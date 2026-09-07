@@ -16,11 +16,34 @@ services:
       retries: 5
 
   nats:
-    image: nats:2-alpine
+    image: nats:2.10-alpine
     command: ["-js", "-m", "8222"]
     ports:
       - "4222:4222"
       - "8222:8222"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  neo4j:
+    image: neo4j:5.26.2-community
+    environment:
+      NEO4J_AUTH: neo4j/anxionos
+      NEO4J_PLUGINS: '["apoc"]'
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4jdata:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
 
 volumes:
   pgdata:
+  neo4jdata:

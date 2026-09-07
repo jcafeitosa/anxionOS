@@ -3,10 +3,15 @@
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
-	"exports": { ".": "./src/index.ts" },
+	"exports": {
+		".": "./src/index.ts"
+	},
 	"scripts": {
 		"build": "tsc --project tsconfig.json",
 		"typecheck": "tsc --project tsconfig.json --noEmit"
 	},
-	"dependencies": { "@anxionos/contracts": "workspace:*" }
+	"dependencies": {
+		"@anxionos/contracts": "workspace:*",
+		"nats": "^2.29.3"
+	}
 }

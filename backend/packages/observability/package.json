@@ -3,9 +3,16 @@
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
-	"exports": { ".": "./src/index.ts" },
+	"exports": {
+		".": "./src/index.ts"
+	},
 	"scripts": {
 		"build": "tsc --project tsconfig.json",
 		"typecheck": "tsc --project tsconfig.json --noEmit"
+	},
+	"dependencies": {
+		"@elysia/opentelemetry": "^1.4.12",
+		"@opentelemetry/api": "^1.9.1",
+		"@opentelemetry/sdk-node": "^0.222.0"
 	}
 }

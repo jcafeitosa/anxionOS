@@ -16,8 +16,8 @@
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
 		"@types/bun": "latest",
-		"dependency-cruiser": "^16.9.0",
-		"typescript": "^5.7.2",
+		"dependency-cruiser": "^16.10.4",
+		"typescript": "^5.9.3",
 		"@anxionos/contracts": "workspace:*",
 		"@anxionos/eventing": "workspace:*",
 		"@anxionos/database": "workspace:*"
