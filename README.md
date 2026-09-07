@@ -8,7 +8,7 @@ O repositório está em **fase de especificação e planejamento**. Não há apl
 
 A knowledge base **Open Knowledge / OKF** vive em `brain/` no workspace local do mantenedor. Essa pasta **não** é versionada no GitHub (não clone nem commite `brain/` neste repositório remoto). ADRs, specs, PRD e notas de arquitetura permanecem locais; quem desenvolve com o time obtém `brain/` por canal acordado com o mantenedor.
 
-Neste repositório público: [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md), templates em `.github/` e, no futuro, `backend/`.
+Neste repositório público: [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md), diagramas [Archify](https://github.com/tt-a1i/archify) em `.archify/`, templates em `.github/` e, no futuro, `backend/`.
 
 ## Começar aqui
 
@@ -16,16 +16,29 @@ Neste repositório público: [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUT
 | --- | --- |
 | [AGENTS.md](AGENTS.md) | Guia operacional para humanos e agentes (fontes de verdade locais, gates, o que não fazer) |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Como contribuir com código e com o repositório público |
+| [.archify/README.md](.archify/README.md) | Diagramas de arquitetura e workflow (Archify) |
 
 Com `brain/` local: abra `brain/index.md` como índice da knowledge base.
+
+### Diagramas (Archify)
+
+```bash
+npm install
+npm run archify:check    # doctor + validação das specs
+npm run archify:build    # gera HTML em .archify/artifacts/
+```
+
+Artefatos versionados: abra `.archify/artifacts/*.html` no navegador (tema claro/escuro, export PNG).
 
 ## Estrutura do repositório
 
 ```
 anxionOS/
 ├── AGENTS.md          # Instruções para agentes e desenvolvedores
+├── .archify/          # Specs JSON + artifacts HTML (Archify)
 ├── brain/             # (local, gitignored) OKF — specs, ADRs, notas
 ├── .github/           # Templates de issue/PR e CI mínimo
+├── package.json       # Scripts archify:* e postinstall do vendor
 └── backend/           # (futuro) apps, modules, packages
 ```
 

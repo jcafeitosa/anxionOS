@@ -10,6 +10,7 @@
 
 # Dependencies and build outputs
 node_modules/
+vendor/archify/
 dist/
 build/
 coverage/

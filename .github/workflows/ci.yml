@@ -16,13 +16,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
       - name: Required project files
         run: |
           test -f AGENTS.md
           test -f README.md
           test -f LICENSE
           test -f CONTRIBUTING.md
+          test -f package.json
+          test -d .archify/specs
           echo "anxionOS: estrutura mínima do repositório público OK (brain/ é local)."
+
+      - name: Install toolchain (Archify vendor)
+        run: npm install
+
+      - name: Archify specs (showcase validation)
+        run: npm run archify:check
 
       - name: No backend scaffold required yet
         run: |

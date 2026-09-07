@@ -95,6 +95,18 @@ Quando existir código indexado, **priorize** as ferramentas code-review-graph a
 
 Até haver código, explore via documentação em `brain/`.
 
+### Archify (diagramas)
+
+[Archify](https://github.com/tt-a1i/archify) gera diagramas interativos (HTML/SVG) a partir de JSON tipado em `.archify/specs/`. **Complementa** o code-review-graph: Archify comunica arquitetura e fluxos; o grafo de código responde impacto e relações no source.
+
+| Uso | Quando |
+| --- | --- |
+| Visão de plataforma / módulos | `architecture` — ex.: `.archify/specs/anxionos-platform.architecture.json` |
+| Workflow de agentes ou runbooks | `workflow` — derivar do fluxo em AGENTS.md |
+| Sequências de API / eventos | `sequence`, `dataflow`, `lifecycle` |
+
+Comandos na raiz: `npm run archify:validate`, `npm run archify:build`. Detalhes em [.archify/README.md](.archify/README.md). Com `backend/` implantado, atualizar specs com evidência real — não inventar componentes.
+
 ### Frontend
 
 Após alterações de UI, inspecionar com Chrome DevTools MCP quando aplicável.

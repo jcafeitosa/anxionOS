@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "anxionOS — visão de plataforma",
+    "quality_profile": "showcase",
+    "output": "anxionos-platform.architecture.html",
+    "views": [
+      {
+        "id": "request-path",
+        "label": "Caminho principal",
+        "focus": ["actors", "api", "modules", "graph", "eventing"],
+        "note": "Da interface humana ao grafo institucional e eventos de domínio."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "actors",
+      "type": "external",
+      "label": "Humanos",
+      "sublabel": "Owner · operador",
+      "pos": [40, 300],
+      "size": [120, 60]
+    },
+    {
+      "id": "brain",
+      "type": "external",
+      "label": "brain/",
+      "sublabel": "OKF local",
+      "pos": [40, 140],
+      "size": [120, 60],
+      "tag": "gitignored"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "API",
+      "sublabel": "Bun + Elysia",
+      "pos": [250, 300],
+      "size": [130, 60],
+      "tag": "apps/api"
+    },
+    {
+      "id": "workers",
+      "type": "backend",
+      "label": "Workers",
+      "sublabel": "TypeScript",
+      "pos": [250, 440],
+      "size": [130, 60]
+    },
+    {
+      "id": "modules",
+      "type": "backend",
+      "label": "Módulos",
+      "sublabel": "23 contexts",
+      "pos": [460, 300],
+      "size": [130, 60],
+      "tag": "ADR0002"
+    },
+    {
+      "id": "graph",
+      "type": "database",
+      "label": "Grafo",
+      "sublabel": "institucional",
+      "pos": [670, 200],
+      "size": [130, 60]
+    },
+    {
+      "id": "eventing",
+      "type": "messagebus",
+      "label": "Eventing",
+      "sublabel": "outbox · NATS",
+      "pos": [670, 400],
+      "size": [130, 60]
+    },
+    {
+      "id": "connections",
+      "type": "backend",
+      "label": "Connections",
+      "sublabel": "LLM · venues",
+      "pos": [880, 300],
+      "size": [130, 60]
+    },
+    {
+      "id": "providers",
+      "type": "external",
+      "label": "Providers",
+      "sublabel": "externos",
+      "pos": [1060, 300],
+      "size": [120, 60]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "backend/ planejado (ADR0002)",
+      "wraps": ["api", "workers", "modules", "graph", "eventing", "connections"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "actors-to-api",
+      "from": "actors",
+      "to": "api",
+      "label": "HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "api-to-modules",
+      "from": "api",
+      "to": "modules",
+      "label": "commands",
+      "labelDy": 54
+    },
+    {
+      "id": "workers-to-eventing",
+      "from": "workers",
+      "to": "eventing",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelDy": 58
+    },
+    {
+      "id": "modules-to-graph",
+      "from": "modules",
+      "to": "graph",
+      "label": "projections",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelDy": -68
+    },
+    {
+      "id": "modules-to-eventing",
+      "from": "modules",
+      "to": "eventing",
+      "label": "events",
+      "labelDy": 58
+    },
+    {
+      "id": "modules-to-connections",
+      "from": "modules",
+      "to": "connections",
+      "label": "inference"
+    },
+    {
+      "id": "connections-to-providers",
+      "from": "connections",
+      "to": "providers",
+      "labelDy": 54
+    },
+    {
+      "id": "brain-to-actors",
+      "from": "brain",
+      "to": "actors",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 58
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Estado atual",
+      "items": [
+        "Fase de especificação — sem backend/ implantado",
+        "brain/ local-only no GitHub",
+        "Layout modular aceito (ADR0002)"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Próximo passo",
+      "items": [
+        "P01 tooling após greenlight",
+        "Atualizar diagramas com evidência de código",
+        "code-review-graph para impacto em source"
+      ]
+    }
+  ]
+}

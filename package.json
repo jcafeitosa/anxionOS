@@ -1,0 +1,26 @@
+{
+  "name": "anxionos",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Plataforma multi-tenant de investimentos autônomos governados por grafo institucional.",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "postinstall": "node scripts/ensure-archify.mjs",
+    "archify:doctor": "node vendor/archify/archify/bin/archify.mjs doctor",
+    "archify:validate": "node scripts/archify-validate-all.mjs",
+    "archify:build": "node scripts/archify-build-all.mjs",
+    "archify:check": "npm run archify:doctor && npm run archify:validate"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jcafeitosa/anxionOS.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jcafeitosa/anxionOS/issues"
+  },
+  "homepage": "https://github.com/jcafeitosa/anxionOS#readme"
+}
