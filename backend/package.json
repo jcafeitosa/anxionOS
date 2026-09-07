@@ -1,0 +1,25 @@
+{
+	"name": "@anxionos/backend",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"workspaces": ["apps/*", "packages/*"],
+	"scripts": {
+		"dev": "bun run --filter @anxionos/api dev",
+		"build": "bun run --filter '*' build",
+		"test": "bun test",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"typecheck": "tsc --build",
+		"boundaries": "depcruise --config .dependency-cruiser.cjs apps packages"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"@types/bun": "latest",
+		"dependency-cruiser": "^16.9.0",
+		"typescript": "^5.7.2",
+		"@anxionos/contracts": "workspace:*",
+		"@anxionos/eventing": "workspace:*",
+		"@anxionos/database": "workspace:*"
+	}
+}

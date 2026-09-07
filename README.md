@@ -2,7 +2,7 @@
 
 anxionOS é uma plataforma multi-tenant de investimentos autônomos governados por um **grafo institucional**: agências, agentes, modelos, estratégias, capital e decisões conectados com autoridade, risco e auditoria explícitos. Humanos e agentes compartilham contratos de domínio; a apresentação varia por papel (Owner, operador, plataforma, parceiro).
 
-O repositório está em **fase de especificação e planejamento**. Não há aplicação `backend/` implantada nem código de produto verificado neste momento.
+O repositório inclui o **scaffold P01** do backend (`backend/`) — workspace Bun/TypeScript com API health, packages compartilhados e boundaries documentados. Módulos de domínio (P02+) ainda não existem.
 
 ## Documentação canônica (local)
 
@@ -42,6 +42,18 @@ npm run graphify:check
 
 Índice local em `.graphify/out/` (gitignored). Requer Python ≥ 3.10.
 
+### Backend (P01 — tooling e boundaries)
+
+```bash
+cd backend
+bun install
+bun run dev          # http://localhost:3000
+bun test
+curl http://localhost:3000/health
+```
+
+Detalhes: [backend/README.md](backend/README.md). Infra local opcional: `docker compose -f backend/deploy/docker/docker-compose.yml up -d`.
+
 ### Taskboard (obrigatório — dev local)
 
 **Todo agente (humano ou IA) deve usar o board em tempo real** antes, durante e após qualquer trabalho neste repositório. Issues no [Dashi/Codex Taskboard](https://github.com/chuspeeism/dashi-taskboard) em `http://127.0.0.1:47823/` (projeto **anxionOS**). Ferramenta **somente local** — o CI não depende dela.
@@ -67,10 +79,10 @@ anxionOS/
 ├── package.json       # Scripts archify:*, graphify:*, taskboard:* e postinstall do vendor
 ├── scripts/taskboard.mjs  # Wrapper CLI/HTTP para o board local
 ├── .env.example       # TASKBOARD_URL, PROJECT_ID (dev local)
-└── backend/           # (futuro) apps, modules, packages
+└── backend/           # P01: apps/api, packages, tests, deploy
 ```
 
-Organização modular do backend, roadmap P01–P09 e decisões aceitas estão documentados em `brain/` local (ex.: ADR0002, SDD institucional). Implementação somente após greenlight explícito.
+Organização modular completa (23 módulos), roadmap P02–P09 e decisões aceitas estão em `brain/` local (ex.: ADR0002, SDD institucional).
 
 ## Contribuir
 

@@ -1,0 +1,22 @@
+{
+	"files": [],
+	"references": [
+		{ "path": "./apps/api" },
+		{ "path": "./packages/contracts" },
+		{ "path": "./packages/eventing" },
+		{ "path": "./packages/database" },
+		{ "path": "./packages/observability" }
+	],
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"strict": true,
+		"skipLibCheck": true,
+		"noEmit": true,
+		"verbatimModuleSyntax": true,
+		"isolatedModules": true,
+		"esModuleInterop": true,
+		"resolveJsonModule": true
+	}
+}

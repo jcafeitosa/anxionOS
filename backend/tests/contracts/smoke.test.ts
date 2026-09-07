@@ -1,0 +1,42 @@
+import { describe, expect, test } from "bun:test";
+import { healthResponseSchema, schemaVersion } from "@anxionos/contracts";
+import { createConnection } from "@anxionos/database";
+import type { DomainJournal, Outbox } from "@anxionos/eventing";
+
+describe("contracts", () => {
+	test("exports schemaVersion", () => {
+		expect(schemaVersion).toBe("0.1.0");
+	});
+
+	test("healthResponseSchema validates payload", () => {
+		const parsed = healthResponseSchema.parse({
+			status: "ok",
+			schemaVersion,
+			service: "api",
+			timestamp: new Date().toISOString(),
+		});
+		expect(parsed.status).toBe("ok");
+	});
+});
+
+describe("eventing ports", () => {
+	test("journal and outbox are interface-only", () => {
+		const journal: DomainJournal = { append: async () => {} };
+		const outbox: Outbox = {
+			enqueue: async () => {},
+			markDispatched: async () => {},
+		};
+		expect(journal).toBeDefined();
+		expect(outbox).toBeDefined();
+	});
+});
+
+describe("database stub", () => {
+	test("createConnection returns pingable handle", async () => {
+		const conn = await createConnection({
+			url: "postgres://user:pass@localhost:5432/anxionos",
+		});
+		expect(await conn.ping()).toBe(true);
+		await conn.close();
+	});
+});
