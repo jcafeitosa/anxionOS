@@ -47,3 +47,6 @@ Thumbs.db
 # Knowledge base (Open Knowledge / OKF) — local only; not published to GitHub
 brain/
 
+
+# Activity log — local only; not published to GitHub
+log.md
