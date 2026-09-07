@@ -120,6 +120,7 @@ Comandos na raiz: `npm run archify:validate`, `npm run archify:build`. Detalhes 
 | Navegação por wiki | `.graphify/out/wiki/index.md` quando gerado |
 
 Comandos na raiz: `npm run graphify:doctor`, `graphify:index`, `graphify:check`. Saída em `.graphify/out/` (gitignored). Detalhes em [.graphify/README.md](.graphify/README.md).
+No Cursor: `.graphify/.venv/bin/graphify cursor install` escreve `.cursor/rules/graphify.mdc` (regra `alwaysApply`) para priorizar consultas ao grafo antes de Grep/Glob/Read.
 
 #### Archify vs Graphify vs code-review-graph
 
