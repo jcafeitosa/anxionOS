@@ -142,7 +142,7 @@ O [Dashi/Codex Taskboard](https://github.com/chuspeeism/dashi-taskboard) é a **
 
 **Labels:** `for-claude` (elegível para agente), `hold` (não tocar), `phase-N` (fase P0x).
 
-**Projeto:** `anxionOS` (resolvido por `workspacePath` do repo ou `TASKBOARD_PROJECT_NAME`).
+**Projeto:** `anxionOS` (resolvido por `workspacePath` do repo, `TASKBOARD_PROJECT_NAME` ou pin `TASKBOARD_PROJECT_ID` em `.env`).
 
 #### Workflow: start work / end work
 

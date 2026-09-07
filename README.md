@@ -53,7 +53,7 @@ anxionOS/
 ├── .github/           # Templates de issue/PR e CI mínimo
 ├── package.json       # Scripts archify:*, taskboard:* e postinstall do vendor
 ├── scripts/taskboard.mjs  # Wrapper CLI/HTTP para o board local
-├── .env.example       # TASKBOARD_URL (dev local)
+├── .env.example       # TASKBOARD_URL, PROJECT_ID (dev local)
 └── backend/           # (futuro) apps, modules, packages
 ```
 

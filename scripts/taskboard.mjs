@@ -13,6 +13,7 @@
  *
  * Env: TASKBOARD_URL or CODEX_TASKBOARD_URL (default http://127.0.0.1:47823)
  *      TASKBOARD_PROJECT_NAME (default anxionOS)
+ *      TASKBOARD_PROJECT_ID (optional pin)
  *      CODEX_THREAD_ID / CLAUDE_CODE_SESSION_ID for write attribution
  */
 
@@ -28,6 +29,7 @@ const baseUrl = (
   "http://127.0.0.1:47823"
 ).replace(/\/$/, "");
 const projectName = process.env.TASKBOARD_PROJECT_NAME ?? "anxionOS";
+const projectIdEnv = process.env.TASKBOARD_PROJECT_ID ?? null;
 const threadId =
   process.env.CODEX_THREAD_ID ??
   process.env.CLAUDE_CODE_SESSION_ID ??
@@ -69,7 +71,7 @@ Options for create:
   --labels a,b
   --description TEXT
 
-Env: TASKBOARD_URL, TASKBOARD_PROJECT_NAME, CODEX_THREAD_ID`);
+Env: TASKBOARD_URL, TASKBOARD_PROJECT_NAME, TASKBOARD_PROJECT_ID, CODEX_THREAD_ID`);
   process.exit(exitCode);
 }
 
@@ -140,17 +142,28 @@ function parseCreateArgs(argv) {
 }
 
 function findProjectId(projects) {
+  if (projectIdEnv) {
+    const pinned = projects.find((p) => p.id === projectIdEnv);
+    if (pinned) return pinned.id;
+    throw new Error(`TASKBOARD_PROJECT_ID="${projectIdEnv}" not found on ${baseUrl}`);
+  }
+  const byPath = projects.find((p) => p.workspacePath === root);
+  if (byPath) return byPath.id;
   const byName = projects.find((p) => p.name === projectName);
   if (byName) return byName.id;
   throw new Error(
-    `Project "${projectName}" not found. Create it in the Taskboard UI or run: taskctl project create --name ${projectName}`,
+    `Project "${projectName}" not found. Create it in the Taskboard UI or run: taskctl project map <id> --workspace-path ${root}`,
   );
 }
 
 async function resolveProjectId() {
+  if (projectIdEnv) {
+    const { projects } = await httpJson("/api/projects");
+    return findProjectId(projects);
+  }
   if (taskctl) {
     const ctx = runTaskctl(["context", "current", "--cwd", root, "--json"]);
-    if (ctx.project?.name === projectName || ctx.project?.workspacePath === root) {
+    if (ctx.project?.workspacePath === root || ctx.project?.name === projectName) {
       return ctx.project.id;
     }
   }
