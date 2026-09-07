@@ -30,17 +30,18 @@ npm run archify:build    # gera HTML em .archify/artifacts/
 
 Artefatos versionados: abra `.archify/artifacts/*.html` no navegador (tema claro/escuro, export PNG).
 
-### Taskboard (dev local)
+### Taskboard (obrigatório — dev local)
 
-Issues de desenvolvimento do anxionOS podem ser rastreadas no [Dashi/Codex Taskboard](https://github.com/chuspeeism/dashi-taskboard) em `http://127.0.0.1:47823/` (projeto **anxionOS**). Ferramenta **somente local** — o CI não depende dela.
+**Todo agente (humano ou IA) deve usar o board em tempo real** antes, durante e após qualquer trabalho neste repositório. Issues no [Dashi/Codex Taskboard](https://github.com/chuspeeism/dashi-taskboard) em `http://127.0.0.1:47823/` (projeto **anxionOS**). Ferramenta **somente local** — o CI não depende dela.
 
 ```bash
 cp .env.example .env   # opcional
-npm run taskboard:ping
+npm run taskboard:ensure   # falha se offline — obrigatório antes de trabalhar
+npm run taskboard:context
 npm run taskboard:list
 ```
 
-Detalhes para agentes: [AGENTS.md](AGENTS.md) (seção Dashi Taskboard). Wrapper: `scripts/taskboard.mjs`.
+Regras completas: [AGENTS.md](AGENTS.md) (seção Dashi Taskboard). Wrapper: `scripts/taskboard.mjs`.
 
 ## Estrutura do repositório
 

@@ -1,0 +1,15 @@
+---
+description: Dashi Taskboard obrigatório para todo agente — consultar e atualizar em tempo real
+alwaysApply: true
+---
+
+# Taskboard obrigatório
+
+Antes de qualquer trabalho neste repositório:
+
+1. `npm run taskboard:ensure` — pare se falhar (board offline).
+2. `npm run taskboard:context` + `npm run taskboard:list` ou `node scripts/taskboard.mjs get ANX-<N>`.
+3. Issue `ANX-*` em `in_progress` (criar se não existir; sem exceções para micro-fixes).
+4. Atualizar status em tempo real: `in_review` ao terminar; `done` só com aceite; `blocked` com comentário.
+
+Regras completas: [AGENTS.md](../../AGENTS.md) (seção Dashi Taskboard). Skill: `manage-taskboard`.

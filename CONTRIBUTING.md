@@ -5,7 +5,8 @@ Obrigado por participar. Este repositório prioriza **documentação governada**
 ## Antes de abrir PR ou issue
 
 1. Leia [AGENTS.md](AGENTS.md) — estado do projeto, fontes de verdade e restrições (sem scaffold massivo, sem inventar stack).
-2. Se você tem `brain/` no workspace local, consulte `brain/index.md` para specs, ADRs e notas. **Não commite arquivos em `brain/`** — a pasta está no `.gitignore` e não é publicada no GitHub.
+2. **Taskboard obrigatório:** humanos e agentes de IA devem registrar e atualizar trabalho no [Dashi Taskboard](https://github.com/chuspeeism/dashi-taskboard) local (`npm run taskboard:ensure`). Toda PR referencia uma issue `ANX-*`; status `in_review` ou `done` conforme [AGENTS.md](AGENTS.md).
+3. Se você tem `brain/` no workspace local, consulte `brain/index.md` para specs, ADRs e notas. **Não commite arquivos em `brain/`** — a pasta está no `.gitignore` e não é publicada no GitHub.
 
 ## Documentação canônica (`brain/`, local)
 

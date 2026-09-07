@@ -113,22 +113,56 @@ Comandos na raiz: `npm run archify:validate`, `npm run archify:build`. Detalhes 
 
 Após alterações de UI, inspecionar com Chrome DevTools MCP quando aplicável.
 
-### Dashi Taskboard (trabalho rastreável)
+### Dashi Taskboard (obrigatório — tempo real)
 
-O [Dashi/Codex Taskboard](https://github.com/chuspeeism/dashi-taskboard) é a **fonte de verdade local** para issues de desenvolvimento neste repositório. Roda em loopback (`http://127.0.0.1:47823`); **não** entra no CI nem em deploy.
+O [Dashi/Codex Taskboard](https://github.com/chuspeeism/dashi-taskboard) é a **fonte de verdade local** para todo trabalho neste repositório. Roda em loopback (`http://127.0.0.1:47823`); **não** entra no CI nem em deploy.
 
-| Quando usar | Ação |
+**Todo agente (humano ou IA) DEVE usar o board em tempo real.** Sem issue no board, sem trabalho — inclusive micro-fixes. Exceção: nenhuma.
+
+#### Regras obrigatórias
+
+1. **Antes de qualquer tarefa:** confirmar que o board está online e ler o contexto do projeto.
+2. **Issue vinculada:** toda unidade de trabalho tem uma issue `ANX-*`. Se não existir, **criar antes de codar** (buscar duplicatas primeiro).
+3. **Status em tempo real:** refletir o progresso no board conforme avança — nunca deixar issue desatualizada ao fim da sessão.
+4. **Thread binding:** usar `CODEX_THREAD_ID`, `CLAUDE_CODE_SESSION_ID` ou `CURSOR_THREAD_ID` em claims e moves; binding completo conforme skill `manage-taskboard`.
+5. **Comentários:** registrar decisões relevantes, bloqueios e resultado de verificação (via `taskctl comment add` se o wrapper não cobrir).
+6. **Bloqueios:** mover para `blocked` com comentário explicando o impedimento.
+7. **Multi-agente:** uma issue por unidade de trabalho; não duplicar; não tomar issue de outra conversa. Orquestração: skill `orchestrate-work` + `manage-taskboard`.
+
+#### Fluxo de status
+
+`backlog` (não executar sem autorização) → `todo` (claimable) → `in_progress` → `in_review` → `done` (só com aceite explícito). Também: `blocked`, `canceled`.
+
+| Transição | Quando |
 | --- | --- |
-| Trabalho multi-etapas ou coordenação entre agentes | Registrar issue no board **anxionOS** antes de implementar |
-| Issue existente (ex. `ANX-2`) | `taskctl issue get <ID> --json` + comentários antes de codar |
-| Nova demanda durável | Buscar duplicatas; criar só se não houver issue equivalente |
-| Orquestração multi-agente | Seguir skill `orchestrate-work` + `manage-taskboard` |
+| → `in_progress` | Ao **iniciar** trabalho (claim com `--if-version`) |
+| → `in_review` | Ao **terminar** implementação; comentário com o que mudou |
+| → `done` | Só após aceite explícito do usuário/revisor |
+| → `blocked` | Impedimento externo ou dependência não resolvida |
+
+**Labels:** `for-claude` (elegível para agente), `hold` (não tocar), `phase-N` (fase P0x).
 
 **Projeto:** `anxionOS` (resolvido por `workspacePath` do repo ou `TASKBOARD_PROJECT_NAME`).
 
-**Status:** `backlog` (não executar sem autorização) → `todo` (claimable) → `in_progress` → `in_review` → `done` (só com aceite explícito). Também: `blocked`, `canceled`.
+#### Workflow: start work / end work
 
-**Labels:** `for-claude` (elegível para agente), `hold` (não tocar), `phase-N` (fase P0x).
+**Start work** (início de cada tarefa):
+
+```bash
+npm run taskboard:ensure          # falha se board offline — pare e suba o serviço
+npm run taskboard:context
+npm run taskboard:list            # ou: node scripts/taskboard.mjs get ANX-<N>
+# issue inexistente → create antes de continuar
+node scripts/taskboard.mjs move ANX-<N> in_progress   # requer taskctl + thread id
+```
+
+**End work** (fim da implementação, antes de pedir review):
+
+```bash
+# taskctl comment add ANX-<N> --text "..." --thread-id "$CODEX_THREAD_ID"
+node scripts/taskboard.mjs move ANX-<N> in_review
+# done só após aceite explícito
+```
 
 **CLI preferido:** `taskctl` (global ou macOS: `'/Applications/Codex Taskboard.app/Contents/Resources/bin/taskctl'`). Env: `CODEX_TASKBOARD_URL` ou `TASKBOARD_URL`.
 
@@ -136,17 +170,19 @@ O [Dashi/Codex Taskboard](https://github.com/chuspeeism/dashi-taskboard) é a **
 
 ```bash
 cp .env.example .env   # opcional; defaults funcionam em dev local
-npm run taskboard:ping
+npm run taskboard:ensure
 npm run taskboard:context
 npm run taskboard:list
 node scripts/taskboard.mjs get ANX-2
+node scripts/taskboard.mjs create --title "..." --status todo
+node scripts/taskboard.mjs move ANX-2 in_progress
 ```
 
-Escritas (`create`, `move`) exigem `taskctl` e `CODEX_THREAD_ID` (ou `CLAUDE_CODE_SESSION_ID`). Claim: mover `todo → in_progress` com `--if-version` e binding completo conforme `manage-taskboard`.
+Escritas (`create`, `move`) exigem `taskctl` e thread id. Claim: mover `todo → in_progress` com `--if-version` e binding completo conforme `manage-taskboard`.
 
 **API HTTP (leitura / fallback):** `GET /health`, `GET /api/projects`, `GET /api/tasks`, `POST /api/tasks`. Sem autenticação no modo local.
 
-**Offline:** subir o app Codex Taskboard (ou serviço dashi-taskboard) na máquina; confirmar com `npm run taskboard:ping`.
+**Offline:** subir o app Codex Taskboard (ou serviço dashi-taskboard) na máquina; `npm run taskboard:ensure` deve passar antes de qualquer trabalho.
 
 ## O que NÃO fazer
 
@@ -157,28 +193,37 @@ Escritas (`create`, `move`) exigem `taskctl` e `CODEX_THREAD_ID` (ou `CLAUDE_COD
 - **Não** concentrar regra de negócio em rotas, workers globais ou `packages/common` genérico
 - **Não** duplicar documentação canônica — linkar e atualizar a fonte em `brain/`
 - **Não** commitar `brain/` nem segredos, credenciais ou dumps sensíveis
+- **Não** codar nem alterar docs canônicas sem issue `ANX-*` ativa no taskboard
+- **Não** deixar status do board desatualizado ao fim da sessão
 
 ## Workflow para agentes
 
 ```mermaid
 flowchart TD
-  A[Ler fontes de verdade] --> B{Escopo claro?}
+  T[taskboard:ensure + context + issue] --> A[Ler fontes de verdade]
+  A --> B{Escopo claro?}
   B -->|Não| C[Perguntar / registrar lacuna]
-  B -->|Sim| D{Envolve código?}
-  D -->|Não| E[Editar brain/ via open-knowledge]
-  D -->|Sim| F{Greenlight do usuário?}
-  F -->|Não| G[Propor plano incremental P0x]
-  F -->|Sim| H[Implementar pacote ativo apenas]
-  H --> I[Testes + review + docs]
-  E --> I
-  G --> A
+  B -->|Sim| D{Issue ANX-* no board?}
+  D -->|Não| D1[Criar issue; mover in_progress]
+  D -->|Sim| D2[Claim in_progress se todo]
+  D1 --> E{Envolve código?}
+  D2 --> E
+  E -->|Não| F[Editar brain/ via open-knowledge]
+  E -->|Sim| G{Greenlight do usuário?}
+  G -->|Não| H[Propor plano incremental P0x]
+  G -->|Sim| I[Implementar pacote ativo apenas]
+  I --> J[Testes + review + docs]
+  J --> K[mover in_review + comentário]
+  F --> K
+  H --> A
 ```
 
-1. **Ler** índice, estrutura do backend e specs/ADRs relevantes
-2. **Propor** plano curto com critérios de sucesso verificáveis (Karpathy: simplicidade, mudanças cirúrgicas)
-3. **Implementar** incrementalmente — um pacote P0x por vez, sem especulação
-4. **Verificar** gates do SDD e AR01–AR06 antes de considerar entrega
-5. **Documentar** decisões novas como ADR; atualizar notas afetadas
+1. **Taskboard:** `taskboard:ensure`, contexto, issue `ANX-*` em `in_progress` (criar se necessário)
+2. **Ler** índice, estrutura do backend e specs/ADRs relevantes
+3. **Propor** plano curto com critérios de sucesso verificáveis (Karpathy: simplicidade, mudanças cirúrgicas)
+4. **Implementar** incrementalmente — um pacote P0x por vez, sem especulação
+5. **Verificar** gates do SDD e AR01–AR06; mover issue para `in_review` com comentário
+6. **Documentar** decisões novas como ADR; atualizar notas afetadas; `done` só com aceite explícito
 
 
 ## Repositório

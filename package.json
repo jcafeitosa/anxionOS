@@ -14,6 +14,7 @@
     "archify:build": "node scripts/archify-build-all.mjs",
     "archify:check": "npm run archify:doctor && npm run archify:validate",
     "taskboard:ping": "node scripts/taskboard.mjs ping",
+    "taskboard:ensure": "node scripts/taskboard.mjs ensure",
     "taskboard:list": "node scripts/taskboard.mjs list",
     "taskboard:context": "node scripts/taskboard.mjs context"
   },

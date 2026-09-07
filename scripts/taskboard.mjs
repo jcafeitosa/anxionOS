@@ -55,6 +55,7 @@ function usage(exitCode = 1) {
 
 Commands:
   ping                         Health check (${baseUrl}/health)
+  ensure                       Same as ping; fails fast if board offline (required before work)
   context                      Resolve project for this repo (taskctl)
   projects                     List projects (HTTP)
   list [--status STATUS]       List issues in anxionOS project
@@ -162,9 +163,14 @@ if (!cmd) usage();
 
 try {
   switch (cmd) {
-    case "ping": {
+    case "ping":
+    case "ensure": {
       const health = await httpJson("/health");
-      console.log(JSON.stringify({ ok: true, url: baseUrl, ...health }, null, 2));
+      const payload = { ok: true, url: baseUrl, ...health };
+      if (cmd === "ensure") {
+        console.log(`taskboard online: ${baseUrl}`);
+      }
+      console.log(JSON.stringify(payload, null, 2));
       break;
     }
     case "context": {
