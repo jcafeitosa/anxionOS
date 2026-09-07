@@ -2,39 +2,41 @@
 
 anxionOS é uma plataforma multi-tenant de investimentos autônomos governados por um **grafo institucional**: agências, agentes, modelos, estratégias, capital e decisões conectados com autoridade, risco e auditoria explícitos. Humanos e agentes compartilham contratos de domínio; a apresentação varia por papel (Owner, operador, plataforma, parceiro).
 
-O repositório está em **fase de especificação e planejamento**. Não há aplicação `backend/` implantada nem código de produto verificado neste momento. A documentação canônica vive em `brain/` (Open Knowledge / OKF), com ADRs, specs e notas de arquitetura.
+O repositório está em **fase de especificação e planejamento**. Não há aplicação `backend/` implantada nem código de produto verificado neste momento.
+
+## Documentação canônica (local)
+
+A knowledge base **Open Knowledge / OKF** vive em `brain/` no workspace local do mantenedor. Essa pasta **não** é versionada no GitHub (não clone nem commite `brain/` neste repositório remoto). ADRs, specs, PRD e notas de arquitetura permanecem locais; quem desenvolve com o time obtém `brain/` por canal acordado com o mantenedor.
+
+Neste repositório público: [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md), templates em `.github/` e, no futuro, `backend/`.
 
 ## Começar aqui
 
 | Recurso | Descrição |
 | --- | --- |
-| [AGENTS.md](AGENTS.md) | Guia operacional para humanos e agentes (fontes de verdade, gates, o que não fazer) |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Como contribuir com documentação e, futuramente, código |
-| [brain/index.md](brain/index.md) | Índice da knowledge base |
+| [AGENTS.md](AGENTS.md) | Guia operacional para humanos e agentes (fontes de verdade locais, gates, o que não fazer) |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Como contribuir com código e com o repositório público |
+
+Com `brain/` local: abra `brain/index.md` como índice da knowledge base.
 
 ## Estrutura do repositório
 
 ```
 anxionOS/
 ├── AGENTS.md          # Instruções para agentes e desenvolvedores
-├── brain/             # Documentação OKF (specs, ADRs, notas, pesquisa)
-├── .github/           # Templates de issue/PR e CI mínimo (fase docs)
-└── backend/           # (futuro) apps, modules, packages — ver ADR0002
+├── brain/             # (local, gitignored) OKF — specs, ADRs, notas
+├── .github/           # Templates de issue/PR e CI mínimo
+└── backend/           # (futuro) apps, modules, packages
 ```
 
-A organização modular do backend está **aceita** em [ADR0002](brain/project-docs/decisions/0002-adopt-modular-backend-layout.md) e detalhada em [anxionos-backend-structure.md](brain/notes/anxionos-backend-structure.md). A implementação segue o roadmap P01–P09 do [SDD institucional](brain/project-docs/specs/001-institutional-contract/spec.md), somente após greenlight explícito.
+Organização modular do backend, roadmap P01–P09 e decisões aceitas estão documentados em `brain/` local (ex.: ADR0002, SDD institucional). Implementação somente após greenlight explícito.
 
 ## Contribuir
 
 1. Leia [AGENTS.md](AGENTS.md) e [CONTRIBUTING.md](CONTRIBUTING.md).
-2. Para decisões de arquitetura, use ADRs em `brain/project-docs/decisions/`.
+2. **Não** inclua `brain/` em commits deste repositório.
 3. Comunicação em **português (PT-BR)**; identificadores técnicos podem seguir inglês.
 
 ## Licença
 
 Este projeto está licenciado sob a [MIT License](LICENSE).
-
-## Decisões em aberto
-
-- [ADR0001](brain/project-docs/decisions/0001-graph-operational-domain-authority.md) — grafo operacional (proposto)
-- [ADR0003](brain/project-docs/decisions/0003-tool-gateway-module-placement.md) — módulo Tool Gateway (proposto)

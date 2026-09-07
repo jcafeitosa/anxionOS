@@ -34,11 +34,6 @@ Thumbs.db
 *.swo
 *~
 
-# Large external captures (keep markdown sources in brain/external-sources/)
-brain/external-sources/*.tar.gz
-brain/external-sources/*-20260907.html
-brain/external-sources/*-openrouter-models-*.json
-brain/external-sources/*-kilo-models-*.json
 
 # OpenKnowledge machine-local (see also .ok/.gitignore)
 .ok/local/
@@ -49,3 +44,6 @@ brain/external-sources/*-kilo-models-*.json
 .ok/sync-state.json
 .ok/last-spawn-error.log
 .ok/okf/
+# Knowledge base (Open Knowledge / OKF) — local only; not published to GitHub
+brain/
+

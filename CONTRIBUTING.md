@@ -1,25 +1,23 @@
 # Contribuindo com o anxionOS
 
-Obrigado por participar. Este repositório prioriza **documentação governada** antes da implementação do backend.
+Obrigado por participar. Este repositório prioriza **documentação governada** (localmente) antes da implementação do backend.
 
 ## Antes de abrir PR ou issue
 
 1. Leia [AGENTS.md](AGENTS.md) — estado do projeto, fontes de verdade e restrições (sem scaffold massivo, sem inventar stack).
-2. Consulte [brain/index.md](brain/index.md) para localizar specs, ADRs e notas existentes.
+2. Se você tem `brain/` no workspace local, consulte `brain/index.md` para specs, ADRs e notas. **Não commite arquivos em `brain/`** — a pasta está no `.gitignore` e não é publicada no GitHub.
 
-## Documentação (`brain/`)
+## Documentação canônica (`brain/`, local)
 
-- Siga as convenções **Open Knowledge / OKF** (frontmatter, templates em `.ok/templates/`).
-- Use o MCP **open-knowledge** quando disponível para buscar, editar e auditar documentos.
-- **Decisões** arquiteturais ou de produto duradouras → ADR em `brain/project-docs/decisions/`.
-- **Contratos e capacidades** → specs em `brain/project-docs/specs/`.
-- **Contexto e planejamento** → notas em `brain/notes/` e pesquisa em `brain/research/`.
+- A knowledge base OKF fica em `brain/` **apenas na máquina do desenvolvedor** (ou cópia compartilhada fora deste remote).
+- Decisões, specs e notas são editadas localmente (MCP **open-knowledge** quando disponível).
+- Mudanças de contrato ou arquitetura aceita devem ser refletidas em `brain/` local e, quando aplicável, em ADRs/specs **fora** deste git — não via PR que adicione `brain/`.
 
-Não duplique documentação canônica: atualize a fonte e linke a partir de outros arquivos.
+Para PRs neste repositório: atualize README, AGENTS.md, CONTRIBUTING ou código em `backend/` quando existir.
 
 ## Código (quando existir)
 
-Implementação só após greenlight explícito do mantenedor, um pacote **P0x** por vez, conforme [estrutura do backend](brain/notes/anxionos-backend-structure.md) e SDD P01–P09.
+Implementação só após greenlight explícito do mantenedor, um pacote **P0x** por vez, conforme estrutura do backend e SDD documentados em `brain/` local.
 
 - Validação de schema nos boundaries (ex.: Zod).
 - Testes nos gates AR01–AR06 quando aplicável.
@@ -31,4 +29,4 @@ Issues, discussões e documentação voltada a pessoas: **português (PT-BR)**. 
 
 ## Segurança
 
-Não commite `.env`, credenciais, chaves API ou dumps sensíveis. Reporte vulnerabilidades pelos canais que o mantenedor indicar (issue privada ou contato direto).
+Não commite `.env`, credenciais, chaves API, dumps sensíveis nem o diretório `brain/`. Reporte vulnerabilidades pelos canais que o mantenedor indicar (issue privada ou contato direto).

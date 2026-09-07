@@ -22,8 +22,7 @@ jobs:
           test -f README.md
           test -f LICENSE
           test -f CONTRIBUTING.md
-          test -f brain/index.md
-          echo "anxionOS: fase de documentação — estrutura mínima OK."
+          echo "anxionOS: estrutura mínima do repositório público OK (brain/ é local)."
 
       - name: No backend scaffold required yet
         run: |

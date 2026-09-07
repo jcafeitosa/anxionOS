@@ -11,16 +11,23 @@ anxionOS é uma plataforma multi-tenant de investimentos autônomos governados p
 | Aspecto | Situação |
 | --- | --- |
 | Código | **Não existe** `backend/` nem aplicação implantada verificada |
-| Documentação | Ativa em `brain/` (Open Knowledge / OKF) |
+| Documentação | Ativa em `brain/` **local** (OKF; não versionada no GitHub) |
 | Organização do backend | **Aceita** — [ADR0002](brain/project-docs/decisions/0002-adopt-modular-backend-layout.md) |
 | Modelo operacional do grafo | **Proposto** — [ADR0001](brain/project-docs/decisions/0001-graph-operational-domain-authority.md) |
 | PRD | Rascunho — [0001-anxionos-prd-mestre](brain/project-docs/proposals/0001-anxionos-prd-mestre.md) |
 
-Esta fase autoriza **planejamento e documentação**. Implementação de código exige greenlight explícito do usuário e segue a sequência P01→P09 documentada na estrutura do backend.
+Esta fase autoriza **planejamento e documentação**.
+## Repositório público vs. `brain/` local
+
+A pasta **`brain/`** (Open Knowledge / OKF) é **somente local**: está no `.gitignore` e **não** é enviada ao GitHub. Os caminhos abaixo (`brain/index.md`, specs, ADRs) são fontes de verdade **no workspace local**; links relativos continuam válidos para quem tem `brain/` clonado ou sincronizado fora do git. Colaboradores que só clonam o remote veem [README.md](README.md) e este arquivo — obtenham `brain/` pelo canal acordado com o mantenedor.
+
+**Não** commitar `brain/` neste repositório.
+
+ Implementação de código exige greenlight explícito do usuário e segue a sequência P01→P09 documentada na estrutura do backend.
 
 ## Fontes de verdade
 
-Consultar **antes** de implementar ou contradizer decisões:
+Com `brain/` presente localmente, consultar **antes** de implementar ou contradizer decisões:
 
 1. **[brain/index.md](brain/index.md)** — índice e links principais
 2. **[brain/notes/anxionos-backend-structure.md](brain/notes/anxionos-backend-structure.md)** — árvore de módulos, ownership, dependências e gates (baseline aceito)
@@ -100,7 +107,7 @@ Após alterações de UI, inspecionar com Chrome DevTools MCP quando aplicável.
 - **Não** tratar ADR0001 (proposto) como decisão fechada de stack física
 - **Não** concentrar regra de negócio em rotas, workers globais ou `packages/common` genérico
 - **Não** duplicar documentação canônica — linkar e atualizar a fonte em `brain/`
-- **Não** commitar segredos, credenciais ou dumps sensíveis
+- **Não** commitar `brain/` nem segredos, credenciais ou dumps sensíveis
 
 ## Workflow para agentes
 
@@ -142,7 +149,7 @@ Comunicação com o usuário em **português (PT-BR)**. Identificadores de códi
 
 | Documento | Caminho |
 | --- | --- |
-| Índice da knowledge base | [brain/index.md](brain/index.md) |
+| Índice da knowledge base (local) | [brain/index.md](brain/index.md) |
 | Estrutura do backend (aceita) | [brain/notes/anxionos-backend-structure.md](brain/notes/anxionos-backend-structure.md) |
 | SDD institucional | [brain/project-docs/specs/001-institutional-contract/spec.md](brain/project-docs/specs/001-institutional-contract/spec.md) |
 | Connections | [brain/project-docs/specs/005-connections-integration/spec.md](brain/project-docs/specs/005-connections-integration/spec.md) |
