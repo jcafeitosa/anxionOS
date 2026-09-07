@@ -1,0 +1,51 @@
+# OpenKnowledge regenerates its built-in project skill on every open, and
+# different app builds version-stamp it differently. It is a per-machine
+# artifact — keep it out of git so teammates don't collide under auto-sync.
+.claude/skills/open-knowledge/
+.cursor/skills/open-knowledge/
+.codex/skills/open-knowledge/
+.github/skills/open-knowledge/
+.opencode/skills/open-knowledge/
+.pi/skills/open-knowledge/
+
+# Dependencies and build outputs
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+credentials.json
+*credentials*.json
+*.pem
+*.p12
+id_rsa
+id_ed25519
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.swo
+*~
+
+# Large external captures (keep markdown sources in brain/external-sources/)
+brain/external-sources/*.tar.gz
+brain/external-sources/*-20260907.html
+brain/external-sources/*-openrouter-models-*.json
+brain/external-sources/*-kilo-models-*.json
+
+# OpenKnowledge machine-local (see also .ok/.gitignore)
+.ok/local/
+.ok/worktrees/
+.ok/principal.json
+.ok/state.json
+.ok/server.lock
+.ok/sync-state.json
+.ok/last-spawn-error.log
+.ok/okf/

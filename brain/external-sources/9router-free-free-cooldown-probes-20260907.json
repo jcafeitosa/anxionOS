@@ -1,0 +1,35 @@
+{
+  "sourceCommit": "eb712ca821f0ba6bc41043fbd14494c5af5daba5",
+  "scope": "Actual upstream filter and expiry helper; synthetic data, no provider inference",
+  "results": [
+    {
+      "id": "vendor/small:free",
+      "selectedByActual9routerFilter": false
+    },
+    {
+      "id": "vendor/tagged:free",
+      "selectedByActual9routerFilter": false
+    },
+    {
+      "id": "vendor/numeric:free",
+      "selectedByActual9routerFilter": false
+    },
+    {
+      "id": "vendor/decimal:free",
+      "selectedByActual9routerFilter": false
+    },
+    {
+      "id": "vendor/extra-cost",
+      "selectedByActual9routerFilter": true
+    },
+    {
+      "id": "vendor/accepted:free",
+      "selectedByActual9routerFilter": true
+    },
+    {
+      "probe": "retry-time-aggregation",
+      "displaySeconds": 30,
+      "targetReleaseAtLeastSeconds": 1200
+    }
+  ]
+}

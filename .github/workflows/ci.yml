@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  docs-phase:
+    name: Repository sanity (docs phase)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Required project files
+        run: |
+          test -f AGENTS.md
+          test -f README.md
+          test -f LICENSE
+          test -f CONTRIBUTING.md
+          test -f brain/index.md
+          echo "anxionOS: fase de documentação — estrutura mínima OK."
+
+      - name: No backend scaffold required yet
+        run: |
+          if [ -d backend ]; then
+            echo "backend/ presente — futuros jobs de build/test podem ser adicionados aqui."
+          else
+            echo "backend/ ausente (esperado nesta fase)."
+          fi
