@@ -11,6 +11,10 @@
 # Dependencies and build outputs
 node_modules/
 vendor/archify/
+vendor/graphify/
+.graphify/.venv/
+.graphify/out/
+graphify-out/
 dist/
 build/
 coverage/

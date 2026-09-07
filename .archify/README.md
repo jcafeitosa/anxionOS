@@ -16,6 +16,14 @@
 - Node.js ≥ 18 (recomendado ≥ 22)
 - `npm install` na raiz (executa `scripts/ensure-archify.mjs`)
 
+## Specs atuais
+
+| Spec | Tipo | Artefato |
+| --- | --- | --- |
+| `anxionos-platform.architecture.json` | architecture | `artifacts/anxionos-platform.architecture.html` |
+| `anxionos-delivery-p01-p09.workflow.json` | workflow | `artifacts/anxionos-delivery-p01-p09.workflow.html` |
+| `anxionos-connections-inference.workflow.json` | workflow | `artifacts/anxionos-connections-inference.workflow.html` |
+
 ## Comandos (raiz do repo)
 
 ```bash

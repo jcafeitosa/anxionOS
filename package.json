@@ -8,11 +8,14 @@
     "node": ">=18"
   },
   "scripts": {
-    "postinstall": "node scripts/ensure-archify.mjs",
+    "postinstall": "node scripts/ensure-archify.mjs && node scripts/ensure-graphify.mjs",
     "archify:doctor": "node vendor/archify/archify/bin/archify.mjs doctor",
     "archify:validate": "node scripts/archify-validate-all.mjs",
     "archify:build": "node scripts/archify-build-all.mjs",
     "archify:check": "npm run archify:doctor && npm run archify:validate",
+    "graphify:doctor": "node scripts/graphify-doctor.mjs",
+    "graphify:index": "node scripts/graphify-index.mjs",
+    "graphify:check": "node scripts/graphify-check.mjs",
     "taskboard:ping": "node scripts/taskboard.mjs ping",
     "taskboard:ensure": "node scripts/taskboard.mjs ensure",
     "taskboard:list": "node scripts/taskboard.mjs list",

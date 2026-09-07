@@ -1,0 +1,27 @@
+# Local-only knowledge base (not in git)
+brain/
+
+# Vendored toolchains (not part of product corpus)
+vendor/
+
+# Dependencies and build outputs
+node_modules/
+dist/
+build/
+coverage/
+
+# Graphify artifacts (regenerated locally)
+.graphify/out/
+graphify-out/
+
+# Archify generated HTML (specs JSON are indexed separately if needed)
+.archify/artifacts/
+
+# OS and editors
+.DS_Store
+.idea/
+
+# Secrets
+.env
+.env.*
+credentials.json

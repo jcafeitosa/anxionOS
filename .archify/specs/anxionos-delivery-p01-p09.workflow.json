@@ -1,0 +1,84 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "anxionOS — entrega P01→P09",
+    "quality_profile": "showcase",
+    "output": "anxionos-delivery-p01-p09.workflow.html",
+    "views": [
+      {
+        "id": "foundation",
+        "label": "Fundação",
+        "focus": ["p01", "p02", "p03"],
+        "note": "Baseline, contratos e kernel do grafo institucional."
+      },
+      {
+        "id": "domain",
+        "label": "Domínio",
+        "focus": ["p04", "p05", "p06"],
+        "note": "Agentes, Connections e ciclo de investimento."
+      },
+      {
+        "id": "launch",
+        "label": "Lançamento",
+        "focus": ["p07", "p08", "p09"],
+        "note": "UX comercial, evolução e gate de lançamento."
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "foundation", "label": "Fundação (P01–P03)" },
+    { "id": "domain", "label": "Domínio (P04–P06)" },
+    { "id": "launch", "label": "Entrega (P07–P09)" }
+  ],
+  "phases": [
+    { "id": "baseline", "label": "Baseline", "fromCol": 0, "toCol": 2 },
+    { "id": "capabilities", "label": "Capacidades", "fromCol": 3, "toCol": 5, "variant": "emphasis" }
+  ],
+  "groups": [
+    { "id": "foundation_pkg", "label": "P01–P03", "lane": "foundation", "fromCol": 0, "toCol": 2 },
+    { "id": "domain_pkg", "label": "P04–P06", "lane": "domain", "fromCol": 3, "toCol": 5, "variant": "emphasis" }
+  ],
+  "mainPath": ["p01", "p02", "p03", "p04", "p05", "p06", "p07", "p08", "p09"],
+  "nodes": [
+    { "id": "p01", "lane": "foundation", "col": 0, "type": "backend", "label": "P01", "sublabel": "baseline", "width": 132 },
+    { "id": "p02", "lane": "foundation", "col": 1, "type": "backend", "label": "P02", "sublabel": "foundation", "width": 132 },
+    { "id": "p03", "lane": "foundation", "col": 2, "type": "database", "label": "P03", "sublabel": "kernel", "width": 132 },
+    { "id": "p04", "lane": "domain", "col": 3, "type": "backend", "label": "P04", "sublabel": "agents", "width": 132 },
+    { "id": "p05", "lane": "domain", "col": 4, "type": "backend", "label": "P05", "sublabel": "connections", "width": 132 },
+    { "id": "p06", "lane": "domain", "col": 5, "type": "backend", "label": "P06", "sublabel": "investment", "width": 132 },
+    { "id": "p07", "lane": "launch", "col": 5, "type": "frontend", "label": "P07", "sublabel": "UX", "width": 132, "yOffset": 80 },
+    { "id": "p08", "lane": "launch", "col": 5, "type": "security", "label": "P08", "sublabel": "evolution", "width": 132, "yOffset": 160 },
+    { "id": "p09", "lane": "launch", "col": 5, "type": "cloud", "label": "P09", "sublabel": "launch", "width": 132, "yOffset": 240, "tag": "gate" }
+  ],
+  "edges": [
+    { "from": "p01", "to": "p02" },
+    { "from": "p02", "to": "p03" },
+    { "from": "p03", "to": "p04", "variant": "emphasis" },
+    { "from": "p04", "to": "p05" },
+    { "from": "p05", "to": "p06" },
+    { "from": "p06", "to": "p07", "variant": "emphasis" },
+    { "from": "p07", "to": "p08" },
+    { "from": "p08", "to": "p09" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Sequência SDD",
+      "items": [
+        "P01–P03: contratos, eventing e grafo",
+        "P04–P06: agentes, inferência e investimento",
+        "P07–P09: UX, evolução e lançamento"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Estado atual",
+      "items": [
+        "Fase de especificação — sem backend/ implantado",
+        "Layout modular aceito (ADR0002)",
+        "Implementação exige greenlight explícito"
+      ]
+    }
+  ]
+}

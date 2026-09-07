@@ -8,7 +8,7 @@ O repositório está em **fase de especificação e planejamento**. Não há apl
 
 A knowledge base **Open Knowledge / OKF** vive em `brain/` no workspace local do mantenedor. Essa pasta **não** é versionada no GitHub (não clone nem commite `brain/` neste repositório remoto). ADRs, specs, PRD e notas de arquitetura permanecem locais; quem desenvolve com o time obtém `brain/` por canal acordado com o mantenedor.
 
-Neste repositório público: [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md), diagramas [Archify](https://github.com/tt-a1i/archify) em `.archify/`, templates em `.github/` e, no futuro, `backend/`.
+Neste repositório público: [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md), diagramas [Archify](https://github.com/tt-a1i/archify) em `.archify/`, grafo [Graphify](https://github.com/Graphify-Labs/graphify) em `.graphify/`, templates em `.github/` e, no futuro, `backend/`.
 
 ## Começar aqui
 
@@ -17,6 +17,7 @@ Neste repositório público: [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUT
 | [AGENTS.md](AGENTS.md) | Guia operacional para humanos e agentes (fontes de verdade locais, gates, o que não fazer) |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Como contribuir com código e com o repositório público |
 | [.archify/README.md](.archify/README.md) | Diagramas de arquitetura e workflow (Archify) |
+| [.graphify/README.md](.graphify/README.md) | Grafo de conhecimento do corpus (Graphify) |
 
 Com `brain/` local: abra `brain/index.md` como índice da knowledge base.
 
@@ -29,6 +30,17 @@ npm run archify:build    # gera HTML em .archify/artifacts/
 ```
 
 Artefatos versionados: abra `.archify/artifacts/*.html` no navegador (tema claro/escuro, export PNG).
+
+### Grafo de conhecimento (Graphify)
+
+```bash
+npm install          # também prepara vendor/graphify + .graphify/.venv
+npm run graphify:doctor
+npm run graphify:index   # AST-only, sem API key
+npm run graphify:check
+```
+
+Índice local em `.graphify/out/` (gitignored). Requer Python ≥ 3.10.
 
 ### Taskboard (obrigatório — dev local)
 
@@ -49,9 +61,10 @@ Regras completas: [AGENTS.md](AGENTS.md) (seção Dashi Taskboard). Wrapper: `sc
 anxionOS/
 ├── AGENTS.md          # Instruções para agentes e desenvolvedores
 ├── .archify/          # Specs JSON + artifacts HTML (Archify)
+├── .graphify/          # Config + índice local Graphify (out/ gitignored)
 ├── brain/             # (local, gitignored) OKF — specs, ADRs, notas
 ├── .github/           # Templates de issue/PR e CI mínimo
-├── package.json       # Scripts archify:*, taskboard:* e postinstall do vendor
+├── package.json       # Scripts archify:*, graphify:*, taskboard:* e postinstall do vendor
 ├── scripts/taskboard.mjs  # Wrapper CLI/HTTP para o board local
 ├── .env.example       # TASKBOARD_URL, PROJECT_ID (dev local)
 └── backend/           # (futuro) apps, modules, packages

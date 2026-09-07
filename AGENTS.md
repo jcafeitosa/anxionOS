@@ -108,6 +108,29 @@ Até haver código, explore via documentação em `brain/`.
 | Sequências de API / eventos | `sequence`, `dataflow`, `lifecycle` |
 
 Comandos na raiz: `npm run archify:validate`, `npm run archify:build`. Detalhes em [.archify/README.md](.archify/README.md). Com `backend/` implantado, atualizar specs com evidência real — não inventar componentes.
+### Graphify (grafo de conhecimento)
+
+[Graphify](https://github.com/Graphify-Labs/graphify) indexa código e documentação em um grafo local (`graph.json`) com AST (tree-sitter) e, opcionalmente, extração semântica via LLM. **Complementa** Archify e o code-review-graph MCP.
+
+| Uso | Quando |
+| --- | --- |
+| Explorar corpus pequeno (scripts, specs públicas, `AGENTS.md`) | Antes de Grep/Glob em massa — `npm run graphify:index` |
+| God nodes, comunidades, conexões surpreendentes | Após `graphify extract` ou skill `/graphify` (requer API key para docs/imagens) |
+| Manter índice após editar código | `npm run graphify:index` (AST-only, sem API) |
+| Navegação por wiki | `.graphify/out/wiki/index.md` quando gerado |
+
+Comandos na raiz: `npm run graphify:doctor`, `graphify:index`, `graphify:check`. Saída em `.graphify/out/` (gitignored). Detalhes em [.graphify/README.md](.graphify/README.md).
+
+#### Archify vs Graphify vs code-review-graph
+
+| Ferramenta | Entrada | Saída | Melhor para |
+| --- | --- | --- | --- |
+| **Archify** | JSON em `.archify/specs/` | HTML/SVG de arquitetura e fluxos | Comunicar design aceito, roadmap P01–P09, fluxos institucionais |
+| **Graphify** | Arquivos do repo (código, md, pdf…) | `graph.json`, relatórios, wiki opcional | Descobrir estrutura e relações no corpus indexado; compressão de contexto |
+| **code-review-graph** (MCP) | Código indexado no MCP | Callers, callees, impacto, review | Exploração estrutural e blast radius quando o grafo MCP está ativo |
+
+Prioridade para agentes: **code-review-graph** (se código indexado no MCP) → **Graphify** (se `.graphify/out/graph.json` existe) → documentação em `brain/` (local) → Grep/Glob.
+
 
 ### Frontend
 

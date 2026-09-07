@@ -1,0 +1,66 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "anxionOS — Connections: inferência governada",
+    "quality_profile": "showcase",
+    "output": "anxionos-connections-inference.workflow.html",
+    "views": [
+      {
+        "id": "config-to-route",
+        "label": "Binding à rota",
+        "focus": ["binding", "routing"],
+        "note": "Modelo fixado no agente e seleção de oferta elegível."
+      },
+      {
+        "id": "inference-to-ledger",
+        "label": "Inferência e uso",
+        "focus": ["routing", "inference", "usage"],
+        "note": "Chamada upstream, resposta e registro de quota/custo."
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "config", "label": "Configuração" },
+    { "id": "runtime", "label": "Runtime de inferência" }
+  ],
+  "phases": [
+    { "id": "setup", "label": "Binding", "fromCol": 0, "toCol": 1 },
+    { "id": "execute", "label": "Execução", "fromCol": 2, "toCol": 3, "variant": "emphasis" }
+  ],
+  "groups": [
+    { "id": "inference_path", "label": "Caminho principal", "lane": "runtime", "fromCol": 1, "toCol": 3, "variant": "emphasis" }
+  ],
+  "mainPath": ["binding", "routing", "inference", "usage"],
+  "nodes": [
+    { "id": "binding", "lane": "config", "col": 0, "type": "security", "label": "Binding", "sublabel": "modelo fixado", "width": 132, "tag": "versionado" },
+    { "id": "routing", "lane": "runtime", "col": 1, "type": "backend", "label": "Roteamento", "sublabel": "pool · oferta", "width": 132 },
+    { "id": "inference", "lane": "runtime", "col": 2, "type": "cloud", "label": "Inferência", "sublabel": "LLM upstream", "width": 132 },
+    { "id": "usage", "lane": "runtime", "col": 3, "type": "database", "label": "Usage/Ledger", "sublabel": "quota · custo", "width": 132 }
+  ],
+  "edges": [
+    { "from": "binding", "to": "routing", "variant": "emphasis" },
+    { "from": "routing", "to": "inference" },
+    { "from": "inference", "to": "usage", "variant": "emphasis" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Contrato Connections",
+      "items": [
+        "Binding versionado fixa o modelo por agente/run",
+        "Router escolhe oferta compatível, não substitui o modelo",
+        "Usage/ledger registra consumo sem expor segredos"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Governança",
+      "items": [
+        "Grants e quotas validados antes da chamada",
+        "Cooldown e saúde influenciam a rota elegível",
+        "Spec 005-connections-integration (rascunho)"
+      ]
+    }
+  ]
+}
