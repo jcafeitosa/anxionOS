@@ -12,7 +12,10 @@
     "archify:doctor": "node vendor/archify/archify/bin/archify.mjs doctor",
     "archify:validate": "node scripts/archify-validate-all.mjs",
     "archify:build": "node scripts/archify-build-all.mjs",
-    "archify:check": "npm run archify:doctor && npm run archify:validate"
+    "archify:check": "npm run archify:doctor && npm run archify:validate",
+    "taskboard:ping": "node scripts/taskboard.mjs ping",
+    "taskboard:list": "node scripts/taskboard.mjs list",
+    "taskboard:context": "node scripts/taskboard.mjs context"
   },
   "repository": {
     "type": "git",

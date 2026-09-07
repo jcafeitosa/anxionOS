@@ -30,6 +30,18 @@ npm run archify:build    # gera HTML em .archify/artifacts/
 
 Artefatos versionados: abra `.archify/artifacts/*.html` no navegador (tema claro/escuro, export PNG).
 
+### Taskboard (dev local)
+
+Issues de desenvolvimento do anxionOS podem ser rastreadas no [Dashi/Codex Taskboard](https://github.com/chuspeeism/dashi-taskboard) em `http://127.0.0.1:47823/` (projeto **anxionOS**). Ferramenta **somente local** — o CI não depende dela.
+
+```bash
+cp .env.example .env   # opcional
+npm run taskboard:ping
+npm run taskboard:list
+```
+
+Detalhes para agentes: [AGENTS.md](AGENTS.md) (seção Dashi Taskboard). Wrapper: `scripts/taskboard.mjs`.
+
 ## Estrutura do repositório
 
 ```
@@ -38,7 +50,9 @@ anxionOS/
 ├── .archify/          # Specs JSON + artifacts HTML (Archify)
 ├── brain/             # (local, gitignored) OKF — specs, ADRs, notas
 ├── .github/           # Templates de issue/PR e CI mínimo
-├── package.json       # Scripts archify:* e postinstall do vendor
+├── package.json       # Scripts archify:*, taskboard:* e postinstall do vendor
+├── scripts/taskboard.mjs  # Wrapper CLI/HTTP para o board local
+├── .env.example       # TASKBOARD_URL (dev local)
 └── backend/           # (futuro) apps, modules, packages
 ```
 

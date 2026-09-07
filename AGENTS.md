@@ -102,6 +102,8 @@ Até haver código, explore via documentação em `brain/`.
 | Uso | Quando |
 | --- | --- |
 | Visão de plataforma / módulos | `architecture` — ex.: `.archify/specs/anxionos-platform.architecture.json` |
+| Sequência de implementação P01–P09 | `workflow` — `.archify/specs/anxionos-delivery-p01-p09.workflow.json` |
+| Fluxo Connections (binding → ledger) | `workflow` — `.archify/specs/anxionos-connections-inference.workflow.json` |
 | Workflow de agentes ou runbooks | `workflow` — derivar do fluxo em AGENTS.md |
 | Sequências de API / eventos | `sequence`, `dataflow`, `lifecycle` |
 
@@ -110,6 +112,41 @@ Comandos na raiz: `npm run archify:validate`, `npm run archify:build`. Detalhes 
 ### Frontend
 
 Após alterações de UI, inspecionar com Chrome DevTools MCP quando aplicável.
+
+### Dashi Taskboard (trabalho rastreável)
+
+O [Dashi/Codex Taskboard](https://github.com/chuspeeism/dashi-taskboard) é a **fonte de verdade local** para issues de desenvolvimento neste repositório. Roda em loopback (`http://127.0.0.1:47823`); **não** entra no CI nem em deploy.
+
+| Quando usar | Ação |
+| --- | --- |
+| Trabalho multi-etapas ou coordenação entre agentes | Registrar issue no board **anxionOS** antes de implementar |
+| Issue existente (ex. `ANX-2`) | `taskctl issue get <ID> --json` + comentários antes de codar |
+| Nova demanda durável | Buscar duplicatas; criar só se não houver issue equivalente |
+| Orquestração multi-agente | Seguir skill `orchestrate-work` + `manage-taskboard` |
+
+**Projeto:** `anxionOS` (resolvido por `workspacePath` do repo ou `TASKBOARD_PROJECT_NAME`).
+
+**Status:** `backlog` (não executar sem autorização) → `todo` (claimable) → `in_progress` → `in_review` → `done` (só com aceite explícito). Também: `blocked`, `canceled`.
+
+**Labels:** `for-claude` (elegível para agente), `hold` (não tocar), `phase-N` (fase P0x).
+
+**CLI preferido:** `taskctl` (global ou macOS: `'/Applications/Codex Taskboard.app/Contents/Resources/bin/taskctl'`). Env: `CODEX_TASKBOARD_URL` ou `TASKBOARD_URL`.
+
+**Wrapper do repo:**
+
+```bash
+cp .env.example .env   # opcional; defaults funcionam em dev local
+npm run taskboard:ping
+npm run taskboard:context
+npm run taskboard:list
+node scripts/taskboard.mjs get ANX-2
+```
+
+Escritas (`create`, `move`) exigem `taskctl` e `CODEX_THREAD_ID` (ou `CLAUDE_CODE_SESSION_ID`). Claim: mover `todo → in_progress` com `--if-version` e binding completo conforme `manage-taskboard`.
+
+**API HTTP (leitura / fallback):** `GET /health`, `GET /api/projects`, `GET /api/tasks`, `POST /api/tasks`. Sem autenticação no modo local.
+
+**Offline:** subir o app Codex Taskboard (ou serviço dashi-taskboard) na máquina; confirmar com `npm run taskboard:ping`.
 
 ## O que NÃO fazer
 
