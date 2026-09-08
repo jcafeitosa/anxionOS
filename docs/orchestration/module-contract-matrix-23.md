@@ -418,6 +418,31 @@ Fontes: [R09](./structure-debate/graph/R09-dev-plan.md) e [R10](./structure-deba
 
 Esta tabela cobre agrupamentos explícitos R09/R10, mas não substitui rastreio transitivo de D-GR-001..044, T01–T20 individuais e schemas referenciados. Os valores de política do plano exigem configuração tipada e compatibilidade com contrato vigente; não foram aplicados nem homologados. Nenhum rebuild, replay, benchmark ou efeito externo foi executado.
 
+## 6.16. Rastreio por capacidade — agents R09/R10
+
+Fontes: [R09](./structure-debate/agents/R09-dev-plan.md) e [R10](./structure-debate/agents/R10-g0-handoff.md), relidos em 2026-09-08. A consulta atual dos três paths agents (módulo, contracts e testes) retorna diretórios inexistentes; isso comprova ausência nesses paths, não de todo comportamento equivalente. ANX-139 continua núcleo, ANX-143/144 capacidades avançadas.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1 / R10 Agent, AgentVersion, Skill e persistência | Ausente nos paths esperados; equivalentes não demonstrados | ANX-139: domínio e migrations agents_* com schema/repository reais, lifecycle/versionamento/rollback; estado+journal+outbox. Não scaffoldar módulos vazios |
+| R09 S2 / R10 quatro eventos v1 | Ausente no path contracts/agents; nomes/campos dos quatro eventos não enumerados nestes R09/R10 | ANX-139/132: recuperar R04/decisões e especificar nomes, versões, payloads, erros e oráculos. Não inventar quatro nomes para preencher contagem |
+| R09 S3 create / G3-AGT-01 | Implementação não demonstrada | ANX-139: criação idempotente, payload conflitante e scope, um Agent/um evento sob corrida, rollback PG |
+| R09 S3 publish / G3-AGT-02/03 | Implementação não demonstrada | ANX-139: versão imutável, publish+outbox atômicos, deny sem grant e revogação entre validação/efeito; publicar não concede novos grants |
+| R09 S4 / R10 registry / G3-AGT-04 | Parcial no consumidor: `orchestration/src/domain/ports/agent-registry.ts` declara isAgentActive(agentId, organizationId) | ANX-139/140: integrar adapter público compatível e testar agente inativo/tenant diferente/indisponibilidade; não duplicar ou substituir silenciosamente interface existente |
+| R09 S5 / R10 Brain | Implementação não demonstrada no núcleo agents | ANX-139/141/138: invoke por fachada, T01 e grant guard, bindings explícitos, deny/allow e custo; inferência/provider/secrets em connections, sem fallback silencioso |
+| R09 S6 / R10 HTTP CRUD, publish, list skills | Implementação não demonstrada | ANX-139: API Elysia /v1/agents com handlers compartilhados, schema/erros/autorização; listar referências a skills não autoriza executá-las |
+| R09 S7 invoke dequeue opcional | Planejado opcional, não autorização para worker vazio | ANX-139/140: decisão explícita S6 suficiente ou fila concreta com caso de uso/teste; Task/Run/lease continuam orchestration |
+| G3-AGT-05 / R10 projector | Planejado no dono graph | ANX-138/139: consumer graph:agents:v1 projeta nó e versões a partir de evento, dedupe/rebuild/tenant; sem driver Neo4j em agents |
+| R09 S8 OpenAPI Scalar | Deferido do v1 | ANX-139/132: contrato público gerado e validado contra handlers; não confundir documentação com CRUD implementado |
+| R09 S8 Brain streaming SSE | Deferido do v1 | ANX-139/141/168: contrato streaming, cancelamento/backpressure, erro terminal e accounting de uso; transporte não muda authority |
+| R09/R10 promoção evaluation automática | Deferido, não habilitado | ANX-160/171: certificação/recomendação separada de aprovação governance e aplicação da versão pelo owner; ANX-173 reserva autonomia futura, sem autoexpansão |
+| R10 CEO blueprint onboarding saga | Planejado fora do núcleo v1 | ANX-135/139/140/143: organizations possui onboarding, agents configuração/versionamento, orchestration coordena execução; nenhum Run ou billing ledger transferido a agents |
+| R10 checklist G5-AGT-01..05 | Referenciado sem cenários nestes R09/R10; execução não provada | ANX-139/181: recuperar R07 e registrar cada cenário/evidência em sandbox; PASS textual “exec sandbox na G1” não é teste executado |
+| R09 pré-requisitos / R10 AC-G0-01..05, AGT-R06-01..10 e bloqueios | Histórico documental, não revalidado para candidato novo | ANX-139/181: dependências atuais identity/organizations/graph/eventing, claim e crítico nominal real. ANX-82 não autoriza reabrir ou escrever fora da issue |
+| R10 G2–G6 e suite387/387 | Evidência insuficiente para produto agents ausente | ANX-181: pareceres independentes e testes específicos por candidato; suite global não substitui G3-AGT-01..05 |
+
+Não houve execução de testes agents: diretórios previstos estão ausentes, e rodar suite global não comprovaria esses requisitos. Permanecem pendentes o rastreio transitivo de D-AGT-001..014, quatro eventos, dependências R06 e cenários R07. OpenBots seguem ANX-124/125→144; núcleo não presume homologação dessas integrações.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
