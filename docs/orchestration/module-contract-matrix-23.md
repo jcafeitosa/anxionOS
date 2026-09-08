@@ -877,7 +877,7 @@ Conflitos a consolidar:
 
 | Conflito | Fonte nesta matriz | Filhos envolvidos |
 | --- | --- | --- |
-| Submit, risco/reserva e permits | §§6.23–6.25 | ANX-148/149/150/151, governance ANX-136 |
+| Submit, risco/reserva e permits | §§6.23–6.25; disposição/migração no contrato P06 §2.1, aguardando revisão independente | ANX-148/149/150/151/132/163, governance ANX-136 |
 | Invoice issued versus paid e interface partners/accounting | §§6.26, 6.30–6.31; disposição/migração §6.31.1, aguardando revisão independente | ANX-152/156/157/132 |
 | Preço live versus modo de execução REAL | §6.20; disposição e migração planejada no contrato P06 §1.1, aguardando revisão independente | ANX-145/146/132/161/163 |
 | Quem aplica promoção versus quem avalia | §6.21; disposição publicação/backtest/promoção e migração planejada no contrato P09 §6.1/10, aguardando revisão independente | ANX-147/160/171/132, governance ANX-136 |

@@ -61,6 +61,33 @@ Toda ação de agente e usuário passa pelo mesmo application handler, capabilit
 
 Nenhum módulo escreve no repositório privado de outro módulo. Projeções podem ser reconstruídas a partir do journal/outbox autoritativo.
 
+### 2.1. Reconciliação submit, risco, reserva e permits — ANX-127
+
+**Fontes:** a spec canônica local `brain/project-docs/specs/003-investment-lifecycle/spec.md`, seção Decision, risco, aprovação e ordem, coloca risco/aprovação/reserva antes de READY/SUBMITTED. [Decisions R04](../structure-debate/decisions/R04-contracts-events.md) e [R09 G3-DC-S2-06/07](../structure-debate/decisions/R09-dev-plan.md) exigem pré-condições antes de intent.submitted. [Risk R04](../structure-debate/risk/R04-contracts-events.md) consome esse evento, formando ciclo se for o único início da análise; [R08 D-RK-001/003/004/005](../structure-debate/risk/R08-decision-log.md) distingue RiskPermit, mandato e reserva. [Execution R04](../structure-debate/execution/R04-contracts-events.md) recebe separadamente permits de risk/governance e reserva.
+
+**Disposição de sequência:** proposta/intent imutável e checagem de autoridade precedem a solicitação de análise de risco. Essa solicitação usa contrato público de risk antes de SUBMITTED; não depende exclusivamente de intent.submitted e não envia ordem. O nome/versão de comando ou evento de solicitação será fechado no slice ANX-149/150/132, sem inventar schema publicado nesta documentação. Risco aprovado, aprovação institucional exigida e reserva válida permitem preparação final; submit valida as pré-condições e registra a intenção SUBMITTED. O evento final pode acionar execution e observadores, não a primeira análise indispensável para produzi-lo.
+
+O fluxo preserva a sequência canônica: authority → risk → approval aplicável → reservation → ready/submit. Uma análise preliminar ou disposition anterior não satisfaz automaticamente a aprovação final dos hashes/bounds vigentes. Modificação de intent ou evidência invalidada retorna à etapa pertinente; não remove pré-condição para contornar o ciclo.
+
+| Responsabilidade | Dono e limite |
+| --- | --- |
+| Decision/TradeIntent/disposition e transição SUBMITTED | decisions; autorização consultada por contrato, sem emitir ordem |
+| Mandato, grants, aprovação institucional e authorityEpoch | governance; não substitui cálculo determinístico de risco |
+| RiskCheck/RiskPermit, policy executável, riskEpoch e kill switch | risk; não reserva capital e não assina aprovação em nome de governance |
+| Reserva e disponibilidade concorrente | capital; obrigações existentes continuam consideradas |
+| ExecutionPermit institucional | governance, após pré-condições válidas; vincula intent/risco/reserva/modo/limites/epochs, distinto de RiskPermit |
+| Consumo single-use e ordem/dispatch | execution; revalida ambos os permits, reserva, modo e autoridade antes de efeito; transporte não ganha autoridade própria |
+
+“Limites, exposição e aprovação” na tabela anterior significa aprovação do **check de risco**, não transferência da aprovação institucional a risk. RiskPermit não é ExecutionPermit, e approval humana não é nenhum dos dois. O pacote de contracts pode declarar seus tipos sem ser dono dos estados. Single-use permite recuperar resultado idempotente da mesma operação, mas nunca autoriza segundo efeito.
+
+**Concorrência e armazenamento:** reserve/final check precisam preservar os limites relevantes conforme DL-FI2 da spec canônica. Nenhum check feito apenas no início, evento recebido ou cache de epoch demonstra a atomicidade exigida. ANX-148/149/150/151/136 devem especificar locks/CAS, limites transacionais, fencing, expiração e consumo no pacote integrado, por ports públicos e donos respectivos; não simular uma transação distribuída entre módulos/processos com chamadas sequenciais. Falha antes de envio mantém estado recuperável; falha após envio possível resulta em UNKNOWN e reconciliação, preservando obrigações, sem liberação ou retry cego.
+
+**Migração planejada:** inventariar handlers, emissores e consumidores de submitted, risk/permit e reserva. Introduzir e testar o início pré-submit da análise antes de retirar sua dependência exclusiva de submitted. Leitores versionados validam estado e evidências; rejeitam submitted antigo sem prova suficiente. Não retrocriar risk/approval/reservation nem reescrever journal para legitimar intents legados. Intents ainda não despachados podem ser reavaliados por fluxo auditável; ordens já enviadas ou UNKNOWN ficam em reconciliação, sem repetir efeito. Corrigir enums/schemas/eventos exige compatibilidade explícita ANX-132, não renomeação silenciosa de RiskPermit.
+
+Cutover só habilita o novo produtor após consumidores e gates de pré-condição prontos. Rollback bloqueia novas submissões afetadas, preservando fills/reconciliação e reservas de obrigações confirmadas; não restaura o caminho permissivo que aceita AUTHORITY_CHECKED como prova suficiente. Não há código, migration ou alteração de estado operacional nesta entrega.
+
+**Oráculos delegados:** risk pode analisar antes de SUBMITTED; submit sem risco/reserva/aprovação exigida é negado; RiskPermit isolado não despacha; hash/tenant/conta/modo divergente é negado; revogação/expiração entre etapas bloqueia novo efeito; duas reservas concorrentes não excedem capital; dois dispatches não consomem o permit duas vezes; timeout possível após envio gera UNKNOWN sem nova ordem. ANX-163 integra o fluxo PAPER após evidências dos filhos. Esta disposição aguarda revisão independente e não comprova protocolo transacional ou prontidão financeira.
+
 ## 3. Contratos mínimos
 
 ### Instrument
