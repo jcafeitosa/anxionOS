@@ -647,6 +647,30 @@ Fontes: [R09](./structure-debate/risk/R09-dev-plan.md) e [R10](./structure-debat
 
 A ANX-150 adiciona exposure/freshness multiativo, UNKNOWN, reset autorizado e regressão ANX-122 ao plano histórico; esses requisitos continuam dentro do escopo, mesmo não desdobrados nos cinco G3 do R09. Contrato de permit entre decisions/risk/execution permanece para consolidação ANX-127. Nenhum check financeiro, kill switch, permit, teste integrado ou código foi alterado neste incremento. Rastreio transitivo R04/R07/R08 e fórmulas/limites exige fonte explícita.
 
+## 6.25. Rastreio por capacidade — execution R09/R10
+
+Fontes: [R09](./structure-debate/execution/R09-dev-plan.md) e [R10](./structure-debate/execution/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma open-execution-session e submit-order, ports permit/venue-fill/UoW/journal. ANX-151 executa delta; ANX-163 integração PAPER, ANX-161 contratos de adapters.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1 session/order/fill/adapter_ref/contracts | Parcial: comandos e ports presentes, schema completo não revalidado | ANX-151/132: identidade/tenant/conta/modo, ensureSchema, estados/erros e adapter referenciado; seed simulado não habilita venue live |
+| R09 S2 openSession | Parcial: open-execution-session.ts presente | ANX-151: sessão vinculada a conta/modo/adapter/autorização, imutabilidade pertinente e lifecycle; fechar sessão não apaga ordens pendentes |
+| R09 G3-EX-S2-01 submit SIMULATED | Parcial: §6.7 observou fill síncrono na TX | ANX-151/163: order SUBMITTED+fill.confirmed coerentes e atômicos no simulado; não extrapolar TX local para dispatch remoto |
+| R09 G3-EX-S2-02 RiskPermit | Parcial: risk-permit-validation port presente | ANX-151/150: sem permit EX_PERMIT_BYPASS; intentHash/conta/side/instrumento/quantidade/preço/epochs/validade, single-use e fencing revalidados antes do efeito |
+| R09 G3-EX-S2-03 reservation cross-tenant | Não verificado | ANX-151/148: EX_CROSS_TENANT sem ordem/consumo, reserva corresponde à intenção e moeda, replay não lê outra conta |
+| R09 G3-EX-S2-04 clientOrderId duplicado | Não verificado em execução | ANX-151: mesmo orderId no replay, payload conflitante negado, chave escopada e concorrência protegida; retry incerto não cria segunda ordem |
+| R09 G3-EX-S2-05 / S4 duplicate venueFillId | Não verificado | ANX-151/152: EX_DUPLICATE_FILL/disposição contratual, mesma confirmação não duplica evento/ledger, identificação venue+conta e payload divergente rastreáveis |
+| R09 G3-EX-S2-06 REAL | Não verificado | ANX-151: EX_MODE_FORBIDDEN no slice; fixtures TradeIntent/permits isoladas, sem flags REAL_EXECUTION/LIVE_TRADING |
+| R09 S3 cancelOrder/partial fills | Não demonstrado no inventário | ANX-151/148: corrida cancel/fill, parciais e release exato do remanescente, cancel solicitado não equivale a cancel confirmado |
+| R09 S3 capital reservation hook | Planejado por contrato, não escrita lateral | ANX-151/148: fatos fill/cancel confirmados levam ao handler do owner capital, sem alterar tabelas privadas nem duplicar ledger |
+| R09 S4 ReconciliationCase venue | Não demonstrado | ANX-151: timeout/crash após dispatch→UNKNOWN até evidência, consultar ordem/fill por correlação antes de retry, resolução auditada sem inventar resultado |
+| R09 S5 execution-go dispatch/report | Deferido | ANX-151/161/162: protocolo versionado, ack/reject/cancel/replace/report, negociação de capacidade e adapter homologado; engine externo não recebe autoridade institucional própria |
+| R09 S6 graph:execution:v1 | Deferido ao owner graph | ANX-138: Order/Fill como projeção derivada, checkpoint/rebuild/ACL, nunca ledger autoritativo |
+| R10 G4 secrets/bypass/cross-tenant / G5-EX-01..05 | Referências históricas, cinco cenários G5 não enumerados aqui | ANX-151/129/181: recuperar R07 e reproduzir em sandbox, credenciais isoladas e respostas redigidas; não herdar PASS textual |
+| R10 PC-G0-01..10 / spec003/P06/upstreams | Histórico documental | ANX-127/151/181: contratos atuais risk/decisions/capital/connections, claims e pareceres por candidato; g0_ready upstream não equivale à integração executada |
+
+O delta da ANX-151 inclui ack/reject/cancel/replace, UNKNOWN e crash recovery além do simulador inicial; não restringir a entrega futura a repetir S1–S2. Nenhuma ordem, sessão, fill, adapter ou teste financeiro foi acionado. Rastreio transitivo dos schemas/R07/R08 e decisão de placement/permit permanecem pendentes.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
