@@ -756,6 +756,24 @@ Fontes: [R09](./structure-debate/audit/R09-dev-plan.md) e [R10](./structure-deba
 
 O delta ANX-155 exige trilha antes/depois e cadeia decisão→fill→ledger, redaction/retenção e busca autorizada, além dos quatro cenários resumidos R09. Evidência ausente ou digest inválido deve aparecer como lacuna, não explicação fabricada. Nenhum export, replay, leitura de dados financeiros reais ou teste integrado foi executado. Rastreio transitivo R04–R08 permanece pendente.
 
+## 6.30. Rastreio por capacidade — billing R09/R10
+
+Fontes: [R09](./structure-debate/billing/R09-dev-plan.md) e [R10](./structure-debate/billing/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma create-subscription, issue-invoice, usage-recorded-consumer e UoW/journal. ANX-156 executa delta; quatro linhas do R09 não cobrem sozinhas o ciclo comercial solicitado.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1 schema/contracts | Parcial por commands presentes; schema completo não revalidado | ANX-156/132: planos/assinaturas/invoices/usage e eventos/erros versionados, valor/moeda/priceVersion, estado+journal+outbox e isolamento |
+| R09 S2 connections.usage.recorded projector | Parcial: consumer presente, dedupe usageRecordId observado §6.9 | ANX-156/141: uso causal reconcilia invoice, replay/ordering/correções e custos incertos explícitos; leitura+incremento concorrentes não perdem uso |
+| R09 S3 HTTP | Não verificado integralmente | ANX-156: operações e consultas autorizadas por tenant/papel, idempotência/erros e entitlements; não expor dados comerciais de outro tenant |
+| R09 S4 graph | Deferido; stub não homologa runtime | ANX-138: projeção derivada/checkpoint/rebuild/ACL, sem invoice autoritativa no grafo |
+| R10 PC-G0 10/10, PASS G2–G6 e handoff | Genérico/histórico, remete R04–R09 sem critérios/testes detalhados | ANX-127/156/181: recuperar contratos/decisões/matrizes e pareceres por candidato; nenhum teste inferido do resumo |
+| ANX-156 planos/assinaturas/entitlements | Parcial: create-subscription presente, lifecycle completo não provado | ANX-156/135: transições/preço versionado, acesso proporcional e quotas via contrato público; cobrança não concede autoridade de trading |
+| ANX-156 invoices/usage reconciliation | Parcial: issue-invoice presente | ANX-156: emissão congela os fatos/cálculo conforme contrato, corrida consumo/emissão definida, invoice emitida não significa paga |
+| ANX-156 cancelamentos/refunds/webhooks | Não demonstrado no inventário | ANX-156: origem/assinatura, duplicata/out-of-order, refund/reversal ligados ao pagamento, idempotência e sandbox autorizado; nenhuma cobrança real por autorização implícita |
+| ANX-156 segregação trading/entitlements | Não verificado em execução | ANX-156/152/157: capital financeiro isolado, accounting e partners consomem fatos publicados sem escrita privada; reversão comercial rastreável |
+
+Falta recuperar R04–R08 para schemas e cenários detalhados; o inventário limitado não comprova ausência universal dos caminhos restantes. Não foi emitida invoice, criada assinatura, recebido webhook ou executado teste financeiro neste incremento. Nenhum vendor de pagamento foi escolhido.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
