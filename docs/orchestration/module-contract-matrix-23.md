@@ -694,6 +694,30 @@ Fontes: [R09](./structure-debate/accounting/R09-dev-plan.md) e [R10](./structure
 
 Reversões imutáveis, FX e corporate actions da ANX-152 permanecem requisitos adicionais: preservar lançamento original, ligação do estorno, políticas monetárias e causalidade do fato de mercado; não corrigir saldo apagando histórico. Não foram lançados/revertidos valores nem executados testes financeiros. Rastreio transitivo de schemas/plano de contas/decisões e cenários R07 segue pendente.
 
+## 6.27. Rastreio por capacidade — portfolios R09/R10
+
+Fontes: [R09](./structure-debate/portfolios/R09-dev-plan.md) e [R10](./structure-debate/portfolios/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma create-portfolio, apply-fill-to-position, fill-confirmed-consumer e UoW/journal. ANX-153 executa delta.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1 portfolio/position/holding/contracts | Parcial: create-portfolio.ts presente; schema completo não revalidado | ANX-153/132: contas/modos/moedas e chaves, ensureSchema idempotente, ports e contratos/erros, sem ledger duplicado |
+| R09 S2 fill apply / G3-PF-S2-01 | Parcial: apply-fill-to-position.ts e consumer presentes | ANX-153/151: quantidade/lotes corretos por fill, evento position.updated e atomicidade; defaults LONG/TRADING observados §6.8 exigem escopo explícito |
+| R09 G3-PF-S2-02 duplicate | Parcial: dedupe por fill observado §6.8, execução não verificada | ANX-153: mesma revisão no replay, payload conflitante/corrida e nenhum lote duplicado |
+| R09 G3-PF-S2-03 tenant / G4 grant | Não verificado | ANX-153/131: scope nos commands/queries/replay inclusive caminho raced, origem de fill/conta confiável e grant pertinente |
+| R09 G3-PF-S2-04 REAL | Não verificado | ANX-153: modo REAL rejeitado no slice, dados SIMULATED/PAPER separados sem converter posição fictícia em real |
+| R09 G3-PF-S2-05 uniqueness | Não verificado em execução | ANX-153: chave posição única e concorrência PG; distinguir conflito único de erro geral e transação abortada, sem catch permissivo |
+| R09 S3 ValuationSnapshot/valuation.confirmed | Não demonstrado no inventário | ANX-153/146: preços/FX/as-of/baseCurrency, snapshots reproduzíveis e stale explícito, evento confirmado somente após critérios satisfeitos |
+| R09 S4 / G3-PF-S4-01 ledger lag | Não demonstrado | ANX-153/152: divergência/atraso abre PositionReconciliationCase OPEN com evidência/checkpoint, sem inventar cash |
+| R09 G3-PF-S4-02 fill before ledger | Não demonstrado | ANX-153: cash provisório distinguido do liquidado, não aumenta disponibilidade autoritativa; convergência após ledger |
+| R09 G3-PF-S4-03 duplicate ledger | Não demonstrado | ANX-153/152: entrada duplicada não dobra cash, ordenação/replay e reversões consistentes |
+| R09 S5 RebalancePlan propose/approve | Não demonstrado | ANX-153/136/149: plano versionado e aprovação governada, execução via intenções/risco/capital/execution; rebalance não opera venue diretamente |
+| R09 S5 graph:portfolios:v1 | Deferido; stub não é runtime | ANX-138: projeção/checkpoint/rebuild/ACL, sem posição autoritativa no Neo4j |
+| R09 S6 exposure/Timescale NAV opcional | Deferido, decisão explícita necessária | ANX-153/154/150: snapshot de exposição/valuation no owner portfolios, performance deriva retornos; NAV series opcional com dono/consumidores definidos, sem duplicar métrica autoritativa |
+| R10 SQLite ban/RLS | Restrição/planejado | ANX-153/131: posições compartilhadas não autoritativas em SQLite; roles/policies PG e isolamento real, não só filtro de aplicação |
+| R09 fixtures / R10 G5-PF-01..03, PC-G0-01..10/spec003 | Histórico e cenários transitivos não verificados | ANX-127/153/181: fixture fill/capital/instrument/ledger atrasado por checkpoint, recuperar R04/R07/R08 e evidência do candidato, sem herdar PASS |
+
+Lotes, FX/corporate actions, reversões e consolidação stocks+cripto da ANX-153 continuam no delta, mantendo contas e modos segregados. Nenhuma posição, snapshot ou teste financeiro foi alterado/executado. Rastreio transitivo de schemas, políticas de lotes/valuation e cenários R07 permanece pendente.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
