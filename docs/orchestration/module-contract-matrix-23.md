@@ -357,7 +357,7 @@ Fonte primária: [R08 decision log](./modules/identity/R08-decision-log.md) (tab
 
 ## 6.13. Rastreio por capacidade — organizations R09/R10
 
-Fontes: [R09](./modules/organizations/R09-dev-plan.md) e [R10](./modules/organizations/R10-g0-handoff.md), relidos integralmente em 2026-09-08. O aceite histórico ANX-29 não é reaberto; ANX-135 executa o delta. Rodadas e decisões referenciadas transitivamente ainda precisam de rastreio na ANX-127.
+Fontes: [R09](./modules/organizations/R09-dev-plan.md) e [R10](./modules/organizations/R10-g0-handoff.md), relidos integralmente em 2026-09-08. O aceite histórico ANX-29 não é reaberto; ANX-135 executa o delta executável. O rastreio transitivo **D-ORG-001..044** está em **§6.13.1** (ANX-198). Rodadas **R01–R08** têm fonte primária em [R08](./modules/organizations/R08-decision-log.md) e artefatos do debate; ANX-127 cobre completude documental.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -386,11 +386,64 @@ Fontes: [R09](./modules/organizations/R09-dev-plan.md) e [R10](./modules/organiz
 | R10 D-ORG-035 maxCompanies | Planejado comercial | ANX-156/135: billing fornece quota por contrato, organizations aplica criação/alteração sem escrita privada cross-module; teste concorrente |
 | R10 D-ORG-044 export/listagem global | Não verificado | ANX-135/158: escopo PLATFORM/AGENCY, dados mínimos, audit e autorização; “global” não libera consulta cross-tenant a qualquer usuário |
 | R09 fixtures/cleanup / R10 checklist e ambiente | Testes API, fixture-isolation e UoW inventariados; não executados neste incremento | ANX-135/181: fixture dedicada equivalente ao registry, PG/NATS isolados e cleanup limitado; não copiar TRUNCATE CASCADE do plano para banco compartilhado |
-| R09 pré-requisitos / R10 AC-G0-01..08, PC-G0-01..10, DEP-01..07, H-01..05 e B-01..03 | Histórico documental; G6 integrado aparece pendente no R10, não prova situação atual | ANX-135/181: recuperar/revalidar pareceres por candidato, ambiente, claims e responsáveis independentes; checklist marcado não equivale a execução |
+| R09 pré-requisitos / R10 AC-G0-01..08, PC-G0-01..10, DEP-01..07, H-01..05 e B-01..03 | Histórico documental; G6 integrado aparece pendente no R10, não prova situação atual | ANX-135/181: recuperar/revalidar pareceres por candidato. **D-ORG-001..044** em §6.13.1 (ANX-198); R06–R08 com limite de revalidação executável |
 
 **Teste executado:** `bun test tests/contracts/organizations.test.ts` em backend, Bun 1.4.0, exit 0, **6 pass / 0 fail / 21 assertions**. Inspeção prévia: códigos/status de erro, detalhes, enum de Agency, comando create e envelope agency.created. Não cobre todos os comandos/eventos/queries, G3-01..10, G5-01..04, PG, HTTP ou bootstrap. O arquivo é equivalente ao diretório de contratos sugerido pelo plano; não confundir mudança de path com ausência.
 
-A lista de queries e a saga completa continuam não verificadas; rastreio transitivo de D-ORG-001..044 e referências R01–R08 permanece pendente. Nenhum código foi alterado, nenhum convite real enviado e nenhum gate integrado aprovado.
+A lista de queries e a saga completa continuam não verificadas neste incremento. **D-ORG-001..044** estão rastreados em §6.13.1; saga/queries executáveis permanecem em ANX-135. Nenhum código foi alterado, nenhum convite real enviado e nenhum gate integrado aprovado.
+
+### 6.13.1. A1 — disposição transitiva D-ORG-001..044 (ANX-198)
+
+Fonte primária: [R08 decision log](./modules/organizations/R08-decision-log.md) (tabela consolidada, relida 2026-09-08). Crosswalk Slack R07 → D-ORG na mesma fonte. Esta subseção **não** revalida código nem substitui G0/G3 de ANX-135.
+
+| ID | Decisão (resumo) | Classificação | Disposição / issue | Evidência ou limite |
+| --- | --- | --- | --- | --- |
+| D-ORG-001 | Dono Agency/Owner/Membership em PG | Aceito v1 | ANX-135 baseline | Migrations §6.3; não revalidado integralmente |
+| D-ORG-002 | Sessão/BA em identity+apps/api | Aceito v1 | ANX-134/128 | organizations recebe principalId resolvido |
+| D-ORG-003 | Grants/mandatos → governance | Aceito v1 | ANX-136 | organizations publica role/status apenas |
+| D-ORG-004 | Assinatura/invoice → billing | Aceito v1 | ANX-156 | Sem escrita billing em organizations |
+| D-ORG-005 | Projeção Neo4j → graph | Aceito v1 | ANX-138 | organizations emite eventos; D-ORG-021 impl graph |
+| D-ORG-006 | Agent/CEO blueprint → agents | Aceito v1 | ANX-139 | Runtime agents, não organizations |
+| D-ORG-007 | v1 = Agency+Owner+Membership; Organization fora v1 | Deferido pós-v1 | ANX-135 D-ORG-043 | Entidade Organization não no escopo v1 |
+| D-ORG-008 | principalId via PrincipalLookup sem FK cross-module | Aceito v1 | ANX-135/134 | Port identity; adapter D-ORG-022 |
+| D-ORG-009 | INV-ORG-02: um owner ativo por Agency | Aceito v1 | ANX-135 G3-06 | revoke último owner → 409 |
+| D-ORG-010 | Idempotency-Key → commandId + journal | Aceito v1 | ANX-135 | Middleware idempotency §6.3 |
+| D-ORG-011 | Eventos ownerDomain organizations `.v1` | Aceito v1 | ANX-132/135 | Teste contracts 6 pass §6.13 |
+| D-ORG-012 | Contratos `@anxionos/contracts/organizations/*` | Aceito v1 impl G1 | ANX-132 | Matriz campos incompleta |
+| D-ORG-013 | REST `/v1/organizations` + Idempotency-Key | Aceito v1 | ANX-135/128 | plugin.ts presente; HTTP não executado aqui |
+| D-ORG-014 | principalId nunca do body | Aceito v1 | ANX-135 G5-03 | R-ORG-10 não verificado em execução |
+| D-ORG-015 | Tenancy membership ativo; ORG_CROSS_TENANT 403 | Aceito v1 | ANX-135 G3-02 | scoped-access/middleware §6.3 |
+| D-ORG-016 | Prefixo `organizations_*`; enums Drizzle | Aceito v1 | ANX-135 | migrations 0000/0001 |
+| D-ORG-017 | Journal/outbox mesma TX (OrganizationUnitOfWork) | Aceito v1 | ANX-135 S3 | UoW teste existe; integração não executada |
+| D-ORG-018 | Token convite 32b; HMAC-SHA256 pepper | Aceito v1 | ANX-135/129 | hasher inventariado; startup não executado |
+| D-ORG-019 | Token/pepper proibidos em eventos/logs/API | Aceito v1 | ANX-135/129 | Política R08; logs não inspecionados |
+| D-ORG-020 | SQLite proibido estado institucional | Aceito v1 | ADR0004/PG | Política storage |
+| D-ORG-021 | Projeção Neo4j E003/E008/E009/E016 | Aceito impl graph P03 | ANX-138 | consumer `graph:organizations:v1` deferido execução |
+| D-ORG-022 | IdentityPrincipalLookup → getPrincipalById | Aceito v1 | ANX-134/135 | Pré-req ANX-28 histórico |
+| D-ORG-023 | Identity indisponível → 503 ORG_IDENTITY_UNAVAILABLE | Aceito v1 | ANX-135 G3-05 | CreateAgency; não generalizar InviteMember |
+| D-ORG-024 | InviteMember sem lookup se convidado inexistente | Aceito v1 | ANX-135 G3-04 | invite-member.ts presente |
+| D-ORG-025 | Cache existência principal para AuthZ proibido | Aceito v1 | ANX-135 | Sem cache documentado |
+| D-ORG-026 | RLS não obrigatório v1; guards application+api | Aceito v1 | ANX-131 adiado | D-ORG-040 P09 hardening |
+| D-ORG-027 | TTL convite 7 dias | Aceito v1 | ANX-135 G3-07/08 | Config tipada; teste accept parcial |
+| D-ORG-028 | Accept `POST /v1/organizations/invites/accept` | Aceito v1 | ANX-135 | accept-invite-by-token.ts presente |
+| D-ORG-029 | Rate limit 10/IP/min accept | Aceito v1 | ANX-128/135 | accept-rate-limit.ts presente |
+| D-ORG-030 | Guard `assertAgencyScope` api+application | Aceito v1 | ANX-135 | require-agency-membership §6.3 |
+| D-ORG-031 | Índice único parcial invite email | Aceito v1 | ANX-135 G5-02 | migration; corrida não verificada |
+| D-ORG-032 | Rotação pepper dual 24h + runbook | Aceito v1 | ANX-135/129 | Runbook não executado |
+| D-ORG-033 | ANX-29 bloqueada até identity G7 + R10 G0 | Aceito histórico | ANX-135/181 | Aceite ANX-29 não reaberto aqui |
+| D-ORG-034 | Accept token exige match email sessão | Aceito v1 | ANX-135 G3-08 | P-R7-01 resolvido R08 |
+| D-ORG-035 | Quota maxCompanies → billing P07 | Aceito v1 comercial | ANX-156/135 | organizations v1 sem quota própria |
+| D-ORG-036 | Admin/owner ativa por membershipId sem match email | Aceito v1 | ANX-135 | Fluxo assistido documentado |
+| D-ORG-037 | Bootstrap eventing→identity→organizations | Aceito v1 | ANX-128/129 | bootstrap.ts §6.3; ordem não executada |
+| D-ORG-038 | Realtime `organizations:agency:{id}` | Deferido R9 | ANX-168 | Wiring opcional v1 |
+| D-ORG-039 | Saga onboarding UI01 completa | Deferido R9/P04 | ANX-140/156 | advance-onboarding parcial §6.13 |
+| D-ORG-040 | RLS PostgreSQL hardening | Deferido P09 | ANX-131 | Critérios P09 |
+| D-ORG-041 | Código ORG_INVITE_EXPIRED em contracts | Deferido R9 | ANX-132 | P-R7-04 |
+| D-ORG-042 | Tabela organizations_blueprints | Deferido R9 | ANX-135/139 | Onboarding blueprint state |
+| D-ORG-043 | Organization + CONTAINS_AGENCY multi-company | Deferido pós-v1 | ANX-135 | Sem entidade Organization v1 |
+| D-ORG-044 | Export/listagem global memberships | Deferido | ANX-135/158 | Sem endpoint v1; revisão G4 |
+
+**Rodadas R06–R08 (limite A1):** R06 dependências → D-ORG-008/022/023/024/025; R07 riscos/tenancy → D-ORG-015/026–034; R08 → D-ORG-034–036 e tabela acima. **R01–R05** consolidados via crosswalk R08; revalidação executável de queries/saga/G3–G5 permanece ANX-135.
 
 ## 6.14. Rastreio por capacidade — governance R09/R10
 
@@ -931,7 +984,7 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 | Módulo / fonte da pendência | Referência → requisito/grupo a detalhar | Filho / disposição |
 | --- | --- | --- |
 | identity §6.12 | D-IDN-001..024 → **§6.12.1** (ANX-197); R01–R05 structure-debate; R06–R08 com limite em §6.12.1 | ANX-134 executa P1/deferidos; schemas ANX-132; DEP/H/PC-G0 revalidação em ANX-134/181 |
-| organizations §6.13 | D-ORG-001..044, R01–R08 → queries/saga, convites, membership e ownership | ANX-135; isolamento ANX-131; recuperar parecer sem herdar G6 |
+| organizations §6.13 | D-ORG-001..044 → **§6.13.1** (ANX-198); queries/saga/G3–G5 executáveis em ANX-135 | ANX-135 executa delta; isolamento ANX-131; parecer G6 via ANX-181 |
 | governance §6.14 | Rodadas/decisões anteriores → delegation, mandate, aprovação e autoridade temporal | ANX-136/137; fronteiras de permit na disposição P06 §2.1 |
 | graph §6.15 | D-GR-001..044, T01–T20 e schemas → traversals individuais, rebuild/temporalidade e políticas | ANX-138; não converter número de traversal em teste executado |
 | agents §6.16 | D-AGT-001..014, R04/R06/R07 → quatro eventos, dependências e G5-AGT-01..05 | ANX-139/132; OpenBots ANX-124/125→144 e teammates ANX-143 separados |
@@ -970,7 +1023,7 @@ Trabalho documental **parcial** do item A4 (`405b8304`). Não equivale a PASS in
 | Placement gateway | ADR0006, §6.1/§6.34, spec gateway | ADR `1cfa7de6e7a98778f6c388e085790e5b1d5d8314b10e4e3cafe9e338869ce0c2` | `d70b8f91` → PASS F1 revalidado | **G1C3 F1 fechado** (ANX-192/193/194/195) |
 | Conflitos F1–F3 (P06/ops/gateway) | P06, ops, gateway, §6.34 | C2 em comentário `78b398b3` | `f18a2846` C1; `cf16914a` C2 | F1–F3 resolvidos; B1 removido por ADR0006 |
 | Cinco disposições contratuais | §6.34 tabela | hashes por linha na §6.34 | `400da37b`, `7542eb8e`, `1c5076a6`, `ac51f462`, `923d4cd8` | PASS restrito documental cada uma |
-| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** identity D-IDN §6.12.1 (ANX-197); demais módulos pendentes |
+| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** identity §6.12.1 (ANX-197), organizations §6.13.1 (ANX-198); 21 módulos pendentes |
 | Pacote final A4 | esta §6.36 + §6.1 | ver comentários ANX-127 | pendente revisor integral | **A4 parcial** — não encerrar ANX-127 |
 
 Implementação futura permanece delegada aos filhos ANX-126 (ANX-128+); este pacote não homologa produto, engines ou testes financeiros.
