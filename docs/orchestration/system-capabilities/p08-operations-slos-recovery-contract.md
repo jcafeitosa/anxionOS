@@ -31,7 +31,7 @@ Cada request, command, evento, job, decisão, ordem simulada, fill, lançamento 
 | atraso de outbox/inbox | eventing/workers | pausar consumidores afetados e reprocessar por checkpoint |
 | erro de schema ou contrato | contracts/owner domain | quarantine, não retry cego |
 | stale permit/epoch | governance | revogar cache e exigir nova avaliação |
-| divergência de ledger/posição | accounting/reconciliation | abrir caso e bloquear efeitos dependentes |
+| divergência de ledger/posição | accounting (financeira), execution (venue), portfolios (projeção) | dono do estado abre/trata caso por contrato; bloquear efeitos dependentes e preservar evidência em audit |
 | atraso/qualidade de market data | market-data/connections | degradar para leitura segura ou pausar |
 | custo/latência de inferência | connections | aplicar budget e policy, sem fallback silencioso; knowledge consome o serviço autorizado |
 | pool, fila ou storage saturado | platform/operations | backpressure, scale autorizado ou shutdown controlado |

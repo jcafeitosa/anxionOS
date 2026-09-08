@@ -873,17 +873,17 @@ O placement do gateway é a única escolha humana imediata identificada nesta au
 | Conflitos conhecidos | Lista fechada abaixo nesta auditoria; novos achados exigem evidência e justificativa de escopo | ANX-127 com donos afetados: fonte prevalente, decisão aplicável, impacto, migração/compatibilidade ou justificativa de não aplicação. Encaminhamento genérico ao executor não basta |
 | Pacote integrado | Matriz, fila/roadmap e contratos operacionais efetivamente alterados | ANX-127 e revisores: critério → artefato/seção/digest → parecer independente do candidato. Revalidar mudanças afetadas; não herdar PASS de snapshots |
 
-Conflitos a consolidar:
+Disposições dos cinco conflitos — pareceres restritos históricos:
 
-| Conflito | Fonte nesta matriz | Filhos envolvidos |
+| Conflito | Disposição e escopo revisado | Parecer ANX-127 / SHA-256 do artefato revisado |
 | --- | --- | --- |
-| Submit, risco/reserva e permits | §§6.23–6.25; disposição/migração no contrato P06 §2.1, aguardando revisão independente | ANX-148/149/150/151/132/163, governance ANX-136 |
-| Invoice issued versus paid e interface partners/accounting | §§6.26, 6.30–6.31; disposição/migração §6.31.1, aguardando revisão independente | ANX-152/156/157/132 |
-| Preço live versus modo de execução REAL | §6.20; disposição e migração planejada no contrato P06 §1.1, aguardando revisão independente | ANX-145/146/132/161/163 |
-| Quem aplica promoção versus quem avalia | §6.21; disposição publicação/backtest/promoção e migração planejada no contrato P09 §6.1/10, aguardando revisão independente | ANX-147/160/171/132, governance ANX-136 |
-| Envelopes coexistentes e idempotency UUID/string | §6.11; disposição e compatibilidade planejada no contrato P01/P02, aguardando revisão independente; associação do dispatch depende do placement | ANX-130/132/161 |
+| Submit, risco/reserva e permits | P06 §2.1, referência nesta matriz; ANX-148/149/150/151/132/163/136 | `400da37b-3588-45ac-a45e-d0b9bb8acc36`; P06 `599dd4f3a902c0a6812b654f31e78161fcccd111dcf6ed876c0f4b8706962030` |
+| Issued/paid e partners/accounting | Matriz §6.31.1 e referência §6.34; ANX-152/156/157/132 | `7542eb8e-3e79-4832-9509-63b3d6504ef0`; matriz `471fe53a922ccd6c7f9b737c510a9a228f1bdecefeb60ca6485b5d4e5e633109` |
+| Preço corrente versus REAL | P06 §§1.1/10, matriz §§6.20/6.34; ANX-145/146/132/161/163 | `1c5076a6-c9c0-464e-9765-cae58ef83a4f`; P06 `9343e907009bcb57aae4277cb2a23618f3cde80b04881bf45762ac920ca6bbe1` |
+| Publicação/backtest/promoção | P09 §6.1 e referência §6.34; ANX-147/160/171/132/136 | `ac51f462-7d28-4ef8-a763-93bc9d51e129`; P09 `4b23b67cf93f1b8aab8dd19bcc912c0f7f29fa8227f83bd8b4d6f3e454e3a65a` |
+| Envelopes e UUID/string | Plano P01/P02 de compatibilidade; ANX-130/132/161, placement da associação pendente | `923d4cd8-6841-4aa5-a0f8-ce05b2695115`; P01/P02 `a4b34a6599ebd4b0ad017e5d23ca532435c7ff523b00639d99fe6f293da47f08` |
 
-Esta lista organiza pendências; **não resolve os cinco conflitos por declaração**. A5 e a correção do saldo da §6.1 já foram realizadas e não voltam à fila como trabalho novo.
+Todos são **G1 PASS restrito documental**, não implementação ou aprovação integrada. Digests registram o candidato de cada parecer; alterações posteriores exigem revalidação de impacto. C1 integrado recebeu CHANGES_REQUIRED (`13399514-1dd4-41e5-b9a4-7989c0dff49c`): ownership antigo, emissor EffectGate e saldo de pareceres; correções geram novo candidato. Placement continua decisão humana pendente. A5 e correção da §6.1 já realizadas não voltam como trabalho novo.
 
 ### Limite entre planejamento e implementação
 

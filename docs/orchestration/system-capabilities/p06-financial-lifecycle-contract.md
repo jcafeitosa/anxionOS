@@ -54,10 +54,10 @@ Toda ação de agente e usuário passa pelo mesmo application handler, capabilit
 | Limites, exposição e aprovação | risk | resultado de risco e motivos |
 | Saldo disponível e reserva | capital | reserva, liberação e epoch de capital |
 | Permissão de efeito | governance | permit, grant, epoch, fencing e modo |
-| Simulação de ordens e fills | execution/simulation | estado da ordem, fill, fees e slippage |
+| Ordens e fills no ambiente simulado | execution | estado da ordem e fill; simulation fornece cenários/modelos sem assumir esse estado |
 | Débito/crédito financeiro | accounting | journal/outbox e ledger imutável |
 | Posições e valuation | portfolios/performance | snapshots derivados e P&L |
-| Reconciliação e exceções | reconciliation/audit | divergências, UNKNOWN e evidências |
+| Reconciliação e exceções | execution (venue/ordens), accounting (financeira), audit (evidência) | cada dono trata suas divergências; UNKNOWN não autoriza retry |
 
 Nenhum módulo escreve no repositório privado de outro módulo. Projeções podem ser reconstruídas a partir do journal/outbox autoritativo.
 
@@ -163,6 +163,8 @@ A simulação declara seu perfil: histórico/replay, mercado corrente paper ou c
 
 ## 7. Eventos de domínio
 
+Os nomes desta tabela são conceitos de fluxo, não schemas publicados. Cada produtor deve mapear nome, versão e payload ao contrato executável de seu domínio antes de implementar. Não existe módulo reconciliation no baseline; simulation fornece cenários/resultados de simulação, enquanto execution mantém Order/Fill mesmo em SIMULATED/PAPER.
+
 | Evento | Produzido por | Consumido por |
 | --- | --- | --- |
 | `MarketObservationRecorded` | market-data | strategies, simulation, performance |
@@ -171,11 +173,12 @@ A simulação declara seu perfil: histórico/replay, mercado corrente paper ou c
 | `RiskCheckCompleted` | risk | capital, governance, audit |
 | `CapitalReserved/Released` | capital | execution, accounting, audit |
 | `ExecutionPermitGranted/Revoked` | governance | execution, audit |
-| `SimulatedOrderAccepted/StateChanged` | simulation | accounting, portfolios, reconciliation |
-| `SimulatedFillRecorded` | simulation | accounting, portfolios, performance |
-| `LedgerPosted` | accounting | portfolios, performance, reconciliation |
+| `SimulatedOrderAccepted/StateChanged` | execution | accounting, portfolios, audit |
+| `SimulatedFillRecorded` | execution | accounting, portfolios, performance |
+| `LedgerPosted` | accounting | portfolios, performance, audit |
 | `PositionValuated` | portfolios | performance, audit |
-| `ReconciliationOpened/Resolved` | reconciliation | governance, operations, audit |
+| `ExecutionReconciliationOpened/Resolved` | execution | governance, operations, audit |
+| `FinancialReconciliationOpened/Resolved` | accounting | governance, operations, audit |
 
 Todo evento tem envelope versionado, `eventId`, `aggregateId`, `ownerDomain`, `occurredAt`, `causationId`, `correlationId`, tenant, schema version e checkpoint. Secrets, credenciais e prompts não entram no evento.
 

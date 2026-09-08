@@ -171,7 +171,7 @@ MT5 não será colocado no mesmo caminho Linux por inferência: será especifica
 1. Usuário ou agente chama o application handler.
 2. O handler deriva actor, tenant, grant e budget da sessão.
 3. Estratégia/decisão produz TradeIntent imutável.
-4. Risk produz RiskCheck e o EffectGate cria permit somente para SIMULATED.
+4. Conforme [P06 §2.1](./p06-financial-lifecycle-contract.md), risk produz RiskCheck/RiskPermit, capital mantém a reserva e governance emite ExecutionPermit institucional para o modo autorizado. Execution revalida e consome antes do efeito; EffectGate é mecanismo de verificação, não emissor de autoridade. Neste fluxo, o modo é somente SIMULATED.
 5. Gateway verifica manifesto, checksum, ambiente e idempotencyKey.
 6. Adapter executa contra dados históricos/replay e execução virtual.
 7. Eventos são validados, persistidos no journal/outbox e projetados.
