@@ -135,16 +135,18 @@ Mudanças de modelo/provider devem preservar identificação do provider, versã
 
 ## 10. Eventos
 
+Nomes abaixo são conceitos do fluxo, não inventário de schemas publicados. Não existe módulo físico evolution no baseline aceito. ANX-171 deve mapear cada evento ao schema/símbolo versionado e ao dono concreto: governance possui ChangeProposal/aprovação; evaluation avaliação/certificação; simulation cenários; agents/strategies/connections e outros donos aplicam suas próprias versões. Operations coordena recuperação sem escrever estado alheio.
+
 | Evento | Owner | Propósito |
 | --- | --- | --- |
-| `ChangeProposed` | evolution | registrar hipótese e escopo |
+| `ChangeProposed` | governance | registrar hipótese e escopo da ChangeProposal |
 | `EvaluationStarted/Completed` | evaluation | anexar resultado comparável |
 | `ReviewCompleted` | gate owner | registrar parecer independente |
-| `CanaryStarted/Paused` | evolution/operations | controlar exposição |
-| `VersionPromoted` | evolution/governance | publicar versão aprovada |
-| `RollbackRequested/Completed` | evolution/operations | retornar versão segura |
+| `CanaryStarted/Paused` | domínio proprietário da versão; operations coordena operação | controlar exposição sem transferir ownership do estado |
+| `VersionPromoted` | domínio proprietário da versão, após aprovação governance | publicar versão aprovada |
+| `RollbackRequested/Completed` | domínio proprietário da versão; operations coordena recuperação | retornar versão segura preservando efeitos anteriores |
 | `PolicyEpochBumped` | governance | invalidar autoridade anterior |
-| `EvolutionBlocked` | evolution | preservar impedimento e próxima ação |
+| `EvolutionBlocked` | dono do estado bloqueado; orchestration para Task/Run | preservar impedimento e próxima ação |
 
 Eventos incluem digest, predecessor, candidate, ownerDomain, tenant, correlation/causation, schema version, checkpoint e redaction. Nenhum evento contém secret, prompt sensível bruto ou credencial.
 
