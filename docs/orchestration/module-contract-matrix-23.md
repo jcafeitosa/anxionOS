@@ -671,6 +671,29 @@ Fontes: [R09](./structure-debate/execution/R09-dev-plan.md) e [R10](./structure-
 
 O delta da ANX-151 inclui ack/reject/cancel/replace, UNKNOWN e crash recovery além do simulador inicial; não restringir a entrega futura a repetir S1–S2. Nenhuma ordem, sessão, fill, adapter ou teste financeiro foi acionado. Rastreio transitivo dos schemas/R07/R08 e decisão de placement/permit permanecem pendentes.
 
+## 6.26. Rastreio por capacidade — accounting R09/R10
+
+Fontes: [R09](./structure-debate/accounting/R09-dev-plan.md) e [R10](./structure-debate/accounting/R10-g0-handoff.md), relidos em 2026-09-08. Inventário confirma post-trade-fill, post-ledger-entry, fill-confirmed-consumer e balance-validation/UoW/journal. ANX-152 executa delta.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1 chart/journal/schema/contracts/seed | Parcial por presença dos commands; schema/seed completos não revalidados | ANX-152/132: ChartOfAccounts por org, natureza de contas, moeda/precisão e versões; ensureSchema idempotente sem sobrescrever plano existente |
+| R09 S2 fill projector/ledger.posted | Parcial: fill-confirmed-consumer e post-trade-fill presentes | ANX-152/151: evento confirmado original rastreável, postagem+journal+outbox atômicos; sourceRef correto, sem float monetário |
+| R09 G3-ACC-S2-01 balanced | Parcial: balance-validation presente; §6.8 registra cash/clearing a confrontar | ANX-152: balanceamento e natureza/sinais corretos por política monetária; soma zero não demonstra interpretação econômica |
+| R09 G3-ACC-S2-02 duplicate | Não verificado em execução | ANX-152: mesma idempotency/fill gera mesma entry, corrida e payload conflitante; fonte por venue/conta sem colisão entre tenants |
+| R09 G3-ACC-S2-03 tenant / G4 grant | Não verificado | ANX-152/131/136: entrada/consulta/replay isolados, autoria/grant auditáveis, sem lançamento privado cross-module |
+| R09 G3-ACC-S2-04 REAL | Não verificado | ANX-152: REAL rejeitado no slice, contas/modos segregados, fixture simulated não gera capital real |
+| R09 G3-ACC-S2-05 unbalanced | Não verificado | ANX-152: entrada desbalanceada rejeitada sem persistência parcial; arredondamento/FX/taxas conforme contrato, nunca ajuste silencioso |
+| R09 S3 fee postings | Não demonstrado no inventário | ANX-152: taxas por moeda/fill, revisão/correção idempotente, proveniência e precisão; não inferir taxa zero por campo ausente |
+| R09 S3 balance snapshot | Não demonstrado | ANX-152/148/153: projeção de saldo reproduzível, checkpoint/as-of, leitura não vira segundo ledger; divergência/stale explícitos |
+| R09 S4 reconciliation OPEN/RESOLVE/HTTP | Não demonstrado | ANX-152: caso financeiro com fatos/evidências/autoridade, resolução auditada, HTTP autorizado; reconciliação de venue continua execution |
+| R09 S5 graph projector | Deferido, stub não autoriza produção | ANX-138: graph:accounting:v1 derivado e reconstruível, ledger autoritativo PG exclusivamente accounting |
+| R09 S6 billing.invoice.paid consumer | Deferido após billing | ANX-152/156: evento pago deduplicado, segregação comercial/trading e reversões; invoice emitida não é paga |
+| R10 SQLite ban/RLS | Restrição de autoridade e evolução planejada | ANX-152/131: nenhum ledger SQLite, políticas/roles PG e provas de isolamento; aplicação-only não equivale a RLS |
+| R10 G5-ACC-01..03/PC-G0-01..10/spec003 | Histórico referenciado, cenários G5 não detalhados aqui | ANX-127/152/181: recuperar R04/R07/R08/parecer do candidato; checkmarks não aprovam produto |
+
+Reversões imutáveis, FX e corporate actions da ANX-152 permanecem requisitos adicionais: preservar lançamento original, ligação do estorno, políticas monetárias e causalidade do fato de mercado; não corrigir saldo apagando histórico. Não foram lançados/revertidos valores nem executados testes financeiros. Rastreio transitivo de schemas/plano de contas/decisões e cenários R07 segue pendente.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
