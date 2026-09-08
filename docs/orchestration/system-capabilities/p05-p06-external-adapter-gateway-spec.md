@@ -407,6 +407,38 @@ As formulações anteriores “sem alterar contrato central/core” descrevem o 
 
 Os próximos executores devem rastrear imports, registry/ports, adapters reais, testes e limites do slice antes de implementar o delta. Esta seção registra lacunas; não resolve silenciosamente a decisão de placement nem altera o código.
 
+## Placement aprovado — ANX-127 / ADR0006
+
+O usuário aprovou em 2026-09-08 a distribuição entre os 23 módulos. Fonte: [ADR0006](../../../brain/project-docs/decisions/0006-distribute-external-gateways-within-baseline.md), complementar ao ADR0002. O placement está aceito; o detalhamento abaixo e a implementação continuam sujeitos aos gates.
+
+### Ownership e escritor único
+
+| Estado / operação | Dono da escrita autoritativa | Limite |
+| --- | --- | --- |
+| Registro técnico: adapter id/versão, digest, manifesto imutável, port/schema versions, proveniência e referência de conformance | operations, PostgreSQL com journal/outbox, no lifecycle de deploy | Leitura por port público; registro não habilita trading nem guarda credencial |
+| Aprovação institucional, grants e epochs | governance | Revalidação no domínio consumidor; catálogo não concede autoridade |
+| Provider/account/endpoint/binding e referências de secrets | connections | Artefato referencia conexão, não duplica estado mutável |
+| Ativação financeira por versão/conta/modo; dispatch, reports, idempotência e UNKNOWN | execution | Não assume ingestão de feeds nem duplica risco/reserva |
+| Ativação de feed, subscription, backfill, observações e checkpoints | market-data, PostgreSQL/Timescale conforme mapa | Consulta o catálogo técnico sem chamar execução financeira |
+| Conformance/qualidade e evidências | evaluation quando aplicável; audit mantém manifests; operations referencia resultado de release | Certificado não concede grant ou amplia ambiente |
+| Contratos/SDK/transporte/runtime | packages/contracts/sdk/eventing, services e apps composition roots | Sem registro autoritativo paralelo, regras financeiras ou SDK de engine no domínio |
+
+Um runtime multi-capability compartilha o artefato identificado por digest, não o estado de ativação financeira e de feed. Os status proposed/testing/approved-simulated/approved-paper/approved-real descritos acima são visão derivada de registro, homologação e ativação por capability, não campo global que operations possa usar para promover trading. Suspensão técnica impede novos usos sem apagar obrigações nem encerrar cegamente consultas/reconciliação autorizadas. Cache não substitui autoridade atual.
+
+### Migração planejada, não executada
+
+1. ANX-161 inventaria imports/reexports, registry, dispatch/report, tabelas/migrations, journal/outbox/inbox, epochs e idempotência existentes. Classifica cada objeto no mapa acima; ANX-128 verifica boundaries. Não basta renomear adapter-gateway.
+2. ANX-158/162 detalham a fatia mínima de catálogo técnico em operations, sem antecipar todo console P07. O contrato dessa fatia precede habilitação de adapters na ANX-161; não criar registry provisório duplicado. ANX-141 preserva connections; ANX-145/146 recebem dados; ANX-151 recebe dispatch financeiro. Respeitar P01/P02 antes dos novos slices.
+3. Criar contratos versionados e migrations de cada dono. Fachada temporária no import legado, se necessária, só delega sem regra/persistência própria e tem remoção rastreada ANX-161.
+4. Backfill preserva ids, hashes, tenant/conta/modo, causalidade e checkpoints. Eventos históricos mantêm ownerDomain/versão originais e proveniência legada; novos fatos usam o dono escolhido. Não reescrever journal ou republicar fatos como novos efeitos; reconciliar origem/destino.
+5. Leitores compatíveis precedem novos escritores. Cutover por classe de estado usa fencing/revisão e exclui o escritor antigo; nunca dois escritores do mesmo agregado. Copiar tabelas não cria transação distribuída com o engine.
+6. Dispatch enviado ou UNKNOWN conserva identidade e responsável pela reconciliação até confirmação. Não trocar adapter/conta como retry. Preservar reservas/obrigações e ingestão idempotente de fills tardios.
+7. Rollback suspende novas habilitações/dispatches afetados e restaura apenas caminho compatível com escritor único. Preserva estado confirmado, dedupe e evidências; não restaura grants antigos nem desfaz ledger com rollback de código. Remoção de pacote/tabelas legados só após leitura/restore/replay comprovados e slice autorizado; nenhum delete nesta entrega.
+
+### Oráculos e continuidade
+
+ANX-161 coordena ANX-158/162/141/145/146/151/132/128 com matriz objeto→dono→migração→consumidor→teste. Provar registry sem poder de trading; feed autorizado sem permit financeiro; versão incompatível rejeitada; único escritor sob corrida; idempotência/UNKNOWN preservados no corte/rollback; isolamento tenant/conta/modo e paridade humano/agente. ANX-174–180 mantêm homologação por engine; nenhum novo motor ganha suporte por apenas constar no catálogo.
+
 ## Dependências e handoff
 
 Depende dos contratos P01/P02, do debate de execution e dos contratos P06. A implementação deve abrir slices próprias para:
