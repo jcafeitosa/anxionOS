@@ -627,6 +627,26 @@ Fontes: [R09](./structure-debate/decisions/R09-dev-plan.md) e [R10](./structure-
 
 Nenhuma intenção, aprovação, reserva ou ordem foi criada neste incremento e nenhum teste financeiro executado. Conflito de submit e ownership dos permits permanece aberto para consolidação explícita na ANX-127; este rastreio não escolhe silenciosamente nova semântica. Requisitos transitivos/campos e cenários R07 seguem pendentes.
 
+## 6.24. Rastreio por capacidade — risk R09/R10
+
+Fontes: [R09](./structure-debate/risk/R09-dev-plan.md) e [R10](./structure-debate/risk/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma activate-limit-policy e run-pre-trade-check, com ports epoch/UoW/journal. Continuação ANX-150; preservar correção ANX-122 conforme escopo da issue e revalidar revisão antes de tocar código.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1 policy/check/permit/schema/contracts | Parcial: activate-limit-policy.ts e ports presentes | ANX-150/132: policy versionada, config obrigatória, schema/erros e estado+journal+outbox; ativação autorizada não amplia limites por iniciativa do agente |
+| R09 S2 / G3-RK-S2-01 PASS emite permit | Parcial: run-pre-trade-check.ts observado na §6.7 emite só PASS | ANX-150/151: permit ligado a intentHash, conta/modo/versão/epochs/validade; emissão não dispensa consumo single-use/revalidação execution |
+| R09 G3-RK-S2-02 CONFIG_REQUIRED | Não verificado em execução | ANX-150: configuração ausente nega com motivo, sem default permissivo, sem permit e sem erro engolido |
+| R09 G3-RK-S2-03 cross-tenant | Não verificado | ANX-150/131: policy/check/permit/journal/replay isolados por escopo; erro sem exposição de dados de outro tenant |
+| R09 G3-RK-S2-04 epoch stale | Parcial: validação no caminho novo observada na §6.7 | ANX-150/136/151: replay histórico não vira autorização atual; revogação concorrente com submit/efeito, UNKNOWN/stale fail-closed |
+| R09 G3-RK-S2-05 limite excedido | Parcial: maxNotional observado não prova todos os limites | ANX-150/148/153: exposição agregada stocks+cripto, moeda/FX/freshness e risco existente; concorrência não permite ultrapassar limite por checks isolados |
+| R09 S3 kill switch/epoch/consumer | Não demonstrado no inventário como conjunto | ANX-150: owner risk, ativação propaga e invalida permits, corrida antes/depois do dispatch; reset exige autoridade e auditoria, sem auto-reset |
+| R09 S4 post-trade | Deferido, não demonstrado | ANX-150/151/152: checks após fills/reconciliação e incidentes, sem reescrever ledger nem tratar pós-check como autorização retroativa |
+| R09 S5 / R10 graph:risk:v1 | Deferido ao owner graph | ANX-138: eventos/checkpoints/rebuild, nenhuma autoridade exclusiva no cache/grafo atrasado |
+| R10 G4 bypass/stale/cross-tenant e G5-RK-01..03 | Referências históricas, três cenários G5 não detalhados aqui | ANX-150/181: recuperar R07 e evidências independentes no candidato, testar bypass sem efeitos em produção |
+| R10 RLS D-RK-015 / PC-G0-01..10/spec003 | Planejado/histórico; “governance limits” não transfere policy de risco | ANX-131 e ANX-127/150: roles/contratos/decisões e fronteiras da autoridade, sem herdar PASS de plano |
+
+A ANX-150 adiciona exposure/freshness multiativo, UNKNOWN, reset autorizado e regressão ANX-122 ao plano histórico; esses requisitos continuam dentro do escopo, mesmo não desdobrados nos cinco G3 do R09. Contrato de permit entre decisions/risk/execution permanece para consolidação ANX-127. Nenhum check financeiro, kill switch, permit, teste integrado ou código foi alterado neste incremento. Rastreio transitivo R04/R07/R08 e fórmulas/limites exige fonte explícita.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
