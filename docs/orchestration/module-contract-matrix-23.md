@@ -39,6 +39,12 @@ Estado autoritativo, journal e outbox são atômicos por domínio. Projeções s
 
 ## 3. Matriz
 
+Reconciliação ANX-127: a lista e os owners seguem a [estrutura aceita, seção Responsabilidades que não podem se sobrepor](../../brain/notes/anxionos-backend-structure.md) e o [ADR0002 — organização modular](../../brain/project-docs/decisions/0002-adopt-modular-backend-layout.md). Esta matriz permanece draft; alinhamento de ownership não homologa schemas nem execução.
+
+Inferência é capacidade de connections. Evolução é um fluxo entre governance (ChangeProposal/aprovação), simulation (cenário), evaluation (avaliação/certificação) e os donos que aplicam a mudança. Não são módulos adicionais. Permits devem distinguir aprovação institucional, autorização de risco e consumo/revalidação em execution; o contrato específico deve ser reconciliado, sem mover todos os permits para governance por conveniência. O kill switch pertence a risk.
+
+Os antigos nomes de eventos/erros desta matriz eram exemplos conceituais, não inventário de schemas publicados. Para cada capacidade, ANX-127/ANX-132 devem registrar símbolo/caminho real, versão, envelope, erro, retry e teste; item sem essa evidência fica **não verificado**, não implicitamente atendido. A tabela abaixo não elimina essa obrigação.
+
 | # | Módulo | Dono de estado e função | Capacidades mínimas | Idempotência/oráculo a verificar | Pacote baseline | Continuação no board |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | identity | Principal e sessão | Registrar, autenticar, revogar e recuperar acesso | principal/sessão + versão; revogação, MFA e tenancy | P02 | ANX-134 |
@@ -80,20 +86,22 @@ A prova de cada linha exige, conforme aplicável:
 9. observabilidade com trace/correlation e redaction;
 10. documentação do risco residual e do rollback.
 
-Para P06, o fluxo integrado mínimo é market-data → strategy → decision → risk → capital → permit → simulation → accounting → portfolios → performance → reconciliation, com stocks, cripto e carteira combinada em SIMULATED/PAPER.
+Para P06, o fluxo integrado mínimo é market-data → strategies → decisions → risk → capital (reserva) → execution (revalidação/consumo de permit e adapter simulado) → accounting → portfolios → performance, com reconciliação de venue em execution e financeira em accounting. Simulation fornece cenários/relógio isolado, não substitui o dono institucional de Order/Fill. Stocks, cripto e carteira combinada exigem evidência SIMULATED/PAPER na ANX-163.
 
 ## 5. Dependências e backlog
 
-A ordem normativa é:
+A sequência abaixo reproduz os pacotes da [estrutura aceita](../../brain/notes/anxionos-backend-structure.md); os prefixos de fase em documentos anteriores não redefinem ownership nem dispensam o [SDD institucional](../../brain/project-docs/specs/001-institutional-contract/spec.md):
 
-- P01/P02: contracts, eventing, identity, organizations e governance;
+- P01/P02: tooling/boundaries, contracts, eventing, database, secrets, observability, identity, organizations e governance;
 - P03: graph e projeções reconstruíveis;
-- P04: orchestration, leases e taskboard mirror;
-- P05: connections, bindings e inference boundaries;
-- P06: fluxo financeiro simulado;
-- P07: agentes, knowledge, evaluation e consoles;
-- P08: operations, recovery, billing e partners;
-- P09: evolution somente após evidência de regressão, segurança e aceite.
+- P04: agents, orchestration e knowledge;
+- P05: connections e inferência governada;
+- P06: market-data, strategies, capital, portfolios, decisions, risk, execution, accounting, performance e audit;
+- P07: billing, partners, operations e experiências humanas;
+- P08: evaluation, simulation e workflows avançados;
+- P09: recovery, benchmarks e lançamento conforme evidências e autorização.
+
+O Dashi local gerencia o desenvolvimento; seu claim não é o estado de Task/Run do produto. As dependências executáveis são as relações do programa ANX-126. Planos de gates por slice continuam obrigatórios; revisar o programa não aprova automaticamente seus filhos.
 
 Cada linha sem schema, owner, oráculo ou issue ativa é backlog, não readiness. Não scaffoldar os 23 módulos vazios.
 
@@ -108,7 +116,11 @@ Cada linha sem schema, owner, oráculo ou issue ativa é backlog, não readiness
 - G6: integração revalidada no mesmo candidato.
 - G7: aceite explícito; documentação não equivale a PASS.
 
-REAL/live, capital real, autonomia L3/L4 e autoexpansão de autoridade não são lacunas a preencher nesta matriz; permanecem proibidos.
+REAL/live, capital real e autonomia L3/L4 não estão autorizados para ativação. O planejamento futuro permanece rastreado em ANX-172/ANX-173, condicionado a evidências e autorização separada; autoexpansão de autoridade continua proibida. Criar backlog não concede capacidade de execução.
+
+## 6.1. Pendências de reconciliação ANX-127
+
+A correção de owners acima é incremental. Continuam pendentes: inventário completo de cada capacidade dos R09/R10 contra símbolos/schemas/testes atuais; atualização da fila e roadmap A5; decisão de posicionamento do adapter-gateway sem criar um 24º dono por inferência; e pareceres independentes G1–G7 aplicáveis. Não declarar ANX-127 concluída apenas por corrigir esta tabela. A [auditoria ANX-118](../../brain/notes/anxionos-backend-conformance-2026-09-08.md) é fonte de achados a revalidar, não prova de ausência atual.
 
 ## 7. Referências
 
