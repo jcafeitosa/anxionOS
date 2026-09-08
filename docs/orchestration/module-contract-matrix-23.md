@@ -532,6 +532,32 @@ Fontes: [R09](./structure-debate/knowledge/R09-dev-plan.md) e [R10](./structure-
 
 Não foi executado novo teste de knowledge neste incremento. A falha de compilação na §6.5 permanece evidência daquele snapshot, não alegação de diagnóstico atual sem reexecução. Rastreio transitivo D-KN, spec002/R04 schemas e parâmetros TTL/budget ainda pendente; não inventar números para fechar células. Nenhuma memória/documento real foi ingerido, publicado ou revogado.
 
+## 6.20. Rastreio por capacidade — market-data R09/R10
+
+Fontes: [R09](./structure-debate/market-data/R09-dev-plan.md) e [R10](./structure-debate/market-data/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma register-instrument, record-observation e observed-consumer, além de UoW/journal. ANX-145 cobre ingest/realtime/qualidade; ANX-146 histórico e semântica temporal.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1 instruments/specs/aliases/contracts / G3-MD-S1-01 | Parcial: register-instrument.ts presente | ANX-145/132: registry versionado, idempotência, payload conflitante, instrumento/venue/asset class e alias não ambíguo; mapear schemas/erros R04 |
+| R09 S2 hypertables/headers/recordObservation / G3-MD-S1-02 | Parcial: record-observation.ts e observed-consumer.ts presentes | ANX-145: Timescale real, sourceEventId deduplica sob concorrência/reconexão, estado+journal/outbox atômicos e event/receive time preservados |
+| R09 G3-MD-S3-01 observed sem instrumento | Parcial: retorno null previsto no plano e observado na §6.6 | ANX-145: manter disposição explícita sem fabricar instrumento/preço; definir observabilidade e recuperação de mapeamento, não transformar null documentado em erro por inferência |
+| R09 G5-MD-03 duplicate flood | Não verificado | ANX-145: flood/replay idempotente com backpressure, sem duplicar ticks/candles/eventos nem ultrapassar limites por tenant/stream |
+| R09 S3 freshness / G3-MD-S2-01 / G5-MD-04 | Não demonstrado no inventário | ANX-145/146/150: getPriceAsOf stale nega uso sensível em risk, relógio/política explícitos e metadata de qualidade; não usar last-known silenciosamente |
+| R09 S1/S4 resolveInstrument / G3-MD-S2-02 | Não demonstrado como query/HTTP no inventário | ANX-145: resolução alias determinística por venue/tempo/escopo, ambiguidade e símbolo inválido retornam erro rastreável |
+| R09 S3 market_events / G3-MD-S3-02 | Não demonstrado | ANX-146: fato de mercado não posta ledger; corporate action raw/adjusted e proveniência; accounting decide efeitos financeiros pelo seu contrato |
+| R09 S3 datasets / S5 replay loader | Não demonstrado | ANX-146: histórico paginado/retomável, snapshots point-in-time, calendário/FX/raw-adjusted, sem lookahead; replay não emite ordem |
+| R09 S4 rollup candles | Não demonstrado | ANX-145/146: agregação temporal determinística, gaps/out-of-order/correções, timeframe/timezone/sessões e revisão de candle rastreáveis |
+| R09 S4 quality monitor / G5-MD-05 | Parcial: consumer aplica OK no slice observado na §6.6; monitor não provado | ANX-145: tick inválido sinalizado/rejeitado conforme contrato, qualidade preservada, alarmes e bloqueio de uso sensível |
+| R09 S5 HTTP/OpenAPI | Não revalidado | ANX-145/146: /v1/market-data, schemas/erros/paginação/limites, autorização e licença de feed, paridade humano/agente |
+| R09 G4-MD-01 / G5-MD-02 / R10 REAL deferido | Restrição do slice SIMULATED/PAPER documentada, execução não testada | ANX-145/146: REAL executionMode rejeitado conforme contrato; separar origem live de preço de autorização de trading REAL, sem alterar schema silenciosamente |
+| R09 G4-MD-02 / G5-MD-01 | Não verificado | ANX-145/131: instrumento/price cross-org negado, GET403 conforme contrato; RLS tem prova PG separada |
+| R09 G4-MD-03/04 | Não verificado | ANX-145/129/132: evento sem secrets/URLs de provider, hypertable sem ledger cols; conferir todos os produtores e schemas pertinentes |
+| R09 connections observed/binding / graph consumer | Integração não provada neste incremento | ANX-141/161/174–180 fornecem capacidades homologadas, ANX-145 normaliza dados e ANX-138 projeta. Stub do plano não autoriza fixture em produção |
+| R10 RLS e ledger fora do módulo | Planejado/ownership delimitado | ANX-131 implementa RLS, ANX-152 ledger; nenhuma gravação lateral em accounting a partir de market_events |
+| R09 AC-R09-01..04 / R10 PC-G0-01..10 e gates | Histórico documental, mapa D-MD afirmado sem desdobramento no R09 | ANX-127/145/146/181: recuperar D-MD, spec003 R12, schemas e evidências atuais; PASS de plano não significa G5 executado |
+
+O usuário pediu dados históricos e realtime de motores externos para stocks/cripto e ambos; esse delta já está nas ANX-145/146, incluindo licenciamento/capacidade e retomada. O texto histórico “REAL/live trading ingest” é ambíguo frente a preço live usado em PAPER: resolver distinção de origem dos dados versus modo de execução na consolidação ANX-127, sem usar a ambiguidade para habilitar capital real ou bloquear definitivamente realtime autorizado. Nenhum feed/engine foi consultado ou homologado neste incremento. Rastreio transitivo das decisões, campos e eventos continua pendente.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
