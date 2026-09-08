@@ -163,7 +163,45 @@ Após alterações de UI, inspecionar com Chrome DevTools MCP quando aplicável.
 
 O [Dashi/Codex Taskboard](https://github.com/chuspeeism/dashi-taskboard) é a **fonte de verdade local** para todo trabalho neste repositório. Roda em loopback (`http://127.0.0.1:47823`); **não** entra no CI nem em deploy.
 
-**Todo agente (humano ou IA) DEVE usar o board em tempo real.** Sem issue no board, sem trabalho — inclusive micro-fixes. Exceção: nenhuma.
+**Todo agente (humano ou IA) DEVE usar o board em tempo real.** Sem issue no board, sem trabalho — inclusive micro-fixes.
+
+Skills obrigatórias: `manage-taskboard` (claims, status, comentários) e `orchestrate-work` (despacho multi-agente, gates G0–G7).
+
+#### Política zero-trabalho-fora-do-board
+
+**Nenhum agente pode executar trabalho técnico fora do taskboard.** O board não é registro posterior — é pré-condição de execução.
+
+**Fluxo obrigatório** (toda sessão, sem atalhos):
+
+1. `npm run taskboard:ensure` — se falhar, **abortar** a tarefa (não codar, não commitar, não editar docs públicas).
+2. `npm run taskboard:context` + `npm run taskboard:list` ou `node scripts/taskboard.mjs get ANX-<N>`.
+3. Issue `ANX-*` existente (buscar duplicatas) ou **criar** antes de qualquer alteração.
+4. Claim: mover para `in_progress` com binding de thread completo (`manage-taskboard`).
+5. Executar o escopo **somente** da issue claimada.
+6. Ao terminar: comentário com evidências → `in_review`. `done` só com aceite explícito.
+
+Atalho de verificação: `npm run taskboard:prework` (ensure + lembrete de issue obrigatória).
+
+**Proibições explícitas** (violação = trabalho inválido):
+
+1. Codar, commitar ou alterar docs públicas (`README`, `AGENTS.md`, `CONTRIBUTING`, `.github/`, `backend/`, `frontend/`) sem issue `ANX-*` em `in_progress` vinculada à conversa atual.
+2. Trabalhar “de cabeça” — tarefa inventada na sessão sem claim no board.
+3. Continuar quando `npm run taskboard:ensure` falhou (board offline).
+4. Ignorar board offline improvisando (lista mental, issue fantasma, “vou registrar depois”).
+5. Fechar sessão com issue desatualizada (`in_progress` sem entrega, `in_review` sem comentário, status que não reflete o trabalho real).
+6. Tomar ou mover issue claimada por outra conversa/thread.
+7. Abrir PR sem identificador `ANX-*` no título ou corpo (PR sem issue = rejeitar).
+
+**Board offline — PARAR, não improvisar:**
+
+- Não codar, não commitar, não editar documentação pública.
+- Informar o usuário que o taskboard está offline e pedir para subir o serviço (Codex Taskboard app ou dashi-taskboard em `http://127.0.0.1:47823`).
+- Se o impedimento persistir: mover a issue para `blocked` com comentário explicando o bloqueio (quando o board voltar).
+- **Não** substituir o board por issue do GitHub, nota mental ou “registro depois”.
+
+**Exceções:** nenhuma para trabalho técnico. Única exceção permitida: responder **perguntas** do usuário sem alterar arquivos (modo consulta, sem código nem docs).
+
+**Gate de aborto:** `npm run taskboard:ensure` com exit code ≠ 0 → **abortar imediatamente** toda a tarefa até o board estar online.
 
 #### Regras obrigatórias
 

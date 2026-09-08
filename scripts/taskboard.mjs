@@ -58,6 +58,7 @@ function usage(exitCode = 1) {
 Commands:
   ping                         Health check (${baseUrl}/health)
   ensure                       Same as ping; fails fast if board offline (required before work)
+  prework                      ensure + reminder: issue ANX-* required before any work
   context                      Resolve project for this repo (taskctl)
   projects                     List projects (HTTP)
   list [--status STATUS]       List issues in anxionOS project
@@ -177,11 +178,23 @@ if (!cmd) usage();
 try {
   switch (cmd) {
     case "ping":
-    case "ensure": {
+    case "ensure":
+    case "prework": {
       const health = await httpJson("/health");
       const payload = { ok: true, url: baseUrl, ...health };
-      if (cmd === "ensure") {
+      if (cmd === "ensure" || cmd === "prework") {
         console.log(`taskboard online: ${baseUrl}`);
+      }
+      if (cmd === "prework") {
+        console.log("");
+        console.log("POLÍTICA zero-trabalho-fora-do-board:");
+        console.log("  1. Issue ANX-* obrigatória (criar ou claim in_progress antes de codar/commitar/docs)");
+        console.log("  2. npm run taskboard:context && npm run taskboard:list");
+        console.log("  3. Board offline = PARAR (não improvisar)");
+        console.log("  4. Ao terminar: comentário → in_review");
+        console.log("");
+        console.log(JSON.stringify({ ...payload, policy: "zero-trabalho-fora-do-board", issueRequired: true }, null, 2));
+        break;
       }
       console.log(JSON.stringify(payload, null, 2));
       break;

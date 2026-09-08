@@ -1,15 +1,36 @@
 ---
-description: Dashi Taskboard obrigatório para todo agente — consultar e atualizar em tempo real
+description: Zero-trabalho-fora-do-board — taskboard obrigatório antes de qualquer alteração
 alwaysApply: true
 ---
 
-# Taskboard obrigatório
+# Política zero-trabalho-fora-do-board
 
-Antes de qualquer trabalho neste repositório:
+**Nenhum agente pode codar, commitar ou alterar docs públicas sem issue ANX-* ativa no Dashi Taskboard.**
 
-1. `npm run taskboard:ensure` — pare se falhar (board offline).
+## Fluxo obrigatório (sem atalhos)
+
+1. `npm run taskboard:ensure` — **falhou = ABORTAR** (não improvisar).
 2. `npm run taskboard:context` + `npm run taskboard:list` ou `node scripts/taskboard.mjs get ANX-<N>`.
-3. Issue `ANX-*` em `in_progress` (criar se não existir; sem exceções para micro-fixes).
-4. Atualizar status em tempo real: `in_review` ao terminar; `done` só com aceite; `blocked` com comentário.
+3. Criar issue se não existir (buscar duplicatas primeiro).
+4. Claim: `in_progress` com binding de thread (`manage-taskboard`).
+5. Trabalhar **somente** no escopo da issue claimada.
+6. Ao terminar: comentário → `in_review`. `done` só com aceite explícito.
 
-Regras completas: [AGENTS.md](../../AGENTS.md) (seção Dashi Taskboard). Skill: `manage-taskboard`.
+Atalho: `npm run taskboard:prework`.
+
+## Proibido
+
+- Trabalho “de cabeça” sem claim.
+- Continuar com board offline.
+- Fechar sessão com issue desatualizada.
+- PR sem `ANX-*` no título/corpo.
+
+## Board offline
+
+PARAR. Pedir ao usuário subir o taskboard. Não codar nem editar docs até `ensure` passar.
+
+## Exceção única
+
+Responder perguntas sem alterar arquivos (consulta pura).
+
+Regras completas: [AGENTS.md](../../AGENTS.md) (Política zero-trabalho-fora-do-board). Skills: `manage-taskboard`, `orchestrate-work`.

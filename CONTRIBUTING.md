@@ -5,8 +5,9 @@ Obrigado por participar. Este repositório prioriza **documentação governada**
 ## Antes de abrir PR ou issue
 
 1. Leia [AGENTS.md](AGENTS.md) — estado do projeto, fontes de verdade e restrições (sem scaffold massivo, sem inventar stack).
-2. **Taskboard obrigatório:** humanos e agentes de IA devem registrar e atualizar trabalho no [Dashi Taskboard](https://github.com/chuspeeism/dashi-taskboard) local (`npm run taskboard:ensure`). Toda PR referencia uma issue `ANX-*`; status `in_review` ou `done` conforme [AGENTS.md](AGENTS.md).
-3. Se você tem `brain/` no workspace local, consulte `brain/index.md` para specs, ADRs e notas. **Não commite arquivos em `brain/`** — a pasta está no `.gitignore` e não é publicada no GitHub.
+2. **Política zero-trabalho-fora-do-board:** humanos e agentes de IA **não podem** codar, commitar nem alterar docs públicas sem issue `ANX-*` em `in_progress` no [Dashi Taskboard](https://github.com/chuspeeism/dashi-taskboard) local. Fluxo: `npm run taskboard:prework` → claim → trabalho → `in_review`. Se `taskboard:ensure` falhar, **pare** e suba o board — não improvise.
+3. **PR sem `ANX-*` será rejeitada.** O identificador deve aparecer no título ou corpo (ex.: `ANX-12`). A issue deve estar em `in_review` ao abrir o PR; `done` só após merge/aceite explícito.
+4. Se você tem `brain/` no workspace local, consulte `brain/index.md` para specs, ADRs e notas. **Não commite arquivos em `brain/`** — a pasta está no `.gitignore` e não é publicada no GitHub.
 
 ## Documentação canônica (`brain/`, local)
 

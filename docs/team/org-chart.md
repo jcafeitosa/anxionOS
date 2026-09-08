@@ -77,7 +77,7 @@ Graph, Connections, Identity, Design System, A11y, DevOps — consulta transvers
 
 ## Workers
 
-Um issue ANX-* por unidade; binding de thread; evidência antes de in_review.
+**Somente via issue ANX-* no taskboard** — zero trabalho fora do board (ver [AGENTS.md](../../AGENTS.md)). Um issue por unidade; binding de thread; claim `in_progress` antes de codar; evidência antes de `in_review`.
 
 ## RACI simplificado
 

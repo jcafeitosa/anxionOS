@@ -9,14 +9,16 @@
 - [ ] Código (`backend/` ou tooling)
 - [ ] CI / repositório
 
-## Issue no taskboard
+## Issue no taskboard (obrigatório — PR sem ANX-* = rejeitar)
 
-<!-- Ex.: ANX-2 — link ou identificador -->
+**ANX-___** <!-- Preencher identificador; deve estar em in_review ao abrir o PR -->
 
 ## Checklist
 
 - [ ] Li [AGENTS.md](../AGENTS.md) e o escopo está alinhado (sem scaffold não autorizado).
-- [ ] Issue **ANX-*** vinculada no Dashi Taskboard; status atualizado (`in_review` ao abrir PR, `done` após merge/aceite).
+- [ ] **Política zero-trabalho-fora-do-board:** trabalho iniciado só após `taskboard:ensure` + claim `in_progress` na issue acima.
+- [ ] Issue **ANX-*** vinculada no título ou corpo; status `in_review` ao abrir PR; `done` após merge/aceite explícito.
+- [ ] Não fechei sessão com issue desatualizada no board.
 - [ ] Se a mudança altera contrato ou arquitetura: specs/ADRs atualizados em `brain/` **local** (fora deste git).
 - [ ] Se editou OKF localmente: frontmatter/templates respeitados (não commitar `brain/` aqui).
 - [ ] Nenhum segredo, `.env` ou dump sensível incluído.
