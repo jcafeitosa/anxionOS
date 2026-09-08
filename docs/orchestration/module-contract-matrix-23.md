@@ -203,6 +203,21 @@ Fontes: [market-data R09](./structure-debate/market-data/R09-dev-plan.md), [stra
 
 Critérios detalhados registrados em ANX-145/146/147/148. Onze módulos possuem evidência inicial parcial; os demais 12 e a cobertura exaustiva R09/R10 ainda estão pendentes.
 
+## 6.7. Evidência inicial — decisions, risk e execution
+
+Fontes: [decisions R09](./structure-debate/decisions/R09-dev-plan.md), [risk R09](./structure-debate/risk/R09-dev-plan.md), [execution R09](./structure-debate/execution/R09-dev-plan.md). Handoffs ANX-149/150/151 refinados; somente inspeção estática, sem ordem, reserva ou chamada externa.
+
+| Requisito | Source observado | Disposição de planejamento |
+| --- | --- | --- |
+| Decisions S2 submit e S4 reserva | `backend/modules/decisions/src/application/commands/submit-intent.ts` exige AUTHORITY_CHECKED/imutabilidade, sem consulta risco/reserva no comando | R09 exige precondição risco/reserva. ANX-149 deve resolver ordem/semântica candidato→liberação sem ciclo e verificar spec antes de implementar. SUBMITTED isolado não autoriza execução |
+| Decisions S3/S5 | Inventário commands propose/checkAuthority/submit | Approval independente, WAITING_HUMAN e EvidenceManifest não demonstrados; ANX-149 exige oráculos de hash/campos aprovados, validade e replay concorrente |
+| Risk S2 | `backend/modules/risk/src/application/commands/run-pre-trade-check.ts` valida epochs no caminho novo, verifica maxNotional e emite permit só PASS | Presente estaticamente; não prova exposição/freshness/liquidez ou kill switch. ANX-150 completa limites e S3 wiring |
+| Risk replay | Retorno idempotente por commandId/intentHash precede validações atuais | ANX-150 deve distinguir resultado histórico de autorização vigente; testar policy/epoch alterado sem reutilização indevida de permit |
+| Execution S2 | `backend/modules/execution/src/application/commands/submit-order.ts` revalida permit da sessão e cria fill síncrono via VenueFillPort dentro da TX | Slice simulated não prova dispatch remoto. ANX-151 exige estado durável, fencing, UNKNOWN/reconcile e rastreabilidade de single-use |
+| Execution S3/S4 | Commands inventariados openSession/submit; cancel/parciais/reconciliation não demonstrados | ANX-151 deve rastrear equivalências e validar vinculação de instrumento/side/quantidade/preço/contas ao intentHash e reserva; inspeção isolada não prova bypass nem enforcement completo |
+
+Não atribuir automaticamente estes gaps a falha dos aceites históricos: comparar revisão e escopo dos slices. Quatorze módulos possuem evidência inicial parcial; nove restantes e R10/exaustividade/gates continuam pendentes.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
