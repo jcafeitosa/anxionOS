@@ -122,6 +122,23 @@ REAL/live, capital real e autonomia L3/L4 não estão autorizados para ativaçã
 
 A correção de owners acima é incremental. Continuam pendentes: inventário completo de cada capacidade dos R09/R10 contra símbolos/schemas/testes atuais; atualização da fila e roadmap A5; decisão de posicionamento do adapter-gateway sem criar um 24º dono por inferência; e pareceres independentes G1–G7 aplicáveis. Não declarar ANX-127 concluída apenas por corrigir esta tabela. A [auditoria ANX-118](../../brain/notes/anxionos-backend-conformance-2026-09-08.md) é fonte de achados a revalidar, não prova de ausência atual.
 
+## 6.2. Evidência granular inicial — identity e agents
+
+Snapshot de inspeção estática ANX-127 sobre worktree baseado em HEAD `87a891fc6e95148f5ec67daf2478225a0e1bc58c`, com source não commitado preexistente. Os caminhos/símbolos abaixo são evidência de presença ou desvio; **nenhum teste de produto foi executado nesta inspeção**. Não extrapolar para readiness dos 23 módulos.
+
+| Requisito e fonte | Arquivo/símbolo observado | Evidência e classificação | Verificação restante / tarefa |
+| --- | --- | --- | --- |
+| [identity R09 P1-S1/S2](./modules/identity/R09-dev-plan.md): contratos e evento registrado | `backend/packages/contracts/src/identity/events.ts`: IDENTITY_EVENT_TYPES e identityPrincipalRegisteredV1PayloadSchema; `backend/modules/identity/src/application/commands/register-principal.ts`: registerPrincipal | Presente estaticamente: tipo identity.principal.registered.v1; payload construído sem authUserId; appendJournal/enqueueOutbox. Não prova rollback/race. | ANX-134: G3-IDN-01/02/05, payload conflitante e concorrência em PG isolado |
+| [identity R09 P1-S3](./modules/identity/R09-dev-plan.md): suspensão | `backend/modules/identity/src/application/commands/suspend-principal.ts`: suspendPrincipal; `infrastructure/migrations/0001_identity_suspend_cols.sql` no mesmo módulo | Command e migration presentes; consulta prévia não prova idempotência sob corrida. Comportamento executado não verificado. | ANX-134: G3-IDN-03/04, simultaneidade e rollback |
+| [identity R09 P1-S4/G3-IDN-06](./modules/identity/R09-dev-plan.md): revogar sessão via consumer | `backend/tests/identity/session-revocation-nats-e2e.test.ts`: beforeAll e teste suspend → relay → consumer | Lacuna de evidência confirmada no teste: indisponibilidade é capturada, e o teste retorna após aviso SKIP sem falhar. Não executado aqui; não se afirma falso PASS ocorrido em CI. | ANX-134: gate deve falhar se dependência obrigatória faltar; skip opcional explicitamente reportado. Exercitar revogação e indisponibilidade em sandbox dedicado |
+| Regra accepted application→ports, [baseline](../../brain/notes/anxionos-backend-structure.md) | registerPrincipal, suspendPrincipal e syncPrincipalEmail, em `backend/modules/identity/src/application/commands/` | Desvio A1 confirmado: imports de Drizzle/Pool/schema/mapeador infrastructure e SQL transacional direto em application. | ANX-134/ANX-128: UoW/ports e teste arquitetural, preservando estado+journal+outbox |
+| [agents R09 S1–S6](./structure-debate/agents/R09-dev-plan.md): módulo, contratos, comandos e API | `backend/modules/agents`, `backend/packages/contracts/src/agents`, `backend/tests/agents` | Diretórios ausentes nesta leitura. Ausência desses paths não é prova de inexistência de toda capacidade equivalente em outros componentes. | ANX-139: implementar slices com G3-AGT-01..05, após reconciliação das interfaces e do R10 |
+| [agents R09 S4](./structure-debate/agents/R09-dev-plan.md): integração registry | `backend/modules/orchestration/src/domain/ports/agent-registry.ts`: AgentRegistryPort.isAgentActive(agentId, organizationId), reexport público | Port consumidor já existe. Busca pelos símbolos examinados não encontrou implementação equivalente; cobertura de aliases/consumidores ainda não demonstrada. | ANX-139: integrar contrato público sem duplicar estado de Run nem criar interface incompatível |
+
+O plano identity P1 exclui ServicePrincipal e rotas públicas; esses itens de continuação não devem ser atribuídos retroativamente ao aceite ANX-78. O plano agents prevê S7 opcional e S8+; disposição deve ser explícita, sem worker vazio. ANX-143/144 e pesquisas ANX-124/125 preservam o escopo avançado/OpenBot separado do núcleo.
+
+Os demais 21 módulos e os R10 ainda não foram reconciliados granularmente neste snapshot. Esta tabela inicia a evidência, não fecha o aceite integral de ANX-127.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
