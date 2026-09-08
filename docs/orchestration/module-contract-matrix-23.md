@@ -1710,11 +1710,11 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 
 **Obrigação de handoff dos filhos:** registrar referência/seção/status decisório → requisito → arquivo/símbolo → teste/comando → resultado. Se a referência estiver ausente, contraditória ou não trouxer o requisito afirmado no R10, registrar o caso e resolver antes do comportamento afetado; usar escopo independente quando houver. ADR aceito prevalece, checklist de debate não substitui parecer do candidato. ANX-181 organiza críticos; os gates independentes do programa continuam necessários.
 
-**O que permanece com ANX-127:** (1) cobertura transitiva A1 e pacote integrado A4 do parecer `405b8304`; (2) G1 integrado do candidato atual (C1 CHANGES_REQUIRED além do escopo já fechado); (3) crítica independente sobre a disposição das referências transitivas antes do fechamento do planejamento. **Já realizado nesta cadeia:** placement ADR0006 aceito; G1C3 F1 PASS documental (ANX-192/193/194; parecer Dirac `d70b8f91` revalidado). Não acrescenta novas tarefas duplicadas nem exige executar os filhos para demonstrar que o backlog existe.
+**O que permanece com ANX-127:** (1) parecer A4 integral sobre candidato C4 (após G1 C4 PASS); (2) gates G2–G7 proporcionais ao pacote documental. **Já realizado nesta cadeia:** A1 completo 23/23; placement ADR0006; G1C3 F1 PASS; **G1 integrado C4 PASS** (Dirac `bf620462`, digest matriz `d31f823d37042b45245245f7639d4bb5e0946a335c69e7f3c41566048410200d`). Não acrescenta novas tarefas duplicadas nem exige executar os filhos para demonstrar que o backlog existe.
 
 ## 6.36. Pacote incremental A4 — candidato integrado (ANX-127)
 
-Trabalho documental **parcial** do item A4 (`405b8304`). Não equivale a PASS integral de ANX-127 nem aprovação de G2–G7. O digest do candidato matriz vigente está nos comentários ANX-127 desta cadeia (último incremento documental ANX-195).
+Trabalho documental **parcial** do item A4 (`405b8304`). Não equivale a PASS integral de ANX-127 nem aprovação de G2–G7. **Candidato C4** — digest matriz verificado (64 chars): `d31f823d37042b45245245f7639d4bb5e0946a335c69e7f3c41566048410200d` (comentários ANX-127 `acb39417`, reconciliação `957e8216`).
 
 | Critério (ANX-127) | Artefato / seção | Digest / referência | Parecer independente | Disposição |
 | --- | --- | --- | --- | --- |
@@ -1722,8 +1722,9 @@ Trabalho documental **parcial** do item A4 (`405b8304`). Não equivale a PASS in
 | Placement gateway | ADR0006, §6.1/§6.34, spec gateway | ADR `1cfa7de6e7a98778f6c388e085790e5b1d5d8314b10e4e3cafe9e338869ce0c2` | `d70b8f91` → PASS F1 revalidado | **G1C3 F1 fechado** (ANX-192/193/194/195) |
 | Conflitos F1–F3 (P06/ops/gateway) | P06, ops, gateway, §6.34 | C2 em comentário `78b398b3` | `f18a2846` C1; `cf16914a` C2 | F1–F3 resolvidos; B1 removido por ADR0006 |
 | Cinco disposições contratuais | §6.34 tabela | hashes por linha na §6.34 | `400da37b`, `7542eb8e`, `1c5076a6`, `ac51f462`, `923d4cd8` | PASS restrito documental cada uma |
-| Agrupamentos R09/R10 | §§6.12–6.33 | ver SHA256 comentários ANX-127 | PASS restritos por §6.x | **A1 completo:** §6.12.1–6.33.2 (ANX-197–219); 23/23 módulos |
-| Pacote final A4 | esta §6.36 + §6.1 | ver comentários ANX-127 | pendente revisor integral | **A4 parcial** — não encerrar ANX-127 |
+| G1 integrado C4 (ownership/EffectGate) | §6.1, §6.34, P06 §2.1, gateway spec | matriz `d31f823d…010200d` | Dirac `bf620462` | **G1 C4 PASS** restrito F1/F2/F3/B1 |
+| Agrupamentos R09/R10 | §§6.12–6.33 | matriz `d31f823d…010200d` | PASS restritos por §6.x | **A1 completo:** §6.12.1–6.33.2 (ANX-197–219); 23/23 módulos |
+| Pacote final A4 | esta §6.36 + §6.1 | matriz `d31f823d…010200d` | A4 `d0ceca33` CHANGES_REQUIRED; re-submissão pendente | **A4 parcial** — B2/B3 resolvidos; não encerrar ANX-127 |
 
 Implementação futura permanece delegada aos filhos ANX-126 (ANX-128+); este pacote não homologa produto, engines ou testes financeiros.
 
