@@ -639,7 +639,7 @@ Fonte primária: [R08 decision log](./structure-debate/graph/R08-decision-log.md
 
 ## 6.16. Rastreio por capacidade — agents R09/R10
 
-Fontes: [R09](./structure-debate/agents/R09-dev-plan.md) e [R10](./structure-debate/agents/R10-g0-handoff.md), relidos em 2026-09-08. A consulta atual dos três paths agents (módulo, contracts e testes) retorna diretórios inexistentes; isso comprova ausência nesses paths, não de todo comportamento equivalente. ANX-139 continua núcleo, ANX-143/144 capacidades avançadas.
+Fontes: [R09](./structure-debate/agents/R09-dev-plan.md) e [R10](./structure-debate/agents/R10-g0-handoff.md), relidos em 2026-09-08. O rastreio transitivo **D-AGT-001..014** e **AGT-R06-01..10** está em **§6.16.1** (ANX-201). A consulta atual dos três paths agents (módulo, contracts e testes) retorna diretórios inexistentes; isso comprova ausência nesses paths, não de todo comportamento equivalente. ANX-139 continua núcleo, ANX-143/144 capacidades avançadas.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -657,10 +657,60 @@ Fontes: [R09](./structure-debate/agents/R09-dev-plan.md) e [R10](./structure-deb
 | R09/R10 promoção evaluation automática | Deferido, não habilitado | ANX-160/171: certificação/recomendação separada de aprovação governance e aplicação da versão pelo owner; ANX-173 reserva autonomia futura, sem autoexpansão |
 | R10 CEO blueprint onboarding saga | Planejado fora do núcleo v1 | ANX-135/139/140/143: organizations possui onboarding, agents configuração/versionamento, orchestration coordena execução; nenhum Run ou billing ledger transferido a agents |
 | R10 checklist G5-AGT-01..05 | Referenciado sem cenários nestes R09/R10; execução não provada | ANX-139/181: recuperar R07 e registrar cada cenário/evidência em sandbox; PASS textual “exec sandbox na G1” não é teste executado |
-| R09 pré-requisitos / R10 AC-G0-01..05, AGT-R06-01..10 e bloqueios | Histórico documental, não revalidado para candidato novo | ANX-139/181: dependências atuais identity/organizations/graph/eventing, claim e crítico nominal real. ANX-82 não autoriza reabrir ou escrever fora da issue |
+| R09 pré-requisitos / R10 AC-G0-01..05, AGT-R06-01..10 e bloqueios | Histórico documental, não revalidado para candidato novo | ANX-139/181: deps atuais. **D-AGT/AGT-R06** em §6.16.1 (ANX-201). ANX-82 não autoriza reabrir fora da issue |
 | R10 G2–G6 e suite387/387 | Evidência insuficiente para produto agents ausente | ANX-181: pareceres independentes e testes específicos por candidato; suite global não substitui G3-AGT-01..05 |
 
-Não houve execução de testes agents: diretórios previstos estão ausentes, e rodar suite global não comprovaria esses requisitos. Permanecem pendentes o rastreio transitivo de D-AGT-001..014, quatro eventos, dependências R06 e cenários R07. OpenBots seguem ANX-124/125→144; núcleo não presume homologação dessas integrações.
+Não houve execução de testes agents: diretórios previstos estão ausentes. **D-AGT-001..014** e **AGT-R06-01..10** estão em §6.16.1; G5-AGT-01..05 e implementação permanecem ANX-139. OpenBots seguem ANX-124/125→144; núcleo não presume homologação dessas integrações.
+
+### 6.16.1. A1 — disposição transitiva agents (ANX-201)
+
+Fontes: [R08 decision log](./structure-debate/agents/R08-decision-log.md) e [R06 dependências](./structure-debate/agents/R06-dependencies.md) (relidas 2026-09-08). Módulo **não implantado** nos paths esperados (§6.16); esta subseção é disposição documental, não claim de código.
+
+#### D-AGT-001..014 (R08)
+
+| ID | Decisão (resumo) | Classificação | Disposição / issue | Evidência ou limite |
+| --- | --- | --- | --- | --- |
+| D-AGT-001 | Dono Agent, AgentVersion, Skill, Binding, Brain — não Task/Run | Aceito v1 | ANX-139 | Módulo ausente §6.16 |
+| D-AGT-002 | AgentVersion imutável após publish | Aceito v1 | ANX-139 G3-AGT-02/03 | Sem impl demonstrada |
+| D-AGT-003 | Brain não persiste estado de Run | Aceito v1 | ANX-140 orchestration | Run/lease fora agents |
+| D-AGT-004 | Skills validadas Zod + contracts | Aceito v1 | ANX-139/132 | Schemas não no path contracts/agents |
+| D-AGT-005 | PG autoritativo; Neo4j projeção graph | Aceito v1 | ANX-138/139 | consumer graph:agents:v1 |
+| D-AGT-006 | T01 fail-closed pré-publish e pré-invoke | Aceito v1 | ANX-139/136/138 | AGT-R06-03; timeout 2s→deny |
+| D-AGT-007 | 4 eventos v1 (created/published/deprecated/skill.updated) | Aceito v1 | ANX-139/132 | Nomes em R06; payloads não enumerados §6.16 |
+| D-AGT-008 | Consumer graph:agents:v1 no graph | Aceito v1 | ANX-138 | Projector dono graph |
+| D-AGT-009 | AgentRegistryPort para orchestration | Aceito v1 | ANX-139/140 | Port parcial orchestration §6.16 |
+| D-AGT-010 | Sem secrets em eventos/DTOs AgentVersion | Aceito v1 | ANX-139/141 | connections resolve bindings |
+| D-AGT-011 | Promotion produção exige evaluation P08 | Deferido P08 | ANX-160/171 | Sem auto-promoção |
+| D-AGT-012 | Brain invoke HTTP sync + fila long-running | Aceito provisório v1 | ANX-139/140 workers | P-R6-03→R08 |
+| D-AGT-013 | Autonomia L0–L4 em AgentVersion metadata | Aceito v1 | ANX-137/173 | L3/L4 não habilitados |
+| D-AGT-014 | Kill switch global via governance mandate | Aceito v1 | ANX-136/139 | Mandate governance |
+
+#### AGT-R06-01..10 (R06 — dependências)
+
+| ID | Decisão (resumo) | Consolidado em | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| AGT-R06-01 | PrincipalLookup valida ownerPrincipalId | D-AGT-001 | ANX-134/139 | AGT_PRINCIPAL_NOT_FOUND |
+| AGT-R06-02 | AgencyScopePort tenancy ativo | D-AGT-001 | ANX-135/139 | Sem FK cross-schema |
+| AGT-R06-03 | T01 obrigatório publish/invoke externo | D-AGT-006 | ANX-136/138 | Timeout 2s |
+| AGT-R06-04 | GraphContextPort T04/T05 leitura via graph | D-AGT-005 | ANX-138/139 | Sem neo4j-driver agents |
+| AGT-R06-05 | Journal/outbox mesma TX PG | D-AGT-005 | ANX-139/129 | Bootstrap eventing→…→agents |
+| AGT-R06-06 | Projector Neo4j graph:agents:v1 | D-AGT-008 | ANX-138 | Eventos agents.*.v1 |
+| AGT-R06-07 | 4 eventos publicados; sub grant opcional | D-AGT-007 | ANX-139 | orchestration/knowledge/audit |
+| AGT-R06-08 | AgentRegistryPort → orchestration | D-AGT-009 | ANX-140 | Stub até agents S4 |
+| AGT-R06-09 | ModelBindingPort ref; sem connections repo | D-AGT-010 | ANX-141 | Binding ID apenas |
+| AGT-R06-10 | Brain worker em apps/workers | D-AGT-012 | ANX-140/128 | Sem estado Run no módulo |
+
+#### Deferências R08 e integrações separadas
+
+| Item | Disposição | Limite |
+| --- | --- | --- |
+| P-R7-02 OpenAPI Scalar | Defer S8 | ANX-139/132 |
+| P-R7-03 Brain streaming SSE | Defer pós-v1 | ANX-139/141/168 |
+| OpenBots | ANX-124/125→144 | Fora núcleo agents |
+| Teammates / CEO blueprint | ANX-143/135/140 | Saga onboarding fora v1 |
+| G5-AGT-01..05 cenários R07 | ANX-139/181 | Recuperar R07; não executado |
+
+**Rodadas R01–R05:** incorporadas em R06/R08; domain sketch mínimo em R09 S1 (P-R7-01). Implementação executável permanece ANX-139.
 
 ## 6.17. Rastreio por capacidade — orchestration R09/R10
 
@@ -1120,7 +1170,7 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 | organizations §6.13 | D-ORG-001..044 → **§6.13.1** (ANX-198); queries/saga/G3–G5 executáveis em ANX-135 | ANX-135 executa delta; isolamento ANX-131; parecer G6 via ANX-181 |
 | governance §6.14 | D-GOV-001..010 + D-R6-GOV + PC-G0 → **§6.14.1** (ANX-199); conflitos ExecutionPermit/PLATFORM abertos | ANX-136/137 executa delta; permits P06 §2.1 em ANX-149/150/151 |
 | graph §6.15 | D-GR-001..044 + T01–T20 → **§6.15.1** (ANX-200); schemas/F0 executáveis em ANX-138 | ANX-138; não converter disposição documental em teste executado |
-| agents §6.16 | D-AGT-001..014, R04/R06/R07 → quatro eventos, dependências e G5-AGT-01..05 | ANX-139/132; OpenBots ANX-124/125→144 e teammates ANX-143 separados |
+| agents §6.16 | D-AGT-001..014 + AGT-R06 → **§6.16.1** (ANX-201); G5-AGT executável em ANX-139 | ANX-139/132; OpenBots ANX-124/125→144; teammates ANX-143 separados |
 | orchestration §6.17 | D-ORC-001..056, R04/checklist20 → seis eventos, dez rotas, lease/run/gateBinding | ANX-140/132; runtime ANX-133; Dashi de desenvolvimento não vira dependência universal |
 | connections §6.18 | D-CX-001..064, R04, DL-CX2 → schemas, endpoint/quota e inferência | ANX-141/132; valores exigem config/fonte, não defaults inventados |
 | knowledge §6.19 | D-KN, spec002 e R04 → memória/retrieval, TTL/budget e schemas | ANX-142/132; falha de typecheck anterior continua snapshot, não prova atual |
@@ -1156,7 +1206,7 @@ Trabalho documental **parcial** do item A4 (`405b8304`). Não equivale a PASS in
 | Placement gateway | ADR0006, §6.1/§6.34, spec gateway | ADR `1cfa7de6e7a98778f6c388e085790e5b1d5d8314b10e4e3cafe9e338869ce0c2` | `d70b8f91` → PASS F1 revalidado | **G1C3 F1 fechado** (ANX-192/193/194/195) |
 | Conflitos F1–F3 (P06/ops/gateway) | P06, ops, gateway, §6.34 | C2 em comentário `78b398b3` | `f18a2846` C1; `cf16914a` C2 | F1–F3 resolvidos; B1 removido por ADR0006 |
 | Cinco disposições contratuais | §6.34 tabela | hashes por linha na §6.34 | `400da37b`, `7542eb8e`, `1c5076a6`, `ac51f462`, `923d4cd8` | PASS restrito documental cada uma |
-| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** identity §6.12.1 (ANX-197), organizations §6.13.1 (ANX-198), governance §6.14.1 (ANX-199), graph §6.15.1 (ANX-200); 19 módulos pendentes |
+| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** identity–graph §6.12.1–6.15.1 (ANX-197–200), agents §6.16.1 (ANX-201); 18 módulos pendentes |
 | Pacote final A4 | esta §6.36 + §6.1 | ver comentários ANX-127 | pendente revisor integral | **A4 parcial** — não encerrar ANX-127 |
 
 Implementação futura permanece delegada aos filhos ANX-126 (ANX-128+); este pacote não homologa produto, engines ou testes financeiros.
