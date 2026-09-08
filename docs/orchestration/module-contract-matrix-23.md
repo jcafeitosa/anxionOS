@@ -889,6 +889,42 @@ Esta lista organiza pendências; **não resolve os cinco conflitos por declaraç
 
 Código, schemas executáveis, integração PG/Neo4j/NATS, providers, PAPER, consoles, restore e readiness estão delegados aos filhos do programa ANX-126. Sua execução futura não bloqueia, por si, a entrega do backlog. O planejamento precisa demonstrar cobertura e dependências, não alegar produto homologado. Os gates proporcionais do pacote documental continuam necessários; REAL/L3/L4 exigem autorização própria.
 
+## 6.35. Disposição das referências transitivas já identificadas
+
+Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma declaração de leitura integral de R01–R08. “R04–R08” abaixo refere-se às rodadas do mesmo módulo nos diretórios dos R09/R10 vinculados à seção indicada; o executor deve resolver o caminho existente, sem criar documento para satisfazer uma referência. Os agrupamentos já têm filhos no programa ANX-126. Campos/schemas, cenários e decisões detalhados são trabalho do G0/contrato desses filhos, **antes de código**, não permissão para implementar sem fonte.
+
+| Módulo / fonte da pendência | Referência → requisito/grupo a detalhar | Filho / disposição |
+| --- | --- | --- |
+| identity §6.12 | D-IDN-001..024, R01–R08 e DEP/H/PC-G0 → lifecycle, eventos, sessão e dependências | ANX-134; schemas ANX-132; pareceres históricos ANX-181 |
+| organizations §6.13 | D-ORG-001..044, R01–R08 → queries/saga, convites, membership e ownership | ANX-135; isolamento ANX-131; recuperar parecer sem herdar G6 |
+| governance §6.14 | Rodadas/decisões anteriores → delegation, mandate, aprovação e autoridade temporal | ANX-136/137; fronteiras de permit na disposição P06 §2.1 |
+| graph §6.15 | D-GR-001..044, T01–T20 e schemas → traversals individuais, rebuild/temporalidade e políticas | ANX-138; não converter número de traversal em teste executado |
+| agents §6.16 | D-AGT-001..014, R04/R06/R07 → quatro eventos, dependências e G5-AGT-01..05 | ANX-139/132; OpenBots ANX-124/125→144 e teammates ANX-143 separados |
+| orchestration §6.17 | D-ORC-001..056, R04/checklist20 → seis eventos, dez rotas, lease/run/gateBinding | ANX-140/132; runtime ANX-133; Dashi de desenvolvimento não vira dependência universal |
+| connections §6.18 | D-CX-001..064, R04, DL-CX2 → schemas, endpoint/quota e inferência | ANX-141/132; valores exigem config/fonte, não defaults inventados |
+| knowledge §6.19 | D-KN, spec002 e R04 → memória/retrieval, TTL/budget e schemas | ANX-142/132; falha de typecheck anterior continua snapshot, não prova atual |
+| market-data §6.20 | D-MD, spec003 R12, schemas → identidade/tempo/qualidade/ingestão | ANX-145/146/132; origem corrente versus REAL disposta em P06 §1.1 |
+| strategies §6.21 | R04/R07/R08, spec003 Strategy Factory → lifecycle, schemas e G5-ST-01..03 | ANX-147/132/181; promoção/publicação disposta em P09 §6.1 |
+| capital §6.22 | R04/R07/R08, spec003/FI02 → reserva, settled/FX e concorrência | ANX-148; integração pré-submit P06 §2.1; não inventar saldo disponível |
+| decisions §6.23 | R04/R07/R08, spec003 → schemas, G5-DC-01..03 e approval | ANX-149/136; sequência pré-submit P06 §2.1 |
+| risk §6.24 | R04/R07/R08, spec003 → permits, G5-RK-01..03 e fórmulas/limites | ANX-150; RiskPermit distinto conforme P06 §2.1; preservar ANX-122 |
+| execution §6.25 | R04/R07/R08 → schemas, G5-EX-01..05, ordens/reconciliação | ANX-151/132; contracts adapters ANX-161; placement segue ANX-127 |
+| accounting §6.26 | R04/R07/R08, spec003 → plano de contas, schemas e G5-ACC-01..03 | ANX-152; interface partners §6.31.1; regra fiscal não deduzida do evento |
+| portfolios §6.27 | R04/R07/R08, spec003 → lotes/valuation e G5-PF-01..03 | ANX-153; fixture temporal/checkpoint e método versionado antes de resultado |
+| performance §6.28 | R04–R08 → definições de métricas, fluxos externos, atribuição e oráculos | ANX-154; fechar com ledger/valuation, não só notional |
+| audit §6.29 | R04–R08 → schemas, decisões, integridade/replay e relatórios | ANX-155; evidência ausente deve permanecer explícita |
+| billing §6.30 | R04–R08 → ciclo comercial, contratos e cenários detalhados | ANX-156/132; issued/paid dispostos na §6.31.1 |
+| partners §6.31 | R04–R08 → comissões/reversão/payout e cenários | ANX-157/132; §6.31.1 define interface sem duplicar ledger financeiro |
+| operations §6.32 | R04–R08 → probes/incidentes/export/retenção e gates | ANX-158; restore ANX-169 e SLO ANX-170; prazos exigem política antes de uso |
+| simulation §6.33 | R04–R08 → sandbox/reprodução e parâmetros dos modelos | ANX-159; evidência de runner, não flags de sandbox como prova |
+| evaluation §6.33 | R04–R08 → score/certificação e parâmetros/critérios | ANX-160; recomendação não aplica estado alheio, P09 §6.1/10 |
+
+**Estado das leituras:** todos os R09/R10 foram consultados conforme seções de origem. Para os cinco conflitos, também foram relidas as fontes explicitadas nas respectivas disposições; isso não significa leitura integral de todas as rodadas de cada linha. As demais referências transitivas não estão atestadas nesta consolidação. A tabela delega o detalhamento rastreável, não declara esses requisitos aderentes.
+
+**Obrigação de handoff dos filhos:** registrar referência/seção/status decisório → requisito → arquivo/símbolo → teste/comando → resultado. Se a referência estiver ausente, contraditória ou não trouxer o requisito afirmado no R10, registrar o caso e resolver antes do comportamento afetado; usar escopo independente quando houver. ADR aceito prevalece, checklist de debate não substitui parecer do candidato. ANX-181 organiza críticos; os gates independentes do programa continuam necessários.
+
+**O que permanece com ANX-127:** escolha humana do placement e seu registro/migração; coerência das cinco disposições no candidato integrado; revisão documental proporcional e aceite. Esta disposição das referências precisa de crítica independente antes de ser considerada suficiente para o fechamento do planejamento. Não acrescenta novas tarefas duplicadas nem exige executar os filhos para demonstrar que o backlog existe.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
