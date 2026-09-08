@@ -14,19 +14,19 @@ tags:
 ---
 # Roadmap executável do anxionOS
 
-**Issue coordenadora:** ANX-45  
-**Status:** draft para revisão do usuário  
+**Origem:** ANX-45 · **Programa de continuação:** ANX-126 · **Reconciliação:** ANX-127  
+**Status:** draft; backlog criado, implementação e gates ainda dependem de evidência  
 **Base:** [mapa de capacidades dos 23 módulos](./system-capabilities/CAPABILITY-MAP.md), [matriz de contratos dos 23 módulos](./module-contract-matrix-23.md), [backlog P01/P02](./system-capabilities/p01-p02-backlog.md), [contratos e gates](./system-capabilities/p01-p02-contracts-and-gates.md), [pacote de evidências G0-G7](./gate-evidence-handoff-acceptance-contract.md) e [fila de módulos](./module-queue.md).
 
 **Contrato W4/P06:** [ciclo financeiro SIMULATED/PAPER](./system-capabilities/p06-financial-lifecycle-contract.md) (ANX-58).
 
 **Contrato W3/P05:** [Connections, binding e inferência governada](./system-capabilities/p05-connections-binding-inference-contract.md) (ANX-62).
 
-**Contrato W8/P08:** [operação 24/7, SLOs e recovery](./system-capabilities/p08-operations-slos-recovery-contract.md) (ANX-63).
+**Contrato operacional (título histórico P08; escopo W6/W8):** [operação 24/7, SLOs e recovery](./system-capabilities/p08-operations-slos-recovery-contract.md) (ANX-63).
 
-**Contrato W7/P07:** [agentes persistentes, memória e evolução](./system-capabilities/p07-agents-memory-evolution-contract.md) (ANX-64).
+**Contrato de agentes (título histórico P07; escopo W2/W5):** [agentes persistentes, memória e evolução](./system-capabilities/p07-agents-memory-evolution-contract.md) (ANX-64).
 
-**Contrato W9/P09:** [evolução institucional e rollback](./p09-evolution-rollback-contract.md) (ANX-70).
+**Contrato de evolução (escopo W5/W6, sem bloco W9):** [evolução institucional e rollback](./p09-evolution-rollback-contract.md) (ANX-70).
 **Controle de execução:** [matriz de prontidão e gates](./gate-readiness-matrix.md) (ANX-54).
 
 ## Objetivo operacional
@@ -39,7 +39,7 @@ A unidade de entrega é um **pacote de capacidade**: módulo proprietário + con
 
 - O mapa funcional cobre 23 módulos e as jornadas humano/agente.
 - A fundação P01/P02 está decomposta em P02-01 a P02-10.
-- Identity, organizations, governance e graph possuem documentação de debate/funcionalidades em níveis diferentes; os demais módulos ainda precisam de pacotes equivalentes.
+- Os 23 módulos possuem planos/debates e evidência inicial parcial na matriz reconciliada ANX-127. Isso não comprova implementação completa; cada continuação deve confrontar R09/R10, símbolos, schemas e testes. O programa ANX-126 contém ANX-127–186, sem reabrir automaticamente slices históricos aceitos.
 - A existência de documentação ou código parcial não equivale a G0, G1, readiness ou autorização de produção.
 - Os contratos de ambiente `SIMULATED`, `PAPER` e `REAL` são normativos, mas `REAL` permanece bloqueado.
 
@@ -57,15 +57,34 @@ A unidade de entrega é um **pacote de capacidade**: módulo proprietário + con
 | W7 — Superfícies comerciais | billing, partners | Subscription, invoice, quotas comerciais, referral, comissão e payout auditáveis | W0 + organizations | Consoles Owner/Partner; sem afetar autoridade financeira |
 | W8 — Consoles e readiness | apps/api, Owner/Operator/Platform/Partner, integração E2E | Paridade de handlers, UX de approval/takeover, dashboards, alertas, runbooks e relatório de prontidão | W0–W7 | Candidato a G2–G7 |
 
+## Mapeamento da continuação
+
+Os blocos W organizam frentes de trabalho; não renumeram P01–P09 do baseline. P04 contém agents/orchestration/knowledge; P05 connections; P06 financeiro/audit; P07 billing/partners/operations/consoles; P08 evaluation/simulation; P09 recovery/benchmarks/release. Títulos antigos de contratos são preservados, sem redefinir ownership.
+
+| Bloco | Continuação rastreável |
+| --- | --- |
+| W0 | ANX-127–137 |
+| W1 | ANX-138 |
+| W2 | ANX-139/140/142/143/144 |
+| W3 | ANX-141 |
+| W4 | ANX-145–154 e ANX-163 |
+| W5 | ANX-159/160/171 |
+| W6 | ANX-155/158/169/170 |
+| W7 | ANX-156/157 |
+| W8 | ANX-164–168 e ANX-181–186 |
+| Integrações transversais | ANX-161/162 e ANX-174–180 |
+
+O diagrama W abaixo é conceitual, não scheduler: relações do board prevalecem para despacho. Em particular, knowledge pode depender da inferência de connections mesmo pertencendo a P04; evitar ciclo artificial “todo W2 antes de W3”. Planejamento antecipado não dispensa os gates do slice. Cada executor deve ter crítico nominal antes de G1; ANX-181 organiza o processo, não autoriza desenvolver sem crítico enquanto aguarda.
+
 ## Ordem executável
 
 ### Fase A — Contratos e autoridade
 
-Executar ANX-27–31 e ANX-47–52 conforme o [backlog P01/P02](./system-capabilities/p01-p02-backlog.md). O resultado mínimo é um contrato que permita rejeitar mensagens inválidas, intents stale, permits reutilizados, escopos indevidos, modos incompatíveis e efeitos externos sem aprovação.
+Consultar ANX-27–31 e ANX-47–52 como histórico do [backlog P01/P02](./system-capabilities/p01-p02-backlog.md); executar somente o delta autorizado nas ANX-127–137 conforme dependências do board. O resultado mínimo é um contrato que permita rejeitar mensagens inválidas, intents stale, permits reutilizados, escopos indevidos, modos incompatíveis e efeitos externos sem aprovação.
 
 ### Fase B — Grafo e projeções
 
-Concluir ANX-32–35. Cada evento deve ser projetável de forma idempotente, com `eventId`, checkpoint e `ownerDomain`; rebuild de uma projeção deve produzir o mesmo estado derivado. Traversals são planos registrados; agente não escreve Cypher livre.
+Revalidar ANX-32–35 como histórico; a continuação do Graph Kernel está em ANX-138, respeitando ANX-130/136. Cada evento deve ser projetável de forma idempotente, com `eventId`, checkpoint e `ownerDomain`; rebuild de uma projeção deve produzir o mesmo estado derivado. Traversals são planos registrados; agente não escreve Cypher livre.
 
 ### Fase C — Agentes, orchestration e knowledge
 
@@ -83,9 +102,9 @@ Simulation e evaluation devem registrar dataset, snapshot, versão de estratégi
 
 Operations e audit devem provar observabilidade, incident response, replay governado, retenção, exportação, restore e reconciliação. O candidato integrado precisa de evidência dos gates G2, G3, G4 e G5 antes de qualquer aceite G7.
 
-## Definition of Done por módulo
+## Critérios de entrega por capacidade
 
-Um módulo só entra em `g0_ready` quando todos os itens aplicáveis estiverem demonstrados:
+G0 exige escopo, fontes, owner, dependências, crítico e oráculos definidos; não equivale a implementação concluída. A lista abaixo é verificada progressivamente em G1–G6 e submetida a G7. `g0_ready` é classificação documental histórica, não status do Dashi nem sinônimo de Definition of Done:
 
 - [ ] ownership de estado, journal e outbox;
 - [ ] entidades, invariantes, policies, ports e erros;

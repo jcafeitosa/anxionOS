@@ -4,7 +4,31 @@ type: guide
 
 # Fila de módulos — backend anxionOS (23 módulos)
 
-Status por módulo físico em `backend/modules/`, alinhado a P01→P09. Atualizado por reconciliação com o board (2026-09-08T15:40Z; ANX-54 orchestrator).
+## Continuação vigente — programa ANX-126
+
+Reconciliação ANX-127 em 2026-09-08: o board é fonte do status atual. O programa ANX-126 está em `in_review`; seus 60 filhos ANX-127–186 estão distribuídos em 57 `todo`, ANX-127 `in_progress` e ANX-172/173 `backlog`. `todo` não significa dependências satisfeitas nem dispensa claim/G0. ANX-124/125 permanecem `blocked`, afetando ANX-144. ANX-54/118 estão `done`; não executar novamente tarefas históricas por causa da tabela abaixo.
+
+| Frente de continuação | Issues |
+| --- | --- |
+| Contratos, boundaries, secrets, eventing, tenancy e workers | ANX-127–133 |
+| Identity, organizations, governance e graph | ANX-134–138 |
+| Agents, orchestration, connections, knowledge e teammates | ANX-139–144 |
+| Dados e ciclo financeiro | ANX-145–154 |
+| Audit, billing, partners, operations, simulation e evaluation | ANX-155–160 |
+| SDK de adapters, Docker e paper integrado | ANX-161–163 |
+| Quatro consoles e realtime | ANX-164–168 |
+| Restore, SLOs e evolução controlada | ANX-169–171 |
+| REAL e autonomia L3/L4 — somente backlog futuro | ANX-172–173 |
+| Sete motores externos, homologação em sandbox | ANX-174–180 |
+| Críticos, revisão, QA, Security, Red Team e aceite | ANX-181–186 |
+
+Consulte a [matriz reconciliada](./module-contract-matrix-23.md) para módulo→issue, fonte→source→oráculo e limitações. Os 23 módulos têm inspeção inicial parcial; schemas, capacidades completas e gates não estão homologados. A ausência de agents no inventário físico não impede que seu debate exista. `adapter-gateway` é diretório extra observado, não um 24º módulo aceito.
+
+A retomada começa pela reconciliação ANX-127. As relações `blockedBy` do board controlam a ordem detalhada; antes de claim, ler issue/comentários e revalidar dependências, autoridade, criticidade e alterações concorrentes. Não iniciar todos os filhos em paralelo.
+
+## Histórico preservado — não usar como fila atual
+
+As tabelas, contagens, PASS e prioridades históricas a seguir foram registradas no snapshot 2026-09-08T15:40Z (ANX-54). Não foram convertidas em evidência do candidato atual nem representam status presente. Mantidas para rastrear debates/aceites; conflitos internos e resultados como 591/591 devem ser confrontados com revisão, ambiente e parecer originais.
 
 **Mapa funcional humano+agente:** [system-capabilities/CAPABILITY-MAP.md](./system-capabilities/CAPABILITY-MAP.md) (ANX-43) · debates Slack em [SLACK-TRANSCRIPTS.md](./system-capabilities/SLACK-TRANSCRIPTS.md)
 
@@ -91,7 +115,7 @@ pie
 | `services/execution-go` | `not_started` | P06 |
 | `services/research-python` | `not_started` | P08 |
 
-## Próximos 5 módulos na fila
+## Próximos passos do snapshot histórico (substituídos pela continuação vigente)
 
 1. **G7 batch** — aceite explícito owner: 17 debates + 17 impl + ANX-118/119–122 (template em comentários ANX-54)
 2. **Debates doc** — revalidar G2 nos 10 `CHANGES_REQUIRED` (correções R04/R05 iniciadas: connections, strategies, billing)
@@ -99,7 +123,7 @@ pie
 4. **agents** — único módulo baseline sem pasta; ANX-82 debate `in_review`
 5. **orchestration** — ANX-53 S1 `in_review`; S6–S7 parcial RB-D04
 
-## Contagens
+## Contagens do snapshot histórico
 
 | Métrica | Quantidade |
 | --- | ---: |
