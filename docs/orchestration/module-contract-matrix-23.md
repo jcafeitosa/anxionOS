@@ -526,7 +526,7 @@ Fontes: [R08 decision log](./modules/governance/R08-decision-log.md), [R06 depen
 
 ## 6.15. Rastreio por capacidade — graph R09/R10
 
-Fontes: [R09](./structure-debate/graph/R09-dev-plan.md) e [R10](./structure-debate/graph/R10-g0-handoff.md), relidos integralmente em 2026-09-08; ANX-138 é a continuação. Inventário atual confirma arquivos de handlers, workers e testes, mas nenhum teste graph foi executado neste incremento. Paths abaixo são relativos a `backend/modules/graph/src/`, salvo indicação.
+Fontes: [R09](./structure-debate/graph/R09-dev-plan.md) e [R10](./structure-debate/graph/R10-g0-handoff.md), relidos integralmente em 2026-09-08; ANX-138 é a continuação. O rastreio transitivo **D-GR-001..044** e **T01–T20** está em **§6.15.1** (ANX-200). Fonte primária decisões: [R08 decision log](./structure-debate/graph/R08-decision-log.md). Inventário atual confirma arquivos de handlers, workers e testes, mas nenhum teste graph foi executado neste incremento. Paths abaixo são relativos a `backend/modules/graph/src/`, salvo indicação.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -553,9 +553,89 @@ Fontes: [R09](./structure-debate/graph/R09-dev-plan.md) e [R10](./structure-deba
 | R09 benchmarks / R10 SLO premium D-GR-040/041 | Objetivos não medidos: T01 p99≤80ms L2 warm, ack p99≤2s a100evt/s, swap10k≤5min dev | ANX-138/170: benchmark reproduzível e ambiente/config; ANX-158 define operação/alertas. PagerDuty citado não é vendor homologado |
 | R10 Graph Explorer UI | Planejado fora P03 | ANX-164–167: navegação/explain por papel, limites e field masking; não fornecer credenciais ou Cypher livre ao usuário/agente |
 | R09 fixture/cleanup / R10 checklist | Teste graph-f0-reset-isolation presente; fixture e cleanup não executados | ANX-138/181: F0 sanitizado Agency/User/Membership/Grant; nunca executar DETACH DELETE ou truncate amplo em graph compartilhado |
-| R09 pré-requisitos / R10 AC-G0-01..08, PC-G0-01..10, H-01..05, B-01..03 e dependências | Histórico 9/10, upstream/restrições de slices não provam status atual | ANX-138/181: revalidar fontes/claims, wiring real e pareceres do candidato; ADR0001 proposto não vira aceito pelo debate |
+| R09 pré-requisitos / R10 AC-G0-01..08, PC-G0-01..10, H-01..05, B-01..03 e dependências | Histórico 9/10, upstream/restrições de slices não provam status atual | ANX-138/181: revalidar wiring. **D-GR/T01–T20** em §6.15.1 (ANX-200); ADR0001 proposto não vira aceito pelo debate |
 
-Esta tabela cobre agrupamentos explícitos R09/R10, mas não substitui rastreio transitivo de D-GR-001..044, T01–T20 individuais e schemas referenciados. Os valores de política do plano exigem configuração tipada e compatibilidade com contrato vigente; não foram aplicados nem homologados. Nenhum rebuild, replay, benchmark ou efeito externo foi executado.
+Esta tabela cobre agrupamentos explícitos R09/R10; **D-GR-001..044** e **T01–T20** estão em §6.15.1. Schemas executáveis e homologação F0 permanecem ANX-138. Nenhum rebuild, replay, benchmark ou efeito externo foi executado.
+
+### 6.15.1. A1 — disposição transitiva graph (ANX-200)
+
+Fonte primária: [R08 decision log](./structure-debate/graph/R08-decision-log.md) (relido 2026-09-08). Classificação T01–T20: [R02 fronteiras](./structure-debate/graph/R02-boundaries.md). Esta subseção **não** executa traversals nem substitui F0 oracles (D-GR-044).
+
+#### D-GR-001..044 (R08)
+
+| ID | Decisão (resumo) | Classificação | Disposição / issue | Evidência ou limite |
+| --- | --- | --- | --- | --- |
+| D-GR-001 | Dono catálogo T01–T20, inbox, rebuild, adapter Neo4j | Aceito v1 | ANX-138 | Handlers/workers §6.15; não executado |
+| D-GR-002 | Capital/grants/tasks/journal não em graph | Aceito v1 | ANX-138 | Dispatcher roteia ownerDomain |
+| D-GR-003 | Zero credencial Neo4j para agentes/módulos | Aceito v1 | ANX-128/138 | API/SDK apenas |
+| D-GR-004 | Registry único; classificação kernel/híbrido | Aceito v1 | ANX-138 | registry.ts inventariado |
+| D-GR-005 | Neo4j adapter isolado infrastructure | Aceito v1 | ANX-138/128 | Import cross-module negado |
+| D-GR-006 | Dispatcher node.create/update por ownerDomain | Aceito v1 | ANX-138 G5-02 | Não verificado execução |
+| D-GR-007 | Consumers `graph:{domain}:v1` em graph P03 | Aceito v1 | ANX-138 | Projectors org/gov parciais |
+| D-GR-008 | Registry híbrido contracts+PG+fail-fast | Aceito v1 | ANX-138/132 | schema migrations 0000–0003 |
+| D-GR-009 | User Neo4j; Principal só PG identity | Aceito v1 | ANX-134/138 | Membership E009→User |
+| D-GR-010 | Um escritor por agregado via ownerDomain | Aceito v1 | ANX-138 | Inbox idempotente |
+| D-GR-011 | T01–T20 edge allowlist; sub-planos estáticos | Aceito v1 | ANX-138 | Bootstrap fail-fast |
+| D-GR-012 | projectionPending async; sync wait PLATFORM | Aceito v1 | ANX-138 | X-Graph-Wait-Projection |
+| D-GR-013 | GraphQuery v1 Zod traversals/; queryVersion 1 | Aceito v1 | ANX-132/138 | contracts/graph |
+| D-GR-014 | Poll minProjectionGeneration; etag checkpoint+gen | Aceito v1 | ANX-138 | node.get handlers |
+| D-GR-015 | NODE_NOT_PROJECTED 409 ≠ NOT_FOUND 404 | Aceito v1 | ANX-138 G3-02/03 | Distinção não executada |
+| D-GR-016 | MERGE_CONFLICT 409 + 1 retry interno | Aceito v1 | ANX-138 | T07 spike |
+| D-GR-017 | PROJECTION_TIMEOUT 504 com commandId | Aceito v1 | ANX-138 | Sync wait |
+| D-GR-018 | Redis L2 + L1 LRU 30s; local-only dev | Aceito v1 | ANX-138/129 | GRAPH_CACHE_MODE |
+| D-GR-019 | Cache epoch-aware (scope, epoch, generation) | Aceito v1 | ANX-138 G3-09 | cache-key tests |
+| D-GR-020 | T01 ALLOW+intentHash nunca cache; DENY 60s | Aceito v1 | ANX-138/136 | GK stale ALLOW |
+| D-GR-021 | Invalidação epoch + pub/sub pós-inbox ack | Aceito v1 | ANX-138 | redis-invalidate test |
+| D-GR-022 | Rebuild flush via registry_generation++ | Aceito v1 | ANX-138 | full swap worker |
+| D-GR-023 | Inbox idempotente eventId+consumerName | Aceito v1 | ANX-138 G3-01 | process-with-inbox |
+| D-GR-024 | NATS ack após COMMIT PG inbox+generation | Aceito v1 | ANX-138/130 | Não executado PG+NATS |
+| D-GR-025 | Rebuild full drain→pause→N+1→replay→F0→swap | Aceito v1 | ANX-138 G3-06 | rebuild-worker parcial |
+| D-GR-026 | Ordem rebuild ownerDomain documentada | Aceito v1 | ANX-138 | identity→org→gov→… |
+| D-GR-027 | nodes.batchGet max 50; 409 só node.get | Aceito v1 | ANX-138 G3-05 | Não executado |
+| D-GR-028 | Poison max_attempts=5 → quarantine+DLQ+ack | Aceito v1 | ANX-138 G3-07 | poison-pill test |
+| D-GR-029 | Backoff exponencial + AckWait ≥330s | Aceito v1 | ANX-138 | Política R07 |
+| D-GR-030 | DLQ graph_projection_dlq; payload_ref redacted | Aceito v1 | ANX-138/155 G5-03 | Não inspecionado |
+| D-GR-031 | Catch-up throttle batch 100 inflight 3 | Aceito v1 | ANX-138 | Valores plano, não medidos |
+| D-GR-032 | Pending >100k bloqueia rebuild | Aceito v1 | ANX-138/158 | SLA OP01 |
+| D-GR-033 | Rate limit 60/min principalId+traversalId | Aceito v1 | ANX-138 G3-10 | graph-rate-limit.ts |
+| D-GR-034 | Admin rebuild/DLQ PLATFORM+audit_manifest_id | Aceito v1 | ANX-138/155 G3-08 | admin-handlers |
+| D-GR-035 | OP01 read-only — sem trigger rebuild UI | Aceito v1 | ANX-164–167 | Explorer deferido |
+| D-GR-036 | Partial rebuild spike design only | Aceito spike | ANX-138 S8 | GK-R08-01; não operação v1 |
+| D-GR-037 | v1 operação = full generation swap only | Aceito v1 | ANX-138 | GK-R08-02 |
+| D-GR-038 | OpenAPI Scalar generation | Deferido slice 2 | ANX-132/138 | GK-R08-03 |
+| D-GR-039 | Auto-replay DLQ batch | Deferido R09 | ANX-138 | v1 manual PLATFORM |
+| D-GR-040 | SLO lag tenants premium | Deferido R09/P07 | ANX-156/170 | Não medido |
+| D-GR-041 | Alertmanager/PagerDuty | Deferido P07 | ANX-158/170 | Vendor não homologado |
+| D-GR-042 | graphDlqReplayInputSchema contracts | Deferido slice 2 | ANX-132 | GK-R08-04 |
+| D-GR-043 | Código graph bloqueado até R10 G0+P02 | Aceito histórico | ANX-138 | Código presente §6.4; revalidar G0 |
+| D-GR-044 | F0 oracles T01–T20 antes prod; QA NOT_RUN | Aceito v1 | ANX-138/181 | Smoke t01-t05 parcial |
+
+#### T01–T20 (R02 — classificação e disposição)
+
+| ID | Classificação R02 | Consumidor/registrador | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| T01 | Kernel puro | governance grant eval | ANX-138/136 | t01-grant-evaluation.ts; F0 obrigatório |
+| T02 | Kernel puro | authorization envelope | ANX-138 | Schema/handler ANX-132 |
+| T03 | Kernel puro | explain traversal | ANX-138 | Smoke parcial |
+| T04 | Kernel composto | agents context | ANX-139/138 | Sub-plano agents |
+| T05 | Kernel puro | agents context | ANX-139/138 | Brain fachada agents |
+| T06 | Kernel puro | orchestration read | ANX-140/138 | Sem mutação via graph |
+| T07 | Kernel composto | capital/portfolios/connections | ANX-148/153/141/138 | Cross-domain; spike D-GR-036 |
+| T08 | Híbrido registrado | strategies | ANX-147/138 | Plano registrado strategies |
+| T09 | Kernel puro | portfolios | ANX-153/138 | Eventos→projeção |
+| T10 | Kernel puro | decisions read | ANX-149/138 | Linhagem read-only |
+| T11 | Kernel puro | execution read | ANX-151/138 | execution-go protocolo |
+| T12 | Kernel puro | graph | ANX-138 | Kernel application |
+| T13 | Kernel puro | orchestration impact | ANX-140/138 | Pré ChangeProposal |
+| T14 | Kernel puro | graph | ANX-138 | Allowlist edges |
+| T15 | Kernel puro | connections | ANX-141/138 | Inferência via T15 gate |
+| T16 | Híbrido registrado | connections | ANX-141/138 | Usage autoritativo connections |
+| T17 | Kernel composto | connections/billing | ANX-141/156/138 | Sub-planos registrados |
+| T18 | Híbrido registrado | execution+accounting | ANX-151/152/138 | Cases ownerDomain |
+| T19 | Kernel puro | simulation snapshot | ANX-159/138 | Isolado; sem promote overwrite |
+| T20 | Híbrido registrado | partners | ANX-157/138 | Plano partners |
+
+**Rodadas R01–R07:** consolidadas via crosswalk GK→D-GR em R08; não reescritas linha a linha. Homologação executável traversals, rebuild, DLQ e benchmarks permanece ANX-138/181.
 
 ## 6.16. Rastreio por capacidade — agents R09/R10
 
@@ -1039,7 +1119,7 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 | identity §6.12 | D-IDN-001..024 → **§6.12.1** (ANX-197); R01–R05 structure-debate; R06–R08 com limite em §6.12.1 | ANX-134 executa P1/deferidos; schemas ANX-132; DEP/H/PC-G0 revalidação em ANX-134/181 |
 | organizations §6.13 | D-ORG-001..044 → **§6.13.1** (ANX-198); queries/saga/G3–G5 executáveis em ANX-135 | ANX-135 executa delta; isolamento ANX-131; parecer G6 via ANX-181 |
 | governance §6.14 | D-GOV-001..010 + D-R6-GOV + PC-G0 → **§6.14.1** (ANX-199); conflitos ExecutionPermit/PLATFORM abertos | ANX-136/137 executa delta; permits P06 §2.1 em ANX-149/150/151 |
-| graph §6.15 | D-GR-001..044, T01–T20 e schemas → traversals individuais, rebuild/temporalidade e políticas | ANX-138; não converter número de traversal em teste executado |
+| graph §6.15 | D-GR-001..044 + T01–T20 → **§6.15.1** (ANX-200); schemas/F0 executáveis em ANX-138 | ANX-138; não converter disposição documental em teste executado |
 | agents §6.16 | D-AGT-001..014, R04/R06/R07 → quatro eventos, dependências e G5-AGT-01..05 | ANX-139/132; OpenBots ANX-124/125→144 e teammates ANX-143 separados |
 | orchestration §6.17 | D-ORC-001..056, R04/checklist20 → seis eventos, dez rotas, lease/run/gateBinding | ANX-140/132; runtime ANX-133; Dashi de desenvolvimento não vira dependência universal |
 | connections §6.18 | D-CX-001..064, R04, DL-CX2 → schemas, endpoint/quota e inferência | ANX-141/132; valores exigem config/fonte, não defaults inventados |
@@ -1076,7 +1156,7 @@ Trabalho documental **parcial** do item A4 (`405b8304`). Não equivale a PASS in
 | Placement gateway | ADR0006, §6.1/§6.34, spec gateway | ADR `1cfa7de6e7a98778f6c388e085790e5b1d5d8314b10e4e3cafe9e338869ce0c2` | `d70b8f91` → PASS F1 revalidado | **G1C3 F1 fechado** (ANX-192/193/194/195) |
 | Conflitos F1–F3 (P06/ops/gateway) | P06, ops, gateway, §6.34 | C2 em comentário `78b398b3` | `f18a2846` C1; `cf16914a` C2 | F1–F3 resolvidos; B1 removido por ADR0006 |
 | Cinco disposições contratuais | §6.34 tabela | hashes por linha na §6.34 | `400da37b`, `7542eb8e`, `1c5076a6`, `ac51f462`, `923d4cd8` | PASS restrito documental cada uma |
-| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** identity §6.12.1 (ANX-197), organizations §6.13.1 (ANX-198), governance §6.14.1 (ANX-199); 20 módulos pendentes |
+| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** identity §6.12.1 (ANX-197), organizations §6.13.1 (ANX-198), governance §6.14.1 (ANX-199), graph §6.15.1 (ANX-200); 19 módulos pendentes |
 | Pacote final A4 | esta §6.36 + §6.1 | ver comentários ANX-127 | pendente revisor integral | **A4 parcial** — não encerrar ANX-127 |
 
 Implementação futura permanece delegada aos filhos ANX-126 (ANX-128+); este pacote não homologa produto, engines ou testes financeiros.
