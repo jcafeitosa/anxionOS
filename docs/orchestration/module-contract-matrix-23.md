@@ -718,6 +718,26 @@ Fontes: [R09](./structure-debate/portfolios/R09-dev-plan.md) e [R10](./structure
 
 Lotes, FX/corporate actions, reversões e consolidação stocks+cripto da ANX-153 continuam no delta, mantendo contas e modos segregados. Nenhuma posição, snapshot ou teste financeiro foi alterado/executado. Rastreio transitivo de schemas, políticas de lotes/valuation e cenários R07 permanece pendente.
 
+## 6.28. Rastreio por capacidade — performance R09/R10
+
+Fontes: [R09](./structure-debate/performance/R09-dev-plan.md) e [R10](./structure-debate/performance/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma record-outcome-snapshot, ledger-posted-consumer e ports UoW/journal. ANX-154 executa delta.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1 OfficialMetricDefinition/schema/contracts | Não demonstrado integralmente no inventário | ANX-154/132: definições/fórmulas versionadas, unidades/moeda/período/calendário, schemas/erros e proveniência; não chamar qualquer agregado de métrica oficial |
+| R09 S2 ledger / G3-PERF-S2-01 | Parcial: ledger-posted-consumer e snapshot presentes; §6.8 observou linesSummary/valueDate | ANX-154/152: realizado deriva de fatos corretos, fees/FX e reversões, sem tratar snapshot de lançamento como P&L calculado |
+| R09 S2 position / G3-PERF-S2-02 | Não demonstrado no inventário de consumers | ANX-154/153: localizar equivalente, exposição derivada da posição/valuation e convergência ledger+position; não escrever estado privado de portfolios |
+| R09 G3-PERF-S2-03 stale position | Não verificado | ANX-154: snapshot stale não confirmado como atual, freshness/as-of explícitos e erro/disposição conforme contrato |
+| R09 G3-PERF-S2-04 tenant | Não verificado em execução | ANX-154/131: métricas/snapshots/journal/replay isolados por agency, autorização também em agregação e backfill |
+| R09 S3 OutcomeSnapshot/HTTP | Parcial: command presente, HTTP não revalidado | ANX-154: snapshot reproduzível com referências/checkpoints, HTTP versionado/autorizado e erro por dados incompletos |
+| R09 S4 Timescale series/rebuild / G3-PERF-S4-01 | Não demonstrado | ANX-154: backfill/rebuild idempotentes, versão de fórmula/dataset, correções fora de ordem e períodos consistentes, sem duplicar série |
+| R09 G5-PERF-01 duplicate ledger | Parcial: dedupe por journalEntryId observado §6.8 | ANX-154: replay concorrente não dobra resultado; commandId aleatório não implica ausência de dedupe, testar chave causal |
+| R09 G5-PERF-02 divergence | Não verificado | ANX-154/153/152: snapshot divergente ledger/posição sinalizado, não inventar reconciliação silenciosa para fechar P&L |
+| R09 S5 graph | Deferido; stub não é produto | ANX-138: projeção derivada, checkpoint/rebuild, ACL e lineage sem ledger/métrica autoritativa Neo4j |
+| R10 PC-G0 10/10 e PASS G2–G6 | Afirmação genérica referenciando R04–R09, sem relatório/candidato detalhado no R10 | ANX-127/154/181: recuperar definições/testes/pareceres originais e revalidar candidato; não herdar aprovação pelo resumo |
+
+Realizado/não realizado, fees/FX, fluxos externos, benchmarks e atribuição agente/estratégia/portfolio da ANX-154 permanecem requisitos adicionais ao R09 resumido. Oráculos devem separar aportes/retiradas de rendimento e fechar com ledger/valuation por período/moeda conforme fórmula aprovada; nenhum número ou método financeiro foi inventado neste incremento. Não foi calculado/publicado P&L nem executado teste financeiro; rastreio transitivo de R04–R08 e definições continua pendente.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
