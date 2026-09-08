@@ -824,7 +824,7 @@ Fonte primária: [R08 decision log](./structure-debate/orchestration/R08-decisio
 
 ## 6.18. Rastreio por capacidade — connections R09/R10
 
-Fontes: [R09](./modules/connections/R09-dev-plan.md) e [R10](./modules/connections/R10-g0-handoff.md), relidos integralmente em 2026-09-08. Inventário atual: commands register-ai-account/invoke-inference, quatro ports e migrations 0000/0001. Equivalências fora destes paths não foram excluídas. ANX-141 é a continuação, não reabertura automática de ANX-84.
+Fontes: [R09](./modules/connections/R09-dev-plan.md) e [R10](./modules/connections/R10-g0-handoff.md), relidos integralmente em 2026-09-08. O rastreio transitivo **D-CX-001..064** está em **§6.18.1** (ANX-203). Fonte primária: [R08 decision log](./modules/connections/R08-decision-log.md). Inventário parcial: register-ai-account/invoke-inference, ports e migrations 0000/0001. ANX-141 é a continuação.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -849,13 +849,104 @@ Fontes: [R09](./modules/connections/R09-dev-plan.md) e [R10](./modules/connectio
 | R09 defer GrantValidation HTTP multi-VM | Planejado, não requisito de deploy multi-VM imediato | ANX-141/136: preservar port, decidir transporte quando houver requisito, autenticação/epoch/fail-closed e compatibilidade sem duplicar autoridade |
 | R09 billing consumer / graph projector | Planejado fora de connections | ANX-156/138: usage comercial deduplicado e graph:connections:v1 reconstruível, sem escrever ledger financeiro ou grafo direto em connections |
 | R09 SINGLE_ACCOUNT_WAIT | Deferido pós-v1 | ANX-141: disposição explícita de espera/limite/timeout; proibir troca silenciosa de conta para escapar da quota |
-| R09 pré-requisitos / R10 AC-G0-01..10, PC-G0-01..10, riscos/handoff | Histórico documental; matriz G5 aponta execução futura | ANX-141/181: revalidar claim/dependências/candidato e responsáveis, não herdar PASS ou interpretar application-only como RLS executado |
+| R09 pré-requisitos / R10 AC-G0-01..10, PC-G0-01..10, riscos/handoff | Histórico documental; matriz G5 aponta execução futura | ANX-141/181: revalidar candidato. **D-CX-001..064** em §6.18.1 (ANX-203); G5-CX não executado |
 
-Os IDs G3-S* na tabela abreviam G3-CX-S* do R09. Rastreio transitivo D-CX-001..064, R04 schemas, DL-CX2 completo e decisões de endpoint/quota continuam pendentes. Nenhum provider, callback, quota ou teste integrado foi acionado neste incremento.
+Os IDs G3-S* na tabela abreviam G3-CX-S* do R09. **D-CX-001..064** estão em §6.18.1; R04 schemas, DL-CX2 executável e homologação G5-CX permanecem ANX-141/181. Nenhum provider, callback, quota ou teste integrado foi acionado neste incremento.
+
+### 6.18.1. A1 — disposição transitiva connections (ANX-203)
+
+Fonte primária: [R08 decision log](./modules/connections/R08-decision-log.md) (relido 2026-09-08). Commands parciais existem (§6.18); esta subseção não revalida G3/G5 nem executa invoke/provider real.
+
+**Saldo R08:** 64 decisões · aceitas v1: 58 · G1 pendentes: 2 (D-CX-059, D-CX-060) · deferidas: 4 (D-CX-061..064).
+
+#### D-CX-001..032 (R08 — fronteiras, domínio, contratos, storage)
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-CX-001 | Dono ProviderSubscription, AIAccount, ConnectionBinding, quotas, usage | Aceito v1 | ANX-141 | Sem Goal/Task/Run |
+| D-CX-002 | Escopo v1 SIMULATED+PAPER apenas | Aceito v1 | ANX-141 | Sem REAL_EXECUTION |
+| D-CX-003 | Goal/Task/Run, WAITING_HUMAN workflow → orchestration | Aceito v1 | ANX-140/141 | connections retorna waitingHuman |
+| D-CX-004 | Grant/epoch/consent → governance; connections fail-closed | Aceito v1 | ANX-136/141 | GrantValidationPort |
+| D-CX-005 | UsageRecord autoritativo PG; billing consome evento | Aceito v1 | ANX-156/141 | Sem ledger em connections |
+| D-CX-006 | Neo4j via graph:connections:v1 — sem dual-write | Aceito v1 | ANX-138/141 | Dono graph |
+| D-CX-007 | ConnectionKind sem REAL_EXECUTION persistível | Aceito v1 | ANX-141/132 | CX-R02-INV-01 |
+| D-CX-008 | Resolver rejeita REAL_EXECUTION legado | Aceito v1 | ANX-141 | CX_CONNECTION_KIND_NOT_SUPPORTED |
+| D-CX-009 | effectClass=LIVE_TRADING proibido registry v1 | Aceito v1 | ANX-141/172 | Adapter registry |
+| D-CX-010 | Import 9Router live → deferred/rejected | Aceito v1 | ANX-141 | Nunca ACTIVE silencioso |
+| D-CX-011 | OpenAPI/docs não listam REAL_EXECUTION | Aceito v1 | ANX-132/141 | Contratos públicos |
+| D-CX-012 | DTOs: secretRef/secretId apenas | Aceito v1 | ANX-129/141 | CX-R02-SEC-01 |
+| D-CX-013 | Eventos connections.*.v1 sem chaves/tokens | Aceito v1 | ANX-132/141 | CX-R02-SEC-02 |
+| D-CX-014 | Neo4j sem secret em propriedade | Aceito v1 | ANX-138/141 | CX-R02-SEC-03 |
+| D-CX-015 | Secret injetado só boundary infra pós grant+epoch | Aceito v1 | ANX-129/141 | CX-R02-SEC-04 |
+| D-CX-016 | OAuth redirect sem credential host não aprovado | Aceito v1 | ANX-141/129 | EndpointPolicy |
+| D-CX-017 | Dois agregados: AIAccount + ConnectionBinding | Aceito v1 | ANX-141 | CX-R03-01 |
+| D-CX-018 | ConnectionResolver único entry point | Aceito v1 | ANX-141 | CX-R03-02 |
+| D-CX-019 | RuntimeAdapter port infra; domain puro | Aceito v1 | ANX-141/128 | CX-R03-03 |
+| D-CX-020 | AgentModelBindingRef em agents, validado connections | Aceito v1 | ANX-139/141 | CX-R03-04 |
+| D-CX-021 | Usage + outbox mesma UoW PG | Aceito v1 | ANX-141/129 | CX-R03-05 |
+| D-CX-022 | Fairness PLATFORM: sequence+lease mesma TX (DL-CX2) | Aceito v1 | ANX-141 G3-S3 | CX-R03-06 |
+| D-CX-023 | PascalCase ANX-62 → connections.*.v1 outbox | Aceito v1 | ANX-132/141 | CX-R04-01 |
+| D-CX-024 | InferenceRequirements em contracts/inference | Aceito v1 | ANX-132/141 | CX-R04-02 |
+| D-CX-025 | Stream + terminal único; billing fecha terminal+usage | Aceito v1 | ANX-141/168 | CX-R04-03 |
+| D-CX-026 | HTTP /v1/connections/* delega mesmo handler SDK | Aceito v1 | ANX-141 | CX-R04-04 |
+| D-CX-027 | GrantValidationPort in-process v1 | Aceito v1 | ANX-136/141 | CX-R04-05 |
+| D-CX-028 | Testes contrato bloqueiam REAL_EXECUTION schema | Aceito v1 | ANX-141/132 | CX-R04-06 |
+| D-CX-029 | secret_id + secret_generation colunas PG | Aceito v1 | ANX-141 | CX-R05-01 |
+| D-CX-030 | Binding ACTIVE imutável — nova versão p/ mudança | Aceito v1 | ANX-141 | CX-R05-02 |
+| D-CX-031 | connections_command_journal obrigatório v1 | Aceito v1 | ANX-141 | CX-R05-04 |
+| D-CX-032 | Stream events journal-only; terminal+usage em PG | Aceito v1 | ANX-141/168 | CX-R05-05 |
+
+#### D-CX-033..064 (R08 — deps, riscos, G1 e deferências)
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-CX-033 | SQLite proibido quota/fairness | Aceito v1 | ANX-141 | Só catálogo descartável |
+| D-CX-034 | Migrations P05 slices S1–S5 incrementais | Aceito v1 | ANX-141 | CX-R05-08 |
+| D-CX-035 | Sem import repos privados agents/orch/billing/graph | Aceito v1 | ANX-128/141 | CX-R06-01 |
+| D-CX-036 | OrganizationScopePort tenancy obrigatório | Aceito v1 | ANX-135/141 | CX-R06-03 |
+| D-CX-037 | PrincipalLookup via adapter organizations | Aceito v1 | ANX-134/141 | CX-R06-04 |
+| D-CX-038 | SecretPort stub P02 OK SIMULATED; gate prod ANX-36 | Aceito v1 | ANX-129/141 | CX-R06-05 |
+| D-CX-039 | Journal/outbox @anxionos/eventing mesma TX | Aceito v1 | ANX-141/129 | CX-R06-06 |
+| D-CX-040 | Consumer graph:connections:v1 no módulo graph | Aceito v1 | ANX-138/32 | CX-R06-07 |
+| D-CX-041 | billing async via connections.usage.recorded.v1 | Aceito v1 | ANX-156/141 | CX-R06-08 |
+| D-CX-042 | orchestration/agents via @anxionos/connections index | Aceito v1 | ANX-140/139/141 | CX-R06-09 |
+| D-CX-043 | Bootstrap: eventing→identity→org→gov→secrets→connections | Aceito v1 | ANX-141/181 | CX-R06-10 |
+| D-CX-044 | deltaRef stream — dono audit; connections emite ref | Aceito v1 | ANX-141 | CX-R06-11 |
+| D-CX-045 | EndpointPolicy obrigatório HTTP/OAuth/MODEL | Aceito v1 | ANX-141/129 | CX-R07-01 |
+| D-CX-046 | Timeout invoke → unknown + connections.call.unknown.v1 | Aceito v1 | ANX-141 G3-S2-03 | CX-R07-03 |
+| D-CX-047 | Reconcile worker SLA 24h; succeeded/failed/void_usage | Aceito v1 | ANX-141 S5 | CX-R07-04 |
+| D-CX-048 | RLS PG v1 não obrigatório — app guards + G5 cross-tenant | Aceito v1 | ANX-131/141 | Paridade organizations |
+| D-CX-049 | WAITING_HUMAN: connections retorna waitingHuman; orch dono Run | Aceito v1 | ANX-140/141 | Não move board |
+| D-CX-050 | consumerKind derivado grant/sessão — header ignorado | Aceito v1 | ANX-141 G4-05 | CX-R07-06 |
+| D-CX-051 | Governance/org down → 503 fail-closed — sem cache grant | Aceito v1 | ANX-136/141 | CX-R07-07 |
+| D-CX-052 | SecretPort stub só NODE_ENV≠prod + ALLOW_SECRETS_STUB | Aceito v1 | ANX-129/141 | CX-R07-08 |
+| D-CX-053 | Checklist G5 R07 gate obrigatório pré-G1 | Aceito v1 | ANX-141/181 | G5-CX não executado |
+| D-CX-054 | command_journal retenção 90d hot PG + archival R09 | Aceito v1 | ANX-141 | CX-R06-13 |
+| D-CX-055 | Circuit breaker upstream: 5 falhas/30s, half-open 1 probe | Aceito v1 | ANX-141 S5 | P-R7-02 |
+| D-CX-056 | EndpointPolicy admin allowlist: connections.platform_admin | Aceito v1 | ANX-136/141 | P-R7-04 |
+| D-CX-057 | Resume WAITING_HUMAN: ${idempotencyKey}:resume:${operationId} | Aceito v1 | ANX-140/141 | P-R7-05 |
+| D-CX-058 | SINGLE_ACCOUNT_WAIT deadline → CX_QUOTA_EXCEEDED + retryAfter | Aceito v1 | ANX-141 | P-R7-07 |
+| D-CX-059 | @anxionos/contracts/connections/* schemas públicos | G1 pendente | ANX-36 S1/132 | ANX-141 bloqueado sem schemas |
+| D-CX-060 | Workers: reconcile, lease reaper, credential refresh | G1 pendente | ANX-36 S5/133 | ANX-141 S5 |
+| D-CX-061 | REAL_EXECUTION / broker live | Deferido | ANX-172 | Epic separado ADR |
+| D-CX-062 | RLS PostgreSQL defense-in-depth | Deferido P09 | ANX-131 | Após G5 evidence |
+| D-CX-063 | GrantValidation HTTP multi-processo | Deferido multi-VM | ANX-141/136 | Preservar port |
+| D-CX-064 | Tabela dedicada stream chunks v1 | Deferido volume | ANX-168 | ALT-CX-R05-06 |
+
+#### Artefatos contratuais referenciados (D-CX-023/026)
+
+| Artefato | Disposição | Limite |
+| --- | --- | --- |
+| Eventos connections.*.v1 (PascalCase ANX-62) | ANX-132/141 | Mapa eventType→schema R04 |
+| HTTP /v1/connections/* | ANX-141 | Paridade handler SDK |
+| InferenceRequirements + invoke path | ANX-141/168 | SIMULATED≠provider real |
+| DL-CX2 fairness PLATFORM | ANX-141 G3-S3 | TX única sequence+lease |
+
+**Rodadas R01–R07:** crosswalk CX-R02..R08 → D-CX em R08. Homologação executável G3/G5, providers reais e workers S5 permanecem ANX-141/133/181.
 
 ## 6.19. Rastreio por capacidade — knowledge R09/R10
 
-Fontes: [R09](./structure-debate/knowledge/R09-dev-plan.md) e [R10](./structure-debate/knowledge/R10-g0-handoff.md), relidos integralmente em 2026-09-08. Inventário atual confirma register-knowledge-source, ingest-document, publish-index, text-chunking e worker sob application/workers; ausência de src/workers não prova ausência de worker. Continuação ANX-142.
+Fontes: [R09](./structure-debate/knowledge/R09-dev-plan.md) e [R10](./structure-debate/knowledge/R10-g0-handoff.md), relidos integralmente em 2026-09-08. O rastreio transitivo **D-KN-001..020** está em **§6.19.1** (ANX-204). Fonte primária: [R08 decision log](./structure-debate/knowledge/R08-decision-log.md). Inventário parcial: register-knowledge-source, ingest-document, publish-index, text-chunking e worker sob application/workers. Continuação ANX-142.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -1252,7 +1343,7 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 | graph §6.15 | D-GR-001..044 + T01–T20 → **§6.15.1** (ANX-200); schemas/F0 executáveis em ANX-138 | ANX-138; não converter disposição documental em teste executado |
 | agents §6.16 | D-AGT-001..014 + AGT-R06 → **§6.16.1** (ANX-201); G5-AGT executável em ANX-139 | ANX-139/132; OpenBots ANX-124/125→144; teammates ANX-143 separados |
 | orchestration §6.17 | D-ORC-001..056 → **§6.17.1** (ANX-202); G5/checklist20 executável em ANX-140 | ANX-140/132; runtime ANX-133; Dashi dev-only não é dep universal |
-| connections §6.18 | D-CX-001..064, R04, DL-CX2 → schemas, endpoint/quota e inferência | ANX-141/132; valores exigem config/fonte, não defaults inventados |
+| connections §6.18 | D-CX-001..064 → **§6.18.1** (ANX-203); R04/DL-CX2 executável em ANX-141 | ANX-141/132; G5-CX e invoke real não executados |
 | knowledge §6.19 | D-KN, spec002 e R04 → memória/retrieval, TTL/budget e schemas | ANX-142/132; falha de typecheck anterior continua snapshot, não prova atual |
 | market-data §6.20 | D-MD, spec003 R12, schemas → identidade/tempo/qualidade/ingestão | ANX-145/146/132; origem corrente versus REAL disposta em P06 §1.1 |
 | strategies §6.21 | R04/R07/R08, spec003 Strategy Factory → lifecycle, schemas e G5-ST-01..03 | ANX-147/132/181; promoção/publicação disposta em P09 §6.1 |
@@ -1286,7 +1377,7 @@ Trabalho documental **parcial** do item A4 (`405b8304`). Não equivale a PASS in
 | Placement gateway | ADR0006, §6.1/§6.34, spec gateway | ADR `1cfa7de6e7a98778f6c388e085790e5b1d5d8314b10e4e3cafe9e338869ce0c2` | `d70b8f91` → PASS F1 revalidado | **G1C3 F1 fechado** (ANX-192/193/194/195) |
 | Conflitos F1–F3 (P06/ops/gateway) | P06, ops, gateway, §6.34 | C2 em comentário `78b398b3` | `f18a2846` C1; `cf16914a` C2 | F1–F3 resolvidos; B1 removido por ADR0006 |
 | Cinco disposições contratuais | §6.34 tabela | hashes por linha na §6.34 | `400da37b`, `7542eb8e`, `1c5076a6`, `ac51f462`, `923d4cd8` | PASS restrito documental cada uma |
-| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** §6.12.1–6.17.1 (ANX-197–202); 17 módulos pendentes (§6.18+) |
+| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** §6.12.1–6.18.1 (ANX-197–203); 16 módulos pendentes (§6.19+) |
 | Pacote final A4 | esta §6.36 + §6.1 | ver comentários ANX-127 | pendente revisor integral | **A4 parcial** — não encerrar ANX-127 |
 
 Implementação futura permanece delegada aos filhos ANX-126 (ANX-128+); este pacote não homologa produto, engines ou testes financeiros.
