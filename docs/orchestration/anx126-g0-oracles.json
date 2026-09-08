@@ -1,0 +1,486 @@
+{
+  "version": 1,
+  "generated": "2026-09-08",
+  "issues": {
+    "ANX-127": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.1",
+      "section": "§6.1",
+      "capability": "P01-baseline-reconciliation",
+      "requisito": "23 módulos + owners ADR0002",
+      "symbol": "docs/orchestration/module-contract-matrix-23.md#3",
+      "oracle": "matriz §3 linhas 23 owners; boundaries ANX-128"
+    },
+    "ANX-128": {
+      "source": "brain/notes/anxionos-backend-structure.md",
+      "section": "Padrão por módulo",
+      "capability": "AR01-boundaries",
+      "requisito": "domain não importa infrastructure",
+      "symbol": "backend/tests/boundaries",
+      "oracle": "npm run boundaries (quando aplicável)"
+    },
+    "ANX-129": {
+      "source": "brain/notes/anxionos-backend-structure.md#packages/secrets",
+      "section": "packages/secrets",
+      "capability": "P02-secrets-vault",
+      "requisito": "secrets-fora-de-prompts",
+      "symbol": "backend/packages/secrets",
+      "oracle": "redaction + rotação idempotente por secretId"
+    },
+    "ANX-130": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.17",
+      "section": "§6.17 eventing",
+      "capability": "P02-outbox-inbox",
+      "requisito": "estado+journal+outbox atômico",
+      "symbol": "backend/packages/eventing",
+      "oracle": "relay worker + idempotência eventId"
+    },
+    "ANX-131": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.13",
+      "section": "§6.13 tenancy",
+      "capability": "P02-tenant-rls",
+      "requisito": "isolamento PostgreSQL RLS",
+      "symbol": "backend/packages/database",
+      "oracle": "tenant context em queries autoritativas"
+    },
+    "ANX-132": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.12",
+      "section": "§6.12 schemas",
+      "capability": "P02-capability-manifest",
+      "requisito": "CapabilityManifest versionado",
+      "symbol": "backend/packages/contracts",
+      "oracle": "contract tests + schema Zod nos boundaries"
+    },
+    "ANX-133": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.17",
+      "section": "§6.17 workers",
+      "capability": "P04-orchestration-workers",
+      "requisito": "lease/checkpoint/shutdown",
+      "symbol": "backend/apps/workers",
+      "oracle": "graceful shutdown + lease fencing"
+    },
+    "ANX-134": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.12",
+      "section": "§6.12 identity",
+      "capability": "identity-lifecycle",
+      "requisito": "D-IDN-001..024",
+      "symbol": "backend/modules/identity",
+      "oracle": "G3-IDN-01..06 quando existir"
+    },
+    "ANX-135": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.13",
+      "section": "§6.13 organizations",
+      "capability": "org-onboarding",
+      "requisito": "D-ORG-001..044",
+      "symbol": "backend/modules/organizations",
+      "oracle": "convite concorrente + membership"
+    },
+    "ANX-136": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.14",
+      "section": "§6.14 governance",
+      "capability": "grant-mandate",
+      "requisito": "delegation/approval/epoch",
+      "symbol": "backend/modules/governance",
+      "oracle": "revogação entre consulta e efeito"
+    },
+    "ANX-137": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.14",
+      "section": "§6.14 autonomia",
+      "capability": "autonomy-matrix-L0-L4",
+      "requisito": "matriz normativa L0-L4",
+      "symbol": "brain/project-docs/specs/004-institutional-evolution/spec.md",
+      "oracle": "ANX-173 backlog futuro"
+    },
+    "ANX-138": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.15",
+      "section": "§6.15 graph",
+      "capability": "graph-traversal-rebuild",
+      "requisito": "D-GR-001..044",
+      "symbol": "backend/modules/graph",
+      "oracle": "eventId+checkpoint+ownerDomain replay"
+    },
+    "ANX-139": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.16",
+      "section": "§6.16 agents",
+      "capability": "agent-versioning",
+      "requisito": "D-AGT-001..014",
+      "symbol": "backend/modules/agents",
+      "oracle": "G5-AGT-01..05"
+    },
+    "ANX-140": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.17",
+      "section": "§6.17 orchestration",
+      "capability": "scheduler-runs",
+      "requisito": "D-ORC-001..056",
+      "symbol": "backend/modules/orchestration",
+      "oracle": "lease/run/gateBinding"
+    },
+    "ANX-141": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.18",
+      "section": "§6.18 connections",
+      "capability": "inference-governed",
+      "requisito": "D-CX-001..064",
+      "symbol": "backend/modules/connections",
+      "oracle": "quota+timeout+redaction"
+    },
+    "ANX-142": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.19",
+      "section": "§6.19 knowledge",
+      "capability": "graph-rag",
+      "requisito": "D-KN retrieval/TTL",
+      "symbol": "backend/modules/knowledge",
+      "oracle": "ACL+revogação recall"
+    },
+    "ANX-143": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.16",
+      "section": "§6.16 teammates",
+      "capability": "agent-teammates",
+      "requisito": "skills/rotinas governadas",
+      "symbol": "backend/modules/agents",
+      "oracle": "grants+rollback paridade"
+    },
+    "ANX-144": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.16",
+      "section": "§6.16 OpenBots",
+      "capability": "openbots-integration",
+      "requisito": "ANX-124/125 dependências",
+      "symbol": "backend/modules/agents",
+      "oracle": "integração sem duplicar Run state"
+    },
+    "ANX-145": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.20",
+      "section": "§6.20 market-data",
+      "capability": "realtime-feeds",
+      "requisito": "D-MD ingestão",
+      "symbol": "backend/modules/market-data",
+      "oracle": "gaps/backfill/point-in-time"
+    },
+    "ANX-146": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.20",
+      "section": "§6.20 backfill",
+      "capability": "historical-series",
+      "requisito": "qualidade+calendários",
+      "symbol": "backend/modules/market-data",
+      "oracle": "fonte+sequência+tempo"
+    },
+    "ANX-147": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.21",
+      "section": "§6.21 strategies",
+      "capability": "backtest-deployment",
+      "requisito": "G5-ST-01..03",
+      "symbol": "backend/modules/strategies",
+      "oracle": "replay sem lookahead"
+    },
+    "ANX-148": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.22",
+      "section": "§6.22 capital",
+      "capability": "reservation-allocation",
+      "requisito": "reserva/consumo/liberação",
+      "symbol": "backend/modules/capital",
+      "oracle": "concorrência reserva parcial"
+    },
+    "ANX-149": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.23",
+      "section": "§6.23 decisions",
+      "capability": "trade-intent",
+      "requisito": "G5-DC-01..03",
+      "symbol": "backend/modules/decisions",
+      "oracle": "validade+aprovação intent"
+    },
+    "ANX-150": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.24",
+      "section": "§6.24 risk",
+      "capability": "risk-check-killswitch",
+      "requisito": "G5-RK-01..03",
+      "symbol": "backend/modules/risk",
+      "oracle": "RiskPermit distinto P06 §2.1"
+    },
+    "ANX-151": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.25",
+      "section": "§6.25 execution",
+      "capability": "order-dispatch",
+      "requisito": "G5-EX-01..05",
+      "symbol": "backend/modules/execution",
+      "oracle": "UNKNOWN sem retry cego"
+    },
+    "ANX-152": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.26",
+      "section": "§6.26 accounting",
+      "capability": "ledger-posting",
+      "requisito": "G5-ACC-01..03",
+      "symbol": "backend/modules/accounting",
+      "oracle": "balanceamento+reversão imutável"
+    },
+    "ANX-153": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.27",
+      "section": "§6.27 portfolios",
+      "capability": "valuation-exposure",
+      "requisito": "G5-PF-01..03",
+      "symbol": "backend/modules/portfolios",
+      "oracle": "FX/stale vs ledger"
+    },
+    "ANX-154": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.28",
+      "section": "§6.28 performance",
+      "capability": "pnl-attribution",
+      "requisito": "métricas derivadas",
+      "symbol": "backend/modules/performance",
+      "oracle": "ledger+valuation oráculos"
+    },
+    "ANX-155": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.29",
+      "section": "§6.29 audit",
+      "capability": "flight-recorder",
+      "requisito": "integridade/replay",
+      "symbol": "backend/modules/audit",
+      "oracle": "replay sem novos efeitos"
+    },
+    "ANX-156": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.30",
+      "section": "§6.30 billing",
+      "capability": "subscription-invoice",
+      "requisito": "ciclo comercial",
+      "symbol": "backend/modules/billing",
+      "oracle": "webhook idempotente"
+    },
+    "ANX-157": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.31",
+      "section": "§6.31 partners",
+      "capability": "commission-payout",
+      "requisito": "comissão/reversão",
+      "symbol": "backend/modules/partners",
+      "oracle": "duplicata+isolamento"
+    },
+    "ANX-158": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.32",
+      "section": "§6.32 operations",
+      "capability": "incidents-retention",
+      "requisito": "probes/export/recovery",
+      "symbol": "backend/modules/operations",
+      "oracle": "restore auditado ANX-169"
+    },
+    "ANX-159": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.33",
+      "section": "§6.33 simulation",
+      "capability": "digital-twin",
+      "requisito": "sandbox/reprodução",
+      "symbol": "backend/modules/simulation",
+      "oracle": "seed/dataset/clock determinismo"
+    },
+    "ANX-160": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.33",
+      "section": "§6.33 evaluation",
+      "capability": "certification-score",
+      "requisito": "regressão impede promoção",
+      "symbol": "backend/modules/evaluation",
+      "oracle": "candidato+dataset+versão"
+    },
+    "ANX-161": {
+      "source": "brain/project-docs/decisions/0006-distribute-external-gateways-within-baseline.md",
+      "section": "ADR0006",
+      "capability": "adapter-gateway-registry",
+      "requisito": "placement distribuído",
+      "symbol": "backend/modules/adapter-gateway",
+      "oracle": "conformance+UNKNOWN reconciliação"
+    },
+    "ANX-162": {
+      "source": "docs/orchestration/system-capabilities/p05-p06-external-adapter-gateway-spec.md",
+      "section": "Docker sandbox",
+      "capability": "engine-isolation",
+      "requisito": "sem docker socket para agentes",
+      "symbol": "backend/deploy/docker",
+      "oracle": "subir/descer/restart comprovados"
+    },
+    "ANX-163": {
+      "source": "docs/orchestration/system-capabilities/p06-financial-lifecycle-contract.md",
+      "section": "P06 integrado",
+      "capability": "paper-flow-e2e",
+      "requisito": "fluxo SIMULATED/PAPER",
+      "symbol": "backend/modules/execution",
+      "oracle": "market-data→execution→accounting cadeia"
+    },
+    "ANX-164": {
+      "source": "docs/frontend/README.md",
+      "section": "Owner console",
+      "capability": "owner-console-parity",
+      "requisito": "sem fake data produção",
+      "symbol": "frontend/",
+      "oracle": "E2E por papel+loading/denied/stale"
+    },
+    "ANX-165": {
+      "source": "docs/frontend/README.md",
+      "section": "Operator console",
+      "capability": "operator-console",
+      "requisito": "paridade tools/API",
+      "symbol": "frontend/",
+      "oracle": "handlers comuns Astro+React"
+    },
+    "ANX-166": {
+      "source": "docs/frontend/README.md",
+      "section": "Platform console",
+      "capability": "platform-console",
+      "requisito": "isolamento PLATFORM",
+      "symbol": "frontend/",
+      "oracle": "tenancy+grants visíveis"
+    },
+    "ANX-167": {
+      "source": "docs/frontend/README.md",
+      "section": "Partner console",
+      "capability": "partner-console",
+      "requisito": "isolamento parceiro",
+      "symbol": "frontend/",
+      "oracle": "comissão sem ledger direto"
+    },
+    "ANX-168": {
+      "source": "backend/apps/api/src/realtime/",
+      "section": "realtime",
+      "capability": "notifications-subscriptions",
+      "requisito": "canais governados",
+      "symbol": "backend/apps/api/src/realtime",
+      "oracle": "subscription manager+envelope"
+    },
+    "ANX-169": {
+      "source": "docs/orchestration/system-capabilities/p08-operations-slos-recovery-contract.md",
+      "section": "P08 recovery",
+      "capability": "backup-restore-rpo-rto",
+      "requisito": "restore auditado",
+      "symbol": "backend/modules/operations",
+      "oracle": "RPO/RTO drill"
+    },
+    "ANX-170": {
+      "source": "docs/orchestration/system-capabilities/p08-operations-slos-recovery-contract.md",
+      "section": "P08 SLOs",
+      "capability": "slo-load-cost",
+      "requisito": "observabilidade+carga",
+      "symbol": "backend/packages/observability",
+      "oracle": "métricas+limites documentados"
+    },
+    "ANX-171": {
+      "source": "docs/orchestration/p09-evolution-rollback-contract.md",
+      "section": "P09 evolution",
+      "capability": "canary-rollback",
+      "requisito": "promoção revogável humana",
+      "symbol": "backend/modules/evaluation",
+      "oracle": "regressão bloqueia promoção"
+    },
+    "ANX-172": {
+      "source": "docs/orchestration/module-contract-matrix-23.md#6.25",
+      "section": "REAL futuro",
+      "capability": "real-readiness",
+      "requisito": "não opera capital REAL",
+      "symbol": "n/a",
+      "oracle": "backlog; fail-closed"
+    },
+    "ANX-173": {
+      "source": "brain/project-docs/specs/004-institutional-evolution/spec.md",
+      "section": "L3/L4",
+      "capability": "autonomy-certification",
+      "requisito": "não certifica L3/L4",
+      "symbol": "n/a",
+      "oracle": "backlog; supervisão humana"
+    },
+    "ANX-174": {
+      "source": "docs/orchestration/system-capabilities/p05-p06-external-adapter-gateway-spec.md",
+      "section": "NautilusTrader",
+      "capability": "adapter-nautilus",
+      "requisito": "sandbox homologação",
+      "symbol": "backend/modules/execution",
+      "oracle": "conformance ANX-161"
+    },
+    "ANX-175": {
+      "source": "docs/orchestration/system-capabilities/p05-p06-external-adapter-gateway-spec.md",
+      "section": "GoCryptoTrader",
+      "capability": "adapter-gocryptotrader",
+      "requisito": "sandbox",
+      "symbol": "backend/modules/execution",
+      "oracle": "conformance ANX-161"
+    },
+    "ANX-176": {
+      "source": "docs/orchestration/system-capabilities/p05-p06-external-adapter-gateway-spec.md",
+      "section": "Hummingbot",
+      "capability": "adapter-hummingbot",
+      "requisito": "sandbox",
+      "symbol": "backend/modules/execution",
+      "oracle": "conformance ANX-161"
+    },
+    "ANX-177": {
+      "source": "docs/orchestration/system-capabilities/p05-p06-external-adapter-gateway-spec.md",
+      "section": "Freqtrade",
+      "capability": "adapter-freqtrade",
+      "requisito": "sandbox",
+      "symbol": "backend/modules/execution",
+      "oracle": "conformance ANX-161"
+    },
+    "ANX-178": {
+      "source": "docs/orchestration/system-capabilities/p05-p06-external-adapter-gateway-spec.md",
+      "section": "XChange",
+      "capability": "adapter-xchange",
+      "requisito": "sandbox",
+      "symbol": "backend/modules/execution",
+      "oracle": "conformance ANX-161"
+    },
+    "ANX-179": {
+      "source": "docs/orchestration/system-capabilities/p05-p06-external-adapter-gateway-spec.md",
+      "section": "Cryptofeed",
+      "capability": "adapter-cryptofeed",
+      "requisito": "sandbox feeds",
+      "symbol": "backend/modules/market-data",
+      "oracle": "conformance ANX-161"
+    },
+    "ANX-180": {
+      "source": "docs/orchestration/system-capabilities/p05-p06-external-adapter-gateway-spec.md",
+      "section": "MT5",
+      "capability": "adapter-mt5",
+      "requisito": "sandbox",
+      "symbol": "backend/modules/execution",
+      "oracle": "conformance ANX-161"
+    },
+    "ANX-181": {
+      "source": "AGENTS.md",
+      "section": "Pipeline G0-G7",
+      "capability": "gate-g1-critic",
+      "requisito": "crítico independente por slice",
+      "symbol": "n/a",
+      "oracle": "PASS/CHANGES_REQUIRED documentado"
+    },
+    "ANX-182": {
+      "source": "AGENTS.md",
+      "section": "G2 Code Review",
+      "capability": "gate-g2-review",
+      "requisito": "revisão independente diff",
+      "symbol": "n/a",
+      "oracle": "parecer com referências"
+    },
+    "ANX-183": {
+      "source": "AGENTS.md",
+      "section": "G3 QA",
+      "capability": "gate-g3-qa",
+      "requisito": "testes reproduzíveis",
+      "symbol": "n/a",
+      "oracle": "comandos+resultados registrados"
+    },
+    "ANX-184": {
+      "source": "AGENTS.md",
+      "section": "G4 Security",
+      "capability": "gate-g4-security",
+      "requisito": "tenancy+secrets",
+      "symbol": "n/a",
+      "oracle": "achados classificados"
+    },
+    "ANX-185": {
+      "source": "AGENTS.md",
+      "section": "G5 Red Team",
+      "capability": "gate-g5-adversarial",
+      "requisito": "sandbox autorizado",
+      "symbol": "n/a",
+      "oracle": "cenários+bypass tentados"
+    },
+    "ANX-186": {
+      "source": "AGENTS.md",
+      "section": "G6/G7",
+      "capability": "gate-g6-integration",
+      "requisito": "aceite explícito",
+      "symbol": "n/a",
+      "oracle": "candidato integrado revalidado"
+    }
+  }
+}
