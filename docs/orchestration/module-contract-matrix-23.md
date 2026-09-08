@@ -39,31 +39,31 @@ Estado autoritativo, journal e outbox são atômicos por domínio. Projeções s
 
 ## 3. Matriz
 
-| # | Módulo | Dono de estado e função | Capacidades mínimas | Eventos e erros críticos | Idempotência/oráculo | Gate de saída |
+| # | Módulo | Dono de estado e função | Capacidades mínimas | Idempotência/oráculo a verificar | Pacote baseline | Continuação no board |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | identity | principals, sessões, MFA e credenciais de identidade | registrar/autenticar/verificar/revogar sessão | `PrincipalCreated`, `SessionRevoked`; `AUTH_INVALID`, `SESSION_REVOKED` | subject+provider; auth contract, tenancy e MFA tests | P02 |
-| 2 | organizations | tenants, agencies, owners, memberships e convites | CRUD idempotente, membership e tenant scope | `AgencyCreated`, `MembershipChanged`; `TENANT_DENIED`, `INVITE_REPLAY` | tenant+resource+version; RLS/UoW tests | P02 |
-| 3 | governance | grants, authority/policy epochs, permits e kill switch | avaliar autoridade, emitir/revogar grant/permit | `GrantIssued/Revoked`, `PermitGranted/Revoked`; `GRANT_DENIED`, `EPOCH_STALE` | grant subject+scope+epoch; revocation/race tests | P02 |
-| 4 | graph | projeção institucional e traversal governado | projetar eventos, constraints, explicar relações | `GraphProjectionApplied`; `GRAPH_STALE`, `TRAVERSAL_DENIED` | eventId+checkpoint+ownerDomain; rebuild/constraint tests | P03 |
-| 5 | agents | identidade/versionamento de agente e AgentRun | provisionar, iniciar, pausar, checkpointar e reportar run | `AgentRunStarted/Finished`; `CAPABILITY_DENIED`, `HUMAN_REQUIRED` | runId+step+expected version; lifecycle/takeover tests | P07 |
-| 6 | orchestration | objectives, routines, delegation, leases e task execution | criar objetivo, disparar rotina, delegar, claim/renew/release | `ObjectiveCreated`, `DelegationChanged`; `LEASE_LOST`, `ORCHESTRATION_BLOCKED` | issue+boardVersion+status e runId; lease/shutdown tests | P04/P07 |
-| 7 | knowledge | documentos, fontes, provenance, retrieval e policy de acesso | ingestão, busca, citação, classificação e retenção | `KnowledgeIngested`, `RetrievalCompleted`; `SOURCE_UNTRUSTED`, `ACL_DENIED` | document hash+version; ACL/injection/provenance tests | P07 |
-| 8 | connections | bindings, adapters, capabilities de providers e health | resolver binding, health, read, simulate e reconcile | `BindingActivated/Revoked`, `CallUnknown`; `BINDING_INVALID`, `PROVIDER_UNKNOWN` | binding+request hash; secret redaction/UNKNOWN tests | P05 |
-| 9 | inference | policy e execução de inferência por modelo/provider | inferir com schema, budget, provenance e avaliação | `InferenceRequested/Completed`; `MODEL_DENIED`, `OUTPUT_INVALID` | inference key+prompt hash; reproducibility/cost tests | P07 |
-| 10 | market-data | instrumentos, feeds, observações e qualidade temporal | catálogo, ingestão, normalização e replay de dados | `MarketObservationRecorded`; `DATA_STALE`, `QUALITY_REJECTED` | source+sequence+timestamp; out-of-order/gap tests | P06 |
-| 11 | strategies | definições, versões, universo e parâmetros de estratégia | publicar versão, avaliar sinal e explicar premissas | `StrategyVersioned`, `SignalProduced`; `STRATEGY_INVALID`, `DATASET_MISMATCH` | strategy version+observation set; deterministic replay | P06/P07 |
-| 12 | decisions | decisões, sinais aceitos e TradeIntent imutável | criar, explicar, aprovar ou cancelar intenção | `TradeIntentCreated/Cancelled`; `INTENT_INVALID`, `APPROVAL_REQUIRED` | intentId+idempotency key; schema/parity tests | P06 |
-| 13 | risk | políticas, exposições, limites e RiskCheck | pré/pós-trade checks, concentration, liquidity e loss | `RiskCheckCompleted`; `RISK_REJECTED`, `RISK_STALE` | intent+portfolio+riskEpoch; race/limit tests | P06 |
-| 14 | capital | cash, quotas, reservas e epochs de capital | consultar, reservar, liberar e reconciliar capital paper | `CapitalReserved/Released`; `INSUFFICIENT_CAPITAL`, `RESERVATION_EXPIRED` | account+currency+reservation key; concurrent reserve tests | P06 |
-| 15 | execution | ordens, permits consumidos e lifecycle de execução | aceitar/rejeitar/cancelar ordem simulada sob permit | `OrderStateChanged`; `PERMIT_INVALID`, `ORDER_UNKNOWN` | permit single-use+order key; state-machine tests | P06 |
-| 16 | accounting | journal financeiro, ledger balanceado e lançamentos | postar/reverter/reconciliar lançamentos paper | `LedgerPosted/Reversed`; `LEDGER_UNBALANCED`, `ENTRY_DUPLICATE` | source event+entry key; double-entry/rebuild tests | P06 |
-| 17 | portfolios | posições, lotes, cash views e valuation inputs | aplicar fills, corporate actions, posições e snapshots | `PositionUpdated/Valuated`; `POSITION_DIVERGED`, `VALUATION_MISSING` | fill/action id+sequence; ledger-to-position tests | P06 |
-| 18 | performance | P&L, retornos, benchmark, risco e atribuição | calcular realizado/não realizado, fees, FX e métricas | `PerformanceCalculated`; `FX_MISSING`, `METRIC_INVALID` | snapshot+valuation version; reproducibility tests | P06 |
-| 19 | simulation | relógio, cenários, fills, slippage e replay | criar run, executar cenário e produzir resultado paper | `SimulationStarted/Filled/Finished`; `SCENARIO_INVALID`, `SIM_UNKNOWN` | simulationRunId+seed/input hash; replay/partial fill tests | P06 |
-| 20 | evaluation | datasets, casos, judges, baselines e resultados | avaliar agentes, estratégias, skills e regressões | `EvaluationCompleted`; `EVAL_INCONCLUSIVE`, `BASELINE_MISSING` | candidate+dataset+judge version; regression/adversarial tests | P07/P08 |
-| 21 | evolution | propostas de mudança, promoção e rollback de versões | propor, comparar, aprovar e publicar evolução | `ChangeProposed/Promoted/RolledBack`; `PROMOTION_DENIED`, `REGRESSION_FOUND` | candidate hash+approval epoch; canary/rollback tests | P09 |
-| 22 | partners | organizações externas, contratos e escopos de parceria | provisionar partner, consentir feed e administrar binding | `PartnerBound/Unbound`; `PARTNER_SCOPE_DENIED`, `CONSENT_EXPIRED` | partner+binding version; tenant/contract tests | P05/P08 |
-| 23 | billing | planos, quotas, usage, invoices e cobrança interna | medir uso, reservar quota, faturar e exportar | `UsageRecorded`, `InvoiceIssued`; `QUOTA_EXCEEDED`, `BILLING_CONFLICT` | usage event+period; quota/reconciliation tests | P08/P09 |
+| 1 | identity | Principal e sessão | Registrar, autenticar, revogar e recuperar acesso | principal/sessão + versão; revogação, MFA e tenancy | P02 | ANX-134 |
+| 2 | organizations | Agency, Owner, membership e onboarding | Convites, equipes, ownership e mercados habilitados | tenant + recurso + versão; convites concorrentes e bootstrap | P02 | ANX-135 |
+| 3 | governance | Grant, mandato, delegação, approval e authority epoch | Conceder/revogar autoridade e aprovar mudanças | scope + epoch + versão; revogação entre consulta e efeito | P02 | ANX-136/ANX-137 |
+| 4 | graph | Controle de projeção/rebuild e grafo derivado | Traversals governados, contexto, linhagem e reconstrução | eventId + checkpoint + ownerDomain; replay e stale denial | P03 | ANX-138 |
+| 5 | agents | Agent, AgentVersion, configuração e referências a skills | Versionar agente e oferecer fachada Brain; não possuir Run | agent + versão; grants, rollback e paridade de acesso | P04 | ANX-139/ANX-143/ANX-144 |
+| 6 | orchestration | Goal, Task, Run, scheduler, lease e checkpoint do produto | Agendar, delegar, pausar, retomar e WAITING_HUMAN_INPUT | task/run + versão + fencing; cancelamento e retomada | P04 | ANX-140/ANX-133 |
+| 7 | connections | Provider, conta, modelo/oferta, binding, quota e uso de inferência | Catálogo, inferência governada, routing explícito e reconciliação de uso | binding/request + reserva de quota; timeout, custo e redaction | P05 | ANX-141/ANX-129 |
+| 8 | knowledge | Document, Memory, Evidence e ContextManifest | Ingestão, memória, retrieval autorizado e proveniência | hash + versão + ACL; revogação, poisoning e recall | P04 | ANX-142 |
+| 9 | market-data | Instrumento, feed, observação e séries temporais | Histórico/realtime, qualidade, calendários e eventos de mercado | fonte + sequência + tempo; gaps, backfill e point-in-time | P06 | ANX-145/ANX-146 |
+| 10 | strategies | StrategyVersion, backtest e Deployment | Versionar, processar backtest e aplicar deployment aprovado | versão + dataset + parâmetros; replay sem lookahead | P06 | ANX-147 |
+| 11 | capital | Conta de capital, alocação e reserva | Reservar, consumir, liberar e reconciliar alocações | conta + moeda + reserva; concorrência e consumo parcial | P06 | ANX-148 |
+| 12 | portfolios | Posição, lote, exposição, snapshot e valuation | Aplicar fatos confirmados e valorar posições | fill/action + versão; FX, stale e comparação com ledger | P06 | ANX-153 |
+| 13 | decisions | Decision e TradeIntent | Explicar, versionar, aprovar e cancelar intenção | intent + payload + versão; validade e aprovação | P06 | ANX-149 |
+| 14 | risk | RiskPolicy, RiskCheck, limites, risk epoch e kill switch | Checar risco e autorizar/revogar permit de risco conforme contrato | intent + estado de risco + epoch; limite e revogação concorrentes | P06 | ANX-150 |
+| 15 | execution | ExecutionSession, Order, Fill e reconciliação de venue | Dispatch, cancelamento, fills e revalidação/consumo de permit | ordem + permit + fencing; UNKNOWN sem retry cego | P06 | ANX-151/ANX-163 |
+| 16 | accounting | Ledger, lançamentos, taxas e ajustes financeiros | Postar, reverter e reconciliar saldos financeiros | evento fonte + entry; balanceamento e reversão imutável | P06 | ANX-152 |
+| 17 | performance | P&L, retornos, métricas e atribuição derivadas | Calcular métricas sobre ledger e valuation | snapshot + versão; oráculos de P&L/FX/fees | P06 | ANX-154 |
+| 18 | evaluation | Evaluation, Certification, Reputation e critérios de promoção | Avaliar/certificar candidato e detectar regressão | candidato + dataset + versão; regressão impede promoção | P08 | ANX-160/ANX-171 |
+| 19 | simulation | Snapshot, SimulationRun e cenários isolados | Digital Twin, relógio simulado e replay de cenário | run + seed + input hash; isolamento e reprodução | P08 | ANX-159 |
+| 20 | audit | Flight Recorder, manifests, linhagem e replay governado | Indexar evidências e reconstruir explicação sem novos efeitos | evento + digest; integridade, ACL e replay sem ordens | P06 | ANX-155 |
+| 21 | billing | Assinatura/Invoice da plataforma e ciclo comercial | Faturar, reconciliar uso comercial e reverter cobrança | evento de uso/pagamento + período; webhook idempotente | P07 | ANX-156 |
+| 22 | partners | Referral, Commission e Payout comercial | Atribuir indicação, calcular/reverter comissão e aprovar payout | invoice paga/revertida + regra; duplicata e isolamento | P07 | ANX-157 |
+| 23 | operations | Incident, procedimentos, retenção, exportação e recuperação | Operar, recuperar e administrar dados sob governança | operação + scope + versão; restore e ações auditadas | P07 | ANX-158/ANX-169/ANX-170 |
 
 ## 4. Oráculos transversais
 
