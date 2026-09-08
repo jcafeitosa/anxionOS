@@ -172,6 +172,22 @@ Graph S8, travessias completas além do smoke, PlanRevision e requisitos R10 con
 
 Este é o terceiro par com evidência inicial: seis módulos examinados parcialmente, 17 ainda sem evidência granular nesta matriz. Nenhum aceite integral de ANX-127 nem gate integrado decorre dessas verificações.
 
+## 6.5. Evidência inicial — connections e knowledge
+
+Fontes: [connections R09 S1–S5](./modules/connections/R09-dev-plan.md) e [knowledge R09 S1–S5](./structure-debate/knowledge/R09-dev-plan.md). Handoffs complementados nas ANX-141/142, sem repetir os slices iniciais aceitos.
+
+| Requisito | Source / evidência | Lacuna / aceitação |
+| --- | --- | --- |
+| Connections S2 inferência | `backend/modules/connections/src/application/commands/invoke-inference.ts` usa ports/UoW, restringe adapterId a simulated e chama adapter dentro da TX; registra completed e usage OWNER | Não homologado para provider externo. ANX-141 exige estado durável de dispatch/UNKNOWN/reconcile, contexto consumidor confiável e replay com payload/binding |
+| Connections S2 streaming / S3–S5 | `domain/ports/inference-adapter.ts` em connections é terminal Promise, sem chunks; migrations inventariadas 0000/0001 | UNKNOWN/stream/fairness/catalog/ops não demonstrados no slice observado. ANX-141 deve confrontar todos os aceites R09 e equivalências antes de implementar |
+| Knowledge S2 ingest/publicação | `backend/modules/knowledge/src/application/commands/ingest-document.ts`, `publish-index.ts`; worker é fachada run→ingest; simulated embedding usa hash pseudoVector | Presença não prova scheduler, retrieval nem embedding semântico. Publicação verifica contagem persistida, mas provider real exige cardinalidade/IDs/dimensões/modelVersion e falha parcial verificados |
+| Knowledge compilação | `bun run typecheck` em `backend/modules/knowledge` retornou **exit 2**, TS2304 em ingest-document.ts:37, publish-index.ts:32, register-knowledge-source.ts:32 | assertCommandJournalOrganization existe exportado em command-support, porém não está resolvido nos comandos. ANX-142 deve corrigir import/integração e testar ramo raced/cross-tenant. Não corrigido aqui |
+| Knowledge S3–S5 | Inventário atual de commands/ports concentra registro/ingest/publicação/embedding | Memórias/evidências/revogação, retrieval/context e HTTP/expiry ainda não demonstrados; ANX-142 exige G3/G4/G5 do R09, busca de equivalentes e schemas explícitos |
+
+A compilação falha é evidência executada, não inferência de prontidão. Nenhuma chamada a provider externo ou teste PG/pgvector foi executado nesta inspeção. A lacuna de imports não autoriza atribuir falha a entregas antigas sem identificar a revisão correspondente.
+
+Oito módulos agora possuem evidência inicial, ainda parcial. Os demais 15, R10 e inventário completo de cada capability permanecem pendentes.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
