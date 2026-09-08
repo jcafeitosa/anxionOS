@@ -447,7 +447,7 @@ Fonte primária: [R08 decision log](./modules/organizations/R08-decision-log.md)
 
 ## 6.14. Rastreio por capacidade — governance R09/R10
 
-Fontes: [R09](./modules/governance/R09-dev-plan.md) e [R10](./modules/governance/R10-g0-handoff.md), relidos em 2026-09-08. ANX-136 executa o delta; ANX-137 trata matriz de autonomia. Evidência histórica de ANX-30 não é aprovação deste candidato.
+Fontes: [R09](./modules/governance/R09-dev-plan.md) e [R10](./modules/governance/R10-g0-handoff.md), relidos em 2026-09-08. ANX-136 executa o delta; ANX-137 trata matriz de autonomia. O rastreio transitivo **D-GOV-001..010** e dependências **D-R6-GOV-001..006** estão em **§6.14.1** (ANX-199). Evidência histórica de ANX-30 não é aprovação deste candidato.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -465,11 +465,64 @@ Fontes: [R09](./modules/governance/R09-dev-plan.md) e [R10](./modules/governance
 | R10 projector Neo4j | Planejado no owner graph | ANX-138: projeção derived/eventId/checkpoint/rebuild; nenhuma transferência de autoridade PG |
 | R10 ExecutionPermit emission→decisions | Conflito contratual conhecido, não encerrado pelo encaminhamento | ANX-127/149/150/151: consolidar distinção aprovação institucional, permit de risco e consumo em execution; manter ADR aceito até decisão/migração explícita |
 | R10 PLATFORM engineering grants full matrix | Deferido no v1; não significa autorização irrestrita | ANX-136/137: matriz PLATFORM versus AGENCY, efeitos/limites/aprovação/transições e break-glass revogável; não ativar L3/L4 |
-| R09 pré-requisitos / R10 PC-G0-01..10 e equipes | Histórico: PC-G0-06 indica T01 real pendente, apesar de resumo 10/10 debate | ANX-136/181: verificar identity/eventing/organizations atuais, crítico independente identificado e evidência T01; não herdar PASS por papel nominal |
+| R09 pré-requisitos / R10 PC-G0-01..10 e equipes | Histórico: PC-G0-06 indica T01 real pendente, apesar de resumo 10/10 debate | ANX-136/181: verificar deps atuais. **D-GOV/PC-G0/D-R6-GOV** em §6.14.1 (ANX-199); T01 real e crítico independente permanecem pendentes |
 
 **Teste executado:** `bun test tests/contracts/governance-contracts.test.ts` em backend, Bun 1.4.0, exit 0, **4 pass / 0 fail / 4 assertions**. Testes inspecionados cobrem owner constant, parse IssueGrant, grantIssued e mapeamento GOV_EPOCH_STALE. Não testam delegação, mandato, autoridade efetiva, PG, T01 real ou corrida de revogação.
 
-A busca de delegation/mandate nos paths governance/contracts/API encontrou schemas, não execução equivalente demonstrada. Classificação é parcial/não verificada, não ausência universal. Rastreio transitivo das rodadas anteriores e consolidação de conflitos continuam na ANX-127. Nenhum grant ou aprovação real foi criado.
+A busca de delegation/mandate nos paths governance/contracts/API encontrou schemas, não execução equivalente demonstrada. Classificação é parcial/não verificada, não ausência universal. **D-GOV-001..010** e **D-R6-GOV-001..006** estão em §6.14.1; conflitos ExecutionPermit/PLATFORM permanecem abertos em ANX-127/149/150/151. Nenhum grant ou aprovação real foi criado.
+
+### 6.14.1. A1 — disposição transitiva governance (ANX-199)
+
+Fontes: [R08 decision log](./modules/governance/R08-decision-log.md), [R06 dependências](./modules/governance/R06-dependencies.md), [R07 riscos](./modules/governance/R07-risks.md) (relidas 2026-09-08). Governance **não** usa prefixo D-GR (reservado ao módulo **graph**, §6.15). Esta subseção **não** revalida código nem fecha conflitos contratuais.
+
+#### D-GOV-001..010 (R08)
+
+| ID | Decisão (resumo) | Classificação | Disposição / issue | Evidência ou limite |
+| --- | --- | --- | --- | --- |
+| D-GOV-001 | Dono grants, delegations, mandates, approvals, authorityEpoch | Aceito v1 | ANX-136 baseline | Migrations/UoW §6.4; delegation/mandate não demonstrados |
+| D-GOV-002 | PolicyVersion RISK e kill switch → risk | Aceito ownership | ANX-150 | governance não implementa corpo RISK |
+| D-GOV-003 | graph executa T01; governance persiste grants+epoch | Aceito v1 | ANX-136/138 | Adapter graph-t01 com doubles §6.4; T01 real pendente |
+| D-GOV-004 | Prefixo PG `governance_*` + command journal | Aceito v1 | ANX-136 | schema 0000/0001 inventariado |
+| D-GOV-005 | Eventos ownerDomain governance `.v1` | Aceito v1 | ANX-132/136 | Teste contracts 4 pass §6.14 |
+| D-GOV-006 | Consumer membership.activated → grant baseline owner | Aceito v1 | ANX-136/130 | organizations-membership-consumer presente; desvio camada §6.4 |
+| D-GOV-007 | RevokeGrant bump authorityEpoch monotônico (GK03) | Aceito v1 | ANX-136 G3-GOV-02 | epoch store presente; corrida não verificada |
+| D-GOV-008 | TraversalEvaluator port público; adapter → graph | Aceito v1 | ANX-136/138 | Port+adapter §6.4; timeout/stale não executados |
+| D-GOV-009 | ChangeProposal HIERARCHY_MODE via ADR0005/spec006 | Aceito v1 | ANX-136/137 | change-proposal commands parciais |
+| D-GOV-010 | v1 sem PolicyReference enforcement cross-risk | Deferido P06 | ANX-150/151 | Integração pré-submit P06 §2.1 |
+
+#### D-R6-GOV-001..006 (R06 — dependências)
+
+| ID | Decisão (resumo) | Consolidado em | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-R6-GOV-01 | PrincipalLookup fail-closed em IssueGrant | D-GOV-001 | ANX-136/134 | Lookup via identity port |
+| D-R6-GOV-02 | Consumer activated → grant baseline | D-GOV-006 | ANX-136/135 | Evento organizations |
+| D-R6-GOV-03 | Consumer revoked → close grants + epoch | D-GOV-007 | ANX-136 | membership.revoked handler |
+| D-R6-GOV-04 | TraversalEvaluator adapter → graph T01 | D-GOV-008 | ANX-138 | Sem Neo4j no módulo |
+| D-R6-GOV-05 | orchestration importa port público | D-GOV-008 | ANX-140/128 | Proibido infra privada |
+| D-R6-GOV-06 | risk PolicyVersion kind=RISK | D-GOV-002/010 | ANX-150 | governance só PolicyReference |
+
+#### PC-G0-01..06 (R08 — pré-condições G0)
+
+| ID | Pré-condição | Status documental | Disposição |
+| --- | --- | --- | --- |
+| PC-G0-01 | R01–R08 concluídos | ✅ debate | Artefatos R01–R08 no módulo |
+| PC-G0-02 | R09 plano slices | ✅ R09 | ANX-136 executa |
+| PC-G0-03 | R10 handoff | ✅ R10 | ANX-136 G0 |
+| PC-G0-04 | identity G7 ANX-28 | ⏳ Pendente | ANX-134 |
+| PC-G0-05 | organizations membership events | ⏳ ANX-29 histórico | ANX-135 |
+| PC-G0-06 | graph T01 adapter testável | ⏳ ANX-32 | ANX-138 |
+
+#### Conflitos e itens abertos (não-D-GOV)
+
+| Item | Fonte §6.14 | Disposição | Limite |
+| --- | --- | --- | --- |
+| ExecutionPermit emission → decisions | R10 conflito conhecido | ANX-127/149/150/151 | Distinção aprovação/permit/risco não fechada |
+| PLATFORM engineering grants full matrix | R10 deferido v1 | ANX-136/137 | Sem L3/L4; matriz PLATFORM vs AGENCY |
+| CreateDelegation / Mandate commands | R10 parcial contratual | ANX-136 | Schemas sem command demonstrado |
+| Projector Neo4j governance | R10 planejado graph | ANX-138 | Projeção derived, sem autoridade PG |
+| R-GOV-02 stale ALLOW (R07) | GK03 | D-GOV-007 | Cache invalidation graph ANX-138 |
+
+**Rodadas R01–R05:** consolidadas em R06/R08; não reescritas linha a linha. Revalidação executável G3-GOV-01..05, HTTP e T01 real permanece ANX-136/181.
 
 ## 6.15. Rastreio por capacidade — graph R09/R10
 
@@ -985,7 +1038,7 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 | --- | --- | --- |
 | identity §6.12 | D-IDN-001..024 → **§6.12.1** (ANX-197); R01–R05 structure-debate; R06–R08 com limite em §6.12.1 | ANX-134 executa P1/deferidos; schemas ANX-132; DEP/H/PC-G0 revalidação em ANX-134/181 |
 | organizations §6.13 | D-ORG-001..044 → **§6.13.1** (ANX-198); queries/saga/G3–G5 executáveis em ANX-135 | ANX-135 executa delta; isolamento ANX-131; parecer G6 via ANX-181 |
-| governance §6.14 | Rodadas/decisões anteriores → delegation, mandate, aprovação e autoridade temporal | ANX-136/137; fronteiras de permit na disposição P06 §2.1 |
+| governance §6.14 | D-GOV-001..010 + D-R6-GOV + PC-G0 → **§6.14.1** (ANX-199); conflitos ExecutionPermit/PLATFORM abertos | ANX-136/137 executa delta; permits P06 §2.1 em ANX-149/150/151 |
 | graph §6.15 | D-GR-001..044, T01–T20 e schemas → traversals individuais, rebuild/temporalidade e políticas | ANX-138; não converter número de traversal em teste executado |
 | agents §6.16 | D-AGT-001..014, R04/R06/R07 → quatro eventos, dependências e G5-AGT-01..05 | ANX-139/132; OpenBots ANX-124/125→144 e teammates ANX-143 separados |
 | orchestration §6.17 | D-ORC-001..056, R04/checklist20 → seis eventos, dez rotas, lease/run/gateBinding | ANX-140/132; runtime ANX-133; Dashi de desenvolvimento não vira dependência universal |
@@ -1023,7 +1076,7 @@ Trabalho documental **parcial** do item A4 (`405b8304`). Não equivale a PASS in
 | Placement gateway | ADR0006, §6.1/§6.34, spec gateway | ADR `1cfa7de6e7a98778f6c388e085790e5b1d5d8314b10e4e3cafe9e338869ce0c2` | `d70b8f91` → PASS F1 revalidado | **G1C3 F1 fechado** (ANX-192/193/194/195) |
 | Conflitos F1–F3 (P06/ops/gateway) | P06, ops, gateway, §6.34 | C2 em comentário `78b398b3` | `f18a2846` C1; `cf16914a` C2 | F1–F3 resolvidos; B1 removido por ADR0006 |
 | Cinco disposições contratuais | §6.34 tabela | hashes por linha na §6.34 | `400da37b`, `7542eb8e`, `1c5076a6`, `ac51f462`, `923d4cd8` | PASS restrito documental cada uma |
-| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** identity §6.12.1 (ANX-197), organizations §6.13.1 (ANX-198); 21 módulos pendentes |
+| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** identity §6.12.1 (ANX-197), organizations §6.13.1 (ANX-198), governance §6.14.1 (ANX-199); 20 módulos pendentes |
 | Pacote final A4 | esta §6.36 + §6.1 | ver comentários ANX-127 | pendente revisor integral | **A4 parcial** — não encerrar ANX-127 |
 
 Implementação futura permanece delegada aos filhos ANX-126 (ANX-128+); este pacote não homologa produto, engines ou testes financeiros.
