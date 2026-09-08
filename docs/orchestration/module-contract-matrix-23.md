@@ -250,6 +250,22 @@ Os seis R10 lidos são draft e apresentam PC-G0 10/10 e PASS genérico G2–G6 c
 
 Agora os 23 módulos possuem **evidência inicial parcial** e tarefas de continuação. Isso não fecha a reconciliação exaustiva por capability/schema/teste, R10 dos demais módulos, roadmap A5, posicionamento do adapter-gateway ou gates independentes. ANX-127 continua em andamento.
 
+## 6.10. Reconciliação dos handoffs R10
+
+Leitura documental ANX-127 em 2026-09-08, complementando os seis R10 da §6.9. R10 é fonte de escopo e condições históricas; não transfere aprovação para um novo candidato.
+
+| Fonte R10 | Constatação | Continuação |
+| --- | --- | --- |
+| [identity](./modules/identity/R10-g0-handoff.md) e [organizations](./modules/organizations/R10-g0-handoff.md) | Distinguem slices aceitos de itens deferidos (RLS, reativação, blueprint, quotas). Equipes são nomes nominais de papéis | ANX-134/135/131 e ANX-181 devem vincular cada delta a requisitos e responsáveis/run identificáveis; não reabrir P0 por inferência |
+| [governance](./modules/governance/R10-g0-handoff.md) | PC-G0-06 T01 real aparece pendente, embora resumo diga 10/10 debate; emission de ExecutionPermit aponta para decisions | ANX-136/138/149/150: distinguir G0 documental de prova T01 e reconciliar permit institucional/risco/execução por contrato aceito, sem mover owner silenciosamente |
+| [graph](./structure-debate/graph/R10-g0-handoff.md) e [orchestration](./structure-debate/orchestration/R10-g0-handoff.md) | Registram 9/10 e bloqueios upstream históricos, além de mocks limitados a slices | ANX-138/140: comprovar integração atual, não inferir ausência de grant events nem liberar produção por fixture. Workers de domínio permanecem nos módulos; apps compõem |
+| [agents](./structure-debate/agents/R10-g0-handoff.md) | Documento registra módulo ausente e cita suite 387/387 como G3 | ANX-139/181: suite global não demonstra os G3-AGT; exigir testes específicos e crítico independente identificado |
+| [connections](./modules/connections/R10-g0-handoff.md) | PASS G5 aponta execução sandbox futura em G1 | ANX-141/181: separar qualidade do plano de teste adversarial executado; recuperar relatório/candidato antes de herdar aprovação |
+| [knowledge](./structure-debate/knowledge/R10-g0-handoff.md) | Tabela contém G4 CHANGES_REQUIRED parcial e G5 S1–S2 parcial, mas veredito declara G2–G6 doc PASS | ANX-142: conservar pendências G4-KN-03/04 e KN-02/04/05 até prova/disposição autorizada; resumo não encerra achados |
+| market-data, strategies, capital, decisions, risk, execution, accounting, portfolios e performance (R10 nos mesmos diretórios de seus R09 acima) | Referenciam matrizes/rodadas ou execução futura; vários diferem RLS/projeção | Respectivas ANX-145–154, ANX-131 e ANX-181: recuperar evidência exata, rastrear deferências por capability e validar integração; checkmark não demonstra engine real |
+
+Todos os 23 R10 foram consultados nesta sequência, mas isso **não** conclui rastreio de todos os requisitos nos documentos referenciados R04–R09, ADRs, símbolos, testes e resultados. A decisão accepted aplicável continua prevalecendo sobre handoffs draft. Nomes como code-architect/critic-reviewer indicam papéis planejados; isoladamente não demonstram agentes distintos com contexto próprio. Os próximos gates exigem responsável/run, candidato/digest, escopo, evidências, achados, disposição e riscos residuais.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
