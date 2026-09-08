@@ -31,6 +31,18 @@ Os modos permitidos nesta fase são:
 
 Toda ação de agente e usuário passa pelo mesmo application handler, capability manifest, validação de schema, política, risco, idempotência e auditoria.
 
+### 1.1. Reconciliação ANX-127: dados correntes não são execução REAL
+
+**Fonte e precedência:** o pedido explícito do usuário inclui preços em tempo real e histórico para stocks/cripto. Este contrato §1 já define PAPER com preços correntes; o [desenho dos modos](./execution-modes-and-asset-classes.md), seções Decisão e PAPER, mantém execução virtual. Os textos draft [market-data R09](../structure-debate/market-data/R09-dev-plan.md), G4-MD-01/G5-MD-02, e [R10](../structure-debate/market-data/R10-g0-handoff.md), Out of scope, não podem converter a palavra “live” em proibição genérica de dados correntes.
+
+**Disposição documental:** distinguir origem temporal dos dados de autoridade de execução. Uma observação de preço corrente pode alimentar PAPER sem autorizar ordem, transferência, acesso a conta financeira ou capital real. O modo permanece SIMULATED/PAPER conforme contrato do run; “live” na origem de dados nunca se converte em `executionMode: REAL`. A rejeição de REAL nos schemas do slice permanece válida. A aquisição de feeds continua sujeita a capability, licença, escopo, custo e homologação; esta distinção não habilita um endpoint ou segredo.
+
+**Ownership e impacto:** market-data registra proveniência, timestamps, qualidade e replay; execution preserva o modo da ordem. ANX-145/146 tratam dados; ANX-132/161 tratam contratos públicos e separação read/financeiro; ANX-163 verifica a composição PAPER. Esta disposição não escolhe o placement do gateway nem altera o dono de permits.
+
+**Compatibilidade e migração planejada:** os executores devem mapear campos e consumidores existentes antes do diff. Preservar a validação atual de modo; não renomear REAL para PAPER nem reescrever registros históricos por heurística. Quando origem temporal não estiver representada, especificar evolução versionada com proveniência verificável; registros legados sem evidência permanecem sem origem comprovada e não são usados como cotação corrente autorizadora. Leitores incompatíveis rejeitam o novo contrato explicitamente. Cutover exige leitores compatíveis antes do produtor; rollback interrompe o novo produtor sem reinterpretar payloads já persistidos ou promover modo. Não há migration SQL nesta entrega documental.
+
+**Oráculos delegados, não executados:** dado corrente autorizado + PAPER produz apenas execução virtual; `executionMode: REAL` continua rejeitado; dado histórico/replay não aparece como cotação corrente; ausência de proveniência/freshness impede uso sensível; capability de leitura não permite orderSubmit; usuário e agente recebem as mesmas validações. ANX-145/146/161/163 devem registrar versões e evidências de casos positivos e negativos. Nenhum feed, broker ou exchange foi acionado para esta reconciliação.
+
 ## 2. Ownership por módulo
 
 | Etapa | Dono | Autoridade |
@@ -171,7 +183,7 @@ Agentes não recebem Cypher, credenciais, acesso direto a ledger ou capacidade d
 - limites de instrumentos, venues e moedas no primeiro release;
 - formato de replay e retenção dos artefatos de simulação.
 
-REAL/live, capital real e autonomia L3/L4 não são decisões pendentes deste contrato; permanecem proibidos até novo escopo, evidência e autorização formal.
+Execução REAL (live trading), capital real e autonomia L3/L4 não são decisões pendentes deste contrato; permanecem proibidos até novo escopo, evidência e autorização formal. Dados de mercado correntes para PAPER seguem a distinção da §1.1 e não habilitam trading real.
 
 ## 11. Referências
 
