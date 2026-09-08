@@ -714,7 +714,7 @@ Fontes: [R08 decision log](./structure-debate/agents/R08-decision-log.md) e [R06
 
 ## 6.17. Rastreio por capacidade — orchestration R09/R10
 
-Fontes: [R09](./structure-debate/orchestration/R09-dev-plan.md) e [R10](./structure-debate/orchestration/R10-g0-handoff.md), relidos integralmente em 2026-09-08. ANX-140 executa o delta e ANX-133 a fundação de workers. Inventário atual confirma commands de heartbeat/sweeper, embora não exista pasta src/workers no módulo; não classificar a funcionalidade como ausente pelo layout. Paths relativos a `backend/modules/orchestration/src/application/`.
+Fontes: [R09](./structure-debate/orchestration/R09-dev-plan.md) e [R10](./structure-debate/orchestration/R10-g0-handoff.md), relidos integralmente em 2026-09-08. O rastreio transitivo **D-ORC-001..056** está em **§6.17.1** (ANX-202). ANX-140 executa o delta e ANX-133 a fundação de workers. Inventário atual confirma commands de heartbeat/sweeper, embora não exista pasta `src/workers` no módulo; paths relativos a `backend/modules/orchestration/src/application/`.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -738,7 +738,7 @@ Fontes: [R09](./structure-debate/orchestration/R09-dev-plan.md) e [R10](./struct
 | R10 Neo4j/ReviewEdge / grants | Fora do owner orchestration | ANX-138 projeta gate events; ANX-136 fornece autoridade/T01 por port; sem Neo4j ou concessão interna de grant |
 | R09 benchmarks / R10 riscos | Objetivos não medidos: checkout p99≤120ms local, T01 p99≤2s, zero double-apply, 500orphans≤5batches | ANX-140/170: ambiente/carga/dataset e métricas reproduzíveis; não confundir target com SLO cumprido |
 | R09 fixture e G5 checklist20 / R10 checklist/ambiente | Referências não equivalem a prova executada | ANX-140/181: oito cenários G5 acima e vinte itens R07 precisam evidências próprias; fixture ANX901/902 somente no ambiente dedicado, sem alterar board real ou truncate compartilhado |
-| R09 pré-requisitos / R10 AC-G0-01..08, PC-G0-01..10, DEP-01..08, H-01..05, B-01..04 | Histórico9/10, dependências e autorização a revalidar | ANX-140/181: novo claim/G0, ambiente, crítico e pareceres do candidato; status históricos não bloqueiam/liberam automaticamente o delta atual |
+| R09 pré-requisitos / R10 AC-G0-01..08, PC-G0-01..10, DEP-01..08, H-01..05, B-01..04 | Histórico9/10, dependências e autorização a revalidar | ANX-140/181: revalidar G0. **D-ORC-001..056** em §6.17.1 (ANX-202); checklist20/G5 permanecem pendentes execução |
 
 Os tempos/limites acima vêm do plano histórico, exigem config tipada e reconciliação com contrato vigente. A ligação ao Dashi descrita nesses slices é integração explícita de desenvolvimento, não dependência universal de cada Task/Run do produto. WAITING_HUMAN_INPUT, cancelamento, budgets e retomada da ANX-140 permanecem requisitos adicionais das specs institucionais, não comprovados pelos cenários de mirror. Rastreio transitivo D-ORC-001..056, seis eventos, dez rotas e checklist20 ainda pendente. Nenhum worker, webhook, teste integrado ou cleanup foi executado.
 
