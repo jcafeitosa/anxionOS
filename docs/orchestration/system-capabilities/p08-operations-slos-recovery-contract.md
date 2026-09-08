@@ -33,7 +33,7 @@ Cada request, command, evento, job, decisão, ordem simulada, fill, lançamento 
 | stale permit/epoch | governance | revogar cache e exigir nova avaliação |
 | divergência de ledger/posição | accounting/reconciliation | abrir caso e bloquear efeitos dependentes |
 | atraso/qualidade de market data | market-data/connections | degradar para leitura segura ou pausar |
-| custo/latência de inferência | inference/knowledge | aplicar budget e policy, sem fallback silencioso |
+| custo/latência de inferência | connections | aplicar budget e policy, sem fallback silencioso; knowledge consome o serviço autorizado |
 | pool, fila ou storage saturado | platform/operations | backpressure, scale autorizado ou shutdown controlado |
 
 ## 3. SLO/SLI
@@ -121,7 +121,7 @@ Durante incidente, prevalecem pausa, isolamento e preservação de evidência. M
 | Owner | sua agência, risco, capital paper, agentes e auditoria | aprovar políticas dentro do grant e solicitar ações |
 | Operator | saúde, filas, jobs, reconciliação e incidentes delegados | pausar, drenar, reprocessar e escalar dentro do grant |
 | Platform | tenants, capacity, providers, SLOs, custos e recovery | operar infraestrutura sem ler payload financeiro desnecessário |
-| Partner | somente bindings, feeds e métricas contratadas | administrar sua conexão dentro do escopo consentido |
+| Partner | referrals, comissões, reversões e status de payout do seu escopo comercial | solicitar ações comerciais autorizadas; não recebe administração de feeds/connections por ser parceiro |
 
 O backend é a autoridade de autorização; o console não esconde estados de risco nem cria uma trilha paralela. Agente e humano usam os mesmos handlers, erros e permits. Takeover humano preserva contexto e revoga a ação concorrente quando necessário.
 
@@ -168,6 +168,14 @@ Qualquer requisito sem evidência, ferramenta indisponível, timeout ou achado a
 - orçamento operacional e política de custo de inferência.
 
 REAL/live, capital real e autonomia L3/L4 continuam fora do escopo.
+
+## Continuação e limites de evidência — ANX-127
+
+O título P08 é histórico: operations/comercial/consoles pertencem a P07 e provas de recovery/readiness avançam em P09 conforme baseline. Reconciliação do ownership: inferência pertence a connections; parceiro comercial não equivale a administrador de provider/feed.
+
+ANX-169 cobre restore/RPO/RTO; ANX-170 cobre carga/SLO/custos; ANX-158 os workflows operacionais. Na inspeção de nomes de arquivos em backend/deploy e backend/tests, a busca restore/backup/recovery/load/slo/benchmark retornou apenas graph/integration/load-test-app.ts. Isso **não prova ausência global** de scripts equivalentes nem restore executado: inventariar também automações/artefatos autorizados e recuperar evidências do ambiente antes de implementar.
+
+Não preencher números de RPO/RTO/SLO sem decisão e medição. Os próximos executores devem registrar objetivo aprovado e resultado medido separadamente, janela, dataset, volume, hardware, dependências, revisão e limites do teste. Restore drill exige destino isolado e autorização de retomada, não apenas sucesso de comandos.
 
 ## 12. Referências
 
