@@ -262,7 +262,7 @@ Fontes R09 e respectivos R10: [audit](./structure-debate/audit/R09-dev-plan.md),
 
 Os seis R10 lidos são draft e apresentam PC-G0 10/10 e PASS genérico G2–G6 com referência R04–R09. Isso não constitui evidência executada sobre o candidato atual: parecer, revisão, escopo e resultados precisam ser recuperados antes de herdar qualquer aprovação. Preservar histórico e consultar board para status, sem reabrir aceites por inferência.
 
-Agora os 23 módulos possuem **evidência inicial parcial** e tarefas de continuação. Isso não fecha a reconciliação exaustiva por capability/schema/teste, R10 dos demais módulos, roadmap A5, posicionamento do adapter-gateway ou gates independentes. ANX-127 continua em andamento.
+Agora os 23 módulos possuem **evidência inicial parcial** e tarefas de continuação. Isso não fecha a reconciliação exaustiva por capability/schema/teste, R10 dos demais módulos, roadmap A5, revalidação G1 integrada do placement (ADR0006) e implementação/migração (ANX-161/162), ou gates independentes. ANX-127 continua em andamento.
 
 ## 6.10. Reconciliação dos handoffs R10
 
@@ -855,7 +855,7 @@ Fontes relidas integralmente em 2026-09-08: [simulation R09](./structure-debate/
 
 Nenhuma simulação, avaliação, certificação, promoção ou teste integrado foi executado. Rastreio transitivo R04–R08, fórmulas de score e parâmetros dos modelos segue pendente; não foram inventados critérios numéricos.
 
-Com este incremento, os **23 módulos** possuem desdobramento dos requisitos explicitados em seus R09/R10 nas §§6.12–6.33 (simulation/evaluation compartilham §6.33). Isso é cobertura documental dos agrupamentos consultados, **não** reconciliação completa das capacidades referenciadas transitivamente, schemas/decisões ou aprovação ANX-127. Continuam as condições de encerramento da §6.1: cobertura restante, conflitos/migrações, placement e pacote independente do conjunto.
+Com este incremento, os **23 módulos** possuem desdobramento dos requisitos explicitados em seus R09/R10 nas §§6.12–6.33 (simulation/evaluation compartilham §6.33). Isso é cobertura documental dos agrupamentos consultados, **não** reconciliação completa das capacidades referenciadas transitivamente, schemas/decisões ou aprovação ANX-127. Continuam as condições de encerramento da §6.1: cobertura restante, conflitos/migrações e pacote independente do conjunto. Placement do gateway distribuído foi aprovado (ADR0006, 2026-09-08); pendem revalidação G1 integrada, implementação e migração (ANX-161/162).
 
 ## 6.34. Lista finita de fechamento documental — ANX-127
 
@@ -867,7 +867,7 @@ Usuário confirmou “sim” à distribuição nos 23 módulos. [ADR0006](../../
 
 O placement do gateway é a única escolha humana imediata identificada nesta auditoria. As alternativas e impactos estão no comentário ANX-127 `8a0f2a7b-9b34-4fc6-a086-d13822e839e3`: distribuição entre os 23 donos ou novo domínio mediante ADR/árvore. ANX-127/161 devem registrar a escolha explícita, dono do registry e escritor único, compatibilidade, migração e rollback. O ADR0003 de tools permanece proposto; nem ele nem a existência de adapter-gateway no source aprovam um domínio adicional. Não reconstruir as mesmas opções a cada continuação nem interpretar continuação automática como aceite.
 
-### Trabalho documental executável sem essa escolha
+### Trabalho documental executável após a decisão de placement (ADR0006)
 
 | Pacote | Limite e fonte | Evidência exigida / responsável |
 | --- | --- | --- |
@@ -910,7 +910,7 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 | capital §6.22 | R04/R07/R08, spec003/FI02 → reserva, settled/FX e concorrência | ANX-148; integração pré-submit P06 §2.1; não inventar saldo disponível |
 | decisions §6.23 | R04/R07/R08, spec003 → schemas, G5-DC-01..03 e approval | ANX-149/136; sequência pré-submit P06 §2.1 |
 | risk §6.24 | R04/R07/R08, spec003 → permits, G5-RK-01..03 e fórmulas/limites | ANX-150; RiskPermit distinto conforme P06 §2.1; preservar ANX-122 |
-| execution §6.25 | R04/R07/R08 → schemas, G5-EX-01..05, ordens/reconciliação | ANX-151/132; contracts adapters ANX-161; placement segue ANX-127 |
+| execution §6.25 | R04/R07/R08 → schemas, G5-EX-01..05, ordens/reconciliação | ANX-151/132; contracts adapters ANX-161; placement distribuído aprovado (ADR0006); contratos/migração ANX-161/162 |
 | accounting §6.26 | R04/R07/R08, spec003 → plano de contas, schemas e G5-ACC-01..03 | ANX-152; interface partners §6.31.1; regra fiscal não deduzida do evento |
 | portfolios §6.27 | R04/R07/R08, spec003 → lotes/valuation e G5-PF-01..03 | ANX-153; fixture temporal/checkpoint e método versionado antes de resultado |
 | performance §6.28 | R04–R08 → definições de métricas, fluxos externos, atribuição e oráculos | ANX-154; fechar com ledger/valuation, não só notional |
