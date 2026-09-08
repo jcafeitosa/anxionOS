@@ -120,7 +120,21 @@ REAL/live, capital real e autonomia L3/L4 não estão autorizados para ativaçã
 
 ## 6.1. Pendências de reconciliação ANX-127
 
-A correção de owners acima é incremental. Continuam pendentes: inventário completo de cada capacidade dos R09/R10 contra símbolos/schemas/testes atuais; atualização da fila e roadmap A5; decisão de posicionamento do adapter-gateway sem criar um 24º dono por inferência; e pareceres independentes G1–G7 aplicáveis. Não declarar ANX-127 concluída apenas por corrigir esta tabela. A [auditoria ANX-118](../../brain/notes/anxionos-backend-conformance-2026-09-08.md) é fonte de achados a revalidar, não prova de ausência atual.
+Saldo vigente após auditoria independente de fechamento, registrada em ANX-127 no comentário `405b8304-f8bd-430b-866d-c171fd86b735`: **CHANGES_REQUIRED** para o conjunto documental. A correção de owners é incremental, não aceite integral.
+
+| Entrega de planejamento | Estado e evidência | Condição para encerramento |
+| --- | --- | --- |
+| Lista dos 23 módulos e owners | Reconciliada na §3 com baseline/ADR0002; não homologa implementação | Preservar exatamente os owners aceitos e revalidar mudanças posteriores |
+| A5 — fila e roadmap | Atualização documental realizada em [module-queue](./module-queue.md), seção Continuação vigente, e [execution-roadmap](./execution-roadmap.md), Mapeamento da continuação; checkpoints anteriores abaixo são históricos | Incluir estes arquivos no candidato final e nos pareceres; não repetir A5 como alteração ainda não realizada |
+| Cobertura de cada capacidade R09/R10 | Parcial nas §§6.2–6.11 | Cada requisito deve ter fonte/seção, classificação, evidência/limite e issue ou disposição; uma linha por módulo não substitui este rastreio |
+| Conflitos de contrato e migração | Identificados nas tabelas e comentários dos filhos | Consolidar decisão aplicável, impacto e migração dos conflitos conhecidos; encaminhamento genérico ao executor não encerra a reconciliação |
+| Placement do adapter-gateway | Decisão humana pendente; diretório observado não aprova 24º owner | Decisão explícita entre distribuição no baseline e novo owner com ADR/árvore/migração; opções podem ser preparadas sem executar migração |
+| Pacote final documental | Pareceres incrementais não equivalem a aprovação do conjunto | Agregar critérios, digests e pareceres independentes aplicáveis ao mesmo candidato; não simular gates ou herdar PASS antigo |
+| Implementação futura | Delegada às tarefas do programa ANX-126 | Não precisa ser executada para concluir este planejamento; gaps devem estar cobertos e dependências claras. Gates de produto permanecem futuros |
+
+As contagens progressivas e pendências nas §§6.2–6.9 descrevem o checkpoint em que cada inspeção foi feita; o saldo acima e a §6.10 prevalecem para o alcance da revisão documental atual. Todos os 23 módulos possuem evidência inicial parcial e todos os R10 foram consultados, mas o inventário exaustivo de capacidades ainda não está concluído.
+
+Não declarar ANX-127 concluída apenas por corrigir esta tabela ou criar 60 tarefas. A [auditoria ANX-118](../../brain/notes/anxionos-backend-conformance-2026-09-08.md) é fonte de achados a revalidar, não prova de ausência atual.
 
 ## 6.2. Evidência granular inicial — identity e agents
 
