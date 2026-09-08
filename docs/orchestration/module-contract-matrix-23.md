@@ -865,7 +865,7 @@ Conflitos a consolidar:
 | Invoice issued versus paid e interface partners/accounting | §§6.26, 6.30–6.31 | ANX-152/156/157 |
 | Preço live versus modo de execução REAL | §6.20; disposição e migração planejada no contrato P06 §1.1, aguardando revisão independente | ANX-145/146/132/161/163 |
 | Quem aplica promoção versus quem avalia | §6.21; disposição publicação/backtest/promoção e migração planejada no contrato P09 §6.1/10, aguardando revisão independente | ANX-147/160/171/132, governance ANX-136 |
-| Envelopes coexistentes e idempotency UUID/string | §6.11 | ANX-130/132/161 |
+| Envelopes coexistentes e idempotency UUID/string | §6.11; disposição e compatibilidade planejada no contrato P01/P02, aguardando revisão independente; associação do dispatch depende do placement | ANX-130/132/161 |
 
 Esta lista organiza pendências; **não resolve os cinco conflitos por declaração**. A5 e a correção do saldo da §6.1 já foram realizadas e não voltam à fila como trabalho novo.
 

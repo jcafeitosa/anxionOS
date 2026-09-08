@@ -59,6 +59,22 @@ Comandos e eventos versionados devem carregar, no mínimo:
 
 Campos sensíveis não entram em eventos, prompts ou grafo. A validação ocorre na borda e novamente antes de persistir ou despachar.
 
+### Compatibilidade de envelopes e idempotência — reconciliação ANX-127
+
+**Evidência estática (2026-09-08):** `backend/packages/contracts/src/envelope-v02.ts` define envelope 0.2.0, chave UUID obrigatória para command e opcional para event. `adapter-gateway/commands.ts` aceita chave string de 1 a 128 caracteres; commandId continua UUID. O helper `upgradeDomainEventEnvelopeToV02` preserva eventId como messageId e exige contexto adicional. Não se infere compatibilidade universal pela existência desse helper.
+
+**Disposição de contrato:** versão do envelope, versão do payload e identidade idempotente são conceitos distintos. A coexistência 0.1.0/0.2.0 não autoriza alterar a versão de uma mensagem persistida nem aceitar qualquer payload. Cada rota/subscription declara versões e messageTypes suportados; o schema específico e o escopo institucional são validados além do envelope genérico. A atualização de eventos requer contexto com proveniência, nunca ator/tenant inventado para satisfazer um schema.
+
+**UUID versus chave do adapter:** não estreitar silenciosamente o contrato do adapter nem alargar o envelope publicado. As chaves pertencem a contratos distintos: a integração deve preservar a chave opaca original e associá-la a uma identidade institucional UUID estável. Reentregas da mesma operação reutilizam essa associação; gerar um UUID novo por retry é proibido. Não usar truncamento, normalização de caixa, substituição ou hash não especificado como conversão implícita. Sem associação verificável e contrato de integração compatível, rejeitar antes de efeito externo.
+
+A associação deve ser persistida atomicamente pelo dono do comando/dispatch, com escopo explícito de tenant, operação, modo e binding/conta/adapter aplicáveis; não criar um registro global que una operações de contas diferentes. O mesmo identificador com payload semanticamente diferente produz conflito, não replay de sucesso. A política de comparação e a chave única devem ser especificadas/testadas no slice executável. Pacotes de contracts/eventing oferecem schemas/mecanismo, não passam a possuir esse estado. O placement físico do gateway continua pendente na ANX-127; a implementação da associação nesse caminho depende dessa decisão.
+
+**Migração e compatibilidade planejadas:** ANX-130/132/161 inventariam produtores, leitores e registros de deduplicação. Habilitar primeiro leitores com suporte explícito e validação por versão, depois novos produtores. Preservar ids, causalidade, chaves originais e journal; upgrade de leitura não republica automaticamente um efeito como novo comando. Registros legados só recebem associação quando a identidade puder ser demonstrada; ambiguidade exige reconciliação. Não limpar inbox/journal ou expirar associações enquanto houver retry/replay/UNKNOWN suportado. A janela de retenção deve cobrir a política documentada desses caminhos, sem prazo arbitrário nesta entrega.
+
+Rollback interrompe o produtor incompatível e preserva associações/eventos já aceitos; não volta a gerar ids distintos nem restaura um consumidor que interprete o mesmo efeito como novo. Eventos sem contexto suficiente permanecem explicitamente incompatíveis com a conversão, sem perda do original.
+
+**Oráculos delegados:** chave opaca não UUID preservada; retry após crash recupera a mesma associação; corrida cria uma única identidade; payload conflitante é negado; contas/tenants/modos distintos não colidem; versões não suportadas falham antes do efeito; upgrade conserva identidade e não duplica consumo; rollback e UNKNOWN mantêm reconciliação. Formato exato da associação/schema e migrations pertencem ao pacote executável ANX-130/132/161. Esta disposição aguarda revisão independente; não implementa bridge, não altera schemas e não comprova atomicidade ou integração real.
+
 ## CapabilityManifest
 
 Cada capacidade exposta à UI, SDK ou agente deve publicar:
