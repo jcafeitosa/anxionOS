@@ -100,6 +100,20 @@ A promoção exige:
 
 O runtime pode pausar canary por threshold, mas não promover por conta própria. A promoção publica uma versão imutável e registra o predecessor.
 
+### 6.1. Reconciliação strategies: publicação, backtest e promoção — ANX-127
+
+Fontes: [strategies R04](./structure-debate/strategies/R04-contracts-events.md) distingue published, backtest requested/completed e certification; [R08 D-ST-001/003](./structure-debate/strategies/R08-decision-log.md) mantém StrategyVersion/Deployment em strategies e menciona promoção via evento de evaluation. R09 S2 exige lifecycle válido; este contrato §§4–6/10 exige avaliação, aprovação independente e aplicação pelo dono da versão. O baseline aceito ADR0002 mantém cada domínio como dono de seu estado. Os registros de debate não autorizam evaluation a escrever diretamente em strategies nem tornam certificado uma aprovação institucional.
+
+**Disposição:** publicar torna o artefato de versão disponível segundo seu contrato, mas não comprova backtest. Backtest concluído precisa de evidência vinculada à versão, dados, parâmetros e resultado; conclusão não é aprovação automática de qualidade. Evaluation produz avaliação/certificação/recomendação; governance registra a aprovação aplicável; strategies aplica a transição de sua StrategyVersion/Deployment por handler próprio. Um evento de certificado pode iniciar o fluxo de promoção, não substituir seus gates. Nenhuma dessas ações concede grant, aumenta orçamento ou habilita REAL.
+
+**Evidência de desvio, não padrão:** em inspeção estática de 2026-09-08, `backend/modules/strategies/src/application/commands/publish-strategy-version.ts` define `toState = "BACKTESTED"` sem verificar um backtest no handler. Isso não prova ausência global de backtests, mas impede usar apenas esse rótulo como evidência de execução ou certificação. Não foi executado o comando.
+
+**Impacto e migração planejada:** ANX-147 deve separar a semântica de publicação da comprovação de backtest no contrato e nos consumidores, sem inventar um resultado histórico. Antes do diff, inventariar enum, eventos, journal, API, projeções e usos de BACKTESTED. Preservar registros/eventos originais; classificar o legado por evidência verificável, mantendo não comprovado o que só recebeu o rótulo. A correção de estado exige transição auditável/versionada do dono, não edição retroativa do journal. A versão exata do schema e a representação de publicação ficam no pacote executável ANX-147/132, sujeitas a revisão de compatibilidade; não há enum ou migration SQL criada aqui.
+
+Leitores devem distinguir evidência de rótulo antes do cutover do produtor; consumidores antigos que tratem published como backtest/certificação não podem continuar autorizando promoção. Rollback bloqueia novas promoções dependentes da semântica incompatível e preserva evidências; não restaura elegibilidade apenas porque o código antigo reconhece BACKTESTED. Deployments e efeitos existentes precisam de análise e reconciliação pelo respectivo dono, sem cancelamento em massa ou desfazimento financeiro implícito.
+
+**Oráculos delegados:** publish idempotente não fabrica backtest; completed sem resultado válido não certifica; certificado sem aprovação aplicável não promove; certificado de outra versão/tenant é negado; replay e concorrência não duplicam transição/evento; revogação ou mudança de candidato invalida evidências dependentes. ANX-147/160/136/171 e ANX-132 devem demonstrar contratos e casos negativos sobre o candidato integrado. Esta disposição documental aguarda revisão independente; não declara testes executados, backtest homologado ou promoção disponível.
+
 ## 7. Rollback
 
 Rollback é uma transição explícita para a última versão conhecida e aprovada, acionada por métrica, incidente, achado ou decisão humana. Deve:
