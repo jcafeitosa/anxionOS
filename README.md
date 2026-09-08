@@ -8,16 +8,17 @@ O repositório inclui **backend** (P01–P02) e **frontend** (P07 shell Owner) (
 
 A knowledge base **Open Knowledge / OKF** vive em `brain/` no workspace local do mantenedor. Essa pasta **não** é versionada no GitHub (não clone nem commite `brain/` neste repositório remoto). ADRs, specs, PRD e notas de arquitetura permanecem locais; quem desenvolve com o time obtém `brain/` por canal acordado com o mantenedor.
 
-Neste repositório público: [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md), diagramas [Archify](https://github.com/tt-a1i/archify) em `.archify/`, grafo [Graphify](https://github.com/Graphify-Labs/graphify) em `.graphify/`, templates em `.github/` e, no futuro, `backend/`.
+Neste repositório público: [docs/index.md](docs/index.md) (hub central), [AGENTS.md](AGENTS.md), [CONTRIBUTING.md](CONTRIBUTING.md), diagramas [Archify](docs/archify/README.md) (specs em `.archify/`), grafo [Graphify](docs/graphify/README.md) (índice em `.graphify/`), templates em `.github/` e código em `backend/` e `frontend/`.
 
 ## Começar aqui
 
 | Recurso | Descrição |
 | --- | --- |
+| [docs/index.md](docs/index.md) | **Hub central** — índice de toda documentação do projeto |
 | [AGENTS.md](AGENTS.md) | Guia operacional para humanos e agentes (fontes de verdade locais, gates, o que não fazer) |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Como contribuir com código e com o repositório público |
-| [.archify/README.md](.archify/README.md) | Diagramas de arquitetura e workflow (Archify) |
-| [.graphify/README.md](.graphify/README.md) | Grafo de conhecimento do corpus (Graphify) |
+| [docs/archify/README.md](docs/archify/README.md) | Diagramas de arquitetura e workflow (Archify) |
+| [docs/graphify/README.md](docs/graphify/README.md) | Grafo de conhecimento do corpus (Graphify) |
 
 Com `brain/` local: abra `brain/index.md` como índice da knowledge base.
 
@@ -52,7 +53,7 @@ bun test
 curl http://localhost:3000/health
 ```
 
-Detalhes: [backend/README.md](backend/README.md). Infra local opcional: `docker compose -f backend/deploy/docker/docker-compose.yml up -d`.
+Detalhes: [docs/backend/README.md](docs/backend/README.md). Infra local opcional: `docker compose -f backend/deploy/docker/docker-compose.yml up -d`.
 
 
 ### Frontend (P07 — Owner Console shell)
@@ -65,7 +66,7 @@ npm run frontend:dev    # http://localhost:4321 (raiz do repo)
 npm run frontend:build
 ```
 
-Setup e convenções: [frontend/README.md](frontend/README.md). Design system: `frontend/design-system/MASTER.md`. Org chart: [docs/team/org-chart.md](docs/team/org-chart.md). Proxy `/api` → backend `:3000`.
+Setup e convenções: [docs/frontend/README.md](docs/frontend/README.md). Design system: [docs/design-system/README.md](docs/design-system/README.md). Org chart: [docs/team/org-chart.md](docs/team/org-chart.md). Proxy `/api` → backend `:3000`.
 
 ### Taskboard (obrigatório — dev local)
 
@@ -85,8 +86,9 @@ Regras completas: [AGENTS.md](AGENTS.md) (seção Dashi Taskboard). Wrapper: `sc
 ```
 anxionOS/
 ├── AGENTS.md          # Instruções para agentes e desenvolvedores
+├── docs/              # Documentação centralizada do projeto (ver docs/index.md)
 ├── .archify/          # Specs JSON + artifacts HTML (Archify)
-├── .graphify/          # Config + índice local Graphify (out/ gitignored)
+├── .graphify/         # Config + índice local Graphify (out/ gitignored)
 ├── brain/             # (local, gitignored) OKF — specs, ADRs, notas
 ├── .github/           # Templates de issue/PR e CI mínimo
 ├── package.json       # Scripts archify:*, graphify:*, taskboard:* e postinstall do vendor

@@ -1,5 +1,11 @@
 {
   "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "paths": {
+      "@anxionos/api": ["../backend/apps/api/src/index.ts"],
+      "@anxionos/contracts": ["../backend/packages/contracts/src/index.ts"]
+    }
+  },
   "include": [".astro/types.d.ts", "**/*"],
   "exclude": ["dist"]
 }

@@ -6,6 +6,21 @@ type: agent-instructions
 
 Guia operacional do repositório. Leia antes de codar, propor arquitetura ou alterar documentação canônica.
 
+## Gate obrigatório — leitura antes de qualquer trabalho
+
+**Todo humano e todo agente de IA deve ler este arquivo (`AGENTS.md`) no início da sessão, antes de qualquer trabalho técnico** — exploração de código, implementação, commits ou edição de documentação pública (`README`, `CONTRIBUTING`, `docs/`, `backend/`, `frontend/`, `.github/`).
+
+| Requisito | Detalhe |
+| --- | --- |
+| Quando | Antes de explorar, codar, commitar ou editar docs públicas |
+| Subagentes | O agente pai **deve** incluir "Read AGENTS.md" em todo prompt de subagente com trabalho técnico |
+| Violação | Trabalho **inválido** — mesma severidade da [política zero-trabalho-fora-do-board](#dashi-taskboard-obrigatório--tempo-real) |
+| Exceção | Consulta pura sem alterar arquivos; ainda assim, recomenda-se ler para precisão |
+
+**Ordem de gates (sem atalhos):** (1) ler `AGENTS.md` → (2) `npm run taskboard:ensure` + claim `ANX-*` → (3) graphify antes de Grep/Glob/Read em massa → (4) executar escopo da issue.
+
+Regras Cursor: `.cursor/rules/agents-md-required.mdc`, `taskboard-required.mdc`, `graphify.mdc`.
+
 ## O que é o projeto
 
 anxionOS é uma plataforma multi-tenant de investimentos autônomos governados por um **grafo institucional**: agências, agentes, modelos, estratégias, capital e decisões conectados com autoridade, risco e auditoria explícitos. Humanos e agentes compartilham contratos de domínio; a apresentação varia por papel (Owner, operador, plataforma, parceiro).
@@ -42,6 +57,21 @@ Com `brain/` presente localmente, consultar **antes** de implementar ou contradi
 
 Se um fato não está documentado, **não invente** stack, vendors ou comportamento. Registre lacuna ou pergunte.
 
+## Rastreabilidade obrigatória entre documentação e implementação
+
+Antes de alterar código, registrar na issue um **pacote de contexto**: documento e seção aplicável, status decisório, requisito/capability, módulo proprietário, camada, arquivos previstos, armazenamento, eventos e testes de aceitação. Ler via OpenKnowledge a estrutura aceita, o mapa de armazenamento, ADRs aplicáveis, spec do domínio e plano/handoff vigente do slice. Título da issue, transcript de debate e código semelhante não substituem esses contratos.
+
+- **Precedência:** instrução explícita vigente do usuário e ADR aceito aplicável orientam a decisão. Proposta, matriz draft ou decisão de debate não substitui silenciosamente ADR aceito. Registrar conflitos e resolver o requisito afetado antes de implementá-lo; prosseguir no escopo independente autorizado. Identificar ADR por caminho e título, pois há numeração repetida entre `brain/` e `docs/`.
+- **23 módulos do baseline:** usar exatamente a lista da estrutura aceita. Inferência pertence a `connections`; evolução envolve donos já definidos. Uma linha de capacidade não cria módulo físico. `tools` permanece proposta no ADR0003 enquanto não houver aceite e atualização da árvore.
+- **Camadas:** `application` usa ports de domínio, inclusive UnitOfWork, provider, cache, verificação e persistência; não importa implementação de `infrastructure`, schema Drizzle ou driver SQL. Infra implementa ports; composition root injeta adapters. `src/` intermediário é organização de pacote, não motivo para duplicar domínio.
+- **Dependências:** verificar imports resolvidos, aliases e reexports; export público não autoriza consumidor a escrever estado alheio. Bootstrap pode instanciar adapters públicos sem transferir ownership. Workers específicos permanecem no módulo; apps apenas compõem os runtimes.
+- **Evidência:** manter matriz requisito → fonte/seção → arquivo/símbolo → teste/comando → resultado. Classificar como aderente, desvio, planejado fora do slice ou não verificado. Passar em `boundaries` não prova regras que seu conjunto de verificações não implementa.
+- **Escopo e concorrência:** registrar revisão e arquivos não commitados relevantes; nunca atribuir mudanças de outra sessão à entrega. Validar novamente evidências afetadas por alterações concorrentes.
+- **Handoff:** atualizar documentação operacional que descreve o comportamento alterado, preservar histórico de ADRs e vincular a fonte canônica. Código existente não torna um desvio padrão. Correção fora da issue exige unidade rastreável autorizada; não ocultar achados sob “segue o padrão”.
+- **G2/G3:** revisar AR01–AR08 proporcionais ao slice, incluindo ownership/migrations, estado+journal+outbox, projeção/rebuild, paridade UI/API/tools e isolamento AGENCY/PLATFORM. Distinguir inspeção estática de prova executada com engines reais. SIMULATED documentado não é inferência real homologada.
+
+Auditoria inicial e pendências rastreadas: [ANX-118 — aderência do backend](brain/notes/anxionos-backend-conformance-2026-09-08.md).
+
 ## Regras de desenvolvimento
 
 Aplicam-se quando houver implementação, conforme [estrutura do backend](brain/notes/anxionos-backend-structure.md):
@@ -75,6 +105,38 @@ P01 (tooling e boundaries) → P02 (contracts, eventing, identity…) → P03 (g
 - Validação de schema nos boundaries (ex.: Zod)
 - Testes de módulo, contratos e integração nos gates AR01–AR06
 - Mudanças materiais de estrutura → atualizar nota + ADR com plano de migração
+
+### Tolerância zero — código incompleto e débito disfarçado
+
+**Política obrigatória para todo agente executor, crítico e revisor.** Violação invalida a entrega (mesma severidade de trabalho fora do board). Não há “deixar para depois” no diff entregue.
+
+| Proibido | O que fazer em vez disso |
+| --- | --- |
+| Código incompleto, stub, `throw new Error("not implemented")`, retornos vazios ou ramos mortos “para depois” | Implementar o escopo da issue até comportamento verificável, ou **não** mergear e registrar bloqueio no board |
+| Comentários `TODO`, `FIXME`, `HACK`, `XXX`, `TEMP` sem rastreio | Resolver na mesma entrega **ou** abrir issue `ANX-*` e referenciar o id no comentário (ex.: `TODO(ANX-123)`); sem id = proibido |
+| Mocks, placeholders e dados fake em caminhos de produção (`apps/`, `modules/`, `packages/`, `frontend/` fora de `e2e/` e fixtures nomeadas) | Usar contratos, ports, fixtures de teste isoladas ou feature flags documentadas em ADR/spec |
+| Valores hardcoded (URLs, hosts, tenant/agency ids, segredos, limites de negócio, timeouts mágicos) | `process.env` / config tipada, constantes nomeadas com fonte documentada, ou valores do fixture de teste explicitamente delimitados |
+| Segredos, peppers, tokens ou credenciais no source | `.env.example` + secret store autorizado; nunca em eventos, DTOs, prompts ou grafo |
+| `console.log` / `debugger` / prints de diagnóstico deixados no commit | Logger estruturado (`@anxionos/observability`) ou remover antes do handoff |
+| Erros engolidos (`catch {}`, `catch { return null }`) sem política explícita | Propagar, mapear para `AppError`/envelope institucional ou registrar com contexto auditável |
+| Código morto, imports não usados, arquivos órfãos introduzidos no diff | Remover na mesma entrega; não expandir superfície “por precaução” |
+| Duplicar regra de negócio em rotas, workers globais ou helpers genéricos | Dono de domínio no módulo correto (ADR0002) |
+
+**Exceções explícitas (devem ser óbvias no diff):**
+
+- Fixtures e helpers em `backend/tests/`, `frontend/e2e/`, `**/fixtures/**` com nome e spec que delimitam escopo F0/mock.
+- Rotas e seeds **dev-only** atrás de `ENABLE_DEV_ROUTES`, `ALLOW_DEV_SEED`, `NODE_ENV !== production` — documentados em `backend/.env.example`.
+- Placeholders de UI **somente** quando a spec da fase (ex.: P07) declarar shell/placeholder e o componente deixar isso explícito ao usuário (copy ou status `pending`), sem simular dados autoritativos.
+
+**Verificação antes de `in_review` (executor + crítico):**
+
+1. Buscar no diff: `TODO`, `FIXME`, `HACK`, `not implemented`, `placeholder`, `mock` fora de testes.
+2. Confirmar que config sensível vem de env/config, não de literais de produção.
+3. Confirmar que cada caminho novo tem tratamento de erro e teste ou justificativa rastreável na issue.
+4. Code Review (G2) **rejeita** qualquer achado da tabela acima sem disposição documentada na issue.
+
+Regra Cursor espelhada: [.cursor/rules/zero-tolerance-code.mdc](.cursor/rules/zero-tolerance-code.mdc).
+
 
 ## Armazenamento confirmado
 
@@ -129,7 +191,7 @@ Até haver código, explore via documentação em `brain/`.
 | Workflow de agentes ou runbooks | `workflow` — derivar do fluxo em AGENTS.md |
 | Sequências de API / eventos | `sequence`, `dataflow`, `lifecycle` |
 
-Comandos na raiz: `npm run archify:validate`, `npm run archify:build`. Detalhes em [.archify/README.md](.archify/README.md). Com `backend/` implantado, atualizar specs com evidência real — não inventar componentes.
+Comandos na raiz: `npm run archify:validate`, `npm run archify:build`. Detalhes em [docs/archify/README.md](docs/archify/README.md). Com `backend/` implantado, atualizar specs com evidência real — não inventar componentes.
 ### Graphify (grafo de conhecimento)
 
 [Graphify](https://github.com/Graphify-Labs/graphify) indexa código e documentação em um grafo local (`graph.json`) com AST (tree-sitter) e, opcionalmente, extração semântica via LLM. **Complementa** Archify e o code-review-graph MCP.
@@ -141,7 +203,7 @@ Comandos na raiz: `npm run archify:validate`, `npm run archify:build`. Detalhes 
 | Manter índice após editar código | `npm run graphify:index` (AST-only, sem API) |
 | Navegação por wiki | `.graphify/out/wiki/index.md` quando gerado |
 
-Comandos na raiz: `npm run graphify:doctor`, `graphify:index`, `graphify:check`. Saída em `.graphify/out/` (gitignored). Detalhes em [.graphify/README.md](.graphify/README.md).
+Comandos na raiz: `npm run graphify:doctor`, `graphify:index`, `graphify:check`. Saída em `.graphify/out/` (gitignored). Detalhes em [docs/graphify/README.md](docs/graphify/README.md).
 No Cursor: `.graphify/.venv/bin/graphify cursor install` escreve `.cursor/rules/graphify.mdc` (regra `alwaysApply`) para priorizar consultas ao grafo antes de Grep/Glob/Read.
 
 #### Archify vs Graphify vs code-review-graph
@@ -272,6 +334,7 @@ Escritas (`create`, `move`) exigem `taskctl` e thread id. Claim: mover `todo →
 
 ## O que NÃO fazer
 
+- **Não** entregar código incompleto, `TODO`/`FIXME` sem issue, mocks em produção, hardcoded não documentado nem erros silenciosos — ver [Tolerância zero](#tolerância-zero--código-incompleto-e-débito-disfarçado)
 - **Não** criar `backend/` com 23 módulos vazios ou pastas placeholder
 - **Não** iniciar código sem greenlight explícito do usuário
 - **Não** contradizer ADR0002 ou a estrutura aceita sem novo ADR
@@ -291,7 +354,7 @@ Decisão do usuário em 2026-09-07: cada agente executor deve ter seu próprio c
 | Gate | Responsável | Evidência e condição de saída |
 | --- | --- | --- |
 | G0 — Preparar | Orquestrador + executor | Issue autorizada, ownership, escopo, critérios, dependências, ambiente e crítico nominal por executor |
-| G1 — Desenvolver | Executor + seu crítico | Crítico acompanha plano e incrementos; executor implementa e verifica. Aprovação explícita do crítico sobre a revisão exata, critérios satisfeitos e achados impeditivos resolvidos |
+| G1 — Desenvolver | Executor + seu crítico | Crítico acompanha plano e incrementos; executor implementa e verifica. **Tolerância zero** a código incompleto, TODO sem issue, hardcoded e mocks em produção (ver seção dedicada em AGENTS.md). Aprovação explícita do crítico sobre a revisão exata, critérios satisfeitos e achados impeditivos resolvidos |
 | G2 — Revisar código | Code Review Team independente | Diff completo, contratos, arquitetura, concorrência, manutenção, migração e testes revisados; relatório com referências concretas |
 | G3 — Validar produto | QA Team independente | Critérios funcionais, casos negativos, integração, regressão e E2E aplicáveis executados; ambiente, comandos, resultados e limitações registrados |
 | G4 — Revisar segurança | Security Team independente | Fronteiras de confiança, autorização/tenancy, secrets, dependências e fluxos de dados avaliados; testes de segurança pertinentes e achados classificados |
@@ -366,7 +429,8 @@ Consoles **Astro + React/TypeScript** em `frontend/` (Owner, Operator, Platform,
 | Recurso | Caminho |
 | --- | --- |
 | App | `frontend/` (`@anxionos/frontend`) |
-| Design system | `frontend/design-system/MASTER.md` (ui-ux-pro-max) |
+| Design system | [docs/design-system/README.md](docs/design-system/README.md) → `frontend/design-system/MASTER.md` |
+| Documentação frontend | [docs/frontend/README.md](docs/frontend/README.md) |
 | Org chart equipe | [docs/team/org-chart.md](docs/team/org-chart.md) |
 | Dev | `npm run frontend:dev` → http://localhost:4321 |
 | API proxy | `/api` → http://localhost:3000 (backend) |
@@ -377,7 +441,9 @@ Seguir tokens do design system; a11y WCAG (contraste, labels, focus). Não usar 
 
 | Recurso | Caminho |
 | --- | --- |
+| Hub de documentação | [docs/index.md](docs/index.md) |
 | Visão geral e estado do projeto | [README.md](README.md) |
+| Backend (detalhado) | [docs/backend/README.md](docs/backend/README.md) |
 | Como contribuir | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Licença | [LICENSE](LICENSE) |
 | Templates GitHub (issues, PR, CI) | [.github/](.github/) |

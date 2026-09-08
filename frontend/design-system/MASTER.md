@@ -6,63 +6,89 @@
 
 ---
 
-**Project:** anxionOS
-**Generated:** 2026-09-07 19:00:30
-**Category:** Fintech/Crypto
+**Project:** anxionOS  
+**Generated:** 2026-09-07 (ui-ux-pro-max + uupm.cc dark premium pattern)  
+**Category:** Fintech / Institutional SaaS  
+**Reference:** [UI/UX Pro Max](https://www.uupm.cc/) — dark-first premium SaaS
 
 ---
 
 ## Global Rules
 
-### Color Palette
+### Color Palette (dark-first)
 
 | Role | Hex | CSS Variable |
 |------|-----|--------------|
-| Primary | `#0F172A` | `--color-primary` |
-| On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#1E293B` | `--color-secondary` |
-| Accent/CTA | `#22C55E` | `--color-accent` |
 | Background | `#020617` | `--color-background` |
-| Foreground | `#F8FAFC` | `--color-foreground` |
-| Muted | `#1A1E2F` | `--color-muted` |
-| Border | `#334155` | `--color-border` |
-| Destructive | `#EF4444` | `--color-destructive` |
-| Ring | `#0F172A` | `--color-ring` |
+| Background Deep | `#020203` | `--color-background-deep` |
+| Surface | `#0a0a0c` | `--color-surface` |
+| Surface Elevated | `#0f172a` | `--color-surface-elevated` |
+| Glass | `rgba(255,255,255,0.05)` | `--color-glass` |
+| Foreground | `#f8fafc` | `--color-foreground` |
+| Muted Foreground | `#94a3b8` | `--color-muted-foreground` |
+| Primary | `#1e293b` | `--color-primary` |
+| Secondary | `#334155` | `--color-secondary` |
+| Accent / CTA | `#f97316` | `--color-accent` |
+| Accent Blue | `#3b82f6` | `--color-accent-blue` |
+| On Accent | `#0f172a` | `--color-on-accent` |
+| Border | `rgba(255,255,255,0.08)` | `--color-border` |
+| Destructive | `#ef4444` | `--color-destructive` |
+| Ring | `#f97316` | `--color-ring` |
 
-**Color Notes:** Dark bg + green positive indicators
+**Color Notes:** OLED deep blacks, orange primary CTA, blue secondary accent. Subtle aurora gradients (blue-orange) in hero only — never purple/pink AI gradients.
 
 ### Typography
 
-- **Heading Font:** IBM Plex Sans
-- **Body Font:** IBM Plex Sans
-- **Mood:** financial, trustworthy, professional, corporate, banking, serious
-- **Google Fonts:** [IBM Plex Sans + IBM Plex Sans](https://fonts.google.com/share?selection.family=IBM+Plex+Sans:wght@300;400;500;600;700)
+- **Heading Font:** Plus Jakarta Sans (display, modern tech)
+- **Body Font:** Inter
+- **Mono:** JetBrains Mono (IDs, codes)
+- **Mood:** premium fintech, institutional trust, bold hero, restrained UI chrome
+- **Google Fonts:** [Plus Jakarta Sans + Inter + JetBrains Mono](https://fonts.google.com/share?selection.family=Inter:wght@300;400;500;600;700|JetBrains+Mono:wght@400;500|Plus+Jakarta+Sans:wght@400;500;600;700;800)
 
 **CSS Import:**
 ```css
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 ```
 
-### Spacing Variables
+**Hero scale:** `font-size: clamp(2.5rem, 6vw, 4.5rem); letter-spacing: -0.03em;`
+
+### Spacing (8px rhythm)
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--space-xs` | `4px` / `0.25rem` | Tight gaps |
-| `--space-sm` | `8px` / `0.5rem` | Icon gaps, inline spacing |
-| `--space-md` | `16px` / `1rem` | Standard padding |
-| `--space-lg` | `24px` / `1.5rem` | Section padding |
-| `--space-xl` | `32px` / `2rem` | Large gaps |
-| `--space-2xl` | `48px` / `3rem` | Section margins |
-| `--space-3xl` | `64px` / `4rem` | Hero padding |
+| `--space-xs` | `4px` | Tight gaps |
+| `--space-sm` | `8px` | Icon gaps |
+| `--space-md` | `16px` | Standard padding |
+| `--space-lg` | `24px` | Card padding |
+| `--space-xl` | `32px` | Section gaps |
+| `--space-2xl` | `48px` | Section margins |
+| `--space-3xl` | `64px` | Hero padding |
 
-### Shadow Depths
+**Containers:** `max-w-7xl` marketing, `max-w-md` auth forms, `max-w-lg` MFA.
+
+### Shadows & Glass
 
 | Level | Value | Usage |
 |-------|-------|-------|
-| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)` | Subtle lift |
-| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.1)` | Cards, buttons |
-| `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.1)` | Modals, dropdowns |
-| `--shadow-xl` | `0 20px 25px rgba(0,0,0,0.15)` | Hero images, featured cards |
+| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.4)` | Subtle lift |
+| `--shadow-md` | `0 4px 24px rgba(0,0,0,0.35)` | Cards |
+| `--shadow-glow-accent` | `0 0 40px rgba(249,115,22,0.15)` | Primary CTA |
+| Glass border | `1px solid rgba(255,255,255,0.08)` | Cards, auth panels |
+| Glass blur | `backdrop-filter: blur(12px)` | Nav, modals |
+
+### Internationalization
+
+- **Locales:** `pt-BR` (default), `en`, `es`
+- **Auto-detect:** geo IP (ipapi.co) → cookie `anxion_locale` → `Accept-Language` → `pt-BR`
+- **Manual override:** seletor de idioma no header (landing) e auth shell
+- **Override URL:** `?locale=en` | `?locale=es` | `?locale=pt-BR`
+
+### Motion
+
+- Transitions: **150–300ms** `ease-out`
+- Entrance: `animate-fade-in-up`, `stagger-children` (respect `prefers-reduced-motion`)
+- Hover: opacity / border-color only — **no layout-shifting scale**
+- `prefers-reduced-motion`: disable ambient blob animation
 
 ---
 
@@ -70,140 +96,71 @@
 
 ### Buttons
 
-```css
-/* Primary Button */
-.btn-primary {
-  background: #22C55E;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
+- **Primary:** `bg-accent text-on-accent`, glow on hover, `min-h-11`, `rounded-lg`, `font-semibold`
+- **Secondary:** `border border-border bg-transparent text-foreground`, hover `bg-glass`
+- **Ghost:** text only, hover muted background
+- All: `cursor-pointer`, visible `:focus-visible` ring
 
-.btn-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-/* Secondary Button */
-.btn-secondary {
-  background: transparent;
-  color: #0F172A;
-  border: 2px solid #0F172A;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-```
-
-### Cards
+### Cards (OLED / glass)
 
 ```css
-.card {
-  background: #020617;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: var(--shadow-md);
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-
-.card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  transition: border-color 200ms ease, box-shadow 200ms ease;
 }
 ```
 
 ### Inputs
 
-```css
-.input {
-  padding: 12px 16px;
-  border: 1px solid #E2E8F0;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 200ms ease;
-}
+- `min-h-11`, `bg-surface`, `border-border`, `rounded-lg`
+- Focus: `ring-2 ring-ring border-accent/50`
+- Labels: always visible, `text-sm font-medium`
+- Errors: `text-destructive text-sm` below field
+- Loading: disabled + spinner on submit button
 
-.input:focus {
-  border-color: #0F172A;
-  outline: none;
-  box-shadow: 0 0 0 3px #0F172A20;
-}
-```
+### Auth shell
 
-### Modals
-
-```css
-.modal-overlay {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
-
-.modal {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: var(--shadow-xl);
-  max-width: 500px;
-  width: 90%;
-}
-```
+- Split layout desktop: brand panel (gradient + logo) | form panel
+- Mobile: stacked, form first, compact header
+- Footer links: login ↔ register ↔ forgot-password
 
 ---
 
 ## Style Guidelines
 
-**Style:** Dark Mode (OLED)
+**Style:** Modern Dark (Cinema) + Hero-centric landing (uupm.cc pattern)
 
-**Keywords:** Dark theme, low light, high contrast, deep black, midnight blue, eye-friendly, OLED, night mode, power efficient
+**Keywords:** OLED, glassmorphism, deep black, orange CTA, blue accent, generous whitespace, Lucide icons
 
-**Best For:** Night-mode apps, coding platforms, entertainment, eye-strain prevention, OLED devices, low-light
+**Landing sections:** 1. Hero + dual CTA, 2. Feature grid (3–4), 3. Trust strip, 4. Final CTA, 5. Footer
 
-**Key Effects:** Minimal glow (text-shadow: 0 0 10px), dark-to-light transitions, low white emission, high readability, visible focus
-
-### Page Pattern
-
-**Pattern Name:** Event/Conference Landing
-
-- **Conversion Strategy:** Early bird pricing with deadline. Social proof (past attendees). Speaker credibility. Multi-ticket discounts.
-- **CTA Placement:** Register CTA sticky + After speakers + Bottom
-- **Section Order:** 1. Hero (date/location/countdown), 2. Speakers grid, 3. Agenda/schedule, 4. Sponsors, 5. Register CTA
+**Auth UX:** blur validation, autocomplete attributes, MFA OTP `inputmode="numeric"`, loading on submit
 
 ---
 
 ## Anti-Patterns (Do NOT Use)
 
-- ❌ Playful design
-- ❌ Unclear fees
+- ❌ Emojis as icons — Lucide only
 - ❌ AI purple/pink gradients
-
-### Additional Forbidden Patterns
-
-- ❌ **Emojis as icons** — Use SVG icons (Heroicons, Lucide, Simple Icons)
-- ❌ **Missing cursor:pointer** — All clickable elements must have cursor:pointer
-- ❌ **Layout-shifting hovers** — Avoid scale transforms that shift layout
-- ❌ **Low contrast text** — Maintain 4.5:1 minimum contrast ratio
-- ❌ **Instant state changes** — Always use transitions (150-300ms)
-- ❌ **Invisible focus states** — Focus states must be visible for a11y
+- ❌ Playful / cartoon fintech
+- ❌ Instant state changes
+- ❌ Invisible focus states
+- ❌ `autocomplete="off"` on auth fields
+- ❌ Pure `#000000` backgrounds (OLED smear)
 
 ---
 
 ## Pre-Delivery Checklist
 
-Before delivering any UI code, verify:
-
-- [ ] No emojis used as icons (use SVG instead)
-- [ ] All icons from consistent icon set (Heroicons/Lucide)
-- [ ] `cursor-pointer` on all clickable elements
-- [ ] Hover states with smooth transitions (150-300ms)
-- [ ] Light mode: text contrast 4.5:1 minimum
-- [ ] Focus states visible for keyboard navigation
+- [ ] Lucide icons only
+- [ ] `cursor-pointer` on clickable elements
+- [ ] 150–300ms transitions
+- [ ] WCAG 4.5:1 contrast on dark
+- [ ] Focus rings visible
 - [ ] `prefers-reduced-motion` respected
-- [ ] Responsive: 375px, 768px, 1024px, 1440px
-- [ ] No content hidden behind fixed navbars
+- [ ] Responsive: 375, 768, 1024, 1440px
+- [ ] Form loading states
 - [ ] No horizontal scroll on mobile

@@ -2,6 +2,18 @@
 
 Hierarquia **circular** de agentes humanos e IA para desenvolvimento full-stack governado. Mandato desce (C→B→A→Workers); evidência e revisão sobem (Workers→A→B→C).
 
+## Modos de hierarquia (ADR 0005)
+
+Dois modos configuráveis por organização, com **Owner** e **Orchestrator/CEO** no centro. Detalhes: [ADR 0005](../../brain/project-docs/decisions/0005-agent-hierarchy-modes-triangular-circular.md) (local) e [spec 006](../../brain/project-docs/specs/006-agent-hierarchy-orchestration/spec.md).
+
+| Modo | Identificador | Comportamento |
+| --- | --- | --- |
+| **Circular** (default anxionOS) | `HIERARCHY_CIRCULAR` | Mandato desce; evidência e pareceres G2–G5 sobem com arestas de revisão no grafo |
+| **Triangular (árvore)** | `HIERARCHY_TREE` | Árvore pura de reporte (paridade Paperclip); revisão via taskboard/audit |
+
+O diagrama abaixo ilustra o modo **circular** documentado neste organograma.
+
+
 ## Princípio circular
 
 Não é silo rígido: cada nível **revisa** o inferior e **reporta** ao superior, mas feedback de qualidade, risco e produto **retorna** ao topo com evidência verificável (gates G0–G7 em [AGENTS.md](../../AGENTS.md)).

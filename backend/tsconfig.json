@@ -1,11 +1,27 @@
 {
 	"files": [],
 	"references": [
-		{ "path": "./apps/api" },
-		{ "path": "./packages/contracts" },
-		{ "path": "./packages/eventing" },
-		{ "path": "./packages/database" },
-		{ "path": "./packages/observability" }
+		{
+			"path": "./apps/workers"
+		},
+		{
+			"path": "./apps/api"
+		},
+		{
+			"path": "./packages/contracts"
+		},
+		{
+			"path": "./packages/eventing"
+		},
+		{
+			"path": "./packages/database"
+		},
+		{
+			"path": "./packages/observability"
+		},
+		{
+			"path": "./modules/identity"
+		}
 	],
 	"compilerOptions": {
 		"target": "ES2022",

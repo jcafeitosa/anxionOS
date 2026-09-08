@@ -15,7 +15,7 @@
 
 ## Checklist
 
-- [ ] Li [AGENTS.md](../AGENTS.md) e o escopo está alinhado (sem scaffold não autorizado).
+- [ ] Li [AGENTS.md](../AGENTS.md) **no início da sessão** (gate obrigatório) e o escopo está alinhado (sem scaffold não autorizado).
 - [ ] **Política zero-trabalho-fora-do-board:** trabalho iniciado só após `taskboard:ensure` + claim `in_progress` na issue acima.
 - [ ] Issue **ANX-*** vinculada no título ou corpo; status `in_review` ao abrir PR; `done` após merge/aceite explícito.
 - [ ] Não fechei sessão com issue desatualizada no board.

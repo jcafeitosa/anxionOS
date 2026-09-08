@@ -6,7 +6,7 @@ Versões resolvidas nos lockfiles em **2026-09-07**. Política: latest estável 
 
 | Decisão | Escolha | Status |
 | ------- | ------- | ------ |
-| Framework web (P07+) | **Astro** + React islands | Aceito — ver [frontend/README.md](../frontend/README.md) |
+| Framework web (P07+) | **Astro** + React islands | Aceito — ver [docs/frontend/README.md](frontend/README.md) |
 | Alternativas excluídas | Next.js, Vite SPA standalone, React Native | — |
 
 ## Runtime
@@ -57,6 +57,8 @@ Versões resolvidas nos lockfiles em **2026-09-07**. Política: latest estável 
 
 | Pacote                   | Versão (lock) |
 | ------------------------ | ------------- |
+| `pino`                   | 9.14.0        |
+| `pino-pretty`            | 13.1.3        |
 | `@elysia/opentelemetry`  | 1.4.12        |
 | `@opentelemetry/api`     | 1.9.1         |
 | `@opentelemetry/sdk-node`| 0.222.0       |
@@ -80,6 +82,7 @@ Versões resolvidas nos lockfiles em **2026-09-07**. Política: latest estável 
 | `tailwindcss`       | 4.3.3         | Estilo |
 | `@tailwindcss/vite` | 4.3.3         | Plugin Vite (via Astro) |
 | `lucide-react`      | 1.42.0        | Ícones |
+| `better-auth`       | 1.7.3         | Cliente auth (React) |
 
 ## Atualizar
 
