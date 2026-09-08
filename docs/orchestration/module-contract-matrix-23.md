@@ -188,6 +188,21 @@ A compilação falha é evidência executada, não inferência de prontidão. Ne
 
 Oito módulos agora possuem evidência inicial, ainda parcial. Os demais 15, R10 e inventário completo de cada capability permanecem pendentes.
 
+## 6.6. Evidência inicial — market-data, strategies e capital
+
+Fontes: [market-data R09](./structure-debate/market-data/R09-dev-plan.md), [strategies R09](./structure-debate/strategies/R09-dev-plan.md) e [capital R09](./structure-debate/capital/R09-dev-plan.md). Inspeção estática; nenhum teste financeiro/PG ou efeito de mercado executado.
+
+| Requisito | Source observado | Delta / tarefa |
+| --- | --- | --- |
+| Market-data S2 observed→recorded | `backend/modules/market-data/src/application/consumers/observed-consumer.ts` chama recordObservation com commandId novo e qualityFlag OK; retorna null quando mapeamento falha | ANX-145: comprovar dedupe sourceEventId e preservar/avaliar qualidade de feed real. Retorno null é previsto no R09, não automaticamente erro engolido |
+| Market-data S3–S5 | Registry/record e migrations 0000/0001 presentes; getPriceAsOf não encontrado na busca de símbolos nesses módulos | ANX-146: freshness/as-of, histórico/replay, calendários/FX, stale FAIL_CLOSED e eventos sem escrita lateral de ledger; busca limitada não prova ausência global |
+| Strategies S2 publicação | `backend/modules/strategies/src/application/commands/publish-strategy-version.ts` define lifecycle BACKTESTED sem consultar resultado de backtest no comando observado | ANX-147: reconciliar semântica antes de deployment; publicar não prova execução de backtest. Verificar também replay commandId/payload/tenant antes de promover |
+| Strategies S3–S5 | Commands inventariados: register/createVersion/publish; runner/deployment/signal não demonstrados | ANX-147: implementar delta com binding validation e stale signal; stub do plano não autoriza mock de produção |
+| Capital S2 reservas | `backend/modules/capital/src/application/commands/reserve-for-intent.ts` valida grant antes da TX, persiste HELD/intentHash/expiresAt e publica evento | ANX-148: FI02 e revogação entre validação/commit. Timestamp não prova expiração operacional |
+| Capital release/consume e S3–S5 | Inventário commands register/proposeAllocation/reserve; busca releaseReservation/consumeReservation não retornou implementação em capital | ANX-148: rastrear equivalências e comprovar release idempotente, consume após release negado, revogação auto-release, settled lag/FX/projector. Não inferir completude de S2 por status histórico |
+
+Critérios detalhados registrados em ANX-145/146/147/148. Onze módulos possuem evidência inicial parcial; os demais 12 e a cobertura exaustiva R09/R10 ainda estão pendentes.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
