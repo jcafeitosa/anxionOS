@@ -1183,7 +1183,7 @@ Fonte primária: [R08 decision log](./structure-debate/capital/R08-decision-log.
 
 ## 6.23. Rastreio por capacidade — decisions R09/R10
 
-Fontes: [R09](./structure-debate/decisions/R09-dev-plan.md) e [R10](./structure-debate/decisions/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma propose-decision, check-authority e submit-intent, com UoW/journal. ANX-149 executa delta; a inspeção parcial não valida a cadeia financeira integrada.
+Fontes: [R09](./structure-debate/decisions/R09-dev-plan.md) e [R10](./structure-debate/decisions/R10-g0-handoff.md), relidos em 2026-09-08. O rastreio transitivo **D-DC-001..015** está em **§6.23.1** (ANX-208). Fonte primária: [R08 decision log](./structure-debate/decisions/R08-decision-log.md). Inventário parcial: propose-decision, check-authority e submit-intent, com UoW/journal. ANX-149 executa delta.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -1198,13 +1198,41 @@ Fontes: [R09](./structure-debate/decisions/R09-dev-plan.md) e [R10](./structure-
 | R09 G3-DC-S5-01 consumer não SUBMITTED | Não verificado | ANX-149/151: consumer ignora/rejeita estado impróprio conforme contrato, sem ordem/consumo de capital; evento sozinho não dispensa revalidação |
 | R09 S5 EvidenceManifest/knowledge consumer | Não demonstrado | ANX-149/142: fontes e versão/dataset/hash vinculados, ACL e revogação, manifest reproduzível, conteúdo externo não altera autoridade |
 | R09 S6 / R10 PC-G0-08 graph defer S5 | Deferido; rótulos de slice diferem, não justificam duplicação | ANX-138/149: graph:decisions:v1 derivado, lineage/checkpoint/rebuild sem mover dono Decision/TradeIntent |
-| R10 G5-DC-01..03, RLS D-DC-015 e PC-G0-01..10 | Histórico referenciado, cenários G5 não detalhados nestes R09/R10 | ANX-127/149/131/181: recuperar R04/R07/R08/spec003, testes independentes por candidato; não herdar PASS textual |
+| R10 G5-DC-01..03, RLS D-DC-015 e PC-G0-01..10 | Histórico referenciado, cenários G5 não detalhados nestes R09/R10 | **D-DC-001..015** em §6.23.1 (ANX-208); G5-DC não executado |
 
-Nenhuma intenção, aprovação, reserva ou ordem foi criada neste incremento e nenhum teste financeiro executado. Conflito de submit e ownership dos permits permanece aberto para consolidação explícita na ANX-127; este rastreio não escolhe silenciosamente nova semântica. Requisitos transitivos/campos e cenários R07 seguem pendentes.
+Nenhuma intenção, aprovação, reserva ou ordem foi criada neste incremento. **D-DC-001..015** estão em §6.23.1; conflito submit pré-risco/reserva (§6.23 tabela) e G5-DC permanecem ANX-127/149/181 — sem escolher semântica silenciosa.
+
+### 6.23.1. A1 — disposição transitiva decisions (ANX-208)
+
+Fonte primária: [R08 decision log](./structure-debate/decisions/R08-decision-log.md) (relido 2026-09-08). Commands parciais existem (§6.23); esta subseção não revalida G3/G5 nem executa submit/approval real.
+
+**Saldo R08:** 15 decisões · aceitas v1: 15.
+
+#### D-DC-001..015 (R08)
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-DC-001 | Dono DecisionRecord, Proposal, TradeIntent, Disposition, AuthorityRef | Aceito v1 | ANX-149 | spec003 |
+| D-DC-002 | TradeIntent imutável pós-submit; alteração = novo hash | Aceito v1 | ANX-149 | intentHash |
+| D-DC-003 | governance Grant separado — AuthorityRef snapshot only | Aceito v1 | ANX-136/149 | Sem grant inline |
+| D-DC-004 | orchestration Task/Run separado — correlationId link | Aceito v1 | ANX-140/149 | Não move board |
+| D-DC-005 | agents Proposal source; decisions materializa intent | Aceito v1 | ANX-139/149 | Dono intent |
+| D-DC-006 | knowledge Evidence storage; decisions EvidenceManifest refs | Aceito v1 | ANX-142/149 | Sem conteúdo inline |
+| D-DC-007 | risk RiskCheck separado; state via evento | Aceito v1 | ANX-150/149 | P06 §2.1 ordem |
+| D-DC-008 | audit Flight Recorder; decisions manifestHash only | Aceito v1 | ANX-149/154 | Sem payload bruto |
+| D-DC-009 | PG autoritativo; zero SQLite | Aceito v1 | ANX-149 | ADR0004 |
+| D-DC-010 | SIMULATED+PAPER only v1 | Aceito v1 | ANX-149 | REAL rejeitado |
+| D-DC-011 | Independent approver policy (FI03) | Aceito v1 | ANX-149/136 | G3-DC-S2-05 |
+| D-DC-012 | Epoch stale recheck antes RESERVED/READY | Aceito v1 | ANX-136/149 | Fail-closed |
+| D-DC-013 | command_journal ownerDomain=decisions | Aceito v1 | ANX-149 | HTTP idempotency |
+| D-DC-014 | graph projeção async agent→evidence→decision→intent | Aceito v1 | ANX-138/149 | graph:decisions:v1 |
+| D-DC-015 | RLS defer P09 — application-only tenancy | Aceito v1 | ANX-131/149 | G5-DC-01 |
+
+**Rodadas R01–R07:** R08 registrado. Homologação G3/G5, cadeia pré-submit P06 §2.1 e conflito submit/risco/reserva permanecem ANX-149/181.
 
 ## 6.24. Rastreio por capacidade — risk R09/R10
 
-Fontes: [R09](./structure-debate/risk/R09-dev-plan.md) e [R10](./structure-debate/risk/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma activate-limit-policy e run-pre-trade-check, com ports epoch/UoW/journal. Continuação ANX-150; preservar correção ANX-122 conforme escopo da issue e revalidar revisão antes de tocar código.
+Fontes: [R09](./structure-debate/risk/R09-dev-plan.md) e [R10](./structure-debate/risk/R10-g0-handoff.md), relidos em 2026-09-08. O rastreio transitivo **D-RK-001..010** está em **§6.24.1** (ANX-209). Fonte primária: [R08 decision log](./structure-debate/risk/R08-decision-log.md). Inventário parcial: activate-limit-policy e run-pre-trade-check, com ports epoch/UoW/journal. Continuação ANX-150; preservar ANX-122.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -1218,9 +1246,32 @@ Fontes: [R09](./structure-debate/risk/R09-dev-plan.md) e [R10](./structure-debat
 | R09 S4 post-trade | Deferido, não demonstrado | ANX-150/151/152: checks após fills/reconciliação e incidentes, sem reescrever ledger nem tratar pós-check como autorização retroativa |
 | R09 S5 / R10 graph:risk:v1 | Deferido ao owner graph | ANX-138: eventos/checkpoints/rebuild, nenhuma autoridade exclusiva no cache/grafo atrasado |
 | R10 G4 bypass/stale/cross-tenant e G5-RK-01..03 | Referências históricas, três cenários G5 não detalhados aqui | ANX-150/181: recuperar R07 e evidências independentes no candidato, testar bypass sem efeitos em produção |
-| R10 RLS D-RK-015 / PC-G0-01..10/spec003 | Planejado/histórico; “governance limits” não transfere policy de risco | ANX-131 e ANX-127/150: roles/contratos/decisões e fronteiras da autoridade, sem herdar PASS de plano |
+| R10 RLS D-RK-015 / PC-G0-01..10/spec003 | Planejado/histórico; D-RK-015 não consta no R08 | **D-RK-001..010** em §6.24.1 (ANX-209); RLS/G5-RK não executados |
 
-A ANX-150 adiciona exposure/freshness multiativo, UNKNOWN, reset autorizado e regressão ANX-122 ao plano histórico; esses requisitos continuam dentro do escopo, mesmo não desdobrados nos cinco G3 do R09. Contrato de permit entre decisions/risk/execution permanece para consolidação ANX-127. Nenhum check financeiro, kill switch, permit, teste integrado ou código foi alterado neste incremento. Rastreio transitivo R04/R07/R08 e fórmulas/limites exige fonte explícita.
+A ANX-150 adiciona exposure/freshness multiativo, UNKNOWN, reset autorizado e regressão ANX-122 ao plano histórico. **D-RK-001..010** estão em §6.24.1; D-RK-015 (RLS) citado no R10 não consta no R08. G5-RK e fórmulas executáveis permanecem ANX-150/181.
+
+### 6.24.1. A1 — disposição transitiva risk (ANX-209)
+
+Fonte primária: [R08 decision log](./structure-debate/risk/R08-decision-log.md) (relido 2026-09-08). Commands parciais existem (§6.24); esta subseção não revalida G3/G5 nem executa pre-trade real.
+
+**Saldo R08:** 10 decisões · aceitas v1: 10 · **nota:** D-RK-015 (RLS) referenciado no R10, ausente no R08.
+
+#### D-RK-001..010 (R08)
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-RK-001 | Dono LimitPolicy, ExposureSnapshot, RiskCheckResult, RiskPermit | Aceito v1 | ANX-150 | spec003 |
+| D-RK-002 | decisions TradeIntent separado — risk valida intentHash only | Aceito v1 | ANX-149/150 | P06 §2.1 |
+| D-RK-003 | governance MandateVersion declarativo; risk LimitPolicy executável | Aceito v1 | ANX-136/150 | Sem policy em gov |
+| D-RK-004 | capital reserva; risk consulta não muta | Aceito v1 | ANX-148/150 | Read-only |
+| D-RK-005 | execution revalida RiskPermit + ExecutionPermit + epochs | Aceito v1 | ANX-151/150 | Single-use |
+| D-RK-006 | CONFIG_REQUIRED fail-closed (spec 003) | Aceito v1 | ANX-150 G3-S2-02 | Sem default permissivo |
+| D-RK-007 | Kill switch bump riskEpoch sem apagar histórico | Aceito v1 | ANX-150 S3 | Reset autorizado |
+| D-RK-008 | PG autoritativo; zero SQLite | Aceito v1 | ANX-150 | ADR0004 |
+| D-RK-009 | SIMULATED+PAPER only v1 | Aceito v1 | ANX-150 | REAL rejeitado |
+| D-RK-010 | Pre-trade obrigatório; post-trade defer S4 | Aceito v1 | ANX-150/151 | S4 deferido |
+
+**Rodadas R01–R07:** R08 registrado. Homologação G3/G5, kill switch operacional e post-trade permanecem ANX-150/181.
 
 ## 6.25. Rastreio por capacidade — execution R09/R10
 
@@ -1483,8 +1534,8 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 | market-data §6.20 | D-MD-001..018 → **§6.20.1** (ANX-205); spec003/R12 executável em ANX-145/146 | ANX-145/146/132; G5-MD e feeds reais não executados |
 | strategies §6.21 | D-ST-001..007,015 → **§6.21.1** (ANX-206); lacuna 008..014 no R08 | ANX-147/132/181; G5-ST e backtest não executados |
 | capital §6.22 | D-CAP-001..012,015 → **§6.22.1** (ANX-207); lacuna 013..014 no R08 | ANX-148; G5-CAP e lifecycle reserva não executados |
-| decisions §6.23 | R04/R07/R08, spec003 → schemas, G5-DC-01..03 e approval | ANX-149/136; sequência pré-submit P06 §2.1 |
-| risk §6.24 | R04/R07/R08, spec003 → permits, G5-RK-01..03 e fórmulas/limites | ANX-150; RiskPermit distinto conforme P06 §2.1; preservar ANX-122 |
+| decisions §6.23 | D-DC-001..015 → **§6.23.1** (ANX-208); conflito submit/risco em §6.23 | ANX-149/136; G5-DC e cadeia integrada não executados |
+| risk §6.24 | D-RK-001..010 → **§6.24.1** (ANX-209); D-RK-015 RLS ausente no R08 | ANX-150; G5-RK e pre-trade real não executados |
 | execution §6.25 | R04/R07/R08 → schemas, G5-EX-01..05, ordens/reconciliação | ANX-151/132; contracts adapters ANX-161; placement distribuído aprovado (ADR0006); contratos/migração ANX-161/162 |
 | accounting §6.26 | R04/R07/R08, spec003 → plano de contas, schemas e G5-ACC-01..03 | ANX-152; interface partners §6.31.1; regra fiscal não deduzida do evento |
 | portfolios §6.27 | R04/R07/R08, spec003 → lotes/valuation e G5-PF-01..03 | ANX-153; fixture temporal/checkpoint e método versionado antes de resultado |
@@ -1512,7 +1563,7 @@ Trabalho documental **parcial** do item A4 (`405b8304`). Não equivale a PASS in
 | Placement gateway | ADR0006, §6.1/§6.34, spec gateway | ADR `1cfa7de6e7a98778f6c388e085790e5b1d5d8314b10e4e3cafe9e338869ce0c2` | `d70b8f91` → PASS F1 revalidado | **G1C3 F1 fechado** (ANX-192/193/194/195) |
 | Conflitos F1–F3 (P06/ops/gateway) | P06, ops, gateway, §6.34 | C2 em comentário `78b398b3` | `f18a2846` C1; `cf16914a` C2 | F1–F3 resolvidos; B1 removido por ADR0006 |
 | Cinco disposições contratuais | §6.34 tabela | hashes por linha na §6.34 | `400da37b`, `7542eb8e`, `1c5076a6`, `ac51f462`, `923d4cd8` | PASS restrito documental cada uma |
-| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** §6.12.1–6.22.1 (ANX-197–207); 12 módulos pendentes (§6.23+) |
+| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** §6.12.1–6.24.1 (ANX-197–209); 10 módulos pendentes (§6.25+) |
 | Pacote final A4 | esta §6.36 + §6.1 | ver comentários ANX-127 | pendente revisor integral | **A4 parcial** — não encerrar ANX-127 |
 
 Implementação futura permanece delegada aos filhos ANX-126 (ANX-128+); este pacote não homologa produto, engines ou testes financeiros.
