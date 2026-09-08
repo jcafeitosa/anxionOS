@@ -967,10 +967,55 @@ Fontes: [R09](./structure-debate/knowledge/R09-dev-plan.md) e [R10](./structure-
 | R09 S5 HTTP/OpenAPI | Não verificado integralmente | ANX-142: /v1/knowledge, contratos/erros/auth e OpenAPI coerentes; paridade handler humano/agente sem lógica duplicada |
 | R09 deps connections/agents/graph | Ports/consumidores planejados, integração não provada | ANX-141/139/138: embedding via connections, Brain consome contexto autorizado, graph:knowledge:v1 derivado. “embed stub” do plano não autoriza mock em produção |
 | R10 RLS / Timescale fora de knowledge | Deferências/ownership documentados | ANX-131 trata RLS; ANX-145/146 séries de mercado. Não criar ledger de séries autoritativo em knowledge por proximidade técnica |
-| R09 AC-R09-01..04 / R10 PC-G0-01..10 e handoff | Checklist histórico; mapa D-KN afirmado no R09 não está desdobrado ali | ANX-127/142/181: recuperar decisões/fontes transitivas, dependências atuais e candidato antes de herdar aceite |
+| R09 AC-R09-01..04 / R10 PC-G0-01..10 e handoff | Checklist histórico; mapa D-KN afirmado no R09 não está desdobrado ali | **D-KN-001..020** em §6.19.1 (ANX-204); G5-KN não executado |
 | R10 G4 parcial/G5 parcial versus veredito PASS | Conflito de evidência preservado, não encerrado por resumo | ANX-142/181: G4-KN-03/04 e G5-KN-02/04/05 permanecem pendentes até relatório/teste/disposição autorizada, revalidar demais cenários afetados |
 
-Não foi executado novo teste de knowledge neste incremento. A falha de compilação na §6.5 permanece evidência daquele snapshot, não alegação de diagnóstico atual sem reexecução. Rastreio transitivo D-KN, spec002/R04 schemas e parâmetros TTL/budget ainda pendente; não inventar números para fechar células. Nenhuma memória/documento real foi ingerido, publicado ou revogado.
+Não foi executado novo teste de knowledge neste incremento. **D-KN-001..020** estão em §6.19.1; spec002/R04 schemas executáveis e G5-KN permanecem ANX-142/181. Nenhuma memória/documento real foi ingerido, publicado ou revogado.
+
+### 6.19.1. A1 — disposição transitiva knowledge (ANX-204)
+
+Fonte primária: [R08 decision log](./structure-debate/knowledge/R08-decision-log.md) (relido 2026-09-08). Commands parciais existem (§6.19); esta subseção não revalida G3/G5 nem executa ingest/retrieval real.
+
+**Saldo R08:** 20 decisões · aceitas v1: 18 · G1 pendentes: 2 (D-KN-019, D-KN-020).
+
+#### D-KN-001..020 (R08 — domínio, contratos, storage, deps)
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-KN-001 | Dono Document/Memory/Evidence/ContextManifest/EmbeddingSpace | Aceito v1 | ANX-142 | spec002 |
+| D-KN-002 | pgvector PG owner knowledge (ADR0004) | Aceito v1 | ANX-142 | Sem Timescale |
+| D-KN-003 | ACL pré-filtro antes vector search | Aceito v1 | ANX-142 G5-KN-01 | R07 reforço |
+| D-KN-004 | BrainFacade agents — knowledge persiste corpus | Aceito v1 | ANX-139/142 | Dono corpus |
+| D-KN-005 | GraphTraversalPort read-only via graph module | Aceito v1 | ANX-138/142 | SDK in-process v1 |
+| D-KN-006 | Embedding compute via connections MODEL | Aceito v1 | ANX-141/142 | Sem mock prod |
+| D-KN-007 | Eventos sem vetores/texto bruto/secrets | Aceito v1 | ANX-132/142 | G4-KN-01 |
+| D-KN-008 | context.manifest.created.v1 ownerDomain knowledge | Aceito v1 | ANX-132/142 | P-R7-01 |
+| D-KN-009 | BlobStorePort shared contracts/storage | Aceito v1 | ANX-132/142 | P-R7-03 |
+| D-KN-010 | Neo4j async graph:knowledge:v1 | Aceito v1 | ANX-138/32 | Sem dual-write |
+| D-KN-011 | Working memory TTL owner knowledge | Aceito v1 | ANX-142 | Config tipada |
+| D-KN-012 | PromoteMemory via evaluation gate | Aceito v1 | ANX-160/142 | evaluation owner P08 |
+| D-KN-013 | SQLite só ACL cache descartável | Aceito v1 | ANX-142 | Sem autoridade |
+| D-KN-014 | command_journal HTTP idempotency | Aceito v1 | ANX-142 | 90d hot PG |
+| D-KN-015 | RLS PG defer P09 — application guards | Aceito v1 | ANX-131/142 | Paridade org |
+| D-KN-016 | knowledge.document.revoked.v1 ACL document | Aceito v1 | ANX-132/142 | P-R7-05 |
+| D-KN-017 | Timescale fora knowledge | Aceito v1 | ANX-145/146 | market-data owner |
+| D-KN-018 | RetrievalSession audit efêmera | Aceito v1 | ANX-142 | Sem persistência longa |
+| D-KN-019 | @anxionos/contracts/knowledge/* schemas públicos | G1 pendente | ANX-86/132 | ANX-142 bloqueado |
+| D-KN-020 | Workers ingestion/index | G1 pendente | ANX-86/133 | ANX-142 S2 |
+
+#### Resoluções P-R7 referenciadas
+
+| P-R7 | Decisão | ID |
+| --- | --- | --- |
+| P-R7-01 | Prefix context.manifest.created.v1 | D-KN-008 |
+| P-R7-02 | GraphTraversal SDK in-process v1 | D-KN-005 |
+| P-R7-03 | BlobStore @anxionos/contracts/storage | D-KN-009 |
+| P-R7-04 | Retrieval scores RetrievalPolicy versionada env | R07 KN-R07-02 |
+| P-R7-05 | document revoke event | D-KN-016 |
+| P-R7-06 | RLS v1 application-only defer P09 | D-KN-015 |
+| P-R7-07 | command_journal 90d hot + archival R09 | D-KN-014 |
+
+**Rodadas R01–R07:** crosswalk KN-R02..R08 → D-KN em R08. Homologação executável G3/G5, embedding real e workers ingestion permanecem ANX-142/133/181.
 
 ## 6.20. Rastreio por capacidade — market-data R09/R10
 
@@ -1344,7 +1389,7 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 | agents §6.16 | D-AGT-001..014 + AGT-R06 → **§6.16.1** (ANX-201); G5-AGT executável em ANX-139 | ANX-139/132; OpenBots ANX-124/125→144; teammates ANX-143 separados |
 | orchestration §6.17 | D-ORC-001..056 → **§6.17.1** (ANX-202); G5/checklist20 executável em ANX-140 | ANX-140/132; runtime ANX-133; Dashi dev-only não é dep universal |
 | connections §6.18 | D-CX-001..064 → **§6.18.1** (ANX-203); R04/DL-CX2 executável em ANX-141 | ANX-141/132; G5-CX e invoke real não executados |
-| knowledge §6.19 | D-KN, spec002 e R04 → memória/retrieval, TTL/budget e schemas | ANX-142/132; falha de typecheck anterior continua snapshot, não prova atual |
+| knowledge §6.19 | D-KN-001..020 → **§6.19.1** (ANX-204); spec002/R04 executável em ANX-142 | ANX-142/132; G5-KN e embedding real não executados |
 | market-data §6.20 | D-MD, spec003 R12, schemas → identidade/tempo/qualidade/ingestão | ANX-145/146/132; origem corrente versus REAL disposta em P06 §1.1 |
 | strategies §6.21 | R04/R07/R08, spec003 Strategy Factory → lifecycle, schemas e G5-ST-01..03 | ANX-147/132/181; promoção/publicação disposta em P09 §6.1 |
 | capital §6.22 | R04/R07/R08, spec003/FI02 → reserva, settled/FX e concorrência | ANX-148; integração pré-submit P06 §2.1; não inventar saldo disponível |
@@ -1377,7 +1422,7 @@ Trabalho documental **parcial** do item A4 (`405b8304`). Não equivale a PASS in
 | Placement gateway | ADR0006, §6.1/§6.34, spec gateway | ADR `1cfa7de6e7a98778f6c388e085790e5b1d5d8314b10e4e3cafe9e338869ce0c2` | `d70b8f91` → PASS F1 revalidado | **G1C3 F1 fechado** (ANX-192/193/194/195) |
 | Conflitos F1–F3 (P06/ops/gateway) | P06, ops, gateway, §6.34 | C2 em comentário `78b398b3` | `f18a2846` C1; `cf16914a` C2 | F1–F3 resolvidos; B1 removido por ADR0006 |
 | Cinco disposições contratuais | §6.34 tabela | hashes por linha na §6.34 | `400da37b`, `7542eb8e`, `1c5076a6`, `ac51f462`, `923d4cd8` | PASS restrito documental cada uma |
-| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** §6.12.1–6.18.1 (ANX-197–203); 16 módulos pendentes (§6.19+) |
+| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** §6.12.1–6.19.1 (ANX-197–204); 15 módulos pendentes (§6.20+) |
 | Pacote final A4 | esta §6.36 + §6.1 | ver comentários ANX-127 | pendente revisor integral | **A4 parcial** — não encerrar ANX-127 |
 
 Implementação futura permanece delegada aos filhos ANX-126 (ANX-128+); este pacote não homologa produto, engines ou testes financeiros.
