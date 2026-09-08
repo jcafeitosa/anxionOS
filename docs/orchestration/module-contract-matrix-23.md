@@ -504,6 +504,34 @@ Fontes: [R09](./modules/connections/R09-dev-plan.md) e [R10](./modules/connectio
 
 Os IDs G3-S* na tabela abreviam G3-CX-S* do R09. Rastreio transitivo D-CX-001..064, R04 schemas, DL-CX2 completo e decisões de endpoint/quota continuam pendentes. Nenhum provider, callback, quota ou teste integrado foi acionado neste incremento.
 
+## 6.19. Rastreio por capacidade — knowledge R09/R10
+
+Fontes: [R09](./structure-debate/knowledge/R09-dev-plan.md) e [R10](./structure-debate/knowledge/R10-g0-handoff.md), relidos integralmente em 2026-09-08. Inventário atual confirma register-knowledge-source, ingest-document, publish-index, text-chunking e worker sob application/workers; ausência de src/workers não prova ausência de worker. Continuação ANX-142.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1 sources/documents/journal/contracts | Parcial: register-knowledge-source.ts e command-journal/UoW presentes | ANX-142/132: schemas, ownership, versão, dedupe e estado+journal+outbox; erro de typecheck anteriormente executado na §6.5 precisa revalidação/correção pelo executor |
+| R09 S2 pgvector/chunks/EmbeddingPort | Parcial: embedding-port.ts, text-chunking e ingest presentes; pseudoVector observado na §6.5 | ANX-142/141: dimensões/modelVersion/IDs/cardinalidade e espaços de embedding, provider autorizado e custos; vetor hash não equivale a embedding semântico homologado |
+| R09 G3-KN-S1-01 ingest idempotente | Parcial por presença do comando, não reexecutado | ANX-142: mesmo documento/versão não duplica chunks/custo/eventos, payload conflitante e concorrência com falha parcial |
+| R09 G3-KN-S1-02 publish atomic | Parcial: publish-index.ts presente, contagem verificada na inspeção anterior | ANX-142: falha parcial não altera activeVersion, generation/manifest íntegros e rollback; contagem sozinha não valida correspondência/modelo |
+| R09 S2 ingest worker | Parcial: application/workers/ingest-document-worker.ts presente | ANX-142/133: composição/scheduler, retry/checkpoint/fencing, cancelamento e backpressure; fachada run não prova execução contínua |
+| R09 S3 memories/evidence/embedding_spaces | Não demonstrado pelo inventário de comandos/ports | ANX-142: ciclo candidata/verificada/revogada, evidência/proveniência, versões/ACL e armazenamento conforme contrato; buscar equivalentes antes de criar |
+| R09 G3-KN-S2-02 verifyMemory | Não verificado | ANX-142: sem evidência resulta KN_INSUFFICIENT_EVIDENCE; evidência inválida/revogada não promove memória |
+| R09 G3-KN-S3-02 / G5-KN-04 revoke/expiry | Não verificado | ANX-142/138: revogação exclui retrieval vetorial/grafo/cache dentro do TTL contratual, corrida e cache stale não vazam conteúdo; memory-expiry worker testado com relógio controlado |
+| R09 S4 RetrievalPort/query / G3-KN-S2-01 | Não demonstrado no inventário de ports | ANX-142: ACL deny retorna vazio+audit conforme contrato, filtros antes de disponibilizar conteúdo, recall medido com dataset autorizado |
+| R09 G5-KN-01 / G4-KN-02 | Não verificado no candidato atual | ANX-142/131: vector query cross-tenant não retorna dados, document GET cross-org403; filtro de aplicação não comprova RLS |
+| R09 context manifests / G3-KN-S3-01 / G4-KN-04 | Não demonstrado | ANX-142: truncamento por budget com proveniência/rastreio, sem hiddenReasoning e sem conteúdo não autorizado, tamanho/custo reproduzíveis |
+| R09 G5-KN-02 poisoning | Não verificado | ANX-142: documento é dado não instrução; injection no manifest não amplia tools/grants nem altera políticas. Sandbox e casos negativos explícitos |
+| R09 GraphTraversalPort / G4-KN-03 / G5-KN-05 | Não demonstrado como integração completa | ANX-142/138: T05/T10 e expansões somente registradas/autorizadas, sem grant deny, limites/ACL revalidados; nenhum Cypher livre |
+| R09 G4-KN-01 / G5-KN-03 | Não verificado | ANX-142/132: schema/lint/evento realmente persistido não contém float[]/embeddings; inspeção de todos os produtores pertinentes, não só fixture limpa |
+| R09 S5 HTTP/OpenAPI | Não verificado integralmente | ANX-142: /v1/knowledge, contratos/erros/auth e OpenAPI coerentes; paridade handler humano/agente sem lógica duplicada |
+| R09 deps connections/agents/graph | Ports/consumidores planejados, integração não provada | ANX-141/139/138: embedding via connections, Brain consome contexto autorizado, graph:knowledge:v1 derivado. “embed stub” do plano não autoriza mock em produção |
+| R10 RLS / Timescale fora de knowledge | Deferências/ownership documentados | ANX-131 trata RLS; ANX-145/146 séries de mercado. Não criar ledger de séries autoritativo em knowledge por proximidade técnica |
+| R09 AC-R09-01..04 / R10 PC-G0-01..10 e handoff | Checklist histórico; mapa D-KN afirmado no R09 não está desdobrado ali | ANX-127/142/181: recuperar decisões/fontes transitivas, dependências atuais e candidato antes de herdar aceite |
+| R10 G4 parcial/G5 parcial versus veredito PASS | Conflito de evidência preservado, não encerrado por resumo | ANX-142/181: G4-KN-03/04 e G5-KN-02/04/05 permanecem pendentes até relatório/teste/disposição autorizada, revalidar demais cenários afetados |
+
+Não foi executado novo teste de knowledge neste incremento. A falha de compilação na §6.5 permanece evidência daquele snapshot, não alegação de diagnóstico atual sem reexecução. Rastreio transitivo D-KN, spec002/R04 schemas e parâmetros TTL/budget ainda pendente; não inventar números para fechar células. Nenhuma memória/documento real foi ingerido, publicado ou revogado.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
