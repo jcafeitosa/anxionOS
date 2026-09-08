@@ -19,6 +19,7 @@
     "taskboard:ping": "node scripts/taskboard.mjs ping",
     "taskboard:ensure": "node scripts/taskboard.mjs ensure",
     "taskboard:list": "node scripts/taskboard.mjs list",
+    "taskboard:list:compact": "node scripts/taskboard.mjs list --compact",
     "taskboard:context": "node scripts/taskboard.mjs context",
     "taskboard:prework": "node scripts/taskboard.mjs prework",
     "frontend:dev": "npm run dev --prefix frontend",
