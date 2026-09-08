@@ -443,6 +443,36 @@ Fontes: [R09](./structure-debate/agents/R09-dev-plan.md) e [R10](./structure-deb
 
 Não houve execução de testes agents: diretórios previstos estão ausentes, e rodar suite global não comprovaria esses requisitos. Permanecem pendentes o rastreio transitivo de D-AGT-001..014, quatro eventos, dependências R06 e cenários R07. OpenBots seguem ANX-124/125→144; núcleo não presume homologação dessas integrações.
 
+## 6.17. Rastreio por capacidade — orchestration R09/R10
+
+Fontes: [R09](./structure-debate/orchestration/R09-dev-plan.md) e [R10](./structure-debate/orchestration/R10-g0-handoff.md), relidos integralmente em 2026-09-08. ANX-140 executa o delta e ANX-133 a fundação de workers. Inventário atual confirma commands de heartbeat/sweeper, embora não exista pasta src/workers no módulo; não classificar a funcionalidade como ausente pelo layout. Paths relativos a `backend/modules/orchestration/src/application/`.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1–S2 / R10 entidades, persistência e contratos | Não revalidado integralmente neste incremento | ANX-140/132: Goal/Task/Run/Lease/Heartbeat/GateBinding, migrations 0000–0001, UoW, journal hash, scope obrigatório, seis eventos versionados e gateBinding1.0.0; mapear campos e erros R04 |
+| R09 S3 / G3-01/02/03 / P-R5-05 | Parcial: checkout-task.ts presente | ANX-140: board todo nega, in_progress+T01 autoriza, replay definido, FOR UPDATE e TX lease+run+journal+outbox com rollback; hash mismatch G5-05 rejeitado |
+| R09 renew / G3-06 / G5-03 | Parcial: renew-task-lease.ts presente | ANX-140: token alheio negado, comparação segura, renew em in_review conforme contrato e cap8h; fencing/epoch revalidados no efeito |
+| R09 release / G5-01/08 | Parcial: release-task-lease.ts presente | ANX-140: liberação idempotente autorizada, spoof done não libera lease; token apenas resposta autorizada, nunca logs/eventos |
+| R09 S4 mirror / G3-04 / G5-01/07 | Parcial: ingest-taskboard-webhook.ts, sync-taskboard-status.ts e validate-mirror-transition.ts presentes; testes puros anteriores §6.4 | ANX-140/129: HMAC real sobre raw body, prod sem assinatura401, done/canceled sem gate vigente rejeitados, nenhum efeito colateral |
+| R09 dedupe/polling / R10 mirror | Parcial nos comandos, worker runtime não revalidado | ANX-140/133: dedupe issue+boardVersion+status, webhook+polling sem double-apply, offline90s recupera, polling60s apenas leases ativos; TASKBOARD_URL ausente desabilita polling com aviso explícito |
+| R09 S5 heartbeat / G3-07 / G5-04 | Parcial: record-run-heartbeat.ts, dequeue-run-heartbeats.ts e acknowledge-run-heartbeat.ts presentes | ANX-140/133: coalesce30s, uma pending por chave, ack pós-processamento, flood20k/org respeita cap10k/backpressure; retry após crash sem duplicar efeito |
+| R09 sweeper / G3-08 | Parcial: sweep-expired-leases.ts presente | ANX-140/133: 500 leases em até5 batches100, jitter0–30s conforme política e orphan event; restart/checkpoint e lease expirado não permitem worker antigo atuar |
+| R09 S6 gates / G3-05/09 / G5-02 | Parcial: record-gate-disposition.ts presente | ANX-140: append-only, PASS invalidado por digest, G7 exige Owner real, N/A exige razão; identity down503 sem binding fantasma |
+| R09 queries / R10 HTTP | Parcial: get-task.ts, get-run.ts, list-gate-bindings-by-issue.ts presentes | ANX-140: dez rotas e erros contratuais, DTO sem token indevido, scope+idempotency e G5-06 cross-tenant; paths públicos/admin definidos |
+| R09 T01 / G3-10 / R10 R-ORC-02 | Parcial: checkout-authorization.ts presente; integração não executada | ANX-140/136/138: timeout2s503, breaker30s nega checkout/renew até half-open; nenhuma indisponibilidade vira ALLOW |
+| R09 hierarchy / R10 TREE/CIRCULAR | Parcial: hierarchy-mode-resolver.ts presente | ANX-140/135: modo obtido de port autorizado, payload CIRCULAR completo, ExplainEscalationPath read-only; ADR0005/spec006 propostos não viram aceitos pelo R10 |
+| R09 startup/S7/AR01 | Não verificado integralmente | ANX-140/128/129: bootstrap eventing→identity→organizations→orchestration; adapters antes de rotas/workers; webhook rate60/min/IP e sem imports privados. Worker de domínio permanece no módulo, apps compõe, apesar da árvore histórica |
+| R09 S8 OpenAPI / R10 D-ORC-054 | Deferido, não demonstrado | ANX-140/132: geração OpenAPI Scalar/contratos públicos versus admin e comando documentado equivalente |
+| R09 S8 G5 CI / R10 D-ORC-056 | Deferido; manual sandbox não substituído por job planejado | ANX-140/181: go/no-go fixture determinística, board de teste isolado, HMAC e cleanup seguro. Não incluir Dashi de desenvolvimento no CI contrariando AGENTS; usar superfície simulada isolada de teste quando aplicável |
+| R09 S9 PlanRevision / R10 D-ORC-055 | Deferido; R10 resume spike em S8, R09 especifica S9 | ANX-140: consolidar go/no-go/ADR e migration0002 ou rejeição formal antes de código; diferença de rótulo não autoriza migração |
+| R10 AgentRegistry forte / wakeup saga | Deferido do v1 | ANX-139/140/143: registry público fail-closed, agente ativo e tenant; wakeup não transfere Run a agents e não usa registry permissivo em produção |
+| R10 Neo4j/ReviewEdge / grants | Fora do owner orchestration | ANX-138 projeta gate events; ANX-136 fornece autoridade/T01 por port; sem Neo4j ou concessão interna de grant |
+| R09 benchmarks / R10 riscos | Objetivos não medidos: checkout p99≤120ms local, T01 p99≤2s, zero double-apply, 500orphans≤5batches | ANX-140/170: ambiente/carga/dataset e métricas reproduzíveis; não confundir target com SLO cumprido |
+| R09 fixture e G5 checklist20 / R10 checklist/ambiente | Referências não equivalem a prova executada | ANX-140/181: oito cenários G5 acima e vinte itens R07 precisam evidências próprias; fixture ANX901/902 somente no ambiente dedicado, sem alterar board real ou truncate compartilhado |
+| R09 pré-requisitos / R10 AC-G0-01..08, PC-G0-01..10, DEP-01..08, H-01..05, B-01..04 | Histórico9/10, dependências e autorização a revalidar | ANX-140/181: novo claim/G0, ambiente, crítico e pareceres do candidato; status históricos não bloqueiam/liberam automaticamente o delta atual |
+
+Os tempos/limites acima vêm do plano histórico, exigem config tipada e reconciliação com contrato vigente. A ligação ao Dashi descrita nesses slices é integração explícita de desenvolvimento, não dependência universal de cada Task/Run do produto. WAITING_HUMAN_INPUT, cancelamento, budgets e retomada da ANX-140 permanecem requisitos adicionais das specs institucionais, não comprovados pelos cenários de mirror. Rastreio transitivo D-ORC-001..056, seis eventos, dez rotas e checklist20 ainda pendente. Nenhum worker, webhook, teste integrado ou cleanup foi executado.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
