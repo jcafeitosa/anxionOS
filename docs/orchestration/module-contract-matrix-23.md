@@ -606,6 +606,27 @@ Fontes: [R09](./structure-debate/capital/R09-dev-plan.md) e [R10](./structure-de
 
 Rastreio transitivo de contratos, decisões e interpretação de settled/FX permanece pendente. Nenhum saldo, reserva, fill ou ledger foi alterado e nenhum teste financeiro executado neste incremento.
 
+## 6.23. Rastreio por capacidade — decisions R09/R10
+
+Fontes: [R09](./structure-debate/decisions/R09-dev-plan.md) e [R10](./structure-debate/decisions/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma propose-decision, check-authority e submit-intent, com UoW/journal. ANX-149 executa delta; a inspeção parcial não valida a cadeia financeira integrada.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1 decision/proposal/intent/schema/contracts | Parcial por comandos presentes; schema completo não revalidado | ANX-149/132: identidades/versões, campos/erros e state machine, ensureSchema idempotente e estado+journal+outbox |
+| R09 S2 propose / G3-DC-S2-01 | Parcial: propose-decision.ts presente | ANX-149: cria Decision com proveniência, duplicata não cria nova decisão/intenção, payload conflitante e rollback |
+| R09 checkAuthority / G3-DC-S2-04 | Parcial: check-authority.ts presente | ANX-149/136: scope e epoch atuais, stale negado, evidência de autorização não equivale a permit de execução |
+| R09 submit / G3-DC-S2-02 | Parcial: submit-intent.ts observado na §6.7 | ANX-149: intentHash/versão imutáveis, revisão/expiração invalidam aprovação/execução; replay concorrente não altera intenção |
+| R09 G3-DC-S2-03 / R10 G4 cross-tenant | Não verificado em execução | ANX-149/131: escopo nos commands/journal/replay/queries, nenhum resultado de outra agency, RLS testado separadamente |
+| R09 S3 Disposition/approval / G3-DC-S2-05 | Não demonstrado no inventário | ANX-149/136: aprovador independente verificável, hash/digest aprovado, expiração/revogação e conflito de interesse; autor não aprova a própria mudança por inferência |
+| R09 S3 WAITING_HUMAN hook | Não demonstrado | ANX-149/140: Task/Run espera em orchestration, disposition da decisão em decisions, resposta tardia/duplicada/revisada não executa intenção obsoleta |
+| R09 S2/S4 / G3-DC-S2-06/07 | Conflito conhecido: R09 exige risco/reserva antes de submit; command observado exige AUTHORITY_CHECKED | ANX-127/149/150/148: consolidar ordem/semântica antes de implementação, DC_SUBMIT_PRECONDITION sem risco e rejeição sem reserva conforme contrato escolhido; não criar ciclo nem remover check silenciosamente |
+| R09 G3-DC-S5-01 consumer não SUBMITTED | Não verificado | ANX-149/151: consumer ignora/rejeita estado impróprio conforme contrato, sem ordem/consumo de capital; evento sozinho não dispensa revalidação |
+| R09 S5 EvidenceManifest/knowledge consumer | Não demonstrado | ANX-149/142: fontes e versão/dataset/hash vinculados, ACL e revogação, manifest reproduzível, conteúdo externo não altera autoridade |
+| R09 S6 / R10 PC-G0-08 graph defer S5 | Deferido; rótulos de slice diferem, não justificam duplicação | ANX-138/149: graph:decisions:v1 derivado, lineage/checkpoint/rebuild sem mover dono Decision/TradeIntent |
+| R10 G5-DC-01..03, RLS D-DC-015 e PC-G0-01..10 | Histórico referenciado, cenários G5 não detalhados nestes R09/R10 | ANX-127/149/131/181: recuperar R04/R07/R08/spec003, testes independentes por candidato; não herdar PASS textual |
+
+Nenhuma intenção, aprovação, reserva ou ordem foi criada neste incremento e nenhum teste financeiro executado. Conflito de submit e ownership dos permits permanece aberto para consolidação explícita na ANX-127; este rastreio não escolhe silenciosamente nova semântica. Requisitos transitivos/campos e cenários R07 seguem pendentes.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
