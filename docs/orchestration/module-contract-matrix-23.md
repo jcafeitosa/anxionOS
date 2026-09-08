@@ -1132,7 +1132,7 @@ Fonte primária: [R08 decision log](./structure-debate/strategies/R08-decision-l
 
 ## 6.22. Rastreio por capacidade — capital R09/R10
 
-Fontes: [R09](./structure-debate/capital/R09-dev-plan.md) e [R10](./structure-debate/capital/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual: register-capital-account, propose-allocation, reserve-for-intent e ports UoW/journal/grant. ANX-148 executa continuação; demais equivalências não excluídas por esse inventário.
+Fontes: [R09](./structure-debate/capital/R09-dev-plan.md) e [R10](./structure-debate/capital/R10-g0-handoff.md), relidos em 2026-09-08. O rastreio transitivo **D-CAP-001..012, D-CAP-015** está em **§6.22.1** (ANX-207). Fonte primária: [R08 decision log](./structure-debate/capital/R08-decision-log.md). Inventário parcial: register-capital-account, propose-allocation, reserve-for-intent e ports UoW/journal/grant. ANX-148 executa continuação.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -1151,9 +1151,35 @@ Fontes: [R09](./structure-debate/capital/R09-dev-plan.md) e [R10](./structure-de
 | R09 FX / G3-CAP-S4-01 | Não demonstrado | ANX-148/146: FX as-of/baseCurrency, proveniência/tempo, arredondamento por moeda; câmbio ausente/stale não aumenta disponível silenciosamente |
 | R09 G5-CAP-01 / R10 RLS D-CAP-015 | Não verificado | ANX-148/131: command journal/replay cross-tenant negados, RLS PG com roles/contexto, sem reutilizar saldo/reserva de outra agency |
 | R09 S5 / R10 graph:capital:v1 | Deferido; stub histórico não prova projeção operacional | ANX-138: projetar eventos autorizados, checkpoint/rebuild e ACL, sem ledger no grafo ou stub em produção |
-| R10 G2–G6, PC-G0-01..10, spec003/FI02 e handoff | Histórico documental; integração citada no R09 não executada aqui | ANX-127/148/181: recuperar R04/R07/R08 e relatório do candidato, classificar cenários realmente executados; S1–S2 no título não prova lifecycle completo |
+| R10 G2–G6, PC-G0-01..10, spec003/FI02 e handoff | Histórico documental; integração citada no R09 não executada aqui | **D-CAP-001..012,015** em §6.22.1 (ANX-207); G5-CAP não executado |
 
-Rastreio transitivo de contratos, decisões e interpretação de settled/FX permanece pendente. Nenhum saldo, reserva, fill ou ledger foi alterado e nenhum teste financeiro executado neste incremento.
+**D-CAP-001..012,015** estão em §6.22.1; FI02 executável, settled/FX e G5-CAP permanecem ANX-148/181. Nenhum saldo, reserva, fill ou ledger foi alterado neste incremento. Lacuna: D-CAP-013..014 ausentes no R08.
+
+### 6.22.1. A1 — disposição transitiva capital (ANX-207)
+
+Fonte primária: [R08 decision log](./structure-debate/capital/R08-decision-log.md) (relido 2026-09-08). Commands parciais existem (§6.22); esta subseção não revalida G3/G5 nem executa reserva/ledger real.
+
+**Saldo R08:** 13 decisões registradas · aceitas v1: 13 · **lacuna:** D-CAP-013..014 não constam no R08.
+
+#### D-CAP-001..012, D-CAP-015 (R08)
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-CAP-001 | Dono CapitalAccount, Allocation, CapitalReservation | Aceito v1 | ANX-148 | spec003/FI02 |
+| D-CAP-002 | Allocation = mandato; não duplica saldo | Aceito v1 | ANX-148 | Sem double-count |
+| D-CAP-003 | Reserva global por conta — FI02 | Aceito v1 | ANX-148 G3-S2-03 | Concorrência PG |
+| D-CAP-004 | Grant em governance; capital só grantId | Aceito v1 | ANX-136/148 | Fail-closed |
+| D-CAP-005 | Ledger em accounting; BalanceView derivada | Aceito v1 | ANX-152/148 | Sem ledger em capital |
+| D-CAP-006 | Position em portfolios | Aceito v1 | ANX-148 | Dono portfolios |
+| D-CAP-007 | SIMULATED+PAPER only v1 | Aceito v1 | ANX-148 | REAL rejeitado |
+| D-CAP-008 | PG autoritativo; zero SQLite saldo | Aceito v1 | ANX-148 | ADR0004 |
+| D-CAP-009 | FX via MarketDataPort | Aceito v1 | ANX-146/148 | as-of explícito |
+| D-CAP-010 | reservation events + balance.snapshot | Aceito v1 | ANX-148/132 | Eventos v1 |
+| D-CAP-011 | strategies budget → capital Allocation | Aceito v1 | ANX-147/148 | Mandato, não saldo |
+| D-CAP-012 | graph:capital:v1 async | Aceito v1 | ANX-138/32 | Sem dual-write |
+| D-CAP-015 | RLS defer P09 — application guards | Aceito v1 | ANX-131/148 | G5-CAP-01 |
+
+**Rodadas R01–R07:** R08 registrado; R09/R10 pendentes na rodada. Homologação G3/G5, lifecycle reserva completo e integração accounting permanecem ANX-148/181.
 
 ## 6.23. Rastreio por capacidade — decisions R09/R10
 
@@ -1456,7 +1482,7 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 | knowledge §6.19 | D-KN-001..020 → **§6.19.1** (ANX-204); spec002/R04 executável em ANX-142 | ANX-142/132; G5-KN e embedding real não executados |
 | market-data §6.20 | D-MD-001..018 → **§6.20.1** (ANX-205); spec003/R12 executável em ANX-145/146 | ANX-145/146/132; G5-MD e feeds reais não executados |
 | strategies §6.21 | D-ST-001..007,015 → **§6.21.1** (ANX-206); lacuna 008..014 no R08 | ANX-147/132/181; G5-ST e backtest não executados |
-| capital §6.22 | R04/R07/R08, spec003/FI02 → reserva, settled/FX e concorrência | ANX-148; integração pré-submit P06 §2.1; não inventar saldo disponível |
+| capital §6.22 | D-CAP-001..012,015 → **§6.22.1** (ANX-207); lacuna 013..014 no R08 | ANX-148; G5-CAP e lifecycle reserva não executados |
 | decisions §6.23 | R04/R07/R08, spec003 → schemas, G5-DC-01..03 e approval | ANX-149/136; sequência pré-submit P06 §2.1 |
 | risk §6.24 | R04/R07/R08, spec003 → permits, G5-RK-01..03 e fórmulas/limites | ANX-150; RiskPermit distinto conforme P06 §2.1; preservar ANX-122 |
 | execution §6.25 | R04/R07/R08 → schemas, G5-EX-01..05, ordens/reconciliação | ANX-151/132; contracts adapters ANX-161; placement distribuído aprovado (ADR0006); contratos/migração ANX-161/162 |
@@ -1486,7 +1512,7 @@ Trabalho documental **parcial** do item A4 (`405b8304`). Não equivale a PASS in
 | Placement gateway | ADR0006, §6.1/§6.34, spec gateway | ADR `1cfa7de6e7a98778f6c388e085790e5b1d5d8314b10e4e3cafe9e338869ce0c2` | `d70b8f91` → PASS F1 revalidado | **G1C3 F1 fechado** (ANX-192/193/194/195) |
 | Conflitos F1–F3 (P06/ops/gateway) | P06, ops, gateway, §6.34 | C2 em comentário `78b398b3` | `f18a2846` C1; `cf16914a` C2 | F1–F3 resolvidos; B1 removido por ADR0006 |
 | Cinco disposições contratuais | §6.34 tabela | hashes por linha na §6.34 | `400da37b`, `7542eb8e`, `1c5076a6`, `ac51f462`, `923d4cd8` | PASS restrito documental cada uma |
-| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** §6.12.1–6.21.1 (ANX-197–206); 13 módulos pendentes (§6.22+) |
+| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** §6.12.1–6.22.1 (ANX-197–207); 12 módulos pendentes (§6.23+) |
 | Pacote final A4 | esta §6.36 + §6.1 | ver comentários ANX-127 | pendente revisor integral | **A4 parcial** — não encerrar ANX-127 |
 
 Implementação futura permanece delegada aos filhos ANX-126 (ANX-128+); este pacote não homologa produto, engines ou testes financeiros.
