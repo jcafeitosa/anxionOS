@@ -925,7 +925,7 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 
 **Obrigação de handoff dos filhos:** registrar referência/seção/status decisório → requisito → arquivo/símbolo → teste/comando → resultado. Se a referência estiver ausente, contraditória ou não trouxer o requisito afirmado no R10, registrar o caso e resolver antes do comportamento afetado; usar escopo independente quando houver. ADR aceito prevalece, checklist de debate não substitui parecer do candidato. ANX-181 organiza críticos; os gates independentes do programa continuam necessários.
 
-**O que permanece com ANX-127:** revalidação do placement já aprovado e registrado no ADR0006/spec gateway; coerência das cinco disposições no candidato integrado; revisão documental proporcional e aceite. Esta disposição das referências precisa de crítica independente antes de ser considerada suficiente para o fechamento do planejamento. Não acrescenta novas tarefas duplicadas nem exige executar os filhos para demonstrar que o backlog existe.
+**O que permanece com ANX-127:** (1) cobertura transitiva A1 e pacote integrado A4 do parecer `405b8304`; (2) G1 integrado do candidato atual (C1 CHANGES_REQUIRED além do escopo já fechado); (3) crítica independente sobre a disposição das referências transitivas antes do fechamento do planejamento. **Já realizado nesta cadeia:** placement ADR0006 aceito; G1C3 F1 PASS documental (ANX-192/193/194; parecer Dirac `d70b8f91` revalidado). Não acrescenta novas tarefas duplicadas nem exige executar os filhos para demonstrar que o backlog existe.
 
 ## 7. Referências
 
