@@ -359,6 +359,32 @@ Fontes: [R09](./modules/organizations/R09-dev-plan.md) e [R10](./modules/organiz
 
 A lista de queries e a saga completa continuam não verificadas; rastreio transitivo de D-ORG-001..044 e referências R01–R08 permanece pendente. Nenhum código foi alterado, nenhum convite real enviado e nenhum gate integrado aprovado.
 
+## 6.14. Rastreio por capacidade — governance R09/R10
+
+Fontes: [R09](./modules/governance/R09-dev-plan.md) e [R10](./modules/governance/R10-g0-handoff.md), relidos em 2026-09-08. ANX-136 executa o delta; ANX-137 trata matriz de autonomia. Evidência histórica de ANX-30 não é aprovação deste candidato.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1 / R10 persistência | Parcial: migrations 0000/0001, governance-unit-of-work, command-journal e authority-epoch-store presentes | ANX-136: schema idempotente, estado+journal+outbox e rollback; testes schema/epoch existentes não executados aqui |
+| R09 S2 IssueGrant / G3-GOV-01 | Parcial: issue-grant.ts e grant-commands.test.ts presentes | ANX-136: mesmo comando não duplica grant/evento; payload conflitante, scope e concorrência explicitamente testados |
+| R09 S2 RevokeGrant / GK03 / G3-GOV-02 | Parcial: revoke-grant.ts e epoch store presentes; observação anterior na §6.3 | ANX-136: revoke+epoch+evento atômicos; revogação entre leitura e efeito bloqueia em todos os consumidores afetados |
+| R09 S3 / G3-GOV-03 | Parcial: organizations-membership-consumer.ts presente, com desvio de camada já identificado | ANX-136/130: activated cria apenas grants derivados previstos; revoked os fecha; inbox/estado atômicos, replay e eventos fora de ordem sem restaurar grant revogado |
+| R10 CreateDelegation / R09 G3-GOV-04 | Parcial contratual: commands.ts contém parentGrantId/delegatePrincipalId; não há command CreateDelegation no inventário application observado | ANX-136: procurar equivalentes, implementar delta; delegação não excede parent, erro 409, expiração/revogação em cadeia e scope |
+| R10 Mandate | Parcial contratual: mandateKindSchema e mandateIssuedPayloadSchema publicados; entidade/command não demonstrados no inventário | ANX-136: especificar criação, validade, revogação e autoridade; payload de evento não demonstra mandato operante |
+| R09 S4 / R10 SubmitChangeProposal e ResolveApproval | Parcial: commands e entities presentes, change-proposal-commands.test.ts existe | ANX-136: aprovação vinculada à versão/hash, actor autorizado, expiração, replay e concorrência; aprovação não executa mudança automaticamente |
+| R10 ListEffectiveGrants, GetGrantById, GetAuthorityEpoch | Não verificado por símbolo neste incremento; ausência de arquivo com nome esperado não prova ausência global | ANX-136: mapear query pública/handler equivalente, scope, status/expiração e estado atual; erro/indisponibilidade fail-closed |
+| R09 S5 / G3-GOV-05 / R10 TraversalEvaluator | Parcial: adapter graph-t01 e port presentes; teste com doubles na §6.3 passou | ANX-136/138: T01 real, epoch stale, timeout→DENY e revogação durante chamada; sem Cypher ou credencial Neo4j para agente |
+| R09 S6 / R10 API e AR01 | Não verificado integralmente | ANX-136/128: rotas grants e change-proposals, autorização de escopo, contratos e imports resolvidos; suites HTTP/G5 independentes sobre sandbox |
+| R10 PolicyVersion RISK body | Planejado fora de governance, owner risk | ANX-150: policy/kill switch de risco; approval institucional não substitui check de risco |
+| R10 projector Neo4j | Planejado no owner graph | ANX-138: projeção derived/eventId/checkpoint/rebuild; nenhuma transferência de autoridade PG |
+| R10 ExecutionPermit emission→decisions | Conflito contratual conhecido, não encerrado pelo encaminhamento | ANX-127/149/150/151: consolidar distinção aprovação institucional, permit de risco e consumo em execution; manter ADR aceito até decisão/migração explícita |
+| R10 PLATFORM engineering grants full matrix | Deferido no v1; não significa autorização irrestrita | ANX-136/137: matriz PLATFORM versus AGENCY, efeitos/limites/aprovação/transições e break-glass revogável; não ativar L3/L4 |
+| R09 pré-requisitos / R10 PC-G0-01..10 e equipes | Histórico: PC-G0-06 indica T01 real pendente, apesar de resumo 10/10 debate | ANX-136/181: verificar identity/eventing/organizations atuais, crítico independente identificado e evidência T01; não herdar PASS por papel nominal |
+
+**Teste executado:** `bun test tests/contracts/governance-contracts.test.ts` em backend, Bun 1.4.0, exit 0, **4 pass / 0 fail / 4 assertions**. Testes inspecionados cobrem owner constant, parse IssueGrant, grantIssued e mapeamento GOV_EPOCH_STALE. Não testam delegação, mandato, autoridade efetiva, PG, T01 real ou corrida de revogação.
+
+A busca de delegation/mandate nos paths governance/contracts/API encontrou schemas, não execução equivalente demonstrada. Classificação é parcial/não verificada, não ausência universal. Rastreio transitivo das rodadas anteriores e consolidação de conflitos continuam na ANX-127. Nenhum grant ou aprovação real foi criado.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
