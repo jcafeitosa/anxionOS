@@ -738,6 +738,24 @@ Fontes: [R09](./structure-debate/performance/R09-dev-plan.md) e [R10](./structur
 
 Realizado/não realizado, fees/FX, fluxos externos, benchmarks e atribuição agente/estratégia/portfolio da ANX-154 permanecem requisitos adicionais ao R09 resumido. Oráculos devem separar aportes/retiradas de rendimento e fechar com ledger/valuation por período/moeda conforme fórmula aprovada; nenhum número ou método financeiro foi inventado neste incremento. Não foi calculado/publicado P&L nem executado teste financeiro; rastreio transitivo de R04–R08 e definições continua pendente.
 
+## 6.29. Rastreio por capacidade — audit R09/R10
+
+Fontes: [R09](./structure-debate/audit/R09-dev-plan.md) e [R10](./structure-debate/audit/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma ingest-domain-event-tap, domain-event-tap-consumer e UoW/journal. Continuação ANX-155.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1 manifest/replay schema | Não revalidado integralmente | ANX-155/132: manifests versionados, referências/digests/escopo, schema e erros, persistência auditável sem copiar secrets |
+| R09 S2 / G3-AUD-S2-01 tap dedupe | Parcial: ingest/consumer presentes; sourceEventId dedupe observado §6.9 | ANX-155/130: replay/flood/race não duplicam fato, payload divergente identificado e ordering/proveniência preservados |
+| R09 S3 replay session/audit.replay | Não demonstrado no inventário | ANX-155/136: grant/scope/validade, sessão e acesso registrados, revogação durante leitura aplicada; não conceder autoridade pelos próprios dados replayados |
+| R09 G3-AUD-S3-01 read-only | Não verificado | ANX-155: reconstruir explicação sem chamar handlers de efeito, ordem/provider/ledger/consumer externo; teste negativo demonstra zero efeito |
+| R09 G5-AUD-01 export cross-tenant | Não verificado | ANX-155/131/158: export autorizado por scope, filtros/redaction e trilha, sem registros de outra agency; retenção/expiração do pacote explícitas |
+| R09 G5-AUD-02 mutable chunk rejected | Parcial: payloadHash armazenado não prova verificação, conforme §6.9 | ANX-155: calcular/verificar digest contra fonte confiável, chunk alterado rejeitado e falha auditada; não confiar no hash fornecido pelo mesmo conteúdo |
+| R09 S4 HTTP | Não verificado integralmente | ANX-155: busca/leitura/export/replay com contratos e erros, paridade humano/agente e limites de consulta |
+| R09 S4 graph | Deferido; stub não é runtime | ANX-138: lineage derivada/checkpoint/rebuild/ACL; audit não substitui journals autoritativos dos domínios |
+| R10 PC-G0 10/10 e PASS G2–G6 | Resumo histórico referenciando R04–R09 sem parecer detalhado | ANX-127/155/181: recuperar schemas/decisões/relatórios e revalidar candidato; não herdar PASS pelo resumo |
+
+O delta ANX-155 exige trilha antes/depois e cadeia decisão→fill→ledger, redaction/retenção e busca autorizada, além dos quatro cenários resumidos R09. Evidência ausente ou digest inválido deve aparecer como lacuna, não explicação fabricada. Nenhum export, replay, leitura de dados financeiros reais ou teste integrado foi executado. Rastreio transitivo R04–R08 permanece pendente.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
