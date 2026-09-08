@@ -322,6 +322,43 @@ Fontes: [R09 completo](./modules/identity/R09-dev-plan.md) e [R10 completo](./mo
 
 O inventário de paths inicialmente retornou exit 2 porque `backend/tests/contracts/identity/` não existe; a busca posterior encontrou o arquivo `identity-events.test.ts`. O erro não foi interpretado como ausência de testes. Este incremento não fecha os demais módulos nem o aceite integral ANX-127.
 
+## 6.13. Rastreio por capacidade — organizations R09/R10
+
+Fontes: [R09](./modules/organizations/R09-dev-plan.md) e [R10](./modules/organizations/R10-g0-handoff.md), relidos integralmente em 2026-09-08. O aceite histórico ANX-29 não é reaberto; ANX-135 executa o delta. Rodadas e decisões referenciadas transitivamente ainda precisam de rastreio na ANX-127.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1 / R10 domínio e contratos | Parcial: migrations 0000/0001 e ports identificados na §6.3; contrato testado abaixo | ANX-135/132: enums, campos, erros, índices únicos e bootstrap idempotente; não criar entidade Organization por inferência |
+| R09 S2 / AR01 | Parcial: application/services e commands presentes; desvio de import concreto registrado na §6.3 | ANX-135/128: ports sem framework, eventos ownerDomain organizations, nenhuma dependência privada identity/governance/Neo4j/Better Auth |
+| R09 S3 / P-R5-06 | Parcial: UoW e teste existem; integração não executada | ANX-135: estado + command_journal + domain_journal + outbox na mesma TX, rollback e corrida; dependência indisponível não conta como PASS |
+| R09 S4 CreateAgency / G3-01 | Parcial: create-agency.ts e teste presentes | ANX-135: duas chamadas com mesma chave criam uma Agency, replay definido e conflito de payload tratado |
+| R09 S4 UpdateAgencyMarkets / R10 comandos | Parcial: update-agency-markets.ts presente | ANX-135: autorização owner/admin, versão concorrente, mercados stocks/crypto/both e evento; sem habilitar execução financeira implicitamente |
+| R09 G3-03 / R10 quatro queries | Não verificado neste incremento; inventário application sem pasta queries não prova ausência de equivalentes | ANX-135: localizar exports/handlers de GetAgencyById, ListAgenciesForPrincipal, ListMembershipsByAgency e GetMembership; listar somente escopo/memberships ativos |
+| R09 InviteMember / G3-04 | Parcial: invite-member.ts e teste presentes | ANX-135: convite sem depender de lookup identity; identidade indisponível não impede este caso específico |
+| R09 CreateAgency / G3-05 / R10 R-ORG-03 | Não verificado em execução | ANX-135: identity indisponível retorna 503 e zero escrita. Não generalizar esta regra para InviteMember |
+| R09 S5 ActivateMembership / G3-09 | Parcial: activate-membership.ts e membership-commands.test.ts presentes | ANX-135: caminho administrativo autorizado, sem bypass genérico; testar role/agency e concorrência |
+| R09 S5 RevokeMembership / G3-06 | Parcial: revoke-membership.ts presente | ANX-135: não remover último owner; 409 ORG_OWNER_REQUIRED, incluindo duas revogações concorrentes |
+| R09 S5 AcceptInvite / G3-07/08 / G5-04 | Parcial: accept-invite-by-token.ts e accept-invite.test.ts presentes | ANX-135: TTL 7d segundo contrato, expirado 410, email divergente 403, single-use e token após revoke. Valores históricos precisam configuração tipada/documentada |
+| R09 HMAC/pepper/startup / R10 DEP-04 | Não verificado em execução; teste de hasher e bootstrap.ts inventariados | ANX-135/129: HMAC-SHA256, pepper ausente/vazio aborta startup; nenhum token/pepper em logs/eventos; ordem eventing→identity→organizations antes das rotas |
+| R09 S6 / wiring / OpenAPI | Parcial: plugin.ts, middleware, scoped-access.ts, dto.ts e accept-rate-limit.ts presentes | ANX-135: prefixo e rotas contratuais, sessão, Idempotency-Key, tags, ordem e rate limit accept 10/min/IP conforme contrato. Arquivo presente não prova aplicação do limite |
+| R09 G3-02 / G5-01 / R10 R-ORG-01 | Não verificado em execução | ANX-135: principal A não lê/muta agency B; middleware, application e repositório mantêm scope, erro 403 |
+| R09 G5-02 | Não verificado em execução | ANX-135: 20 convites paralelos, índice email respeitado e sem corrupção, em fixture isolada |
+| R09 G5-03 / R10 R-ORG-10 | Não verificado em execução | ANX-135: principalId adulterado no body não eleva privilégio; origem confiável e schema, 403 ou campo ignorado conforme contrato |
+| R09 G3-10 / R10 R-ORG-06 | Residual v1 documentado: chaves distintas podem criar duas Agencies; não é dedupe global prometida | ANX-135/156: preservar semântica e aplicar quota comercial por contrato, sem deduplicação silenciosa |
+| R10 D-ORG-039 AdvanceOnboarding | Parcial: `application/commands/advance-onboarding.ts` valida transição simples, owner/admin e publica evento via UoW | ANX-135/140/156: saga billing com compensação, retomada e idempotência ainda não demonstrada. Método existente não prova saga completa |
+| R10 D-ORG-042 blueprint | Planejado fora do v1; capacidade não cria owner novo | ANX-135/139/140: organizations possui onboarding/configuração; agents fornece versões/configuração e orchestration executa fluxo conforme contrato |
+| R10 D-ORG-043 Organization/CONTAINS_AGENCY e DEF-10 Department/Team | Planejado pós-v1, não homologado por escopo genérico “hierarquia” | ANX-135: desenho e decisão explícita antes de novas entidades, migração de memberships/ownership e isolamento; sem redefinir baseline silenciosamente |
+| R10 D-ORG-038 realtime e D-ORG-021 graph | Planejado fora do slice inicial | ANX-168/138: eventos organizations, autorização de assinatura, revogação, projeção/rebuild; nenhum estado autoritativo transferido ao transporte/grafo |
+| R10 D-ORG-040 RLS | Planejado, não provado por guards v1 | ANX-131: roles/contexto/policies e testes PG; fase histórica não substitui sequência vigente |
+| R10 D-ORG-035 maxCompanies | Planejado comercial | ANX-156/135: billing fornece quota por contrato, organizations aplica criação/alteração sem escrita privada cross-module; teste concorrente |
+| R10 D-ORG-044 export/listagem global | Não verificado | ANX-135/158: escopo PLATFORM/AGENCY, dados mínimos, audit e autorização; “global” não libera consulta cross-tenant a qualquer usuário |
+| R09 fixtures/cleanup / R10 checklist e ambiente | Testes API, fixture-isolation e UoW inventariados; não executados neste incremento | ANX-135/181: fixture dedicada equivalente ao registry, PG/NATS isolados e cleanup limitado; não copiar TRUNCATE CASCADE do plano para banco compartilhado |
+| R09 pré-requisitos / R10 AC-G0-01..08, PC-G0-01..10, DEP-01..07, H-01..05 e B-01..03 | Histórico documental; G6 integrado aparece pendente no R10, não prova situação atual | ANX-135/181: recuperar/revalidar pareceres por candidato, ambiente, claims e responsáveis independentes; checklist marcado não equivale a execução |
+
+**Teste executado:** `bun test tests/contracts/organizations.test.ts` em backend, Bun 1.4.0, exit 0, **6 pass / 0 fail / 21 assertions**. Inspeção prévia: códigos/status de erro, detalhes, enum de Agency, comando create e envelope agency.created. Não cobre todos os comandos/eventos/queries, G3-01..10, G5-01..04, PG, HTTP ou bootstrap. O arquivo é equivalente ao diretório de contratos sugerido pelo plano; não confundir mudança de path com ausência.
+
+A lista de queries e a saga completa continuam não verificadas; rastreio transitivo de D-ORG-001..044 e referências R01–R08 permanece pendente. Nenhum código foi alterado, nenhum convite real enviado e nenhum gate integrado aprovado.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
