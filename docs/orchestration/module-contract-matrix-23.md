@@ -841,6 +841,38 @@ Nenhuma simulação, avaliação, certificação, promoção ou teste integrado 
 
 Com este incremento, os **23 módulos** possuem desdobramento dos requisitos explicitados em seus R09/R10 nas §§6.12–6.33 (simulation/evaluation compartilham §6.33). Isso é cobertura documental dos agrupamentos consultados, **não** reconciliação completa das capacidades referenciadas transitivamente, schemas/decisões ou aprovação ANX-127. Continuam as condições de encerramento da §6.1: cobertura restante, conflitos/migrações, placement e pacote independente do conjunto.
 
+## 6.34. Lista finita de fechamento documental — ANX-127
+
+Auditoria independente de fechamento registrada por Dirac no comentário ANX-127 `2612becf-5984-499b-8241-ab4ff0268ab0`, sobre matriz com SHA-256 `8a8bdc01057b089af0ad8f51378a684fea71259a9340dbc7960d297e07f4d2f3` (candidato anterior à inclusão desta seção). Parecer: PASS restrito da atualização da §6.1; nenhum novo agrupamento explícito faltante identificado; **sem PASS integral/transitivo**. A inclusão desta seção não herda aprovação daquele digest.
+
+### Pendência de decisão humana
+
+O placement do gateway é a única escolha humana imediata identificada nesta auditoria. As alternativas e impactos estão no comentário ANX-127 `8a0f2a7b-9b34-4fc6-a086-d13822e839e3`: distribuição entre os 23 donos ou novo domínio mediante ADR/árvore. ANX-127/161 devem registrar a escolha explícita, dono do registry e escritor único, compatibilidade, migração e rollback. O ADR0003 de tools permanece proposto; nem ele nem a existência de adapter-gateway no source aprovam um domínio adicional. Não reconstruir as mesmas opções a cada continuação nem interpretar continuação automática como aceite.
+
+### Trabalho documental executável sem essa escolha
+
+| Pacote | Limite e fonte | Evidência exigida / responsável |
+| --- | --- | --- |
+| Referências transitivas | Apenas referências já apontadas nas §§6.12–6.33; não expandir para pesquisa ilimitada | ANX-127: referência → requisito/grupo → filho ou disposição. Marcar o que não foi lido; separar detalhe de implementação delegado de conflito que exige resolução documental |
+| Conflitos conhecidos | Lista fechada abaixo nesta auditoria; novos achados exigem evidência e justificativa de escopo | ANX-127 com donos afetados: fonte prevalente, decisão aplicável, impacto, migração/compatibilidade ou justificativa de não aplicação. Encaminhamento genérico ao executor não basta |
+| Pacote integrado | Matriz, fila/roadmap e contratos operacionais efetivamente alterados | ANX-127 e revisores: critério → artefato/seção/digest → parecer independente do candidato. Revalidar mudanças afetadas; não herdar PASS de snapshots |
+
+Conflitos a consolidar:
+
+| Conflito | Fonte nesta matriz | Filhos envolvidos |
+| --- | --- | --- |
+| Submit, risco/reserva e permits | §§6.23–6.25 | ANX-148/149/150/151, governance ANX-136 |
+| Invoice issued versus paid e interface partners/accounting | §§6.26, 6.30–6.31 | ANX-152/156/157 |
+| Preço live versus modo de execução REAL | §6.20 | ANX-145/146/161/163 |
+| Quem aplica promoção versus quem avalia | §6.21 e contrato P09 §10 | ANX-147/160/171, governance ANX-136 |
+| Envelopes coexistentes e idempotency UUID/string | §6.11 | ANX-130/132/161 |
+
+Esta lista organiza pendências; **não resolve os cinco conflitos por declaração**. A5 e a correção do saldo da §6.1 já foram realizadas e não voltam à fila como trabalho novo.
+
+### Limite entre planejamento e implementação
+
+Código, schemas executáveis, integração PG/Neo4j/NATS, providers, PAPER, consoles, restore e readiness estão delegados aos filhos do programa ANX-126. Sua execução futura não bloqueia, por si, a entrega do backlog. O planejamento precisa demonstrar cobertura e dependências, não alegar produto homologado. Os gates proporcionais do pacote documental continuam necessários; REAL/L3/L4 exigem autorização própria.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
