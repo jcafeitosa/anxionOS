@@ -266,6 +266,20 @@ Leitura documental ANX-127 em 2026-09-08, complementando os seis R10 da §6.9. R
 
 Todos os 23 R10 foram consultados nesta sequência, mas isso **não** conclui rastreio de todos os requisitos nos documentos referenciados R04–R09, ADRs, símbolos, testes e resultados. A decisão accepted aplicável continua prevalecendo sobre handoffs draft. Nomes como code-architect/critic-reviewer indicam papéis planejados; isoladamente não demonstram agentes distintos com contexto próprio. Os próximos gates exigem responsável/run, candidato/digest, escopo, evidências, achados, disposição e riscos residuais.
 
+## 6.11. Fundação transversal — catálogo e envelopes
+
+Fonte: [P01/P02, CapabilityManifest e envelope](./system-capabilities/p01-p02-contracts-and-gates.md). Continuação ANX-132, com ANX-130 para evolução de eventos.
+
+- Busca literal `CapabilityManifest|capabilityManifest|capability_manifest` em backend/packages, backend/modules, backend/apps e frontend/src: sem matches. Buscar equivalentes antes de afirmar ausência universal ou criar duplicatas.
+- `backend/packages/contracts/src/execution/effect-gate.ts` contém effectClassSchema com as quatro classes documentadas. Isso não implementa catálogo de capabilities nem prova uso do gate por todos os handlers.
+- `envelope-v02.ts` publica envelope 0.2.0; `index.ts` mantém schemaVersion 0.1.0 para health/legado. Coexistência não é defeito automaticamente: mapear produtores/consumidores e migração.
+- Envelope genérico aceita payload unknown e escopos opcionais; ANX-132 deve comprovar schema de messageType e escopo obrigatório onde aplicável. Parse genérico não é autorização.
+- Idempotency key do envelope v02 exige UUID, enquanto AdapterCommand aceita string 1..128. ANX-132/161 devem fechar interoperabilidade explícita, sem transformação silenciosa.
+
+**Evidência executada:** em backend, `bun test tests/contracts/events-envelope.test.ts tests/contracts/effect-gate.test.ts` — Bun 1.4.0, exit 0, **11 pass / 0 fail / 14 assertions**. Os testes inspecionados cobrem shape/upgrade, gate puro e transições UNKNOWN; não comprovam paridade UI/API/tools, registry, single-use concorrente ou integração externa. Nenhuma ordem ou provider foi acionado.
+
+A matriz por capability ainda deve ligar catálogo, schemas, handler, superfícies, grant/epoch, budget/approval, erros e oráculos reais. ANX-132 contém handoff detalhado; o resultado estreito acima não fecha ANX-127.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
