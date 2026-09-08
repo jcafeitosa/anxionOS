@@ -473,6 +473,37 @@ Fontes: [R09](./structure-debate/orchestration/R09-dev-plan.md) e [R10](./struct
 
 Os tempos/limites acima vêm do plano histórico, exigem config tipada e reconciliação com contrato vigente. A ligação ao Dashi descrita nesses slices é integração explícita de desenvolvimento, não dependência universal de cada Task/Run do produto. WAITING_HUMAN_INPUT, cancelamento, budgets e retomada da ANX-140 permanecem requisitos adicionais das specs institucionais, não comprovados pelos cenários de mirror. Rastreio transitivo D-ORC-001..056, seis eventos, dez rotas e checklist20 ainda pendente. Nenhum worker, webhook, teste integrado ou cleanup foi executado.
 
+## 6.18. Rastreio por capacidade — connections R09/R10
+
+Fontes: [R09](./modules/connections/R09-dev-plan.md) e [R10](./modules/connections/R10-g0-handoff.md), relidos integralmente em 2026-09-08. Inventário atual: commands register-ai-account/invoke-inference, quatro ports e migrations 0000/0001. Equivalências fora destes paths não foram excluídas. ANX-141 é a continuação, não reabertura automática de ANX-84.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1 core / G3-S1-01/02 | Parcial: register-ai-account.ts, UoW/journal e migration0000 presentes | ANX-141/132: account/provider/binding e contracts completos, registered outbox, replay commandId HTTP definido e payload conflitante |
+| R09 S1 activateBinding / G3-S1-03 | Não demonstrado no inventário de commands | ANX-141: localizar equivalente, negar sem grant CX_GRANT_INVALID, readiness/conta/tenant/mode explícitos |
+| R09 G3-S1-04/05 / G4-04 / G5-04 | Não verificado em execução | ANX-141/131: falha outbox zero estado parcial, cross-org403, autorização também em replay/race; application tenancy não prova RLS |
+| R09 S2 terminal / G3-S2-01/02 | Parcial: invoke-inference.ts SIMULATED observado na §6.5 | ANX-141: usage+completed coerentes, mesma idempotencyKey retorna request original, custos/retries sem duplicação; simulado não homologa provider |
+| R09 S2 UNKNOWN / G3-S2-03 / G5-03 | Não demonstrado no fluxo inspecionado anteriormente | ANX-141: timeout incerto gera UNKNOWN/evento e reconciliação durável, sem retry cego, troca de conta/provider ou dupla cobrança |
+| R09 S2 streaming / G3-S2-04 | Port terminal Promise registrado na §6.5, streaming não demonstrado | ANX-141/168: chunks versionados, um terminal, cancelamento/backpressure/erro e usage parcial/final |
+| R09 S2 waitingHuman / G3-S2-05 / G5-07 | Não demonstrado | ANX-141/140: TASKBOARD consumer retorna espera sem mover board, callback repetido/tardio idempotente; estado Task/Run no owner orchestration |
+| R09 S3 / G3-S3-01/02/03 / G5-02/10 | Migration0002 não presente neste inventário; mecanismo equivalente não demonstrado | ANX-141: DL-CX2 vinte PLATFORM paralelas/três contas, replay mantém conta/lease único, AGENCY cursor com lock+revision; quotas concorrentes não excedidas |
+| R09 S4 / G3-S4-01/02 | Migration0003 não presente no inventário; catálogo completo não demonstrado | ANX-141: offerings/releases/subscriptions, readiness nega invoke; PG autoritativo, SQLite opcional só cache reconstruível, sem autoridade de quota/grant |
+| R09 S5 reconcile / G3-S5-01 | Não demonstrado; migration0004 ausente no inventário | ANX-141: case→resolved com evidência e evento reconciled;24h é alvo do plano, não SLA medido/garantido |
+| R09 S5 reaper / G3-S5-02 | Não demonstrado | ANX-141/133: liberar só lease expires_at<now, fencing e race com uso ativo, nenhuma quota liberada duas vezes |
+| R09 S5 registry/profiles/probes/breaker / G3-S5-03 / G5-08 | Não demonstrado como conjunto | ANX-141: homologação/config/perfil explícitos, probes reais, breaker governance503 fail-closed; upstream cascade não causa fallback permissivo |
+| R09 EndpointPolicy / G4-01 / G5-01/06 | Não verificado | ANX-141/129: metadata URL negada, SSRF e redirects/OAuth avaliados em sandbox autorizado; secrets apenas no adapter autorizado |
+| R09 secrets/mode/stub / G4-02/03/06 / G5-09 | Não verificado integralmente | ANX-141/129: snapshots eventos sem chaves proibidas, LIVE_TRADING rejeitado, prod+stub startup fail; inferência real autorizada não equivale a execução financeira REAL |
+| R09 G4-05/07 / G5-05 | Não verificado | ANX-141/136: revogação mid-invoke, consumerKind derivado de contexto confiável e spoof ignorado; uso OWNER observado não cobre todos consumidores |
+| R09 G4-08 AR01 | Não verificado neste incremento | ANX-141/128: imports resolvidos, application via ports, sem acesso privado cross-module e sem provider SDK no domínio |
+| R09 defer REAL_EXECUTION/broker live | Fora de connections P05 | ANX-172 permanece backlog sem ativação; execution/adapters por contratos próprios, inferência não recebe permissão de trade implicitamente |
+| R09/R10 defer RLS | Planejado | ANX-131: políticas/roles/contexto/testes PG; fase histórica P09 não substitui sequência aceita |
+| R09 defer GrantValidation HTTP multi-VM | Planejado, não requisito de deploy multi-VM imediato | ANX-141/136: preservar port, decidir transporte quando houver requisito, autenticação/epoch/fail-closed e compatibilidade sem duplicar autoridade |
+| R09 billing consumer / graph projector | Planejado fora de connections | ANX-156/138: usage comercial deduplicado e graph:connections:v1 reconstruível, sem escrever ledger financeiro ou grafo direto em connections |
+| R09 SINGLE_ACCOUNT_WAIT | Deferido pós-v1 | ANX-141: disposição explícita de espera/limite/timeout; proibir troca silenciosa de conta para escapar da quota |
+| R09 pré-requisitos / R10 AC-G0-01..10, PC-G0-01..10, riscos/handoff | Histórico documental; matriz G5 aponta execução futura | ANX-141/181: revalidar claim/dependências/candidato e responsáveis, não herdar PASS ou interpretar application-only como RLS executado |
+
+Os IDs G3-S* na tabela abreviam G3-CX-S* do R09. Rastreio transitivo D-CX-001..064, R04 schemas, DL-CX2 completo e decisões de endpoint/quota continuam pendentes. Nenhum provider, callback, quota ou teste integrado foi acionado neste incremento.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
