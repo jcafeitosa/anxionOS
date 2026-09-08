@@ -556,7 +556,7 @@ Fontes: [R09](./structure-debate/market-data/R09-dev-plan.md) e [R10](./structur
 | R10 RLS e ledger fora do módulo | Planejado/ownership delimitado | ANX-131 implementa RLS, ANX-152 ledger; nenhuma gravação lateral em accounting a partir de market_events |
 | R09 AC-R09-01..04 / R10 PC-G0-01..10 e gates | Histórico documental, mapa D-MD afirmado sem desdobramento no R09 | ANX-127/145/146/181: recuperar D-MD, spec003 R12, schemas e evidências atuais; PASS de plano não significa G5 executado |
 
-O usuário pediu dados históricos e realtime de motores externos para stocks/cripto e ambos; esse delta já está nas ANX-145/146, incluindo licenciamento/capacidade e retomada. O texto histórico “REAL/live trading ingest” é ambíguo frente a preço live usado em PAPER: resolver distinção de origem dos dados versus modo de execução na consolidação ANX-127, sem usar a ambiguidade para habilitar capital real ou bloquear definitivamente realtime autorizado. Nenhum feed/engine foi consultado ou homologado neste incremento. Rastreio transitivo das decisões, campos e eventos continua pendente.
+O usuário pediu dados históricos e realtime de motores externos para stocks/cripto e ambos; esse delta já está nas ANX-145/146, incluindo licenciamento/capacidade e retomada. A ambiguidade histórica “REAL/live trading ingest” recebeu disposição documental no [contrato P06 §1.1](./system-capabilities/p06-financial-lifecycle-contract.md): origem corrente não é executionMode REAL; preservam-se rejeição de REAL, autorização de dados, compatibilidade versionada e tratamento de legado sem proveniência. Disposição ainda sujeita à revisão independente; não prova implementação nem habilita feeds. Nenhum feed/engine foi consultado ou homologado neste incremento. Rastreio transitivo das decisões, campos e eventos continua pendente.
 
 ## 6.21. Rastreio por capacidade — strategies R09/R10
 
@@ -863,7 +863,7 @@ Conflitos a consolidar:
 | --- | --- | --- |
 | Submit, risco/reserva e permits | §§6.23–6.25 | ANX-148/149/150/151, governance ANX-136 |
 | Invoice issued versus paid e interface partners/accounting | §§6.26, 6.30–6.31 | ANX-152/156/157 |
-| Preço live versus modo de execução REAL | §6.20 | ANX-145/146/161/163 |
+| Preço live versus modo de execução REAL | §6.20; disposição e migração planejada no contrato P06 §1.1, aguardando revisão independente | ANX-145/146/132/161/163 |
 | Quem aplica promoção versus quem avalia | §6.21 e contrato P09 §10 | ANX-147/160/171, governance ANX-136 |
 | Envelopes coexistentes e idempotency UUID/string | §6.11 | ANX-130/132/161 |
 
