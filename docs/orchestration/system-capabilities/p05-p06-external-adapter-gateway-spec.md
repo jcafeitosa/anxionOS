@@ -401,11 +401,11 @@ Inspeção estática de 2026-09-08; não homologa runtimes, PAPER, REAL ou capac
 | Resultado | Mesmo handler transforma outcome diferente de ACCEPTED em REJECTED no command result | Separar confirmação de transporte de resultado financeiro/job; nenhum FILLED/PARTIAL/UNKNOWN pode ser reinterpretado silenciosamente como rejeição |
 | Negotiation / homologação | `backend/packages/contracts/src/adapter-gateway/types.ts`: manifesto tem digest/capabilities/ambiente, mas não portVersion nem status de homologação | Versionar contrato e provar compatibilidade, suspensão e registry antes de novos efeitos; shape de exemplo não equivale a schema publicado |
 | Data-plane | `adapterCommandV1Schema` em commands.ts exige order/intent/permit mesmo quando requestedCapabilities inclui marketData | O caminho financeiro descrito acima não é contrato genérico para leitura. Reconciliar contratos separados e autoridade de dados; não fabricar permit financeiro para consulta |
-| Ownership | ADAPTER_GATEWAY_OWNER_DOMAIN e persistência própria existem sob modules/adapter-gateway | Posicionamento permanece pendente frente ao baseline de 23 módulos. Nenhum 24º domínio é aceito implicitamente; registrar decisão e migração antes de mudar ownership |
+| Ownership | ADAPTER_GATEWAY_OWNER_DOMAIN e persistência própria existem sob modules/adapter-gateway | Disposição atual: ADR0006 mantém os 23 módulos; Placement aprovado abaixo define destinos e migração. O código observado ainda requer migração, não é owner aceito |
 
 As formulações anteriores “sem alterar contrato central/core” descrevem o objetivo de isolar integrações que já cabem no port. **Não são garantia para capacidades com semântica nova**: estas exigem proposta/ADR aplicável, schemas versionados, migração e revisão dos consumidores. Peculiaridades de tradução ficam no adapter; regra institucional nova não pode ser escondida em profile.
 
-Os próximos executores devem rastrear imports, registry/ports, adapters reais, testes e limites do slice antes de implementar o delta. Esta seção registra lacunas; não resolve silenciosamente a decisão de placement nem altera o código.
+Os próximos executores devem rastrear imports, registry/ports, adapters reais, testes e limites do slice antes de implementar o delta. Esta seção registra lacunas do snapshot. A decisão explícita posterior está em Placement aprovado; nenhum código foi alterado por este registro.
 
 ## Placement aprovado — ANX-127 / ADR0006
 

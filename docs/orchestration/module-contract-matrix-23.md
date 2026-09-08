@@ -128,7 +128,7 @@ Saldo vigente após auditoria independente de fechamento, registrada em ANX-127 
 | A5 — fila e roadmap | Atualização documental realizada em [module-queue](./module-queue.md), seção Continuação vigente, e [execution-roadmap](./execution-roadmap.md), Mapeamento da continuação; checkpoints anteriores abaixo são históricos | Incluir estes arquivos no candidato final e nos pareceres; não repetir A5 como alteração ainda não realizada |
 | Cobertura de cada capacidade R09/R10 | Agrupamentos explícitos dos 23 módulos desdobrados nas §§6.12–6.33, complementando §§6.2–6.11. Crítico não identificou agrupamento explícito faltante nas revisões realizadas (ANX-127, comentário 5dcba1cf-9dd3-44f9-ab33-bd721d32abea); sem PASS integral/transitivo | Completar referências transitivas, campos/schemas e decisões indicados como pendentes em cada seção. Preservar fonte/seção, classificação, evidência/limite e issue/disposição por requisito; obter parecer do candidato integrado |
 | Conflitos de contrato e migração | Identificados nas tabelas e comentários dos filhos | Consolidar decisão aplicável, impacto e migração dos conflitos conhecidos; encaminhamento genérico ao executor não encerra a reconciliação |
-| Placement do adapter-gateway | Decisão humana pendente; diretório observado não aprova 24º owner | Decisão explícita entre distribuição no baseline e novo owner com ADR/árvore/migração; opções podem ser preparadas sem executar migração |
+| Placement do adapter-gateway | Aprovado pelo usuário: distribuição nos 23 módulos, ADR0006; ANX-127 retomada | Registry técnico em operations, execução em execution, dados em market-data; plano de escritor único/migração na spec gateway. Detalhamento aguarda revalidação, implementação futura |
 | Pacote final documental | Pareceres incrementais não equivalem a aprovação do conjunto | Agregar critérios, digests e pareceres independentes aplicáveis ao mesmo candidato; não simular gates ou herdar PASS antigo |
 | Implementação futura | Delegada às tarefas do programa ANX-126 | Não precisa ser executada para concluir este planejamento; gaps devem estar cobertos e dependências claras. Gates de produto permanecem futuros |
 
@@ -861,7 +861,9 @@ Com este incremento, os **23 módulos** possuem desdobramento dos requisitos exp
 
 Auditoria independente de fechamento registrada por Dirac no comentário ANX-127 `2612becf-5984-499b-8241-ab4ff0268ab0`, sobre matriz com SHA-256 `8a8bdc01057b089af0ad8f51378a684fea71259a9340dbc7960d297e07f4d2f3` (candidato anterior à inclusão desta seção). Parecer: PASS restrito da atualização da §6.1; nenhum novo agrupamento explícito faltante identificado; **sem PASS integral/transitivo**. A inclusão desta seção não herda aprovação daquele digest.
 
-### Pendência de decisão humana
+### Decisão humana — resolvida em 2026-09-08
+
+Usuário confirmou “sim” à distribuição nos 23 módulos. [ADR0006](../../brain/project-docs/decisions/0006-distribute-external-gateways-within-baseline.md) registra o aceite; [spec do gateway — Placement aprovado](./system-capabilities/p05-p06-external-adapter-gateway-spec.md) detalha registry/escritor/migração/rollback. O parágrafo seguinte preserva o impedimento histórico de C2, agora removido por resposta explícita, não por continuação automática.
 
 O placement do gateway é a única escolha humana imediata identificada nesta auditoria. As alternativas e impactos estão no comentário ANX-127 `8a0f2a7b-9b34-4fc6-a086-d13822e839e3`: distribuição entre os 23 donos ou novo domínio mediante ADR/árvore. ANX-127/161 devem registrar a escolha explícita, dono do registry e escritor único, compatibilidade, migração e rollback. O ADR0003 de tools permanece proposto; nem ele nem a existência de adapter-gateway no source aprovam um domínio adicional. Não reconstruir as mesmas opções a cada continuação nem interpretar continuação automática como aceite.
 
@@ -923,7 +925,7 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 
 **Obrigação de handoff dos filhos:** registrar referência/seção/status decisório → requisito → arquivo/símbolo → teste/comando → resultado. Se a referência estiver ausente, contraditória ou não trouxer o requisito afirmado no R10, registrar o caso e resolver antes do comportamento afetado; usar escopo independente quando houver. ADR aceito prevalece, checklist de debate não substitui parecer do candidato. ANX-181 organiza críticos; os gates independentes do programa continuam necessários.
 
-**O que permanece com ANX-127:** escolha humana do placement e seu registro/migração; coerência das cinco disposições no candidato integrado; revisão documental proporcional e aceite. Esta disposição das referências precisa de crítica independente antes de ser considerada suficiente para o fechamento do planejamento. Não acrescenta novas tarefas duplicadas nem exige executar os filhos para demonstrar que o backlog existe.
+**O que permanece com ANX-127:** revalidação do placement já aprovado e registrado no ADR0006/spec gateway; coerência das cinco disposições no candidato integrado; revisão documental proporcional e aceite. Esta disposição das referências precisa de crítica independente antes de ser considerada suficiente para o fechamento do planejamento. Não acrescenta novas tarefas duplicadas nem exige executar os filhos para demonstrar que o backlog existe.
 
 ## 7. Referências
 
