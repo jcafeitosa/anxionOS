@@ -233,6 +233,23 @@ Fontes: [accounting R09](./structure-debate/accounting/R09-dev-plan.md), [portfo
 
 Dezessete módulos possuem evidência inicial parcial. Audit, billing, partners, operations, evaluation e simulation ainda não receberam inspeção granular nesta matriz; as respectivas tarefas já existem. Exaustividade R09/R10, schemas/testes e gates continuam pendentes. Estes handoffs orientam os próximos agentes e não homologam o ciclo financeiro.
 
+## 6.9. Evidência inicial — seis módulos restantes
+
+Fontes R09 e respectivos R10: [audit](./structure-debate/audit/R09-dev-plan.md), [billing](./structure-debate/billing/R09-dev-plan.md), [partners](./structure-debate/partners/R09-dev-plan.md), [operations](./structure-debate/operations/R09-dev-plan.md), [evaluation](./structure-debate/evaluation/R09-dev-plan.md), [simulation](./structure-debate/simulation/R09-dev-plan.md). Inspeção estática sem testes de produto, alterações de código ou efeitos externos. Paths abaixo relativos a `backend/modules/<módulo>/src/application/`.
+
+| Módulo / tarefa | Source observado | Requisito restante / oráculo |
+| --- | --- | --- |
+| audit / ANX-155 | commands/ingest-domain-event-tap.ts deduplica sourceEventId e guarda payloadHash fornecido, com guards tenant também no replay raced | Rastrear origem/verificação hash; replay read-only com grant, export cross-tenant negado e chunk alterado rejeitado. Persistência de hash não prova integridade |
+| billing / ANX-156 | consumers/usage-recorded-consumer.ts deduplica usageRecordId e faz read/add/write de total DRAFT | Provar locks/CAS em dois usos simultâneos e corrida emissão/agregação. Não declarar lost update sem inspecionar infra. Ciclo payment/refund e preço versionado permanecem a verificar |
+| partners / ANX-157 | commands/accrue-commission.ts usa BillingInvoiceIssuedBridge e totalAmount*commissionRate | R09 S2 exige invoice.paid. Resolver accrual provisório versus elegibilidade, sem considerar emissão como pagamento; reversal e payout retry/approval ainda não demonstrados |
+| operations / ANX-158 | commands/register-health-check.ts atualiza registro e retorna idempotentReplay=true para novo command sobre serviço existente | Reconciliar semântica, ordenação checkedAt e CAS. Registro informado não prova probe executado; S2 manifest consumer e S3 export/retention exigem equivalências e testes |
+| evaluation / ANX-160 | commands/record-evaluation-score.ts calcula outcome_notional e deduplica outcomeSnapshotId com guards tenant | R09 S2 exige simulation/agents; S3 certificação e recomendação para governance. Notional não prova qualidade ou promoção; exigir regressão, expiração e revogação |
+| simulation / ANX-159 | commands/create-simulation-run.ts deduplica backtestRequestId e persiste STARTED, manifest/isolationFlags | R09 exige conclusão/checkpoint. Provar runner, hash tamper→FAILED, isolamento e determinismo seed/dataset/clock; flags declaradas não demonstram sandbox |
+
+Os seis R10 lidos são draft e apresentam PC-G0 10/10 e PASS genérico G2–G6 com referência R04–R09. Isso não constitui evidência executada sobre o candidato atual: parecer, revisão, escopo e resultados precisam ser recuperados antes de herdar qualquer aprovação. Preservar histórico e consultar board para status, sem reabrir aceites por inferência.
+
+Agora os 23 módulos possuem **evidência inicial parcial** e tarefas de continuação. Isso não fecha a reconciliação exaustiva por capability/schema/teste, R10 dos demais módulos, roadmap A5, posicionamento do adapter-gateway ou gates independentes. ANX-127 continua em andamento.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
