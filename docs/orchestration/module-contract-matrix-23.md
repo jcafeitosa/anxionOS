@@ -791,6 +791,22 @@ Fontes: [R09](./structure-debate/partners/R09-dev-plan.md) e [R10](./structure-d
 
 Atribuição, elegibilidade, antifraude, ajustes/clawback e registro comercial da ANX-157 permanecem no delta. “Ledger comercial” na issue significa rastreio de obrigações/comissões do owner partners, não novo ledger financeiro que substitui accounting; formalizar interface de postings conforme contrato. Nenhuma comissão/payout/refund ou teste financeiro foi executado, e nenhum vendor foi escolhido. Rastreio transitivo R04–R08 e resolução invoiceIssued/paid continuam pendentes.
 
+### 6.31.1. Disposição issued/paid e interface contábil — ANX-127
+
+**Fontes e precedência:** [partners R04](./structure-debate/partners/R04-contracts-events.md) define consumo de `billing.invoice.paid.v1` e `billing.refund.processed.v1`; [R08 D-PTR-002/004](./structure-debate/partners/R08-decision-log.md) mantém comissão em partners e idempotência invoice/referral; R09 S2/G3-PTR-S2-01 exige commission on paid. Esses contratos de planejamento orientam a correção, não a conveniência do bridge atual. Em 2026-09-08, `accrue-commission.ts` foi relido: createInvoiceIssuedConsumer usa BillingInvoiceIssuedBridge e mapInvoiceIssuedToAccrualInput para chamar accrueCommission, que grava accrual e publica commission.accrued. Inspeção estática, sem emissão ou pagamento.
+
+**Disposição:** invoice issued comprova emissão, não recebimento. Não dispara comissão elegível nem autoriza payout. A origem de elegibilidade prevista é o fato de pagamento validado por billing, vinculado à invoice e à regra comercial aplicável em partners. Uma estimativa sobre invoice emitida, se implementada, deve ser explicitamente provisória e não reutilizar accrued/paid como promessa de liquidação. Fatura paga, comissão reconhecida e repasse liquidado são fatos diferentes; o primeiro não prova os seguintes.
+
+**Ownership:** billing valida e publica seus fatos comerciais; partners calcula/acompanha obrigações de comissão e reversões por regra versionada; accounting valida e registra os lançamentos financeiros conforme seu contrato. Evento partners não concede acesso ao repositório contábil. “Ledger comercial” significa histórico de obrigações de partners, não segundo ledger financeiro. A interface deve vincular fato de origem, tenant, invoice/referral, moeda, valor e regra, com resposta/evento contábil rastreável. Scheduling de payout não é settlement e não reduz saldo por si. O plano de contas e momento exato de reconhecimento permanecem no slice accounting, sem regra fiscal inventada aqui.
+
+**Migração e compatibilidade planejadas (ANX-156/157/152/132):** inventariar bridge, produtores, consumidores, journal, accruals e postings já existentes. Desabilitar a criação de novas comissões elegíveis a partir de issued no cutover; habilitar paid somente com schema/autenticidade/causalidade e deduplicação testados. Não renomear issued para paid, reconstruir pagamento por valor de invoice ou apagar histórico. Accrual legado sem prova de pagamento fica explicitamente não comprovado para payout; reconciliação pode vinculá-lo a pagamento verificável ou produzir ajuste auditável. Paid posterior não pode duplicar a mesma obrigação invoice/referral já reconciliada.
+
+Postings financeiros existentes exigem revisão e eventual ajuste compensatório pelo dono accounting, nunca delete ou escrita direta de partners. Refund/reversal referencia fato original, respeita moeda/regra e processa duplicatas, parcialidade e eventos fora de ordem. Regras para pagamentos parciais e base comissionável devem ser fechadas no contrato comercial antes de habilitar esse caso, sem presumir que toda invoice foi paga integralmente.
+
+Leitores contábeis e comerciais compatíveis devem preceder o novo produtor. Rollback suspende novos accruals/payouts afetados, preservando inbox/journal e obrigações confirmadas; não reativa o bridge issued como caminho de elegibilidade. FAILED confirmado e UNKNOWN não são equivalentes: transferência incerta exige reconciliação, não retry cego. Esta entrega não agenda nem executa cobrança, refund ou repasse.
+
+**Oráculos delegados:** issued isolado não cria elegibilidade; paid válido gera uma obrigação idempotente; paid duplicado ou tardio após legado reconciliado não duplica; tenant/referral incorreto é negado; refund repetido não duplica reversão; payout scheduled não aparece como settled; emissão de evento comercial não prova posting financeiro; crash/replay preserva correlação e diferenças ficam explícitas até reconciliação. ANX-156/157/152/132 devem executar os casos em sandbox autorizado. Disposição documental sujeita à revisão independente; nenhum schema, consumer ou migration foi alterado.
+
 ## 6.32. Rastreio por capacidade — operations R09/R10
 
 Fontes: [R09](./structure-debate/operations/R09-dev-plan.md) e [R10](./structure-debate/operations/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma register-health-check/create-incident e ports UoW/journal. Continuação ANX-158; ANX-169/170 tratam restore e readiness operacional.
@@ -862,7 +878,7 @@ Conflitos a consolidar:
 | Conflito | Fonte nesta matriz | Filhos envolvidos |
 | --- | --- | --- |
 | Submit, risco/reserva e permits | §§6.23–6.25 | ANX-148/149/150/151, governance ANX-136 |
-| Invoice issued versus paid e interface partners/accounting | §§6.26, 6.30–6.31 | ANX-152/156/157 |
+| Invoice issued versus paid e interface partners/accounting | §§6.26, 6.30–6.31; disposição/migração §6.31.1, aguardando revisão independente | ANX-152/156/157/132 |
 | Preço live versus modo de execução REAL | §6.20; disposição e migração planejada no contrato P06 §1.1, aguardando revisão independente | ANX-145/146/132/161/163 |
 | Quem aplica promoção versus quem avalia | §6.21; disposição publicação/backtest/promoção e migração planejada no contrato P09 §6.1/10, aguardando revisão independente | ANX-147/160/171/132, governance ANX-136 |
 | Envelopes coexistentes e idempotency UUID/string | §6.11; disposição e compatibilidade planejada no contrato P01/P02, aguardando revisão independente; associação do dispatch depende do placement | ANX-130/132/161 |
