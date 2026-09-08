@@ -1421,7 +1421,7 @@ Fonte primária: [R08 decision log](./structure-debate/portfolios/R08-decision-l
 
 ## 6.28. Rastreio por capacidade — performance R09/R10
 
-Fontes: [R09](./structure-debate/performance/R09-dev-plan.md) e [R10](./structure-debate/performance/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma record-outcome-snapshot, ledger-posted-consumer e ports UoW/journal. ANX-154 executa delta.
+Fontes: [R09](./structure-debate/performance/R09-dev-plan.md) e [R10](./structure-debate/performance/R10-g0-handoff.md), relidos em 2026-09-08. O rastreio transitivo **D-PERF-001..005** está em **§6.28.1** (ANX-213). Fonte primária: [R08 decision log](./structure-debate/performance/R08-decision-log.md). Inventário parcial: record-outcome-snapshot, ledger-posted-consumer e ports UoW/journal. ANX-154 executa delta.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -1435,13 +1435,25 @@ Fontes: [R09](./structure-debate/performance/R09-dev-plan.md) e [R10](./structur
 | R09 G5-PERF-01 duplicate ledger | Parcial: dedupe por journalEntryId observado §6.8 | ANX-154: replay concorrente não dobra resultado; commandId aleatório não implica ausência de dedupe, testar chave causal |
 | R09 G5-PERF-02 divergence | Não verificado | ANX-154/153/152: snapshot divergente ledger/posição sinalizado, não inventar reconciliação silenciosa para fechar P&L |
 | R09 S5 graph | Deferido; stub não é produto | ANX-138: projeção derivada, checkpoint/rebuild, ACL e lineage sem ledger/métrica autoritativa Neo4j |
-| R10 PC-G0 10/10 e PASS G2–G6 | Afirmação genérica referenciando R04–R09, sem relatório/candidato detalhado no R10 | ANX-127/154/181: recuperar definições/testes/pareceres originais e revalidar candidato; não herdar aprovação pelo resumo |
+| R10 PC-G0 10/10 e PASS G2–G6 | Afirmação genérica referenciando R04–R09, sem relatório/candidato detalhado no R10 | **D-PERF-001..005** em §6.28.1 (ANX-213); G5-PERF não executado |
 
-Realizado/não realizado, fees/FX, fluxos externos, benchmarks e atribuição agente/estratégia/portfolio da ANX-154 permanecem requisitos adicionais ao R09 resumido. Oráculos devem separar aportes/retiradas de rendimento e fechar com ledger/valuation por período/moeda conforme fórmula aprovada; nenhum número ou método financeiro foi inventado neste incremento. Não foi calculado/publicado P&L nem executado teste financeiro; rastreio transitivo de R04–R08 e definições continua pendente.
+**D-PERF-001..005** estão em §6.28.1; fórmulas/oráculos executáveis permanecem ANX-154/181.
+
+### 6.28.1. A1 — disposição transitiva performance (ANX-213)
+
+Fonte primária: [R08 decision log](./structure-debate/performance/R08-decision-log.md) (relido 2026-09-08).
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-PERF-001 | performance dono agregados R03 | Aceito v1 | ANX-154 | spec003 |
+| D-PERF-002 | Métricas oficiais; não reescreve ledger nem posição | Aceito v1 | ANX-154/152/153 | Derivado |
+| D-PERF-003 | PG autoritativo | Aceito v1 | ANX-154 | ADR0004 |
+| D-PERF-004 | OfficialMetricDefinition versionada; rebuild idempotente | Aceito v1 | ANX-154 S4 | Fórmula aprovada |
+| D-PERF-005 | graph:performance:v1 async | Aceito v1 | ANX-138/154 | S5 defer |
 
 ## 6.29. Rastreio por capacidade — audit R09/R10
 
-Fontes: [R09](./structure-debate/audit/R09-dev-plan.md) e [R10](./structure-debate/audit/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma ingest-domain-event-tap, domain-event-tap-consumer e UoW/journal. Continuação ANX-155.
+Fontes: [R09](./structure-debate/audit/R09-dev-plan.md) e [R10](./structure-debate/audit/R10-g0-handoff.md), relidos em 2026-09-08. O rastreio transitivo **D-AUD-001..005** está em **§6.29.1** (ANX-214). Fonte primária: [R08 decision log](./structure-debate/audit/R08-decision-log.md). Inventário parcial: ingest-domain-event-tap, domain-event-tap-consumer e UoW/journal. Continuação ANX-155.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -1453,13 +1465,25 @@ Fontes: [R09](./structure-debate/audit/R09-dev-plan.md) e [R10](./structure-deba
 | R09 G5-AUD-02 mutable chunk rejected | Parcial: payloadHash armazenado não prova verificação, conforme §6.9 | ANX-155: calcular/verificar digest contra fonte confiável, chunk alterado rejeitado e falha auditada; não confiar no hash fornecido pelo mesmo conteúdo |
 | R09 S4 HTTP | Não verificado integralmente | ANX-155: busca/leitura/export/replay com contratos e erros, paridade humano/agente e limites de consulta |
 | R09 S4 graph | Deferido; stub não é runtime | ANX-138: lineage derivada/checkpoint/rebuild/ACL; audit não substitui journals autoritativos dos domínios |
-| R10 PC-G0 10/10 e PASS G2–G6 | Resumo histórico referenciando R04–R09 sem parecer detalhado | ANX-127/155/181: recuperar schemas/decisões/relatórios e revalidar candidato; não herdar PASS pelo resumo |
+| R10 PC-G0 10/10 e PASS G2–G6 | Resumo histórico referenciando R04–R09 sem parecer detalhado | **D-AUD-001..005** em §6.29.1 (ANX-214); G5-AUD não executado |
 
-O delta ANX-155 exige trilha antes/depois e cadeia decisão→fill→ledger, redaction/retenção e busca autorizada, além dos quatro cenários resumidos R09. Evidência ausente ou digest inválido deve aparecer como lacuna, não explicação fabricada. Nenhum export, replay, leitura de dados financeiros reais ou teste integrado foi executado. Rastreio transitivo R04–R08 permanece pendente.
+**D-AUD-001..005** estão em §6.29.1; replay/export real permanecem ANX-155/181.
+
+### 6.29.1. A1 — disposição transitiva audit (ANX-214)
+
+Fonte primária: [R08 decision log](./structure-debate/audit/R08-decision-log.md) (relido 2026-09-08).
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-AUD-001 | audit dono agregados R03 | Aceito v1 | ANX-155 | Flight Recorder |
+| D-AUD-002 | Flight Recorder e DeltaRef ownerDomain=audit; não segundo ledger | Aceito v1 | ANX-155 | Sem autoridade financeira |
+| D-AUD-003 | PG autoritativo | Aceito v1 | ANX-155 | ADR0004 |
+| D-AUD-004 | DeltaRef payload imutável; replay exige grant audit.replay read-only | Aceito v1 | ANX-155/136 G3-S3 | Zero efeito |
+| D-AUD-005 | graph:audit:v1 async | Aceito v1 | ANX-138/155 | S4 defer |
 
 ## 6.30. Rastreio por capacidade — billing R09/R10
 
-Fontes: [R09](./structure-debate/billing/R09-dev-plan.md) e [R10](./structure-debate/billing/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma create-subscription, issue-invoice, usage-recorded-consumer e UoW/journal. ANX-156 executa delta; quatro linhas do R09 não cobrem sozinhas o ciclo comercial solicitado.
+Fontes: [R09](./structure-debate/billing/R09-dev-plan.md) e [R10](./structure-debate/billing/R10-g0-handoff.md), relidos em 2026-09-08. O rastreio transitivo **D-BIL-001..005** está em **§6.30.1** (ANX-215). Fonte primária: [R08 decision log](./structure-debate/billing/R08-decision-log.md). Inventário parcial: create-subscription, issue-invoice, usage-recorded-consumer e UoW/journal. ANX-156 executa delta.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -1473,11 +1497,23 @@ Fontes: [R09](./structure-debate/billing/R09-dev-plan.md) e [R10](./structure-de
 | ANX-156 cancelamentos/refunds/webhooks | Não demonstrado no inventário | ANX-156: origem/assinatura, duplicata/out-of-order, refund/reversal ligados ao pagamento, idempotência e sandbox autorizado; nenhuma cobrança real por autorização implícita |
 | ANX-156 segregação trading/entitlements | Não verificado em execução | ANX-156/152/157: capital financeiro isolado, accounting e partners consomem fatos publicados sem escrita privada; reversão comercial rastreável |
 
-Falta recuperar R04–R08 para schemas e cenários detalhados; o inventário limitado não comprova ausência universal dos caminhos restantes. Não foi emitida invoice, criada assinatura, recebido webhook ou executado teste financeiro neste incremento. Nenhum vendor de pagamento foi escolhido.
+**D-BIL-001..005** estão em §6.30.1; ciclo comercial executável permanece ANX-156/181. Nenhum vendor de pagamento foi escolhido.
+
+### 6.30.1. A1 — disposição transitiva billing (ANX-215)
+
+Fonte primária: [R08 decision log](./structure-debate/billing/R08-decision-log.md) (relido 2026-09-08).
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-BIL-001 | billing dono agregados R03 | Aceito v1 | ANX-156 | Comercial |
+| D-BIL-002 | Dono Subscription/Invoice/Refund; consome connections.usage.recorded.v1 async | Aceito v1 | ANX-156/141 | Sem ledger |
+| D-BIL-003 | PG autoritativo | Aceito v1 | ANX-156 | ADR0004 |
+| D-BIL-004 | UsageAggregation idempotente por usageRecordId | Aceito v1 | ANX-156 S2 | InvoiceLine ref |
+| D-BIL-005 | graph:billing:v1 async | Aceito v1 | ANX-138/156 | S4 defer |
 
 ## 6.31. Rastreio por capacidade — partners R09/R10
 
-Fontes: [R09](./structure-debate/partners/R09-dev-plan.md) e [R10](./structure-debate/partners/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma register-partner/accrue-commission e ports UoW/journal. ANX-157 executa delta sem transferências reais.
+Fontes: [R09](./structure-debate/partners/R09-dev-plan.md) e [R10](./structure-debate/partners/R10-g0-handoff.md), relidos em 2026-09-08. O rastreio transitivo **D-PTR-001..005** está em **§6.31.2** (ANX-216). Fonte primária: [R08 decision log](./structure-debate/partners/R08-decision-log.md). Disposição issued/paid permanece em **§6.31.1**. Inventário parcial: register-partner/accrue-commission e ports UoW/journal. ANX-157 executa delta.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -1488,7 +1524,7 @@ Fontes: [R09](./structure-debate/partners/R09-dev-plan.md) e [R10](./structure-d
 | R09 G3-PTR-S3-03 tenant | Não verificado | ANX-157/131: parceiro vê apenas escopo permitido em comandos/queries/replay/export, sem dados de outro parceiro/agency |
 | R09 S4 HTTP | Não verificado integralmente | ANX-157/167: APIs e console Partner com comissões calculadas/elegíveis/pagas distinguidas, erros e aprovação verificáveis |
 | R09 S4 graph | Deferido; stub não é runtime | ANX-138: projeção/referral/lineage derivada e ACL, sem estado comercial autoritativo Neo4j |
-| R10 PC-G0 10/10 e PASS G2–G6 | Histórico genérico remete R04–R09 | ANX-127/157/181: recuperar schema/decisões/G5 e evidência do candidato; não herdar aprovação do resumo |
+| R10 PC-G0 10/10 e PASS G2–G6 | Histórico genérico remete R04–R09 | **D-PTR-001..005** em §6.31.2 (ANX-216); issued/paid em §6.31.1 |
 
 Atribuição, elegibilidade, antifraude, ajustes/clawback e registro comercial da ANX-157 permanecem no delta. “Ledger comercial” na issue significa rastreio de obrigações/comissões do owner partners, não novo ledger financeiro que substitui accounting; formalizar interface de postings conforme contrato. Nenhuma comissão/payout/refund ou teste financeiro foi executado, e nenhum vendor foi escolhido. Rastreio transitivo R04–R08 e resolução invoiceIssued/paid continuam pendentes.
 
@@ -1507,6 +1543,18 @@ Postings financeiros existentes exigem revisão e eventual ajuste compensatório
 Leitores contábeis e comerciais compatíveis devem preceder o novo produtor. Rollback suspende novos accruals/payouts afetados, preservando inbox/journal e obrigações confirmadas; não reativa o bridge issued como caminho de elegibilidade. FAILED confirmado e UNKNOWN não são equivalentes: transferência incerta exige reconciliação, não retry cego. Esta entrega não agenda nem executa cobrança, refund ou repasse.
 
 **Oráculos delegados:** issued isolado não cria elegibilidade; paid válido gera uma obrigação idempotente; paid duplicado ou tardio após legado reconciliado não duplica; tenant/referral incorreto é negado; refund repetido não duplica reversão; payout scheduled não aparece como settled; emissão de evento comercial não prova posting financeiro; crash/replay preserva correlação e diferenças ficam explícitas até reconciliação. ANX-156/157/152/132 devem executar os casos em sandbox autorizado. Disposição documental sujeita à revisão independente; nenhum schema, consumer ou migration foi alterado.
+
+### 6.31.2. A1 — disposição transitiva partners (ANX-216)
+
+Fonte primária: [R08 decision log](./structure-debate/partners/R08-decision-log.md) (relido 2026-09-08). Conflito issued/paid: §6.31.1.
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-PTR-001 | partners dono agregados R03 | Aceito v1 | ANX-157 | Comissões |
+| D-PTR-002 | Dono commission; ledger via partners.commission.accrued.v1 | Aceito v1 | ANX-157/152 | Não duplica accounting |
+| D-PTR-003 | PG autoritativo | Aceito v1 | ANX-157 | ADR0004 |
+| D-PTR-004 | Commission idempotente por invoiceId+referralId | Aceito v1 | ANX-157 S2 | Paid não issued |
+| D-PTR-005 | graph:partners:v1 async | Aceito v1 | ANX-138/157 | S4 defer |
 
 ## 6.32. Rastreio por capacidade — operations R09/R10
 
