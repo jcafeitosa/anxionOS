@@ -391,6 +391,22 @@ A ordem de entrega é:
 
 Fontes de referência operacional: [NautilusTrader](https://nautilustrader.io/docs/latest/), [GoCryptoTrader](https://github.com/thrasher-corp/gocryptotrader), [Hummingbot](https://hummingbot.org/docs/), [Freqtrade](https://docs.freqtrade.io/en/latest/), [XChange](https://github.com/knowm/XChange), [Cryptofeed](https://github.com/bmoscon/cryptofeed) e [MetaTrader 5 Python Integration](https://www.mql5.com/en/docs/python_metatrader5).
 
+## Reconciliação de implementação — ANX-127 / ANX-161
+
+Inspeção estática de 2026-09-08; não homologa runtimes, PAPER, REAL ou capacidades de vendors. ANX-117 é origem histórica; a continuação está em ANX-161 (contrato/SDK), ANX-162 (infra) e ANX-174–180 (engines).
+
+| Tema | Source / diferença observada | Critério de continuação |
+| --- | --- | --- |
+| Dispatch durável | `backend/modules/adapter-gateway/src/application/commands/dispatch-adapter-command.ts` chama transport dentro da TX antes de gravar dispatch; falha vira AGW_TRANSPORT_FAILED | ANX-161: crash/timeout remoto com estado UNKNOWN e reconciliação; não inferir atomicidade entre PG e processo externo |
+| Resultado | Mesmo handler transforma outcome diferente de ACCEPTED em REJECTED no command result | Separar confirmação de transporte de resultado financeiro/job; nenhum FILLED/PARTIAL/UNKNOWN pode ser reinterpretado silenciosamente como rejeição |
+| Negotiation / homologação | `backend/packages/contracts/src/adapter-gateway/types.ts`: manifesto tem digest/capabilities/ambiente, mas não portVersion nem status de homologação | Versionar contrato e provar compatibilidade, suspensão e registry antes de novos efeitos; shape de exemplo não equivale a schema publicado |
+| Data-plane | `adapterCommandV1Schema` em commands.ts exige order/intent/permit mesmo quando requestedCapabilities inclui marketData | O caminho financeiro descrito acima não é contrato genérico para leitura. Reconciliar contratos separados e autoridade de dados; não fabricar permit financeiro para consulta |
+| Ownership | ADAPTER_GATEWAY_OWNER_DOMAIN e persistência própria existem sob modules/adapter-gateway | Posicionamento permanece pendente frente ao baseline de 23 módulos. Nenhum 24º domínio é aceito implicitamente; registrar decisão e migração antes de mudar ownership |
+
+As formulações anteriores “sem alterar contrato central/core” descrevem o objetivo de isolar integrações que já cabem no port. **Não são garantia para capacidades com semântica nova**: estas exigem proposta/ADR aplicável, schemas versionados, migração e revisão dos consumidores. Peculiaridades de tradução ficam no adapter; regra institucional nova não pode ser escondida em profile.
+
+Os próximos executores devem rastrear imports, registry/ports, adapters reais, testes e limites do slice antes de implementar o delta. Esta seção registra lacunas; não resolve silenciosamente a decisão de placement nem altera o código.
+
 ## Dependências e handoff
 
 Depende dos contratos P01/P02, do debate de execution e dos contratos P06. A implementação deve abrir slices próprias para:
