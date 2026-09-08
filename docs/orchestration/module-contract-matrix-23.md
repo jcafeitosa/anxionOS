@@ -385,6 +385,39 @@ Fontes: [R09](./modules/governance/R09-dev-plan.md) e [R10](./modules/governance
 
 A busca de delegation/mandate nos paths governance/contracts/API encontrou schemas, não execução equivalente demonstrada. Classificação é parcial/não verificada, não ausência universal. Rastreio transitivo das rodadas anteriores e consolidação de conflitos continuam na ANX-127. Nenhum grant ou aprovação real foi criado.
 
+## 6.15. Rastreio por capacidade — graph R09/R10
+
+Fontes: [R09](./structure-debate/graph/R09-dev-plan.md) e [R10](./structure-debate/graph/R10-g0-handoff.md), relidos integralmente em 2026-09-08; ANX-138 é a continuação. Inventário atual confirma arquivos de handlers, workers e testes, mas nenhum teste graph foi executado neste incremento. Paths abaixo são relativos a `backend/modules/graph/src/`, salvo indicação.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1 contratos, migrations 0000–0003, seed e registry generation | Não revalidado integralmente; teste ensure-schema presente no inventário | ANX-138/132: schemas/envelope/erros/catálogo T01–T20, drift seed↔PG, migração e bootstrap idempotentes |
+| R09 S2 registry, sub-plan e ports | Não verificado em execução; testes registry/ports presentes | ANX-138: lookup e allowlist de edges, sub-plano não registrado falha no bootstrap; domínio sem framework |
+| R09 S3 adapter/constraints / G5-01 / AR01 | Parcial por inventário e desvios na §6.4; testes de constraints/adapter presentes | ANX-138/128: adapter Neo4j privado, import cross-module negado, nenhum acesso privado a graph_*; credenciais só infra/secrets |
+| R09 startup / R10 DEP-03..07 | Não verificado em execução | ANX-138/129: ausência de Neo4j/credenciais falha nos runtimes dependentes, sequência schemas→registry→HTTP→workers; local-only permite L1 sem Redis apenas no modo documentado |
+| R09 S4 / G3-01 / G5-05 | Parcial: application/projections/inbox/process-with-inbox.ts e workers/projection-consumer.ts presentes | ANX-138/130: dedupe eventId+consumer, crash antes/depois da mutação e ack; prova real PG+Neo4j. Nome do teste “atômico” não estabelece TX distribuída |
+| R09 S4 organizations+identity / R10 DEP-01/02/06 | Parcial: organizations e governance projectors presentes; identity smoke não demonstrado neste inventário | ANX-138: rastrear evento/símbolo equivalente, oráculos Membership/User/Grant, ordering e revision. RB-D04 histórico não significa grant projector ausente atualmente |
+| R09 poison / G3-07 / R10 R-GR-01 | Não verificado em execução; teste poison-pill presente | ANX-138: quinta falha conforme política documentada leva quarantine/DLQ/ack; sem retry infinito, segredo ou bloqueio de fila |
+| R09 G5-03 / R10 R-GR-06 | Não verificado | ANX-138/129/155: payload_ref redigido, ACL e retenção; inspeção de logs/DLQ em fixture, não segredo real |
+| R09 S5 / G3-06 / R10 full swap e R-GR-02 | Parcial: application/rebuild/full-generation-swap.ts e workers/rebuild-worker.ts presentes | ANX-138: drain→pause→N+1→replay→F0→swap→resume, ordem ownerDomain, leitura consistente e recuperação de falha em cada etapa. Limite pending 100k, batch 100/inflight 3 são requisitos do plano, não medição atual |
+| R09 S6 / G3-09 / R10 cache e R-GR-04 | Não verificado em execução; testes cache-key, redis-invalidate e graph-cache-g3-09 presentes | ANX-138: chave epoch-aware, L1 30s, DENY 60s conforme contrato, invalidate cross-pod; ALLOW/intentHash fresh, revogação impede stale autorização |
+| R09 S7 T01/T03 / G3-04 | Parcial: traversal-handlers.ts e traversal/t01-grant-evaluation.ts presentes | ANX-138: respostas reais autorizadas, fresh/cache miss intentHash e explain com scope; smoke não prova todos os caminhos |
+| R09 node.get / G3-02/03 | Parcial: http/node-handlers.ts e pending-projection-registry.ts presentes | ANX-138: distinguir 404 ausente e 409 não projetado; poll minProjectionGeneration só devolve 200 quando satisfaz condição, timeout explícito |
+| R09 nodes.batchGet / G3-05 | Não verificado em execução | ANX-138: 51 keys rejeitadas 422 conforme contrato, limites/escopo/erros por item e nenhuma leitura cross-tenant |
+| R09 dispatcher node.create/update / G5-02 | Não verificado | ANX-138: comando para Grant vai ao handler público governance, não mutação direta Neo4j; mesma autoridade humano/agente |
+| R09 admin / G3-08 / G5-04/05 / R10 R-GR-03 | Parcial: http/admin-handlers.ts presente | ANX-138/155: PLATFORM+audit_manifest_id obrigatório, manual replay idempotente e rebuild sem PLATFORM 403 |
+| R09 rate limit / G3-10 / G5-06 | Parcial: http/graph-rate-limit.ts presente | ANX-138: 61ª request/min e herd 100 paralelas durante catch-up respeitam política 60/min; teste multi-instância se for promessa do runtime |
+| R09 S8 partial / GK-R08-01 / R10 D-GR-036 | Planejado, go/no-go não demonstrado | ANX-138: protótipo T07 cross-domain com read fence e oráculo; sem prova, manter full swap. Não migrar graph_domain_generation por antecipação |
+| R09 S8 OpenAPI/graphDlqReplayInputSchema | Planejado, não verificado | ANX-138/132: contrato/publicação Scalar e comando contracts:openapi ou equivalente validado; sem afirmar ferramenta inexistente pelo nome |
+| R10 auto-replay batch D-GR-039 | Fora do v1, sem autorização implícita de replay automático | ANX-138: manter manual como baseline; antes de incluir batch, fechar política, limite, cancelamento, autorização e auditoria |
+| R10 T04–T20 completos | Deferido no v1; inventário contém smoke t01-t05, não prova todas as travessias | ANX-138 com owners consumidores: mapear cada traversal aplicável a schema/handler/oráculo; inaplicabilidade exige disposição explícita, não stub |
+| R09 benchmarks / R10 SLO premium D-GR-040/041 | Objetivos não medidos: T01 p99≤80ms L2 warm, ack p99≤2s a100evt/s, swap10k≤5min dev | ANX-138/170: benchmark reproduzível e ambiente/config; ANX-158 define operação/alertas. PagerDuty citado não é vendor homologado |
+| R10 Graph Explorer UI | Planejado fora P03 | ANX-164–167: navegação/explain por papel, limites e field masking; não fornecer credenciais ou Cypher livre ao usuário/agente |
+| R09 fixture/cleanup / R10 checklist | Teste graph-f0-reset-isolation presente; fixture e cleanup não executados | ANX-138/181: F0 sanitizado Agency/User/Membership/Grant; nunca executar DETACH DELETE ou truncate amplo em graph compartilhado |
+| R09 pré-requisitos / R10 AC-G0-01..08, PC-G0-01..10, H-01..05, B-01..03 e dependências | Histórico 9/10, upstream/restrições de slices não provam status atual | ANX-138/181: revalidar fontes/claims, wiring real e pareceres do candidato; ADR0001 proposto não vira aceito pelo debate |
+
+Esta tabela cobre agrupamentos explícitos R09/R10, mas não substitui rastreio transitivo de D-GR-001..044, T01–T20 individuais e schemas referenciados. Os valores de política do plano exigem configuração tipada e compatibilidade com contrato vigente; não foram aplicados nem homologados. Nenhum rebuild, replay, benchmark ou efeito externo foi executado.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
