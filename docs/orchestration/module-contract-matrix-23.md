@@ -1275,7 +1275,7 @@ Fonte primária: [R08 decision log](./structure-debate/risk/R08-decision-log.md)
 
 ## 6.25. Rastreio por capacidade — execution R09/R10
 
-Fontes: [R09](./structure-debate/execution/R09-dev-plan.md) e [R10](./structure-debate/execution/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma open-execution-session e submit-order, ports permit/venue-fill/UoW/journal. ANX-151 executa delta; ANX-163 integração PAPER, ANX-161 contratos de adapters.
+Fontes: [R09](./structure-debate/execution/R09-dev-plan.md) e [R10](./structure-debate/execution/R10-g0-handoff.md), relidos em 2026-09-08. O rastreio transitivo **D-EX-001..012** está em **§6.25.1** (ANX-210). Fonte primária: [R08 decision log](./structure-debate/execution/R08-decision-log.md). Inventário parcial: open-execution-session e submit-order, ports permit/venue-fill/UoW/journal. ANX-151 executa delta; ANX-163 PAPER; ANX-161 adapters.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -1293,9 +1293,34 @@ Fontes: [R09](./structure-debate/execution/R09-dev-plan.md) e [R10](./structure-
 | R09 S5 execution-go dispatch/report | Deferido | ANX-151/161/162: protocolo versionado, ack/reject/cancel/replace/report, negociação de capacidade e adapter homologado; engine externo não recebe autoridade institucional própria |
 | R09 S6 graph:execution:v1 | Deferido ao owner graph | ANX-138: Order/Fill como projeção derivada, checkpoint/rebuild/ACL, nunca ledger autoritativo |
 | R10 G4 secrets/bypass/cross-tenant / G5-EX-01..05 | Referências históricas, cinco cenários G5 não enumerados aqui | ANX-151/129/181: recuperar R07 e reproduzir em sandbox, credenciais isoladas e respostas redigidas; não herdar PASS textual |
-| R10 PC-G0-01..10 / spec003/P06/upstreams | Histórico documental | ANX-127/151/181: contratos atuais risk/decisions/capital/connections, claims e pareceres por candidato; g0_ready upstream não equivale à integração executada |
+| R10 PC-G0-01..10 / spec003/P06/upstreams | Histórico documental | **D-EX-001..012** em §6.25.1 (ANX-210); G5-EX não executado |
 
-O delta da ANX-151 inclui ack/reject/cancel/replace, UNKNOWN e crash recovery além do simulador inicial; não restringir a entrega futura a repetir S1–S2. Nenhuma ordem, sessão, fill, adapter ou teste financeiro foi acionado. Rastreio transitivo dos schemas/R07/R08 permanece pendente. Placement do gateway distribuído foi aprovado em 2026-09-08 (ADR0006); permits/EffectGate e integração executável seguem delegados a ANX-151/161/162.
+O delta da ANX-151 inclui ack/reject/cancel/replace, UNKNOWN e crash recovery além do simulador inicial. **D-EX-001..012** estão em §6.25.1; G5-EX e integração executável permanecem ANX-151/161/162/181. Placement ADR0006 aprovado; EffectGate não executado.
+
+### 6.25.1. A1 — disposição transitiva execution (ANX-210)
+
+Fonte primária: [R08 decision log](./structure-debate/execution/R08-decision-log.md) (relido 2026-09-08). Commands parciais existem (§6.25); esta subseção não revalida G3/G5 nem executa submit/fill real.
+
+**Saldo R08:** 12 decisões · aceitas v1: 11 · deferida: 1 (D-EX-010 execution-go S3).
+
+#### D-EX-001..012 (R08)
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-EX-001 | Dono Order, Fill, ExecutionSession, VenueAdapterRef | Aceito v1 | ANX-151 | spec003/P06 |
+| D-EX-002 | decisions TradeIntent separado — execution valida intentHash only | Aceito v1 | ANX-149/151 | P06 §2.1 |
+| D-EX-003 | Submit atômico: consume RiskPermit + ExecutionPermit + reservation | Aceito v1 | ANX-151/150/148 | TX única |
+| D-EX-004 | Fill→accounting/portfolios via execution.fill.confirmed.v1 async | Aceito v1 | ANX-152/153/151 | Sem ledger inline |
+| D-EX-005 | capital reservation referenciada; consumo no projector fill | Aceito v1 | ANX-148/151 | Dono capital |
+| D-EX-006 | connections dono secretRef; execution só VenueAdapterRef | Aceito v1 | ANX-141/129/151 | Sem secrets |
+| D-EX-007 | Duplicate fill idempotente / reject com ReconciliationCase | Aceito v1 | ANX-151 G3-S2-05 | EX_DUPLICATE_FILL |
+| D-EX-008 | PG autoritativo; zero SQLite order/fill | Aceito v1 | ANX-151 | ADR0004 |
+| D-EX-009 | SIMULATED+PAPER only v1; REAL/LIVE_TRADING rejeitado | Aceito v1 | ANX-151 | EX_MODE_FORBIDDEN |
+| D-EX-010 | execution-go defer S3; simulator inline TS em S1–S2 | Deferido S3 | ANX-151/161/162 | S1–S2 TS |
+| D-EX-011 | ReconciliationCase venue owner execution; financeiro accounting | Aceito v1 | ANX-151 S4 | UNKNOWN SLA |
+| D-EX-012 | clientOrderId idempotência por org+adapter | Aceito v1 | ANX-151 G3-S2-04 | Replay seguro |
+
+**Rodadas R01–R07:** R08 registrado. Homologação G3/G5, execution-go e adapters reais permanecem ANX-151/161/162/181.
 
 ## 6.26. Rastreio por capacidade — accounting R09/R10
 
@@ -1536,7 +1561,7 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 | capital §6.22 | D-CAP-001..012,015 → **§6.22.1** (ANX-207); lacuna 013..014 no R08 | ANX-148; G5-CAP e lifecycle reserva não executados |
 | decisions §6.23 | D-DC-001..015 → **§6.23.1** (ANX-208); conflito submit/risco em §6.23 | ANX-149/136; G5-DC e cadeia integrada não executados |
 | risk §6.24 | D-RK-001..010 → **§6.24.1** (ANX-209); D-RK-015 RLS ausente no R08 | ANX-150; G5-RK e pre-trade real não executados |
-| execution §6.25 | R04/R07/R08 → schemas, G5-EX-01..05, ordens/reconciliação | ANX-151/132; contracts adapters ANX-161; placement distribuído aprovado (ADR0006); contratos/migração ANX-161/162 |
+| execution §6.25 | D-EX-001..012 → **§6.25.1** (ANX-210); ADR0006 placement | ANX-151/161/162; G5-EX e adapters reais não executados |
 | accounting §6.26 | R04/R07/R08, spec003 → plano de contas, schemas e G5-ACC-01..03 | ANX-152; interface partners §6.31.1; regra fiscal não deduzida do evento |
 | portfolios §6.27 | R04/R07/R08, spec003 → lotes/valuation e G5-PF-01..03 | ANX-153; fixture temporal/checkpoint e método versionado antes de resultado |
 | performance §6.28 | R04–R08 → definições de métricas, fluxos externos, atribuição e oráculos | ANX-154; fechar com ledger/valuation, não só notional |
@@ -1563,7 +1588,7 @@ Trabalho documental **parcial** do item A4 (`405b8304`). Não equivale a PASS in
 | Placement gateway | ADR0006, §6.1/§6.34, spec gateway | ADR `1cfa7de6e7a98778f6c388e085790e5b1d5d8314b10e4e3cafe9e338869ce0c2` | `d70b8f91` → PASS F1 revalidado | **G1C3 F1 fechado** (ANX-192/193/194/195) |
 | Conflitos F1–F3 (P06/ops/gateway) | P06, ops, gateway, §6.34 | C2 em comentário `78b398b3` | `f18a2846` C1; `cf16914a` C2 | F1–F3 resolvidos; B1 removido por ADR0006 |
 | Cinco disposições contratuais | §6.34 tabela | hashes por linha na §6.34 | `400da37b`, `7542eb8e`, `1c5076a6`, `ac51f462`, `923d4cd8` | PASS restrito documental cada uma |
-| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** §6.12.1–6.24.1 (ANX-197–209); 10 módulos pendentes (§6.25+) |
+| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** §6.12.1–6.25.1 (ANX-197–210); 9 módulos pendentes (§6.26+) |
 | Pacote final A4 | esta §6.36 + §6.1 | ver comentários ANX-127 | pendente revisor integral | **A4 parcial** — não encerrar ANX-127 |
 
 Implementação futura permanece delegada aos filhos ANX-126 (ANX-128+); este pacote não homologa produto, engines ou testes financeiros.
