@@ -296,7 +296,7 @@ A matriz por capability ainda deve ligar catálogo, schemas, handler, superfíci
 
 ## 6.12. Rastreio por capacidade — identity R09/R10
 
-Fontes: [R09 completo](./modules/identity/R09-dev-plan.md) e [R10 completo](./modules/identity/R10-g0-handoff.md), relidos em 2026-09-08. Esta seção desdobra os requisitos explícitos desses dois artefatos; não atesta o conteúdo transitivo de todas as decisões D-IDN-001..024 ou rodadas R01–R08. ANX-134 continua responsável pelo delta de identity; ANX-127 pela completude documental.
+Fontes: [R09 completo](./modules/identity/R09-dev-plan.md) e [R10 completo](./modules/identity/R10-g0-handoff.md), relidos em 2026-09-08. Esta seção desdobra os requisitos explícitos desses dois artefatos; o rastreio transitivo **D-IDN-001..024** está em **§6.12.1** (ANX-197). Rodadas **R01–R05** permanecem em [structure-debate/identity/](./structure-debate/identity/) com crosswalk em [R08](./modules/identity/R08-decision-log.md); **R06–R08** têm fonte primária nos artefatos citados no R10. ANX-134 continua responsável pelo delta executável de identity; ANX-127 pela completude documental.
 
 | Requisito / fonte | Classificação e evidência | Disposição / verificação |
 | --- | --- | --- |
@@ -316,11 +316,44 @@ Fontes: [R09 completo](./modules/identity/R09-dev-plan.md) e [R10 completo](./mo
 | R10 RLS D-IDN-018 | Planejado, não provado por tenancy em application | ANX-131: implementação/roles/contexto/testes PG; fase histórica P09 não substitui sequência aceita atual |
 | R09/R10 projector D-IDN-020 | Planejado fora de identity, dono graph | ANX-138: eventos identity, idempotência, rebuild e revogação; sem duplicar grafo em identity |
 | R10 reactivatePrincipal DEF-06 | Planejado pós-suspend; recovery da ANX-134 deve desdobrar reativação explicitamente | ANX-134: autoridade, auditoria e estado restaurado; reativação não restaura grants ou sessões revogados por inferência |
-| R09 pré-requisitos / R10 DEP-01..06, AC-G0-01..08, PC-G0-01..10, H-01..04 | Evidência histórica documental, não revalidada para novo candidato. ANX-78 citado no R10 não é claim deste programa | ANX-134/181: novo G0 com issue, dependências atuais, fonte decisória, executor/crítico distintos e evidências. R06–R08 e decisões referenciadas ainda exigem rastreio transitivo na ANX-127 |
+| R09 pré-requisitos / R10 DEP-01..06, AC-G0-01..08, PC-G0-01..10, H-01..04 | Evidência histórica documental, não revalidada para novo candidato. ANX-78 citado no R10 não é claim deste programa | ANX-134/181: novo G0 com issue, dependências atuais, fonte decisória, executor/crítico distintos e evidências. **D-IDN-001..024** rastreados em §6.12.1 (ANX-197); R06–R08 mantêm limite de revalidação executável no candidato integrado |
 
 **Verificação executada:** `bun test tests/contracts/identity-events.test.ts` em backend, Bun 1.4.0, exit 0: **4 pass / 0 fail / 11 assertions**. Inspeção prévia confirmou testes puros de códigos de erro, normalização de comando, envelope registered e payload suspended. Não houve PG, NATS, Better Auth, operações de sessão nem teste de segurança integrado.
 
 O inventário de paths inicialmente retornou exit 2 porque `backend/tests/contracts/identity/` não existe; a busca posterior encontrou o arquivo `identity-events.test.ts`. O erro não foi interpretado como ausência de testes. Este incremento não fecha os demais módulos nem o aceite integral ANX-127.
+
+### 6.12.1. A1 — disposição transitiva D-IDN-001..024 (ANX-197)
+
+Fonte primária: [R08 decision log](./modules/identity/R08-decision-log.md) (tabela consolidada, relida 2026-09-08). Crosswalk **R01–R05** → D-IDN na mesma fonte; artefatos em [structure-debate/identity/](./structure-debate/identity/). Esta subseção **não** revalida código nem substitui G0/G3 de ANX-134; classifica cada decisão com owner, issue e limite explícito.
+
+| ID | Decisão (resumo) | Classificação | Disposição / issue | Evidência ou limite |
+| --- | --- | --- | --- | --- |
+| D-IDN-001 | Principal humano em PG `identity_principals` | Aceito v1/P0 | ANX-134 preserva baseline | Migration e register na §6.2; não revalidado integralmente neste candidato |
+| D-IDN-002 | Better Auth/sessão HTTP em `apps/api` | Aceito v1/P0 | ANX-128 composition root | identity não importa BA; wiring de sessão em ANX-134/130 |
+| D-IDN-003 | `principalId` canônico; `authUserId` só no boundary | Aceito v1/P0 | ANX-134/132 contratos | Teste envelope §6.12 parcial; campo em payload real não inspecionado |
+| D-IDN-004 | Agency/Membership/grants → organizations/governance | Aceito v1/P0 | ANX-135/136 | Fora do módulo identity; sem claim de execução aqui |
+| D-IDN-005 | Projeção Neo4j `:Principal` via eventos | Aceito v1/P0 | ANX-138 graph | Projector D-IDN-020 deferido; sem grafo em identity |
+| D-IDN-006 | `RegisterPrincipal` idempotente por `authUserId` | Aceito v1/P0 | ANX-134 G3-IDN-02 | Teste register existe; corrida não verificada neste incremento |
+| D-IDN-007 | Journal/outbox mesma transação PG | Aceito v1/P0 | ANX-134 G3-IDN-05 | UoW identity; falha outbox não verificada em execução |
+| D-IDN-008 | Queries fail-closed para `suspended` | Aceito v1/P0 | ANX-134 G3-IDN-03/04 | suspendPrincipal presente; re-suspend/corrida pendente |
+| D-IDN-009 | Adapter `IdentityPrincipalLookup` em organizations | Aceito v1/P0 | ANX-135 adapter | P-R7-03 deferido reavaliação; v1 aceita organizations |
+| D-IDN-010 | governance usa `PrincipalLookup` via organizations | Aceito v1/P0 | ANX-136 | Lookup indireto; sem adapter identity em packages |
+| D-IDN-011 | Eventos `ownerDomain: identity`, sufixo `.v1` | P1 pendente | ANX-134/132 | Código legado; normalização eventType aberta |
+| D-IDN-012 | Payload evento sem `authUserId` | P1 pendente | ANX-134/132 | Teste fixture §6.12; journal real não inspecionado |
+| D-IDN-013 | `@anxionos/contracts/identity/*` schemas públicos | P1 pendente | ANX-132 | Pacote contracts; matriz de campos incompleta |
+| D-IDN-014 | `suspendPrincipal` + `identity.principal.suspended.v1` | P1 pendente | ANX-134 | Command presente; evento persistido não provado |
+| D-IDN-015 | Consumer `apps/api:identity-sessions:v1` | P1 pendente | ANX-134/130 | Consumer em apps/api §6.2; NATS/skip registrado |
+| D-IDN-016 | `syncPrincipalEmail` hook BA → identity | P1 pendente | ANX-134 | Command sketch; hook não comprovado conectado |
+| D-IDN-017 | `ServicePrincipal` agregado + storage | Deferido P02+ | ANX-134 DEF-01 | execution-go; sem identidade implícita de execução |
+| D-IDN-018 | RLS PostgreSQL identity | Deferido P09 | ANX-131 | Tenancy PG; fase histórica não substitui sequência aceita |
+| D-IDN-019 | Rotas HTTP `/v1/identity/*` | Deferido | ANX-164–167/128 | operations P07; sem API pública v1 em identity |
+| D-IDN-020 | Consumer `graph:identity:v1` | Deferido P03 | ANX-138 DEF-05 | Dono graph; rebuild/idempotência fora identity |
+| D-IDN-021 | Bootstrap: eventing → identity → organizations → governance | Aceito v1/P0 | ANX-128/129 ordem | Bootstrap apps; não executado neste incremento |
+| D-IDN-022 | SQLite proibido para estado institucional identity | Aceito v1/P0 | ADR0004/PG | Política de storage; sem SQLite autoritativo |
+| D-IDN-023 | Principal global; tenancy via Membership | Aceito v1/P0 | ANX-135 membership | Sem tenant id em Principal |
+| D-IDN-024 | Testes P0 register/get | Aceito v1/P0 | ANX-134 regressão | Testes citados §6.2; suite parcial 4 pass identity-events |
+
+**Rodadas R06–R08 (limite A1):** R06 dependências → D-IDN-009/010/021; R07 riscos → D-IDN-011/012/018; R08 decision log → tabela acima. **R01–R05** não são reescritos linha a linha aqui; crosswalk R08 mapeia para D-IDN. Revalidação executável de DEP/AC-G0/PC-G0 permanece em ANX-134/181.
 
 ## 6.13. Rastreio por capacidade — organizations R09/R10
 
@@ -897,7 +930,7 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 
 | Módulo / fonte da pendência | Referência → requisito/grupo a detalhar | Filho / disposição |
 | --- | --- | --- |
-| identity §6.12 | D-IDN-001..024, R01–R08 e DEP/H/PC-G0 → lifecycle, eventos, sessão e dependências | ANX-134; schemas ANX-132; pareceres históricos ANX-181 |
+| identity §6.12 | D-IDN-001..024 → **§6.12.1** (ANX-197); R01–R05 structure-debate; R06–R08 com limite em §6.12.1 | ANX-134 executa P1/deferidos; schemas ANX-132; DEP/H/PC-G0 revalidação em ANX-134/181 |
 | organizations §6.13 | D-ORG-001..044, R01–R08 → queries/saga, convites, membership e ownership | ANX-135; isolamento ANX-131; recuperar parecer sem herdar G6 |
 | governance §6.14 | Rodadas/decisões anteriores → delegation, mandate, aprovação e autoridade temporal | ANX-136/137; fronteiras de permit na disposição P06 §2.1 |
 | graph §6.15 | D-GR-001..044, T01–T20 e schemas → traversals individuais, rebuild/temporalidade e políticas | ANX-138; não converter número de traversal em teste executado |
@@ -937,7 +970,7 @@ Trabalho documental **parcial** do item A4 (`405b8304`). Não equivale a PASS in
 | Placement gateway | ADR0006, §6.1/§6.34, spec gateway | ADR `1cfa7de6e7a98778f6c388e085790e5b1d5d8314b10e4e3cafe9e338869ce0c2` | `d70b8f91` → PASS F1 revalidado | **G1C3 F1 fechado** (ANX-192/193/194/195) |
 | Conflitos F1–F3 (P06/ops/gateway) | P06, ops, gateway, §6.34 | C2 em comentário `78b398b3` | `f18a2846` C1; `cf16914a` C2 | F1–F3 resolvidos; B1 removido por ADR0006 |
 | Cinco disposições contratuais | §6.34 tabela | hashes por linha na §6.34 | `400da37b`, `7542eb8e`, `1c5076a6`, `ac51f462`, `923d4cd8` | PASS restrito documental cada uma |
-| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 transitivo pendente** |
+| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** identity D-IDN §6.12.1 (ANX-197); demais módulos pendentes |
 | Pacote final A4 | esta §6.36 + §6.1 | ver comentários ANX-127 | pendente revisor integral | **A4 parcial** — não encerrar ANX-127 |
 
 Implementação futura permanece delegada aos filhos ANX-126 (ANX-128+); este pacote não homologa produto, engines ou testes financeiros.
