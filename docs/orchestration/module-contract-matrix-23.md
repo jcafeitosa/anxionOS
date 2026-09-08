@@ -1714,7 +1714,7 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 
 ## 6.36. Pacote incremental A4 — candidato integrado (ANX-127)
 
-Pacote documental A4 (`405b8304`) com **PASS_WITH_CONDITIONS** (`2ccab708`). Não equivale a `done` de ANX-127 nem aprovação de G2–G7. **Candidato C4** (G1 base): `d31f823d37042b45245245f7639d4bb5e0946a335c69e7f3c41566048410200d`. **Candidato C5** (pós-A4 housekeeping P1–P3): digest canônico em comentário ANX-127 `75ee206d` (hash de disco verificado no board, não inline — evita drift por auto-referência).
+Pacote documental A4 (`405b8304`) com **PASS_WITH_CONDITIONS** (`2ccab708`). Não equivale a `done` de ANX-127 nem aprovação de G2–G7. **Candidato C4** (G1 base): `d31f823d37042b45245245f7639d4bb5e0946a335c69e7f3c41566048410200d`. **Candidato C5** (pós-A4 housekeeping P1–P3): digest canônico em comentário ANX-127 `bcfec1c4` (hash de disco verificado no board, não inline — evita drift por auto-referência).
 
 | Critério (ANX-127) | Artefato / seção | Digest / referência | Parecer independente | Disposição |
 | --- | --- | --- | --- | --- |
