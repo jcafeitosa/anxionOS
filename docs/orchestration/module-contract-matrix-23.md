@@ -669,7 +669,7 @@ Fontes: [R09](./structure-debate/execution/R09-dev-plan.md) e [R10](./structure-
 | R10 G4 secrets/bypass/cross-tenant / G5-EX-01..05 | Referências históricas, cinco cenários G5 não enumerados aqui | ANX-151/129/181: recuperar R07 e reproduzir em sandbox, credenciais isoladas e respostas redigidas; não herdar PASS textual |
 | R10 PC-G0-01..10 / spec003/P06/upstreams | Histórico documental | ANX-127/151/181: contratos atuais risk/decisions/capital/connections, claims e pareceres por candidato; g0_ready upstream não equivale à integração executada |
 
-O delta da ANX-151 inclui ack/reject/cancel/replace, UNKNOWN e crash recovery além do simulador inicial; não restringir a entrega futura a repetir S1–S2. Nenhuma ordem, sessão, fill, adapter ou teste financeiro foi acionado. Rastreio transitivo dos schemas/R07/R08 e decisão de placement/permit permanecem pendentes.
+O delta da ANX-151 inclui ack/reject/cancel/replace, UNKNOWN e crash recovery além do simulador inicial; não restringir a entrega futura a repetir S1–S2. Nenhuma ordem, sessão, fill, adapter ou teste financeiro foi acionado. Rastreio transitivo dos schemas/R07/R08 permanece pendente. Placement do gateway distribuído foi aprovado em 2026-09-08 (ADR0006); permits/EffectGate e integração executável seguem delegados a ANX-151/161/162.
 
 ## 6.26. Rastreio por capacidade — accounting R09/R10
 
@@ -885,7 +885,7 @@ Disposições dos cinco conflitos — pareceres restritos históricos:
 | Publicação/backtest/promoção | P09 §6.1 e referência §6.34; ANX-147/160/171/132/136 | `ac51f462-7d28-4ef8-a763-93bc9d51e129`; P09 `4b23b67cf93f1b8aab8dd19bcc912c0f7f29fa8227f83bd8b4d6f3e454e3a65a` |
 | Envelopes e UUID/string | Plano P01/P02 de compatibilidade; ANX-130/132/161, placement da associação pendente | `923d4cd8-6841-4aa5-a0f8-ce05b2695115`; P01/P02 `a4b34a6599ebd4b0ad017e5d23ca532435c7ff523b00639d99fe6f293da47f08` |
 
-Todos são **G1 PASS restrito documental**, não implementação ou aprovação integrada. Digests registram o candidato de cada parecer; alterações posteriores exigem revalidação de impacto. C1 integrado recebeu CHANGES_REQUIRED (`13399514-1dd4-41e5-b9a4-7989c0dff49c`): ownership antigo, emissor EffectGate e saldo de pareceres; correções geram novo candidato. Placement continua decisão humana pendente. A5 e correção da §6.1 já realizadas não voltam como trabalho novo.
+Todos são **G1 PASS restrito documental**, não implementação ou aprovação integrada. Digests registram o candidato de cada parecer; alterações posteriores exigem revalidação de impacto. C1 integrado recebeu CHANGES_REQUIRED (`13399514-1dd4-41e5-b9a4-7989c0dff49c`): ownership antigo, emissor EffectGate e saldo de pareceres; correções geram novo candidato. Placement do gateway foi aprovado em 2026-09-08 (ADR0006); revalidação G1 integrada, implementação e gates G2+ permanecem pendentes e distintos da decisão humana. A5 e correção da §6.1 já realizadas não voltam como trabalho novo.
 
 ### Limite entre planejamento e implementação
 
