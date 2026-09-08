@@ -791,6 +791,28 @@ Fontes: [R09](./structure-debate/partners/R09-dev-plan.md) e [R10](./structure-d
 
 Atribuição, elegibilidade, antifraude, ajustes/clawback e registro comercial da ANX-157 permanecem no delta. “Ledger comercial” na issue significa rastreio de obrigações/comissões do owner partners, não novo ledger financeiro que substitui accounting; formalizar interface de postings conforme contrato. Nenhuma comissão/payout/refund ou teste financeiro foi executado, e nenhum vendor foi escolhido. Rastreio transitivo R04–R08 e resolução invoiceIssued/paid continuam pendentes.
 
+## 6.32. Rastreio por capacidade — operations R09/R10
+
+Fontes: [R09](./structure-debate/operations/R09-dev-plan.md) e [R10](./structure-debate/operations/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma register-health-check/create-incident e ports UoW/journal. Continuação ANX-158; ANX-169/170 tratam restore e readiness operacional.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1 incident/export/health schema | Parcial: create-incident/register-health-check presentes | ANX-158/132: estados, autoridade, scopes, contratos/erros e estado+journal+outbox; presença de create não prova lifecycle |
+| R09 S2 audit.manifest consumer | Não demonstrado no inventário | ANX-158/155: ingestão por contrato, digest/ACL e dedupe, manifest alterado/tenant errado não gera operação |
+| R09 S2 health probes | Parcial: registro existe, probe real não demonstrado | ANX-158/170: origem/checkedAt/stale e erro/timeout observáveis; corrigir semântica replay apontada §6.9 sem chamar registro informado de probe executado |
+| R09 S3 export lifecycle / G3-OPS-S3-01 / G5-OPS-01 | Não demonstrado | ANX-158/155/133: job idempotente, duplicata/retry/checkpoint/cancelamento e pacote autorizado; duas tentativas não criam duas operações não controladas |
+| R09 S3 retention ACL / G3-OPS-S3-02 | Não demonstrado | ANX-158: política/escopo/hold, pedido indevido negado e auditado; prazo ausente não autoriza deleção |
+| R09 G5-OPS-02 cross-tenant manifest | Não verificado | ANX-158/131/155: manifest/artefato/export de outra agency negados em criação, consulta e download, incluindo replay |
+| R09 S4 HTTP | Não verificado integralmente | ANX-158/165/166: API por papel/scope, contratos/erros/aprovação, visibilidade de pending/failed em vez de sucesso fictício |
+| R09 S4 graph | Deferido; stub não é runtime | ANX-138: incident/procedure lineage derivada, eventos/checkpoint/rebuild e ACL |
+| R10 PC-G0 10/10 e PASS G2–G6 | Histórico genérico referenciando R04–R09 | ANX-127/158/181: recuperar critérios e pareceres/candidato, sem herdar evidência de execução |
+| ANX-158 runbooks/incident lifecycle | Parcial: create-incident presente, restante não demonstrado | ANX-158: triagem/escalonamento/resolução e procedimentos versionados com responsáveis/evidência; não apagar incidentes para “resolver” |
+| ANX-158 legal hold/export/deleção | Não demonstrado | ANX-158: política aprovada, retenção de obrigações, preview/escopo e approval de ação perigosa, evidência de execução e limites; sem inventar prazos legais |
+| ANX-158 recovery sem LLM / ANX-169/170 | Planejado, provas operacionais não executadas | ANX-169: restore em ambiente isolado e runbook determinístico; ANX-170: SLI/SLO/carga/custo medidos, nenhuma prontidão24/7 por documento |
+| ANX-158 ações privilegiadas | Não verificado | ANX-158/136: grants/epoch/aprovação/revogação, audit antes/depois e rollback autorizado; operations coordena sem assumir estado privado de todos os módulos |
+
+Nenhum probe, export, deleção, incident real, restore ou teste operacional foi acionado. Rastreio transitivo R04–R08 e políticas/tempos de retenção permanecem pendentes. Este planejamento não autoriza execução de runbooks perigosos nem alteração de produção.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
