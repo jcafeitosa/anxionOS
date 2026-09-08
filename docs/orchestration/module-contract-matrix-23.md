@@ -1019,7 +1019,7 @@ Fonte primária: [R08 decision log](./structure-debate/knowledge/R08-decision-lo
 
 ## 6.20. Rastreio por capacidade — market-data R09/R10
 
-Fontes: [R09](./structure-debate/market-data/R09-dev-plan.md) e [R10](./structure-debate/market-data/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma register-instrument, record-observation e observed-consumer, além de UoW/journal. ANX-145 cobre ingest/realtime/qualidade; ANX-146 histórico e semântica temporal.
+Fontes: [R09](./structure-debate/market-data/R09-dev-plan.md) e [R10](./structure-debate/market-data/R10-g0-handoff.md), relidos em 2026-09-08. O rastreio transitivo **D-MD-001..018** está em **§6.20.1** (ANX-205). Fonte primária: [R08 decision log](./structure-debate/market-data/R08-decision-log.md). Inventário parcial: register-instrument, record-observation e observed-consumer, além de UoW/journal. ANX-145 cobre ingest/realtime/qualidade; ANX-146 histórico e semântica temporal.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -1039,13 +1039,54 @@ Fontes: [R09](./structure-debate/market-data/R09-dev-plan.md) e [R10](./structur
 | R09 G4-MD-03/04 | Não verificado | ANX-145/129/132: evento sem secrets/URLs de provider, hypertable sem ledger cols; conferir todos os produtores e schemas pertinentes |
 | R09 connections observed/binding / graph consumer | Integração não provada neste incremento | ANX-141/161/174–180 fornecem capacidades homologadas, ANX-145 normaliza dados e ANX-138 projeta. Stub do plano não autoriza fixture em produção |
 | R10 RLS e ledger fora do módulo | Planejado/ownership delimitado | ANX-131 implementa RLS, ANX-152 ledger; nenhuma gravação lateral em accounting a partir de market_events |
-| R09 AC-R09-01..04 / R10 PC-G0-01..10 e gates | Histórico documental, mapa D-MD afirmado sem desdobramento no R09 | ANX-127/145/146/181: recuperar D-MD, spec003 R12, schemas e evidências atuais; PASS de plano não significa G5 executado |
+| R09 AC-R09-01..04 / R10 PC-G0-01..10 e gates | Histórico documental, mapa D-MD afirmado sem desdobramento no R09 | **D-MD-001..018** em §6.20.1 (ANX-205); G5-MD não executado |
 
-O usuário pediu dados históricos e realtime de motores externos para stocks/cripto e ambos; esse delta já está nas ANX-145/146, incluindo licenciamento/capacidade e retomada. A ambiguidade histórica “REAL/live trading ingest” recebeu disposição documental no [contrato P06 §1.1](./system-capabilities/p06-financial-lifecycle-contract.md): origem corrente não é executionMode REAL; preservam-se rejeição de REAL, autorização de dados, compatibilidade versionada e tratamento de legado sem proveniência. Disposição ainda sujeita à revisão independente; não prova implementação nem habilita feeds. Nenhum feed/engine foi consultado ou homologado neste incremento. Rastreio transitivo das decisões, campos e eventos continua pendente.
+O usuário pediu dados históricos e realtime de motores externos para stocks/cripto e ambos; esse delta já está nas ANX-145/146, incluindo licenciamento/capacidade e retomada. A ambiguidade histórica “REAL/live trading ingest” recebeu disposição documental no [contrato P06 §1.1](./system-capabilities/p06-financial-lifecycle-contract.md): origem corrente não é executionMode REAL. **D-MD-001..018** estão em §6.20.1; spec003 R12 schemas executáveis e G5-MD permanecem ANX-145/146/181. Nenhum feed/engine foi consultado ou homologado neste incremento.
+
+### 6.20.1. A1 — disposição transitiva market-data (ANX-205)
+
+Fonte primária: [R08 decision log](./structure-debate/market-data/R08-decision-log.md) (relido 2026-09-08). Commands parciais existem (§6.20); esta subseção não revalida G3/G5 nem executa ingest/Timescale real.
+
+**Saldo R08:** 18 decisões · aceitas v1: 16 · G1 pendentes: 2 (D-MD-017, D-MD-018).
+
+#### D-MD-001..018 (R08 — domínio, contratos, storage, deps)
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-MD-001 | Dono Instrument/Observation/FreshnessPolicy/MarketEvent/Dataset | Aceito v1 | ANX-145/146 | spec003 R12 |
+| D-MD-002 | Timescale hypertables owner market-data (ADR0004) | Aceito v1 | ANX-145 | P06-S2 |
+| D-MD-003 | PG registry + journal/outbox ownerDomain market-data | Aceito v1 | ANX-145 | Mesma TX |
+| D-MD-004 | connections observed → recorded sem reemissão | Aceito v1 | ANX-141/145 | P-R7-01 |
+| D-MD-005 | getPriceAsOf com freshness explícito | Aceito v1 | ANX-145/150 | FAIL_CLOSED risk |
+| D-MD-006 | resolveInstrument + alias map tabela única | Aceito v1 | ANX-145 | Determinístico |
+| D-MD-007 | SIMULATED+PAPER only v1 — REAL rejeitado | Aceito v1 | ANX-145/146 | P06 §1.1 |
+| D-MD-008 | MarketEvent ≠ lançamento accounting | Aceito v1 | ANX-146/152 | Sem ledger lateral |
+| D-MD-009 | Neo4j async graph:market-data:v1 | Aceito v1 | ANX-138/32 | Sem dual-write |
+| D-MD-010 | Large books → object storage | Aceito v1 | ANX-145 | >256KB P-R7-03 |
+| D-MD-011 | QualityFlag enum shared contracts | Aceito v1 | ANX-132/145 | G5-MD-05 |
+| D-MD-012 | specHash imutável para backtest pin | Aceito v1 | ANX-146/159 | Replay sem lookahead |
+| D-MD-013 | DRAINING block new instruments only | Aceito v1 | ANX-145 | Leitura permitida |
+| D-MD-014 | command_journal HTTP idempotency | Aceito v1 | ANX-145 | 90d hot PG |
+| D-MD-015 | RLS PG defer P09 — application guards | Aceito v1 | ANX-131/145 | Paridade org |
+| D-MD-016 | Hypertables desde P06-S2 | Aceito v1 | ANX-145 | P-R7-02 |
+| D-MD-017 | @anxionos/contracts/market-data/* schemas públicos | G1 pendente | ANX-88/132 | ANX-145 bloqueado |
+| D-MD-018 | Workers ingest/observed consumer | G1 pendente | ANX-88/133 | ANX-145 S2 |
+
+#### Resoluções P-R7 referenciadas
+
+| P-R7 | Decisão | ID |
+| --- | --- | --- |
+| P-R7-01 | observed vs recorded — recorded only institucional | D-MD-004 |
+| P-R7-02 | Timescale S1 vs S2 — hypertables S2 | D-MD-016 |
+| P-R7-03 | Book storage object storage >256KB | D-MD-010 |
+| P-R7-04 | Freshness default risk FAIL_CLOSED obrigatório | D-MD-005 / MD-R07-01 |
+| P-R7-05 | RLS v1 application-only defer P09 | D-MD-015 |
+
+**Rodadas R01–R07:** crosswalk MD-R02..R08 → D-MD em R08. Homologação executável G3/G5, Timescale real e feeds externos permanecem ANX-145/146/181.
 
 ## 6.21. Rastreio por capacidade — strategies R09/R10
 
-Fontes: [R09](./structure-debate/strategies/R09-dev-plan.md) e [R10](./structure-debate/strategies/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual mostra register-strategy, create-strategy-version e publish-strategy-version, UoW/journal. ANX-147 é continuação; presença não demonstra backtest/deployment completos.
+Fontes: [R09](./structure-debate/strategies/R09-dev-plan.md) e [R10](./structure-debate/strategies/R10-g0-handoff.md), relidos em 2026-09-08. O rastreio transitivo **D-ST-001..007, D-ST-015** está em **§6.21.1** (ANX-206). Fonte primária: [R08 decision log](./structure-debate/strategies/R08-decision-log.md). Inventário parcial: register-strategy, create/publish-strategy-version, UoW/journal. ANX-147 é continuação.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -1060,11 +1101,34 @@ Fontes: [R09](./structure-debate/strategies/R09-dev-plan.md) e [R10](./structure
 | R10 G5-ST-01..03 | Cenários apenas referenciados nestes R09/R10 | ANX-147/181: recuperar R07, identificar os três cenários e reproduções em sandbox; não inventar títulos para completar numeração |
 | R09 deps market-data/agents/graph / R10 graph:strategies:v1 | Integração não provada | ANX-146/139/138: dataset autorizado e point-in-time, configuração de agente por port, projeção reconstruível; não copiar estado privado |
 | R10 RLS D-ST-015 | Planejado além de application-only | ANX-131: roles/policies/contexto e testes PG próprios, sem herdar prova por filtro de aplicação |
-| R10 PC-G0-01..10, spec003 Strategy Factory e handoff | Histórico documental, contratos/decisões transitivos não recuperados neste incremento | ANX-127/147/181: fontes, claim, deps e pareceres atuais; ANX-90 S1–S2 não prova S3–S5 |
+| R10 PC-G0-01..10, spec003 Strategy Factory e handoff | Histórico documental, contratos/decisões transitivos não recuperados neste incremento | **D-ST-001..007,015** em §6.21.1 (ANX-206); G5-ST não executado |
 
 **Precisão de ownership para o executor ANX-147:** a frase da issue “avaliação e promoção não pertencem a strategies” deve ser lida como avaliação/certificação em evaluation e aprovação institucional em governance. A aplicação de deployment/promoção/rollback da própria StrategyVersion permanece em strategies, conforme §3 e contrato de evolução; não transferir escrita desse estado para evaluation. Consolidar esta formulação no pacote de conflitos, sem retirar o escopo de deployment solicitado.
 
-Nenhum backtest, deploy PAPER, teste integrado ou alteração de código foi executado. Rastreio transitivo R04/R07/R08 e semântica de lifecycle permanecem pendentes; o inventário limitado não prova ausência global de equivalentes.
+Nenhum backtest, deploy PAPER, teste integrado ou alteração de código foi executado. **D-ST-001..007,015** estão em §6.21.1; R04/R07 schemas executáveis e G5-ST permanecem ANX-147/181. IDs D-ST-008..014 ausentes no R08 — não inventar.
+
+### 6.21.1. A1 — disposição transitiva strategies (ANX-206)
+
+Fonte primária: [R08 decision log](./structure-debate/strategies/R08-decision-log.md) (relido 2026-09-08). Commands parciais existem (§6.21); esta subseção não revalida G3/G5 nem executa backtest/deploy.
+
+**Saldo R08:** 8 decisões registradas · aceitas v1: 7 · deferida/G1: 1 (D-ST-007) · **lacuna:** D-ST-008..014 não constam no R08.
+
+#### D-ST-001..007, D-ST-015 (R08)
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-ST-001 | Dono StrategyVersion/Deployment/Signal/BacktestRun | Aceito v1 | ANX-147 | spec003 Factory |
+| D-ST-002 | Signal ≠ TradeIntent | Aceito v1 | ANX-147/149 | Sem ordem implícita |
+| D-ST-003 | Promoção via evaluation event | Aceito v1 | ANX-160/147 | evaluation gate P08 |
+| D-ST-004 | SIMULATED+PAPER only v1 | Aceito v1 | ANX-147 | REAL rejeitado |
+| D-ST-005 | MarketDataPort — não replica preços | Aceito v1 | ANX-146/147 | Dono market-data |
+| D-ST-006 | graph:strategies:v1 async | Aceito v1 | ANX-138/32 | Sem dual-write |
+| D-ST-007 | research-python job protocol defer S3 | Deferido S3 | ANX-90 | ANX-147 S3+ |
+| D-ST-015 | RLS defer P09 — application guards | Aceito v1 | ANX-131/147 | Paridade org |
+
+**Nota de ownership (ANX-147):** avaliação/certificação em evaluation; aprovação institucional em governance; deployment/promoção/rollback de StrategyVersion permanece em strategies (§3, contrato evolução).
+
+**Rodadas R01–R07:** R08 parcial — PC-G0 8/10; R09/R10 pendentes na rodada. Homologação G3/G5, backtest runner e deploy PAPER permanecem ANX-147/181.
 
 ## 6.22. Rastreio por capacidade — capital R09/R10
 
@@ -1390,8 +1454,8 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 | orchestration §6.17 | D-ORC-001..056 → **§6.17.1** (ANX-202); G5/checklist20 executável em ANX-140 | ANX-140/132; runtime ANX-133; Dashi dev-only não é dep universal |
 | connections §6.18 | D-CX-001..064 → **§6.18.1** (ANX-203); R04/DL-CX2 executável em ANX-141 | ANX-141/132; G5-CX e invoke real não executados |
 | knowledge §6.19 | D-KN-001..020 → **§6.19.1** (ANX-204); spec002/R04 executável em ANX-142 | ANX-142/132; G5-KN e embedding real não executados |
-| market-data §6.20 | D-MD, spec003 R12, schemas → identidade/tempo/qualidade/ingestão | ANX-145/146/132; origem corrente versus REAL disposta em P06 §1.1 |
-| strategies §6.21 | R04/R07/R08, spec003 Strategy Factory → lifecycle, schemas e G5-ST-01..03 | ANX-147/132/181; promoção/publicação disposta em P09 §6.1 |
+| market-data §6.20 | D-MD-001..018 → **§6.20.1** (ANX-205); spec003/R12 executável em ANX-145/146 | ANX-145/146/132; G5-MD e feeds reais não executados |
+| strategies §6.21 | D-ST-001..007,015 → **§6.21.1** (ANX-206); lacuna 008..014 no R08 | ANX-147/132/181; G5-ST e backtest não executados |
 | capital §6.22 | R04/R07/R08, spec003/FI02 → reserva, settled/FX e concorrência | ANX-148; integração pré-submit P06 §2.1; não inventar saldo disponível |
 | decisions §6.23 | R04/R07/R08, spec003 → schemas, G5-DC-01..03 e approval | ANX-149/136; sequência pré-submit P06 §2.1 |
 | risk §6.24 | R04/R07/R08, spec003 → permits, G5-RK-01..03 e fórmulas/limites | ANX-150; RiskPermit distinto conforme P06 §2.1; preservar ANX-122 |
@@ -1422,7 +1486,7 @@ Trabalho documental **parcial** do item A4 (`405b8304`). Não equivale a PASS in
 | Placement gateway | ADR0006, §6.1/§6.34, spec gateway | ADR `1cfa7de6e7a98778f6c388e085790e5b1d5d8314b10e4e3cafe9e338869ce0c2` | `d70b8f91` → PASS F1 revalidado | **G1C3 F1 fechado** (ANX-192/193/194/195) |
 | Conflitos F1–F3 (P06/ops/gateway) | P06, ops, gateway, §6.34 | C2 em comentário `78b398b3` | `f18a2846` C1; `cf16914a` C2 | F1–F3 resolvidos; B1 removido por ADR0006 |
 | Cinco disposições contratuais | §6.34 tabela | hashes por linha na §6.34 | `400da37b`, `7542eb8e`, `1c5076a6`, `ac51f462`, `923d4cd8` | PASS restrito documental cada uma |
-| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** §6.12.1–6.19.1 (ANX-197–204); 15 módulos pendentes (§6.20+) |
+| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** §6.12.1–6.21.1 (ANX-197–206); 13 módulos pendentes (§6.22+) |
 | Pacote final A4 | esta §6.36 + §6.1 | ver comentários ANX-127 | pendente revisor integral | **A4 parcial** — não encerrar ANX-127 |
 
 Implementação futura permanece delegada aos filhos ANX-126 (ANX-128+); este pacote não homologa produto, engines ou testes financeiros.
