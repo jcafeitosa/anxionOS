@@ -1324,7 +1324,7 @@ Fonte primária: [R08 decision log](./structure-debate/execution/R08-decision-lo
 
 ## 6.26. Rastreio por capacidade — accounting R09/R10
 
-Fontes: [R09](./structure-debate/accounting/R09-dev-plan.md) e [R10](./structure-debate/accounting/R10-g0-handoff.md), relidos em 2026-09-08. Inventário confirma post-trade-fill, post-ledger-entry, fill-confirmed-consumer e balance-validation/UoW/journal. ANX-152 executa delta.
+Fontes: [R09](./structure-debate/accounting/R09-dev-plan.md) e [R10](./structure-debate/accounting/R10-g0-handoff.md), relidos em 2026-09-08. O rastreio transitivo **D-ACC-001..012, D-ACC-015** está em **§6.26.1** (ANX-211). Fonte primária: [R08 decision log](./structure-debate/accounting/R08-decision-log.md). Inventário parcial: post-trade-fill, post-ledger-entry, fill-confirmed-consumer e balance-validation/UoW/journal. ANX-152 executa delta.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -1341,13 +1341,39 @@ Fontes: [R09](./structure-debate/accounting/R09-dev-plan.md) e [R10](./structure
 | R09 S5 graph projector | Deferido, stub não autoriza produção | ANX-138: graph:accounting:v1 derivado e reconstruível, ledger autoritativo PG exclusivamente accounting |
 | R09 S6 billing.invoice.paid consumer | Deferido após billing | ANX-152/156: evento pago deduplicado, segregação comercial/trading e reversões; invoice emitida não é paga |
 | R10 SQLite ban/RLS | Restrição de autoridade e evolução planejada | ANX-152/131: nenhum ledger SQLite, políticas/roles PG e provas de isolamento; aplicação-only não equivale a RLS |
-| R10 G5-ACC-01..03/PC-G0-01..10/spec003 | Histórico referenciado, cenários G5 não detalhados aqui | ANX-127/152/181: recuperar R04/R07/R08/parecer do candidato; checkmarks não aprovam produto |
+| R10 G5-ACC-01..03/PC-G0-01..10/spec003 | Histórico referenciado, cenários G5 não detalhados aqui | **D-ACC-001..012,015** em §6.26.1 (ANX-211); G5-ACC não executado |
 
-Reversões imutáveis, FX e corporate actions da ANX-152 permanecem requisitos adicionais: preservar lançamento original, ligação do estorno, políticas monetárias e causalidade do fato de mercado; não corrigir saldo apagando histórico. Não foram lançados/revertidos valores nem executados testes financeiros. Rastreio transitivo de schemas/plano de contas/decisões e cenários R07 segue pendente.
+Reversões imutáveis, FX e corporate actions da ANX-152 permanecem requisitos adicionais. **D-ACC-001..012,015** estão em §6.26.1; lacuna D-ACC-013..014 no R08. G5-ACC permanece ANX-152/181.
+
+### 6.26.1. A1 — disposição transitiva accounting (ANX-211)
+
+Fonte primária: [R08 decision log](./structure-debate/accounting/R08-decision-log.md) (relido 2026-09-08). Commands parciais existem (§6.26); esta subseção não revalida G3/G5 nem executa posting real.
+
+**Saldo R08:** 13 decisões · aceitas v1: 13 · **lacuna:** D-ACC-013..014 ausentes no R08.
+
+#### D-ACC-001..012, D-ACC-015 (R08)
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-ACC-001 | Dono JournalEntry, LedgerPosting, FeePosting, ReconciliationCase financeiro | Aceito v1 | ANX-152 | spec003 |
+| D-ACC-002 | Partida dobrada; posted imutável — Reversal para correção | Aceito v1 | ANX-152 | Sem apagar histórico |
+| D-ACC-003 | Ledger PG autoritativo; zero SQLite journal | Aceito v1 | ANX-152 | ADR0004 |
+| D-ACC-004 | capital BalanceView derivada de accounting.ledger.posted.v1 | Aceito v1 | ANX-148/152 | Projeção |
+| D-ACC-005 | billing dono Invoice; accounting projector pós invoice.paid | Aceito v1 | ANX-156/152 | S6 defer |
+| D-ACC-006 | market-data dono preço; accounting só priceRef | Aceito v1 | ANX-146/152 | Sem preço inline |
+| D-ACC-007 | Fill→posting assíncrono projector + idempotência | Aceito v1 | ANX-151/152 | G3-ACC-S2-02 |
+| D-ACC-008 | Fee venue vs platform fee — agregados distintos | Aceito v1 | ANX-152 S3 | Sem taxa zero implícita |
+| D-ACC-009 | SIMULATED+PAPER only v1; REAL reject | Aceito v1 | ANX-152 | G3-ACC-S2-04 |
+| D-ACC-010 | graph:accounting:v1 async projeção linhagem | Aceito v1 | ANX-138/152 | S5 defer |
+| D-ACC-011 | connections usage → billing → accounting (não direto) | Aceito v1 | ANX-156/141 | Sem atalho |
+| D-ACC-012 | ReconciliationCase ownerDomain=accounting | Aceito v1 | ANX-152 S4 | Venue em execution |
+| D-ACC-015 | RLS defer P09 — application-only tenancy | Aceito v1 | ANX-131/152 | G5-ACC-01 |
+
+**Rodadas R01–R07:** R08 registrado. Homologação G3/G5, billing consumer e reversões FX permanecem ANX-152/181.
 
 ## 6.27. Rastreio por capacidade — portfolios R09/R10
 
-Fontes: [R09](./structure-debate/portfolios/R09-dev-plan.md) e [R10](./structure-debate/portfolios/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma create-portfolio, apply-fill-to-position, fill-confirmed-consumer e UoW/journal. ANX-153 executa delta.
+Fontes: [R09](./structure-debate/portfolios/R09-dev-plan.md) e [R10](./structure-debate/portfolios/R10-g0-handoff.md), relidos em 2026-09-08. O rastreio transitivo **D-PF-001..015** está em **§6.27.1** (ANX-212). Fonte primária: [R08 decision log](./structure-debate/portfolios/R08-decision-log.md). Inventário parcial: create-portfolio, apply-fill-to-position, fill-confirmed-consumer e UoW/journal. ANX-153 executa delta.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -1365,9 +1391,33 @@ Fontes: [R09](./structure-debate/portfolios/R09-dev-plan.md) e [R10](./structure
 | R09 S5 graph:portfolios:v1 | Deferido; stub não é runtime | ANX-138: projeção/checkpoint/rebuild/ACL, sem posição autoritativa no Neo4j |
 | R09 S6 exposure/Timescale NAV opcional | Deferido, decisão explícita necessária | ANX-153/154/150: snapshot de exposição/valuation no owner portfolios, performance deriva retornos; NAV series opcional com dono/consumidores definidos, sem duplicar métrica autoritativa |
 | R10 SQLite ban/RLS | Restrição/planejado | ANX-153/131: posições compartilhadas não autoritativas em SQLite; roles/policies PG e isolamento real, não só filtro de aplicação |
-| R09 fixtures / R10 G5-PF-01..03, PC-G0-01..10/spec003 | Histórico e cenários transitivos não verificados | ANX-127/153/181: fixture fill/capital/instrument/ledger atrasado por checkpoint, recuperar R04/R07/R08 e evidência do candidato, sem herdar PASS |
+| R09 fixtures / R10 G5-PF-01..03, PC-G0-01..10/spec003 | Histórico e cenários transitivos não verificados | **D-PF-001..015** em §6.27.1 (ANX-212); G5-PF não executado |
 
-Lotes, FX/corporate actions, reversões e consolidação stocks+cripto da ANX-153 continuam no delta, mantendo contas e modos segregados. Nenhuma posição, snapshot ou teste financeiro foi alterado/executado. Rastreio transitivo de schemas, políticas de lotes/valuation e cenários R07 permanece pendente.
+Lotes, FX/corporate actions e consolidação stocks+cripto da ANX-153 continuam no delta. **D-PF-001..015** estão em §6.27.1; G5-PF permanece ANX-153/181.
+
+### 6.27.1. A1 — disposição transitiva portfolios (ANX-212)
+
+Fonte primária: [R08 decision log](./structure-debate/portfolios/R08-decision-log.md) (relido 2026-09-08).
+
+**Saldo R08:** 15 decisões · aceitas v1: 15.
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-PF-001 | Dono Portfolio, Position, Holding, ValuationSnapshot, RebalancePlan | Aceito v1 | ANX-153 | spec003 |
+| D-PF-002 | Position key (capitalAccountId, instrumentId, positionSide, book) | Aceito v1 | ANX-153 G3-S2-05 | Uma canônica/key |
+| D-PF-003 | Posição PG autoritativa; zero SQLite state | Aceito v1 | ANX-153 | ADR0004 |
+| D-PF-004 | capital Allocation/Reservation separados — mandateRef only | Aceito v1 | ANX-148/153 | Sem reserva aqui |
+| D-PF-005 | accounting ledger separado — consome ledger.posted cash reconcile | Aceito v1 | ANX-152/153 | G3-PF-S4 |
+| D-PF-006 | strategies Deployment/Signal separados — Holding attribution | Aceito v1 | ANX-147/153 | Sem ordem |
+| D-PF-007 | Fill→position assíncrono projector + idempotência | Aceito v1 | ANX-151/153 | G3-PF-S2-02 |
+| D-PF-008 | ValuationSnapshot CONFIRMED imutável; market-data priceRef | Aceito v1 | ANX-146/153 S3 | stale explícito |
+| D-PF-009 | RebalancePlan não executa ordem — downstream decisions/execution | Aceito v1 | ANX-153 S5 | Aprovação gov |
+| D-PF-010 | SIMULATED+PAPER only v1; REAL reject | Aceito v1 | ANX-153 | G3-PF-S2-04 |
+| D-PF-011 | graph:portfolios:v1 async projeção Neo4j | Aceito v1 | ANX-138/153 | S5 defer |
+| D-PF-012 | command_journal/outbox ownerDomain=portfolios | Aceito v1 | ANX-153 | HTTP idempotency |
+| D-PF-013 | organizations tenancy — portfolio capitalAccount same ownerUserId | Aceito v1 | ANX-135/153 | G3-PF-S2-03 |
+| D-PF-014 | PositionReconciliationCase ownerDomain=portfolios | Aceito v1 | ANX-153 S4 | G3-PF-S4-01 |
+| D-PF-015 | RLS defer P09 — application-only tenancy | Aceito v1 | ANX-131/153 | G5-PF-01 |
 
 ## 6.28. Rastreio por capacidade — performance R09/R10
 
@@ -1562,8 +1612,8 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 | decisions §6.23 | D-DC-001..015 → **§6.23.1** (ANX-208); conflito submit/risco em §6.23 | ANX-149/136; G5-DC e cadeia integrada não executados |
 | risk §6.24 | D-RK-001..010 → **§6.24.1** (ANX-209); D-RK-015 RLS ausente no R08 | ANX-150; G5-RK e pre-trade real não executados |
 | execution §6.25 | D-EX-001..012 → **§6.25.1** (ANX-210); ADR0006 placement | ANX-151/161/162; G5-EX e adapters reais não executados |
-| accounting §6.26 | R04/R07/R08, spec003 → plano de contas, schemas e G5-ACC-01..03 | ANX-152; interface partners §6.31.1; regra fiscal não deduzida do evento |
-| portfolios §6.27 | R04/R07/R08, spec003 → lotes/valuation e G5-PF-01..03 | ANX-153; fixture temporal/checkpoint e método versionado antes de resultado |
+| accounting §6.26 | D-ACC-001..012,015 → **§6.26.1** (ANX-211); lacuna 013..014 no R08 | ANX-152; G5-ACC e posting real não executados |
+| portfolios §6.27 | D-PF-001..015 → **§6.27.1** (ANX-212) | ANX-153; G5-PF e valuation real não executados |
 | performance §6.28 | R04–R08 → definições de métricas, fluxos externos, atribuição e oráculos | ANX-154; fechar com ledger/valuation, não só notional |
 | audit §6.29 | R04–R08 → schemas, decisões, integridade/replay e relatórios | ANX-155; evidência ausente deve permanecer explícita |
 | billing §6.30 | R04–R08 → ciclo comercial, contratos e cenários detalhados | ANX-156/132; issued/paid dispostos na §6.31.1 |
@@ -1588,7 +1638,7 @@ Trabalho documental **parcial** do item A4 (`405b8304`). Não equivale a PASS in
 | Placement gateway | ADR0006, §6.1/§6.34, spec gateway | ADR `1cfa7de6e7a98778f6c388e085790e5b1d5d8314b10e4e3cafe9e338869ce0c2` | `d70b8f91` → PASS F1 revalidado | **G1C3 F1 fechado** (ANX-192/193/194/195) |
 | Conflitos F1–F3 (P06/ops/gateway) | P06, ops, gateway, §6.34 | C2 em comentário `78b398b3` | `f18a2846` C1; `cf16914a` C2 | F1–F3 resolvidos; B1 removido por ADR0006 |
 | Cinco disposições contratuais | §6.34 tabela | hashes por linha na §6.34 | `400da37b`, `7542eb8e`, `1c5076a6`, `ac51f462`, `923d4cd8` | PASS restrito documental cada uma |
-| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** §6.12.1–6.25.1 (ANX-197–210); 9 módulos pendentes (§6.26+) |
+| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** §6.12.1–6.27.1 (ANX-197–212); 7 módulos pendentes (§6.28+) |
 | Pacote final A4 | esta §6.36 + §6.1 | ver comentários ANX-127 | pendente revisor integral | **A4 parcial** — não encerrar ANX-127 |
 
 Implementação futura permanece delegada aos filhos ANX-126 (ANX-128+); este pacote não homologa produto, engines ou testes financeiros.
