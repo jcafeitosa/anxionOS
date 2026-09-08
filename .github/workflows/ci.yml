@@ -45,10 +45,36 @@ jobs:
       - name: Graphify toolchain (doctor + AST index)
         run: npm run graphify:check
 
-      - name: No backend scaffold required yet
+  frontend-build:
+    name: Frontend build (P07)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+  backend-test:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install and test backend
+        working-directory: backend
         run: |
-          if [ -d backend ]; then
-            echo "backend/ presente — futuros jobs de build/test podem ser adicionados aqui."
-          else
-            echo "backend/ ausente (esperado nesta fase)."
-          fi
+          bun install
+          bun test

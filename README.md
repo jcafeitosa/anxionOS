@@ -2,7 +2,7 @@
 
 anxionOS é uma plataforma multi-tenant de investimentos autônomos governados por um **grafo institucional**: agências, agentes, modelos, estratégias, capital e decisões conectados com autoridade, risco e auditoria explícitos. Humanos e agentes compartilham contratos de domínio; a apresentação varia por papel (Owner, operador, plataforma, parceiro).
 
-O repositório inclui o **scaffold P01** do backend (`backend/`) — workspace Bun/TypeScript com API health, packages compartilhados e boundaries documentados. Módulos de domínio (P02+) ainda não existem.
+O repositório inclui **backend** (P01–P02) e **frontend** (P07 shell Owner) (`backend/`) — workspace Bun/TypeScript com API health, packages compartilhados e boundaries documentados. Módulos de domínio (P02+) ainda não existem.
 
 ## Documentação canônica (local)
 
@@ -54,6 +54,17 @@ curl http://localhost:3000/health
 
 Detalhes: [backend/README.md](backend/README.md). Infra local opcional: `docker compose -f backend/deploy/docker/docker-compose.yml up -d`.
 
+
+### Frontend (P07 — Owner Console shell)
+
+```bash
+cd frontend && npm install
+npm run frontend:dev    # http://localhost:4321 (raiz do repo)
+npm run frontend:build
+```
+
+Design system: `frontend/design-system/MASTER.md`. Org chart: [docs/team/org-chart.md](docs/team/org-chart.md). Proxy `/api` → backend `:3000`.
+
 ### Taskboard (obrigatório — dev local)
 
 **Todo agente (humano ou IA) deve usar o board em tempo real** antes, durante e após qualquer trabalho neste repositório. Issues no [Dashi/Codex Taskboard](https://github.com/chuspeeism/dashi-taskboard) em `http://127.0.0.1:47823/` (projeto **anxionOS**). Ferramenta **somente local** — o CI não depende dela.
@@ -79,7 +90,8 @@ anxionOS/
 ├── package.json       # Scripts archify:*, graphify:*, taskboard:* e postinstall do vendor
 ├── scripts/taskboard.mjs  # Wrapper CLI/HTTP para o board local
 ├── .env.example       # TASKBOARD_URL, PROJECT_ID (dev local)
-└── backend/           # P01: apps/api, packages, tests, deploy
+├── frontend/          # P07: Astro + React Owner Console
+└── backend/           # P01–P02: apps/api, packages, tests, deploy
 ```
 
 Organização modular completa (23 módulos), roadmap P02–P09 e decisões aceitas estão em `brain/` local (ex.: ADR0002, SDD institucional).

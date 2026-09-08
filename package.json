@@ -19,7 +19,9 @@
     "taskboard:ping": "node scripts/taskboard.mjs ping",
     "taskboard:ensure": "node scripts/taskboard.mjs ensure",
     "taskboard:list": "node scripts/taskboard.mjs list",
-    "taskboard:context": "node scripts/taskboard.mjs context"
+    "taskboard:context": "node scripts/taskboard.mjs context",
+    "frontend:dev": "npm run dev --prefix frontend",
+    "frontend:build": "npm run build --prefix frontend"
   },
   "repository": {
     "type": "git",

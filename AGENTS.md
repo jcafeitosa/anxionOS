@@ -1,3 +1,7 @@
+---
+type: agent-instructions
+---
+
 # anxionOS — instruções para agentes
 
 Guia operacional do repositório. Leia antes de codar, propor arquitetura ou alterar documentação canônica.
@@ -10,7 +14,7 @@ anxionOS é uma plataforma multi-tenant de investimentos autônomos governados p
 
 | Aspecto | Situação |
 | --- | --- |
-| Código | **Não existe** `backend/` nem aplicação implantada verificada |
+| Código | Esqueleto parcial em `backend/`; aplicação implantada não verificada. Revalidar source e board antes de implementar |
 | Documentação | Ativa em `brain/` **local** (OKF; não versionada no GitHub) |
 | Organização do backend | **Aceita** — [ADR0002](brain/project-docs/decisions/0002-adopt-modular-backend-layout.md) |
 | Modelo operacional do grafo | **Proposto** — [ADR0001](brain/project-docs/decisions/0001-graph-operational-domain-authority.md) |
@@ -71,6 +75,24 @@ P01 (tooling e boundaries) → P02 (contracts, eventing, identity…) → P03 (g
 - Validação de schema nos boundaries (ex.: Zod)
 - Testes de módulo, contratos e integração nos gates AR01–AR06
 - Mudanças materiais de estrutura → atualizar nota + ADR com plano de migração
+
+## Armazenamento confirmado
+
+Consultar o [mapa de armazenamento dos 23 módulos](brain/notes/anxionos-storage-ownership.md). SQLite é proposto para checkpoints/caches/sandboxes locais, sem autoridade sobre capital, grants, ordens ou quotas compartilhadas. Nunca escrever diretamente no SQLite interno de Dashi/OpenKnowledge; usar as interfaces suportadas. Testes locais não substituem os engines reais.
+
+Usar **Neo4j para o grafo institucional**, **PostgreSQL para transações**, **TimescaleDB para séries temporais** e **pgvector para embeddings**, conforme [ADR0004](brain/project-docs/decisions/0004-postgresql-timescaledb-pgvector.md). A escolha PostgreSQL não substitui Neo4j. Manter journal/outbox autoritativos, projeções reconstruíveis e Graph Kernel governado. Latest estável exige matriz compatível e validação; edição/licença e desempenho ainda precisam de evidência.
+
+## Bibliotecas nativas e integrações oficiais
+
+A base indicada é Bun, Elysia e Astro. **Zod, Drizzle, Better Auth, pg e Scalar são preferências do usuário a avaliar com opinião independente e evidências rastreáveis**; a recomendação atual os mantém pelas integrações documentadas. Não tratar a lista como justificativa suficiente nem substituir componentes silenciosamente. Consultar a [análise e fontes preservadas](brain/research/bun-elysia-astro-foundation.md) antes de implementar. Escolha de pacote não confirma versão ou compatibilidade: validar runtime, APIs e peer dependencies no lockfile.
+
+Priorizar recursos nativos adequados, depois integrações oficiais e bibliotecas indicadas nas documentações oficiais. A recomendação técnica atual é Drizzle sobre pg para PostgreSQL, Zod para validação, Better Auth para autenticação/sessão e Scalar pela integração OpenAPI compatível do Elysia. Validar adequação e compatibilidade e comparar alternativas quando a evidência indicar; estas recomendações não são decisões irreversíveis atribuídas ao usuário. Não instalar alternativas duplicadas apenas por constarem de exemplos.
+
+Antes de adicionar dependência, registrar necessidade, fonte oficial/data, classificação (nativa/oficial/documentada/alternativa), versão, compatibilidade e verificação pertinente na issue. Alternativa fora das recomendações exige justificativa concreta e revisão; mudança de arquitetura exige ADR aplicável. Não exigir nova aprovação para escolha rotineira já autorizada.
+
+Usar sempre a release estável mais recente (latest) das bibliotecas ao adicionar ou atualizar dependências, conforme instrução do usuário. Consultar registry oficial, release notes e peer dependencies no momento da execução; registrar versão resolvida e data, fixar versão exata/lockfile e testar o conjunto. Não deixar latest flutuante em builds de CI nem atualizar durante deploy. Se latest apontar para prerelease ou houver incompatibilidade, registrar evidência e propor solução antes de adoção; não adotar rc/beta nem fazer downgrade silencioso. Esta regra não cria atualizações automáticas ou monitoramento permanente. Não remover tooling existente, substituir drivers ou converter build Astro/Vite para Bun por inferência desta regra. Node/adapters do Astro têm requisitos próprios. Preservar domínio sem frameworks e a autorização institucional além de Better Auth.
+
+“Usar tudo que for necessário” significa adicionar por caso de uso verificável. “E outros” não autoriza instalar todos os plugins. Code Review verifica esta política e QA comprova as integrações.
 
 ## MCP e ferramentas
 
@@ -183,7 +205,7 @@ node scripts/taskboard.mjs move ANX-<N> in_progress   # requer taskctl + thread 
 **End work** (fim da implementação, antes de pedir review):
 
 ```bash
-# taskctl comment add ANX-<N> --text "..." --thread-id "$CODEX_THREAD_ID"
+# taskctl comment add ANX-<N> --body "..." --thread-id "$CODEX_THREAD_ID"
 node scripts/taskboard.mjs move ANX-<N> in_review
 # done só após aceite explícito
 ```
@@ -220,35 +242,94 @@ Escritas (`create`, `move`) exigem `taskctl` e thread id. Claim: mover `todo →
 - **Não** codar nem alterar docs canônicas sem issue `ANX-*` ativa no taskboard
 - **Não** deixar status do board desatualizado ao fim da sessão
 
+## Pipeline obrigatório de desenvolvimento e revisão
+
+Decisão do usuário em 2026-09-07: cada agente executor deve ter seu próprio crítico independente durante o desenvolvimento. Após aprovação objetiva do crítico, a entrega deve passar por Code Review Team, QA Team, Security Team e Red Team. Estas regras também orientam o orquestrador local; não concedem autoridade aos agentes do produto.
+
+### Etapas e critérios
+
+| Gate | Responsável | Evidência e condição de saída |
+| --- | --- | --- |
+| G0 — Preparar | Orquestrador + executor | Issue autorizada, ownership, escopo, critérios, dependências, ambiente e crítico nominal por executor |
+| G1 — Desenvolver | Executor + seu crítico | Crítico acompanha plano e incrementos; executor implementa e verifica. Aprovação explícita do crítico sobre a revisão exata, critérios satisfeitos e achados impeditivos resolvidos |
+| G2 — Revisar código | Code Review Team independente | Diff completo, contratos, arquitetura, concorrência, manutenção, migração e testes revisados; relatório com referências concretas |
+| G3 — Validar produto | QA Team independente | Critérios funcionais, casos negativos, integração, regressão e E2E aplicáveis executados; ambiente, comandos, resultados e limitações registrados |
+| G4 — Revisar segurança | Security Team independente | Fronteiras de confiança, autorização/tenancy, secrets, dependências e fluxos de dados avaliados; testes de segurança pertinentes e achados classificados |
+| G5 — Testar adversarialmente | Red Team independente | Tentar invalidar controles e premissas em ambiente isolado autorizado; cenários de abuso, bypass de autoridade, prompt injection, concorrência e falhas conforme escopo; reprodução e cleanup registrados |
+| G6 — Integrar | Orquestrador + responsáveis pelos gates | Agregar pareceres sobre o mesmo candidato; testar integração dos filhos e verificar ausência de evidência obsoleta; entregar para aceite |
+| G7 — Aceitar e liberar | Usuário/revisor autorizado | Aceite explícito para done; merge/deploy somente dentro da autorização aplicável, com verificações de release, observabilidade e rollback |
+
+Fluxo: G0 → G1 → G2 → G3 → G4 → G5 → G6 → G7. Análises preliminares podem ocorrer em paralelo, mas o avanço formal respeita as dependências. Aprovação do crítico é condição para o handoff às quatro equipes, não substitui seus pareceres.
+
+### Independência, achados e retorno
+
+- Cada executor tem um crítico identificado, distinto do autor, com contexto próprio e acesso ao diff/requisitos/evidências. Não vale trocar de persona na mesma execução e declarar revisão independente.
+- Cada equipe tem um responsável identificado e parecer separado; ninguém aprova alteração que escreveu. Revisores não precisam recriar uma cadeia infinita de revisores: se escreverem correções, passam a ser executores dessas mudanças e outro revisor as aprova.
+- “Crítico convencido” significa critérios demonstrados, não persuasão do autor. Parecer obrigatório: gate, issue/run, autor/revisor, revisão ou digest do artefato, escopo, evidências, achados, severidade, decisão e riscos residuais.
+- Decisões possíveis: PASS, CHANGES_REQUIRED, BLOCKED e NOT_APPLICABLE. NOT_APPLICABLE exige justificativa verificável e concordância do responsável do gate; nunca é substituto para teste indisponível. Todas as quatro equipes emitem disposição, inclusive em entrega documental, com avaliação proporcional ao artefato.
+- Qualquer requisito obrigatório descumprido, teste obrigatório falho ou achado crítico/alto bloqueia. Achados médios/baixos exigem correção ou disposição explícita pelo responsável autorizado, com justificativa e issue rastreável; autor não aceita unilateralmente o próprio risco.
+- Correções retornam ao executor e seu crítico. Qualquer alteração invalida aprovações do candidato anterior: cada gate já realizado deve repetir os testes/revisões afetados ou emitir revalidação explícita com análise de impacto sobre o novo digest. Nunca reaproveitar automaticamente um PASS antigo.
+- Timeouts, ferramenta ausente e orçamento esgotado produzem pendência/bloqueio, jamais aprovação. Após três ciclos sem convergência, escalar impasse com evidências; não relaxar critérios ou repetir indefinidamente.
+- Red Team atua somente em fixtures/sandbox/staging com escopo autorizado, limites e condição de parada; não operar capital real, atacar terceiros, usar segredos reais ou fazer teste destrutivo em produção por autorização implícita deste pipeline.
+- Após integração, validar o candidato integrado; PASS de cada filho isolado não aprova o conjunto. Após release autorizada, observar sinais de falha e aplicar o rollback autorizado; lições viram regressões ou melhorias rastreadas. Qualidade é demonstrada por evidência, nunca prometida como perfeição.
+
+### Dashi, delegação e fechamento
+
+Manter uma issue por unidade executável e relações de dependência para revisões delegadas, quando suportadas e verificadas. Revisão auxiliar pode permanecer na issue do coordenador com run/revisor/gate identificados; equipe não toma o claim do executor. O executor solicita o handoff e o orquestrador despacha/reconcilia os responsáveis.
+
+Estados dos gates são internos, registrados em comentários/artefatos; não inventar novos status do board. A entrega fica in_progress enquanto produz e corrige, e in_review quando submetida às equipes ou ao aceite, com gates pendentes explícitos. in_review nunca significa aprovada. Só done após todos os gates obrigatórios concluídos, filhos obrigatórios resolvidos e aceite explícito aplicável. Ao iniciar correção autorizada de sua própria entrega, retornar a in_progress com versão atual.
+
+Sem identidade verificável ou agente independente disponível, registrar gate pendente e suspender o avanço; não fingir que equipes foram executadas. Cada pacote de handoff contém issue, revisão/digest, requisitos, diff/artefatos, ambiente, evidências, achados prévios, limites de acesso, critérios do gate e mecanismo de retorno. O board preserva status/ownership; relatórios preservam a prova de cada decisão.
+
+## Personas e colaboração no OpenKnowledge
+
+Aplicar [Personas e colaboração da equipe](brain/notes/anxionos-team-personas.md): Executor pragmático; crítico questionador e cooperativo; Code Review orientado a contratos/manutenção; QA a comportamento reproduzível; Security a controles e risco; Red Team a hipóteses adversariais autorizadas. Cada participante mantém identidade IA real e independente, responsabilidade e parecer próprios.
+
+Colaborar em linguagem natural por assunto, com perguntas específicas, menções para ação, handoffs confirmados e discordâncias resolvidas por evidência. Silêncio, reação ou texto não autenticado não aprovam gates. Mensagem deve preservar issue, autor, candidato e evidências quando pertinentes; mudanças invalidam aprovações anteriores.
+
+OpenKnowledge é o ambiente principal de conhecimento e discussão: reutilizar notes, fontes/pesquisa/artigos, propostas/ADRs/specs, guias, postmortems, wiki, conceitos, índices e logs conforme a finalidade. Usar comentários ancorados quando disponíveis; sem ferramenta de escrita de comentários, registrar síntese atribuída no documento/issue, nunca inventar API ou conversa. Ler comentários pendentes via MCP. Dashi mantém status/ownership; Git/CI e relatórios mantêm evidências. Não criar um arquivo por mensagem nem preencher pastas sem necessidade.
+
+Usar templates, links/backlinks, history, checkpoints, skills e audit conforme a etapa. Toda escrita Markdown passa por OpenKnowledge. Contexto local não é publicado automaticamente; “como Slack” define interação e não autoriza integração/envio externo. Sem participantes disponíveis, reportar gate pendente, não atuar como várias pessoas fictícias.
+
 ## Workflow para agentes
 
 ```mermaid
 flowchart TD
-  T[taskboard:ensure + context + issue] --> A[Ler fontes de verdade]
-  A --> B{Escopo claro?}
-  B -->|Não| C[Perguntar / registrar lacuna]
-  B -->|Sim| D{Issue ANX-* no board?}
-  D -->|Não| D1[Criar issue; mover in_progress]
-  D -->|Sim| D2[Claim in_progress se todo]
-  D1 --> E{Envolve código?}
-  D2 --> E
-  E -->|Não| F[Editar brain/ via open-knowledge]
-  E -->|Sim| G{Greenlight do usuário?}
-  G -->|Não| H[Propor plano incremental P0x]
-  G -->|Sim| I[Implementar pacote ativo apenas]
-  I --> J[Testes + review + docs]
-  J --> K[mover in_review + comentário]
-  F --> K
-  H --> A
+  A[Issue autorizada e contexto] --> B[Executor e critico identificado]
+  B --> C[Desenvolver e verificar]
+  C --> D{PASS do critico?}
+  D -->|Nao| C
+  D -->|Sim| E[Code Review Team]
+  E --> F[QA Team]
+  F --> G[Security Team]
+  G --> H[Red Team]
+  H --> I[Validar candidato integrado]
+  I --> J[Aceite explicito]
+  J --> K[Done e liberacao autorizada]
+  E -->|Achado impeditivo| C
+  F -->|Achado impeditivo| C
+  G -->|Achado impeditivo| C
+  H -->|Achado impeditivo| C
+  I -->|Falha| C
 ```
 
-1. **Taskboard:** `taskboard:ensure`, contexto, issue `ANX-*` em `in_progress` (criar se necessário)
-2. **Ler** índice, estrutura do backend e specs/ADRs relevantes
-3. **Propor** plano curto com critérios de sucesso verificáveis (Karpathy: simplicidade, mudanças cirúrgicas)
-4. **Implementar** incrementalmente — um pacote P0x por vez, sem especulação
-5. **Verificar** gates do SDD e AR01–AR06; mover issue para `in_review` com comentário
-6. **Documentar** decisões novas como ADR; atualizar notas afetadas; `done` só com aceite explícito
+Aplicar integralmente G0–G7 acima. Retorno para correções exige nova revisão do crítico e revalidação explícita dos gates anteriores para o candidato atualizado. Etapa indisponível permanece pendente. Documentação usa OpenKnowledge; testes e revisões são proporcionais ao artefato, sem declarar execução de testes de produto em mudanças apenas documentais.
 
+
+
+## Frontend (P07 — consoles web)
+
+Consoles **Astro + React/TypeScript** em `frontend/` (Owner, Operator, Platform, Partner — apenas Owner shell na P07).
+
+| Recurso | Caminho |
+| --- | --- |
+| App | `frontend/` (`@anxionos/frontend`) |
+| Design system | `frontend/design-system/MASTER.md` (ui-ux-pro-max) |
+| Org chart equipe | [docs/team/org-chart.md](docs/team/org-chart.md) |
+| Dev | `npm run frontend:dev` → http://localhost:4321 |
+| API proxy | `/api` → http://localhost:3000 (backend) |
+
+Seguir tokens do design system; a11y WCAG (contraste, labels, focus). Não usar React Native.
 
 ## Repositório
 
