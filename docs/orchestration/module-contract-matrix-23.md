@@ -155,6 +155,23 @@ Comentários específicos de handoff registrados em ANX-135/136. Os retornos por
 
 Esta seção não completa o inventário exaustivo dos dois módulos: R10, campos de schemas, todas as decisões D-ORG e API/G5 ainda requerem cruzamento. Somada à seção 6.2, há evidência inicial para quatro módulos; os demais 19 continuam sem reconciliação granular aqui.
 
+## 6.4. Evidência inicial — graph e orchestration
+
+Fontes de escopo: [graph R09 S1–S8](./structure-debate/graph/R09-dev-plan.md) e [orchestration R09 S1–S9](./structure-debate/orchestration/R09-dev-plan.md). Os planos históricos não substituem as regras de camadas do baseline.
+
+| Requisito | Source / resultado | Limite e tarefa |
+| --- | --- | --- |
+| Graph S4 inbox/projeção | `backend/modules/graph/src/application/projections/inbox/process-with-inbox.ts` importa Pool, inbox/DLQ repositories e messaging infrastructure; executa project antes de ackInboxEntry/COMMIT PG e NATS ack | A2 confirmado. ANX-138 deve separar ports/infra e provar crash/replay no destino; ordem de chamadas não demonstra transação atômica entre PG e Neo4j |
+| Graph S5–S7 | `application/rebuild/full-generation-swap.ts` importa Pool/PoolClient e rebuild repository; `application/http/` importa cache/repos concretos | Refatoração rastreada ANX-138, sem mover ownership para apps. Integração/rebuild não executados aqui |
+| RB-D04 / grants | `application/projections/governance/governance-projector.ts` em graph já contém schemas issued/revoked, guard de revisão e chaves AGENCY | Não afirmar ausência por bloqueio histórico. ANX-138 deve revalidar wiring, revogação e escopo PLATFORM; presença não homologa o fluxo |
+| Orchestration S4 HMAC | `backend/modules/orchestration/src/application/commands/ingest-taskboard-webhook.ts` importa implementação/config HMAC de infrastructure | A2 confirmado. ANX-140 deve usar port, preservar raw payload/autorização/erro e provar caminho HTTP |
+| Orchestration S4 mirror | Executado `cd backend && bun test tests/orchestration/unit/taskboard-hmac.test.ts tests/orchestration/unit/validate-mirror-transition.test.ts`: Bun 1.4.0, **8 pass / 0 fail / 8 assertions** | Assinaturas e transições de mirror, incluindo G7 e versão. Doubles dos repositories; não prova PG, webhook real ou disponibilidade do board |
+| Orchestration S5–S9 | Árvore prevista de workers e deferências no R09 não basta para identificar runtime atual | ANX-140/ANX-133 devem resolver símbolos/composition e verificar heartbeat/sweeper/restart. Não inferir ausência por pasta diferente; registry permissivo do plano não autoriza bypass em produção |
+
+Graph S8, travessias completas além do smoke, PlanRevision e requisitos R10 continuam pendentes de reconciliação específica. O título histórico de teste “COMMIT atômico inbox+marker+Neo4j” deve ser confrontado com os limites reais das transações: marcador de deduplicação e mutação precisam ser consistentes no destino; PG e Neo4j não ganham atomicidade distribuída pela nomenclatura.
+
+Este é o terceiro par com evidência inicial: seis módulos examinados parcialmente, 17 ainda sem evidência granular nesta matriz. Nenhum aceite integral de ANX-127 nem gate integrado decorre dessas verificações.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
