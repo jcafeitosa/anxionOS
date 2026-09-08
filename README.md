@@ -57,13 +57,15 @@ Detalhes: [backend/README.md](backend/README.md). Infra local opcional: `docker 
 
 ### Frontend (P07 — Owner Console shell)
 
+**Stack obrigatória:** Astro + React islands (`@astrojs/react`) + TypeScript + Tailwind. Não Next.js, Vite SPA standalone nem React Native.
+
 ```bash
 cd frontend && npm install
 npm run frontend:dev    # http://localhost:4321 (raiz do repo)
 npm run frontend:build
 ```
 
-Design system: `frontend/design-system/MASTER.md`. Org chart: [docs/team/org-chart.md](docs/team/org-chart.md). Proxy `/api` → backend `:3000`.
+Setup e convenções: [frontend/README.md](frontend/README.md). Design system: `frontend/design-system/MASTER.md`. Org chart: [docs/team/org-chart.md](docs/team/org-chart.md). Proxy `/api` → backend `:3000`.
 
 ### Taskboard (obrigatório — dev local)
 

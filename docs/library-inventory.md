@@ -1,6 +1,13 @@
-# Inventário de bibliotecas — backend anxionOS
+# Inventário de bibliotecas — anxionOS
 
-Versões resolvidas no `backend/bun.lock` em **2026-09-07**. Política: latest estável no momento da instalação, fixado no lockfile.
+Versões resolvidas nos lockfiles em **2026-09-07**. Política: latest estável no momento da instalação, fixado no lockfile.
+
+## Decisões de stack (frontend)
+
+| Decisão | Escolha | Status |
+| ------- | ------- | ------ |
+| Framework web (P07+) | **Astro** + React islands | Aceito — ver [frontend/README.md](../frontend/README.md) |
+| Alternativas excluídas | Next.js, Vite SPA standalone, React Native | — |
 
 ## Runtime
 
@@ -62,12 +69,34 @@ Versões resolvidas no `backend/bun.lock` em **2026-09-07**. Política: latest e
 | `typescript`        | 5.7.x         |
 | `dependency-cruiser`| 16.9.x        |
 
+### `@anxionos/frontend` (P07 — `frontend/package-lock.json`)
+
+| Pacote              | Versão (lock) | Classificação |
+| ------------------- | ------------- | ------------- |
+| `astro`             | 7.3.1         | Framework (decisão de projeto) |
+| `@astrojs/react`    | 6.0.5         | Integração oficial |
+| `react`             | 19.2.8        | Islands interativas |
+| `react-dom`         | 19.2.8        | Islands interativas |
+| `tailwindcss`       | 4.3.3         | Estilo |
+| `@tailwindcss/vite` | 4.3.3         | Plugin Vite (via Astro) |
+| `lucide-react`      | 1.42.0        | Ícones |
+
 ## Atualizar
+
+### Backend
 
 ```bash
 cd backend
 bun update          # latest dentro dos ranges do package.json
 bun test && bun run typecheck && bun run boundaries
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm update          # latest dentro dos ranges do package.json
+npm run build
 ```
 
 Registrar data e versões resolvidas neste arquivo após mudanças materiais.

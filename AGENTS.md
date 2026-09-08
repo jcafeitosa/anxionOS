@@ -157,6 +157,8 @@ Prioridade para agentes: **code-review-graph** (se código indexado no MCP) → 
 
 ### Frontend
 
+**Stack obrigatória:** Astro + React islands (`@astrojs/react`) + TypeScript. **Não** usar Next.js, Vite SPA standalone nem React Native para consoles web. Interatividade via islands; páginas e layout em `.astro`.
+
 Após alterações de UI, inspecionar com Chrome DevTools MCP quando aplicável.
 
 ### Dashi Taskboard (obrigatório — tempo real)
@@ -356,6 +358,8 @@ Aplicar integralmente G0–G7 acima. Retorno para correções exige nova revisã
 
 
 ## Frontend (P07 — consoles web)
+
+**Stack obrigatória:** Astro + React islands; não Next/Vite SPA/React Native.
 
 Consoles **Astro + React/TypeScript** em `frontend/` (Owner, Operator, Platform, Partner — apenas Owner shell na P07).
 
