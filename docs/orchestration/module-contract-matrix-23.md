@@ -137,7 +137,23 @@ Snapshot de inspeção estática ANX-127 sobre worktree baseado em HEAD `87a891f
 
 O plano identity P1 exclui ServicePrincipal e rotas públicas; esses itens de continuação não devem ser atribuídos retroativamente ao aceite ANX-78. O plano agents prevê S7 opcional e S8+; disposição deve ser explícita, sem worker vazio. ANX-143/144 e pesquisas ANX-124/125 preservam o escopo avançado/OpenBot separado do núcleo.
 
-Os demais 21 módulos e os R10 ainda não foram reconciliados granularmente neste snapshot. Esta tabela inicia a evidência, não fecha o aceite integral de ANX-127.
+Os demais módulos e os R10 ainda não foram reconciliados exaustivamente neste snapshot; a seção 6.3 acrescenta evidência inicial de organizations/governance. Esta tabela inicia a evidência, não fecha o aceite integral de ANX-127.
+
+## 6.3. Evidência inicial — organizations e governance
+
+Inspeção ANX-127 dos planos [organizations R09 S1–S6](./modules/organizations/R09-dev-plan.md) e [governance R09 S1–S6](./modules/governance/R09-dev-plan.md), sem reabrir o aceite dos slices ANX-29/30.
+
+| Fonte/critério | Source e evidência | Classificação / continuação |
+| --- | --- | --- |
+| Organizations S1–S5 | Migrations 0000/0001, ports/UoW e commands em `backend/modules/organizations/src/`; `accept-invite-by-token.ts` importa MembershipRevisionConflictError do repository infrastructure | Presença estática parcial; A2 confirmado. ANX-135 deve corrigir fronteira do erro sem perder CAS/replay ou mudar erro público silenciosamente |
+| Organizations S3, commit/rollback | `backend/tests/organizations/uow-journal-outbox.test.ts` declara cenários commit/rollback, mas retorna se dbAvailable falso | Integração não executada neste incremento; gate obrigatório não pode usar retorno vazio como evidência. ANX-135 exige fixture dedicada; não executar cleanup amplo do plano em banco compartilhado |
+| Governance S2/S4 | `backend/modules/governance/src/application/commands/revoke-grant.ts` usa UoW, epoch e eventos; submit-change-proposal/resolve-approval e testes correspondentes existem | Presença estática, não prova concorrência/atomicidade executada. ANX-136 revalida G3-GOV-01..04 |
+| Governance S3 | `application/consumers/organizations-membership-consumer.ts` no módulo governance usa Pool/processWithInbox, além do GovernanceUnitOfWork | A2 confirmado; ANX-136 separa infra/transport do caso de uso. Atomicidade inbox/UoW e crash entre commits ainda precisam prova |
+| Governance S5/G3-GOV-05 | `backend/modules/governance/src/infrastructure/adapters/graph-t01-traversal-evaluator.ts`; `backend/tests/governance/t01-traversal-evaluator.test.ts` | Executado: `cd backend && bun test tests/governance/t01-traversal-evaluator.test.ts`, Bun 1.4.0, **4 pass / 0 fail / 10 assertions**. Doubles de epoch store/grafo; cobre timeout, stale input, normalização e erro. Não homologa Neo4j real nem revogação durante chamada |
+
+Comentários específicos de handoff registrados em ANX-135/136. Os retornos por indisponibilidade no teste membership-consumer também exigem tratamento explícito no gate, sem alegar que falso PASS ocorreu em CI. A evolução RLS (ANX-131) não deve ser confundida com o escopo original application-only tenancy v1 do plano organizations.
+
+Esta seção não completa o inventário exaustivo dos dois módulos: R10, campos de schemas, todas as decisões D-ORG e API/G5 ainda requerem cruzamento. Somada à seção 6.2, há evidência inicial para quatro módulos; os demais 19 continuam sem reconciliação granular aqui.
 
 ## 7. Referências
 
