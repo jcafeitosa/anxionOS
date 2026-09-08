@@ -1558,7 +1558,7 @@ Fonte primária: [R08 decision log](./structure-debate/partners/R08-decision-log
 
 ## 6.32. Rastreio por capacidade — operations R09/R10
 
-Fontes: [R09](./structure-debate/operations/R09-dev-plan.md) e [R10](./structure-debate/operations/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma register-health-check/create-incident e ports UoW/journal. Continuação ANX-158; ANX-169/170 tratam restore e readiness operacional.
+Fontes: [R09](./structure-debate/operations/R09-dev-plan.md) e [R10](./structure-debate/operations/R10-g0-handoff.md), relidos em 2026-09-08. O rastreio transitivo **D-OPS-001..005** está em **§6.32.1** (ANX-217). Fonte primária: [R08 decision log](./structure-debate/operations/R08-decision-log.md). Inventário parcial: register-health-check/create-incident e ports UoW/journal. Continuação ANX-158; ANX-169/170 tratam restore e readiness operacional.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -1576,11 +1576,23 @@ Fontes: [R09](./structure-debate/operations/R09-dev-plan.md) e [R10](./structure
 | ANX-158 recovery sem LLM / ANX-169/170 | Planejado, provas operacionais não executadas | ANX-169: restore em ambiente isolado e runbook determinístico; ANX-170: SLI/SLO/carga/custo medidos, nenhuma prontidão24/7 por documento |
 | ANX-158 ações privilegiadas | Não verificado | ANX-158/136: grants/epoch/aprovação/revogação, audit antes/depois e rollback autorizado; operations coordena sem assumir estado privado de todos os módulos |
 
-Nenhum probe, export, deleção, incident real, restore ou teste operacional foi acionado. Rastreio transitivo R04–R08 e políticas/tempos de retenção permanecem pendentes. Este planejamento não autoriza execução de runbooks perigosos nem alteração de produção.
+**D-OPS-001..005** estão em §6.32.1; probes/export/retenção executáveis permanecem ANX-158/169/170. Este planejamento não autoriza execução de runbooks perigosos nem alteração de produção.
+
+### 6.32.1. A1 — disposição transitiva operations (ANX-217)
+
+Fonte primária: [R08 decision log](./structure-debate/operations/R08-decision-log.md) (relido 2026-09-08).
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-OPS-001 | operations dono agregados R03 | Aceito v1 | ANX-158 | spec008 |
+| D-OPS-002 | Dono incidentes/export/health; não audit replay nem kill switch | Aceito v1 | ANX-158/155 | Registry ADR0006 |
+| D-OPS-003 | PG autoritativo | Aceito v1 | ANX-158 | ADR0004 |
+| D-OPS-004 | ServiceHealthSnapshot de probes; export referencia audit deltaRefId | Aceito v1 | ANX-158/155 | Probe real ≠ registro |
+| D-OPS-005 | graph:operations:v1 async | Aceito v1 | ANX-138/158 | S4 defer |
 
 ## 6.33. Rastreio por capacidade — simulation e evaluation R09/R10
 
-Fontes relidas integralmente em 2026-09-08: [simulation R09](./structure-debate/simulation/R09-dev-plan.md), [R10](./structure-debate/simulation/R10-g0-handoff.md), [evaluation R09](./structure-debate/evaluation/R09-dev-plan.md) e [R10](./structure-debate/evaluation/R10-g0-handoff.md). Inventário confirma create-simulation-run/backtest-requested-consumer e record-evaluation-score/outcome-recorded-consumer. Continuação ANX-159/160.
+Fontes relidas integralmente em 2026-09-08: [simulation R09](./structure-debate/simulation/R09-dev-plan.md), [R10](./structure-debate/simulation/R10-g0-handoff.md), [evaluation R09](./structure-debate/evaluation/R09-dev-plan.md) e [R10](./structure-debate/evaluation/R10-g0-handoff.md). O rastreio transitivo **D-SIM-001..005** está em **§6.33.1** (ANX-218); **D-EVL-001..005** em **§6.33.2** (ANX-219). Fontes primárias: [simulation R08](./structure-debate/simulation/R08-decision-log.md) e [evaluation R08](./structure-debate/evaluation/R08-decision-log.md). Inventário parcial: create-simulation-run/backtest-requested-consumer e record-evaluation-score/outcome-recorded-consumer. Continuação ANX-159/160.
 
 | Requisito / fonte | Classificação e evidência | Continuação / oráculo |
 | --- | --- | --- |
@@ -1600,9 +1612,33 @@ Fontes relidas integralmente em 2026-09-08: [simulation R09](./structure-debate/
 | EVL G3-EVL-S2-03 tenant | Não verificado | ANX-160/131: input/score/certificado/replay/consulta de outro tenant negados, reputação não expõe dados privados |
 | EVL S4 HTTP/graph | Não revalidado/deferido | ANX-160/138: API por contratos e ACL, projeção derivada/rebuild, sem estado de promoção autoritativo no grafo |
 | ANX-160 scorecards/reputação/reprodução | Planejado, não provado por notional | ANX-160: avaliação agente/estratégia reproduzível/auditada, versão de critérios, teste de regressão/drift e reputação com proveniência |
-| Ambos R10 PC-G0 10/10 e PASS G2–G6 | Resumos históricos remetem R04–R09 sem evidência detalhada | ANX-127/159/160/181: recuperar matrizes/contratos/pareceres do candidato; não herdar aprovação por status do debate |
+| Ambos R10 PC-G0 10/10 e PASS G2–G6 | Resumos históricos remetem R04–R09 sem evidência detalhada | **D-SIM-001..005** §6.33.1 (ANX-218); **D-EVL-001..005** §6.33.2 (ANX-219) |
 
-Nenhuma simulação, avaliação, certificação, promoção ou teste integrado foi executado. Rastreio transitivo R04–R08, fórmulas de score e parâmetros dos modelos segue pendente; não foram inventados critérios numéricos.
+**D-SIM-001..005** e **D-EVL-001..005** estão nas subseções abaixo; runner/score/certificação executáveis permanecem ANX-159/160. Não foram inventados critérios numéricos.
+
+### 6.33.1. A1 — disposição transitiva simulation (ANX-218)
+
+Fonte primária: [R08 decision log](./structure-debate/simulation/R08-decision-log.md) (relido 2026-09-08).
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-SIM-001 | simulation dono agregados R03 | Aceito v1 | ANX-159 | spec004 |
+| D-SIM-002 | Dono SimulationRun isolado; sem promoção produção | Aceito v1 | ANX-159/160 | Sandbox ≠ live |
+| D-SIM-003 | PG autoritativo | Aceito v1 | ANX-159 | ADR0004 |
+| D-SIM-004 | Twin fidelity tiers; research-python via SimulationRun port | Aceito v1 | ANX-159 | G5-SIM |
+| D-SIM-005 | graph:simulation:v1 async | Aceito v1 | ANX-138/159 | S4 defer |
+
+### 6.33.2. A1 — disposição transitiva evaluation (ANX-219)
+
+Fonte primária: [R08 decision log](./structure-debate/evaluation/R08-decision-log.md) (relido 2026-09-08).
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-EVL-001 | evaluation dono agregados R03 | Aceito v1 | ANX-160 | spec004 |
+| D-EVL-002 | Dono scoring P08; promoção via governance | Aceito v1 | ANX-160/136 | P09 §6.1 |
+| D-EVL-003 | PG autoritativo | Aceito v1 | ANX-160 | ADR0004 |
+| D-EVL-004 | ScoringPolicy OP01-OP08; agent vs strategy scores separados | Aceito v1 | ANX-160 | Critérios versionados |
+| D-EVL-005 | graph:evaluation:v1 async | Aceito v1 | ANX-138/160 | S4 defer |
 
 Com este incremento, os **23 módulos** possuem desdobramento dos requisitos explicitados em seus R09/R10 nas §§6.12–6.33 (simulation/evaluation compartilham §6.33). Isso é cobertura documental dos agrupamentos consultados, **não** reconciliação completa das capacidades referenciadas transitivamente, schemas/decisões ou aprovação ANX-127. Continuam as condições de encerramento da §6.1: cobertura restante, conflitos/migrações e pacote independente do conjunto. Placement do gateway distribuído foi aprovado (ADR0006, 2026-09-08); pendem revalidação G1 integrada, implementação e migração (ANX-161/162).
 
@@ -1662,13 +1698,13 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 | execution §6.25 | D-EX-001..012 → **§6.25.1** (ANX-210); ADR0006 placement | ANX-151/161/162; G5-EX e adapters reais não executados |
 | accounting §6.26 | D-ACC-001..012,015 → **§6.26.1** (ANX-211); lacuna 013..014 no R08 | ANX-152; G5-ACC e posting real não executados |
 | portfolios §6.27 | D-PF-001..015 → **§6.27.1** (ANX-212) | ANX-153; G5-PF e valuation real não executados |
-| performance §6.28 | R04–R08 → definições de métricas, fluxos externos, atribuição e oráculos | ANX-154; fechar com ledger/valuation, não só notional |
-| audit §6.29 | R04–R08 → schemas, decisões, integridade/replay e relatórios | ANX-155; evidência ausente deve permanecer explícita |
-| billing §6.30 | R04–R08 → ciclo comercial, contratos e cenários detalhados | ANX-156/132; issued/paid dispostos na §6.31.1 |
-| partners §6.31 | R04–R08 → comissões/reversão/payout e cenários | ANX-157/132; §6.31.1 define interface sem duplicar ledger financeiro |
-| operations §6.32 | R04–R08 → probes/incidentes/export/retenção e gates | ANX-158; restore ANX-169 e SLO ANX-170; prazos exigem política antes de uso |
-| simulation §6.33 | R04–R08 → sandbox/reprodução e parâmetros dos modelos | ANX-159; evidência de runner, não flags de sandbox como prova |
-| evaluation §6.33 | R04–R08 → score/certificação e parâmetros/critérios | ANX-160; recomendação não aplica estado alheio, P09 §6.1/10 |
+| performance §6.28 | D-PERF-001..005 → **§6.28.1** (ANX-213) | ANX-154; fórmulas/oráculos executáveis em ANX-154/181 |
+| audit §6.29 | D-AUD-001..005 → **§6.29.1** (ANX-214) | ANX-155; integridade/replay executável em ANX-155 |
+| billing §6.30 | D-BIL-001..005 → **§6.30.1** (ANX-215) | ANX-156/132; issued/paid em §6.31.1 |
+| partners §6.31 | D-PTR-001..005 → **§6.31.2** (ANX-216); issued/paid §6.31.1 | ANX-157/132; interface sem duplicar ledger |
+| operations §6.32 | D-OPS-001..005 → **§6.32.1** (ANX-217) | ANX-158; restore ANX-169 e SLO ANX-170 |
+| simulation §6.33 | D-SIM-001..005 → **§6.33.1** (ANX-218) | ANX-159; runner real, não flags de sandbox |
+| evaluation §6.33 | D-EVL-001..005 → **§6.33.2** (ANX-219) | ANX-160; promoção via governance P09 §6.1 |
 
 **Estado das leituras:** todos os R09/R10 foram consultados conforme seções de origem. Para os cinco conflitos, também foram relidas as fontes explicitadas nas respectivas disposições; isso não significa leitura integral de todas as rodadas de cada linha. As demais referências transitivas não estão atestadas nesta consolidação. A tabela delega o detalhamento rastreável, não declara esses requisitos aderentes.
 
@@ -1686,7 +1722,7 @@ Trabalho documental **parcial** do item A4 (`405b8304`). Não equivale a PASS in
 | Placement gateway | ADR0006, §6.1/§6.34, spec gateway | ADR `1cfa7de6e7a98778f6c388e085790e5b1d5d8314b10e4e3cafe9e338869ce0c2` | `d70b8f91` → PASS F1 revalidado | **G1C3 F1 fechado** (ANX-192/193/194/195) |
 | Conflitos F1–F3 (P06/ops/gateway) | P06, ops, gateway, §6.34 | C2 em comentário `78b398b3` | `f18a2846` C1; `cf16914a` C2 | F1–F3 resolvidos; B1 removido por ADR0006 |
 | Cinco disposições contratuais | §6.34 tabela | hashes por linha na §6.34 | `400da37b`, `7542eb8e`, `1c5076a6`, `ac51f462`, `923d4cd8` | PASS restrito documental cada uma |
-| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** §6.12.1–6.27.1 (ANX-197–212); 7 módulos pendentes (§6.28+) |
+| Agrupamentos R09/R10 | §§6.12–6.33 | ver SHA256 comentários ANX-127 | PASS restritos por §6.x | **A1 completo:** §6.12.1–6.33.2 (ANX-197–219); 23/23 módulos |
 | Pacote final A4 | esta §6.36 + §6.1 | ver comentários ANX-127 | pendente revisor integral | **A4 parcial** — não encerrar ANX-127 |
 
 Implementação futura permanece delegada aos filhos ANX-126 (ANX-128+); este pacote não homologa produto, engines ou testes financeiros.
