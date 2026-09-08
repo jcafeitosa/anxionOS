@@ -774,6 +774,23 @@ Fontes: [R09](./structure-debate/billing/R09-dev-plan.md) e [R10](./structure-de
 
 Falta recuperar R04–R08 para schemas e cenários detalhados; o inventário limitado não comprova ausência universal dos caminhos restantes. Não foi emitida invoice, criada assinatura, recebido webhook ou executado teste financeiro neste incremento. Nenhum vendor de pagamento foi escolhido.
 
+## 6.31. Rastreio por capacidade — partners R09/R10
+
+Fontes: [R09](./structure-debate/partners/R09-dev-plan.md) e [R10](./structure-debate/partners/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual confirma register-partner/accrue-commission e ports UoW/journal. ANX-157 executa delta sem transferências reais.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1 partner/commission/payout schema | Parcial: register-partner presente; schema completo não revalidado | ANX-157/132: atribuição/identidade/regra versionada, estados/valores/moeda, atomicidade e contratos sem dados privados desnecessários |
+| R09 S2 / G3-PTR-S2-01 commission on paid | Conflito conhecido: accrue-commission usa bridge invoiceIssued observado §6.9; R09 exige paid | ANX-127/157/156: consolidar cálculo provisório versus elegibilidade, decisão/migração explícitas; emissão não autoriza payout |
+| R09 S3 / G3-PTR-S3-01 refund reversal | Não demonstrado no inventário | ANX-157/156: reversão idempotente ligada à invoice/pagamento/regra original, parcial/integral e ordering, sem apagar histórico |
+| R09 payout lifecycle / G3-PTR-S3-02 FAILED retry | Não demonstrado | ANX-157/136: aprovação, estados e idempotência; FAILED confirmado distinto de UNKNOWN, não repetir transferência incerta; somente sandbox autorizado |
+| R09 G3-PTR-S3-03 tenant | Não verificado | ANX-157/131: parceiro vê apenas escopo permitido em comandos/queries/replay/export, sem dados de outro parceiro/agency |
+| R09 S4 HTTP | Não verificado integralmente | ANX-157/167: APIs e console Partner com comissões calculadas/elegíveis/pagas distinguidas, erros e aprovação verificáveis |
+| R09 S4 graph | Deferido; stub não é runtime | ANX-138: projeção/referral/lineage derivada e ACL, sem estado comercial autoritativo Neo4j |
+| R10 PC-G0 10/10 e PASS G2–G6 | Histórico genérico remete R04–R09 | ANX-127/157/181: recuperar schema/decisões/G5 e evidência do candidato; não herdar aprovação do resumo |
+
+Atribuição, elegibilidade, antifraude, ajustes/clawback e registro comercial da ANX-157 permanecem no delta. “Ledger comercial” na issue significa rastreio de obrigações/comissões do owner partners, não novo ledger financeiro que substitui accounting; formalizar interface de postings conforme contrato. Nenhuma comissão/payout/refund ou teste financeiro foi executado, e nenhum vendor foi escolhido. Rastreio transitivo R04–R08 e resolução invoiceIssued/paid continuam pendentes.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
