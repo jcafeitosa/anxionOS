@@ -740,7 +740,87 @@ Fontes: [R09](./structure-debate/orchestration/R09-dev-plan.md) e [R10](./struct
 | R09 fixture e G5 checklist20 / R10 checklist/ambiente | Referências não equivalem a prova executada | ANX-140/181: oito cenários G5 acima e vinte itens R07 precisam evidências próprias; fixture ANX901/902 somente no ambiente dedicado, sem alterar board real ou truncate compartilhado |
 | R09 pré-requisitos / R10 AC-G0-01..08, PC-G0-01..10, DEP-01..08, H-01..05, B-01..04 | Histórico9/10, dependências e autorização a revalidar | ANX-140/181: revalidar G0. **D-ORC-001..056** em §6.17.1 (ANX-202); checklist20/G5 permanecem pendentes execução |
 
-Os tempos/limites acima vêm do plano histórico, exigem config tipada e reconciliação com contrato vigente. A ligação ao Dashi descrita nesses slices é integração explícita de desenvolvimento, não dependência universal de cada Task/Run do produto. WAITING_HUMAN_INPUT, cancelamento, budgets e retomada da ANX-140 permanecem requisitos adicionais das specs institucionais, não comprovados pelos cenários de mirror. Rastreio transitivo D-ORC-001..056, seis eventos, dez rotas e checklist20 ainda pendente. Nenhum worker, webhook, teste integrado ou cleanup foi executado.
+Os tempos/limites acima vêm do plano histórico, exigem config tipada e reconciliação com contrato vigente. A ligação ao Dashi descrita nesses slices é integração explícita de desenvolvimento, não dependência universal de cada Task/Run do produto. **D-ORC-001..056** estão em §6.17.1; G5 checklist20 e homologação executável permanecem ANX-140. Nenhum worker, webhook, teste integrado ou cleanup foi executado.
+
+### 6.17.1. A1 — disposição transitiva orchestration (ANX-202)
+
+Fonte primária: [R08 decision log](./structure-debate/orchestration/R08-decision-log.md) (relido 2026-09-08). Commands parciais existem (§6.17); esta subseção não revalida G3/G5 nem executa workers.
+
+#### D-ORC-001..028 (R08 — domínio, contratos, storage)
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-ORC-001 | Dono Goal/Task/Run/lease/scheduler | Aceito v1 | ANX-140 | Sem grants/Neo4j |
+| D-ORC-002 | Modos HIERARCHY_TREE e CIRCULAR | Aceito v1 | ANX-140/135 | ADR0005/spec006 |
+| D-ORC-003 | Org nova default CIRCULAR; import TREE | Aceito v1 | ANX-135 | OH-T06 |
+| D-ORC-004 | Centro Owner+CEO; pipeline G0–G7 | Aceito v1 | ANX-140/181 | AGENTS.md gates |
+| D-ORC-005 | Checkout TaskLease idempotente | Aceito v1 | ANX-140 G3-01 | checkout-task.ts |
+| D-ORC-006 | Heartbeat fila PG + Run FSM | Aceito v1 | ANX-140/133 | record/dequeue heartbeat |
+| D-ORC-007 | goalAncestry[] denormalizado | Aceito v1 | ANX-140 | Goal DAG orch |
+| D-ORC-008 | Board override Owner; G7 único done | Aceito v1 | ANX-140 G3-05 | GateBinding |
+| D-ORC-009 | Dashi claim ANX-*; orch espelha | Aceito v1 | ANX-140 | Dev integration only |
+| D-ORC-010 | TREE: checkout/ancestry iguais | Aceito v1 | ANX-140 | Audit+GateBinding |
+| D-ORC-011 | CIRCULAR: G4/G5 fail → ESCALATES_TO | Aceito v1 | ANX-138/140 | graph read |
+| D-ORC-012 | GateBinding schema v1 normativo | Aceito v1 | ANX-132/140 | gateBindingV1 |
+| D-ORC-013 | TTL lease 4h; renew cap 8h | Aceito v1 | ANX-140 G3-06 | Config tipada |
+| D-ORC-014 | Evento checked_out sem leaseToken | Aceito v1 | ANX-132/140 | Payload v1 |
+| D-ORC-015 | PlanRevision agregado separado | Aceito v1 | ANX-140 | migration 0002 defer |
+| D-ORC-016 | Mirror webhook + polling 60s | Aceito v1 | ANX-140/129 | taskboard mirror |
+| D-ORC-017 | RecordGateDisposition invalida PASS | Aceito v1 | ANX-140 | Digest change |
+| D-ORC-018 | CIRCULAR: gate event → ReviewEdge graph | Aceito v1 | ANX-138 | graph:orchestration:gate |
+| D-ORC-019 | Comentário board ≠ GateBinding | Aceito v1 | ANX-140 | Unidirecional |
+| D-ORC-020 | gateBindingV1Schema Zod normativo | Aceito v1 | ANX-132 | JSON Schema derivado |
+| D-ORC-021 | 6 eventos v1 mapeados | Aceito v1 | ANX-132/140 | Ver tabela abaixo |
+| D-ORC-022 | HTTP /v1/orchestration/* 10 rotas | Aceito v1 | ANX-140 | Sketch R04 |
+| D-ORC-023 | Webhook dedupe; comandos+outbox | Aceito v1 | ANX-140 G3-04 | ingest webhook |
+| D-ORC-024 | HMAC webhook opcional v1 | Aceito v1 | ANX-140 | D-ORC-051 prod |
+| D-ORC-025 | NOT_APPLICABLE exige reason | Aceito v1 | ANX-140 | Demais exigem digest |
+| D-ORC-026 | leaseToken só HTTP checkout/renew | Aceito v1 | ANX-140 | Nunca evento/log |
+| D-ORC-027 | CIRCULAR: evento gate binding completo | Aceito v1 | ANX-138 | Projeção graph |
+| D-ORC-028 | TaskLease tabela filha 1:1 | Aceito v1 | ANX-140 | Não colunas em tasks |
+
+#### D-ORC-029..056 (R08 — deps, riscos, deferências)
+
+| ID | Decisão (resumo) | Classificação | Disposição | Limite |
+| --- | --- | --- | --- | --- |
+| D-ORC-029 | Heartbeat fila PG coalesce | Aceito v1 | ANX-140/133 | Não Redis lock |
+| D-ORC-030 | gate_bindings append-only | Aceito v1 | ANX-140 | invalidated_at |
+| D-ORC-031 | command_journal idempotência HTTP | Aceito v1 | ANX-140 G5-05 | Hash mismatch |
+| D-ORC-032 | Migrations 0000 core + 0001 índices | Aceito v1 | ANX-140 | §6.4 inventário |
+| D-ORC-033 | taskboard_mirror dedupe | Aceito v1 | ANX-140 | issue+version+status |
+| D-ORC-034 | PrincipalLookup valida reviewer G7 | Aceito v1 | ANX-134/140 | identity port |
+| D-ORC-035 | OrganizationScopePort fail-closed | Aceito v1 | ANX-135/140 | ORC_SCOPE_DENIED |
+| D-ORC-036 | T01 obrigatório checkout/renew 2s | Aceito v1 | ANX-136/138 | 503 deny |
+| D-ORC-037 | GraphQueryPort read-only escalation | Aceito v1 | ANX-138/140 | CIRCULAR explain |
+| D-ORC-038 | Journal/outbox mesma TX PG | Aceito v1 | ANX-140/129 | eventing bootstrap |
+| D-ORC-039 | TaskboardMirrorPort; Dashi não autoridade lease | Aceito v1 | ANX-140 | Mirror table |
+| D-ORC-040 | Projector graph:orchestration:gate:v1 | Aceito v1 | ANX-138 | Dono graph |
+| D-ORC-041 | Publica 6 eventos; não subscreve v1 | Aceito v1 | ANX-140 | Downstream async |
+| D-ORC-042 | AgentRegistryPort stub v1 permissivo | Aceito v1 | ANX-140/139 | D-ORC-053 forte |
+| D-ORC-043 | Workers sweeper+heartbeat apps/workers | Aceito v1 | ANX-133/140 | Composition root |
+| D-ORC-044 | Checkout bloqueado se board ≠ in_progress | Aceito v1 | ANX-140 G3-01 | ORC_MIRROR sync |
+| D-ORC-045 | Mirror done/canceled exige G7 PASS | Aceito v1 | ANX-140 | ORC_MIRROR_REJECTED |
+| D-ORC-046 | G7 PASS: reviewerId isOwnerPrincipal | Aceito v1 | ANX-140 | Comentário ignorado |
+| D-ORC-047 | Sweeper batch máx 100 + jitter | Aceito v1 | ANX-140/133 | sweep-expired-leases |
+| D-ORC-048 | Heartbeat coalesce 30s; cap 10k/org | Aceito v1 | ANX-140 G5-04 | Backpressure |
+| D-ORC-049 | Checklist G5 R07 gate pré-G1 | Aceito v1 | ANX-140/181 | 20 itens não executados |
+| D-ORC-050 | SLO T01 p99 2s/5s + breaker | Aceito v1 | ANX-140/170 | P-R7-01 resolvido |
+| D-ORC-051 | Prod HMAC webhook obrigatório | Aceito v1 | ANX-140/129 | ORC_WEBHOOK_HMAC_REQUIRED |
+| D-ORC-052 | in_review: lease renovável; done exige G7 | Aceito v1 | ANX-140 | P-R7-03 resolvido |
+| D-ORC-053 | AgentRegistryPort forte agents P04 | Aceito v1 | ANX-139/140 | P-R7-05 critérios |
+| D-ORC-054 | OpenAPI Scalar generation | Deferido R09 | ANX-140/132 | S8 |
+| D-ORC-055 | plan_revisions migration 0002 | Deferido R09 | ANX-140 | S9 spike |
+| D-ORC-056 | G5 CI sandbox automatizado | Deferido R09 | ANX-140/181 | Manual sandbox baseline |
+
+#### Artefatos contratuais referenciados (D-ORC-021/022)
+
+| Artefato | Disposição | Limite |
+| --- | --- | --- |
+| 6 eventos v1 (`task.checked_out`, gate disposition, etc.) | ANX-132/140 | Mapa eventType→schema R04 |
+| 10 rotas HTTP sketch | ANX-140 | get-task, checkout, renew, webhook, admin… |
+| gateBindingV1Schema | ANX-132 | Normativo antes código |
+
+**Rodadas R01–R07:** crosswalk ORCH-R02..R08 → D-ORC em R08. Homologação executável G3/G5, workers runtime e mirror real permanecem ANX-140/133/181.
 
 ## 6.18. Rastreio por capacidade — connections R09/R10
 
@@ -1171,7 +1251,7 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 | governance §6.14 | D-GOV-001..010 + D-R6-GOV + PC-G0 → **§6.14.1** (ANX-199); conflitos ExecutionPermit/PLATFORM abertos | ANX-136/137 executa delta; permits P06 §2.1 em ANX-149/150/151 |
 | graph §6.15 | D-GR-001..044 + T01–T20 → **§6.15.1** (ANX-200); schemas/F0 executáveis em ANX-138 | ANX-138; não converter disposição documental em teste executado |
 | agents §6.16 | D-AGT-001..014 + AGT-R06 → **§6.16.1** (ANX-201); G5-AGT executável em ANX-139 | ANX-139/132; OpenBots ANX-124/125→144; teammates ANX-143 separados |
-| orchestration §6.17 | D-ORC-001..056, R04/checklist20 → seis eventos, dez rotas, lease/run/gateBinding | ANX-140/132; runtime ANX-133; Dashi de desenvolvimento não vira dependência universal |
+| orchestration §6.17 | D-ORC-001..056 → **§6.17.1** (ANX-202); G5/checklist20 executável em ANX-140 | ANX-140/132; runtime ANX-133; Dashi dev-only não é dep universal |
 | connections §6.18 | D-CX-001..064, R04, DL-CX2 → schemas, endpoint/quota e inferência | ANX-141/132; valores exigem config/fonte, não defaults inventados |
 | knowledge §6.19 | D-KN, spec002 e R04 → memória/retrieval, TTL/budget e schemas | ANX-142/132; falha de typecheck anterior continua snapshot, não prova atual |
 | market-data §6.20 | D-MD, spec003 R12, schemas → identidade/tempo/qualidade/ingestão | ANX-145/146/132; origem corrente versus REAL disposta em P06 §1.1 |
@@ -1206,7 +1286,7 @@ Trabalho documental **parcial** do item A4 (`405b8304`). Não equivale a PASS in
 | Placement gateway | ADR0006, §6.1/§6.34, spec gateway | ADR `1cfa7de6e7a98778f6c388e085790e5b1d5d8314b10e4e3cafe9e338869ce0c2` | `d70b8f91` → PASS F1 revalidado | **G1C3 F1 fechado** (ANX-192/193/194/195) |
 | Conflitos F1–F3 (P06/ops/gateway) | P06, ops, gateway, §6.34 | C2 em comentário `78b398b3` | `f18a2846` C1; `cf16914a` C2 | F1–F3 resolvidos; B1 removido por ADR0006 |
 | Cinco disposições contratuais | §6.34 tabela | hashes por linha na §6.34 | `400da37b`, `7542eb8e`, `1c5076a6`, `ac51f462`, `923d4cd8` | PASS restrito documental cada uma |
-| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** identity–graph §6.12.1–6.15.1 (ANX-197–200), agents §6.16.1 (ANX-201); 18 módulos pendentes |
+| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 parcial:** §6.12.1–6.17.1 (ANX-197–202); 17 módulos pendentes (§6.18+) |
 | Pacote final A4 | esta §6.36 + §6.1 | ver comentários ANX-127 | pendente revisor integral | **A4 parcial** — não encerrar ANX-127 |
 
 Implementação futura permanece delegada aos filhos ANX-126 (ANX-128+); este pacote não homologa produto, engines ou testes financeiros.
