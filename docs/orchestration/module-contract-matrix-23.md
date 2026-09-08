@@ -294,6 +294,34 @@ Fonte: [P01/P02, CapabilityManifest e envelope](./system-capabilities/p01-p02-co
 
 A matriz por capability ainda deve ligar catálogo, schemas, handler, superfícies, grant/epoch, budget/approval, erros e oráculos reais. ANX-132 contém handoff detalhado; o resultado estreito acima não fecha ANX-127.
 
+## 6.12. Rastreio por capacidade — identity R09/R10
+
+Fontes: [R09 completo](./modules/identity/R09-dev-plan.md) e [R10 completo](./modules/identity/R10-g0-handoff.md), relidos em 2026-09-08. Esta seção desdobra os requisitos explícitos desses dois artefatos; não atesta o conteúdo transitivo de todas as decisões D-IDN-001..024 ou rodadas R01–R08. ANX-134 continua responsável pelo delta de identity; ANX-127 pela completude documental.
+
+| Requisito / fonte | Classificação e evidência | Disposição / verificação |
+| --- | --- | --- |
+| R09 P0: Principal, migration, register, queries, bootstrap e adapter organizations | Baseline histórico aceito; não revalidado integralmente neste incremento. Arquivos identity inventariados na §6.2 | ANX-134: preservar P0, testar regressões afetadas; não repetir implantação por checkmark histórico |
+| R09 P1-S1: types/commands/queries/events/index e round-trip | Parcial, schemas presentes. Teste real localizado em `backend/tests/contracts/identity-events.test.ts`, não no subdiretório sugerido pelo Top 5 | ANX-134/132: completar matriz de campos, erros e casos inválidos. Resultado estreito abaixo |
+| R09 P1-S2 / G3-IDN-01 / G4-IDN-01 / G5 payload: evento registrado sem authUserId | Parcial: símbolo/command na §6.2; teste de envelope construído sem authUserId passou | ANX-134: inspecionar evento realmente persistido no journal/outbox. Fixture sem campo não prova rejeição/remoção de campo injetado |
+| R09 G3-IDN-02 / G5 duplo register | Não verificado em execução neste incremento; teste register-principal existe | ANX-134: replay e race com mesmo authUserId, um Principal e um evento; payload conflitante explicitamente tratado |
+| R09 P1-S3 / G3-IDN-03 | Parcial: migration 0001 e suspendPrincipal presentes | ANX-134: active→suspended, evento e queries fail-closed em PG isolado |
+| R09 G3-IDN-04 | Não verificado em execução; teste suspend-principal existe | ANX-134: re-suspend sem evento duplicado, inclusive corrida |
+| R09 G3-IDN-05 / R10 R-IDN-03 | Não verificado em execução | ANX-134: falha de outbox não deixa estado/journal parcial; separar infra/UoW preservando transação |
+| R09 P1-S4 / G3-IDN-06 / G5 sessão / R10 R-IDN-06 | Parcial: `apps/api/src/identity/session-revocation-consumer.ts` valida payload, resolve authUserId e chama DELETE em session. Teste NATS existe, com limitação de skip registrada na §6.2 | ANX-134/130: sessões inválidas após evento, indisponibilidade, replay e crash entre efeito/inbox; não executar contra sessões reais |
+| R09 P1-S4 syncPrincipalEmail | Parcial: command implementa atualização e evento; comentário “P1 sketch” não prova hook conectado nem comportamento completo | ANX-134: origem autenticada da alteração, concorrência email único, replay, hook Better Auth e regressão. Não entregar esboço como funcionalidade homologada |
+| R09 G4-IDN-02 logs sem email em clear | Não verificado; teste de contrato não inspeciona logs | ANX-134/129: amostragem de logs/caminhos de erro com fixtures; distinguir payload autorizado de log redigido |
+| R10 R-IDN-05 PG indisponível / R-IDN-02 tipo legado | Não verificado no candidato integrado | ANX-134/130: consultas/adapters negam acesso quando indisponíveis; migração de consumidores não perde nem duplica eventos |
+| R09/R10 ServicePrincipal deferido D-IDN-017 | Planejado fora do P1 histórico, explicitamente incluído na continuação ANX-134 | ANX-134: contratos institucionais e ciclo de revogação próprios; não criar identidade implícita de execução |
+| R09/R10 rotas D-IDN-019 | Planejado fora do P1; destino histórico operations não transfere ownership identity | ANX-134 define handlers; ANX-164–167 compõem superfícies por papel. ANX-128 verifica apps como composition roots |
+| R10 RLS D-IDN-018 | Planejado, não provado por tenancy em application | ANX-131: implementação/roles/contexto/testes PG; fase histórica P09 não substitui sequência aceita atual |
+| R09/R10 projector D-IDN-020 | Planejado fora de identity, dono graph | ANX-138: eventos identity, idempotência, rebuild e revogação; sem duplicar grafo em identity |
+| R10 reactivatePrincipal DEF-06 | Planejado pós-suspend; recovery da ANX-134 deve desdobrar reativação explicitamente | ANX-134: autoridade, auditoria e estado restaurado; reativação não restaura grants ou sessões revogados por inferência |
+| R09 pré-requisitos / R10 DEP-01..06, AC-G0-01..08, PC-G0-01..10, H-01..04 | Evidência histórica documental, não revalidada para novo candidato. ANX-78 citado no R10 não é claim deste programa | ANX-134/181: novo G0 com issue, dependências atuais, fonte decisória, executor/crítico distintos e evidências. R06–R08 e decisões referenciadas ainda exigem rastreio transitivo na ANX-127 |
+
+**Verificação executada:** `bun test tests/contracts/identity-events.test.ts` em backend, Bun 1.4.0, exit 0: **4 pass / 0 fail / 11 assertions**. Inspeção prévia confirmou testes puros de códigos de erro, normalização de comando, envelope registered e payload suspended. Não houve PG, NATS, Better Auth, operações de sessão nem teste de segurança integrado.
+
+O inventário de paths inicialmente retornou exit 2 porque `backend/tests/contracts/identity/` não existe; a busca posterior encontrou o arquivo `identity-events.test.ts`. O erro não foi interpretado como ausência de testes. Este incremento não fecha os demais módulos nem o aceite integral ANX-127.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
