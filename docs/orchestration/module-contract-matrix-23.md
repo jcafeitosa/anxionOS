@@ -218,6 +218,21 @@ Fontes: [decisions R09](./structure-debate/decisions/R09-dev-plan.md), [risk R09
 
 Não atribuir automaticamente estes gaps a falha dos aceites históricos: comparar revisão e escopo dos slices. Quatorze módulos possuem evidência inicial parcial; nove restantes e R10/exaustividade/gates continuam pendentes.
 
+## 6.8. Evidência inicial — accounting, portfolios e performance
+
+Fontes: [accounting R09](./structure-debate/accounting/R09-dev-plan.md), [portfolios R09](./structure-debate/portfolios/R09-dev-plan.md), [performance R09](./structure-debate/performance/R09-dev-plan.md). Inspeção estática; handoffs ANX-152/153/154 complementados, sem alteração de código nem testes financeiros.
+
+| Requisito | Source observado | Delta / tarefa |
+| --- | --- | --- |
+| Accounting S2 fill→ledger | `backend/modules/accounting/src/application/commands/post-trade-fill.ts` gera duas linhas cash/clearing e delega postLedgerEntry; sourceRef.eventId recebe commandId | ANX-152: confrontar natureza e sinais com chart canônico, rastrear evento original no consumer e provar dedupe por fill. Balanceamento isolado não demonstra interpretação econômica correta |
+| Accounting S3/S4/S6 | Commands inventariados postTradeFill/postLedgerEntry | Fees, balance snapshot, reconciliation OPEN/RESOLVE e billing consumer exigem busca de equivalentes e prova; não declarar ausência global nem reutilizar aceite antigo |
+| Portfolios S2 | `backend/modules/portfolios/src/application/commands/apply-fill-to-position.ts` deduplica holding por tenant/fill e aplica signedDelta com LONG/TRADING | ANX-153: validar escopo dos defaults, chave/revisão e concorrência. Guard tenant anterior não é repetido no replay raced; requer teste, não exploit declarado |
+| Portfolios concorrência / S3–S5 | Mesmo command captura genericamente erro de save e consulta posição novamente; inventário create/apply | ANX-153: distinguir conflito único de outros erros e provar transação/savepoint PG; valuation, cash reconciliation e rebalance ainda não demonstrados no slice observado |
+| Performance S2/S3 | `backend/modules/performance/src/application/commands/record-outcome-snapshot.ts` deduplica commandId/journalEntryId com guards tenant também dentro da TX; persiste linesSummary/valueDate | ANX-154: UUID novo do consumer não significa ausência de dedupe. Snapshot de lançamento não demonstra cálculo de P&L |
+| Performance S2/S4 | Consumer observado ledger-posted; R09 requer ledger+position e séries/rebuild | ANX-154: mapear equivalentes, metric definitions, convergência fora de ordem, stale/divergência, fees/FX/fluxos e rebuild com oráculos reproduzíveis |
+
+Dezessete módulos possuem evidência inicial parcial. Audit, billing, partners, operations, evaluation e simulation ainda não receberam inspeção granular nesta matriz; as respectivas tarefas já existem. Exaustividade R09/R10, schemas/testes e gates continuam pendentes. Estes handoffs orientam os próximos agentes e não homologam o ciclo financeiro.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
