@@ -129,7 +129,7 @@ Saldo vigente após auditoria independente de fechamento, registrada em ANX-127 
 | Cobertura de cada capacidade R09/R10 | Agrupamentos explícitos dos 23 módulos desdobrados nas §§6.12–6.33, complementando §§6.2–6.11. Crítico não identificou agrupamento explícito faltante nas revisões realizadas (ANX-127, comentário 5dcba1cf-9dd3-44f9-ab33-bd721d32abea); sem PASS integral/transitivo | Completar referências transitivas, campos/schemas e decisões indicados como pendentes em cada seção. Preservar fonte/seção, classificação, evidência/limite e issue/disposição por requisito; obter parecer do candidato integrado |
 | Conflitos de contrato e migração | Identificados nas tabelas e comentários dos filhos | Consolidar decisão aplicável, impacto e migração dos conflitos conhecidos; encaminhamento genérico ao executor não encerra a reconciliação |
 | Placement do adapter-gateway | Aprovado (ADR0006); G1C3 F1 PASS documental 2026-09-08 (ANX-192/193) | Registry técnico em operations, execução em execution, dados em market-data; spec gateway. Digest candidato integrado: ver §6.34 e comentários ANX-127. G1 integrado, implementação e migração (ANX-161/162) permanecem distintos |
-| Pacote final documental | Pareceres incrementais não equivalem a aprovação do conjunto | Agregar critérios, digests e pareceres independentes aplicáveis ao mesmo candidato; não simular gates ou herdar PASS antigo |
+| Pacote final documental | §6.36 pacote incremental A4 iniciado (ANX-196); incompleto | Completar critérios→digest→parecer sobre candidato único; obter parecer integral antes de encerrar ANX-127; não simular gates ou herdar PASS antigo |
 | Implementação futura | Delegada às tarefas do programa ANX-126 | Não precisa ser executada para concluir este planejamento; gaps devem estar cobertos e dependências claras. Gates de produto permanecem futuros |
 
 As contagens progressivas e pendências nas §§6.2–6.9 descrevem o checkpoint em que cada inspeção foi feita; o saldo acima e a §6.10 prevalecem para o alcance da revisão documental atual. Todos os 23 módulos possuem evidência inicial parcial e todos os R10 foram consultados, mas o inventário exaustivo de capacidades ainda não está concluído.
@@ -926,6 +926,21 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 **Obrigação de handoff dos filhos:** registrar referência/seção/status decisório → requisito → arquivo/símbolo → teste/comando → resultado. Se a referência estiver ausente, contraditória ou não trouxer o requisito afirmado no R10, registrar o caso e resolver antes do comportamento afetado; usar escopo independente quando houver. ADR aceito prevalece, checklist de debate não substitui parecer do candidato. ANX-181 organiza críticos; os gates independentes do programa continuam necessários.
 
 **O que permanece com ANX-127:** (1) cobertura transitiva A1 e pacote integrado A4 do parecer `405b8304`; (2) G1 integrado do candidato atual (C1 CHANGES_REQUIRED além do escopo já fechado); (3) crítica independente sobre a disposição das referências transitivas antes do fechamento do planejamento. **Já realizado nesta cadeia:** placement ADR0006 aceito; G1C3 F1 PASS documental (ANX-192/193/194; parecer Dirac `d70b8f91` revalidado). Não acrescenta novas tarefas duplicadas nem exige executar os filhos para demonstrar que o backlog existe.
+
+## 6.36. Pacote incremental A4 — candidato integrado (ANX-127)
+
+Trabalho documental **parcial** do item A4 (`405b8304`). Não equivale a PASS integral de ANX-127 nem aprovação de G2–G7. O digest do candidato matriz vigente está nos comentários ANX-127 desta cadeia (último incremento documental ANX-195).
+
+| Critério (ANX-127) | Artefato / seção | Digest / referência | Parecer independente | Disposição |
+| --- | --- | --- | --- | --- |
+| 23 módulos + owners | matriz §3 | candidato integrado | Dirac `0d6535a4` (histórico) | reconciliado em incrementos; sem PASS integral |
+| Placement gateway | ADR0006, §6.1/§6.34, spec gateway | ADR `1cfa7de6e7a98778f6c388e085790e5b1d5d8314b10e4e3cafe9e338869ce0c2` | `d70b8f91` → PASS F1 revalidado | **G1C3 F1 fechado** (ANX-192/193/194/195) |
+| Conflitos F1–F3 (P06/ops/gateway) | P06, ops, gateway, §6.34 | C2 em comentário `78b398b3` | `f18a2846` C1; `cf16914a` C2 | F1–F3 resolvidos; B1 removido por ADR0006 |
+| Cinco disposições contratuais | §6.34 tabela | hashes por linha na §6.34 | `400da37b`, `7542eb8e`, `1c5076a6`, `ac51f462`, `923d4cd8` | PASS restrito documental cada uma |
+| Agrupamentos R09/R10 | §§6.12–6.33 | — | PASS restritos por §6.x | **A1 transitivo pendente** |
+| Pacote final A4 | esta §6.36 + §6.1 | ver comentários ANX-127 | pendente revisor integral | **A4 parcial** — não encerrar ANX-127 |
+
+Implementação futura permanece delegada aos filhos ANX-126 (ANX-128+); este pacote não homologa produto, engines ou testes financeiros.
 
 ## 7. Referências
 
