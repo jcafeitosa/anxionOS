@@ -6,7 +6,7 @@
  * Usage:
  *   node scripts/taskboard.mjs ping
  *   node scripts/taskboard.mjs context
- *   node scripts/taskboard.mjs list [--status todo]
+ *   node scripts/taskboard.mjs list [--status todo] [--compact]
  *   node scripts/taskboard.mjs get ANX-2
  *   node scripts/taskboard.mjs create --title "..." [--status todo] [--priority medium] [--labels for-claude,phase-1]
  *   node scripts/taskboard.mjs move ANX-2 in_progress
@@ -39,6 +39,9 @@ const threadId =
 const MAC_TASKCTL =
   "/Applications/Codex Taskboard.app/Contents/Resources/bin/taskctl";
 
+/** Full-project `taskctl issue list --json` can exceed Node's default 1 MiB maxBuffer. */
+const TASKCTL_MAX_BUFFER_BYTES = 16 * 1024 * 1024;
+
 function resolveTaskctl() {
   const fromPath = spawnSync("which", ["taskctl"], { encoding: "utf8" });
   if (fromPath.status === 0 && fromPath.stdout.trim()) {
@@ -61,7 +64,7 @@ Commands:
   prework                      ensure + reminder: issue ANX-* required before any work
   context                      Resolve project for this repo (taskctl)
   projects                     List projects (HTTP)
-  list [--status STATUS]       List issues in anxionOS project
+  list [--status STATUS] [--compact]  List issues in anxionOS project
   get <ID>                     Get issue by identifier (e.g. ANX-2)
   create --title T [opts]      Create issue (requires taskctl + thread id)
   move <ID> <STATUS>           Move issue status (requires taskctl + thread id)
@@ -114,8 +117,23 @@ function runTaskctl(args) {
     cwd: root,
     encoding: "utf8",
     env,
+    maxBuffer: TASKCTL_MAX_BUFFER_BYTES,
   });
   return JSON.parse(out);
+}
+
+function compactTaskList(data) {
+  if (!data?.tasks) return data;
+  return {
+    ...data,
+    tasks: data.tasks.map((task) => ({
+      identifier: task.identifier,
+      status: task.status,
+      title: task.title,
+      priority: task.priority,
+      labels: task.labels,
+    })),
+  };
 }
 
 function requireThreadId() {
@@ -223,16 +241,20 @@ try {
     case "list": {
       const statusIdx = rest.indexOf("--status");
       const status = statusIdx >= 0 ? rest[statusIdx + 1] : undefined;
+      const compact = rest.includes("--compact");
       if (taskctl) {
         const projectId = await resolveProjectId();
         const args = ["issue", "list", "--project", projectId, "--json"];
         if (status) args.push("--status", status);
-        console.log(JSON.stringify(runTaskctl(args), null, 2));
+        const data = compact ? compactTaskList(runTaskctl(args)) : runTaskctl(args);
+        console.log(JSON.stringify(data, null, 2));
         break;
       }
       const projectId = await resolveProjectId();
       const query = status ? `?projectId=${projectId}&status=${status}` : `?projectId=${projectId}`;
-      const data = await httpJson(`/api/tasks${query}`);
+      const data = compact
+        ? compactTaskList(await httpJson(`/api/tasks${query}`))
+        : await httpJson(`/api/tasks${query}`);
       console.log(JSON.stringify(data, null, 2));
       break;
     }
