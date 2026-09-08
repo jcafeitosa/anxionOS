@@ -813,6 +813,34 @@ Fontes: [R09](./structure-debate/operations/R09-dev-plan.md) e [R10](./structure
 
 Nenhum probe, export, deleção, incident real, restore ou teste operacional foi acionado. Rastreio transitivo R04–R08 e políticas/tempos de retenção permanecem pendentes. Este planejamento não autoriza execução de runbooks perigosos nem alteração de produção.
 
+## 6.33. Rastreio por capacidade — simulation e evaluation R09/R10
+
+Fontes relidas integralmente em 2026-09-08: [simulation R09](./structure-debate/simulation/R09-dev-plan.md), [R10](./structure-debate/simulation/R10-g0-handoff.md), [evaluation R09](./structure-debate/evaluation/R09-dev-plan.md) e [R10](./structure-debate/evaluation/R10-g0-handoff.md). Inventário confirma create-simulation-run/backtest-requested-consumer e record-evaluation-score/outcome-recorded-consumer. Continuação ANX-159/160.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| SIM S1 schema/contracts/sandbox config | Parcial: create-simulation-run presente; flags de isolamento não provam sandbox (§6.9) | ANX-159/132: manifest/config versionados, tenant e inputs, sem credencial/endpoint live no runtime isolado |
+| SIM S2 requested→started→completed / G3-SIM-S2-01 | Parcial: consumer/create presentes, STARTED observado §6.9 | ANX-159: runner executa e conclui/falha com evidência; registro STARTED não é execução concluída |
+| SIM G3-SIM-S2-02 duplicate request | Parcial: backtestRequestId dedupe observado anteriormente | ANX-159: replay/race não duplicam run/custo/eventos, payload conflitante e crash/restart testados |
+| SIM S3 completed/checkpoint / G5-SIM-04 | Não demonstrado | ANX-159: seed+dataset+clock+versão de modelo reproduzem resultado/checkpoint, completed somente após validação, fontes de não determinismo declaradas |
+| SIM G5-SIM-01 path traversal | Não verificado | ANX-159: paths de sandbox/artefatos confinados, entradas maliciosas negadas em fixtures sem acesso a dados reais |
+| SIM G5-SIM-02 hash tamper | Não verificado | ANX-159: dataset/manifest alterado→FAILED, sem continuar com resultado aparentemente válido |
+| SIM G5-SIM-03 tenant isolation | Não verificado | ANX-159/131: run/dataset/checkpoint/artefatos isolados, nenhum estado de outro tenant ou ambiente |
+| SIM S4 HTTP/graph | Não revalidado/deferido | ANX-159/138: API autorizada e projeção derivada, stub não é runtime, run simulado não escreve Order/Fill autoritativos fora do ciclo execution |
+| ANX-159 fill/slippage/fees/failure scenarios | Planejado além do R09 resumido | ANX-159/147/151: modelos versionados, relógio/mercado/hipóteses explicitados, cenários negativos e diferenças PAPER/REAL; nenhum realismo presumido pela seed |
+| EVL S1 schema/contracts | Parcial: record-evaluation-score presente, schema completo não revalidado | ANX-160/132: dataset/scorecard/judge/version/digest, erros e atomicidade |
+| EVL S2 simulation+agents/scoring / G3-EVL-S2-01 | Parcial: outcome-recorded-consumer presente, simulation/agents consumers não demonstrados | ANX-160/159/139: completed legítimo desencadeia avaliação deduplicada, actor/tenant/candidato explícitos; outcome_notional observado §6.9 não prova qualidade |
+| EVL S3 certification / G3-EVL-S3-01 | Não demonstrado | ANX-160: critérios satisfeitos, certificado vinculado à versão/dataset, validade/expiração/revogação/drift, sem autoaprovação |
+| EVL S3 promotion.recommended / G3-EVL-S3-02 | Não demonstrado | ANX-160/136/171: recomendação para governance, regressão impede promoção, owner da versão aplica mudança aprovada; certificação não concede grant |
+| EVL G3-EVL-S2-03 tenant | Não verificado | ANX-160/131: input/score/certificado/replay/consulta de outro tenant negados, reputação não expõe dados privados |
+| EVL S4 HTTP/graph | Não revalidado/deferido | ANX-160/138: API por contratos e ACL, projeção derivada/rebuild, sem estado de promoção autoritativo no grafo |
+| ANX-160 scorecards/reputação/reprodução | Planejado, não provado por notional | ANX-160: avaliação agente/estratégia reproduzível/auditada, versão de critérios, teste de regressão/drift e reputação com proveniência |
+| Ambos R10 PC-G0 10/10 e PASS G2–G6 | Resumos históricos remetem R04–R09 sem evidência detalhada | ANX-127/159/160/181: recuperar matrizes/contratos/pareceres do candidato; não herdar aprovação por status do debate |
+
+Nenhuma simulação, avaliação, certificação, promoção ou teste integrado foi executado. Rastreio transitivo R04–R08, fórmulas de score e parâmetros dos modelos segue pendente; não foram inventados critérios numéricos.
+
+Com este incremento, os **23 módulos** possuem desdobramento dos requisitos explicitados em seus R09/R10 nas §§6.12–6.33 (simulation/evaluation compartilham §6.33). Isso é cobertura documental dos agrupamentos consultados, **não** reconciliação completa das capacidades referenciadas transitivamente, schemas/decisões ou aprovação ANX-127. Continuam as condições de encerramento da §6.1: cobertura restante, conflitos/migrações, placement e pacote independente do conjunto.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
