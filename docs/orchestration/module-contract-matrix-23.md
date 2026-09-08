@@ -558,6 +558,54 @@ Fontes: [R09](./structure-debate/market-data/R09-dev-plan.md) e [R10](./structur
 
 O usuário pediu dados históricos e realtime de motores externos para stocks/cripto e ambos; esse delta já está nas ANX-145/146, incluindo licenciamento/capacidade e retomada. O texto histórico “REAL/live trading ingest” é ambíguo frente a preço live usado em PAPER: resolver distinção de origem dos dados versus modo de execução na consolidação ANX-127, sem usar a ambiguidade para habilitar capital real ou bloquear definitivamente realtime autorizado. Nenhum feed/engine foi consultado ou homologado neste incremento. Rastreio transitivo das decisões, campos e eventos continua pendente.
 
+## 6.21. Rastreio por capacidade — strategies R09/R10
+
+Fontes: [R09](./structure-debate/strategies/R09-dev-plan.md) e [R10](./structure-debate/strategies/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual mostra register-strategy, create-strategy-version e publish-strategy-version, UoW/journal. ANX-147 é continuação; presença não demonstra backtest/deployment completos.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1 Strategy CRUD/schema/contracts | Parcial: register-strategy.ts presente; demais operações CRUD não comprovadas pelo inventário | ANX-147/132: localizar queries/update/retire equivalentes, contratos/erros/tenancy e journal/outbox; não declarar CRUD completo por registro |
+| R09 S2 StrategyVersion publish / G3-ST-S1-01 | Parcial: create/publish commands presentes | ANX-147: artefato/parâmetros/hash/versão imutáveis, replay idempotente, payload conflitante e publicação atômica |
+| R09 lifecycle / G3-ST-S2-01 | Parcial: §6.6 observou publish definir BACKTESTED sem consulta a backtest | ANX-127/147: consolidar semântica publish versus backtest demonstrado, migration de estados históricos se necessária; lifecycle inválido rejeitado, não inferir certificação do rótulo |
+| R09 S3 BacktestRun/runner port | Não demonstrado no inventário de ports/commands | ANX-147/146/159: dataset/version/seed/clock, execução isolada e resultados reproduzíveis, sem lookahead; stub histórico não autoriza runner falso em produção |
+| R09 S4 Deployment / G3-ST-S4-01 | Não demonstrado | ANX-147/141/161: binding incompatível negado, versão aprovada/imutável, modo PAPER explícito, pause/cancel/rollback e reconciliação de jobs sem duplicação |
+| R09 S5 Signal emit / G3-ST-S3-01 | Não demonstrado | ANX-147/145/149: signal stale rejeitado, proveniência e tempo/dataset/versão; sinal não é autorização de ordem |
+| R09 S5 HTTP | Não verificado integralmente | ANX-147: superfície por contratos, mesmo application handler humano/agente, erros/autorização e testes HTTP |
+| R10 G4 cross-tenant/REAL reject | Referência histórica R07, não teste executado | ANX-147/131: isolamento em comandos/queries/replay, REAL não habilitado; schemas e gate de efeito em teste negativo |
+| R10 G5-ST-01..03 | Cenários apenas referenciados nestes R09/R10 | ANX-147/181: recuperar R07, identificar os três cenários e reproduções em sandbox; não inventar títulos para completar numeração |
+| R09 deps market-data/agents/graph / R10 graph:strategies:v1 | Integração não provada | ANX-146/139/138: dataset autorizado e point-in-time, configuração de agente por port, projeção reconstruível; não copiar estado privado |
+| R10 RLS D-ST-015 | Planejado além de application-only | ANX-131: roles/policies/contexto e testes PG próprios, sem herdar prova por filtro de aplicação |
+| R10 PC-G0-01..10, spec003 Strategy Factory e handoff | Histórico documental, contratos/decisões transitivos não recuperados neste incremento | ANX-127/147/181: fontes, claim, deps e pareceres atuais; ANX-90 S1–S2 não prova S3–S5 |
+
+**Precisão de ownership para o executor ANX-147:** a frase da issue “avaliação e promoção não pertencem a strategies” deve ser lida como avaliação/certificação em evaluation e aprovação institucional em governance. A aplicação de deployment/promoção/rollback da própria StrategyVersion permanece em strategies, conforme §3 e contrato de evolução; não transferir escrita desse estado para evaluation. Consolidar esta formulação no pacote de conflitos, sem retirar o escopo de deployment solicitado.
+
+Nenhum backtest, deploy PAPER, teste integrado ou alteração de código foi executado. Rastreio transitivo R04/R07/R08 e semântica de lifecycle permanecem pendentes; o inventário limitado não prova ausência global de equivalentes.
+
+## 6.22. Rastreio por capacidade — capital R09/R10
+
+Fontes: [R09](./structure-debate/capital/R09-dev-plan.md) e [R10](./structure-debate/capital/R10-g0-handoff.md), relidos em 2026-09-08. Inventário atual: register-capital-account, propose-allocation, reserve-for-intent e ports UoW/journal/grant. ANX-148 executa continuação; demais equivalências não excluídas por esse inventário.
+
+| Requisito / fonte | Classificação e evidência | Continuação / oráculo |
+| --- | --- | --- |
+| R09 S1 account/schema/contracts | Parcial: register-capital-account.ts presente | ANX-148/132: conta/moeda/agency/modo, schemas/erros, registro idempotente e estado+journal+outbox atômicos |
+| R09 S2 Allocation | Parcial: propose-allocation.ts presente; ciclo completo não demonstrado | ANX-148: alocação aprovada/versionada, limites por conta/moeda e autoridade, nenhuma proposta reserva capital implicitamente |
+| R09 reserve / G3-CAP-S2-01 | Parcial: reserve-for-intent.ts presente, HELD/expiresAt/intentHash observados na §6.6 | ANX-148: disponível insuficiente nega sem efeitos, saldo por moeda e reserva vinculada à intenção imutável |
+| R09 G3-CAP-S2-02 / G5-CAP-02 | Não verificado em execução | ANX-148/136: grant inválido/epoch stale negados também no efeito e replay; resultado histórico não renova autoridade |
+| R09 FI02 / G3-CAP-S2-03 | Não verificado | ANX-148: duas reservas concorrentes não excedem disponível; lock/CAS e rollback provados no PG real isolado |
+| R09 REAL / G3-CAP-S2-04 | Não verificado | ANX-148: modo REAL rejeitado no slice, segregação de contas SIMULATED/PAPER e nenhuma reserva contra capital real |
+| R09 release / G3-CAP-S2-05 | Não demonstrado no inventário | ANX-148: release idempotente, valor exato remanescente após fills parciais/cancelamento, sem saldo duplicado |
+| R09 consume / G3-CAP-S2-06 / G5-CAP-03 | Não demonstrado no inventário | ANX-148/151: consume após release rejeitado, intentHash estável, double consume retry sem duplicação; consumo parcial reconcilia com fill confirmado |
+| R09 revoke / G3-CAP-S2-07 | Não demonstrado | ANX-148/136: grant revoked libera HELD conforme contrato; race com dispatch/fill deve preservar obrigação já confirmada, não apagar consumo/ledger |
+| R09 lifecycle EXPIRED | Timestamp observado não prova worker de expiração | ANX-148/133: relógio/fencing, expiração concorrente com release/consume e reexecução segura; transições terminais não reabrem reserva |
+| R09 S3 / G3-CAP-S3-01 | Consumer não demonstrado no inventário | ANX-148/152: accounting.ledger.posted correlacionado e deduplicado; available apenas após settled segundo contrato, sem segundo ledger em capital |
+| R09 S4 balance.snapshot/HTTP available | Não demonstrado | ANX-148: snapshot rastreável a fatos/revisão, disponibilidade consultável com scope e stale explícito; não inventar saldo diante de atraso |
+| R09 FX / G3-CAP-S4-01 | Não demonstrado | ANX-148/146: FX as-of/baseCurrency, proveniência/tempo, arredondamento por moeda; câmbio ausente/stale não aumenta disponível silenciosamente |
+| R09 G5-CAP-01 / R10 RLS D-CAP-015 | Não verificado | ANX-148/131: command journal/replay cross-tenant negados, RLS PG com roles/contexto, sem reutilizar saldo/reserva de outra agency |
+| R09 S5 / R10 graph:capital:v1 | Deferido; stub histórico não prova projeção operacional | ANX-138: projetar eventos autorizados, checkpoint/rebuild e ACL, sem ledger no grafo ou stub em produção |
+| R10 G2–G6, PC-G0-01..10, spec003/FI02 e handoff | Histórico documental; integração citada no R09 não executada aqui | ANX-127/148/181: recuperar R04/R07/R08 e relatório do candidato, classificar cenários realmente executados; S1–S2 no título não prova lifecycle completo |
+
+Rastreio transitivo de contratos, decisões e interpretação de settled/FX permanece pendente. Nenhum saldo, reserva, fill ou ledger foi alterado e nenhum teste financeiro executado neste incremento.
+
 ## 7. Referências
 
 - [Mapa de capacidades](./system-capabilities/CAPABILITY-MAP.md)
