@@ -43,6 +43,7 @@
     "orchestration:terminal": "node .cursor/orchestration/agent-dialogue/terminal-panel.mjs",
     "orchestration:watch": "node .cursor/orchestration/agent-dialogue/watch.mjs",
     "orchestration:who": "node .cursor/orchestration/agent-dialogue/roster-lookup.mjs",
+    "orchestration:test": "node --test .cursor/orchestration/tests/*.test.mjs",
     "orchestration:workflow": "node .cursor/orchestration/agent-workflow/monitor.mjs",
     "postinstall": "node scripts/ensure-archify.mjs && node scripts/ensure-graphify.mjs",
     "taskboard:context": "node scripts/taskboard.mjs context",
