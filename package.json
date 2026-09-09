@@ -27,6 +27,7 @@
     "test:e2e": "npm run test:e2e --prefix frontend",
     "orchestration:dialogue": "node .cursor/orchestration/agent-dialogue/broadcast.mjs",
     "orchestration:show-dialogue": "node .cursor/orchestration/agent-dialogue/conversation.mjs",
+    "orchestration:chat": "node .cursor/orchestration/agent-dialogue/chat-feed.mjs",
     "orchestration:broadcast": "node .cursor/orchestration/agent-dialogue/broadcast.mjs post",
     "orchestration:watch": "node .cursor/orchestration/agent-dialogue/watch.mjs",
     "orchestration:personas": "node .cursor/orchestration/agent-dialogue/personas.mjs list",
