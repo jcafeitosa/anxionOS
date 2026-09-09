@@ -370,7 +370,7 @@ Decisão do usuário em 2026-09-07: cada agente executor deve ter seu próprio c
 | G4 — Revisar segurança | Security Team independente | Fronteiras de confiança, autorização/tenancy, secrets, dependências e fluxos de dados avaliados; testes de segurança pertinentes e achados classificados |
 | G5 — Testar adversarialmente | Red Team independente | Tentar invalidar controles e premissas em ambiente isolado autorizado; cenários de abuso, bypass de autoridade, prompt injection, concorrência e falhas conforme escopo; reprodução e cleanup registrados |
 | G6 — Integrar | Orquestrador + responsáveis pelos gates | Agregar pareceres sobre o mesmo candidato; testar integração dos filhos e verificar ausência de evidência obsoleta; entregar para aceite |
-| G7 — Aceitar e liberar | Usuário/revisor autorizado | Aceite explícito para done; merge/deploy somente dentro da autorização aplicável, com verificações de release, observabilidade e rollback |
+| G7 — Aceitar e liberar | Usuário/revisor autorizado | Aceite explícito para `done` **somente com entrega 100% concluída** — zero ressalvas, zero follow-ups MEDIUM pendentes no escopo, filhos bloqueadores resolvidos; merge/deploy somente dentro da autorização aplicável, com verificações de release, observabilidade e rollback |
 
 Fluxo: G0 → G1 → G2 → G3 → G4 → G5 → G6 → G7. Análises preliminares podem ocorrer em paralelo, mas o avanço formal respeita as dependências. Aprovação do crítico é condição para o handoff às quatro equipes, não substitui seus pareceres.
 
@@ -390,7 +390,7 @@ Fluxo: G0 → G1 → G2 → G3 → G4 → G5 → G6 → G7. Análises preliminar
 
 Manter uma issue por unidade executável e relações de dependência para revisões delegadas, quando suportadas e verificadas. Revisão auxiliar pode permanecer na issue do coordenador com run/revisor/gate identificados; equipe não toma o claim do executor. O executor solicita o handoff e o orquestrador despacha/reconcilia os responsáveis.
 
-Estados dos gates são internos, registrados em comentários/artefatos; não inventar novos status do board. A entrega fica in_progress enquanto produz e corrige, e in_review quando submetida às equipes ou ao aceite, com gates pendentes explícitos. in_review nunca significa aprovada. Só done após todos os gates obrigatórios concluídos, filhos obrigatórios resolvidos e aceite explícito aplicável. Ao iniciar correção autorizada de sua própria entrega, retornar a in_progress com versão atual.
+Estados dos gates são internos, registrados em comentários/artefatos; não inventar novos status do board. A entrega fica in_progress enquanto produz e corrige, e in_review quando submetida às equipes ou ao aceite, com gates pendentes explícitos. in_review nunca significa aprovada. Só `done` após todos os gates obrigatórios concluídos, **100% do escopo entregue sem ressalvas**, filhos bloqueadores resolvidos e aceite explícito aplicável. **Proibido** `done COM RESSALVAS` ou aceite com MEDIUM pendente no escopo ([ZERO-RESERVATIONS-DONE.md](.cursor/orchestration/ZERO-RESERVATIONS-DONE.md)). Ao iniciar correção autorizada de sua própria entrega, retornar a in_progress com versão atual.
 
 Sem identidade verificável ou agente independente disponível, registrar gate pendente e suspender o avanço; não fingir que equipes foram executadas. Cada pacote de handoff contém issue, revisão/digest, requisitos, diff/artefatos, ambiente, evidências, achados prévios, limites de acesso, critérios do gate e mecanismo de retorno. O board preserva status/ownership; relatórios preservam a prova de cada decisão.
 
