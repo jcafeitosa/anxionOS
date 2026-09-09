@@ -1,7 +1,10 @@
+import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createLogger } from "@anxionos/observability";
 import type { Pool } from "pg";
-import { IDENTITY_DDL } from "./schema-ddl";
+
+const logger = createLogger({ service: "identity-migrate" });
 
 const migrationsFolder = join(
 	dirname(fileURLToPath(import.meta.url)),
@@ -9,9 +12,11 @@ const migrationsFolder = join(
 );
 
 export async function ensureIdentitySchema(pool: Pool): Promise<void> {
-	// migrationsFolder owned by identity module (AR01); DDL bootstrap is idempotent.
-	void migrationsFolder;
-	await pool.query(IDENTITY_DDL);
+	const schemaSql = readFileSync(
+		join(migrationsFolder, "0000_identity_schema.sql"),
+		"utf8",
+	);
+	await pool.query(schemaSql);
 }
 
 const databaseUrl =
@@ -23,12 +28,14 @@ async function main(): Promise<void> {
 	const pool = new PgPool({ connectionString: databaseUrl });
 	await ensureIdentitySchema(pool);
 	await pool.end();
-	console.log("identity schema ensured");
+	logger.info("identity schema ensured");
 }
 
 if (import.meta.main) {
 	main().catch((error: unknown) => {
-		console.error(error);
+		logger.error("identity schema migration failed", {
+			error: error instanceof Error ? error.message : String(error),
+		});
 		process.exit(1);
 	});
 }

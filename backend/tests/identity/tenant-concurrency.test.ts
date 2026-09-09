@@ -1,3 +1,4 @@
+/** Scope: in-memory repositories only — not PostgreSQL advisory-lock concurrency. */
 import { describe, expect, test } from "bun:test";
 import { registerPrincipal } from "@anxionos/identity";
 import {
