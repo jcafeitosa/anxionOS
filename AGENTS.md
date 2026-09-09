@@ -216,6 +216,10 @@ No Cursor: `.graphify/.venv/bin/graphify cursor install` escreve `.cursor/rules/
 
 Prioridade para agentes: **code-review-graph** (se código indexado no MCP) → **Graphify** (se `.graphify/out/graph.json` existe) → documentação em `brain/` (local) → Grep/Glob.
 
+### Orquestração multi-agente (Cursor)
+
+A pasta [.cursor/orchestration/](./.cursor/orchestration/) **estende** este `AGENTS.md` com personas, dialogue, pipeline G0–G7 e runbooks — não substitui regras canônicas. Todo agente orquestrado deve seguir [COMPLIANCE.md](./.cursor/orchestration/COMPLIANCE.md) e [ONBOARDING.md](./.cursor/orchestration/ONBOARDING.md) antes de trabalho técnico.
+
 
 ### Frontend
 
