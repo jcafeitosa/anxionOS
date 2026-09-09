@@ -28,7 +28,14 @@
     "orchestration:dialogue": "node .cursor/orchestration/agent-dialogue/broadcast.mjs",
     "orchestration:broadcast": "node .cursor/orchestration/agent-dialogue/broadcast.mjs post",
     "orchestration:watch": "node .cursor/orchestration/agent-dialogue/watch.mjs",
-    "orchestration:personas": "node .cursor/orchestration/agent-dialogue/personas.mjs list"
+    "orchestration:personas": "node .cursor/orchestration/agent-dialogue/personas.mjs list",
+    "orchestration:autonomy": "node .cursor/orchestration/agent-autonomy/registry.mjs",
+    "orchestration:hooks": "node .cursor/orchestration/agent-autonomy/hooks-manager.mjs",
+    "orchestration:loops": "node .cursor/orchestration/agent-autonomy/loops-manager.mjs",
+    "orchestration:cron": "node .cursor/orchestration/agent-autonomy/cron-manager.mjs",
+    "orchestration:goals": "node .cursor/orchestration/agent-autonomy/goals-manager.mjs",
+    "orchestration:proactive": "node .cursor/orchestration/agent-proactive/initiative.mjs",
+    "orchestration:monitor": "node .cursor/orchestration/agent-proactive/monitor.mjs"
   },
   "repository": {
     "type": "git",
