@@ -49,7 +49,8 @@
     "orchestration:hire": "node .cursor/orchestration/agent-hire/hire.mjs",
     "orchestration:dismiss": "node .cursor/orchestration/agent-hire/dismiss.mjs",
     "orchestration:hire-roster": "node .cursor/orchestration/agent-hire/roster.mjs",
-    "orchestration:roster": "node .cursor/orchestration/agent-hire/roster.mjs"
+    "orchestration:roster": "node .cursor/orchestration/agent-hire/roster.mjs",
+    "orchestration:diagram-check": "node .cursor/orchestration/agent-workflow/diagram-check.mjs"
   },
   "repository": {
     "type": "git",
