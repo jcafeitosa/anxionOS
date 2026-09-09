@@ -45,6 +45,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@anxionos/contracts": "workspace:*",
+        "@anxionos/eventing": "workspace:*",
         "@anxionos/identity": "workspace:*",
         "@anxionos/observability": "workspace:*",
         "@better-auth/drizzle-adapter": "^1.7.3",
@@ -52,6 +53,8 @@
         "@elysia/openapi": "^1.4.16",
         "better-auth": "^1.7.3",
         "elysia": "^1.2.25",
+        "nats": "^2.29.3",
+        "pg": "^8.23.0",
         "zod": "^3.24.1",
       },
     },
@@ -200,6 +203,7 @@
       "dependencies": {
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
+        "@anxionos/observability": "workspace:*",
         "drizzle-orm": "^0.38.3",
         "pg": "^8.23.0",
       },
