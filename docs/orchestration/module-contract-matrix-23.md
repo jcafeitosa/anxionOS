@@ -1728,35 +1728,37 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 
 **Obrigação de handoff dos filhos:** registrar referência/seção/status decisório → requisito → arquivo/símbolo → teste/comando → resultado. Se a referência estiver ausente, contraditória ou não trouxer o requisito afirmado no R10, registrar o caso e resolver antes do comportamento afetado; usar escopo independente quando houver. ADR aceito prevalece, checklist de debate não substitui parecer do candidato. ANX-181 organiza críticos; os gates independentes do programa continuam necessários.
 
-**O que permanece com ANX-127:** gate G7 aceite explícito do usuário sobre candidato integrado C8 (digest em comentário ANX-127/ANX-186, não inline — evita drift). Implementação delegada ANX-128+. **Já realizado nesta cadeia:** A1 documental 23/23 (§6.12.1–6.33.2; filhos ANX-197–219; ANX-213–219 `done` no board (verificado 2026-09-09)); placement ADR0006; G1C3 F1 PASS; **G1 integrado C4 PASS_WITH_CONDITIONS** (`018e91eb`, candidato `d31f823d…010200d`; condições C1–C3 satisfeitas); **A4 PASS_WITH_CONDITIONS** (`2ccab708`, candidato C5); **G2–G5 PASS_WITH_CONDITIONS** (`989c4cef`, `00e53b57`, `1f744480`, `e62ab0a9`; candidato C8). Conflito issued/paid (§6.31.1) permanece disposição de implementação, não bloqueio do planejamento. Não acrescenta novas tarefas duplicadas nem exige executar os filhos para demonstrar que o backlog existe.
+**Histórico da cadeia ANX-127:** os incrementos A1 dos 23 módulos (§6.12.1–6.33.2; ANX-197–219), placement ADR0006 e disposições dos cinco conflitos têm registros próprios. O status `done` dos filhos é um fato do board, não prova de revisão integrada. G1 C4 `018e91eb`, A4 `2ccab708` e G2–G6 abaixo são pareceres históricos limitados aos respectivos candidatos; não aprovam o run atual. A migração issued/paid (§6.31.1) e os testes de produto permanecem nas tarefas de implementação.
 
-## 6.36. Pacote incremental A4 — candidato integrado (ANX-127)
+## 6.36. Histórico do pacote incremental A4 e candidatos C4–C8
 
-Pacote documental A4 (`405b8304`) com **PASS_WITH_CONDITIONS** (`2ccab708`). Não equivale a `done` de ANX-127 nem aprovação de G2–G7.
+Esta seção preserva a proveniência dos pareceres, **não os transforma em aprovações do arquivo atual**. `PASS_WITH_CONDITIONS` é a classificação literal encontrada nos registros antigos; não é uma nova disposição normativa. O [pipeline obrigatório](../../AGENTS.md) exige PASS, CHANGES_REQUIRED, BLOCKED ou NOT_APPLICABLE justificado, independência verificável e revalidação de mudanças.
 
-**Digest autoritativo C4 (G1 integrado F1/F2/F3/B1):** `d31f823d37042b45245245f7639d4bb5e0946a335c69e7f3c41566048410200d` — pinado nesta §6.36; parecer independente **G1 C4 PASS_WITH_CONDITIONS** em comentário ANX-127 `018e91eb-bae0-4d64-8e80-83308366d046` (thread `cursor-orchestrator-20260908`; revisor Dirac/critic-reviewer). Parecer histórico `bf620462` superseded para registro canônico.
+| Registro histórico | Candidato explicitado no parecer | Referência no board | Alcance e limitação |
+| --- | --- | --- | --- |
+| G1 C4, F1/F2/F3/B1 | C4 `d31f823d37042b45245245f7639d4bb5e0946a335c69e7f3c41566048410200d` | ANX-127 `018e91eb-bae0-4d64-8e80-83308366d046` | Restrições C1–C3; não comprova G1 integral/transitivo de outro candidato |
+| A4 | C5; hashes nos comentários ANX-127 `bcfec1c4` / `55e3adb4` | ANX-127 `2ccab708` | Registro incremental; não é aceite G2–G7 |
+| G2 | C6 `67a7254316a7924e39e897c018d62aa99f3f96a002275ceb61a183a95c4f3552` | ANX-182 `989c4cef` | Parecer histórico, não reatribuir a C8 |
+| G3 | C6, mesmo hash do G2 | ANX-183 `00e53b57` | Parecer documental; produto/E2E não executados |
+| G4 | C7 `7ff36445e997ed6437be47ce01b827af7b69abed7dc37594265a47c17fabf7ca` | ANX-184 `1f744480` | Não reatribuir a C8 |
+| G5 | C8 pré-G6 `0a976d7ca1cdc3f7456ea68452712e7aa096ab5037ef3cb8516cd1359fcd177b` | ANX-185 `e62ab0a9` | Tabletop documental; não eficácia de runtime |
+| G6 | C8 integrado `5bad03946eef066f77148412bf42424c66886baa96e63c970b286e062bf1c801` | ANX-186 `51190da1-ba4e-4969-b6b4-4d6538a70a35` | Agregação histórica; declarações de independência/revalidação precisam de prova por revisor, não bastando o mesmo thread para todas as equipes |
 
-**Candidato C5** (pós-A4 housekeeping P1–P3): digest canônico em comentário ANX-127 `bcfec1c4` / `55e3adb4` (hash de disco verificado no board, não inline — evita drift por auto-referência).
+O aceite histórico G7 do C6 (ANX-127 `e2305e26`) permanece preservado, sem ser estendido a candidatos posteriores. A lista dos filhos A1 e suas disposições permanece nas §§6.12.1–6.35. Pareceres restritos dos cinco conflitos continuam identificados na §6.34; a correção desta narrativa não altera aqueles contratos nem implementa as tarefas.
 
-**Comentários SHA dos filhos A1 (C2):** os incrementos documentais ANX-197–219 registram digest por filho nos comentários desta issue, thread `cursor-anxionos-20d6a526`, sequência `62d99e0e-1a84-4294-85ba-794b1ba1f082` (ANX-197 / identity §6.12.1) → `8e547b85-0441-4d53-ad48-2c5b0df0cce3` (ANX-219 / evaluation §6.33.2). Não duplicar hashes inline na matriz.
+## 6.37. Run vigente de revalidação documental — ANX-186
 
-| Critério (ANX-127) | Artefato / seção | Digest / referência | Parecer independente | Disposição |
-| --- | --- | --- | --- | --- |
-| 23 módulos + owners | matriz §3 | candidato integrado | Dirac `0d6535a4` (histórico) | reconciliado em incrementos; sem PASS integral |
-| Placement gateway | ADR0006, §6.1/§6.34, spec gateway | ADR `1cfa7de6e7a98778f6c388e085790e5b1d5d8314b10e4e3cafe9e338869ce0c2` | `d70b8f91` → PASS F1 revalidado | **G1C3 F1 fechado** (ANX-192/193/194/195) |
-| Conflitos F1–F3 (P06/ops/gateway) | P06, ops, gateway, §6.34 | C2 em comentário `78b398b3` | `f18a2846` C1; `cf16914a` C2 | F1–F3 resolvidos; B1 removido por ADR0006 |
-| Cinco disposições contratuais | §6.34 tabela | hashes por linha na §6.34 | `400da37b`, `7542eb8e`, `1c5076a6`, `ac51f462`, `923d4cd8` | PASS restrito documental cada uma |
-| G1 integrado C4 (ownership/EffectGate) | §6.1, §6.34, P06 §2.1, gateway spec | matriz `d31f823d37042b45245245f7639d4bb5e0946a335c69e7f3c41566048410200d` | `018e91eb` PASS_WITH_CONDITIONS (C1–C3) | **G1 C4 fechado** sobre F1/F2/F3/B1; não cobre G1 integral/transitivo |
-| Agrupamentos R09/R10 | §§6.12–6.33 | matriz `d31f823d…010200d` | PASS restritos por §6.x | **A1 documental 23/23:** §6.12.1–6.33.2 (ANX-197–219); filhos ANX-213–219 `done` no board (verificado 2026-09-09) |
-| Issued/paid partners/accounting | §6.31.1 | disposição documental | `7542eb8e` PASS restrito | implementação delegada ANX-152/156/157 — não bloqueia planejamento |
-| Pacote final A4 | esta §6.36 + §6.1 | candidato C5 (digest ANX-127) | A4 `2ccab708` PASS_WITH_CONDITIONS | **A4 fechado documentalmente** (G1 C4 `018e91eb` registrado) |
-| G2 Code Review | esta §6.36 + matriz integral | candidato C8 (digest em comentário ANX-127/ANX-186) | `989c4cef` PASS_WITH_CONDITIONS | documental proporcional; não herda PASS de lote 213–219 |
-| G3 QA | esta §6.36 + matriz integral | candidato C8 (digest em comentário ANX-127/ANX-186) | `00e53b57` PASS_WITH_CONDITIONS | documental proporcional; produto/E2E NOT_APPLICABLE |
-| G4 Security | esta §6.36 + matriz integral | candidato C8 (digest em comentário ANX-127/ANX-186) | `1f744480` PASS_WITH_CONDITIONS | documental proporcional; condições implementação rastreadas |
-| G5 Red Team | esta §6.36 + matriz integral | candidato C8 (digest em comentário ANX-127/ANX-186) | `e62ab0a9` PASS_WITH_CONDITIONS | tabletop documental; runtime adversarial NOT_APPLICABLE |
-| Pacote integrado G6 | esta §6.36 + §6.1 | candidato C8 (digest em comentário ANX-127/ANX-186) | ANX-186 G6 | **G6 PASS_WITH_CONDITIONS**; G7 aceite usuário pendente |
+O usuário solicitou concluir as revisões; G0 e coordenação estão registrados na ANX-186 (`87be61b9`). O roster independente (`41bf2dd4`) identifica coordenador, crítico Dirac, Code Review Hubble, QA Singer, Security Darwin e Red Team Chandrasekhar. O run revisa **o pacote documental**: esta matriz, [fila](./module-queue.md), [roadmap](./execution-roadmap.md), [P01/P02](./system-capabilities/p01-p02-contracts-and-gates.md), [gateway](./system-capabilities/p05-p06-external-adapter-gateway-spec.md), [P06](./system-capabilities/p06-financial-lifecycle-contract.md), [operações](./system-capabilities/p08-operations-slos-recovery-contract.md) e [evolução P09](./p09-evolution-rollback-contract.md).
 
-Implementação futura permanece delegada aos filhos ANX-126 (ANX-128+); este pacote não homologa produto, engines ou testes financeiros.
+A ANX-186 conserva anexos recuperáveis e hashes do pacote de entrada (`0aba7db9`). Cada correção gera novo candidato: seu hash final, checkpoint/anexo, achados e disposições são registrados **no board, fora do corpo avaliado**, evitando alterar o próprio candidato para anunciar seu PASS. As fontes canônicas e sua precedência permanecem nas §§3/5 e no AGENTS.md.
+
+- Cobertura exigida: os 23 owners e os agrupamentos/referências finitos das §§6.12–6.35 possuem fonte, classificação e tarefa/disposição; lacuna de fonte não é requisito inventado nem comportamento liberado.
+- Conflitos: disposição, impacto, compatibilidade/migração e rollback devem ser coerentes no conjunto; o código/testes futuros não são condição para entregar o backlog.
+- Revisões: G1 → G2 → G3 → G4 → G5 → G6, com parecer independente do mesmo candidato ou revalidação explícita de impacto. Análises preliminares em paralelo não liberam gates.
+- Evidência: resultado ausente, não verificável ou de outro digest não é PASS. Achados impeditivos retornam para correção; alterações exigem revalidação dos gates afetados.
+- Encerramento: consultar os pareceres deste run na ANX-186. Esta seção fixa o protocolo e não afirma antecipadamente aprovação de gates nem aceite G7.
+
+As dependências de implementação do programa, inclusive ANX-171, permanecem válidas para a integração do **produto**. A revisão documental aqui delimitada não encerra essas dependências, não autoriza mover tarefas de implementação para done e não homologa engines, capital real, operação 24/7 ou L3/L4.
 
 ## 7. Referências
 
