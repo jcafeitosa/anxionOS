@@ -42,7 +42,7 @@
     "orchestration:tail": "node .cursor/orchestration/agent-dialogue/tail-formatted.mjs",
     "orchestration:terminal": "node .cursor/orchestration/agent-dialogue/terminal-panel.mjs",
     "orchestration:test": "node --test .cursor/orchestration/tests/*.test.mjs",
-    "orchestration:verify": "npm run orchestration:test && npm run orchestration:diagram-check && npm run orchestration:personas",
+    "orchestration:verify": "npm run orchestration:test && npm run orchestration:diagram-check && npm run orchestration:personas && node .cursor/orchestration/agent-compliance/compliance-check.mjs --help",
     "orchestration:watch": "node .cursor/orchestration/agent-dialogue/watch.mjs",
     "orchestration:who": "node .cursor/orchestration/agent-dialogue/roster-lookup.mjs",
     "orchestration:workflow": "node .cursor/orchestration/agent-workflow/monitor.mjs",
@@ -53,7 +53,8 @@
     "taskboard:list:compact": "node scripts/taskboard.mjs list --compact",
     "taskboard:ping": "node scripts/taskboard.mjs ping",
     "taskboard:prework": "node scripts/taskboard.mjs prework",
-    "test:e2e": "npm run test:e2e --prefix frontend"
+    "test:e2e": "npm run test:e2e --prefix frontend",
+    "orchestration:compliance": "node .cursor/orchestration/agent-compliance/compliance-check.mjs"
   },
   "repository": {
     "type": "git",
