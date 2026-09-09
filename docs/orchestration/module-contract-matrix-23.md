@@ -1728,7 +1728,7 @@ Esta é a lista finita extraída das pendências das §§6.12–6.33, não uma d
 
 **Obrigação de handoff dos filhos:** registrar referência/seção/status decisório → requisito → arquivo/símbolo → teste/comando → resultado. Se a referência estiver ausente, contraditória ou não trouxer o requisito afirmado no R10, registrar o caso e resolver antes do comportamento afetado; usar escopo independente quando houver. ADR aceito prevalece, checklist de debate não substitui parecer do candidato. ANX-181 organiza críticos; os gates independentes do programa continuam necessários.
 
-**O que permanece com ANX-127:** gates G2–G7 proporcionais ao pacote documental (implementação delegada ANX-128+). **Já realizado nesta cadeia:** A1 documental 23/23 (§6.12.1–6.33.2; filhos ANX-197–219; ANX-213–219 ainda `in_review` no board); placement ADR0006; G1C3 F1 PASS; **G1 integrado C4 PASS_WITH_CONDITIONS** (`018e91eb`, candidato `d31f823d…010200d`; condições C1–C3 satisfeitas); **A4 PASS_WITH_CONDITIONS** (`2ccab708`, candidato C5). Conflito issued/paid (§6.31.1) permanece disposição de implementação, não bloqueio do planejamento. Não acrescenta novas tarefas duplicadas nem exige executar os filhos para demonstrar que o backlog existe.
+**O que permanece com ANX-127:** gates G2–G7 proporcionais ao pacote documental (implementação delegada ANX-128+). **Já realizado nesta cadeia:** A1 documental 23/23 (§6.12.1–6.33.2; filhos ANX-197–219; ANX-213–219 `done` no board (verificado 2026-09-09)); placement ADR0006; G1C3 F1 PASS; **G1 integrado C4 PASS_WITH_CONDITIONS** (`018e91eb`, candidato `d31f823d…010200d`; condições C1–C3 satisfeitas); **A4 PASS_WITH_CONDITIONS** (`2ccab708`, candidato C5). Conflito issued/paid (§6.31.1) permanece disposição de implementação, não bloqueio do planejamento. Não acrescenta novas tarefas duplicadas nem exige executar os filhos para demonstrar que o backlog existe.
 
 ## 6.36. Pacote incremental A4 — candidato integrado (ANX-127)
 
@@ -1747,7 +1747,7 @@ Pacote documental A4 (`405b8304`) com **PASS_WITH_CONDITIONS** (`2ccab708`). Nã
 | Conflitos F1–F3 (P06/ops/gateway) | P06, ops, gateway, §6.34 | C2 em comentário `78b398b3` | `f18a2846` C1; `cf16914a` C2 | F1–F3 resolvidos; B1 removido por ADR0006 |
 | Cinco disposições contratuais | §6.34 tabela | hashes por linha na §6.34 | `400da37b`, `7542eb8e`, `1c5076a6`, `ac51f462`, `923d4cd8` | PASS restrito documental cada uma |
 | G1 integrado C4 (ownership/EffectGate) | §6.1, §6.34, P06 §2.1, gateway spec | matriz `d31f823d37042b45245245f7639d4bb5e0946a335c69e7f3c41566048410200d` | `018e91eb` PASS_WITH_CONDITIONS (C1–C3) | **G1 C4 fechado** sobre F1/F2/F3/B1; não cobre G1 integral/transitivo |
-| Agrupamentos R09/R10 | §§6.12–6.33 | matriz `d31f823d…010200d` | PASS restritos por §6.x | **A1 documental 23/23:** §6.12.1–6.33.2 (ANX-197–219); filhos ANX-213–219 `in_review` no board |
+| Agrupamentos R09/R10 | §§6.12–6.33 | matriz `d31f823d…010200d` | PASS restritos por §6.x | **A1 documental 23/23:** §6.12.1–6.33.2 (ANX-197–219); filhos ANX-213–219 `done` no board (verificado 2026-09-09) |
 | Issued/paid partners/accounting | §6.31.1 | disposição documental | `7542eb8e` PASS restrito | implementação delegada ANX-152/156/157 — não bloqueia planejamento |
 | Pacote final A4 | esta §6.36 + §6.1 | candidato C5 (digest ANX-127) | A4 `2ccab708` PASS_WITH_CONDITIONS | **A4 fechado documentalmente** (G1 C4 `018e91eb` registrado); G2–G7 pendentes; não encerrar ANX-127 |
 
