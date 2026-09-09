@@ -42,7 +42,8 @@
     "orchestration:session": "node .cursor/orchestration/agent-dialogue/session-tracker.mjs",
     "orchestration:silence-watch": "node .cursor/orchestration/agent-autonomy/scripts/silence-detector.mjs",
     "orchestration:terminal": "node .cursor/orchestration/agent-dialogue/terminal-panel.mjs",
-    "orchestration:tail": "node .cursor/orchestration/agent-dialogue/tail-formatted.mjs"
+    "orchestration:tail": "node .cursor/orchestration/agent-dialogue/tail-formatted.mjs",
+    "orchestration:cto-accept": "node .cursor/orchestration/agent-proactive/cto-accept.mjs"
   },
   "repository": {
     "type": "git",
