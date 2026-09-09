@@ -235,6 +235,8 @@ O [Dashi/Codex Taskboard](https://github.com/chuspeeism/dashi-taskboard) é a **
 
 Skills obrigatórias: `manage-taskboard` (claims, status, comentários) e `orchestrate-work` (despacho multi-agente, gates G0–G7).
 
+**Dual-board (orquestrador):** trabalho de **produto** (`backend/`, `frontend/`, docs públicas, slices `ANX-*`) usa o **Dashi taskboard**; trabalho **framework/non-project** (`.cursor/orchestration/`, regras Cursor, personas, meta-tooling) usa o **Cursor taskboard** (`CreateGoal` + `CURSOR_GOAL_ID` ou registry em `.cursor/orchestration-runtime/goals/`). Ver [.cursor/orchestration/TASKBOARD-ROUTING.md](.cursor/orchestration/TASKBOARD-ROUTING.md). **Nunca misturar boards** na mesma unidade de trabalho.
+
 #### Política zero-trabalho-fora-do-board
 
 **Nenhum agente pode executar trabalho técnico fora do taskboard.** O board não é registro posterior — é pré-condição de execução.

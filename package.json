@@ -2,7 +2,7 @@
   "name": "anxionos",
   "version": "1.0.0",
   "private": true,
-  "description": "Plataforma multi-tenant de investimentos aut\u00f4nomos governados por grafo institucional.",
+  "description": "Plataforma multi-tenant de investimentos autônomos governados por grafo institucional.",
   "type": "module",
   "engines": {
     "node": ">=18"
@@ -70,7 +70,8 @@
     "test:e2e": "npm run test:e2e --prefix frontend",
     "orchestration:install-global": "node scripts/install-orchestration-global.mjs",
     "orchestration:global": "node scripts/orchestration-global.mjs",
-    "orchestration:migrate-runtime": "node .cursor/orchestration/agent-config/migrate-runtime-paths.mjs"
+    "orchestration:migrate-runtime": "node .cursor/orchestration/agent-config/migrate-runtime-paths.mjs",
+    "orchestration:cursor-goals": "node .cursor/orchestration/agent-config/cursor-goals.mjs"
   },
   "repository": {
     "type": "git",
