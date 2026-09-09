@@ -102,7 +102,7 @@ Organização modular completa (23 módulos), roadmap P02–P09 e decisões acei
 
 ## Orquestração Cursor (framework agnóstico)
 
-O diretório [`.cursor/orchestration/`](.cursor/orchestration/) é um **framework portable** de equipe multi-agente no Cursor (pipeline G0–G7, dialogue, hire, compliance). Cada repositório fornece overlay em [`.codewhale/orchestration.config.json`](.codewhale/orchestration.config.json).
+O diretório [`.cursor/orchestration/`](.cursor/orchestration/) é um **framework portable** de equipe multi-agente no Cursor (pipeline G0–G7, dialogue, hire, compliance). Cada repositório fornece overlay em [`.cursor/orchestration.config.json`](.cursor/orchestration.config.json).
 
 | Recurso | Caminho |
 | --- | --- |

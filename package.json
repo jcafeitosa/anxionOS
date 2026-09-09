@@ -61,7 +61,8 @@
     "taskboard:prework": "node scripts/taskboard.mjs prework",
     "test:e2e": "npm run test:e2e --prefix frontend",
     "orchestration:install-global": "node scripts/install-orchestration-global.mjs",
-    "orchestration:global": "node scripts/orchestration-global.mjs"
+    "orchestration:global": "node scripts/orchestration-global.mjs",
+    "orchestration:migrate-runtime": "node .cursor/orchestration/agent-config/migrate-runtime-paths.mjs"
   },
   "repository": {
     "type": "git",
