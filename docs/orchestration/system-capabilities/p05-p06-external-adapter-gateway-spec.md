@@ -151,6 +151,16 @@ Todo evento deve incluir:
 
 O gateway nunca converte uma resposta de transporte em FILLED. UNKNOWN exige reconciliação antes de qualquer novo dispatch.
 
+### Autorização de eventos inbound
+
+Assinatura válida e correlationId não bastam para autorizar mutação. A identidade autenticada do runtime deve corresponder ao binding/dispatch/subscription persistido confiável, independentemente dos campos alegados no payload. O receptor valida tenant, agência, conta, modo, versão do adapter e capability contra esse registro. `execution` recebe fatos financeiros; `market-data` recebe observações de mercado, conforme ownership aceito no ADR0006. Restrições de publicação/assinatura do transporte complementam, mas não substituem, a verificação pelo owner receptor.
+
+Adapter data-only não publica fatos financeiros autoritativos. Evento com origem ou escopo inválido vai para quarantine e auditoria, sem mutar estado financeiro. Evidências e payloads preservados obedecem redaction, ACL e retenção; credenciais não entram em eventos, logs ou grafo.
+
+Revogação/expiração bloqueia novos efeitos, mas não apaga um fill legítimo tardio de dispatch anteriormente autorizado. Um fato autenticado, causalmente ligado ao dispatch persistido e compatível com seu escopo segue para reconciliação pelo owner, sem emitir novo permit nem ordem. Fato sem causalidade verificável permanece em quarantine; não é aceito só por parecer plausível ou por conter commandId conhecido.
+
+ANX-161/162, em conjunto com ANX-151/145, devem provar: rejeição de assinatura ausente/inválida; runtime A usando command/subscription de B; adapter data-only enviando FILLED; conta/modo/tenant divergentes; replay sem efeito duplicado; e aceitação para reconciliação de fill tardio legítimo após revogação, sem novo dispatch. Schema completo e mecanismo criptográfico pertencem à implementação rastreada; esta seção fecha o requisito de autorização, não declara homologação de runtime.
+
 ## Isolamento Docker
 
 Cada adapter terá imagem própria, usuário não-root, filesystem read-only, limites de CPU/memória/processos, rede mínima, healthcheck e shutdown gracioso. O compose de desenvolvimento/staging deve:

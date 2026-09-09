@@ -1231,7 +1231,7 @@ Fonte primária: [R08 decision log](./structure-debate/decisions/R08-decision-lo
 | D-DC-005 | agents Proposal source; decisions materializa intent | Aceito v1 | ANX-139/149 | Dono intent |
 | D-DC-006 | knowledge Evidence storage; decisions EvidenceManifest refs | Aceito v1 | ANX-142/149 | Sem conteúdo inline |
 | D-DC-007 | risk RiskCheck separado; state via evento | Aceito v1 | ANX-150/149 | P06 §2.1 ordem |
-| D-DC-008 | audit Flight Recorder; decisions manifestHash only | Aceito v1 | ANX-149/154 | Sem payload bruto |
+| D-DC-008 | audit Flight Recorder; decisions manifestHash only | Aceito v1 | ANX-149/155 | Sem payload bruto |
 | D-DC-009 | PG autoritativo; zero SQLite | Aceito v1 | ANX-149 | ADR0004 |
 | D-DC-010 | SIMULATED+PAPER only v1 | Aceito v1 | ANX-149 | REAL rejeitado |
 | D-DC-011 | Independent approver policy (FI03) | Aceito v1 | ANX-149/136 | G3-DC-S2-05 |
@@ -1737,26 +1737,30 @@ Esta seção preserva a proveniência dos pareceres, **não os transforma em apr
 | Registro histórico | Candidato explicitado no parecer | Referência no board | Alcance e limitação |
 | --- | --- | --- | --- |
 | G1 C4, F1/F2/F3/B1 | C4 `d31f823d37042b45245245f7639d4bb5e0946a335c69e7f3c41566048410200d` | ANX-127 `018e91eb-bae0-4d64-8e80-83308366d046` | Restrições C1–C3; não comprova G1 integral/transitivo de outro candidato |
-| A4 | C5; hashes nos comentários ANX-127 `bcfec1c4` / `55e3adb4` | ANX-127 `2ccab708` | Registro incremental; não é aceite G2–G7 |
+| A4 | C4 pré-§6.36 `d31f823d37042b45245245f7639d4bb5e0946a335c69e7f3c41566048410200d`; pós-§6.36 `c371208b12283214df7bbcd02f484b381e011069a583b525a3331ca659706bd6` | ANX-127 `2ccab708-5270-4850-a176-3e6512f106bd` | C5 era próximo passo, não candidato deste parecer; registro incremental, não aceite G2–G7 |
 | G2 | C6 `67a7254316a7924e39e897c018d62aa99f3f96a002275ceb61a183a95c4f3552` | ANX-182 `989c4cef` | Parecer histórico, não reatribuir a C8 |
 | G3 | C6, mesmo hash do G2 | ANX-183 `00e53b57` | Parecer documental; produto/E2E não executados |
 | G4 | C7 `7ff36445e997ed6437be47ce01b827af7b69abed7dc37594265a47c17fabf7ca` | ANX-184 `1f744480` | Não reatribuir a C8 |
 | G5 | C8 pré-G6 `0a976d7ca1cdc3f7456ea68452712e7aa096ab5037ef3cb8516cd1359fcd177b` | ANX-185 `e62ab0a9` | Tabletop documental; não eficácia de runtime |
 | G6 | C8 integrado `5bad03946eef066f77148412bf42424c66886baa96e63c970b286e062bf1c801` | ANX-186 `51190da1-ba4e-4969-b6b4-4d6538a70a35` | Agregação histórica; declarações de independência/revalidação precisam de prova por revisor, não bastando o mesmo thread para todas as equipes |
 
+Proveniência dos registros: o comentário G1 `018e91eb` foi publicado pelo thread `cursor-orchestrator-20260908`, não pelo crítico independente Dirac `01a082b7-c442-7780-b323-d4aaa17508b7`. Os registros A4/G2/G3/G4/G5/G6 acima (`2ccab708`, `989c4cef`, `00e53b57`, `1f744480`, `e62ab0a9`, `51190da1`) foram publicados pelo thread `cursor-anxionos-20d6a526`; nomes de equipes no texto não demonstram independência entre autores/revisores.
+
 O aceite histórico G7 do C6 (ANX-127 `e2305e26`) permanece preservado, sem ser estendido a candidatos posteriores. A lista dos filhos A1 e suas disposições permanece nas §§6.12.1–6.35. Pareceres restritos dos cinco conflitos continuam identificados na §6.34; a correção desta narrativa não altera aqueles contratos nem implementa as tarefas.
 
-## 6.37. Run vigente de revalidação documental — ANX-186
+## 6.37. Run vigente de reconciliação C9-R1 — ANX-220
 
-O usuário solicitou concluir as revisões; G0 e coordenação estão registrados na ANX-186 (`87be61b9`). O roster independente (`41bf2dd4`) identifica coordenador, crítico Dirac, Code Review Hubble, QA Singer, Security Darwin e Red Team Chandrasekhar. O run revisa **o pacote documental**: esta matriz, [fila](./module-queue.md), [roadmap](./execution-roadmap.md), [P01/P02](./system-capabilities/p01-p02-contracts-and-gates.md), [gateway](./system-capabilities/p05-p06-external-adapter-gateway-spec.md), [P06](./system-capabilities/p06-financial-lifecycle-contract.md), [operações](./system-capabilities/p08-operations-slos-recovery-contract.md) e [evolução P09](./p09-evolution-rollback-contract.md).
+O usuário determinou voltar ao C9, investigar as reversões e resolver as pendências. G0 e coordenação atuais estão na ANX-220; ANX-186 (`87be61b9`, roster `41bf2dd4`) permanece histórico. O roster independente reutiliza o crítico Dirac, Code Review Hubble, QA Singer, Security Darwin e Red Team Chandrasekhar com identidades reais e novas disposições explícitas para C9-R1, sem herdar PASS de C11. O run revisa **o pacote documental**: esta matriz, [fila](./module-queue.md), [roadmap](./execution-roadmap.md), [P01/P02](./system-capabilities/p01-p02-contracts-and-gates.md), [gateway](./system-capabilities/p05-p06-external-adapter-gateway-spec.md), [P06](./system-capabilities/p06-financial-lifecycle-contract.md), [operações](./system-capabilities/p08-operations-slos-recovery-contract.md) e [evolução P09](./p09-evolution-rollback-contract.md).
 
-A ANX-186 conserva anexos recuperáveis e hashes do pacote de entrada (`0aba7db9`). Cada correção gera novo candidato: seu hash final, checkpoint/anexo, achados e disposições são registrados **no board, fora do corpo avaliado**, evitando alterar o próprio candidato para anunciar seu PASS. As fontes canônicas e sua precedência permanecem nas §§3/5 e no AGENTS.md.
+A ANX-220 conserva anexos recuperáveis e os oito hashes do C9 de entrada (checkpoint `26577ef24079662cf84d68cc2d91652b51f450fe`). ANX-186 conserva o histórico C8–C11 (`0aba7db9`, `13df2b62`); esses candidatos não aprovam C9-R1. A investigação na ANX-220 distingue ações registradas, conteúdo observado e hipóteses: reset/checkout para C9 registrados na ANX-127 (`55c2920b`, `9b372eef`), fast-forward e autosaves subsequentes no reflog explicam a alternância; a autoria de um autosave não prova quem escolheu o conteúdo. Não se constatou corrupção aleatória do OpenKnowledge.
+
+O escritor deste run é o coordenador vinculado à ANX-220; revisores não editam os artefatos. A coordenação foi comunicada nas ANX-127/186/220. Claim não é lock de Git/CRDT: nenhum participante deve executar reset/checkout/restore dos candidatos durante o run. Antes de cada edição, conferir a base; congelar os oito artefatos por manifesto e anexos para revisão. Qualquer drift suspende o aceite, preserva ambas as versões e exige coordenação explícita, nunca restore automático. Não tocar no stash de WIP de backend/frontend. Esta contenção é operacional, não um lock técnico nem promessa de impedir outros processos. Cada correção gera novo candidato: seu hash final, checkpoint/anexo, achados e disposições são registrados **no board, fora do corpo avaliado**, evitando alterar o próprio candidato para anunciar seu PASS. As fontes canônicas e sua precedência permanecem nas §§3/5 e no AGENTS.md.
 
 - Cobertura exigida: os 23 owners e os agrupamentos/referências finitos das §§6.12–6.35 possuem fonte, classificação e tarefa/disposição; lacuna de fonte não é requisito inventado nem comportamento liberado.
 - Conflitos: disposição, impacto, compatibilidade/migração e rollback devem ser coerentes no conjunto; o código/testes futuros não são condição para entregar o backlog.
 - Revisões: G1 → G2 → G3 → G4 → G5 → G6, com parecer independente do mesmo candidato ou revalidação explícita de impacto. Análises preliminares em paralelo não liberam gates.
 - Evidência: resultado ausente, não verificável ou de outro digest não é PASS. Achados impeditivos retornam para correção; alterações exigem revalidação dos gates afetados.
-- Encerramento: consultar os pareceres deste run na ANX-186. Esta seção fixa o protocolo e não afirma antecipadamente aprovação de gates nem aceite G7.
+- Encerramento: consultar os pareceres deste run na ANX-220. Esta seção fixa o protocolo e não afirma antecipadamente aprovação de gates nem aceite G7.
 
 As dependências de implementação do programa, inclusive ANX-171, permanecem válidas para a integração do **produto**. A revisão documental aqui delimitada não encerra essas dependências, não autoriza mover tarefas de implementação para done e não homologa engines, capital real, operação 24/7 ou L3/L4.
 

@@ -73,14 +73,16 @@ Transições exigem causa, actor, policy, timestamp, autorização e auditoria. 
 
 Workers devem:
 
-1. parar de aceitar novos jobs;
-2. renovar ou liberar leases de forma explícita;
-3. persistir checkpoint somente após efeito e journal correspondentes;
-4. enviar eventos pendentes ao outbox;
-5. marcar trabalho ambíguo como UNKNOWN;
-6. fechar conexões e publicar estado de saída.
+1. parar de aceitar novos jobs e drenar o trabalho já autorizado;
+2. renovar ou liberar leases explicitamente, validando fencing token e versão esperada no commit do owner;
+3. persistir estado de domínio, journal e inserção no outbox na mesma transação PostgreSQL do owner; checkpoint nunca avança antes desse commit e, quando separado, pode atrasar, mas não ultrapassar o efeito durável;
+4. deixar o relay publicar somente registros já duráveis do outbox; publicação e ACK ocorrem fora da transação do domínio, com entrega repetível e deduplicação no consumidor;
+5. tratar dispatch externo ambíguo como UNKNOWN e reconciliar antes de novo efeito, sem presumir atomicidade entre PostgreSQL e adapter/venue;
+6. fechar conexões e publicar estado de saída após preservar o trabalho pendente recuperável.
 
-Lease expirado não autoriza commit tardio. Fencing token e versão esperada impedem worker antigo de publicar. Reprocessamento começa no último checkpoint confirmado e é idempotente; não usa timeout como prova de sucesso.
+Lease expirado não autoriza commit tardio. Fencing token e versão esperada impedem commit de worker antigo. Reprocessamento começa no último checkpoint confirmado, com inbox/idempotência do owner; timeout não prova sucesso. Não se posterga a inserção no outbox para o shutdown: o relay pode publicar depois, nunca criar retroativamente a evidência que deveria ter sido atômica com o estado e journal.
+
+Oráculos de implementação nas ANX-130/133/158/169: crash antes do commit deixa estado/journal/outbox sem avanço parcial; crash depois do commit e antes de publicar preserva o evento para relay; crash depois de publicar e antes do ACK permite redelivery sem duplicar efeito; checkpoint separado atrasado permite replay idempotente sem perder evento; fencing obsoleto rejeita commit; dispatch externo incerto exige reconciliação, não retry cego. Estes são critérios documentais, não testes executados neste run.
 
 ## 6. Backup, restore e reconstrução
 
