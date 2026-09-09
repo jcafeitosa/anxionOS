@@ -17,6 +17,9 @@ export async function handlePrincipalSuspended(
 	if (!principal) {
 		return;
 	}
+	if (principal.status !== "suspended") {
+		return;
+	}
 	try {
 		await deps.sessionRevoker.revokeAllForAuthUser(principal.authUserId);
 	} catch (error) {

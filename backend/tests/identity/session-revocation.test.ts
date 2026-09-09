@@ -13,7 +13,34 @@ const principal: Principal = {
 	suspensionReason: "ops.manual",
 };
 
+const activePrincipal: Principal = {
+	...principal,
+	status: "active",
+	suspendedAt: null,
+	suspensionReason: null,
+};
+
 describe("handlePrincipalSuspended", () => {
+	test("does not revoke sessions when principal is still active", async () => {
+		const revoked: string[] = [];
+		await handlePrincipalSuspended(
+			{
+				principalRepository: createInMemoryPrincipalRepository([activePrincipal]),
+				sessionRevoker: {
+					async revokeAllForAuthUser(authUserId) {
+						revoked.push(authUserId);
+					},
+				},
+			},
+			{
+				principalId: activePrincipal.id,
+				reasonCode: "ops.manual",
+				suspendedAt: "2026-09-08T12:00:00.000Z",
+			},
+		);
+		expect(revoked).toEqual([]);
+	});
+
 	test("revokes sessions for resolved auth user", async () => {
 		const revoked: string[] = [];
 		await handlePrincipalSuspended(

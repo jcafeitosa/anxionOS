@@ -82,7 +82,7 @@ export async function startIdentitySessionRevocationConsumer(
 			durable_name: IDENTITY_SESSIONS_DURABLE,
 			filter_subject: IDENTITY_SUSPENDED_SUBJECT,
 			ack_policy: AckPolicy.Explicit,
-			deliver_policy: DeliverPolicy.All,
+			deliver_policy: DeliverPolicy.New,
 		});
 	} catch {
 		// durable consumer may already exist from a prior process
