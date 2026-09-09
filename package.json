@@ -2,7 +2,7 @@
   "name": "anxionos",
   "version": "1.0.0",
   "private": true,
-  "description": "Plataforma multi-tenant de investimentos aut\u00f4nomos governados por grafo institucional.",
+  "description": "Plataforma multi-tenant de investimentos autônomos governados por grafo institucional.",
   "type": "module",
   "engines": {
     "node": ">=18"
@@ -24,7 +24,9 @@
     "taskboard:prework": "node scripts/taskboard.mjs prework",
     "frontend:dev": "npm run dev --prefix frontend",
     "frontend:build": "npm run build --prefix frontend",
-    "test:e2e": "npm run test:e2e --prefix frontend"
+    "test:e2e": "npm run test:e2e --prefix frontend",
+    "orchestration:dialogue": "node .cursor/orchestration/agent-dialogue/broadcast.mjs",
+    "orchestration:broadcast": "node .cursor/orchestration/agent-dialogue/broadcast.mjs post"
   },
   "repository": {
     "type": "git",
