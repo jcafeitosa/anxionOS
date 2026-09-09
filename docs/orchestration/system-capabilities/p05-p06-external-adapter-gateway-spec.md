@@ -151,16 +151,6 @@ Todo evento deve incluir:
 
 O gateway nunca converte uma resposta de transporte em FILLED. UNKNOWN exige reconciliação antes de qualquer novo dispatch.
 
-### Autorização do retorno do runtime — ANX-161/162
-
-Autenticar ou verificar a assinatura do adapter prova a origem, não a autoridade para reportar qualquer comando/feed. Antes de aplicar um evento, execution (resultado financeiro) ou market-data (observação) deve vincular a identidade autenticada do runtime ao binding e ao dispatch/subscription persistidos pelo caminho autorizado. Esse vínculo confiável, independente dos campos autodeclarados no payload, deve corresponder a tenant/agency, conta, modo, adapter/versão e capability. `adapterId`, `commandId`, `tenantId` ou `accountRef` recebidos nunca concedem autoridade por si.
-
-O transporte deve restringir publish/subscribe ao escopo e à capability do runtime, com configuração derivada do binding autorizado e verificação pelo dono no recebimento. Um runtime data-only não pode publicar resultados financeiros. Retorno ausente de autenticação, assinatura inválida, origem de outro binding ou conta/modo divergente é rejeitado ou posto em quarentena auditável, sem alterar estado financeiro; payload e evidência ficam sujeitos a redaction/ACL e retenção autorizadas.
-
-Suspensão/revogação bloqueia novos efeitos, mas não apaga obrigações já emitidas. Fills tardios e reconciliação de dispatch existente seguem um caminho de recebimento autorizado e causalmente vinculado ao dispatch original; não concedem novo permit nem são descartados apenas porque o permit original expirou. Origem não verificável permanece em quarentena e exige reconciliação por fonte autorizada, sem inventar sucesso ou repetir ordem.
-
-**Conformance obrigatório — ANX-161/162, com ANX-151/145 nos donos:** assinatura ausente/inválida; runtime A usando commandId/subscription de B; data-only emitindo FILLED/RECONCILED financeiro; conta/modo/tenant divergente; replay duplicado; fill tardio legítimo após suspensão. Oráculos: rejeição/quarentena sem mutação financeira para origem/escopo inválidos, deduplicação do fato válido, registro tardio legítimo sem novo efeito e trilha causal preservada. Algoritmo de autenticação, subject mapping e schemas exatos serão fixados/testados no slice; esta especificação não homologa os runtimes.
-
 ## Isolamento Docker
 
 Cada adapter terá imagem própria, usuário não-root, filesystem read-only, limites de CPU/memória/processos, rede mínima, healthcheck e shutdown gracioso. O compose de desenvolvimento/staging deve:
