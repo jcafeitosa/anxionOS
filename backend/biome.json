@@ -3,5 +3,24 @@
 	"organizeImports": { "enabled": true },
 	"linter": { "enabled": true, "rules": { "recommended": true } },
 	"formatter": { "enabled": true, "indentStyle": "tab" },
-	"files": { "ignore": ["node_modules", "dist"] }
+	"files": {
+		"ignore": [
+			"node_modules",
+			"dist",
+			"graphify-out",
+			"**/scripts/reconstruct-src.mjs",
+			"**/scripts/finalize-*-src.mjs"
+		]
+	},
+	"overrides": [
+		{
+			"include": ["tests/**"],
+			"linter": {
+				"rules": {
+					"performance": { "noDelete": "off" },
+					"suspicious": { "noExportsInTest": "off" }
+				}
+			}
+		}
+	]
 }
