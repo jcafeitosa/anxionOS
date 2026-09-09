@@ -36,7 +36,9 @@
     "orchestration:cron": "node .cursor/orchestration/agent-autonomy/cron-manager.mjs",
     "orchestration:goals": "node .cursor/orchestration/agent-autonomy/goals-manager.mjs",
     "orchestration:proactive": "node .cursor/orchestration/agent-proactive/initiative.mjs",
-    "orchestration:monitor": "node .cursor/orchestration/agent-proactive/monitor.mjs"
+    "orchestration:monitor": "node .cursor/orchestration/agent-proactive/monitor.mjs",
+    "orchestration:session": "node .cursor/orchestration/agent-dialogue/session-tracker.mjs",
+    "orchestration:silence-watch": "node .cursor/orchestration/agent-autonomy/scripts/silence-detector.mjs"
   },
   "repository": {
     "type": "git",
