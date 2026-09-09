@@ -33,7 +33,7 @@ bun run boundaries   # dependency-cruiser (AR01)
 
 ### Desenvolvimento com hotswap
 
-`bun run dev` delega para `apps/api` com `bun --watch src/index.ts` — o runtime Bun recarrega automaticamente ao salvar arquivos `.ts` no workspace. Logs de boot incluem `API listening (hotswap via bun --watch)` na porta `3000` (ou `PORT` do `.env`).
+`bun run dev` delega para `apps/api` com `bun --env-file=../../.env --watch src/index.ts` — carrega `backend/.env` (Postgres, NATS, Neo4j, Better Auth) mesmo com cwd em `apps/api`. O runtime Bun recarrega automaticamente ao salvar arquivos `.ts`. Logs de boot incluem `DATABASE_URL loaded — identity and auth schema ready` e `API listening` na porta `3000` (ou `PORT` do `.env`). Better Auth monta em `/api/auth/*` quando `BETTER_AUTH_SECRET` e `BETTER_AUTH_URL` estão definidos.
 
 ### Observabilidade e erros (P02)
 
