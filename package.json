@@ -44,7 +44,11 @@
     "orchestration:terminal": "node .cursor/orchestration/agent-dialogue/terminal-panel.mjs",
     "orchestration:tail": "node .cursor/orchestration/agent-dialogue/tail-formatted.mjs",
     "orchestration:cto-accept": "node .cursor/orchestration/agent-proactive/cto-accept.mjs",
-    "orchestration:cto-decide": "node .cursor/orchestration/agent-proactive/cto-decide.mjs"
+    "orchestration:cto-decide": "node .cursor/orchestration/agent-proactive/cto-decide.mjs",
+    "orchestration:hire": "node .cursor/orchestration/agent-hire/hire.mjs",
+    "orchestration:dismiss": "node .cursor/orchestration/agent-hire/dismiss.mjs",
+    "orchestration:hire-roster": "node .cursor/orchestration/agent-hire/roster.mjs",
+    "orchestration:roster": "node .cursor/orchestration/agent-hire/roster.mjs"
   },
   "repository": {
     "type": "git",
