@@ -1231,7 +1231,7 @@ Fonte primária: [R08 decision log](./structure-debate/decisions/R08-decision-lo
 | D-DC-005 | agents Proposal source; decisions materializa intent | Aceito v1 | ANX-139/149 | Dono intent |
 | D-DC-006 | knowledge Evidence storage; decisions EvidenceManifest refs | Aceito v1 | ANX-142/149 | Sem conteúdo inline |
 | D-DC-007 | risk RiskCheck separado; state via evento | Aceito v1 | ANX-150/149 | P06 §2.1 ordem |
-| D-DC-008 | audit Flight Recorder; decisions manifestHash only | Aceito v1 | ANX-149/154 | Sem payload bruto |
+| D-DC-008 | audit Flight Recorder; decisions manifestHash only | Aceito v1 | ANX-149/155 | Sem payload bruto |
 | D-DC-009 | PG autoritativo; zero SQLite | Aceito v1 | ANX-149 | ADR0004 |
 | D-DC-010 | SIMULATED+PAPER only v1 | Aceito v1 | ANX-149 | REAL rejeitado |
 | D-DC-011 | Independent approver policy (FI03) | Aceito v1 | ANX-149/136 | G3-DC-S2-05 |
