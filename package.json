@@ -41,6 +41,7 @@
     "orchestration:show-dialogue": "node .cursor/orchestration/agent-dialogue/conversation.mjs",
     "orchestration:silence-watch": "node .cursor/orchestration/agent-autonomy/scripts/silence-detector.mjs",
     "orchestration:speak": "node .cursor/orchestration/agent-dialogue/chat-participation.mjs",
+    "orchestration:standup": "node .cursor/orchestration/agent-dialogue/standup.mjs",
     "orchestration:tail": "node .cursor/orchestration/agent-dialogue/tail-formatted.mjs",
     "orchestration:terminal": "node .cursor/orchestration/agent-dialogue/terminal-panel.mjs",
     "orchestration:test": "node --test .cursor/orchestration/tests/*.test.mjs",
