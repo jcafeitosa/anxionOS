@@ -1,4 +1,4 @@
-import type { Pool } from "pg";
+import type { GraphDatabasePool } from "../../domain/ports/graph-database-pool";
 import type { GraphStore } from "../../domain/ports/graph-store";
 import type { RebuildControl } from "../../domain/ports/rebuild-control";
 import type { TraversalEvaluator } from "../../domain/ports/traversal-evaluator";
@@ -9,7 +9,7 @@ import type { PendingProjectionRegistry } from "./pending-projection-registry";
 import type { GraphTraversalRateLimiter } from "./graph-rate-limit";
 
 export interface GraphHttpRuntime {
-    pool: Pool;
+    pool: GraphDatabasePool;
     graphStore: GraphStore;
     traversalEvaluator: TraversalEvaluator;
     cache: GraphReadCache;

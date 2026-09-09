@@ -1,4 +1,4 @@
-import type { ProjectionHandlerContext } from "../../../infrastructure/projections/inbox/process-with-inbox";
+import type { ProjectionHandlerContext } from "../inbox/projection-handler";
 import { GOVERNANCE_EVENT_TYPES, GOVERNANCE_OWNER_DOMAIN, grantIssuedPayloadSchema, grantRevokedPayloadSchema, } from "@anxionos/contracts/governance";
 import { GRAPH_GOVERNANCE_CONSUMER_NAME } from "../../../domain/projections/constants";
 import { ProjectionError } from "../../../domain/projections/errors";

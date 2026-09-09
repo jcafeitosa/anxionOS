@@ -1,4 +1,4 @@
-import type { ProjectionHandlerContext } from "../../../infrastructure/projections/inbox/process-with-inbox";
+import type { ProjectionHandlerContext } from "../inbox/projection-handler";
 import { ORGANIZATION_EVENT_TYPES, ORGANIZATIONS_OWNER_DOMAIN, } from "@anxionos/contracts/organizations";
 import { GRAPH_ORGANIZATIONS_CONSUMER_NAME, } from "../../../domain/projections/constants";
 import { ProjectionError } from "../../../domain/projections/errors";

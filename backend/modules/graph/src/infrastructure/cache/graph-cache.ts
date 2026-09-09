@@ -3,6 +3,7 @@ import type { RebuildCacheControl } from "../../application/rebuild/full-generat
 import { type BuildGraphCacheKeyInput } from "./cache-key-builder";
 import { type GraphCacheRedisCommandPort } from "./redis-l2-cache";
 import { GRAPH_CACHE_TTL_SECONDS, shouldCacheT01Decision, } from "@anxionos/contracts/graph";
+import { shouldCacheTraversalResult as shouldCacheTraversalResultPolicy } from "../../domain/cache/should-cache-traversal";
 import { buildGraphCacheRedisKeyFromInput, GRAPH_CACHE_KEY_PREFIX, } from "./cache-key-builder";
 import { createRedisL2Cache, resolveL2TtlSeconds, subscribeGraphCacheInvalidation, } from "./redis-l2-cache";
 
@@ -69,7 +70,7 @@ class LruTtlCache {
         this.tail = null;
     }
     deleteByPrefix(prefix) {
-        const removed = [];
+        const removed: string[] = [];
         for (const key of this.nodes.keys()) {
             if (key.includes(prefix)) {
                 this.delete(key);
@@ -119,15 +120,8 @@ class LruTtlCache {
 export function resolveGraphCacheMode(env: NodeJS.ProcessEnv = process.env): GraphCacheMode {
     return env.GRAPH_CACHE_MODE === "l1-l2" ? "l1-l2" : "local-only";
 }
-export function shouldCacheTraversalResult(input) {
-    if (input.intentHash) {
-        return false;
-    }
-    if (input.traversalId === "T01") {
-        return shouldCacheT01Decision(input.decision ?? "ALLOW", input.intentHash);
-    }
-    return input.traversalId === "T03" || input.traversalId === "T15";
-}
+export { shouldCacheTraversalResultPolicy as shouldCacheTraversalResult };
+const shouldCacheTraversalResult = shouldCacheTraversalResultPolicy;
 export function createGraphReadCache(options: GraphReadCacheOptions = {}): GraphReadCache {
     const mode = options.mode ?? resolveGraphCacheMode();
     const l1 = new LruTtlCache(options.l1MaxEntries ?? 500, options.l1TtlSeconds ?? GRAPH_CACHE_TTL_SECONDS.L1);

@@ -1,4 +1,4 @@
-import { shouldCacheTraversalResult } from "../../infrastructure/cache/graph-cache.js";
+import { shouldCacheTraversalResult } from "../../domain/cache/should-cache-traversal";
 
 /**
  * Cache-aside helper for graph traversals. Uses runtime-injected key/TTL resolvers

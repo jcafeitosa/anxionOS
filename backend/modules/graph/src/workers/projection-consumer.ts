@@ -1,7 +1,7 @@
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import type { Pool } from "pg";
 import type { GraphStore } from "../domain/ports/graph-store";
-import { type ProcessWithInboxResult, type ProjectionHandler } from "../infrastructure/projections/inbox/process-with-inbox";
+import { type ProcessWithInboxResult, type ProjectionHandler } from "../application/projections/inbox/projection-handler";
 import type { NatsMessagePort } from "../infrastructure/messaging/nats-message-port";
 import { processWithInbox, } from "../infrastructure/projections/inbox/process-with-inbox";
 

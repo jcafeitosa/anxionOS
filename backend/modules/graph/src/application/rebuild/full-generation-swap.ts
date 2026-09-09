@@ -1,4 +1,4 @@
-import type { Pool } from "pg";
+import type { GraphDatabasePool } from "../../domain/ports/graph-database-pool";
 import type { RebuildControl, RebuildJob } from "../../domain/ports/rebuild-control";
 import type { RebuildRegistryPort } from "../../domain/ports/rebuild-registry-port";
 import { GRAPH_REBUILD_OWNER_DOMAIN_ORDER, } from "../../domain/rebuild/constants";
@@ -117,7 +117,7 @@ export interface RebuildReplayPort {
 }
 
 export interface StartFullGenerationSwapInput {
-    pool: Pool;
+    pool: GraphDatabasePool;
     rebuildControl: RebuildControl;
     rebuildRegistry: RebuildRegistryPort;
     cutoffCheckpoint: number;
@@ -127,7 +127,7 @@ export interface StartFullGenerationSwapInput {
 }
 
 export interface ExecuteFullGenerationSwapInput {
-    pool: Pool;
+    pool: GraphDatabasePool;
     rebuildControl: RebuildControl;
     rebuildRegistry: RebuildRegistryPort;
     job: RebuildJob;

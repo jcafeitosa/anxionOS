@@ -1,13 +1,25 @@
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
-import type { Pool } from "pg";
+import type { GraphDatabasePool } from "../../../domain/ports/graph-database-pool";
 import type { GraphStore } from "../../../domain/ports/graph-store";
-import type { NatsMessagePort } from "../../../infrastructure/messaging/nats-message-port";
+import type { NatsMessagePort } from "../../../domain/ports/nats-message-port";
 import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
 import { GRAPH_PROJECTION_DEFAULT_CHECKPOINT, GRAPH_PROJECTION_MAX_ATTEMPTS, } from "../../../domain/projections/constants";
 import { isProjectionError, ProjectionError, } from "../../../domain/projections/errors";
 import { nakDelayMs } from "../../../infrastructure/messaging/nats-message-port";
 import { buildRedactedPayloadRef, insertDlqEntry, } from "../../../infrastructure/persistence/dlq-repository";
 import { ackInboxEntry, bumpProjectionGeneration, findProjectionGeneration, claimInboxForProcessing, markInboxPendingRetry, quarantineInboxEntry, } from "../../../infrastructure/persistence/inbox-repository";
+import type {
+    ProcessWithInboxOptions,
+    ProcessWithInboxResult,
+    ProjectionHandler,
+} from "../../../application/projections/inbox/projection-handler";
+export type {
+    ProcessWithInboxOptions,
+    ProcessWithInboxResult,
+    ProcessWithInboxStatus,
+    ProjectionHandler,
+    ProjectionHandlerContext,
+} from "../../../application/projections/inbox/projection-handler";
 
 function classifyError(error) {
     if (isProjectionError(error)) {
@@ -34,7 +46,7 @@ async function quarantineAndAck(client, options, parsed, entry, errorCode, build
     await client.query("COMMIT");
     options.message?.ack();
     return {
-        status: "quarantined" as const as const,
+        status: "quarantined" as const,
         errorCode,
         dlqId,
         attemptCount: entry.attemptCount,
@@ -60,7 +72,7 @@ export async function processWithInbox(options) {
         if (claim === "already_processed") {
             await client.query("ROLLBACK");
             options.message?.ack();
-            const duplicateResult = { status: "duplicate" as const as const };
+            const duplicateResult = { status: "duplicate" as const };
             await options.afterAck?.({
                 envelope: parsed,
                 result: duplicateResult,
@@ -71,7 +83,7 @@ export async function processWithInbox(options) {
             await client.query("ROLLBACK");
             options.message?.ack();
             return {
-                status: "quarantined" as const as const,
+                status: "quarantined" as const,
                 errorCode: "ALREADY_QUARANTINED",
                 attemptCount: claim.attemptCount,
             };
@@ -94,7 +106,7 @@ export async function processWithInbox(options) {
             await client.query("COMMIT");
             options.message?.nak(nakDelayMs(entry.attemptCount));
             return {
-                status: "retry" as const as const,
+                status: "retry" as const,
                 errorCode: classified.code,
                 attemptCount: entry.attemptCount,
             };
@@ -104,7 +116,7 @@ export async function processWithInbox(options) {
         await client.query("COMMIT");
         options.message?.ack();
         const processedResult = {
-            status: "processed" as const as const,
+            status: "processed" as const,
             projectionGeneration,
         };
         await options.afterAck?.({
@@ -122,39 +134,3 @@ export async function processWithInbox(options) {
     }
 }
 
-export interface ProjectionHandlerContext {
-    graphStore: GraphStore;
-    projectionGeneration: number;
-    envelope: DomainEventEnvelope;
-}
-
-export type ProjectionHandler = (context: ProjectionHandlerContext) => Promise<void>;
-
-export type ProcessWithInboxStatus = "processed" | "duplicate" | "quarantined" | "retry";
-
-export interface ProcessWithInboxResult {
-    status: ProcessWithInboxStatus;
-    projectionGeneration?: number;
-    errorCode?: string;
-    dlqId?: string;
-    attemptCount?: number;
-}
-
-export interface ProcessWithInboxOptions {
-    pool: Pool;
-    graphStore: GraphStore;
-    consumerName: string;
-    ownerDomain: string;
-    envelope: DomainEventEnvelope;
-    project: ProjectionHandler;
-    checkpoint?: number;
-    maxAttempts?: number;
-    message?: NatsMessagePort;
-    buildPayloadRef?: (envelope: DomainEventEnvelope) => string;
-    /** GK-R05-03: cache pub/sub invalidate only after inbox COMMIT + NATS ack */
-    afterAck?: (input: {
-        envelope: DomainEventEnvelope;
-        result: ProcessWithInboxResult;
-    }) => void | Promise<void>;
-}
-/** Idempotent inbox + Neo4j + PG generation bump; NATS ack only after COMMIT (GK-R06-02). */

@@ -69,7 +69,7 @@ export async function handleNodesBatchGet(runtime, body, scope) {
         assertNodeReadable(scope, nodeKey);
     }
     const records = await runtime.graphStore.getNodes(keys);
-    const recordByKey = new Map(records.map((record) => [
+    const recordByKey = new Map<string, import("../../domain/ports/graph-store").GraphNodeRecord>(records.map((record) => [
         `${record.nodeKey.scopeType}:${record.nodeKey.scopeId}:${record.nodeKey.type}:${record.nodeKey.id}`,
         record,
     ]));

@@ -1,3 +1,4 @@
+export type { NatsMessagePort } from "../../domain/ports/nats-message-port";
 export function createTrackingNatsMessagePort() {
     const state = {
         acked: false,
@@ -27,9 +28,4 @@ export function nakDelayMs(attemptCount: number): number {
     const base = Math.min(300_000, 2 ** attemptCount * 1000);
     const jitter = base * (0.8 + Math.random() * 0.2);
     return Math.floor(jitter);
-}
-
-export interface NatsMessagePort {
-    ack(): void;
-    nak(delayMs?: number): void;
 }

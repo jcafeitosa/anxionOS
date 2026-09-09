@@ -104,7 +104,7 @@ export async function handleTraversal(runtime, traversalIdParam, body, scope, re
             ...cacheLookupInput,
             decision: "DENY",
         };
-        const cached = await getOrLoadGraphCacheValue(runtime.cache, denyCacheInput, evaluateTraversal);
+        const cached = await getOrLoadGraphCacheValue(runtime, denyCacheInput, evaluateTraversal);
         evaluation = cached.value;
         cacheHit = cached.cacheHit;
         if (!cacheHit && evaluation.data.decision !== "DENY") {
@@ -115,7 +115,7 @@ export async function handleTraversal(runtime, traversalIdParam, body, scope, re
         evaluation = await evaluateTraversal();
     }
     else {
-        const cached = await getOrLoadGraphCacheValue(runtime.cache, cacheLookupInput, evaluateTraversal);
+        const cached = await getOrLoadGraphCacheValue(runtime, cacheLookupInput, evaluateTraversal);
         evaluation = cached.value;
         cacheHit = cached.cacheHit;
     }
