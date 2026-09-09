@@ -29,6 +29,7 @@
     "orchestration:show-dialogue": "node .cursor/orchestration/agent-dialogue/conversation.mjs",
     "orchestration:chat": "node .cursor/orchestration/agent-dialogue/chat-feed.mjs",
     "orchestration:broadcast": "node .cursor/orchestration/agent-dialogue/broadcast.mjs post",
+    "orchestration:speak": "node .cursor/orchestration/agent-dialogue/chat-participation.mjs",
     "orchestration:watch": "node .cursor/orchestration/agent-dialogue/watch.mjs",
     "orchestration:personas": "node .cursor/orchestration/agent-dialogue/personas.mjs list",
     "orchestration:autonomy": "node .cursor/orchestration/agent-autonomy/registry.mjs",
