@@ -75,7 +75,11 @@
     "orchestration:cursor-goals": "node .cursor/orchestration/agent-config/cursor-goals.mjs",
     "orchestration:brain": "node .cursor/orchestration/agent-brain/brain-cli.mjs",
     "orchestration:zero-policies": "node .cursor/orchestration/agent-workflow/zero-policies.mjs",
-    "orchestration:taskboard": "node .cursor/orchestration/agent-config/agent-taskboard-cli.mjs"
+    "orchestration:taskboard": "node .cursor/orchestration/agent-config/agent-taskboard-cli.mjs",
+    "taskboard:cursor-ensure": "npm run taskboard:ensure",
+    "taskboard:cursor-prework": "npm run taskboard:prework",
+    "taskboard:cursor-sync-agents": "npm run orchestration:taskboard -- sync-agents",
+    "taskboard:cursor-start": "npm run taskboard:cursor-ensure && npm run taskboard:cursor-sync-agents"
   },
   "repository": {
     "type": "git",
