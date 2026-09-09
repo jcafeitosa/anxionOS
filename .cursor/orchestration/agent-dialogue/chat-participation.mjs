@@ -18,6 +18,7 @@
  */
 
 import { readFileSync } from "node:fs";
+import { getCliBrand } from "../agent-config/cli-brand.mjs";
 import { fileURLToPath } from "node:url";
 import { writePendingChatDisplay } from "./chat-feed.mjs";
 import { appendDialogueMessage } from "./dialogue-log.mjs";
@@ -84,7 +85,7 @@ export function extractFirstMention(body) {
 }
 
 function usage(exitCode = 0) {
-  console.log(`anxionOS chat participation (speak)
+  console.log(`${getCliBrand()} — chat participation (speak)
 
 Usage:
   npm run orchestration:speak -- --persona SLUG --body "TEXT" [--issue ANX-N]

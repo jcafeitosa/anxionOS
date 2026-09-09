@@ -48,9 +48,23 @@ sequenceDiagram
   end
 ```
 
-Interaction types: `challenge`, `verdict`, `handoff`.
+Interaction types: `challenge`, `response`, `verdict`, `handoff`, `review`, `consult`, `escalate`.
 
 ---
+
+
+## Colaboração de equipe (Google-style)
+
+| Momento | Ação | Tipo dialogue |
+| --- | --- | --- |
+| Receber handoff | `ack` + ler diff | `ack` |
+| Dúvida de escopo | `question` a Renata ou `consult` a lead B | `question` / `consult` |
+| Revisão adversarial | `challenge` com evidência concreta | `challenge` |
+| Após response do executor | `verdict` G1 ou novo `challenge` (max 3 ciclos) | `verdict` / `challenge` |
+| PASS G1 | `handoff` Fernanda + `review` request G2 | `handoff` / `review` |
+| Impasse 3 ciclos | `escalate` Renata | `escalate` |
+
+Marina **desafia** Lucas em voz própria no chat — nunca proxy da orquestradora.
 
 ## Checklist por turno
 

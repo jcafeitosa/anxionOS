@@ -47,7 +47,7 @@ npm run orchestration:global -- init
 ## Uso
 
 ```bash
-npm run orchestration:global -- compliance --pre-work --issue ANX-N --persona orchestrator
+npm run orchestration:global -- compliance --pre-work --issue PREFIX-N --persona orchestrator
 npm run orchestration:global -- chat --new-only
 ```
 
@@ -57,7 +57,9 @@ npm run orchestration:global -- chat --new-only
 npm run orchestration:test && npm run orchestration:verify
 ```
 
-Ver [AGNOSTIC-DESIGN.md](./AGNOSTIC-DESIGN.md) e [templates/README-BOOTSTRAP.md](./templates/README-BOOTSTRAP.md).
+Ver [AGNOSTIC-DESIGN.md](./AGNOSTIC-DESIGN.md), [templates/README-BOOTSTRAP.md](./templates/README-BOOTSTRAP.md) e [examples/project-anxionos/](./examples/project-anxionos/) (instância de referência).
+
+**Não sincronizado para global:** `delegation-queue/` (runtime), `examples/` (overlay por projeto).
 
 ## Tooling G0.14
 

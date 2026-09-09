@@ -1,6 +1,6 @@
-# Registro — skills, tools e MCP (workspace anxionOS)
+# Registro — skills, tools e MCP (framework agnóstico)
 
-Catálogo de capacidades disponíveis no Cursor para a equipe de orquestração. Atualizar quando novos plugins/skills forem adicionados.
+Catálogo de capacidades disponíveis no Cursor para a equipe de orquestração. **Opcional por projeto** — instalar plugins conforme `orchestration.config.json` e overlay em `examples/project-*/`. Atualizar quando novos plugins/skills forem adicionados.
 
 **Relacionados:** [CURSOR-AGENTS-INTEGRATION.md](./CURSOR-AGENTS-INTEGRATION.md) · [TOOLING-INTEGRATION.md](./TOOLING-INTEGRATION.md) · [AGENTS.md](../../AGENTS.md)
 
@@ -29,13 +29,35 @@ Catálogo de capacidades disponíveis no Cursor para a equipe de orquestração.
 
 ---
 
+## Plugins Cursor opcionais (guidelines + portabilidade)
+
+Instalação via Cursor Marketplace / plugins locais. Nenhum é obrigatório para o framework core; projetos referenciam no overlay (`examples/project-*/`) e em [GUIDELINES-INTEGRATION.md](./GUIDELINES-INTEGRATION.md).
+
+| Plugin / skill | Origem | Escopo | Quando invocar |
+| --- | --- | --- | --- |
+| **karpathy-guidelines** | `karpathy-skills` | Todos executores + críticos + G2 | Simplicidade, diffs cirúrgicos, critérios verificáveis; diagramas com propósito ([VISUAL-DOCUMENTATION.md](./VISUAL-DOCUMENTATION.md)) |
+| **check-agent-compatibility** (ECC) | `agent-compatibility` | Framework + leads G2–G5 | Scan portabilidade antes de `install-global`; subagentes `code-reviewer`, `security-reviewer`, etc. ([GUIDELINES-INTEGRATION.md](./GUIDELINES-INTEGRATION.md) §2) |
+| **ui-ux-pro-max** | `ui-ux-pro-max-skill` | **Somente** personas frontend (`frontend-executor`, `frontend-critic`) | Consoles web P07: a11y, tokens, layout; **nunca** backend/orquestração |
+
+### Subagentes ECC (via Task tool — opcional por gate)
+
+| Subagente | Gate | Lead persona |
+| --- | --- | --- |
+| `critic-reviewer`, `silent-failure-hunter` | G1 | Críticos Level C |
+| `code-reviewer`, `typescript-reviewer`, `thermo-nuclear-code-quality-review` | G2 | Fernanda |
+| `e2e-runner`, `validation-review`, `pr-test-analyzer` | G3 | Eduardo |
+| `security-reviewer`, `mantis-threat-model` | G4 | Isa |
+| `security-reviewer` (adversarial) | G5 | Thiago |
+| `compatibility-scan-review`, `startup-review`, `validation-review`, `docs-reliability-review` | G0 (opcional) | Renata / André |
+
+---
+
 ## Skills globais / plugins (referência AGENTS.md)
 
 | Skill | Origem | Quando invocar |
 | --- | --- | --- |
-| manage-taskboard | `~/.claude/skills/` | **Obrigatório** — claims ANX-* |
+| manage-taskboard | `~/.claude/skills/` | **Obrigatório** — claims de issue (prefixo configurável) |
 | orchestrate-work | `~/.claude/skills/` | **Obrigatório** — dispatch multi-agente |
-| karpathy-guidelines | plugin karpathy-skills | Simplicidade, diffs cirúrgicos |
 | test-driven-development | superpowers | G1 implementação |
 | systematic-debugging | superpowers | Debug estruturado |
 | writing-plans / executing-plans | superpowers | Planos multi-step |
@@ -46,7 +68,6 @@ Catálogo de capacidades disponíveis no Cursor para a equipe de orquestração.
 | requesting-code-review | superpowers | Handoff G2 |
 | archify | `.agents/skills/archify/` | Diagramas P2 |
 | context7-mcp | plugin context7 | Docs de libs |
-| ui-ux-pro-max | plugin | **Somente** `frontend/` P07 |
 | open-knowledge-discovery / write | AgentStores | OKF avançado |
 
 ---
@@ -108,4 +129,4 @@ Descoberta: `GetDynamicTools` · invocação: `CallDynamicTool`.
 2. Novo plugin MCP → rodar `GetDynamicTools` e documentar namespace.
 3. Cross-check com [TOOLING-INTEGRATION.md](./TOOLING-INTEGRATION.md) — evitar duplicar política; este arquivo é **inventário**, TOOLING-INTEGRATION é **obrigatoriedade**.
 
-**Gerado/atualizado:** 2026-09-09 · ANX-134
+**Gerado/atualizado:** 2026-09-09 · ANX-237 · plugins opcionais karpathy / ECC / ui-ux-pro-max

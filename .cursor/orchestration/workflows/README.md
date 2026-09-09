@@ -21,6 +21,7 @@ Subagentes: [SUBAGENT-PROMPT-TOOLING.md](../templates/SUBAGENT-PROMPT-TOOLING.md
 | Slug | Nome | Nível | Gate | Arquivo |
 | --- | --- | --- | --- | --- |
 | `orchestrator` | Renata Oliveira | A | G0–G7 | [workflow-orchestrator.md](./workflow-orchestrator.md) |
+| `cto-critic` | Cláudia Nunes | A (núcleo) | G6/G7 audit | [workflow-cto-critic.md](./workflow-cto-critic.md) |
 | `architect` | Marcus Chen | A | G0 consult | [workflow-architect.md](./workflow-architect.md) |
 | `backend-executor` | Lucas Mendes | C | G1 | [workflow-backend-executor.md](./workflow-backend-executor.md) |
 | `backend-critic` | Marina Ferreira | C | G1 | [workflow-backend-critic.md](./workflow-backend-critic.md) |

@@ -49,6 +49,18 @@ Interaction types: `status`, `escalate`, `handoff`.
 
 ---
 
+## Colaboração de equipe (Google-style)
+
+| Momento | Ação | Tipo dialogue |
+| --- | --- | --- |
+| PR ready | `share` link PR + checklist CI | `share` |
+| CI fail | `status` + `consult` executor; `hire` ci-investigator | `status` / `hire` |
+| Merge gate | `handoff` Renata G6 com ANX-* no título | `handoff` |
+| Branch policy | `block` se PR sem issue id | `block` |
+
+
+---
+
 ## Checklist por turno
 
 1. [ ] `npm run orchestration:workflow -- monitor --level C` *(Level C no início)* ou `status --persona github-lead --issue ANX-N`

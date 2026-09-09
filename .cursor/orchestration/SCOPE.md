@@ -2,9 +2,9 @@
 
 Este documento delimita o que **é** e o que **não é** a pasta `.cursor/orchestration/`.
 
-> **Separação obrigatória:** concluir o framework de orquestração Cursor (**ANX-230**, tooling em `.cursor/orchestration/`) **não** conclui o produto anxionOS. Pipeline de produto (P02+, `backend/`, `frontend/`, agentes institucionais) segue issues próprias — ex. **ANX-134** — e specs em `brain/`.
+> **Separação obrigatória:** concluir o **framework** de orquestração Cursor (tooling em `.cursor/orchestration/`) **não** conclui o produto da aplicação. Pipeline de produto segue issues e specs definidas no `orchestration.config.json` da instância (ex.: anxionOS → `brain/`, `backend/`).
 >
-> **Framework agnóstico:** o código em `.cursor/orchestration/` é **portable** entre repositórios. Esta instância (anxionOS) configura prefixo `ANX`, `brain/` e roster via [`.cursor/orchestration.config.json`](../../.cursor/orchestration.config.json). Ver [AGNOSTIC-DESIGN.md](./AGNOSTIC-DESIGN.md).
+> **Framework agnóstico:** o código em `.cursor/orchestration/` é **portable** entre repositórios. Cada instância fornece overlay via [`.cursor/orchestration.config.json`](../../.cursor/orchestration.config.json) (prefixo, `codeRoots`, `knowledgeRoot`, roster). Exemplo anxionOS: [examples/project-anxionos/](./examples/project-anxionos/). Ver [AGNOSTIC-DESIGN.md](./AGNOSTIC-DESIGN.md).
 
 ---
 
@@ -18,7 +18,7 @@ A orquestração em `.cursor/orchestration/` descreve **como a equipe de desenvo
 | Diálogo e broadcast | `dialogue.jsonl`, `orchestration:chat`, `orchestration:speak` |
 | Hire e hierarquia | Level A/B/C, workers on-demand ([HIERARCHY.md](./HIERARCHY.md)) |
 | Pipeline de entrega | Gates G0–G7 para trabalho no repositório ([PIPELINE.md](./PIPELINE.md)) |
-| Taskboard | Dashi/Codex — issues `{{ISSUE_PREFIX}}-*` (anxionOS: `ANX-*`), claims, status |
+| Taskboard | Dashi/Codex — issues `{{ISSUE_PREFIX}}-*` (configurável), claims, status |
 | Workflows por persona | `.cursor/orchestration/workflows/` |
 
 **Objetivo:** governar desenvolvimento, revisão e documentação do código **neste repositório** — não executar agentes em produção.
@@ -53,7 +53,7 @@ flowchart LR
     T[Dashi Taskboard PREFIX]
   end
 
-  subgraph product["anxionOS Product — agents module"]
+  subgraph product["Product domain — ex. agents module"]
     M[backend/modules/agents]
     B[brain specs 002-agents-knowledge]
     N[Neo4j grafo institucional]

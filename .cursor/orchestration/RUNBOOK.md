@@ -93,6 +93,17 @@ npm run orchestration:workflow -- status --persona backend-executor --issue ANX-
 npm run orchestration:workflow -- next --persona backend-executor --issue ANX-N
 npm run orchestration:workflow -- monitor --level C
 npm run orchestration:workflow -- sync --persona backend-executor --issue ANX-N
+
+# Standup coordenado (Google-style)
+npm run orchestration:standup -- --issue ANX-N
+npm run orchestration:standup -- --issue ANX-N --format-only
+npm run orchestration:standup -- --issue ANX-N --post
+npm run orchestration:standup -- --issue ANX-N --post --persona backend-executor --done "..." --doing "..." --blockers "nenhum"
+
+# Barra de progresso G0–G7
+npm run orchestration:progress -- --issue ANX-N
+npm run orchestration:progress -- --issue ANX-N --json
+
 ```
 
 ## Publicar mensagem

@@ -12,6 +12,7 @@
  */
 
 import { execFileSync, spawnSync } from "node:child_process";
+import { getCliBrand } from "../agent-config/cli-brand.mjs";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -53,7 +54,7 @@ function resolveTaskctl() {
 const taskctl = resolveTaskctl();
 
 function usage(exitCode = 0) {
-  console.log(`anxionOS agent dialogue — personas e interações
+  console.log(`${getCliBrand()} — agent dialogue — personas e interações
 
 Commands:
   post [opts]              Publica mensagem (.cursor/orchestration-runtime/dialogue/dialogue.jsonl)

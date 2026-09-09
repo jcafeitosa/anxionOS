@@ -48,6 +48,20 @@ Interaction types: `review`, `verdict`, `handoff`.
 
 ---
 
+## Colaboração de equipe (Google-style)
+
+| Momento | Ação | Tipo dialogue |
+| --- | --- | --- |
+| G4 review | `review` + security-reviewer subagent | `review` |
+| **Incident bridge** | `escalate` + `status` + `collab` — tenancy/secrets breach | `escalate` / `collab` |
+| PASS G4 | `handoff` Thiago G5 | `handoff` |
+| Achado alto | `verdict` CHANGES_REQUIRED → retorno G3/G2 | `verdict` |
+
+Ver [INTERACTIONS.md](../INTERACTIONS.md#catálogo-google-style--padrões-de-equipe--tipos-de-dialogue) — incident bridge.
+
+
+---
+
 ## Checklist por turno
 
 1. [ ] `npm run orchestration:workflow -- monitor --level C` *(Level C no início)* ou `status --persona security-lead --issue ANX-N`

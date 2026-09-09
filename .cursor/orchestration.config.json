@@ -6,10 +6,13 @@
   },
   "taskboardProject": "anxionOS",
   "knowledgeRoot": "brain/",
-  "codeRoots": ["backend/", "frontend/"],
+  "codeRoots": [
+    "backend/",
+    "frontend/"
+  ],
   "scopeDoc": "SCOPE.md",
   "defaultCTO": "orchestrator",
-  "personasFile": ".cursor/orchestration/agent-config/roster.anxionos.json",
+  "personasFile": ".cursor/orchestration/examples/project-anxionos/roster.anxionos.json",
   "paths": {
     "runtime": ".cursor/orchestration-runtime",
     "dialogue": ".cursor/orchestration-runtime/dialogue",
@@ -21,7 +24,10 @@
     "state": ".cursor/orchestration-runtime/state"
   },
   "taskboard": {
-    "urlEnv": ["TASKBOARD_URL", "CODEX_TASKBOARD_URL"],
+    "urlEnv": [
+      "TASKBOARD_URL",
+      "CODEX_TASKBOARD_URL"
+    ],
     "defaultUrl": "http://127.0.0.1:47823"
   }
 }

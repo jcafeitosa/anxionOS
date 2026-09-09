@@ -4,6 +4,7 @@
  */
 
 import { execSync, spawn } from "node:child_process";
+import { getCliBrand } from "../agent-config/cli-brand.mjs";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { appendAutonomyLog } from "./autonomy-log.mjs";
 import {
@@ -20,7 +21,7 @@ import {
 } from "./lib.mjs";
 
 function usage(exitCode = 0) {
-  console.log(`anxionOS Agent Autonomy — cron
+  console.log(`${getCliBrand()} — Agent Autonomy — cron
 
 Commands:
   list [--persona SLUG] [--json]

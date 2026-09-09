@@ -1,3 +1,5 @@
+import { getCliBrand } from "../agent-config/cli-brand.mjs";
+
 /**
  * Formatação ANSI para diálogo de agentes no terminal (sem dependências).
  */
@@ -171,7 +173,7 @@ export function formatDialogueTerminalHeader(opts = {}) {
   const w = terminalWidth();
   const issueLabel = opts.issueId ?? "all";
   const mode = opts.live ? "live" : "snapshot";
-  const title = ` anxionOS Agent Dialogue (${mode}) — issue: ${issueLabel} `;
+  const title = ` ${getCliBrand()} Agent Dialogue (${mode}) — issue: ${issueLabel} `;
   const inner = title.length >= w - 2 ? title.slice(0, w - 2) : title + "─".repeat(Math.max(0, w - 2 - title.length));
   return `${ANSI.cyan}${ANSI.bold}┌${inner}┐${ANSI.reset}`;
 }

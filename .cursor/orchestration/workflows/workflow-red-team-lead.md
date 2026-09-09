@@ -49,6 +49,20 @@ Interaction types: `review`, `verdict`, `handoff`.
 
 ---
 
+## Colaboração de equipe (Google-style)
+
+| Momento | Ação | Tipo dialogue |
+| --- | --- | --- |
+| G5 sandbox | Confirmar escopo autorizado (fixtures/staging) | `plan` / `share` |
+| Ataque adversarial | `status` + `share` reprodução | `status` / `share` |
+| PASS G5 | `handoff` Renata G6 | `handoff` |
+| Bypass crítico | `verdict` BLOCKED + `escalate` | `verdict` / `escalate` |
+
+**Sandbox only** — sem capital real nem terceiros ([PIPELINE.md](../PIPELINE.md#g5)).
+
+
+---
+
 ## Checklist por turno
 
 1. [ ] `npm run orchestration:workflow -- monitor --level C` *(Level C no início)* ou `status --persona red-team-lead --issue ANX-N`

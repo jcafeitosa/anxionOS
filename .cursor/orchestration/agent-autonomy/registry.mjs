@@ -4,6 +4,7 @@
  */
 
 import { appendAutonomyLog, readAutonomyLog } from "./autonomy-log.mjs";
+import { getCliBrand } from "../agent-config/cli-brand.mjs";
 import {
   FORBIDDEN_COMMAND_PATTERNS,
   ISSUE_ID_RE,
@@ -14,7 +15,7 @@ import {
 } from "./lib.mjs";
 
 function usage(exitCode = 0) {
-  console.log(`anxionOS Agent Autonomy — registry
+  console.log(`${getCliBrand()} — Agent Autonomy — registry
 
 Commands:
   list [--persona SLUG] [--type hooks|loops|crons|goals] [--json]
@@ -93,7 +94,7 @@ function validateResource(kind, item, errors) {
   if (!item.id) errors.push(`${kind}: missing id`);
   if (!item.persona) errors.push(`${kind} ${item.id}: missing persona`);
   if ((kind === "loops" || kind === "goals") && !item.issueId) {
-    errors.push(`${kind} ${item.id}: requires issueId ANX-*`);
+    errors.push(`${kind} ${item.id}: requires issueId matching configured prefix`);
   }
   if (item.issueId && !ISSUE_ID_RE.test(item.issueId)) {
     errors.push(`${kind} ${item.id}: invalid issueId ${item.issueId}`);

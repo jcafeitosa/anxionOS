@@ -9,7 +9,8 @@ import { fileURLToPath } from "node:url";
 
 const moduleDir = dirname(fileURLToPath(import.meta.url));
 const frameworkModuleRoot = dirname(moduleDir);
-const DEFAULT_PERSONAS_FALLBACK = join(moduleDir, "roster.anxionos.json");
+export const DEFAULT_ISSUE_PREFIX = "ISSUE";
+const DEFAULT_PERSONAS_FALLBACK = join(moduleDir, "..", "templates", "personas.template.json");
 
 export const DEFAULT_ORCHESTRATION_HOME = join(homedir(), ".cursor", "orchestration");
 
@@ -34,10 +35,10 @@ const DEFAULT_RUNTIME_PATHS = {
 
 const DEFAULT_CONFIG = {
   version: 1,
-  project: { name: null, issuePrefix: "ANX" },
+  project: { name: null, issuePrefix: DEFAULT_ISSUE_PREFIX },
   taskboardProject: null,
-  knowledgeRoot: "brain/",
-  codeRoots: ["backend/", "frontend/"],
+  knowledgeRoot: null,
+  codeRoots: [],
   scopeDoc: "SCOPE.md",
   defaultCTO: "orchestrator",
   personasFile: null,
@@ -79,7 +80,7 @@ function applyEnvOverrides(config) {
   if (process.env.TASKBOARD_PROJECT_NAME) {
     next.taskboardProject = process.env.TASKBOARD_PROJECT_NAME;
   }
-  const prefix = normalizePrefix(next.project?.issuePrefix ?? "ANX");
+  const prefix = normalizePrefix(next.project?.issuePrefix ?? DEFAULT_ISSUE_PREFIX);
   const prefixEscaped = escapeRegex(prefix);
   next.issueIdPattern = `^${prefixEscaped}-\\d+$`;
   next.dialogueIssueIdPattern = `^${prefixEscaped}-(?:\\d+|VALIDATION|TEST)$`;
@@ -254,9 +255,9 @@ export function loadOrchestrationConfig(options = {}) {
   const { config, projectRoot, frameworkRoot, configPath } = getOrchestrationPaths(options);
   return {
     projectName: config.project?.name ?? "project",
-    issuePrefix: normalizePrefix(config.project?.issuePrefix ?? "ANX"),
+    issuePrefix: normalizePrefix(config.project?.issuePrefix ?? DEFAULT_ISSUE_PREFIX),
     taskboardProject: config.taskboardProject ?? config.project?.name ?? null,
-    knowledgeRoot: config.knowledgeRoot ?? "brain/",
+    knowledgeRoot: config.knowledgeRoot ?? null,
     codeRoots: config.codeRoots ?? [],
     scopeDoc: config.scopeDoc ?? "SCOPE.md",
     defaultCTO: config.defaultCTO ?? "orchestrator",

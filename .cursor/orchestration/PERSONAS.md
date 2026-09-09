@@ -384,7 +384,7 @@ Todo agente deve conhecer o roster operacional antes de agir em domínio alheio:
 | **B — gate leads** | G2–G5, Ju, André | **Não** — são revisores; contratam specialists (`HIRE-DELEGATION.md`) |
 | **A / consult** | Renata, Marcus, Helena | **Não** — coordenação, arquitetura ou spike |
 
-Exemplo operacional: [delegation-queue/ANX-134.md](./delegation-queue/ANX-134.md) (Lucas + Marina, G1 em progresso).
+Exemplo operacional: [examples/project-anxionos/delegation-queue/ANX-134.md](./examples/project-anxionos/delegation-queue/ANX-134.md) (Lucas + Marina, G1 em progresso).
 
 ---
 

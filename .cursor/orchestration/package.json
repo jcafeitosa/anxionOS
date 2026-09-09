@@ -1,0 +1,14 @@
+{
+  "name": "@anxionos/orchestration-framework",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Cursor multi-agent orchestration framework — taskboard, dialogue, and G0–G7 pipeline tooling.",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "validate": "npm test && node agent-workflow/diagram-check.mjs && node agent-dialogue/personas.mjs list && node agent-lifecycle/phase-check.mjs --help && node agent-compliance/compliance-check.mjs --help"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

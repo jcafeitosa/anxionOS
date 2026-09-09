@@ -10,6 +10,7 @@ import {
   agentsMdExists,
   scopeMdExists,
   evaluateDialogueDisplayWarnings,
+  evaluateDialogueDisplayViolations,
   evaluateToolingWarnings,
   graphifyIndexExists,
 } from "../agent-compliance/compliance-lib.mjs";
@@ -118,6 +119,11 @@ test("evaluateDialogueDisplayWarnings retorna array", () => {
     assert.ok(w.code);
     assert.ok(w.fix);
   }
+});
+
+test("evaluateDialogueDisplayViolations ignora fora de pre-commit orchestrator", () => {
+  assert.equal(evaluateDialogueDisplayViolations("backend-executor", "pre-commit").length, 0);
+  assert.equal(evaluateDialogueDisplayViolations("orchestrator", "full").length, 0);
 });
 
 test("evaluateCompliance inclui warnings", () => {

@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { getPersona } from "../agent-dialogue/personas.mjs";
 import { levelOf } from "../agent-hire/levels.mjs";
 import { ISSUE_ID_RE } from "../agent-autonomy/lib.mjs";
-import { getOrchestrationPaths } from "../agent-config/load-config.mjs";
+import { formatIssueIdError, getOrchestrationPaths } from "../agent-config/load-config.mjs";
 
 export const repoRoot = getOrchestrationPaths().projectRoot;
 export const workflowsDir = getOrchestrationPaths().paths.workflows;
@@ -26,7 +26,7 @@ export function workflowPath(persona, issueId) {
 export function assertWorkflowArgs(persona, issueId) {
   getPersona(persona);
   if (!issueId || !ISSUE_ID_RE.test(issueId)) {
-    throw new Error("issueId obrigatório no formato ANX-N");
+    throw new Error(formatIssueIdError());
   }
 }
 

@@ -48,6 +48,19 @@ Interaction types: `challenge`, `verdict`, `handoff`.
 
 ---
 
+## Colaboração de equipe (Google-style)
+
+| Momento | Ação | Tipo dialogue |
+| --- | --- | --- |
+| Receber handoff | `ack` + inspecionar diff Astro/React | `ack` |
+| Revisão adversarial G1 | `challenge` a11y, islands, design tokens | `challenge` |
+| Após response Camila | `verdict` G1 ou novo `challenge` (max 3) | `verdict` / `challenge` |
+| PASS G1 | `handoff` Fernanda + `review` request G2 | `handoff` / `review` |
+| Impasse | `escalate` Renata | `escalate` |
+
+
+---
+
 ## Checklist por turno
 
 1. [ ] `npm run orchestration:workflow -- monitor --level C` *(Level C no início)* ou `status --persona frontend-critic --issue ANX-N`

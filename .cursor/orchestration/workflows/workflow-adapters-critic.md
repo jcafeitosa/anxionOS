@@ -46,6 +46,18 @@ Interaction types: `challenge`, `verdict`, `handoff`.
 
 ---
 
+## Colaboração de equipe (Google-style)
+
+| Momento | Ação | Tipo dialogue |
+| --- | --- | --- |
+| Spec 005 | Validar aderência spec 005-connections | `challenge` |
+| Revisão G1 | `challenge` ports, eventos, sem secrets em DTOs | `challenge` |
+| PASS G1 | `handoff` Fernanda G2 | `handoff` / `review` |
+| Impasse | `escalate` Renata | `escalate` |
+
+
+---
+
 ## Checklist por turno
 
 1. [ ] `npm run orchestration:workflow -- monitor --level C` *(Level C no início)* ou `status --persona adapters-critic --issue ANX-N`

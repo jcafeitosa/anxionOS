@@ -44,6 +44,19 @@ Interaction types: `share`, `handoff`, `status`.
 
 ---
 
+## Colaboração de equipe (Google-style)
+
+| Momento | Ação | Tipo dialogue |
+| --- | --- | --- |
+| brain/ links | `share` paths OKF + `consult` antes de editar docs públicas | `share` / `consult` |
+| Handoff doc | `handoff` com seções AGENTS.md/brain citadas | `handoff` |
+| Drift detectado | `challenge` executor se doc desatualizada | `challenge` |
+
+**brain/** somente via open-knowledge MCP.
+
+
+---
+
 ## Checklist por turno
 
 1. [ ] `npm run orchestration:workflow -- monitor --level C` *(Level C no início)* ou `status --persona docs-lead --issue ANX-N`

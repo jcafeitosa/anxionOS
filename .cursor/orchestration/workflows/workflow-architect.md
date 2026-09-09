@@ -59,6 +59,18 @@ Interaction types: `consult`, `share`, `escalate`.
 
 ---
 
+## Colaboração de equipe (Google-style)
+
+| Momento | Ação | Tipo dialogue |
+| --- | --- | --- |
+| Design doc review | `consult` + `debate` (max 3) + `response` | `consult` / `debate` |
+| ADR P2 | `share` Archify + brain/ ADR draft | `share` |
+| Conflito ADR | `escalate` Renata — Marcus não decide G7 | `escalate` |
+| Boundaries | `pair` com executor em tradeoff UoW | `pair` |
+
+
+---
+
 ## Checklist por turno
 
 1. [ ] `npm run orchestration:workflow -- monitor --level C` *(Level C no início)* ou `status --persona architect --issue ANX-N`

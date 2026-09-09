@@ -47,6 +47,18 @@ Interaction types: `ack`, `status`, `handoff`, `escalate`.
 
 ---
 
+## Colaboração de equipe (Google-style)
+
+| Momento | Ação | Tipo dialogue |
+| --- | --- | --- |
+| Spec 005 | `share` links brain/spec 005-connections antes de codar | `share` |
+| Binding/inference | `consult` Gustavo (crítico) ou Marcus (ADR) | `consult` |
+| SIMULATED vs real | `question` Renata se escopo ambíguo | `question` |
+| Candidato G1 | `handoff` Gustavo | `handoff` |
+
+
+---
+
 ## Checklist por turno
 
 1. [ ] `npm run orchestration:workflow -- monitor --level C` *(Level C no início)* ou `status --persona adapters-executor --issue ANX-N`

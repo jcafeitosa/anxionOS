@@ -4,6 +4,7 @@
  */
 
 import { spawnSync } from "node:child_process";
+import { getCliBrand } from "../agent-config/cli-brand.mjs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { appendDialogueMessage } from "../agent-dialogue/dialogue-log.mjs";
@@ -15,7 +16,7 @@ import { evaluateTriggers, formatTriggerResults } from "./triggers.mjs";
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
 function usage(exitCode = 0) {
-  console.log(`anxionOS proactive initiative
+  console.log(`${getCliBrand()} — proactive initiative
 
 Commands:
   check [--persona SLUG] [--json]   Avalia todos os triggers

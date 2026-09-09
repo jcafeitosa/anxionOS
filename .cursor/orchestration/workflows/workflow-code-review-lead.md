@@ -60,6 +60,19 @@ Interaction types: `review`, `verdict`, `handoff`.
 
 ---
 
+## Colaboração de equipe (Google-style)
+
+| Momento | Ação | Tipo dialogue |
+| --- | --- | --- |
+| Receber `review` request | `ack` + `detect_changes` (code-review-graph) | `ack` |
+| LGTM informal | `response` ao executor | `response` |
+| Gate formal G2 | `verdict` PASS/CHANGES_REQUIRED com evidência | `verdict` |
+| PASS G2 | `handoff` Edu G3 | `handoff` |
+| Hire specialist | `hire` typescript-reviewer se blast radius alto | `hire` |
+
+
+---
+
 ## Checklist por turno
 
 1. [ ] `npm run orchestration:workflow -- monitor --level C` *(Level C no início)* ou `status --persona code-review-lead --issue ANX-N`

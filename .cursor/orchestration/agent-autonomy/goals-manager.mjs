@@ -5,6 +5,7 @@
  */
 
 import { appendAutonomyLog } from "./autonomy-log.mjs";
+import { getCliBrand } from "../agent-config/cli-brand.mjs";
 import {
   assertIssueClaim,
   assertOwnership,
@@ -16,7 +17,7 @@ import {
 } from "./lib.mjs";
 
 function usage(exitCode = 0) {
-  console.log(`anxionOS Agent Autonomy — goals
+  console.log(`${getCliBrand()} — Agent Autonomy — goals
 
 Commands:
   protocol                   Imprime resumo do protocolo (ver GOALS-PROTOCOL.md)

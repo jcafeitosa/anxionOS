@@ -17,6 +17,7 @@ import {
   loadSessions,
   resetTurnState,
 } from "../orchestration/agent-dialogue/session-tracker.mjs";
+import { readPendingChatDisplay } from "../orchestration/agent-dialogue/chat-feed.mjs";
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const autonomyDir = getOrchestrationPaths({ projectRoot: repoRoot }).paths.autonomy;
@@ -124,6 +125,37 @@ function processPendingBroadcast() {
   }
 }
 
+function checkPendingChatDisplay() {
+  const pending = readPendingChatDisplay();
+  if (!pending) return;
+
+  process.stderr.write(
+    `agent-orchestration: PENDING_CHAT_DISPLAY — dialogue ${pending.issueId ?? "?"} nao colado no chat Cursor\n`,
+  );
+  process.stderr.write(
+    "  Corrigir: npm run orchestration:chat -- --check-pending (colar saida verbatim na resposta)\n",
+  );
+
+  writeFileSync(
+    pendingEscalatePath,
+    `${JSON.stringify(
+      {
+        persona: "orchestrator",
+        issueId: pending.issueId ?? null,
+        reason: "pending-chat-display",
+        messageId: pending.messageId ?? null,
+        createdAt: new Date().toISOString(),
+        body:
+          `@orchestrator Dialogue **${pending.issueId ?? "sem issue"}** gravado no JSONL mas **nao exibido** no chat. ` +
+          "Colar `npm run orchestration:chat -- --check-pending` verbatim antes do proximo turno.",
+      },
+      null,
+      2,
+    )}\n`,
+    "utf8",
+  );
+}
+
 function checkSilentEnd() {
   const store = loadSessions();
   const personas = Object.keys(store.sessions);
@@ -177,6 +209,7 @@ async function main() {
   await readStdin();
   processPendingBroadcast();
   runStopComplianceCheck();
+  checkPendingChatDisplay();
   checkSilentEnd();
   process.stdout.write(JSON.stringify({}));
   process.exit(0);

@@ -20,6 +20,17 @@ import {
   DEFAULT_RUNTIME_ROOT,
 } from "../agent-config/load-config.mjs";
 
+test("defaults agnósticos sem config de projeto", () => {
+  resetConfigCache();
+  const project = mkdtempSync(join(tmpdir(), "orch-empty-"));
+  const frameworkRoot = join(process.cwd(), ".cursor", "orchestration");
+  const cfg = loadOrchestrationConfig({ projectRoot: project, frameworkRoot });
+  assert.equal(cfg.issuePrefix, "ISSUE");
+  assert.equal(cfg.knowledgeRoot, null);
+  assert.deepEqual(cfg.codeRoots, []);
+  resetConfigCache();
+});
+
 test("carrega config anxionOS com prefixo ANX", () => {
   resetConfigCache();
   const cfg = loadOrchestrationConfig();

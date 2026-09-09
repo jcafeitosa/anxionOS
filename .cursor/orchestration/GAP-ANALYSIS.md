@@ -2,9 +2,9 @@
 
 Inventário formal do sistema de equipe estilo Google eng (personas + dialogue log + pipeline G0–G7).
 
-**Data:** 2026-09-09T16:00Z · **Escopo:** `.cursor/orchestration/`, hooks, rules — framework-only (ANX-230)  
-**Completude estimada:** **~95%** (ver [GOAL-STATUS.md](./GOAL-STATUS.md))  
-**Auditoria:** `orchestration:verify` 52/52 + diagram 34/34 + 7 crons on
+**Data:** 2026-09-09T16:10Z · **Escopo:** `.cursor/orchestration/`, hooks, rules — framework-only (ANX-237)  
+**Completude estimada:** **~98%** (ver [GOAL-STATUS.md](./GOAL-STATUS.md))  
+**Auditoria:** `orchestration:verify` 72/72 + diagram 36/36 + 18 personas + 7 crons on
 
 ---
 
@@ -13,7 +13,7 @@ Inventário formal do sistema de equipe estilo Google eng (personas + dialogue l
 | Artefato | Status | Notas |
 | --- | --- | --- |
 | `TEAM.md` | ✅ | Roster por domínio; cross-links atualizados |
-| `PERSONAS.md` | ✅ | 17 personas com nomes humanos |
+| `PERSONAS.md` | ✅ | 18 personas (núcleo + anéis A/B/C) |
 | `INTERACTIONS.md` | ✅ | **24 tipos** de interação (canônico) |
 | `EXAMPLE-THREADS.md` | ✅ | 3+ threads PT-BR |
 | `COMMUNICATION.md` | ✅ | Protocolo + canais |
@@ -22,7 +22,7 @@ Inventário formal do sistema de equipe estilo Google eng (personas + dialogue l
 | `PIPELINE.md` | ✅ | Gates G0–G7 |
 | `DELEGATION.md` | ✅ | Claims e handoffs |
 | `WORKFLOWS.md` | ✅ | Fluxos operacionais |
-| `workflows/workflow-*.md` | ✅ | 17 workflows individuais por persona |
+| `workflows/workflow-*.md` | ✅ | 18 workflows individuais por persona (incl. `cto-critic`) |
 | `COLLECTIVE-WORKFLOW.md` | ✅ | Pipeline coletivo G0–G7 |
 | `HIERARCHY.md` + `HIRE-DELEGATION.md` | ✅ | Níveis A/B/C + hire on-demand |
 | `SCOPE.md` | ✅ | Equipe Cursor ≠ agentes do produto |
@@ -44,7 +44,8 @@ Inventário formal do sistema de equipe estilo Google eng (personas + dialogue l
 | `agent-workflow/` | ✅ | state, decision-tree, monitor, diagram-check |
 | `agent-autonomy/` | ✅ | 7 crons `[on]`, daemon ativo |
 | `.cursor/orchestration-runtime/dialogue/example-message.json` | ✅ | Schema completo |
-| `package.json` scripts | ✅ | 27 scripts de orquestração |
+| `package.json` scripts | ✅ | 30+ scripts (`standup`, `progress`, `chat`, …) |
+| `PROJECT-GREENLIGHT.md` | ✅ | Política produto BLOCKED / framework ALLOWED |
 
 ---
 
@@ -70,7 +71,7 @@ Inventário formal do sistema de equipe estilo Google eng (personas + dialogue l
 | Gap anterior | Status | Evidência |
 | --- | --- | --- |
 | 17 tipos de interação | ✅ Fechado | `INTERACTIONS.md` + `protocol.mjs` = **24 tipos** |
-| Workflows individuais ausentes | ✅ Fechado | 17× `workflows/workflow-*.md`; `diagram-check` 34/34 OK |
+| Workflows individuais ausentes | ✅ Fechado | 18× `workflows/workflow-*.md` (incl. cto-critic); `diagram-check` 36/36 OK |
 | Hire on-demand não documentado | ✅ Fechado | `HIRE-DELEGATION.md`, `agent-hire/`, regra `hierarchy-circular.mdc` |
 | CTO G7 sem oráculos | ✅ Fechado | `CTO-AUTHORITY.md`, `cto-decide`, `cto-accept` |
 | Roster/competências dispersos | ✅ Fechado | `AGENT-ROSTER.md`, `orchestration:who --can-i` |
@@ -81,10 +82,14 @@ Inventário formal do sistema de equipe estilo Google eng (personas + dialogue l
 | Docs desatualizados (17 tipos, cron off) | ✅ Fechado | Esta revisão + [GOAL-STATUS.md](./GOAL-STATUS.md) |
 | E2E G0→G7 em issue real (ANX-222) | ✅ Fechado | ANX-222 `done`; wave G2–G5 3f85d225 |
 | Fila P02 G7 bloqueada | ✅ Fechado | ANX-129–133 `done` (G7 ACCEPT 2026-09-09) |
-| Testes CLI desatualizados (19/19) | ✅ Fechado | `orchestration:test` **52/52** (2026-09-09T16:00Z) |
+| Testes CLI desatualizados (19/19) | ✅ Fechado | `orchestration:test` **72/72** (standup + progress-bar + compliance) |
+| `workflow-cto-critic.md` ausente | ✅ Fechado | Cláudia — G6/G7 audit (ANX-237) |
+| Google-style só em 4 workflows | ✅ Fechado | Seção *Colaboração de equipe* em todos os 18 workflows (ANX-237) |
+| `orchestration:standup` / `progress` sem RUNBOOK | ✅ Fechado | RUNBOOK + README cheat sheet (ANX-237) |
+| Docs README/COLLECTIVE com contagem 17 | ✅ Fechado | Reconciliado para 18 personas / 36 diagram blocks (ANX-237) |
 | `orchestration-dialogue.mdc` fora de rules | ✅ Fechado | `.cursor/rules/orchestration-dialogue.mdc` alwaysApply (ANX-231) |
 | Sessões órfãs | ✅ Mitigado | 5 encerradas `--force`; regra + `session list` documentados |
-| Rename codewhale→cursor | ✅ Fechado | Consolidado em ANX-230; ANX-232 canceled; runtime `.cursor/orchestration-runtime/`; config `.cursor/orchestration.config.json` tracked; verify 52/52 |
+| Rename codewhale→cursor | ✅ Fechado | Consolidado em ANX-230; ANX-232 canceled; runtime `.cursor/orchestration-runtime/`; config `.cursor/orchestration.config.json` tracked; verify 72/72 |
 | `.gitignore` runtime + legacy | ✅ Fechado | `.cursor/orchestration-runtime/**` ignorado; `.codewhale/` ignorado integralmente; `.cursor/orchestration.config.json` tracked |
 
 ### GAP-001 — ONBOARDING + link AGENTS.md ✅
@@ -105,16 +110,16 @@ Fonte: auditoria c33417ce · smoke 2026-09-09
 
 | Gap | Categoria | Evidência / ação |
 | --- | --- | --- |
-| **Framework não versionado no git** | C | **177** arquivos stageáveis; Owner deve autorizar commit — ver GOAL-STATUS § Escopo de commit |
+| ~~Framework não versionado no git~~ | ✅ | ANX-230 `done` (f77529b); delta ANX-237 (~15 arquivos) pendente commit Owner |
 | ~~`.gitignore` runtime `.cursor/orchestration-runtime/`~~ | ✅ | ANX-232 — `.cursor/orchestration-runtime/**` + `.codewhale/` ignorados; config tracked |
 
 ### Importante (qualidade / confiabilidade)
 
 | Gap | Categoria | Evidência / ação |
 | --- | --- | --- |
-| ~~Zero testes automatizados do CLI~~ | ✅ | `orchestration:test` **52/52** + `orchestration:verify` agregado |
+| ~~Zero testes automatizados do CLI~~ | ✅ | `orchestration:test` **72/72** + `orchestration:verify` agregado |
 | ~~Sem CI para smoke de orquestração~~ | ✅ | `.github/workflows/orchestration-verify.yml` (2026-09-09) |
-| **Cobertura visual ~67%, não 100%** | A/B | `diagram-check`: 69/103 arquivos com Mermaid; workflows 34/34 OK |
+| **Cobertura visual ~67%, não 100%** | A/B | `diagram-check`: 72/107 arquivos com Mermaid; workflows **36/36** OK (18 personas) |
 | ~~`agent-proactive.mjs` não wired~~ | ✅ | `sessionStart` em `.cursor/hooks.json` (2026-09-09) |
 | ~~`orchestration-dialogue.mdc` fora de `.cursor/rules/`~~ | ✅ | `.cursor/rules/orchestration-dialogue.mdc` alwaysApply (ANX-231) |
 | **Compliance dialogue na prática** | E | Agentes às vezes omitam `orchestration:chat` — regras existem em CHAT-PARTICIPATION |
@@ -136,13 +141,14 @@ Fonte: auditoria c33417ce · smoke 2026-09-09
 
 ---
 
-## Checklist framework (~5%)
+## Checklist framework (~2%)
 
-1. Commit git inicial (Owner) — `chore(orchestration): framework v1`
-2. Auto-hire E2E (`taskboard-sync`)
+1. ~~Commit git inicial (Owner)~~ ✅ ANX-230
+2. Auto-hire E2E (`taskboard-sync`) — código existe; fluxo não auditado
 3. Robustez `mirror-taskboard` / `taskctl`
 4. Despacho subagent automatizado (fora de escopo v1)
-5. Cobertura Mermaid 100% (opcional)
+5. Cobertura Mermaid 100% (opcional — atual 67%)
+6. Compliance dialogue na prática (`PENDING_CHAT_DISPLAY` em sessões ativas)
 
 
 ## Roadmap (não automatizável aqui)

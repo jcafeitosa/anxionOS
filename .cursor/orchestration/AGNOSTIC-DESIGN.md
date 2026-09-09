@@ -15,7 +15,7 @@ O sistema de orquestração é **reutilizável em qualquer repositório**. O có
 
 1. **Framework portable** — copiar `.cursor/orchestration/` para outro repo sem editar hardcodes.
 2. **Config por repo** — `orchestration.config.json` define `issuePrefix`, `codeRoots`, `knowledgeRoot`, etc.
-3. **Prefixo configurável** — `ANX` no anxionOS é apenas uma instância; use `{{ISSUE_PREFIX}}` na documentação genérica.
+3. **Prefixo configurável** — default framework `ISSUE`; cada projeto define seu prefixo (ex.: anxionOS → `ANX`). Use `{{ISSUE_PREFIX}}` na documentação genérica.
 4. **OKF opcional** — `knowledgeRoot` default `brain/`; projetos sem OKF apontam para `docs/` ou vazio.
 5. **SCOPE por projeto** — o framework é agnóstico; cada instância documenta o que é equipe Cursor vs produto.
 
@@ -24,13 +24,13 @@ O sistema de orquestração é **reutilizável em qualquer repositório**. O có
 ```json
 {
   "projectName": "string",
-  "issuePrefix": "ANX",
-  "taskboardProject": "anxionOS",
-  "knowledgeRoot": "brain/",
-  "codeRoots": ["backend/", "frontend/"],
+  "issuePrefix": "ISSUE",
+  "taskboardProject": "my-project",
+  "knowledgeRoot": "docs/",
+  "codeRoots": ["src/"],
   "scopeDoc": "SCOPE.md",
   "defaultCTO": "orchestrator",
-  "personasFile": ".cursor/orchestration/agent-config/roster.anxionos.json"
+  "personasFile": ".cursor/orchestration-runtime/personas.local.json"
 }
 ```
 
@@ -121,5 +121,5 @@ Ver [templates/README-BOOTSTRAP.md](./templates/README-BOOTSTRAP.md).
 ## Instância anxionOS
 
 - Config: [`.cursor/orchestration.config.json`](../../.cursor/orchestration.config.json)
-- Roster: [`agent-config/roster.anxionos.json`](./agent-config/roster.anxionos.json)
+- Roster: [`examples/project-anxionos/roster.anxionos.json`](./examples/project-anxionos/roster.anxionos.json)
 - Prefixo: `ANX` (inalterado para compatibilidade)

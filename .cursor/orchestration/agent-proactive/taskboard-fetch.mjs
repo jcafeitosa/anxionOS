@@ -7,13 +7,16 @@ import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
+import { getOrchestrationPaths, getTaskboardProject } from "../agent-config/load-config.mjs";
+
+const paths = getOrchestrationPaths();
+const root = paths.projectRoot;
 const baseUrl = (
   process.env.TASKBOARD_URL ??
   process.env.CODEX_TASKBOARD_URL ??
   "http://127.0.0.1:47823"
 ).replace(/\/$/, "");
-const projectName = process.env.TASKBOARD_PROJECT_NAME ?? "anxionOS";
+const projectName = process.env.TASKBOARD_PROJECT_NAME ?? getTaskboardProject() ?? paths.config.project?.name ?? null;
 const MAC_TASKCTL =
   "/Applications/Codex Taskboard.app/Contents/Resources/bin/taskctl";
 const TASKCTL_MAX_BUFFER_BYTES = 16 * 1024 * 1024;
@@ -56,7 +59,7 @@ async function resolveProjectId() {
   const byPath = projects.find((p) => p.workspacePath === root);
   if (byPath) return byPath.id;
   const byName = projects.find((p) => p.name === projectName);
-  if (!byName) throw new Error(`Project "${projectName}" not found`);
+  if (!byName) throw new Error(`Project "${projectName ?? "(unset)"}" not found — configure taskboardProject in orchestration.config.json`);
   return byName.id;
 }
 

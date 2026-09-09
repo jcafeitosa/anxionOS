@@ -6,9 +6,15 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from
 import { basename, dirname, join } from "node:path";
 import {
   DEFAULT_CONFIG_REL,
+  DEFAULT_ISSUE_PREFIX,
   DEFAULT_RUNTIME_ROOT,
   resolveFrameworkRoot,
 } from "./load-config.mjs";
+
+function defaultIssuePrefix(name) {
+  const cleaned = String(name ?? "").replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+  return cleaned.slice(0, 4) || DEFAULT_ISSUE_PREFIX;
+}
 
 const RUNTIME_DIRS = ["dialogue", "hire", "workflows", "autonomy", "proactive", "lifecycle", "state"];
 
@@ -50,12 +56,16 @@ export function initProject(options = {}) {
 
   let configBody;
   if (existsSync(templatePath)) {
-    configBody = readFileSync(templatePath, "utf8").replace("{{PROJECT_NAME}}", basename(cwd));
+    const projectName = basename(cwd);
+    const issuePrefix = defaultIssuePrefix(projectName);
+    configBody = readFileSync(templatePath, "utf8")
+      .replace("{{PROJECT_NAME}}", projectName)
+      .replace("{{ISSUE_PREFIX}}", issuePrefix);
   } else {
     configBody = JSON.stringify(
       {
         version: 1,
-        project: { name: basename(cwd), issuePrefix: "ANX" },
+        project: { name: basename(cwd), issuePrefix: defaultIssuePrefix(basename(cwd)) },
         paths: {
           runtime: DEFAULT_RUNTIME_ROOT,
           dialogue: `${DEFAULT_RUNTIME_ROOT}/dialogue`,

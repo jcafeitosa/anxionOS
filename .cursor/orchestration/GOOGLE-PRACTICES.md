@@ -24,6 +24,15 @@ Referência: [LIFECYCLE.md](./LIFECYCLE.md) · [GOOGLE-PRACTICES.md](./GOOGLE-PR
 
 ---
 
+
+## Catálogo de interações no dialogue
+
+Mapeamento completo standup, LGTM, cross-team consult, design review, incident bridge, etc. → tipos de dialogue:
+
+**[INTERACTIONS.md § Catálogo Google-style](./INTERACTIONS.md#catálogo-google-style--padrões-de-equipe--tipos-de-dialogue)**
+
+CLI standup: `npm run orchestration:standup -- --issue ANX-N`
+
 ## Design doc (P1)
 
 **Google:** documento de design antes de implementação, revisado por pares.

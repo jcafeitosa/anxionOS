@@ -26,7 +26,8 @@ Override de persona: `--persona backend-executor` ou env `PROACTIVE_PERSONA`.
 **Comportamento:**
 1. Se existir `.cursor/orchestration-runtime/autonomy/pending-broadcast.json`, publica via `orchestration:broadcast` e remove o arquivo.
 2. **Compliance stop:** executa `orchestration:compliance --pre-commit` por sessão ativa. Se falhar **e** não existir `pending-broadcast.json`, grava `pending-escalate.json`.
-3. **No Silent Work:** se há sessão ativa sem broadcast no turno, emite aviso stderr e grava `pending-escalate.json`.
+3. **Pending chat display:** se `.pending-chat-display` existe, emite aviso stderr e grava `pending-escalate.json` (dialogue no JSONL mas não colado no chat).
+4. **No Silent Work:** se há sessão ativa sem broadcast no turno, emite aviso stderr e grava `pending-escalate.json`.
 
 Ver [NO-SILENT-WORK.md](../orchestration/NO-SILENT-WORK.md).
 

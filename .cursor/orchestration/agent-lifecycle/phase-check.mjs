@@ -12,9 +12,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-const ISSUE_ID_RE = /^ANX-\d+$/;
-
-import { getOrchestrationPaths, repoRoot as configRepoRoot } from "../agent-config/load-config.mjs";
+import { formatIssueIdError, getOrchestrationPaths, isValidIssueId, repoRoot as configRepoRoot } from "../agent-config/load-config.mjs";
 
 const moduleDir = dirname(fileURLToPath(import.meta.url));
 export const repoRoot = configRepoRoot;
@@ -59,7 +57,7 @@ export const LIFECYCLE_PHASES = {
     gate: "G-P",
     owners: ["orchestrator"],
     ownerNames: "Renata Oliveira",
-    output: "Issues ANX-* no taskboard, pacotes de delegação",
+    output: "Issues {{ISSUE_PREFIX}}-* no taskboard, pacotes de delegação",
     doc: ".cursor/orchestration/LIFECYCLE.md#p3--planning",
   },
   P4: {
@@ -120,8 +118,8 @@ export function lifecyclePath(issueId) {
 }
 
 export function assertIssueId(issueId) {
-  if (!issueId || !ISSUE_ID_RE.test(issueId)) {
-    throw new Error("issue obrigatório no formato ANX-N");
+  if (!isValidIssueId(issueId, { strict: true })) {
+    throw new Error(formatIssueIdError());
   }
 }
 

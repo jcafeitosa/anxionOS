@@ -2,7 +2,17 @@
 
 **Status:** ativo · **Última atualização:** 2026-09-09
 
-Todo agente da orquestração anxionOS **deve** usar diagramas para clarificar decisões, handoffs e estado — não como decoração. Cada visual mapeia a uma decisão, transição ou evidência rastreável (princípio Karpathy).
+Todo agente da orquestração **deve** usar diagramas para clarificar decisões, handoffs e estado — não como decoração. Cada visual mapeia a uma decisão, transição ou evidência rastreável.
+
+### Princípio Karpathy (skill `karpathy-guidelines`)
+
+| Regra Karpathy | Aplicação em visuals |
+| --- | --- |
+| Simplicidade primeiro | Máx. 1 diagrama obrigatório por `handoff`/`verdict`; mini flowchart só se escopo > trivial |
+| Mudanças cirúrgicas | Nós do diagrama = ações/gates reais da issue — sem caixas genéricas |
+| Meta verificável | Cada nó terminal aponta para evidência (`--evidence`, comando, path) |
+
+Skill completa: plugin `karpathy-skills` · integração por persona: [GUIDELINES-INTEGRATION.md](./GUIDELINES-INTEGRATION.md) §1 · matriz tooling: [TOOLING-INTEGRATION.md](./TOOLING-INTEGRATION.md).
 
 **Relacionados:** [INTERACTIONS.md](./INTERACTIONS.md) · [PIPELINE.md](./PIPELINE.md) · [WORKFLOWS.md](./WORKFLOWS.md) · [COLLECTIVE-WORKFLOW.md](./COLLECTIVE-WORKFLOW.md)
 

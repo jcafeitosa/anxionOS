@@ -56,6 +56,18 @@ Interaction types: `handoff`, `status`, `escalate`, `decision` ([INTERACTIONS.md
 
 ---
 
+
+## Colaboração de equipe (Google-style)
+
+| Marco | Ação | CLI |
+| --- | --- | --- |
+| Início turno longo / multi-persona | Standup Feito/Fazendo/Bloqueio | `npm run orchestration:standup -- --issue ANX-N --post` |
+| Bloqueio cross-team | `consult` ao owner antes de escalar | `speak --type consult` |
+| Impasse debate | `escalate` após 3 ciclos | `broadcast --type escalate` |
+| Design review pré-código | Delegar `consult` a Marcus | `broadcast --type consult --body "@marcus ..."` |
+
+Interaction types ampliados: `consult`, `debate`, `pair`, `collab`, `share` — ver [INTERACTIONS.md](../INTERACTIONS.md#catálogo-google-style--padrões-de-equipe--tipos-de-dialogue).
+
 ## Checklist por turno
 
 1. [ ] `npm run orchestration:workflow -- monitor --level C` *(Level C no início)* ou `status --persona orchestrator --issue ANX-N`
@@ -65,6 +77,8 @@ Interaction types: `handoff`, `status`, `escalate`, `decision` ([INTERACTIONS.md
 5. [ ] Publicar dialogue nos marcos ([NO-SILENT-WORK.md](../NO-SILENT-WORK.md))
 6. [ ] Atualizar `.cursor/orchestration-runtime/workflows/orchestrator-ANX-N.json` via CLI sync/status
 7. [ ] Comentário taskboard em marcos
+8. [ ] Standup se >1 persona ativa na issue (`orchestration:standup --post`)
+
 
 ---
 

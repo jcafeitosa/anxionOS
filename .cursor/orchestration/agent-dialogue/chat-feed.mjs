@@ -9,6 +9,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { formatConversationMarkdown } from "./conversation.mjs";
 import { getDialogueDir, readDialogueMessages } from "./dialogue-log.mjs";
+import { buildChatProgressBlock } from "../agent-workflow/progress-bar.mjs";
 
 export const CURSOR_CHAT_MARKER =
   "<!-- CURSOR_CHAT_DIALOGUE: paste this block verbatim in assistant response -->";
@@ -135,12 +136,13 @@ function filterNewOnly(messages) {
 export async function buildChatFeedOutput(opts) {
   let issueId = opts.issueId ?? undefined;
   let since = opts.since ?? undefined;
-  const includeProgress = opts.withProgress === true || (opts.withProgress !== false && Boolean(issueId));
 
   if (opts.checkPending) {
     const pending = readPendingChatDisplay();
     if (pending?.issueId) issueId = pending.issueId;
   }
+
+  const includeProgress = opts.withProgress === true || (opts.withProgress !== false && Boolean(issueId));
 
   if (opts.since && !since?.includes("T")) {
     since = parseSinceDuration(opts.since);

@@ -49,6 +49,18 @@ Interaction types: `review`, `verdict`, `handoff`.
 
 ---
 
+## Colaboração de equipe (Google-style)
+
+| Momento | Ação | Tipo dialogue |
+| --- | --- | --- |
+| Plano G3 | `plan` com oráculos e comandos antes de executar | `plan` |
+| Oráculos | `status` durante execução; `share` logs falhos | `status` / `share` |
+| PASS G3 | `handoff` Isa G4 + evidências teste | `handoff` |
+| Hire | `hire` e2e-runner / validation-review | `hire` |
+
+
+---
+
 ## Checklist por turno
 
 1. [ ] `npm run orchestration:workflow -- monitor --level C` *(Level C no início)* ou `status --persona qa-lead --issue ANX-N`

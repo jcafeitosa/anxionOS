@@ -4,6 +4,7 @@
  */
 
 import { readdirSync, readFileSync, statSync } from "node:fs";
+import { getCliBrand } from "../agent-config/cli-brand.mjs";
 import { dirname, extname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -76,7 +77,7 @@ function main() {
   const workflowFiles = results.filter((r) => r.isWorkflow);
   const workflowOk = workflowFiles.filter((r) => r.workflowOk);
   const totalMermaid = results.reduce((sum, r) => sum + r.types.total, 0);
-  console.log("anxionOS — diagram coverage report\n");
+  console.log(`${getCliBrand()} — diagram coverage report\n`);
   console.log(`Files scanned:     ${results.length}`);
   console.log(`Files with mermaid: ${withMermaid.length} (${results.length ? Math.round((withMermaid.length / results.length) * 100) : 0}%)`);
   console.log(`Total mermaid blocks: ${totalMermaid}`);

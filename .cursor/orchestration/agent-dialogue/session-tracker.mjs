@@ -13,6 +13,7 @@
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { getCliBrand } from "../agent-config/cli-brand.mjs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { getOrchestrationPaths, repoRoot } from "../agent-config/load-config.mjs";
@@ -244,7 +245,7 @@ export function listSilentSessions(thresholdMs = 10 * 60 * 1000) {
 }
 
 function usage(exitCode = 0) {
-  console.log(`anxionOS session tracker — No Silent Work
+  console.log(`${getCliBrand()} — session tracker — No Silent Work
 
 Commands:
   start --persona SLUG --issue ANX-N

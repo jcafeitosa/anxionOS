@@ -21,6 +21,7 @@ import { decisionToVerdict, evaluateEvidence } from "./cto-evidence.mjs";
 import { fetchBoardState } from "./taskboard-fetch.mjs";
 import { dismissHire } from "../agent-hire/roster.mjs";
 import { assertIssueId } from "../agent-hire/registry.mjs";
+import { formatIssueIdHint, isValidIssueId } from "../agent-config/load-config.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const MAC_TASKCTL = "/Applications/Codex Taskboard.app/Contents/Resources/bin/taskctl";
@@ -210,11 +211,11 @@ async function listPending() {
   for (const t of pending.sort((a, b) => a.identifier.localeCompare(b.identifier))) {
     console.log(`  ${t.identifier} · ${t.title?.slice(0, 60) ?? ""}…`);
   }
-  console.log("\nAvaliar: npm run orchestration:cto-decide -- --issue ANX-N\n");
+  console.log(`\nAvaliar: npm run orchestration:cto-decide -- --issue ${formatIssueIdHint()}\n`);
 }
 
 async function decideIssue(opts) {
-  if (!opts.issue || !/^ANX-\d+$/.test(opts.issue)) throw new Error("--issue ANX-N obrigatório");
+  if (!opts.issue || !isValidIssueId(opts.issue, { strict: true })) throw new Error(`--issue ${formatIssueIdHint()} obrigatório`);
   spawnSync("npm", ["run", "taskboard:ensure"], { cwd: root, stdio: "pipe" });
   const task = runTaskboardGet(opts.issue);
   const comments = runCommentList(opts.issue);
@@ -233,7 +234,8 @@ async function decideIssue(opts) {
       process.exit(1);
     }
     moveDone(opts.issue);
-    if (opts.issue === "ANX-221") launchPipeline();
+    const launchIssue = process.env.CTO_LAUNCH_PIPELINE_ISSUE;
+    if (launchIssue && opts.issue === launchIssue) launchPipeline();
   }
 
   process.exit(result.decision === "ACCEPT" ? 0 : 1);
@@ -270,7 +272,7 @@ async function main() {
     await listPending();
     return;
   }
-  if (!opts.issue) throw new Error("Use --list-pending ou --issue ANX-N");
+  if (!opts.issue) throw new Error(`Use --list-pending ou --issue ${formatIssueIdHint()}`);
   await decideIssue(opts);
 }
 

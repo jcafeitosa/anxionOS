@@ -2,7 +2,7 @@
   "version": 1,
   "project": {
     "name": "{{PROJECT_NAME}}",
-    "issuePrefix": "ANX"
+    "issuePrefix": "{{ISSUE_PREFIX}}"
   },
   "paths": {
     "runtime": ".cursor/orchestration-runtime",
@@ -15,8 +15,10 @@
     "state": ".cursor/orchestration-runtime/state"
   },
   "taskboard": {
-    "urlEnv": ["TASKBOARD_URL", "CODEX_TASKBOARD_URL"],
+    "urlEnv": [
+      "TASKBOARD_URL",
+      "CODEX_TASKBOARD_URL"
+    ],
     "defaultUrl": "http://127.0.0.1:47823"
-  },
-  "issueIdPattern": "^ANX-\\d+$"
+  }
 }

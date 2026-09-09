@@ -5,6 +5,7 @@
  */
 
 import { existsSync, readFileSync, writeFileSync, chmodSync } from "node:fs";
+import { getCliBrand } from "../agent-config/cli-brand.mjs";
 import { join } from "node:path";
 import { appendAutonomyLog } from "./autonomy-log.mjs";
 import {
@@ -19,7 +20,7 @@ import {
 } from "./lib.mjs";
 
 function usage(exitCode = 0) {
-  console.log(`anxionOS Agent Autonomy — hooks
+  console.log(`${getCliBrand()} — Agent Autonomy — hooks
 
 Commands:
   list [--persona SLUG] [--json]

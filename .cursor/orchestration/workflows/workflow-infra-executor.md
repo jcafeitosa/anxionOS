@@ -49,6 +49,18 @@ Interaction types: `ack`, `status`, `handoff`, `escalate`.
 
 ---
 
+## Colaboração de equipe (Google-style)
+
+| Momento | Ação | Tipo dialogue |
+| --- | --- | --- |
+| P01 tooling | `consult` Ana (crítico) em boundaries/deploy | `consult` |
+| CI/CD change | `share` evidência pipeline + `status` | `share` / `status` |
+| Candidato G1 | `handoff` Ana | `handoff` |
+| Cross-module | `consult` lead B antes de alterar app roots | `consult` |
+
+
+---
+
 ## Checklist por turno
 
 1. [ ] `npm run orchestration:workflow -- monitor --level C` *(Level C no início)* ou `status --persona infra-executor --issue ANX-N`

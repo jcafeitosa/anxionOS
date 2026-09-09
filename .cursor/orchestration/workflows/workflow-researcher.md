@@ -43,6 +43,17 @@ Interaction types: `research`, `share`, `handoff`.
 
 ---
 
+## Colaboração de equipe (Google-style)
+
+| Momento | Ação | Tipo dialogue |
+| --- | --- | --- |
+| Spike P0–P1 | `share` fontes + evidências rastreáveis | `share` |
+| Entrega research | `handoff` solicitante com síntese | `handoff` |
+| Lacuna spec | `consult` Marcus ou Renata | `consult` |
+
+
+---
+
 ## Checklist por turno
 
 1. [ ] `npm run orchestration:workflow -- monitor --level C` *(Level C no início)* ou `status --persona researcher --issue ANX-N`

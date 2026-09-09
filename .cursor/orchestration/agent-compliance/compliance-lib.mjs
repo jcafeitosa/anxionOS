@@ -145,6 +145,26 @@ export function evaluateDialogueDisplayWarnings(options = {}) {
   return warnings;
 }
 
+/**
+ * Violacao quando coordenador encerra turno sem colar dialogue no chat.
+ * @param {string} persona
+ * @param {string} mode
+ * @returns {{ code: string, message: string, fix: string }[]}
+ */
+export function evaluateDialogueDisplayViolations(persona, mode = "full") {
+  const violations = [];
+  if (persona !== "orchestrator" || mode !== "pre-commit") return violations;
+  const pendingWarnings = evaluateDialogueDisplayWarnings();
+  if (pendingWarnings.length === 0) return violations;
+  const pending = pendingWarnings[0];
+  violations.push({
+    code: pending.code,
+    message: `${pending.message} — coordenador deve colar orchestration:chat antes de encerrar turno`,
+    fix: pending.fix,
+  });
+  return violations;
+}
+
 function messageFromPersona(message, persona) {
   const slug = message.from?.persona?.role ?? message.from?.role;
   return slug === persona;
@@ -259,7 +279,7 @@ export function evaluateExecutorCriticPairing(persona, issueId, session, mode = 
     violations.push({
       code: "MISSING_CRITIC_PAIR",
       message: `Executor ${persona} sem criticSlug pareado (Level C exige crítico na mesma issue/thread)`,
-      fix: "Consultar PERSONAS.md e roster.anxionos.json",
+      fix: "Consultar PERSONAS.md e personasFile no orchestration.config.json",
     });
     return violations;
   }
@@ -436,6 +456,7 @@ export function evaluateCompliance(input) {
         });
       }
     }
+    violations.push(...evaluateDialogueDisplayViolations(persona, mode));
   }
 
   const warnings = [...evaluateToolingWarnings(), ...evaluateDialogueDisplayWarnings()];

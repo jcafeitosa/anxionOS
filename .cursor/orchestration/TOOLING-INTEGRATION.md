@@ -21,6 +21,9 @@ Documento mestre: **quando** cada ferramenta habilitada no workspace é obrigat�
 | **orchestration:who** | Antes de trabalho cross-domain | Todos | G0.11 | `npm run orchestration:who -- --persona SLUG --can-i "ação"` |
 | **Supermemory** | Recall de contexto de sessões anteriores | Todos (início de turno substantivo) | G0 | `supermemory_search` com `workspaceRoot` absoluto |
 | **Chrome DevTools MCP** | Após alteração em `frontend/` | Camila, Paulo, Edu | G1, G3 | MCP chrome-devtools |
+| **agent-compatibility** (ECC) | Gate opcional de portabilidade do framework; antes de `install-global` ou release | Renata, André, Ju | G0 (opcional), CI | `npx -y agent-compatibility@latest --json <framework-root>` |
+| **karpathy-guidelines** | Escrever/revisar código; diagramas com propósito (não decoração) | Todos executores, críticos, G2 | G0–G1, G2 | skill `karpathy-guidelines` · [GUIDELINES-INTEGRATION.md](./GUIDELINES-INTEGRATION.md) |
+| **ui-ux-pro-max** | UI/UX em `frontend/` (consoles P07) | Camila, Paulo, Edu | G1, G3 | skill `ui-ux-pro-max` · [workflow-frontend-executor.md](./workflows/workflow-frontend-executor.md) |
 
 ---
 
@@ -82,6 +85,49 @@ npm run orchestration:broadcast -- \
 
 ---
 
+## Gate opcional — ECC agent-compatibility (portabilidade)
+
+Scan **agnóstico** do framework Cursor: mede quão bem outro agente consegue navegar, validar e documentar o repositório **sem** conhecimento prévio do projeto.
+
+| Quando | Quem | Critério sugerido |
+| --- | --- | --- |
+| Antes de `npm run orchestration:install-global` | Renata / André | Score ≥ 70/100; top fixes documentados ou resolvidos |
+| Release framework (`VERSION` bump) | Ju + André | Scan repetido; delta registrado no dialogue |
+| Onboarding novo projeto (`orchestration init`) | Orquestrador | Comparar score framework vs overlay do projeto |
+
+### Comando
+
+```bash
+# A partir da raiz do repo que contém .cursor/orchestration/
+npx -y agent-compatibility@latest --json .cursor/orchestration
+
+# Ou após install-global (framework em ~/.cursor/orchestration)
+npx -y agent-compatibility@latest --json ~/.cursor/orchestration
+```
+
+### Interpretação
+
+| Faixa | Ação |
+| --- | --- |
+| **≥ 80** | Portabilidade boa — prosseguir install-global |
+| **70–79** | Aceitável com fricção — registrar top fixes em issue framework |
+| **< 70** | Bloquear release até corrigir paths, docs de bootstrap ou scripts de verify |
+
+O scan **não** substitui `npm run orchestration:verify` (testes determinísticos 73/73). Complementa: verify = contrato interno; ECC = experiência de agente externo.
+
+Skill ECC: `check-agent-compatibility` (plugin agent-compatibility). Subagentes: `compatibility-scan-review`, `startup-review`, `validation-review`, `docs-reliability-review`.
+
+Evidência no dialogue:
+
+```bash
+npm run orchestration:broadcast -- \
+  --from-persona orchestrator --type share --issue ANX-N --gate G0 \
+  --body "ECC scan framework — score e top fixes." \
+  --evidence "command:npx -y agent-compatibility@latest --json .cursor/orchestration,skill:check-agent-compatibility"
+```
+
+---
+
 ## Verificação
 
 ```bash
@@ -89,8 +135,10 @@ npm run orchestration:compliance -- --pre-work --issue ANX-N --persona SLUG
 npm run graphify:check
 npm run archify:validate
 npm run orchestration:test
+# Opcional — portabilidade framework
+npx -y agent-compatibility@latest --json .cursor/orchestration
 ```
 
 Ver [AGNOSTIC-DESIGN.md](./AGNOSTIC-DESIGN.md) para instalação global do framework.
 
-**Última atualização:** 2026-09-09 · Issue ANX-134 · política tooling obrigatório (Renata/CTO)
+**Última atualização:** 2026-09-09 · ANX-237 · ECC opcional + karpathy/ui-ux cross-ref

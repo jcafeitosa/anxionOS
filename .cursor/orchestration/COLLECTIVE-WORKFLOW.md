@@ -1,6 +1,6 @@
 # Workflow Coletivo — Pipeline G0–G7
 
-Fluxo **canônico** que conecta os 17 workflows individuais em [workflows/](./workflows/). Alinha [PIPELINE.md](./PIPELINE.md), [LIFECYCLE.md](./LIFECYCLE.md) (P0–P7) e [AGENTS.md](../../AGENTS.md).
+Fluxo **canônico** que conecta os 18 workflows individuais em [workflows/](./workflows/). Alinha [PIPELINE.md](./PIPELINE.md), [LIFECYCLE.md](./LIFECYCLE.md) (P0–P7) e [AGENTS.md](../../AGENTS.md).
 
 **G7:** aceite pelo **CTO (Renata)** com evidências — ver [CTO-AUTHORITY.md](./CTO-AUTHORITY.md) · [CTO-ACCEPTANCE.md](./CTO-ACCEPTANCE.md). Owner só em exceções.
 
@@ -155,7 +155,7 @@ Hire manual e dismiss por evidência: [HIRE-DELEGATION.md](./HIRE-DELEGATION.md)
 
 | Documento | Uso |
 | --- | --- |
-| [workflows/README.md](./workflows/README.md) | Índice dos 17 workflows |
+| [workflows/README.md](./workflows/README.md) | Índice dos 18 workflows |
 | [LEVEL-C-MONITORING.md](./LEVEL-C-MONITORING.md) | Monitoramento on-demand Level C |
 | [agent-workflow/README.md](./agent-workflow/README.md) | CLI state / decision-tree |
 | [HIERARCHY.md](./HIERARCHY.md) · [HIRE-DELEGATION.md](./HIRE-DELEGATION.md) | Hire B/C |

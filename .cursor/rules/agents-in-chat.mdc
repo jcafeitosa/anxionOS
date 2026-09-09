@@ -23,22 +23,27 @@ Cada falante usa bloco próprio:
 ## Regras
 
 1. **Nunca** responder só como "Assistant" genérico em trabalho de orquestração, delegação ou gates G0–G7.
-2. **Mínimo 2 personas** em threads multi-agente: em **implementação** (Level C, G1) = **executor + crítico pareado** na mesma issue; em delegação/planejamento = orquestrador + executor. Referência: [ANX-134 delegation-queue](../orchestration/delegation-queue/ANX-134.md) (Lucas + Marina).
+2. **Mínimo 2 personas** em threads multi-agente: em **implementação** (Level C, G1) = **executor + crítico pareado** na mesma issue; em delegação/planejamento = orquestrador + executor. Referência: [ANX-134 delegation-queue](../orchestration/examples/project-anxionos/delegation-queue/ANX-134.md) (Lucas + Marina).
 3. **@Owner** — menção ao usuário humano em respostas diretas.
 4. **@mentions cross-persona encorajados** — qualquer agente pode @mention qualquer outro seguindo [INTER-AGENT-PROTOCOL.md](../orchestration/INTER-AGENT-PROTOCOL.md) e [COMPETENCE-BOUNDARIES.md](../orchestration/COMPETENCE-BOUNDARIES.md). **Proibido falar em nome de outra persona.**
 5. **Usuário @mention persona** — a persona citada responde em primeira pessoa; orquestradora só coordena, não faz proxy técnico.
 6. **Cada bloco no chat** também vai ao `dialogue.jsonl` via `npm run orchestration:speak` ou `npm run orchestration:broadcast`.
-7. **Após resposta multi-persona**, executar `npm run orchestration:chat -- --new-only` e anexar saída se não redundante com blocos já colados.
+7. **Após resposta multi-persona**, executar `npm run orchestration:progress -- --issue ANX-N
+npm run orchestration:chat -- --new-only` e anexar saída se não redundante com blocos já colados.
 8. **Aceite G7 (Renata/CTO):** para slices de rotina, Renata aceita com evidências completas ([CTO-ACCEPTANCE.md](../orchestration/CTO-ACCEPTANCE.md)) — anunciar política no chat; Owner só em exceções. Avaliar: `npm run orchestration:cto-decide -- --issue ANX-N`.
 9. **Diagramas:** blocos persona podem incluir Mermaid ao explicar planos, handoffs ou decisões — ver [VISUAL-DOCUMENTATION.md](../orchestration/VISUAL-DOCUMENTATION.md).
-10. Complementa (não substitui) [dialogue-in-cursor-chat.mdc](./dialogue-in-cursor-chat.mdc), [orchestration-dialogue.mdc](./orchestration-dialogue.mdc) e [no-silent-work.mdc](./no-silent-work.mdc).
+10. **Barra de progresso obrigatória** — em turnos substantivos com issue `ANX-*` ativa, coordenadores incluem no **início** da resposta o bloco de `npm run orchestration:progress -- --issue ANX-N` (desde `<!-- CURSOR_CHAT_PROGRESS` até a linha de slices/gates). `orchestration:chat -- --issue ANX-N` já inclui progresso por padrão.
+11. **Colaboração Google-style** — agentes consultam peers (`consult`), debatem (`debate`), fazem pair (`pair`/`collab`) e standup (`orchestration:standup`) antes de invadir domínio alheio. Catálogo: [INTERACTIONS.md](../orchestration/INTERACTIONS.md#catálogo-google-style--padrões-de-equipe--tipos-de-dialogue).
+12. Complementa (não substitui) [dialogue-in-cursor-chat.mdc](./dialogue-in-cursor-chat.mdc), [orchestration-dialogue.mdc](./orchestration-dialogue.mdc) e [no-silent-work.mdc](./no-silent-work.mdc).
 
 ## Comandos
 
 ```bash
 npm run orchestration:speak -- --persona SLUG --body "..." --issue ANX-N
+npm run orchestration:progress -- --issue ANX-N
 npm run orchestration:chat -- --new-only
 npm run orchestration:cto-accept -- --issue ANX-N
+npm run orchestration:standup -- --issue ANX-N --post
 ```
 
 Slash command roundtable: `/team` · `.cursor/commands/team-chat.md`

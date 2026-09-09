@@ -7,6 +7,7 @@
  */
 
 import { existsSync, watch } from "node:fs";
+import { getCliBrand } from "../agent-config/cli-brand.mjs";
 import { dirname } from "node:path";
 import {
   formatDialogueMessages,
@@ -48,7 +49,7 @@ function render(opts, banner = "") {
 const opts = parseArgs(process.argv.slice(2));
 const logPath = getDialogueLogPath();
 
-console.log("anxionOS dialogue watch");
+console.log(`${getCliBrand()} — dialogue watch`);
 render(opts, "snapshot inicial");
 
 if (!existsSync(logPath)) {

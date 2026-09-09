@@ -50,6 +50,38 @@ Interaction types: `ack`, `status`, `handoff`, `response`.
 
 ---
 
+## Colaboração de equipe (Google-style)
+
+| Momento | Ação | Tipo dialogue |
+| --- | --- | --- |
+| Receber handoff | `ack` + ler pacote G0 | `ack` |
+| UI/Astro islands | `consult` Paulo (crítico) ou ui-ux-pro-max skill | `consult` / `pair` |
+| Chrome DevTools | `share` evidência visual após alteração UI | `share` |
+| Candidato G1 | `handoff` Paulo + `status` | `handoff` / `status` |
+| Bloqueio cross-domain | `consult` Lucas/backend antes de tocar API | `consult` |
+
+---
+
+## Ferramentas obrigatórias (P07 frontend)
+
+| Ferramenta | Quando | Evidência |
+| --- | --- | --- |
+| **ui-ux-pro-max** (skill) | Antes de componente/página nova; review a11y (prioridades 1–3) | `skill:ui-ux-pro-max,domain:accessibility` no handoff |
+| **karpathy-guidelines** | Diff mínimo; critérios verificáveis por island | [GUIDELINES-INTEGRATION.md](../GUIDELINES-INTEGRATION.md) §1 |
+| **Chrome DevTools MCP** | Após cada alteração em `frontend/` | snapshot + `share` no dialogue |
+| **graphify** | Explorar código antes de Grep em massa | `graphify query` → Read pontual |
+| Design system | Tokens em `docs/design-system/` — não inventar paleta | path no pacote G0 |
+
+```mermaid
+flowchart LR
+  UX[ui-ux-pro-max plan/review] --> IMPL[implementar island]
+  IMPL --> KP[karpathy: diff cirúrgico]
+  KP --> DEV[Chrome DevTools MCP]
+  DEV --> HO[handoff Paulo]
+```
+
+---
+
 ## Checklist por turno
 
 1. [ ] `npm run orchestration:workflow -- monitor --level C` *(Level C no início)* ou `status --persona frontend-executor --issue ANX-N`

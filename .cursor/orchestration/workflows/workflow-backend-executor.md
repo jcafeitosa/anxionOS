@@ -63,9 +63,27 @@ sequenceDiagram
   end
 ```
 
-Interaction types: `ack`, `status`, `handoff`, `response`, `escalate`.
+Interaction types: `ack`, `status`, `consult`, `pair`, `handoff`, `response`, `escalate`.
 
 ---
+
+
+## Colaboração de equipe (Google-style)
+
+| Momento | Ação | Tipo dialogue |
+| --- | --- | --- |
+| Antes de decisão arquitetural | `consult` @marcus ou peer cross-domain | `consult` |
+| Durante implementação | `status` a cada 10 min; standup no início de turno longo | `status` |
+| Pair com crítico | Mob no diff quando bloqueado | `pair` / `collab` |
+| Pronto para G1 | `handoff` com evidência | `handoff` |
+| Após G1 PASS | Pedir G2 via `review` implícito no handoff a Fernanda | `handoff` + `review` |
+
+```bash
+npm run orchestration:speak -- --persona backend-executor --type consult --issue ANX-N \
+  --body "@marcus — este UoW compartilhado viola ADR0002?"
+npm run orchestration:standup -- --issue ANX-N --post --persona backend-executor \
+  --done "..." --doing "..." --blockers "nenhum"
+```
 
 ## Checklist por turno
 

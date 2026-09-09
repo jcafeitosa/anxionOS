@@ -113,3 +113,45 @@ Detalhes de hierarquia: [INTER-AGENT-PROTOCOL.md](./INTER-AGENT-PROTOCOL.md). An
 | Aceite/bloqueio CTO | `decision`, `block`, `unblock` |
 
 Ver [NO-SILENT-WORK.md](./NO-SILENT-WORK.md).
+
+---
+
+## Catálogo Google-style — padrões de equipe → tipos de dialogue
+
+Mapeamento de interações comuns em equipes de engenharia Google/Meta para os **24 tipos existentes**. Preferir **reutilizar** tipos com guia claro em vez de criar novos.
+
+| Padrão Google / bigtech | Tipo(s) dialogue | Quem inicia | Quando usar | Exemplo CLI |
+| --- | --- | --- | --- | --- |
+| **Daily standup** (Feito/Fazendo/Bloqueio) | `status` | Renata abre; cada ativo responde | Início de turno longo; >1 persona na issue | `npm run orchestration:standup -- --issue ANX-N --post` |
+| **Async FYI** / heads-up | `share` | Qualquer | Descoberta sem ação imediata | `broadcast --type share` |
+| **LGTM** / aprovação informal | `response` ou `verdict` PASS | Revisor | Após `review` ou `consult` | `broadcast --type response --body "LGTM"` |
+| **Blocking on X** | `status` + `block` | Executor ou lead B | Dependência externa | `broadcast --type block` |
+| **Cross-team consult** | `consult` → `response` | Executor C ou lead B | Antes de tocar domínio alheio | `speak --type consult` |
+| **Design doc review** | `consult` + `debate` + `response` | Executor ou Marcus | P1/P2; tradeoffs antes de codar | `broadcast --type consult` |
+| **RFC comment thread** | `debate` (max 3) + `response` | Qualquer | Desacordo com evidência | `broadcast --type debate` |
+| **Code review request** | `review` + `handoff` | Executor após G1 PASS | Pedido formal G2+ | `broadcast --type review --gate G2` |
+| **Pair / mob session** | `pair` ou `collab` | Par executor↔crítico | Mesmo diff ao vivo | `broadcast --type pair` |
+| **Tech lead decision** | `decision` (Renata) ou `share` (Marcus) | B ou A | Desempate; Marcus não decide G7 | `orchestration:cto-decide` |
+| **Manager 1:1** / check-in | `consult` + `status` | Qualquer → Renata | Alinhamento de prioridade | `speak --type consult` |
+| **Incident bridge** | `escalate` + `status` + `collab` | Qualquer ativo | Bloqueio produção | `broadcast --type escalate` |
+| **Blameless postmortem** | `share` + `plan` | Renata ou lead | P7; action items → ANX-* | `broadcast --type share` |
+| **Knowledge share** | `share` | Helena, Marcus, qualquer | Spike concluído | `broadcast --type share` |
+| **Challenge adversarial G1** | `challenge` → `response` | Crítico pareado | Durante G1 | `broadcast --type challenge --gate G1` |
+| **Hire specialist** | `hire` + `consult` | Executor C, lead B | Bloqueio técnico | `orchestration:hire -- --speak` |
+| **Vote / RFC approval** | `vote` → `decision` | Renata | ≥2 opções | `broadcast --type vote` |
+| **Unblock pipeline** | `unblock` + `status` | Renata | Após dependência resolvida | `broadcast --type unblock` |
+
+### Formato standup (Feito / Fazendo / Bloqueio)
+
+CLI: `npm run orchestration:standup -- --issue ANX-N` (template) ou `--post` (publica opener).
+
+### Regras de colaboração (resumo)
+
+1. **Consultar antes de invadir** — `consult` + `response`; editar domínio alheio só após `handoff`.
+2. **@mention obrigatório** quando a mensagem exige ação de outra persona.
+3. **Debate limitado** — máx. 3 ciclos; depois `escalate` a Renata.
+4. **LGTM informal** → `response`; gate formal → `verdict` com evidência.
+5. **Standup não substitui** `ack`/`handoff`/`verdict` nos marcos do pipeline.
+
+Ver: [CHAT-PARTICIPATION.md](./CHAT-PARTICIPATION.md) · [GOOGLE-PRACTICES.md](./GOOGLE-PRACTICES.md).
+

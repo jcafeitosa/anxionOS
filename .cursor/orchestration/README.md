@@ -65,17 +65,17 @@ npm run orchestration:workflow -- monitor --level C
 | [LIFECYCLE.md](./LIFECYCLE.md) | Ciclo de vida P0–P7 — brainstorm → produção |
 | [BRAINSTORM-TO-PROD-RUNBOOK.md](./BRAINSTORM-TO-PROD-RUNBOOK.md) | Runbook passo a passo ideia → prod |
 | [GOOGLE-PRACTICES.md](./GOOGLE-PRACTICES.md) | Práticas bigtech mapeadas ao tooling |
-| [GOAL-STATUS.md](./GOAL-STATUS.md) | Auditoria do goal Cursor — ~95% framework, PARTIAL, crons on |
+| [GOAL-STATUS.md](./GOAL-STATUS.md) | Auditoria do goal Cursor — ~98% framework, PARTIAL, crons on |
 | [E2E-RUNBOOK.md](./E2E-RUNBOOK.md) | Checklist G0→G7 com comandos (ANX-222 referência) |
 | [delegation-queue/](./delegation-queue/) | Pacotes pré-G0 para issues desbloqueáveis pós-ANX-222 |
 | [GAP-ANALYSIS.md](./GAP-ANALYSIS.md) | Lacunas fechadas vs remanescentes (24 tipos) |
 | [GUIDELINES-INTEGRATION.md](./GUIDELINES-INTEGRATION.md) | karpathy + ECC + ui-ux-pro-max por persona/gate |
+| [PROJECT-GREENLIGHT.md](./PROJECT-GREENLIGHT.md) | Produto BLOCKED até @Owner; framework ALLOWED |
 | [COMPLIANCE.md](./COMPLIANCE.md) | Gates G0–G0.8, OpenKnowledge, zero-trabalho-fora-do-board |
 | [PIPELINE.md](./PIPELINE.md) | Gates G0–G7, critérios de saída, independência de revisores |
 | [VISUAL-DOCUMENTATION.md](./VISUAL-DOCUMENTATION.md) | Política obrigatória de diagramas Mermaid/Archify |
-| [COLLECTIVE-WORKFLOW.md](./COLLECTIVE-WORKFLOW.md) | Workflow coletivo + gantt wave |
 | [COLLECTIVE-WORKFLOW.md](./COLLECTIVE-WORKFLOW.md) | Pipeline coletivo G0–G7 + plug-in workflows |
-| [workflows/](./workflows/) | 17 workflows individuais por persona |
+| [workflows/](./workflows/) | 18 workflows individuais por persona |
 | [LEVEL-C-MONITORING.md](./LEVEL-C-MONITORING.md) | Monitoramento on-demand Level C |
 | [WORKFLOWS.md](./WORKFLOWS.md) | Fluxos legados por fase P01–P09 |
 | [GOALS-PROTOCOL.md](./GOALS-PROTOCOL.md) | Protocolo de goals Cursor + taskboard |
@@ -89,7 +89,7 @@ npm run orchestration:workflow -- monitor --level C
 | [AGENT-ROSTER.md](./AGENT-ROSTER.md) | Roster mutuo + matriz de competências |
 | [COMPETENCE-BOUNDARIES.md](./COMPETENCE-BOUNDARIES.md) | Anti-invasão de competência |
 | [INTER-AGENT-PROTOCOL.md](./INTER-AGENT-PROTOCOL.md) | Interação livre na hierarquia |
-| [PERSONAS.md](./PERSONAS.md) | 17 personas nomeadas, pares críticos 1:1 |
+| [PERSONAS.md](./PERSONAS.md) | 18 personas nomeadas, pares críticos 1:1 + cto-critic |
 | [TEAM-COLLABORATION.md](./TEAM-COLLABORATION.md) | Colaboração entre personas |
 | [COMMUNICATION.md](./COMMUNICATION.md) | Protocolo de mensagens |
 | [INTERACTIONS.md](./INTERACTIONS.md) | **24 tipos** de interação — lista canônica + lifecycle |
@@ -105,7 +105,7 @@ npm run orchestration:workflow -- monitor --level C
 | Documento | Conteúdo |
 | --- | --- |
 | [DELEGATION.md](./DELEGATION.md) | Como monitorar board e despachar subagentes |
-| [DELEGATION-PACKAGE-ANX-222.md](./DELEGATION-PACKAGE-ANX-222.md) | Pacote G0 pronto para ANX-222 (pós-G7) |
+| [examples/project-anxionos/DELEGATION-PACKAGE-ANX-222.md](./examples/project-anxionos/DELEGATION-PACKAGE-ANX-222.md) | Pacote G0 pronto para ANX-222 (pós-G7) |
 | [RUNBOOK.md](./RUNBOOK.md) | Comandos de diálogo, sessão, proatividade |
 | [ONBOARDING.md](./ONBOARDING.md) | Primeiro dia de uma persona |
 | [PROACTIVITY.md](./PROACTIVITY.md) | Triggers, suggest, act |
@@ -149,7 +149,7 @@ node scripts/taskboard.mjs move ANX-N in_progress   # requer taskctl + thread id
 ### Diálogo
 
 ```bash
-npm run orchestration:personas                          # listar 17 personas
+npm run orchestration:personas                          # listar 18 personas
 npm run orchestration:personas -- get orchestrator      # detalhe Renata
 npm run orchestration:broadcast -- [post opts]          # publicar mensagem
 npm run orchestration:show-dialogue -- read --issue ANX-N
@@ -157,6 +157,10 @@ npm run orchestration:terminal                          # painel live colorido (
 npm run orchestration:tail                              # snapshot formatado
 npm run orchestration:watch                             # watch legado (texto)
 npm run orchestration:session -- start|heartbeat|end|list
+npm run orchestration:chat                              # diálogo formatado no chat Cursor
+npm run orchestration:chat -- --issue ANX-N --new-only
+npm run orchestration:standup -- --issue ANX-N --post     # standup Google-style
+npm run orchestration:progress -- --issue ANX-N           # barra G0–G7 + slices
 npm run orchestration:silence-watch
 ```
 
@@ -175,7 +179,7 @@ npm run orchestration:goals -- list
 ### Verificação do framework
 
 ```bash
-npm run orchestration:verify    # test (19) + diagram-check (34/34) + personas (17)
+npm run orchestration:verify    # test (72) + diagram-check (36/36) + personas (18)
 npm run orchestration:test      # suite unitária apenas
 npm run orchestration:diagram-check
 ```

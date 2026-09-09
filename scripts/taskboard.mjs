@@ -190,6 +190,16 @@ async function resolveProjectId() {
   return findProjectId(projects);
 }
 
+async function syncHireOnMove(id, status) {
+  try {
+    const { spawnSync } = await import('node:child_process');
+    const cmd = status === 'done' ? 'done' : 'delegate';
+    if (status === 'in_progress' || status === 'done') {
+      spawnSync('node', ['.cursor/orchestration/agent-hire/taskboard-sync.mjs', cmd, '--issue', id], { cwd: root, encoding: 'utf8' });
+    }
+  } catch { /* best-effort */ }
+}
+
 const [cmd, ...rest] = process.argv.slice(2);
 if (!cmd) usage();
 
@@ -302,6 +312,7 @@ try {
       const current = runTaskctl(["issue", "get", id, "--json"]);
       const version = current.task?.version ?? current.version;
       if (!version) throw new Error(`Could not read version for ${id}`);
+      await syncHireOnMove(id, status);
       console.log(
         JSON.stringify(
           runTaskctl([
