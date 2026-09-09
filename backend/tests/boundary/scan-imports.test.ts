@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import {
 	collectTsFiles,
+	extractImportsFromSource,
 	findForbiddenImports,
 	type ForbiddenPattern,
 } from "./scan-imports";
@@ -70,6 +71,22 @@ describe("scan-imports fixtures", () => {
 		expect(violations[0]?.importSpecifier).toContain("drizzle-orm");
 
 		rmSync(tempRoot, { recursive: true, force: true });
+	});
+
+	test("extractImportsFromSource detects multiline import and export-from", () => {
+		const source = `import {
+  pgTable
+} from "drizzle-orm/pg-core";
+export { pool } from "@anxionos/database";
+export async function load() {
+  return import("pg");
+}
+`;
+		const extracted = extractImportsFromSource(source);
+		const specifiers = extracted.map((entry) => entry.specifier);
+		expect(specifiers).toContain("drizzle-orm/pg-core");
+		expect(specifiers).toContain("@anxionos/database");
+		expect(specifiers).toContain("pg");
 	});
 
 	test("findForbiddenImports passes positive fixture import", () => {

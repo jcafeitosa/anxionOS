@@ -15,10 +15,12 @@ import { BACKEND_ROOT } from "./scan-imports";
  * roots (ADR0002 bootstrap); application layers must not consume those paths.
  */
 describe("AR01 alias-reexport-boundaries (ANX-128)", () => {
-	test("dependency-cruiser config includes application-not-infra rule", () => {
+	test("dependency-cruiser config blocks ORM drivers for application layer", () => {
 		const configPath = join(BACKEND_ROOT, ".dependency-cruiser.cjs");
 		const source = readFileSync(configPath, "utf8");
 		expect(source).toContain("application-not-infra");
 		expect(source).toContain("^modules/.+/application/");
+		expect(source).toContain("node_modules/drizzle-orm");
+		expect(source).toContain("node_modules/pg");
 	});
 });

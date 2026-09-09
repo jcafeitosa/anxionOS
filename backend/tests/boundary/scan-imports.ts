@@ -27,9 +27,24 @@ export type ImportViolation = {
 	description: string;
 };
 
-const IMPORT_LINE_RE =
-	/(?:import|export)\s+(?:type\s+)?(?:[\w*{}\s,$]+from\s+)?["']([^"']+)["']/g;
-const REQUIRE_LINE_RE = /require\s*\(\s*["']([^"']+)["']\s*\)/g;
+/** Static import/export-from (supports multiline bindings before `from`). */
+const STATIC_IMPORT_EXPORT_RE =
+	/(?:import|export)\s+(?:type\s+)?(?:[\w*{}\s,$]*?\sfrom\s+)?["']([^"']+)["']/gs;
+/** Side-effect static import without `from`. */
+const SIDE_EFFECT_IMPORT_RE = /import\s+["']([^"']+)["']/gs;
+/** Dynamic `import("…")` (also `await import("…")`). */
+const DYNAMIC_IMPORT_RE = /import\s*\(\s*["']([^"']+)["']\s*\)/gs;
+const REQUIRE_RE = /require\s*\(\s*["']([^"']+)["']\s*\)/gs;
+
+const SOURCE_SCAN_PATTERNS: ReadonlyArray<{
+	pattern: RegExp;
+	kind: "static" | "dynamic" | "require";
+}> = [
+	{ pattern: STATIC_IMPORT_EXPORT_RE, kind: "static" },
+	{ pattern: SIDE_EFFECT_IMPORT_RE, kind: "static" },
+	{ pattern: DYNAMIC_IMPORT_RE, kind: "dynamic" },
+	{ pattern: REQUIRE_RE, kind: "require" },
+];
 
 function toPosixPath(filePath: string): string {
 	return filePath.split("\\").join("/");
@@ -154,27 +169,49 @@ export function collectAllModuleFiles(
 	return files;
 }
 
-function extractImportSpecifiers(line: string): string[] {
-	const specifiers: string[] = [];
-	for (const pattern of [IMPORT_LINE_RE, REQUIRE_LINE_RE]) {
+export type ExtractedImport = {
+	specifier: string;
+	line: number;
+	kind: "static" | "dynamic" | "require";
+};
+
+/**
+ * Extract module specifiers from a TypeScript source file.
+ * Operates on the full file so multiline imports and export-from re-exports are visible.
+ */
+export function extractImportsFromSource(source: string): ExtractedImport[] {
+	const results: ExtractedImport[] = [];
+	const seen = new Set<string>();
+
+	for (const { pattern, kind } of SOURCE_SCAN_PATTERNS) {
 		pattern.lastIndex = 0;
-		let match = pattern.exec(line);
+		let match = pattern.exec(source);
 		while (match !== null) {
-			specifiers.push(match[1]);
-			match = pattern.exec(line);
+			const specifier = match[1];
+			const line = source.slice(0, match.index).split("\n").length;
+			const dedupeKey = `${line}:${kind}:${specifier}`;
+			if (!seen.has(dedupeKey)) {
+				seen.add(dedupeKey);
+				results.push({ specifier, line, kind });
+			}
+			match = pattern.exec(source);
 		}
 	}
-	return specifiers;
+
+	return results;
 }
 
 /**
  * Statically detect forbidden import specifiers for the given rules.
  *
- * **Limitation:** scanning is line-by-line via regex (`IMPORT_LINE_RE` / `REQUIRE_LINE_RE`).
- * Multiline `import` statements (specifier on a line without `from "…"`) are not detected.
- * When a module has no `src/` tree, `collectModuleLayerFiles` falls back to compiled `dist/`
- * output, which preserves resolved single-line imports for the current codebase and mitigates
- * most false negatives for production modules shipped as JS bundles.
+ * **Coverage:** full-file regex scan for static `import`/`export … from`, side-effect
+ * imports, dynamic `import("…")`, and CommonJS `require("…")`. Multiline binding lists
+ * before `from "…"` are supported via the `s` (dotAll) flag.
+ *
+ * **Remaining limits:** template-literal specifiers, computed/dynamic non-literal paths,
+ * string concatenation, and imports injected only at build time are not detected.
+ * When a module has no `src/` tree, `collectModuleLayerFiles` falls back to compiled
+ * `dist/` output, which preserves resolved single-line imports for shipped JS bundles.
  */
 export function findForbiddenImports(
 	files: readonly string[],
@@ -190,24 +227,17 @@ export function findForbiddenImports(
 			continue;
 		}
 
-		const lines = readFileSync(absolutePath, "utf8").split("\n");
-		for (let index = 0; index < lines.length; index += 1) {
-			const line = lines[index];
-			if (!line.includes("import") && !line.includes("require")) {
-				continue;
-			}
-
-			for (const specifier of extractImportSpecifiers(line)) {
-				for (const rule of applicableRules) {
-					if (rule.importPatterns.some((pattern) => pattern.test(specifier))) {
-						violations.push({
-							file: relPath,
-							line: index + 1,
-							importSpecifier: specifier,
-							ruleId: rule.id,
-							description: rule.description,
-						});
-					}
+		const source = readFileSync(absolutePath, "utf8");
+		for (const { specifier, line } of extractImportsFromSource(source)) {
+			for (const rule of applicableRules) {
+				if (rule.importPatterns.some((pattern) => pattern.test(specifier))) {
+					violations.push({
+						file: relPath,
+						line,
+						importSpecifier: specifier,
+						ruleId: rule.id,
+						description: rule.description,
+					});
 				}
 			}
 		}

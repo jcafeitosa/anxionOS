@@ -169,6 +169,132 @@ describe("AR01 application-layer-imports (ADR0002)", () => {
 
 		rmSync(tempRoot, { recursive: true, force: true });
 	});
+	test("fixture detects multiline drizzle-orm import in application layer", () => {
+		const tempRoot = mkdtempSync(join(tmpdir(), "boundary-app-layer-"));
+		const applicationDir = join(
+			tempRoot,
+			"modules",
+			"fixture",
+			"src",
+			"application",
+		);
+		mkdirSync(applicationDir, { recursive: true });
+
+		const invalidFile = join(applicationDir, "bad-multiline.ts");
+		writeFileSync(
+			invalidFile,
+			`import {
+  pgTable
+} from "drizzle-orm/pg-core";
+export {};
+`,
+		);
+
+		const violations = findForbiddenImports(
+			[invalidFile],
+			MODULE_APPLICATION_LAYER_FORBIDDEN,
+			tempRoot,
+		);
+
+		expect(violations).toHaveLength(1);
+		expect(violations[0]?.ruleId).toBe("application-no-frameworks");
+
+		rmSync(tempRoot, { recursive: true, force: true });
+	});
+
+	test("fixture detects dynamic import of pg in application layer", () => {
+		const tempRoot = mkdtempSync(join(tmpdir(), "boundary-app-layer-"));
+		const applicationDir = join(
+			tempRoot,
+			"modules",
+			"fixture",
+			"src",
+			"application",
+		);
+		mkdirSync(applicationDir, { recursive: true });
+
+		const invalidFile = join(applicationDir, "bad-dynamic.ts");
+		writeFileSync(
+			invalidFile,
+			`export async function loadDriver() {
+  return import("pg");
+}
+`,
+		);
+
+		const violations = findForbiddenImports(
+			[invalidFile],
+			MODULE_APPLICATION_LAYER_FORBIDDEN,
+			tempRoot,
+		);
+
+		expect(violations).toHaveLength(1);
+		expect(violations[0]?.ruleId).toBe("application-no-frameworks");
+		expect(violations[0]?.importSpecifier).toBe("pg");
+
+		rmSync(tempRoot, { recursive: true, force: true });
+	});
+
+	test("fixture detects export-from @anxionos/database in application layer", () => {
+		const tempRoot = mkdtempSync(join(tmpdir(), "boundary-app-layer-"));
+		const applicationDir = join(
+			tempRoot,
+			"modules",
+			"fixture",
+			"src",
+			"application",
+		);
+		mkdirSync(applicationDir, { recursive: true });
+
+		const invalidFile = join(applicationDir, "bad-reexport-db.ts");
+		writeFileSync(
+			invalidFile,
+			'export { pool } from "@anxionos/database";\n',
+		);
+
+		const violations = findForbiddenImports(
+			[invalidFile],
+			MODULE_APPLICATION_LAYER_FORBIDDEN,
+			tempRoot,
+		);
+
+		expect(violations).toHaveLength(1);
+		expect(violations[0]?.ruleId).toBe("application-no-infra-packages");
+
+		rmSync(tempRoot, { recursive: true, force: true });
+	});
+
+	test("fixture detects export star from infrastructure in application layer", () => {
+		const tempRoot = mkdtempSync(join(tmpdir(), "boundary-app-layer-"));
+		const applicationDir = join(
+			tempRoot,
+			"modules",
+			"fixture",
+			"src",
+			"application",
+		);
+		mkdirSync(applicationDir, { recursive: true });
+
+		const invalidFile = join(applicationDir, "bad-reexport-infra.ts");
+		writeFileSync(
+			invalidFile,
+			'export * from "../infrastructure/persistence/schema";\n',
+		);
+
+		const violations = findForbiddenImports(
+			[invalidFile],
+			MODULE_APPLICATION_LAYER_FORBIDDEN,
+			tempRoot,
+		);
+
+		expect(violations).toHaveLength(1);
+		expect(violations[0]?.ruleId).toBe(
+			"application-no-infrastructure-relative",
+		);
+
+		rmSync(tempRoot, { recursive: true, force: true });
+	});
+
 
 	test("fixture allows domain port imports in application layer", () => {
 		const tempRoot = mkdtempSync(join(tmpdir(), "boundary-app-layer-"));
