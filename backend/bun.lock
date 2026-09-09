@@ -30,6 +30,7 @@
         "@anxionos/performance": "workspace:*",
         "@anxionos/portfolios": "workspace:*",
         "@anxionos/risk": "workspace:*",
+        "@anxionos/secrets": "workspace:*",
         "@anxionos/simulation": "workspace:*",
         "@anxionos/strategies": "workspace:*",
         "@biomejs/biome": "^1.9.4",
@@ -392,6 +393,10 @@
         "@opentelemetry/sdk-node": "^0.222.0",
       },
     },
+    "packages/secrets": {
+      "name": "@anxionos/secrets",
+      "version": "0.1.0",
+    },
   },
   "packages": {
     "@anxionos/accounting": ["@anxionos/accounting@workspace:modules/accounting"],
@@ -445,6 +450,8 @@
     "@anxionos/portfolios": ["@anxionos/portfolios@workspace:modules/portfolios"],
 
     "@anxionos/risk": ["@anxionos/risk@workspace:modules/risk"],
+
+    "@anxionos/secrets": ["@anxionos/secrets@workspace:packages/secrets"],
 
     "@anxionos/simulation": ["@anxionos/simulation@workspace:modules/simulation"],
 

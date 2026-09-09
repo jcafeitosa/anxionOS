@@ -34,6 +34,7 @@
     "@anxionos/knowledge": "workspace:*",
     "@anxionos/market-data": "workspace:*",
     "@anxionos/observability": "workspace:*",
+    "@anxionos/secrets": "workspace:*",
     "@anxionos/orchestration": "workspace:*",
     "@anxionos/organizations": "workspace:*",
     "@anxionos/strategies": "workspace:*",

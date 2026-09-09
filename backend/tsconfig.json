@@ -20,6 +20,9 @@
 			"path": "./packages/observability"
 		},
 		{
+			"path": "./packages/secrets"
+		},
+		{
 			"path": "./modules/accounting"
 		},
 		{
