@@ -47,9 +47,11 @@
       "dependencies": {
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
+        "@anxionos/governance": "workspace:*",
         "@anxionos/graph": "workspace:*",
         "@anxionos/identity": "workspace:*",
         "@anxionos/observability": "workspace:*",
+        "@anxionos/organizations": "workspace:*",
         "@better-auth/drizzle-adapter": "^1.7.3",
         "@elysia/cors": "^1.4.2",
         "@elysia/openapi": "^1.4.16",
