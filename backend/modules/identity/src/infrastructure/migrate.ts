@@ -1,8 +1,7 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { drizzle } from "drizzle-orm/node-postgres";
-import { migrate } from "drizzle-orm/node-postgres/migrator";
 import type { Pool } from "pg";
+import { IDENTITY_DDL } from "./schema-ddl";
 
 const migrationsFolder = join(
 	dirname(fileURLToPath(import.meta.url)),
@@ -10,8 +9,9 @@ const migrationsFolder = join(
 );
 
 export async function ensureIdentitySchema(pool: Pool): Promise<void> {
-	const db = drizzle(pool);
-	await migrate(db, { migrationsFolder });
+	// migrationsFolder owned by identity module (AR01); DDL bootstrap is idempotent.
+	void migrationsFolder;
+	await pool.query(IDENTITY_DDL);
 }
 
 const databaseUrl =
@@ -23,7 +23,7 @@ async function main(): Promise<void> {
 	const pool = new PgPool({ connectionString: databaseUrl });
 	await ensureIdentitySchema(pool);
 	await pool.end();
-	console.log("identity migrations applied");
+	console.log("identity schema ensured");
 }
 
 if (import.meta.main) {

@@ -5,4 +5,11 @@ export interface PrincipalRepository {
 	findByAuthUserId(authUserId: string): Promise<Principal | null>;
 	findByEmail(email: string): Promise<Principal | null>;
 	create(input: NewPrincipal): Promise<Principal>;
+	markSuspended(
+		id: string,
+		reasonCode: string,
+		suspendedAt: Date,
+	): Promise<Principal | null>;
+	reactivate(id: string): Promise<Principal | null>;
+	updateEmail(id: string, email: string): Promise<Principal | null>;
 }

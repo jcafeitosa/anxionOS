@@ -5,6 +5,11 @@ export const principalStatusEnum = pgEnum("identity_principal_status", [
 	"suspended",
 ]);
 
+export const serviceIdentityStatusEnum = pgEnum("identity_service_identity_status", [
+	"active",
+	"revoked",
+]);
+
 export const principals = pgTable("identity_principals", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	authUserId: text("auth_user_id").notNull().unique(),
@@ -17,5 +22,17 @@ export const principals = pgTable("identity_principals", {
 		.defaultNow(),
 });
 
+export const serviceIdentities = pgTable("identity_service_identities", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	principalId: uuid("principal_id").notNull(),
+	label: text("label").notNull(),
+	status: serviceIdentityStatusEnum("status").notNull().default("active"),
+	createdAt: timestamp("created_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+	revokedAt: timestamp("revoked_at", { withTimezone: true }),
+});
+
 export type PrincipalRow = typeof principals.$inferSelect;
 export type NewPrincipalRow = typeof principals.$inferInsert;
+export type ServiceIdentityRow = typeof serviceIdentities.$inferSelect;

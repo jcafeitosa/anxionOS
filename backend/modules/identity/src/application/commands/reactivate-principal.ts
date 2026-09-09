@@ -1,48 +1,43 @@
-import { suspendPrincipalCommandSchema } from "@anxionos/contracts/identity";
+import { reactivatePrincipalCommandSchema } from "@anxionos/contracts/identity";
 import type { Principal } from "../../domain/entities/principal";
-import { createPrincipalSuspendedEvent } from "../../domain/events/identity-events";
+import { createPrincipalReactivatedEvent } from "../../domain/events/identity-events";
 import type { IdentityUnitOfWork } from "../../domain/ports/identity-unit-of-work";
 import type { PrincipalRepository } from "../../domain/ports/principal-repository";
 import { throwIdentityError } from "../errors";
 
-export interface SuspendPrincipalInput {
+export interface ReactivatePrincipalInput {
 	principalId: string;
-	reasonCode: string;
 	actorPrincipalId?: string;
 }
 
-export interface SuspendPrincipalDeps {
+export interface ReactivatePrincipalDeps {
 	repository: PrincipalRepository;
 	unitOfWork: IdentityUnitOfWork;
 }
 
-export async function suspendPrincipal(
-	deps: SuspendPrincipalDeps,
-	input: SuspendPrincipalInput,
+export async function reactivatePrincipal(
+	deps: ReactivatePrincipalDeps,
+	input: ReactivatePrincipalInput,
 ): Promise<Principal> {
-	const command = suspendPrincipalCommandSchema.parse(input);
+	const command = reactivatePrincipalCommandSchema.parse(input);
 	const existing = await deps.repository.findById(command.principalId);
 	if (!existing) {
 		throwIdentityError("PRINCIPAL_NOT_FOUND", "Principal not found");
 	}
-	if (existing.status === "suspended") {
+	if (existing.status === "active") {
 		return existing;
 	}
-	const suspendedAt = new Date();
+	const reactivatedAt = new Date();
 	return deps.unitOfWork.runInTransaction(async (context) => {
-		const principal = await context.principalRepository.markSuspended(
-			command.principalId,
-			command.reasonCode,
-			suspendedAt,
-		);
+		const principal = await context.principalRepository.reactivate(command.principalId);
 		if (!principal) {
 			throwIdentityError("PRINCIPAL_NOT_FOUND", "Principal not found");
 		}
 		await context.publishEvents([
-			createPrincipalSuspendedEvent({
+			createPrincipalReactivatedEvent({
 				principalId: principal.id,
-				reasonCode: command.reasonCode,
-				suspendedAt: suspendedAt.toISOString(),
+				reactivatedAt: reactivatedAt.toISOString(),
+				actorPrincipalId: command.actorPrincipalId,
 			}),
 		]);
 		return principal;

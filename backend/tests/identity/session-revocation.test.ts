@@ -1,0 +1,36 @@
+import { describe, expect, test } from "bun:test";
+import { handlePrincipalSuspended } from "@anxionos/identity";
+import type { Principal } from "@anxionos/identity";
+import { createInMemoryPrincipalRepository } from "./test-support";
+
+const principal: Principal = {
+	id: "11111111-1111-4111-8111-111111111111",
+	authUserId: "auth-1",
+	email: "owner@example.com",
+	status: "suspended",
+	createdAt: new Date("2026-09-08T12:00:00.000Z"),
+	suspendedAt: new Date("2026-09-08T12:00:00.000Z"),
+	suspensionReason: "ops.manual",
+};
+
+describe("handlePrincipalSuspended", () => {
+	test("revokes sessions for resolved auth user", async () => {
+		const revoked: string[] = [];
+		await handlePrincipalSuspended(
+			{
+				principalRepository: createInMemoryPrincipalRepository([principal]),
+				sessionRevoker: {
+					async revokeAllForAuthUser(authUserId) {
+						revoked.push(authUserId);
+					},
+				},
+			},
+			{
+				principalId: principal.id,
+				reasonCode: "ops.manual",
+				suspendedAt: "2026-09-08T12:00:00.000Z",
+			},
+		);
+		expect(revoked).toEqual(["auth-1"]);
+	});
+});

@@ -1,6 +1,9 @@
+import { syncPrincipalEmailCommandSchema } from "@anxionos/contracts/identity";
 import type { Principal } from "../../domain/entities/principal";
-import type { PrincipalCommandsPort } from "../../domain/ports/principal-commands";
+import { createPrincipalEmailUpdatedEvent } from "../../domain/events/identity-events";
+import type { IdentityUnitOfWork } from "../../domain/ports/identity-unit-of-work";
 import type { PrincipalRepository } from "../../domain/ports/principal-repository";
+import { throwIdentityError } from "../errors";
 
 export interface SyncPrincipalEmailInput {
 	principalId: string;
@@ -9,20 +12,39 @@ export interface SyncPrincipalEmailInput {
 
 export interface SyncPrincipalEmailDeps {
 	repository: PrincipalRepository;
-	principalCommands: PrincipalCommandsPort;
+	unitOfWork: IdentityUnitOfWork;
 }
 
-/** P1 sketch — updates email and emits identity.principal.email_updated.v1. */
 export async function syncPrincipalEmail(
 	deps: SyncPrincipalEmailDeps,
 	input: SyncPrincipalEmailInput,
 ): Promise<Principal> {
-	const existing = await deps.repository.findById(input.principalId);
+	const command = syncPrincipalEmailCommandSchema.parse(input);
+	const existing = await deps.repository.findById(command.principalId);
 	if (!existing) {
-		throw new Error("PRINCIPAL_NOT_FOUND");
+		throwIdentityError("PRINCIPAL_NOT_FOUND", "Principal not found");
 	}
-	if (existing.email === input.email) {
+	if (existing.email === command.email) {
 		return existing;
 	}
-	return deps.principalCommands.syncEmail(input.principalId, input.email);
+	return deps.unitOfWork.runInTransaction(async (context) => {
+		const emailTaken = await context.principalRepository.findByEmail(command.email);
+		if (emailTaken && emailTaken.id !== command.principalId) {
+			throwIdentityError("PRINCIPAL_EMAIL_TAKEN", "Email already registered");
+		}
+		const principal = await context.principalRepository.updateEmail(
+			command.principalId,
+			command.email,
+		);
+		if (!principal) {
+			throwIdentityError("PRINCIPAL_NOT_FOUND", "Principal not found");
+		}
+		await context.publishEvents([
+			createPrincipalEmailUpdatedEvent({
+				principalId: principal.id,
+				email: principal.email,
+			}),
+		]);
+		return principal;
+	});
 }

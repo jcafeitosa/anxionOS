@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { NewPrincipal, Principal } from "../../domain/entities/principal";
 import type { PrincipalRepository } from "../../domain/ports/principal-repository";
@@ -17,7 +17,7 @@ export function toPrincipal(row: PrincipalRow): Principal {
 }
 
 export function createDrizzlePrincipalRepository(
-	db: NodePgDatabase<{ principals: typeof principals }>,
+	db: NodePgDatabase<{ principals: typeof principals; serviceIdentities: typeof import("./schema").serviceIdentities }>,
 ): PrincipalRepository {
 	return {
 		async findById(id: string): Promise<Principal | null> {
@@ -57,6 +57,50 @@ export function createDrizzlePrincipalRepository(
 				throw new Error("Failed to create principal");
 			}
 			return toPrincipal(row);
+		},
+		async markSuspended(
+			id: string,
+			reasonCode: string,
+			suspendedAt: Date,
+		): Promise<Principal | null> {
+			const rows = await db
+				.update(principals)
+				.set({
+					status: "suspended",
+					suspendedAt,
+					suspensionReason: reasonCode,
+				})
+				.where(eq(principals.id, id))
+				.returning();
+			return rows[0] ? toPrincipal(rows[0]) : null;
+		},
+		async reactivate(id: string): Promise<Principal | null> {
+			const rows = await db
+				.update(principals)
+				.set({
+					status: "active",
+					suspendedAt: null,
+					suspensionReason: null,
+				})
+				.where(eq(principals.id, id))
+				.returning();
+			return rows[0] ? toPrincipal(rows[0]) : null;
+		},
+		async updateEmail(id: string, email: string): Promise<Principal | null> {
+			const rows = await db
+				.update(principals)
+				.set({ email })
+				.where(and(eq(principals.id, id), ne(principals.email, email)))
+				.returning();
+			if (rows[0]) {
+				return toPrincipal(rows[0]);
+			}
+			const existing = await db
+				.select()
+				.from(principals)
+				.where(eq(principals.id, id))
+				.limit(1);
+			return existing[0] ? toPrincipal(existing[0]) : null;
 		},
 	};
 }
