@@ -2,7 +2,7 @@
   "name": "anxionos",
   "version": "1.0.0",
   "private": true,
-  "description": "Plataforma multi-tenant de investimentos autônomos governados por grafo institucional.",
+  "description": "Plataforma multi-tenant de investimentos aut\u00f4nomos governados por grafo institucional.",
   "type": "module",
   "engines": {
     "node": ">=18"
@@ -74,7 +74,8 @@
     "orchestration:migrate-runtime": "node .cursor/orchestration/agent-config/migrate-runtime-paths.mjs",
     "orchestration:cursor-goals": "node .cursor/orchestration/agent-config/cursor-goals.mjs",
     "orchestration:brain": "node .cursor/orchestration/agent-brain/brain-cli.mjs",
-    "orchestration:zero-policies": "node .cursor/orchestration/agent-workflow/zero-policies.mjs"
+    "orchestration:zero-policies": "node .cursor/orchestration/agent-workflow/zero-policies.mjs",
+    "orchestration:taskboard": "node .cursor/orchestration/agent-config/agent-taskboard-cli.mjs"
   },
   "repository": {
     "type": "git",
