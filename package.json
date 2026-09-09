@@ -38,7 +38,9 @@
     "orchestration:proactive": "node .cursor/orchestration/agent-proactive/initiative.mjs",
     "orchestration:monitor": "node .cursor/orchestration/agent-proactive/monitor.mjs",
     "orchestration:session": "node .cursor/orchestration/agent-dialogue/session-tracker.mjs",
-    "orchestration:silence-watch": "node .cursor/orchestration/agent-autonomy/scripts/silence-detector.mjs"
+    "orchestration:silence-watch": "node .cursor/orchestration/agent-autonomy/scripts/silence-detector.mjs",
+    "orchestration:terminal": "node .cursor/orchestration/agent-dialogue/terminal-panel.mjs",
+    "orchestration:tail": "node .cursor/orchestration/agent-dialogue/tail-formatted.mjs"
   },
   "repository": {
     "type": "git",
