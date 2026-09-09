@@ -43,7 +43,8 @@
     "orchestration:silence-watch": "node .cursor/orchestration/agent-autonomy/scripts/silence-detector.mjs",
     "orchestration:terminal": "node .cursor/orchestration/agent-dialogue/terminal-panel.mjs",
     "orchestration:tail": "node .cursor/orchestration/agent-dialogue/tail-formatted.mjs",
-    "orchestration:cto-accept": "node .cursor/orchestration/agent-proactive/cto-accept.mjs"
+    "orchestration:cto-accept": "node .cursor/orchestration/agent-proactive/cto-accept.mjs",
+    "orchestration:cto-decide": "node .cursor/orchestration/agent-proactive/cto-decide.mjs"
   },
   "repository": {
     "type": "git",
