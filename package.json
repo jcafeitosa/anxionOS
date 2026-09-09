@@ -2,7 +2,7 @@
   "name": "anxionos",
   "version": "1.0.0",
   "private": true,
-  "description": "Plataforma multi-tenant de investimentos autônomos governados por grafo institucional.",
+  "description": "Plataforma multi-tenant de investimentos aut\u00f4nomos governados por grafo institucional.",
   "type": "module",
   "engines": {
     "node": ">=18"
@@ -29,6 +29,7 @@
     "orchestration:cron": "node .cursor/orchestration/agent-autonomy/cron-manager.mjs",
     "orchestration:cto-accept": "node .cursor/orchestration/agent-proactive/cto-accept.mjs",
     "orchestration:cto-decide": "node .cursor/orchestration/agent-proactive/cto-decide.mjs",
+    "orchestration:delegate-monitor": "node .cursor/orchestration/agent-workflow/delegate-monitor.mjs",
     "orchestration:diagram-check": "node .cursor/orchestration/agent-workflow/diagram-check.mjs",
     "orchestration:dialogue": "node .cursor/orchestration/agent-dialogue/broadcast.mjs",
     "orchestration:dismiss": "node .cursor/orchestration/agent-hire/dismiss.mjs",
