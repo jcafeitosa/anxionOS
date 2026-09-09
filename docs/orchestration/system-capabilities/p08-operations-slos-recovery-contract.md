@@ -75,14 +75,12 @@ Workers devem:
 
 1. parar de aceitar novos jobs;
 2. renovar ou liberar leases de forma explícita;
-3. confirmar a transição de domínio, journal e inserção no outbox na mesma transação PostgreSQL do dono; o checkpoint não pode avançar além desse commit (se persistido separadamente, pode atrasar, nunca antecipar o progresso durável);
-4. publicar/drenar pelo relay apenas registros do outbox já confirmados; entrega/ack no transporte não fazem parte do commit do domínio e permitem repetição idempotente;
-5. preservar dispatch e marcar resultado externo ambíguo como UNKNOWN conforme o protocolo do dono; reconciliar antes de novo efeito, sem prometer atomicidade entre PostgreSQL e adapter externo;
-6. fechar conexões e registrar o estado de saída pelo caminho auditável.
+3. persistir checkpoint somente após efeito e journal correspondentes;
+4. enviar eventos pendentes ao outbox;
+5. marcar trabalho ambíguo como UNKNOWN;
+6. fechar conexões e publicar estado de saída.
 
-Esta sequência aplica a atomicidade do [ADR0004 — Consistência e fronteiras preservadas](../../../brain/project-docs/decisions/0004-postgresql-timescaledb-pgvector.md). Lease expirado não autoriza commit tardio. Fencing token e versão esperada impedem worker antigo de confirmar transições. Reprocessamento começa no último checkpoint confirmado e é idempotente; não usa timeout como prova de sucesso.
-
-**Oráculo de implementação — ANX-130/133/158/169:** interromper antes do commit, depois do commit e antes do ack/publicação, e entre commit e checkpoint separado. Verificar que nenhum checkpoint salta estado+journal+outbox não duráveis, que registros confirmados são republicáveis sem duplicar efeitos e que resultado externo UNKNOWN exige reconciliação. Esses testes ficam nas tarefas de implementação; a revisão deste contrato não declara que foram executados.
+Lease expirado não autoriza commit tardio. Fencing token e versão esperada impedem worker antigo de publicar. Reprocessamento começa no último checkpoint confirmado e é idempotente; não usa timeout como prova de sucesso.
 
 ## 6. Backup, restore e reconstrução
 
