@@ -47,6 +47,7 @@
       "dependencies": {
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
+        "@anxionos/graph": "workspace:*",
         "@anxionos/identity": "workspace:*",
         "@anxionos/observability": "workspace:*",
         "@better-auth/drizzle-adapter": "^1.7.3",

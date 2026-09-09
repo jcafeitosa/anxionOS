@@ -100,6 +100,17 @@ anxionOS/
 
 Organização modular completa (23 módulos), roadmap P02–P09 e decisões aceitas estão em `brain/` local (ex.: ADR0002, SDD institucional).
 
+## Orquestração Cursor (framework agnóstico)
+
+O diretório [`.cursor/orchestration/`](.cursor/orchestration/) é um **framework portable** de equipe multi-agente no Cursor (pipeline G0–G7, dialogue, hire, compliance). Cada repositório fornece overlay em [`.codewhale/orchestration.config.json`](.codewhale/orchestration.config.json).
+
+| Recurso | Caminho |
+| --- | --- |
+| Design agnóstico | [.cursor/orchestration/AGNOSTIC-DESIGN.md](.cursor/orchestration/AGNOSTIC-DESIGN.md) |
+| Bootstrap novo projeto | [.cursor/orchestration/templates/README-BOOTSTRAP.md](.cursor/orchestration/templates/README-BOOTSTRAP.md) |
+| Config anxionOS | `issuePrefix: ANX`, `knowledgeRoot: brain/` |
+| Verificação | `npm run orchestration:test` · `npm run orchestration:verify` |
+
 ## Contribuir
 
 1. Leia [AGENTS.md](AGENTS.md) e [CONTRIBUTING.md](CONTRIBUTING.md).
