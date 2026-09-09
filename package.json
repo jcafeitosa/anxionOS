@@ -72,7 +72,8 @@
     "orchestration:global": "node scripts/orchestration-global.mjs",
     "orchestration:migrate-runtime": "node .cursor/orchestration/agent-config/migrate-runtime-paths.mjs",
     "orchestration:cursor-goals": "node .cursor/orchestration/agent-config/cursor-goals.mjs",
-    "orchestration:brain": "node .cursor/orchestration/agent-brain/brain-cli.mjs"
+    "orchestration:brain": "node .cursor/orchestration/agent-brain/brain-cli.mjs",
+    "orchestration:zero-policies": "node .cursor/orchestration/agent-workflow/zero-policies.mjs"
   },
   "repository": {
     "type": "git",

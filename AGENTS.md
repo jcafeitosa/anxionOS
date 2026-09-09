@@ -237,6 +237,10 @@ Skills obrigatórias: `manage-taskboard` (claims, status, comentários) e `orche
 
 **Dual-board (orquestrador):** trabalho de **produto** (`backend/`, `frontend/`, docs públicas, slices `ANX-*`) usa o **Dashi taskboard**; trabalho **framework/non-project** (`.cursor/orchestration/`, regras Cursor, personas, meta-tooling) usa o **Cursor taskboard** (`CreateGoal` + `CURSOR_GOAL_ID` ou registry em `.cursor/orchestration-runtime/goals/`). Ver [.cursor/orchestration/TASKBOARD-ROUTING.md](.cursor/orchestration/TASKBOARD-ROUTING.md). **Nunca misturar boards** na mesma unidade de trabalho.
 
+#### Políticas Zero (framework de orquestração)
+
+O framework Cursor mantém **19 Políticas Zero** (Z0–Z18) — violação = trabalho inválido. Incluem zero-trabalho-fora-do-board (Z0), tolerância zero de código (Z1/Z9), no silent work (Z3), dual-board (Z10) e visibilidade no chat (Z4/Z8). Catálogo canônico: [.cursor/orchestration/ZERO-POLICIES.md](.cursor/orchestration/ZERO-POLICIES.md) · `npm run orchestration:zero-policies`.
+
 #### Política zero-trabalho-fora-do-board
 
 **Nenhum agente pode executar trabalho técnico fora do taskboard.** O board não é registro posterior — é pré-condição de execução.
