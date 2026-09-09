@@ -1,0 +1,25 @@
+import type { Pool } from "pg";
+import type { GraphStore } from "../../domain/ports/graph-store";
+import type { RebuildControl } from "../../domain/ports/rebuild-control";
+import type { TraversalEvaluator } from "../../domain/ports/traversal-evaluator";
+import type { TraversalCatalog } from "../../domain/schema/traversal-catalog";
+import type { GraphReadCache, GraphCacheLookupInput } from "../../domain/ports/graph-read-cache";
+import type { DlqReplayPort } from "../../domain/ports/dlq-replay-port";
+import type { PendingProjectionRegistry } from "./pending-projection-registry";
+import type { GraphTraversalRateLimiter } from "./graph-rate-limit";
+
+export interface GraphHttpRuntime {
+    pool: Pool;
+    graphStore: GraphStore;
+    traversalEvaluator: TraversalEvaluator;
+    cache: GraphReadCache;
+    catalog: TraversalCatalog;
+    rebuildControl: RebuildControl;
+    pendingProjections: PendingProjectionRegistry;
+    rateLimiter: GraphTraversalRateLimiter;
+    getRegistryGeneration(): Promise<number>;
+    dlqReplay: DlqReplayPort;
+    buildCacheKey(input: GraphCacheLookupInput): string;
+    resolveCacheTtlSeconds(input: GraphCacheLookupInput): number;
+    getCheckpoint(): Promise<string>;
+}
