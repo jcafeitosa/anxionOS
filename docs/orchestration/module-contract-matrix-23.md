@@ -1737,12 +1737,14 @@ Esta seção preserva a proveniência dos pareceres, **não os transforma em apr
 | Registro histórico | Candidato explicitado no parecer | Referência no board | Alcance e limitação |
 | --- | --- | --- | --- |
 | G1 C4, F1/F2/F3/B1 | C4 `d31f823d37042b45245245f7639d4bb5e0946a335c69e7f3c41566048410200d` | ANX-127 `018e91eb-bae0-4d64-8e80-83308366d046` | Restrições C1–C3; não comprova G1 integral/transitivo de outro candidato |
-| A4 | C5; hashes nos comentários ANX-127 `bcfec1c4` / `55e3adb4` | ANX-127 `2ccab708` | Registro incremental; não é aceite G2–G7 |
+| A4 | C4 pré-§6.36 `d31f823d37042b45245245f7639d4bb5e0946a335c69e7f3c41566048410200d`; pós-§6.36 `c371208b12283214df7bbcd02f484b381e011069a583b525a3331ca659706bd6` | ANX-127 `2ccab708` | C5 era próximo passo naquele parecer; `bcfec1c4` / `55e3adb4` registram candidatos posteriores, não o alvo revisado |
 | G2 | C6 `67a7254316a7924e39e897c018d62aa99f3f96a002275ceb61a183a95c4f3552` | ANX-182 `989c4cef` | Parecer histórico, não reatribuir a C8 |
 | G3 | C6, mesmo hash do G2 | ANX-183 `00e53b57` | Parecer documental; produto/E2E não executados |
 | G4 | C7 `7ff36445e997ed6437be47ce01b827af7b69abed7dc37594265a47c17fabf7ca` | ANX-184 `1f744480` | Não reatribuir a C8 |
 | G5 | C8 pré-G6 `0a976d7ca1cdc3f7456ea68452712e7aa096ab5037ef3cb8516cd1359fcd177b` | ANX-185 `e62ab0a9` | Tabletop documental; não eficácia de runtime |
 | G6 | C8 integrado `5bad03946eef066f77148412bf42424c66886baa96e63c970b286e062bf1c801` | ANX-186 `51190da1-ba4e-4969-b6b4-4d6538a70a35` | Agregação histórica; declarações de independência/revalidação precisam de prova por revisor, não bastando o mesmo thread para todas as equipes |
+
+**Proveniência dos históricos:** `018e91eb` foi publicado pela thread `cursor-orchestrator-20260908`, não pela execução Dirac `01a082b7-c442-7780-b323-d4aaa17508b7` deste run. A4 `2ccab708` e G2–G6 `989c4cef` / `00e53b57` / `1f744480` / `e62ab0a9` / `51190da1` foram publicados pela thread `cursor-anxionos-20d6a526`; esses registros não comprovam por si independência entre equipes. Os pareceres do roster real da §6.37 são separados e não assumem a autoria ou o alcance daqueles históricos.
 
 O aceite histórico G7 do C6 (ANX-127 `e2305e26`) permanece preservado, sem ser estendido a candidatos posteriores. A lista dos filhos A1 e suas disposições permanece nas §§6.12.1–6.35. Pareceres restritos dos cinco conflitos continuam identificados na §6.34; a correção desta narrativa não altera aqueles contratos nem implementa as tarefas.
 
