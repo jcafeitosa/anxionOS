@@ -45,6 +45,7 @@
     "orchestration:tail": "node .cursor/orchestration/agent-dialogue/tail-formatted.mjs",
     "orchestration:cto-accept": "node .cursor/orchestration/agent-proactive/cto-accept.mjs",
     "orchestration:cto-decide": "node .cursor/orchestration/agent-proactive/cto-decide.mjs",
+    "orchestration:workflow": "node .cursor/orchestration/agent-workflow/monitor.mjs",
     "orchestration:hire": "node .cursor/orchestration/agent-hire/hire.mjs",
     "orchestration:dismiss": "node .cursor/orchestration/agent-hire/dismiss.mjs",
     "orchestration:hire-roster": "node .cursor/orchestration/agent-hire/roster.mjs",
