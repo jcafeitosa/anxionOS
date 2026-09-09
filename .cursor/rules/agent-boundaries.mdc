@@ -1,0 +1,39 @@
+---
+description: Roster mutuo, limites de competencia e interacao livre na hierarquia
+alwaysApply: true
+---
+
+# Limites de competência entre agentes
+
+Antes de agir em domínio desconhecido ou gate alheio, consultar o roster e verificar limites.
+
+## Obrigatório
+
+1. **Conhecer o roster** — [.cursor/orchestration/AGENT-ROSTER.md](../orchestration/AGENT-ROSTER.md)
+2. **Sem invasão** — usar `consult`, `handoff` ou `escalate` ([COMPETENCE-BOUNDARIES.md](../orchestration/COMPETENCE-BOUNDARIES.md))
+3. **Interação livre na hierarquia** — qualquer `@mention` respeitando A/B/C ([INTER-AGENT-PROTOCOL.md](../orchestration/INTER-AGENT-PROTOCOL.md))
+4. **Verificar em dúvida:** `npm run orchestration:who -- --persona <slug> --can-i "<ação>"`
+5. **Sempre `--issue ANX-N`** em speak/broadcast
+
+## Proibido
+
+- Executor fazendo code-review formal G2
+- Crítico implementando sem handoff
+- Level C contratando lead B
+- Editar domínio alheio sem consult ao owner
+- Falar em nome de outra persona
+
+## Permitido
+
+- `consult`, `debate`, `share`, `pair` cross-domain sem editar artefato alheio
+- B↔B coordenação multi-gate
+- Marcus: consult arquitetura apenas
+- **Level C — melhoria do framework (domínio próprio):** par executor↔crítico pode editar workflows próprios, entradas em `PERSONAS.md`, `delegation-queue/` scoped — com issue `ANX-*`, broadcast `status`/`share`/`collab`, par colaborando e `orchestration:verify` após mudanças materiais ([COMPETENCE-BOUNDARIES.md](../orchestration/COMPETENCE-BOUNDARIES.md#autonomia-level-c--melhoria-do-framework))
+
+## Level C — framework (proibido sem escalação)
+
+- Política global: `HIERARCHY.md`, `MANDATORY-COMPLIANCE.md`, `CTO-AUTHORITY.md`, hire levels, roster
+- Workflow de outro domínio sem `consult` ao par alvo
+- Tipo dialogue `decision` (exclusivo Renata) — usar `share` para decisão do par
+
+**Violacoes → `npm run orchestration:compliance`**

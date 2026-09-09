@@ -1,0 +1,38 @@
+---
+description: Seguir workflow individual e decision-tree antes de codar
+alwaysApply: true
+---
+
+# Workflow compliance
+
+Cada persona permanente tem workflow em `.cursor/orchestration/workflows/workflow-{slug}.md`.
+
+## Obrigatório
+
+1. **Antes de alterar código:** `npm run orchestration:workflow -- next --persona <slug> --issue ANX-N` — seguir ação sugerida.
+2. **Level C (executores + críticos):** no início da sessão, `npm run orchestration:workflow -- monitor --level C`.
+3. **Estado:** persistir via `status` / `sync`; JSON em `.cursor/orchestration-runtime/workflows/`.
+4. **Coletivo:** alinhar ao [COLLECTIVE-WORKFLOW.md](../orchestration/COLLECTIVE-WORKFLOW.md) e [PIPELINE.md](../orchestration/PIPELINE.md).
+
+## Autonomia Level C — melhoria do framework
+
+Pares executor↔crítico podem melhorar workflows e docs scoped do **seu domínio** a qualquer momento:
+
+1. Issue `ANX-*` claimada (criar sub-issue de framework se necessário, ex. ANX-230)
+2. `status` / `share` / `collab` no dialogue com `--issue ANX-N`
+3. Executor + crítico colaboram (`MISSING_CRITIC_PAIR` aplica)
+4. `npm run orchestration:verify` após mudanças materiais
+5. Escalar via `consult`/`escalate` para política global ou workflow de outro time
+
+Verificar escopo: `npm run orchestration:who -- --persona <slug> --can-i "edit framework workflow"`
+
+## Proibido
+
+- Codar sem consultar decision-tree quando issue `in_progress`.
+- Level C ignorar warnings SILENCE / MISSING_ACK / NO_SESSION.
+- Handoff sem tipos [INTERACTIONS.md](../orchestration/INTERACTIONS.md) (`ack`, `status`, `handoff`, `verdict`).
+- Level C editar política global ou workflow alheio sem `consult`/`escalate`.
+
+Docs: [LEVEL-C-MONITORING.md](../orchestration/LEVEL-C-MONITORING.md) · [COMPETENCE-BOUNDARIES.md](../orchestration/COMPETENCE-BOUNDARIES.md#autonomia-level-c--melhoria-do-framework) · [agent-workflow/README.md](../orchestration/agent-workflow/README.md)
+
+**Violacoes → `npm run orchestration:compliance`**

@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "project": {
+    "issuePrefix": "ANX"
+  },
+  "paths": {
+    "runtime": ".cursor/orchestration-runtime",
+    "dialogue": ".cursor/orchestration-runtime/dialogue",
+    "workflows": ".cursor/orchestration-runtime/workflows",
+    "autonomy": ".cursor/orchestration-runtime/autonomy",
+    "hire": ".cursor/orchestration-runtime/hire",
+    "proactive": ".cursor/orchestration-runtime/proactive",
+    "lifecycle": ".cursor/orchestration-runtime/lifecycle",
+    "state": ".cursor/orchestration-runtime/state"
+  },
+  "taskboard": {
+    "urlEnv": ["TASKBOARD_URL", "CODEX_TASKBOARD_URL"],
+    "defaultUrl": "http://127.0.0.1:47823"
+  },
+  "issueIdPattern": "^ANX-\\d+$"
+}

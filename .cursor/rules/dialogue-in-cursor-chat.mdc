@@ -1,0 +1,46 @@
+---
+description: Exibir diálogo dos agentes automaticamente no chat do Cursor (método primário)
+alwaysApply: true
+---
+
+# Diálogo no chat do Cursor (obrigatório)
+
+A UX primária do diálogo entre agentes é **visível neste chat** — não no terminal, não em JSONL bruto.
+
+## Comando principal
+
+```bash
+npm run orchestration:chat
+npm run orchestration:chat -- --issue ANX-N
+npm run orchestration:chat -- --since 30m
+npm run orchestration:chat -- --new-only
+npm run orchestration:chat -- --check-pending
+```
+
+Alias legado (mesma saída, default 20 linhas): `npm run orchestration:show-dialogue`
+
+## Quando executar e colar a saída COMPLETA
+
+1. **Usuário pergunta** sobre diálogo, agentes, equipe, orquestração ou `/dialogue` → executar `npm run orchestration:chat` (ou `--issue` se citou ANX-N) e colar **todo** o markdown na resposta — **nunca resumir** nem omitir mensagens.
+2. **Início de sessão de orquestração** (`orchestration:session start`) → mostrar últimas 10 mensagens via `npm run orchestration:chat`.
+3. **Após broadcast** (`orchestration:broadcast`) → na mesma resposta, executar `npm run orchestration:chat -- --issue ANX-N` e colar a saída completa.
+4. **Arquivo `.cursor/orchestration-runtime/dialogue/.pending-chat-display` existe** → no início do turno, executar `npm run orchestration:chat -- --check-pending` e colar a saída completa antes de continuar.
+5. **Subagente concluiu trabalho** envolvendo dialogue → o agente pai **deve** executar `npm run orchestration:chat -- --new-only` e colar a saída **verbatim** no chat (nunca resumir).
+
+## Formato da saída
+
+A saída começa com:
+
+```
+<!-- CURSOR_CHAT_DIALOGUE: paste this block verbatim in assistant response -->
+```
+
+Incluir **desde esse comentário até o fim** na resposta ao usuário, sem editar.
+
+## Proibido
+
+- Dizer "o diálogo está em `.cursor/orchestration-runtime/dialogue/`" sem mostrar o conteúdo formatado.
+- Resumir mensagens quando o usuário ou esta regra pedem exibição completa.
+- Usar apenas `tail`/`read --json` quando a intenção é mostrar diálogo ao usuário no chat.
+
+Docs: `.cursor/commands/dialogue.md` · `.cursor/orchestration/RUNBOOK.md`

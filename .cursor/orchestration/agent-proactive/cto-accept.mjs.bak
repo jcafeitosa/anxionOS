@@ -1,0 +1,360 @@
+#!/usr/bin/env node
+/**
+ * CTO Evidence-Based Acceptance — avalia pacote G7 e opcionalmente aceita.
+ *
+ * Usage:
+ *   npm run orchestration:cto-accept -- --issue ANX-221
+ *   npm run orchestration:cto-accept -- --issue ANX-221 --json
+ *   npm run orchestration:cto-accept -- --issue ANX-221 --apply
+ */
+
+import { execFileSync, spawnSync } from "node:child_process";
+import { existsSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { appendDialogueMessage, readDialogueMessages } from "../agent-dialogue/dialogue-log.mjs";
+import { getPersona } from "../agent-dialogue/personas.mjs";
+import { createDialogueMessage } from "../agent-dialogue/protocol.mjs";
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
+const MAC_TASKCTL =
+  "/Applications/Codex Taskboard.app/Contents/Resources/bin/taskctl";
+
+const GATE_RE = /\bG([2-6])\b.*\b(BLOCKED|PASS_WITH_CONDITIONS|PASS|CHANGES_REQUIRED|NOT_APPLICABLE)\b/gi;
+const ORACLE_RE =
+  /(bun test|boundaries|test:boundary|npm run boundaries)[^\n]*(\d+\/\d+|0 viol|PASS|pass)/gi;
+const DOC_RE = /(brain\/|AGENTS\.md|ADR000\d|0002-adopt-modular)/i;
+const FILES_RE = /(backend\/|manifest|paths?|arquivos?|\.ts)/i;
+const CRITIC_PASS_RE = /\b(critic|crític|marina|G1).*PASS\b/i;
+const BLOCKED_GATE_RE = /\|\s*G([2-6])\s*\|\s*BLOCKED\b/gi;
+const ESCALATE_PATTERNS = [
+  { re: /\|\s*G5\s*\|\s*BLOCKED\b/i, reason: "Red Team G5 BLOCKED (disposição gate)" },
+  { re: /\|\s*G4\s*\|\s*BLOCKED\b/i, reason: "Security G4 BLOCKED (disposição gate)" },
+  {
+    re: /\bescopo creep\b|\bout of scope\b(?!.*(?:piloto|fase|documentad))/i,
+    reason: "Alterações fora do escopo da issue",
+  },
+  { re: /\bADR\s*conflict|conflito com ADR accepted/i, reason: "Conflito ADR arquitetural" },
+];
+
+function resolveTaskctl() {
+  const fromPath = spawnSync("which", ["taskctl"], { encoding: "utf8" });
+  if (fromPath.status === 0 && fromPath.stdout.trim()) return fromPath.stdout.trim();
+  if (existsSync(MAC_TASKCTL)) return MAC_TASKCTL;
+  return null;
+}
+
+const taskctl = resolveTaskctl();
+
+function parseArgs(argv) {
+  const opts = { issue: null, json: false, apply: false };
+  for (let i = 0; i < argv.length; i += 1) {
+    const a = argv[i];
+    if (a === "--issue") opts.issue = argv[++i]?.toUpperCase();
+    else if (a === "--json") opts.json = true;
+    else if (a === "--apply") opts.apply = true;
+    else if (a === "--help" || a === "-h") {
+      console.log("Usage: cto-accept.mjs --issue ANX-N [--json] [--apply]");
+      process.exit(0);
+    } else throw new Error(`Opção desconhecida: ${a}`);
+  }
+  if (!opts.issue || !/^ANX-\d+$/.test(opts.issue)) {
+    throw new Error("--issue ANX-N obrigatório (ex.: --issue ANX-221)");
+  }
+  return opts;
+}
+
+function runTaskboardGet(issueId) {
+  const out = execFileSync("node", ["scripts/taskboard.mjs", "get", issueId], {
+    cwd: root,
+    encoding: "utf8",
+    maxBuffer: 16 * 1024 * 1024,
+  });
+  const j = JSON.parse(out);
+  return j.task ?? j;
+}
+
+function runCommentList(issueId) {
+  if (!taskctl) return [];
+  try {
+    const out = execFileSync(taskctl, ["comment", "list", issueId, "--json"], {
+      cwd: root,
+      encoding: "utf8",
+      maxBuffer: 16 * 1024 * 1024,
+    });
+    const j = JSON.parse(out);
+    return j.comments ?? [];
+  } catch {
+    return [];
+  }
+}
+
+function corpusFromComments(comments) {
+  return comments.map((c) => `${c.title ?? ""}\n${c.body ?? ""}`).join("\n---\n");
+}
+
+function checkDialogue(issueId) {
+  const messages = readDialogueMessages({ issueId });
+  const handoff = messages.some((m) => m.type === "handoff");
+  const verdictPass = messages.some((m) => m.type === "verdict" && m.verdict === "PASS");
+  const criticVerdictPass = messages.some(
+    (m) =>
+      m.type === "verdict" &&
+      m.verdict === "PASS" &&
+      (m.gate === "G1" || m.from.role === "critic"),
+  );
+  return { messages, handoff, verdictPass, criticVerdictPass };
+}
+
+function checkAcceptanceCriteria(description) {
+  const unchecked = (description.match(/- \[ \]/g) ?? []).length;
+  const checked = (description.match(/- \[x\]/gi) ?? []).length;
+  return { unchecked, checked, open: unchecked > 0 };
+}
+
+function evaluateEvidence(issueId, task, comments) {
+  const corpus = corpusFromComments(comments);
+  const dialogue = checkDialogue(issueId);
+  const criteria = checkAcceptanceCriteria(task.description ?? "");
+  const reasons = [];
+  const warnings = [];
+  const passed = [];
+
+  if (task.status !== "in_review") {
+    reasons.push(`Status ${task.status} — esperado in_review para G7`);
+  } else {
+    passed.push("Issue em in_review");
+  }
+
+  if (!DOC_RE.test(corpus) && !DOC_RE.test(task.description ?? "")) {
+    reasons.push("Referência doc (brain/, ADR ou AGENTS.md) ausente nos comentários");
+  } else {
+    passed.push("Referência documental presente");
+  }
+
+  if (!FILES_RE.test(corpus)) {
+    reasons.push("Lista de arquivos/manifest ausente nos comentários");
+  } else {
+    passed.push("Arquivos/manifest referenciados");
+  }
+
+  if (!ORACLE_RE.test(corpus)) {
+    reasons.push("Comandos de teste + saída ausentes nos comentários");
+  } else {
+    passed.push("Oráculos documentados nos comentários");
+  }
+
+  const criticInComments = CRITIC_PASS_RE.test(corpus);
+  if (!dialogue.criticVerdictPass && !criticInComments) {
+    reasons.push("Crítico G1 PASS ausente (dialogue verdict ou comentário issue)");
+  } else {
+    passed.push("Crítico G1 PASS documentado");
+  }
+
+  const blockedGates = [];
+  let m;
+  const blockedRe = new RegExp(BLOCKED_GATE_RE.source, "gi");
+  while ((m = blockedRe.exec(corpus)) !== null) {
+    blockedGates.push(`G${m[1]}`);
+  }
+  if (blockedGates.length > 0) {
+    reasons.push(`Gates BLOCKED nos comentários: ${[...new Set(blockedGates)].join(", ")}`);
+  } else {
+    const gateHits = corpus.match(GATE_RE) ?? [];
+    if (gateHits.length === 0) {
+      warnings.push("Nenhum gate G2–G6 EXECUTED explícito nos comentários");
+    } else {
+      passed.push(`Gates G2–G6 referenciados (${gateHits.length} menções)`);
+    }
+  }
+
+  if (!dialogue.handoff) {
+    reasons.push("Dialogue sem handoff para a issue");
+  } else {
+    passed.push("Dialogue contém handoff");
+  }
+
+  if (!dialogue.verdictPass) {
+    reasons.push("Dialogue sem verdict PASS");
+  } else {
+    passed.push("Dialogue contém verdict PASS");
+  }
+
+  if (criteria.open) {
+    reasons.push(`Critérios de aceite abertos na descrição (${criteria.unchecked} checkbox(es) [ ])`);
+  } else if (criteria.checked > 0) {
+    passed.push("Critérios de aceite marcados na descrição");
+  }
+
+  if (/não commitado|not committed|ainda não commit|uncommitted|HEAD observado.*não commit/i.test(corpus)) {
+    warnings.push("Comentários indicam deliverable ainda não commitado");
+    if (/pré-condição.*commit|commit Owner pendente|commit gate/i.test(corpus)) {
+      reasons.push("Aceite condicionado a commit — deliverable ainda não commitado");
+    }
+  }
+
+  for (const pat of ESCALATE_PATTERNS) {
+    if (pat.re.test(corpus)) {
+      return {
+        decision: "ESCALATE_TO_OWNER",
+        reasons: [pat.reason, ...reasons],
+        warnings,
+        passed,
+        dialogue,
+        criteria,
+      };
+    }
+  }
+
+  const zeroTolLines = corpus
+    .split("\n")
+    .filter((line) => !/no TODO|zero TODO|Zero tolerance scan.*PASS/i.test(line));
+  const zeroTolCorpus = zeroTolLines.join("\n");
+  if (/TODO\(|FIXME|not implemented|placeholder.*prod/i.test(zeroTolCorpus)) {
+    return {
+      decision: "ESCALATE_TO_OWNER",
+      reasons: ["Violação tolerância zero no diff", ...reasons],
+      warnings,
+      passed,
+      dialogue,
+      criteria,
+    };
+  }
+
+  if (reasons.length > 0) {
+    return { decision: "CHANGES_REQUIRED", reasons, warnings, passed, dialogue, criteria };
+  }
+
+  return { decision: "ACCEPT", reasons: [], warnings, passed, dialogue, criteria };
+}
+
+function formatOutput(result, issueId, opts) {
+  const payload = {
+    issueId,
+    decision: result.decision,
+    reasons: result.reasons,
+    warnings: result.warnings,
+    passed: result.passed,
+    applyEligible: result.decision === "ACCEPT",
+  };
+
+  if (opts.json) {
+    console.log(JSON.stringify(payload, null, 2));
+    return;
+  }
+
+  console.log(`\nCTO Evidence Evaluation — ${issueId}`);
+  console.log(`Decision: ${result.decision}\n`);
+
+  if (result.passed.length) {
+    console.log("✓ Passou:");
+    for (const p of result.passed) console.log(`  - ${p}`);
+  }
+
+  if (result.warnings.length) {
+    console.log("\n⚠ Avisos:");
+    for (const w of result.warnings) console.log(`  - ${w}`);
+  }
+
+  if (result.reasons.length) {
+    console.log("\n✗ Pendências:");
+    for (const r of result.reasons) console.log(`  - ${r}`);
+  }
+
+  if (result.decision === "ACCEPT") {
+    console.log("\nPróximos passos (--apply para executar):");
+    console.log(`  export CURSOR_THREAD_ID="\${CURSOR_THREAD_ID:-cursor-cto-g7-$(date +%Y%m%d)}"`);
+    console.log(`  npm run orchestration:cto-accept -- --issue ${issueId} --apply`);
+    console.log(`  export CTO_EVIDENCE_ACCEPT=1 && ./.cursor/orchestration/launch-pipeline.sh`);
+  } else if (result.decision === "ESCALATE_TO_OWNER") {
+    console.log("\nEscalar @Owner com pacote de evidências incompleto ou risco alto.");
+    console.log("Ver: .cursor/orchestration/CTO-ACCEPTANCE.md");
+  } else {
+    console.log("\nCorrigir pendências antes de novo aceite CTO.");
+    console.log("Ver: .cursor/orchestration/CTO-ACCEPTANCE.md");
+  }
+  console.log("");
+}
+
+function postApprove(issueId, result) {
+  const p = getPersona("orchestrator");
+  const summary = result.passed.slice(0, 5).join("; ");
+  const message = createDialogueMessage({
+    from: {
+      agentId: "orchestrator-cto-accept",
+      role: "orchestrator",
+      name: p.fullName,
+      persona: { name: p.fullName, role: p.slug, team: p.team },
+    },
+    to: { mention: "@Owner" },
+    issueId,
+    gate: "G7",
+    type: "approve",
+    body: `@Owner — G7 aceite CTO para ${issueId}. Evidências verificadas: ${summary}. CLI: orchestration:cto-accept → ACCEPT.`,
+    evidence: [
+      { kind: "issue", ref: issueId },
+      { kind: "file", ref: ".cursor/orchestration/CTO-ACCEPTANCE.md" },
+      { kind: "command", ref: `npm run orchestration:cto-accept -- --issue ${issueId}` },
+    ],
+  });
+  return appendDialogueMessage(message);
+}
+
+function applyAcceptance(issueId, task, result) {
+  postApprove(issueId, result);
+  console.log("✓ Dialogue approve G7 postado");
+
+  if (taskctl) {
+    const threadId =
+      process.env.CURSOR_THREAD_ID ??
+      process.env.CODEX_THREAD_ID ??
+      `cursor-cto-g7-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}`;
+    const body = `G7 aceite CTO (CTO-ACCEPTANCE.md) — evidências completas. CLI: orchestration:cto-accept --issue ${issueId} → ACCEPT.`;
+    try {
+      execFileSync(
+        taskctl,
+        ["comment", "add", issueId, "--body", body, "--thread-id", threadId],
+        { cwd: root, encoding: "utf8" },
+      );
+      console.log(`✓ Comentário taskboard adicionado (thread ${threadId})`);
+    } catch (err) {
+      console.warn(`⚠ taskctl comment add falhou: ${err.message}`);
+      console.warn(`  Manual: taskctl comment add ${issueId} --body "..." --thread-id "${threadId}"`);
+    }
+
+    console.log("\nMover para done:");
+    console.log(`  export CURSOR_THREAD_ID="${threadId}"`);
+    console.log(`  node scripts/taskboard.mjs get ${issueId}`);
+    console.log(`  node scripts/taskboard.mjs move ${issueId} done`);
+    console.log(`  export CTO_EVIDENCE_ACCEPT=1 && ./.cursor/orchestration/launch-pipeline.sh`);
+  } else {
+    console.warn("⚠ taskctl ausente — mover done manualmente");
+  }
+}
+
+async function main() {
+  const opts = parseArgs(process.argv.slice(2));
+
+  spawnSync("npm", ["run", "taskboard:ensure"], { cwd: root, stdio: "pipe" });
+
+  const task = runTaskboardGet(opts.issue);
+  const comments = runCommentList(opts.issue);
+  const result = evaluateEvidence(opts.issue, task, comments);
+
+  formatOutput(result, opts.issue, opts);
+
+  if (opts.apply) {
+    if (result.decision !== "ACCEPT") {
+      console.error(`--apply abortado: decisão ${result.decision}, não ACCEPT`);
+      process.exit(1);
+    }
+    applyAcceptance(opts.issue, task, result);
+  }
+
+  process.exit(result.decision === "ACCEPT" ? 0 : 1);
+}
+
+main().catch((err) => {
+  console.error(err.message);
+  process.exit(2);
+});

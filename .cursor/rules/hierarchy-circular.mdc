@@ -1,0 +1,46 @@
+---
+description: Hierarquia circular A/B/C e hire delegado B/C com evidência
+alwaysApply: true
+---
+
+# Hierarquia circular e hire delegado
+
+Leia [HIERARCHY.md](../orchestration/HIERARCHY.md) e [HIRE-DELEGATION.md](../orchestration/HIRE-DELEGATION.md).
+
+## Núcleo circular (centro)
+
+| Papel | Slug | Notas |
+| --- | --- | --- |
+| **@Owner** | (humano) | G7 final, veto, exceções |
+| **Renata** | `orchestrator` | Orquestra G0–G6; aceite G7 rotina; hire override |
+| **Cláudia** | `cto-critic` | Par crítico de Renata — governança, não código |
+
+Mandato desce do núcleo; evidência e escalações **retornam ao centro**. G7 exceção → @Owner.
+
+## Níveis
+
+| Nível | Quem | Hire |
+| --- | --- | --- |
+| Núcleo | Renata + Cláudia | Qualquer persona/worker; @Owner veto G7 |
+| B | Gate leads G2–G5, Ju, André | Specialists/workers **do gate** |
+| C | Executores + críticos | Executor: crítico pareado + workers subtask; crítico: **não** contrata (consult→B) |
+
+## Obrigatório ao contratar
+
+```bash
+npm run orchestration:hire -- --by-persona <hirer> --persona <target> --issue ANX-N --reason "..." --evidence "..."
+```
+
+- `--evidence` e `--reason` **sempre**
+- Máx. 3 on-demand por issue
+- Dismiss com `--evidence` de entrega
+- Log: `.cursor/orchestration-runtime/hire/hire-log.jsonl`
+
+## Proibido
+
+- Level C contratar lead ou executor/crítico de outro domínio sem B/A
+- Hire sem issue ANX-* claimada
+- Silenciar hire (postar `--speak` ou broadcast status)
+
+## Bootstrap sessão
+`npm run orchestration:hire -- bootstrap` · roster: `npm run orchestration:roster -- counts`

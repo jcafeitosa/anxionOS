@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "project": "meu-projeto",
+  "personas": {
+    "orchestrator": {
+      "slug": "orchestrator",
+      "fullName": "Coordenador",
+      "shortName": "Coord",
+      "team": "leadership",
+      "hierarchyLevel": "A",
+      "role": "orchestrator",
+      "reportsTo": "owner"
+    },
+    "executor": {
+      "slug": "executor",
+      "fullName": "Executor",
+      "shortName": "Exec",
+      "hierarchyLevel": "C",
+      "team": "execution",
+      "role": "executor",
+      "criticSlug": "critic",
+      "reportsTo": "orchestrator"
+    },
+    "critic": {
+      "slug": "critic",
+      "fullName": "Crítico",
+      "shortName": "Crit",
+      "hierarchyLevel": "C",
+      "team": "quality",
+      "role": "critic",
+      "criticOf": "executor",
+      "reportsTo": "orchestrator"
+    }
+  }
+}

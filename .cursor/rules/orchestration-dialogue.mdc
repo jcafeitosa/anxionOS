@@ -1,0 +1,45 @@
+---
+description: Diálogo de orquestração — broadcast obrigatório e exibição no chat Cursor (coordinator)
+alwaysApply: true
+---
+
+# Diálogo de orquestração (obrigatório)
+
+Complementa [dialogue-in-cursor-chat.mdc](./dialogue-in-cursor-chat.mdc) e [agents-in-chat.mdc](./agents-in-chat.mdc). Checklist completo: [CHAT-PARTICIPATION.md](../orchestration/CHAT-PARTICIPATION.md#coordinator-checklist-parent-agent).
+
+## Coordinator / parent após subagente
+
+Quando um **subagente** conclui trabalho que envolve dialogue (`broadcast`, `speak`, handoff, verdict, status):
+
+1. Executar `npm run orchestration:chat -- --new-only`
+2. Colar a saída **verbatim** na resposta ao @Owner (desde `<!-- CURSOR_CHAT_DIALOGUE` até o fim)
+3. **Nunca** resumir nem apontar só para `.cursor/orchestration-runtime/dialogue/`
+
+## Ao concluir turno com handoff, verdict, challenge, escalate ou approve
+
+1. Publicar no log:
+
+```bash
+npm run orchestration:broadcast -- \
+  --from-persona <slug> \
+  --type <tipo> \
+  --issue ANX-N \
+  --gate G1 \
+  --body "..." \
+  --mirror-taskboard
+```
+
+2. Na **mesma** resposta: `npm run orchestration:chat -- --issue ANX-N` e colar a saída completa
+3. Ler thread antes de agir: `npm run orchestration:dialogue -- read --issue ANX-N`
+
+## Sinal `.pending-chat-display`
+
+Se `.cursor/orchestration-runtime/dialogue/.pending-chat-display` existe → no **início do turno**, antes de qualquer outra ação:
+
+```bash
+npm run orchestration:chat -- --check-pending
+```
+
+Colar a saída verbatim. O hook `beforeSubmitPrompt` e `orchestration:compliance` emitem aviso `PENDING_CHAT_DISPLAY` quando o arquivo persiste.
+
+Docs: [RUNBOOK.md](../orchestration/RUNBOOK.md) · `/dialogue` · `npm run orchestration:watch -- --issue ANX-N`

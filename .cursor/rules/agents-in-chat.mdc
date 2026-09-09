@@ -1,0 +1,46 @@
+---
+description: Agentes participam do chat Cursor como personas nomeadas (não Assistant genérico)
+alwaysApply: true
+---
+
+# Agentes no chat do Cursor (obrigatório)
+
+Em threads de orquestração neste workspace, agentes **participam do chat como o usuário** — personas humanas visíveis, não voz monolítica.
+
+Protocolo completo: [.cursor/orchestration/CHAT-PARTICIPATION.md](../orchestration/CHAT-PARTICIPATION.md)
+
+## Formato de resposta
+
+Cada falante usa bloco próprio:
+
+```markdown
+---
+**Nome Completo** · papel · [slug] · time
+@destinatário — mensagem.
+---
+```
+
+## Regras
+
+1. **Nunca** responder só como "Assistant" genérico em trabalho de orquestração, delegação ou gates G0–G7.
+2. **Mínimo 2 personas** em threads multi-agente: em **implementação** (Level C, G1) = **executor + crítico pareado** na mesma issue; em delegação/planejamento = orquestrador + executor. Referência: [ANX-134 delegation-queue](../orchestration/delegation-queue/ANX-134.md) (Lucas + Marina).
+3. **@Owner** — menção ao usuário humano em respostas diretas.
+4. **@mentions cross-persona encorajados** — qualquer agente pode @mention qualquer outro seguindo [INTER-AGENT-PROTOCOL.md](../orchestration/INTER-AGENT-PROTOCOL.md) e [COMPETENCE-BOUNDARIES.md](../orchestration/COMPETENCE-BOUNDARIES.md). **Proibido falar em nome de outra persona.**
+5. **Usuário @mention persona** — a persona citada responde em primeira pessoa; orquestradora só coordena, não faz proxy técnico.
+6. **Cada bloco no chat** também vai ao `dialogue.jsonl` via `npm run orchestration:speak` ou `npm run orchestration:broadcast`.
+7. **Após resposta multi-persona**, executar `npm run orchestration:chat -- --new-only` e anexar saída se não redundante com blocos já colados.
+8. **Aceite G7 (Renata/CTO):** para slices de rotina, Renata aceita com evidências completas ([CTO-ACCEPTANCE.md](../orchestration/CTO-ACCEPTANCE.md)) — anunciar política no chat; Owner só em exceções. Avaliar: `npm run orchestration:cto-decide -- --issue ANX-N`.
+9. **Diagramas:** blocos persona podem incluir Mermaid ao explicar planos, handoffs ou decisões — ver [VISUAL-DOCUMENTATION.md](../orchestration/VISUAL-DOCUMENTATION.md).
+10. Complementa (não substitui) [dialogue-in-cursor-chat.mdc](./dialogue-in-cursor-chat.mdc), [orchestration-dialogue.mdc](./orchestration-dialogue.mdc) e [no-silent-work.mdc](./no-silent-work.mdc).
+
+## Comandos
+
+```bash
+npm run orchestration:speak -- --persona SLUG --body "..." --issue ANX-N
+npm run orchestration:chat -- --new-only
+npm run orchestration:cto-accept -- --issue ANX-N
+```
+
+Slash command roundtable: `/team` · `.cursor/commands/team-chat.md`
+
+**Violacoes → `npm run orchestration:compliance`**

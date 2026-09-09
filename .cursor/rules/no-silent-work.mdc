@@ -1,0 +1,31 @@
+---
+description: Proíbe trabalho solitário ou silencioso — broadcast obrigatório
+alwaysApply: true
+---
+
+# No Silent Work
+
+Leia [NO-SILENT-WORK.md](../orchestration/NO-SILENT-WORK.md) na sessão.
+
+## Obrigatório
+
+1. **Pareamento Level C:** todo executor (`*-executor`) exige crítico pareado na **mesma issue/thread** — `criticSlug` em `PERSONAS.md`, sessão ativa do crítico e `ack` no dialogue. Violação bloqueante: `MISSING_CRITIC_PAIR` (`orchestration:compliance --pre-work`).
+2. **Diálogo:** publicar via `npm run orchestration:broadcast` nos marcos: `ack`, `status`, `share`, `consult`, `handoff`, `verdict`, `escalate`, `hire`, `dismiss`, `decision`, `block`, `unblock`, `plan`.
+3. **Sessão:** `npm run orchestration:session -- start` ao claimar issue; `end` só após `handoff`/`verdict`.
+4. **Fim de turno:** se houve alteração de código, gravar `pending-broadcast.json` ou postar antes de parar.
+
+## Proibido
+
+- Codar sem `ack` após delegação.
+- Trabalhar com issue `in_progress` sem `status` no dialogue.
+- Encerrar turno com sessão ativa e zero broadcast no turno (hook `stop` avisa).
+- > 10 min de trabalho ativo sem post (`silence-watch` escala).
+
+## Atalhos
+
+```bash
+npm run orchestration:session -- start --persona <slug> --issue ANX-N
+npm run orchestration:broadcast -- --from-persona <slug> --type status --issue ANX-N --body "..."
+```
+
+**Violacoes → `npm run orchestration:compliance`**

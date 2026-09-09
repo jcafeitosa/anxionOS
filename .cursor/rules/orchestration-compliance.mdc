@@ -1,0 +1,47 @@
+---
+description: Todos os agentes devem seguir AGENTS.md e OpenKnowledge
+alwaysApply: true
+---
+
+# Compliance de orquestração — AGENTS.md + OpenKnowledge
+
+Regras extraídas de [AGENTS.md](../../AGENTS.md) e [.cursor/orchestration/COMPLIANCE.md](../orchestration/COMPLIANCE.md). Detalhes operacionais: [ONBOARDING.md](../orchestration/ONBOARDING.md), [RUNBOOK.md](../orchestration/RUNBOOK.md), [NO-SILENT-WORK.md](../orchestration/NO-SILENT-WORK.md).
+
+## Antes de qualquer trabalho técnico
+
+1. **Ler AGENTS.md** na sessão (gate G0).
+2. **Ler [SCOPE.md](../orchestration/SCOPE.md)** — personas de orquestração ≠ módulo `backend/modules/agents/` (agentes institucionais do produto).
+3. **`npm run taskboard:ensure`** — falhou = abortar; não codar nem editar docs públicas (gate G0.5).
+4. **Claim `ANX-*`** em `in_progress` com thread binding antes de alterar `backend/`, `frontend/`, `docs/`, `AGENTS.md`, `.github/`.
+5. **OpenKnowledge MCP** para ler/escrever `brain/` — nunca ferramentas nativas em markdown de `brain/` quando MCP disponível.
+6. **Pacote de contexto** na issue (fonte `brain/`, capability, owner, oráculos) antes de código.
+
+## Exploração e implementação
+
+- **`graphify query`** antes de Grep/Glob/Read em massa no código (quando `.graphify/out/graph.json` existe).
+- **Não inventar** stack, vendors ou comportamento ausentes de `brain/` ou `docs/`.
+- **Zero tolerância:** sem TODO/FIXME sem `ANX-*`, sem stubs/mocks em produção, sem hardcoded não documentado.
+- **Application → ports only**; infra no módulo dono (ADR0002).
+
+## No Silent Work
+
+- Broadcast obrigatório: [NO-SILENT-WORK.md](../orchestration/NO-SILENT-WORK.md) · regra `no-silent-work.mdc`.
+- Sessão ativa: `npm run orchestration:session`.
+
+## Pipeline e dialogue
+
+- Gates **G0–G7** conforme [PIPELINE.md](../orchestration/PIPELINE.md); `in_review` ≠ aprovado; `done` só com aceite explícito.
+- Handoffs no dialogue: persona nomeada, `--issue ANX-*`, `--evidence` com comando, path `brain/…` ou seção AGENTS.md.
+- Crítico independente antes de G2; correção invalida PASS anteriores.
+
+## OpenKnowledge (escrita em brain/)
+
+- Frontmatter OKF (`title`, `description`); respeitar `status: accepted` vs `proposed`.
+- Fontes ingeridas e citadas localmente; claims factuais rastreáveis.
+- Templates de pasta via `exec("ls -A <folder>")` antes de `write`.
+
+## Proibido
+
+Trabalho sem AGENTS.md · sem claim · com board offline · PR sem `ANX-*` · bypass de OKF em `brain/`.
+
+**Violacoes → `npm run orchestration:compliance`**

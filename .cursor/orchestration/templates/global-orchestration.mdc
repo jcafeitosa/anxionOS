@@ -1,0 +1,22 @@
+---
+description: Orquestração global — framework em ORCHESTRATION_HOME, config no projeto
+alwaysApply: true
+---
+
+# Orquestração global
+
+- **Framework:** `~/.cursor/orchestration` (ou `ORCHESTRATION_HOME`)
+- **Config do projeto:** `.cursor/orchestration.config.json`
+- **CLI:** `npm run orchestration:global -- <subcomando>` ou `orchestration <subcomando>` (com PATH)
+- **Instalar framework (uma vez):** `npm run orchestration:install-global`
+- **Novo projeto:** `npm run orchestration:global -- init`
+
+## Subcomandos comuns
+
+```bash
+npm run orchestration:global -- compliance --pre-work --issue ANX-N --persona orchestrator
+npm run orchestration:global -- chat --new-only
+npm run orchestration:global -- workflow -- monitor --level C
+```
+
+Docs: `GLOBAL-INSTALL.md` em `ORCHESTRATION_HOME`

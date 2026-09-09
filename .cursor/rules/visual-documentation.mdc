@@ -1,0 +1,42 @@
+---
+description: Agentes devem incluir diagramas Mermaid/ASCII/Archify em planning, handoffs e decisões
+alwaysApply: true
+---
+
+# Documentação Visual (obrigatório)
+
+Política completa: [.cursor/orchestration/VISUAL-DOCUMENTATION.md](../orchestration/VISUAL-DOCUMENTATION.md)
+
+## Quando incluir visuals
+
+| Contexto | Obrigatório? | Formato |
+| --- | --- | --- |
+| Planning / G0 | Sim | `flowchart` |
+| Handoff formal | Sim | `sequenceDiagram` |
+| Verdict / decisão gate | Sim | `stateDiagram` ou `flowchart` |
+| Status (escopo > trivial) | Recomendado | mini `flowchart` |
+| `ack` | Não | — |
+| Arquitetura institucional | Sim (Level A/B) | Archify + link |
+
+## No chat Cursor
+
+Colar Mermaid em blocos markdown — o Cursor renderiza. Persona blocks podem incluir diagramas ao explicar planos ou decisões (ver `agents-in-chat.mdc`).
+
+## No dialogue
+
+```bash
+npm run orchestration:broadcast -- ... --diagram "flowchart TD\n  A-->B"
+npm run orchestration:broadcast -- ... --diagram-file path/to/diagram.mmd
+```
+
+Ou seção `<!-- diagram -->` no `--body`.
+
+## Princípio Karpathy
+
+Diagramas **clarificam decisões e handoffs** — não decoram. Cada nó deve mapear a uma ação, gate ou transição real da issue `ANX-*`.
+
+## Verificação
+
+```bash
+npm run orchestration:diagram-check
+```

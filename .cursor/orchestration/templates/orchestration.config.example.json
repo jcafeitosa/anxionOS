@@ -1,0 +1,13 @@
+{
+  "projectName": "meu-projeto",
+  "issuePrefix": "PROJ",
+  "taskboardProject": "meu-projeto",
+  "knowledgeRoot": "docs/knowledge/",
+  "codeRoots": [
+    "src/",
+    "apps/"
+  ],
+  "scopeDoc": "SCOPE.md",
+  "defaultCTO": "orchestrator",
+  "personasFile": ".cursor/orchestration/templates/personas.template.json"
+}

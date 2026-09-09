@@ -1,0 +1,37 @@
+---
+description: Orquestração via agentes nativos Cursor (Task) + skills/MCP obrigatórios
+alwaysApply: true
+---
+
+# Agentes Cursor + skills/MCP na orquestração
+
+Política: [.cursor/orchestration/CURSOR-AGENTS-INTEGRATION.md](../orchestration/CURSOR-AGENTS-INTEGRATION.md) · registro: [SKILLS-TOOLS-MCP-REGISTRY.md](../orchestration/SKILLS-TOOLS-MCP-REGISTRY.md)
+
+## Obrigatório
+
+1. **Parent (Renata / orquestrador)** — delegar trabalho não trivial via ferramenta `Task` com `subagent_type` adequado (Multitask Mode quando paralelo).
+2. **Subagentes** herdam compliance integral: AGENTS.md, taskboard, graphify, serena, open-knowledge, dialogue.
+3. **Skills** — quando existir skill para a tarefa, **ler e seguir** antes de improvisar (`manage-taskboard`, `orchestrate-work`, `write-a-spec`, `test-driven-development`, etc.).
+4. **MCP** — descobrir com `GetDynamicTools`; invocar com `CallDynamicTool`; nunca bypass de `brain/` sem open-knowledge.
+5. **Pacote delegação** — incluir [SUBAGENT-DELEGATION-PACKAGE.md](../orchestration/templates/SUBAGENT-DELEGATION-PACKAGE.md) em todo Task técnico.
+6. **Hire on-demand** — workers mapeiam a `cursorSubagentType` em `agent-hire/levels.mjs`; preferir Task com esse type após hire.
+
+## Proibido
+
+- Executor/orquestrador fazer diff grande inline quando `Task` + subagent especializado existe
+- Subagente sem Read AGENTS.md + compliance pre-work
+- Ignorar skill disponível para o contexto (ex.: codar sem `manage-taskboard`)
+- MCP ad hoc sem `GetDynamicTools` quando namespace desconhecido
+
+## Mapeamento rápido
+
+| Papel | subagent_type |
+| --- | --- |
+| G2 Fernanda | code-reviewer |
+| G3 Edu | e2e-runner / validation-review |
+| G4 Isa | security-review |
+| Executor Lucas | generalPurpose |
+| Crítico | critic-reviewer |
+| Research Helena | explore / docs-researcher |
+
+**Violação** = mesma severidade que [MANDATORY-COMPLIANCE.md](../orchestration/MANDATORY-COMPLIANCE.md) · gate G0.15.

@@ -1,0 +1,51 @@
+---
+description: Enforcement obrigatorio da orquestracao — compliance executavel antes de codar
+alwaysApply: true
+---
+
+# Orquestracao obrigatoria (enforcement)
+
+Camada mestre: [.cursor/orchestration/MANDATORY-COMPLIANCE.md](../orchestration/MANDATORY-COMPLIANCE.md)
+
+**Violacao = trabalho invalido** (mesma severidade que zero-trabalho-fora-do-board).
+
+## Config por projeto
+
+Prefixo de issues, roots de código e roster vêm de [`.cursor/orchestration.config.json`](../.cursor/orchestration.config.json) (carregado por `agent-config/load-config.mjs`). Overrides: `ORCHESTRATION_ISSUE_PREFIX`, `TASKBOARD_PROJECT_NAME`.
+
+## Antes de QUALQUER edicao em backend/ frontend/ docs/
+
+```bash
+npm run taskboard:ensure
+npm run orchestration:compliance -- --pre-work --issue ANX-N --persona <slug>
+```
+
+Exit 1 = **ABORTAR** — corrigir violacoes listadas antes de editar arquivos.
+
+## Cada turno com alteracao de codigo
+
+1. Sessao ativa: `npm run orchestration:session -- start --persona <slug> --issue ANX-N`
+2. Issue claimada `in_progress` com thread binding
+3. `ack` postado no dialogue antes de codar
+4. `status` a cada 10 min de sessao ativa
+5. Executor + critico pareados na mesma issue
+
+## Fim de turno
+
+```bash
+npm run orchestration:compliance -- --pre-commit --issue ANX-N --persona <slug>
+```
+
+Ou gravar `.cursor/orchestration-runtime/autonomy/pending-broadcast.json` antes do hook `stop`.
+
+## Bundle mandatorio (cross-ref)
+
+Todas as regras abaixo sao **obrigatorias**, nao opcionais:
+
+- [orchestration-compliance.mdc](./orchestration-compliance.mdc) — AGENTS.md + OpenKnowledge
+- [no-silent-work.mdc](./no-silent-work.mdc) — broadcast + sessao
+- [workflow-compliance.mdc](./workflow-compliance.mdc) — decision-tree + monitor Level C
+- [agent-boundaries.mdc](./agent-boundaries.mdc) — competencia e roster
+- [agents-in-chat.mdc](./agents-in-chat.mdc) — personas no chat
+
+**Violacoes → `npm run orchestration:compliance`**

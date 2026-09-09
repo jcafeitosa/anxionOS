@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": ".cursor/hooks/agent-proactive.mjs"
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": ".cursor/hooks/agent-compliance-precheck.mjs"
+      }
+    ],
+    "stop": [
+      {
+        "command": ".cursor/hooks/agent-orchestration.mjs"
+      }
+    ]
+  }
+}

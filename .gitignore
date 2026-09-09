@@ -55,3 +55,11 @@ brain/
 
 # Activity log — local only; not published to GitHub
 log.md
+
+# Cursor orchestration — legacy CodeWhale runtime (deprecated; remove after Owner validates migrate-runtime)
+.codewhale/
+
+# Cursor orchestration runtime (local state — do not commit)
+# Project config stays tracked: .cursor/orchestration.config.json
+.cursor/orchestration-runtime/**
+!.cursor/orchestration-runtime/**/.gitkeep

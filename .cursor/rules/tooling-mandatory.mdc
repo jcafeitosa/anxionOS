@@ -1,0 +1,37 @@
+---
+description: Ferramentas habilitadas obrigatórias — graphify, serena, archify, open-knowledge, MCPs
+alwaysApply: true
+---
+
+# Tooling obrigatório — graphify, serena, archify, MCPs
+
+Política completa: [.cursor/orchestration/TOOLING-INTEGRATION.md](../orchestration/TOOLING-INTEGRATION.md) · enforcement: [MANDATORY-COMPLIANCE.md](../orchestration/MANDATORY-COMPLIANCE.md)
+
+## Obrigatório
+
+1. **graphify** — antes de Grep/Glob/Read em massa no código (regra [graphify.mdc](./graphify.mdc)); após editar código: `graphify update .`
+2. **serena** (MCP) — edições estruturais em símbolos (`find_symbol`, `find_referencing_symbols`, `replace_symbol_body`, `rename_symbol`) quando MCP disponível
+3. **archify** — comunicação de arquitetura, gate P2, handoffs visuais: `npm run archify:validate`, `npm run archify:build` (Owner pode dizer "anchfy" — nome correto é **archify**)
+4. **open-knowledge** — qualquer leitura/escrita em `brain/` somente via MCP; nunca ferramentas nativas em markdown de `brain/`
+5. **code-review-graph** — análise de impacto e review G2 quando código indexado no MCP
+6. **Supermemory** — `supermemory_search` com `workspaceRoot` absoluto no início de turnos substantivos
+7. **Subagentes** — incluir bloco em [.cursor/orchestration/templates/SUBAGENT-PROMPT-TOOLING.md](../orchestration/templates/SUBAGENT-PROMPT-TOOLING.md) em todo Task/delegation com trabalho técnico
+
+## Sequência rápida (G0.14)
+
+```text
+brain/?     → open-knowledge MCP
+explorar?   → graphify query (ANTES de Grep/Glob/Read)
+símbolo?    → serena MCP
+arquitetura?→ archify validate/build
+review G2?  → code-review-graph MCP
+```
+
+## Proibido
+
+- Exploração em massa com Grep/Glob/Read sem `graphify query` quando `.graphify/out/graph.json` existe
+- Editar `brain/` com Read/Write/Grep nativos quando open-knowledge MCP está disponível
+- Delegar subagente de código sem bloco tooling (AGENTS.md + graphify + serena + brain/ MCP)
+- Ignorar avisos `GRAPHIFY_INDEX_MISSING` do compliance — rodar `npm run graphify:index`
+
+**Violação = não-compliance** — mesma severidade que [MANDATORY-COMPLIANCE.md](../orchestration/MANDATORY-COMPLIANCE.md).

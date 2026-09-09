@@ -1,0 +1,178 @@
+{
+  "version": 1,
+  "project": "anxionOS",
+  "personas": {
+    "orchestrator": {
+      "slug": "orchestrator",
+      "fullName": "Renata Oliveira",
+      "shortName": "Renata",
+      "team": "leadership",
+      "hierarchyLevel": "center",
+      "role": "orchestrator",
+      "reportsTo": "owner",
+      "criticSlug": "cto-critic"
+    },
+    "backend-executor": {
+      "slug": "backend-executor",
+      "fullName": "Lucas Mendes",
+      "shortName": "Lucas",
+      "hierarchyLevel": "C",
+      "team": "execution",
+      "role": "executor",
+      "criticSlug": "backend-critic",
+      "reportsTo": "orchestrator"
+    },
+    "frontend-executor": {
+      "slug": "frontend-executor",
+      "fullName": "Camila Santos",
+      "shortName": "Camila",
+      "hierarchyLevel": "C",
+      "team": "execution",
+      "role": "executor",
+      "criticSlug": "frontend-critic",
+      "reportsTo": "orchestrator"
+    },
+    "infra-executor": {
+      "slug": "infra-executor",
+      "fullName": "Rafael Costa",
+      "shortName": "Rafael",
+      "hierarchyLevel": "C",
+      "team": "execution",
+      "role": "executor",
+      "criticSlug": "infra-critic",
+      "reportsTo": "orchestrator"
+    },
+    "adapters-executor": {
+      "slug": "adapters-executor",
+      "fullName": "Diego Almeida",
+      "shortName": "Diego",
+      "hierarchyLevel": "C",
+      "team": "execution",
+      "role": "executor",
+      "criticSlug": "adapters-critic",
+      "reportsTo": "orchestrator"
+    },
+    "backend-critic": {
+      "slug": "backend-critic",
+      "fullName": "Marina Ferreira",
+      "shortName": "Marina",
+      "hierarchyLevel": "C",
+      "team": "quality",
+      "role": "critic",
+      "criticOf": "backend-executor",
+      "reportsTo": "orchestrator"
+    },
+    "frontend-critic": {
+      "slug": "frontend-critic",
+      "fullName": "Paulo Ribeiro",
+      "shortName": "Paulo",
+      "hierarchyLevel": "C",
+      "team": "quality",
+      "role": "critic",
+      "criticOf": "frontend-executor",
+      "reportsTo": "orchestrator"
+    },
+    "infra-critic": {
+      "slug": "infra-critic",
+      "fullName": "Ana Beatriz Lima",
+      "shortName": "Bia",
+      "hierarchyLevel": "C",
+      "team": "quality",
+      "role": "critic",
+      "criticOf": "infra-executor",
+      "reportsTo": "orchestrator"
+    },
+    "adapters-critic": {
+      "slug": "adapters-critic",
+      "fullName": "Gustavo Henrique",
+      "shortName": "Gustavo",
+      "hierarchyLevel": "C",
+      "team": "quality",
+      "role": "critic",
+      "criticOf": "adapters-executor",
+      "reportsTo": "orchestrator"
+    },
+    "code-review-lead": {
+      "slug": "code-review-lead",
+      "fullName": "Fernanda Aoki",
+      "shortName": "Fernanda",
+      "hierarchyLevel": "B",
+      "team": "code-review",
+      "role": "code-review",
+      "reportsTo": "orchestrator"
+    },
+    "qa-lead": {
+      "slug": "qa-lead",
+      "fullName": "Eduardo Nakamura",
+      "shortName": "Edu",
+      "hierarchyLevel": "B",
+      "team": "qa",
+      "role": "qa",
+      "reportsTo": "orchestrator"
+    },
+    "security-lead": {
+      "slug": "security-lead",
+      "fullName": "Isabella Morales",
+      "shortName": "Isa",
+      "hierarchyLevel": "B",
+      "team": "security",
+      "role": "security",
+      "reportsTo": "orchestrator"
+    },
+    "red-team-lead": {
+      "slug": "red-team-lead",
+      "fullName": "Thiago Martins",
+      "shortName": "Thiago",
+      "hierarchyLevel": "B",
+      "team": "red-team",
+      "role": "red-team",
+      "reportsTo": "orchestrator"
+    },
+    "github-lead": {
+      "slug": "github-lead",
+      "fullName": "Juliana Pereira",
+      "shortName": "Ju",
+      "hierarchyLevel": "B",
+      "team": "github",
+      "role": "github",
+      "reportsTo": "orchestrator"
+    },
+    "docs-lead": {
+      "slug": "docs-lead",
+      "fullName": "André Kuznetsov",
+      "shortName": "André",
+      "hierarchyLevel": "B",
+      "team": "docs",
+      "role": "docs",
+      "reportsTo": "orchestrator"
+    },
+    "researcher": {
+      "slug": "researcher",
+      "fullName": "Helena Duarte",
+      "shortName": "Helena",
+      "team": "research",
+      "hierarchyLevel": "on-demand",
+      "role": "researcher",
+      "reportsTo": "orchestrator"
+    },
+    "architect": {
+      "slug": "architect",
+      "fullName": "Marcus Chen",
+      "shortName": "Marcus",
+      "team": "architecture",
+      "hierarchyLevel": "A",
+      "role": "architect",
+      "reportsTo": "orchestrator"
+    },
+    "cto-critic": {
+      "slug": "cto-critic",
+      "fullName": "Cláudia Nunes",
+      "shortName": "Cláudia",
+      "team": "leadership",
+      "hierarchyLevel": "center",
+      "role": "critic",
+      "criticOf": "orchestrator",
+      "reportsTo": "owner"
+    }
+  }
+}

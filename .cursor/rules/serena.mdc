@@ -1,0 +1,25 @@
+---
+description: Serena LSP symbolic code tools (TypeScript/Bun, Python, Go)
+alwaysApply: true
+---
+
+Projeto configurado com [Serena](https://oraios.github.io/serena/) em `.serena/`.
+
+**Language servers ativos:** `typescript` (TS/JS + **Bun**), `python`, `go` (gopls).
+
+| Stack | LSP Serena | Notas |
+| --- | --- | --- |
+| Backend Bun + frontend Astro | `typescript` | Não há LSP "bun" separado; `@types/bun` cobre tipos |
+| Graphify / scripts Python | `python` | Pyright via `uvx` |
+| Go (`backend/services/` futuro) | `go` | Requer `gopls` em PATH ou `ls_specific_settings.go.ls_path` |
+
+**Ferramentas MCP:** `get_symbols_overview`, `find_symbol`, `find_referencing_symbols`, `rename_symbol`, `replace_symbol_body`.
+
+**Ordem de exploração:** graphify → Serena → Read/Grep pontual.
+
+```bash
+npm run serena:check   # health-check + memories
+npm run serena:index   # reindexar símbolos TS
+```
+
+Após editar `.serena/project.yml`: reiniciar MCP Serena no Cursor.

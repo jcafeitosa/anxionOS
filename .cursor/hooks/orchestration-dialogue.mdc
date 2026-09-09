@@ -1,0 +1,15 @@
+---
+description: Redireciona para regra always-on em .cursor/rules/ (não duplicar conteúdo aqui)
+alwaysApply: false
+globs:
+  - ".cursor/orchestration/**"
+  - ".cursor/orchestration-runtime/dialogue/**"
+---
+
+# Hook de diálogo de orquestração
+
+**Canônico (alwaysApply):** [.cursor/rules/orchestration-dialogue.mdc](../rules/orchestration-dialogue.mdc)
+
+**Exibição no chat:** [.cursor/rules/dialogue-in-cursor-chat.mdc](../rules/dialogue-in-cursor-chat.mdc)
+
+Este arquivo permanece em `hooks/` para contexto por glob ao editar dialogue/orchestration. Não duplicar regras — editar os arquivos em `.cursor/rules/`.

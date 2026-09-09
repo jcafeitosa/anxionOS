@@ -1,0 +1,33 @@
+---
+description: Ciclo de vida produto P0–P7 — brainstorm até produção
+alwaysApply: true
+---
+
+# Lifecycle compliance
+
+Framework completo: [.cursor/orchestration/LIFECYCLE.md](../orchestration/LIFECYCLE.md) · runbook [.cursor/orchestration/BRAINSTORM-TO-PROD-RUNBOOK.md](../orchestration/BRAINSTORM-TO-PROD-RUNBOOK.md)
+
+## Obrigatório
+
+1. **Novos projetos** iniciam em **P0** (brainstorm) salvo issue já classificada em P4+ no taskboard.
+2. **Antes de código em `backend/`/`frontend/`:** mínimo **P1** — spec ou design doc em `brain/` via OpenKnowledge MCP.
+3. **P4+:** pipeline G0–G7 + [MANDATORY-COMPLIANCE.md](../orchestration/MANDATORY-COMPLIANCE.md) permanecem obrigatórios.
+4. **Consultar fase:** `npm run orchestration:phase -- status --issue ANX-N`
+5. **Transição de fase:** `npm run orchestration:phase -- set --issue ANX-N --phase P<N>` com evidência no dialogue.
+
+## Proibido
+
+- Codar feature nova sem spec em `brain/` (P1+) ou pacote G0 (P4).
+- Pular P2 (ADR/archify) para mudanças arquiteturais materiais.
+- Deploy staging/prod sem checklist P5–P7.
+
+## CLI
+
+```bash
+npm run orchestration:phase -- next --from brainstorm
+npm run orchestration:phase -- gate P4 --issue ANX-N
+```
+
+Estado persistido: `.cursor/orchestration-runtime/lifecycle/{issue}.json`
+
+**Violacoes → `npm run orchestration:compliance`**

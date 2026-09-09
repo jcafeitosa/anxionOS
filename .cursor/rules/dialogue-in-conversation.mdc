@@ -1,0 +1,22 @@
+---
+description: Exibir diálogo dos agentes na conversa quando solicitado ou ao iniciar sessão de orquestração
+alwaysApply: false
+---
+
+# Diálogo na conversa Cursor
+
+Quando o usuário pedir diálogo **ou** o orquestrador iniciar sessão de orquestração:
+
+1. Executar `npm run orchestration:show-dialogue` (ou com `--issue ANX-N` se o usuário citar uma issue)
+2. Exibir o markdown completo na resposta — **não resumir** nem omitir mensagens
+3. Oferecer filtro `--issue` se o usuário mencionar uma issue específica
+
+Comandos úteis:
+
+```bash
+npm run orchestration:show-dialogue
+npm run orchestration:show-dialogue -- --issue ANX-221
+npm run orchestration:dialogue -- conversation --thread ANX-134-debate-test
+```
+
+Docs: [.cursor/orchestration/agent-dialogue/README.md](../orchestration/agent-dialogue/README.md)
