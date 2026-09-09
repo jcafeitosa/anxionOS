@@ -118,9 +118,9 @@ Cada linha sem schema, owner, oráculo ou issue ativa é backlog, não readiness
 
 REAL/live, capital real e autonomia L3/L4 não estão autorizados para ativação. O planejamento futuro permanece rastreado em ANX-172/ANX-173, condicionado a evidências e autorização separada; autoexpansão de autoridade continua proibida. Criar backlog não concede capacidade de execução.
 
-## 6.1. Pendências de reconciliação ANX-127
+## 6.1. Histórico de pendências de reconciliação ANX-127
 
-Saldo vigente após auditoria independente de fechamento, registrada em ANX-127 no comentário `405b8304-f8bd-430b-866d-c171fd86b735`: **CHANGES_REQUIRED** para o conjunto documental. A correção de owners é incremental, não aceite integral.
+**Checkpoint histórico, não saldo vigente.** A auditoria de fechamento registrada em ANX-127 no comentário `405b8304-f8bd-430b-866d-c171fd86b735` emitiu **CHANGES_REQUIRED** sobre seu candidato. A tabela e as contagens abaixo preservam aquele estágio e as atualizações incrementais subsequentes; não atestam aprovação nem pendência atual. O run de revalidação documental integrado vigente está na §6.37 e nos pareceres da ANX-186, sempre vinculados ao candidato exato.
 
 | Entrega de planejamento | Estado e evidência | Condição para encerramento |
 | --- | --- | --- |
@@ -132,7 +132,7 @@ Saldo vigente após auditoria independente de fechamento, registrada em ANX-127 
 | Pacote final documental | §6.36 candidato C4 `d31f823d…010200d`; G1 C4 PASS_WITH_CONDITIONS (`018e91eb`); A4 PASS_WITH_CONDITIONS (`2ccab708`); candidato C5 pós-P1–P3 | Condições C1–C3 do parecer G1 C4 satisfeitas; housekeeping P1–P3 aplicado; gates G2–G7 proporcionais antes de encerrar ANX-127; não simular gates ou herdar PASS antigo |
 | Implementação futura | Delegada às tarefas do programa ANX-126 | Não precisa ser executada para concluir este planejamento; gaps devem estar cobertos e dependências claras. Gates de produto permanecem futuros |
 
-As contagens progressivas e pendências nas §§6.2–6.9 descrevem o checkpoint em que cada inspeção foi feita; o saldo acima e a §6.10 prevalecem para o alcance da revisão documental atual. Todos os 23 módulos possuem evidência inicial parcial e todos os R10 foram consultados, mas o inventário exaustivo de capacidades ainda não está concluído.
+As contagens progressivas e pendências nas §§6.2–6.9 descrevem o checkpoint em que cada inspeção foi feita. As afirmações de completude ou incompletude desta seção e da §6.10 são históricas; a disposição finita dos agrupamentos e referências está nas §§6.12–6.35. A §6.37 e o ledger da ANX-186 distinguem cobertura documental, lacunas delegadas e aprovação do candidato integrado. Nenhum desses registros comprova implementação.
 
 Não declarar ANX-127 concluída apenas por corrigir esta tabela ou criar 60 tarefas. A [auditoria ANX-118](../../brain/notes/anxionos-backend-conformance-2026-09-08.md) é fonte de achados a revalidar, não prova de ausência atual.
 
