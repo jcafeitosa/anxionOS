@@ -26,7 +26,9 @@
     "frontend:build": "npm run build --prefix frontend",
     "test:e2e": "npm run test:e2e --prefix frontend",
     "orchestration:dialogue": "node .cursor/orchestration/agent-dialogue/broadcast.mjs",
-    "orchestration:broadcast": "node .cursor/orchestration/agent-dialogue/broadcast.mjs post"
+    "orchestration:broadcast": "node .cursor/orchestration/agent-dialogue/broadcast.mjs post",
+    "orchestration:watch": "node .cursor/orchestration/agent-dialogue/watch.mjs",
+    "orchestration:personas": "node .cursor/orchestration/agent-dialogue/personas.mjs list"
   },
   "repository": {
     "type": "git",
