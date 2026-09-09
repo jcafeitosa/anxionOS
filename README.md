@@ -109,7 +109,11 @@ O diretório [`.cursor/orchestration/`](.cursor/orchestration/) é um **framewor
 | Design agnóstico | [.cursor/orchestration/AGNOSTIC-DESIGN.md](.cursor/orchestration/AGNOSTIC-DESIGN.md) |
 | Bootstrap novo projeto | [.cursor/orchestration/templates/README-BOOTSTRAP.md](.cursor/orchestration/templates/README-BOOTSTRAP.md) |
 | Config anxionOS | `issuePrefix: ANX`, `knowledgeRoot: brain/` |
+| Runtime (estado local) | `.cursor/orchestration-runtime/` — dialogue, workflows, hire, autonomy |
+| Migração legado | `npm run orchestration:migrate-runtime` (de `.codewhale/` se existir) |
 | Verificação | `npm run orchestration:test` · `npm run orchestration:verify` |
+
+> **Depreciação:** `.codewhale/` era o runtime legado desta instância (nome interno antigo, não é produto Cursor). O path canônico é `.cursor/orchestration-runtime/`; `load-config.mjs` ainda lê `.codewhale/` como fallback. Após `orchestration:migrate-runtime` e `orchestration:verify`, remova `.codewhale/` manualmente.
 
 ## Contribuir
 
