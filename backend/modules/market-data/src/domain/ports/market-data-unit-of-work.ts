@@ -1,0 +1,52 @@
+import type { DomainEventEnvelope } from "@anxionos/contracts/events";
+import type { CommandJournalRepository } from "./command-journal";
+export interface InstrumentRecord {
+    id: string;
+    organizationId: string;
+    canonicalSymbol: string;
+    instrumentKind: string;
+    assetId: string;
+    venueId: string;
+    executionMode: string;
+    status: string;
+    revision: number;
+}
+export interface ObservationHeaderRecord {
+    id: string;
+    organizationId: string;
+    instrumentId: string;
+    observationKind: string;
+    sourceEventId: string;
+    eventTime: string;
+    price: string;
+    volume: string | null;
+    executionMode: string;
+    qualityFlag: string;
+}
+export interface InstrumentRepository {
+    findById(instrumentId: string, organizationId: string): Promise<InstrumentRecord | null>;
+    findActiveByNaturalKey(organizationId: string, canonicalSymbol: string, venueId: string): Promise<InstrumentRecord | null>;
+    save(record: InstrumentRecord): Promise<InstrumentRecord>;
+}
+export interface ObservationRepository {
+    findBySourceEventId(organizationId: string, sourceEventId: string): Promise<ObservationHeaderRecord | null>;
+    saveHeader(record: ObservationHeaderRecord): Promise<ObservationHeaderRecord>;
+    insertTimeseries(record: {
+        eventTime: string;
+        organizationId: string;
+        instrumentId: string;
+        observationHeaderId: string;
+        observationKind: string;
+        price: string;
+        volume: string | null;
+    }): Promise<void>;
+}
+export interface MarketDataTransactionContext {
+    commandJournal: CommandJournalRepository;
+    instruments: InstrumentRepository;
+    observations: ObservationRepository;
+    publishEvents(envelopes: DomainEventEnvelope[]): Promise<void>;
+}
+export interface MarketDataUnitOfWork {
+    runInTransaction<T>(work: (ctx: MarketDataTransactionContext) => Promise<T>): Promise<T>;
+}

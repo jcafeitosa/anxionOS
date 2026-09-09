@@ -12,4 +12,5 @@ export interface PrincipalRepository {
 	): Promise<Principal | null>;
 	reactivate(id: string): Promise<Principal | null>;
 	updateEmail(id: string, email: string): Promise<Principal | null>;
+	linkAuthUserId(id: string, authUserId: string): Promise<Principal | null>;
 }

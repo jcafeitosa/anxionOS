@@ -21,13 +21,6 @@ export async function suspendPrincipal(
 	input: SuspendPrincipalInput,
 ): Promise<Principal> {
 	const command = suspendPrincipalCommandSchema.parse(input);
-	const existing = await deps.repository.findById(command.principalId);
-	if (!existing) {
-		throwIdentityError("PRINCIPAL_NOT_FOUND", "Principal not found");
-	}
-	if (existing.status === "suspended") {
-		return existing;
-	}
 	const suspendedAt = new Date();
 	return deps.unitOfWork.runInTransaction(async (context) => {
 		const principal = await context.principalRepository.markSuspended(
@@ -35,16 +28,23 @@ export async function suspendPrincipal(
 			command.reasonCode,
 			suspendedAt,
 		);
-		if (!principal) {
+		if (principal) {
+			await context.publishEvents([
+				createPrincipalSuspendedEvent({
+					principalId: principal.id,
+					reasonCode: command.reasonCode,
+					suspendedAt: suspendedAt.toISOString(),
+				}),
+			]);
+			return principal;
+		}
+		const existing = await context.principalRepository.findById(command.principalId);
+		if (!existing) {
 			throwIdentityError("PRINCIPAL_NOT_FOUND", "Principal not found");
 		}
-		await context.publishEvents([
-			createPrincipalSuspendedEvent({
-				principalId: principal.id,
-				reasonCode: command.reasonCode,
-				suspendedAt: suspendedAt.toISOString(),
-			}),
-		]);
-		return principal;
+		if (existing.status === "suspended") {
+			return existing;
+		}
+		throwIdentityError("PRINCIPAL_NOT_FOUND", "Principal not found");
 	});
 }

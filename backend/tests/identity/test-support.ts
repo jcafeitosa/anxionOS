@@ -50,7 +50,7 @@ export function createInMemoryPrincipalRepository(
 		},
 		async markSuspended(id, reasonCode, suspendedAt) {
 			const principal = principals.get(id);
-			if (!principal) {
+			if (!principal || principal.status !== "active") {
 				return null;
 			}
 			const updated = {
@@ -64,7 +64,7 @@ export function createInMemoryPrincipalRepository(
 		},
 		async reactivate(id) {
 			const principal = principals.get(id);
-			if (!principal) {
+			if (!principal || principal.status !== "suspended") {
 				return null;
 			}
 			const updated = {
@@ -82,6 +82,15 @@ export function createInMemoryPrincipalRepository(
 				return null;
 			}
 			const updated = { ...principal, email };
+			principals.set(id, updated);
+			return updated;
+		},
+		async linkAuthUserId(id, authUserId) {
+			const principal = principals.get(id);
+			if (!principal) {
+				return null;
+			}
+			const updated = { ...principal, authUserId };
 			principals.set(id, updated);
 			return updated;
 		},

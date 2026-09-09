@@ -3,10 +3,43 @@
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
-	"exports": { ".": "./src/index.ts" },
+	"exports": {
+		".": "./src/index.ts",
+		"./events": "./src/events.ts",
+		"./errors": "./src/errors.ts",
+		"./envelope-v02": "./src/envelope-v02.ts",
+		"./realtime": "./src/realtime.ts",
+		"./accounting": "./src/accounting/index.ts",
+		"./adapter-gateway": "./src/adapter-gateway/index.ts",
+		"./audit": "./src/audit/index.ts",
+		"./capability-manifest": "./src/capability-manifest/index.ts",
+		"./billing": "./src/billing/index.ts",
+		"./capital": "./src/capital/index.ts",
+		"./connections": "./src/connections/index.ts",
+		"./decisions": "./src/decisions/index.ts",
+		"./evaluation": "./src/evaluation/index.ts",
+		"./execution": "./src/execution/index.ts",
+		"./governance": "./src/governance/index.ts",
+		"./graph": "./src/graph/index.ts",
+		"./identity": "./src/identity/index.ts",
+		"./inference": "./src/inference/index.ts",
+		"./knowledge": "./src/knowledge/index.ts",
+		"./market-data": "./src/market-data/index.ts",
+		"./operations": "./src/operations/index.ts",
+		"./orchestration": "./src/orchestration/index.ts",
+		"./organizations": "./src/organizations/index.ts",
+		"./partners": "./src/partners/index.ts",
+		"./performance": "./src/performance/index.ts",
+		"./portfolios": "./src/portfolios/index.ts",
+		"./risk": "./src/risk/index.ts",
+		"./simulation": "./src/simulation/index.ts",
+		"./strategies": "./src/strategies/index.ts"
+	},
 	"scripts": {
 		"build": "tsc --project tsconfig.json",
 		"typecheck": "tsc --project tsconfig.json --noEmit"
 	},
-	"dependencies": { "zod": "^3.24.1" }
+	"dependencies": {
+		"zod": "^3.24.1"
+	}
 }

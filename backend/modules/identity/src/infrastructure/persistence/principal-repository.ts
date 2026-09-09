@@ -70,7 +70,7 @@ export function createDrizzlePrincipalRepository(
 					suspendedAt,
 					suspensionReason: reasonCode,
 				})
-				.where(eq(principals.id, id))
+				.where(and(eq(principals.id, id), eq(principals.status, "active")))
 				.returning();
 			return rows[0] ? toPrincipal(rows[0]) : null;
 		},
@@ -82,6 +82,14 @@ export function createDrizzlePrincipalRepository(
 					suspendedAt: null,
 					suspensionReason: null,
 				})
+				.where(and(eq(principals.id, id), eq(principals.status, "suspended")))
+				.returning();
+			return rows[0] ? toPrincipal(rows[0]) : null;
+		},
+		async linkAuthUserId(id: string, authUserId: string): Promise<Principal | null> {
+			const rows = await db
+				.update(principals)
+				.set({ authUserId })
 				.where(eq(principals.id, id))
 				.returning();
 			return rows[0] ? toPrincipal(rows[0]) : null;

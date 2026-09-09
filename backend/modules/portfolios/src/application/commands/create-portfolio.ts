@@ -1,0 +1,67 @@
+import { type CreatePortfolioCommand, type PortfoliosCommandResult } from "@anxionos/contracts/portfolios";
+import type { CommandJournalRepository } from "../../domain/ports/command-journal";
+import type { PortfoliosUnitOfWork } from "../../domain/ports/portfolios-unit-of-work";
+import { randomUUID } from "node:crypto";
+import { assertPortfoliosExecutionModeSupported, createPortfolioCommandSchema, portfoliosCommandResultSchema } from "@anxionos/contracts/portfolios";
+import { createPortfolioCreatedEvent } from "../../domain/events/portfolios-events";
+import { loadIdempotentCommandResult, toCommandResultSnapshot, } from "../command-support";
+import { parseCommandResultSnapshot, throwPortfoliosError } from "../errors";
+
+export interface CreatePortfolioDeps {
+    unitOfWork: PortfoliosUnitOfWork;
+    commandJournal: CommandJournalRepository;
+}
+
+export async function createPortfolio(deps: CreatePortfolioDeps, input: CreatePortfolioCommand): Promise<PortfoliosCommandResult> {
+    const command = createPortfolioCommandSchema.parse(input);
+    assertPortfoliosExecutionModeSupported(command.executionMode);
+    const existingCommand = await deps.commandJournal.findByCommandId(command.commandId);
+    if (existingCommand && existingCommand.organizationId !== command.organizationId) {
+        throwPortfoliosError("PF_CROSS_TENANT", "command journal organization mismatch");
+    }
+    const replay = await loadIdempotentCommandResult(deps.commandJournal, command.commandId);
+    if (replay)
+        return replay;
+    return deps.unitOfWork.runInTransaction(async (ctx) => {
+        const raced = await ctx.commandJournal.findByCommandId(command.commandId);
+        if (raced) {
+            const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
+            return portfoliosCommandResultSchema.parse({ ...parsed, idempotentReplay: true });
+        }
+        const portfolioId = `pf_prt_${randomUUID()}`;
+        const saved = await ctx.portfolios.save({
+            id: portfolioId,
+            organizationId: command.organizationId,
+            ownerUserId: command.ownerUserId,
+            capitalAccountId: command.capitalAccountId,
+            name: command.name,
+            baseCurrency: command.baseCurrency,
+            executionMode: command.executionMode,
+            status: "ACTIVE",
+            revision: 1,
+        });
+        await ctx.publishEvents([
+            createPortfolioCreatedEvent({
+                portfolioId: saved.id,
+                organizationId: saved.organizationId,
+                ownerUserId: saved.ownerUserId,
+                capitalAccountId: saved.capitalAccountId,
+                name: saved.name,
+                baseCurrency: saved.baseCurrency,
+                executionMode: saved.executionMode,
+            }),
+        ]);
+        const result = portfoliosCommandResultSchema.parse({
+            aggregateId: saved.id,
+            revision: saved.revision,
+            portfolioId: saved.id,
+        });
+        await ctx.commandJournal.save({
+            commandId: command.commandId,
+            organizationId: command.organizationId,
+            commandName: "createPortfolio",
+            responseSnapshot: toCommandResultSnapshot(result),
+        });
+        return result;
+    });
+}

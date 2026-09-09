@@ -1,6 +1,7 @@
 export { canTransitionAgencyStatus, canTransitionMembershipStatus, canTransitionOnboardingStep, countActiveOwners, wouldViolateOwnerRequired, } from "./domain/entities";
 export { createAgencyCreatedEvent, createAgencyMarketsUpdatedEvent, createAgencyStatusChangedEvent, createMembershipActivatedEvent, createMembershipInvitedEvent, createMembershipRevokedEvent, } from "./domain/events";
 export { AgencyScopeViolationError, PrincipalLookupUnavailableError, } from "./domain/ports";
+export { MembershipRevisionConflictError } from "./domain/errors/membership-errors";
 export { activateMembership, } from "./application/commands/activate-membership";
 export { acceptInviteByToken, } from "./application/commands/accept-invite-by-token";
 export { advanceOnboarding, } from "./application/commands/advance-onboarding";

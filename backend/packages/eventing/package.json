@@ -4,7 +4,15 @@
 	"private": true,
 	"type": "module",
 	"exports": {
-		".": "./src/index.ts"
+		".": "./src/index.ts",
+		"./postgres": "./src/postgres.ts",
+		"./schema": "./src/schema.ts",
+		"./relay": "./src/relay.ts",
+		"./retry": "./src/retry.ts",
+		"./nats-publisher": "./src/nats-publisher.ts",
+		"./schema-upcast": "./src/schema-upcast.ts",
+		"./retention": "./src/retention.ts",
+		"./outbox-relay-worker": "./src/outbox-relay-worker.ts"
 	},
 	"scripts": {
 		"build": "tsc --project tsconfig.json",
@@ -12,6 +20,7 @@
 	},
 	"dependencies": {
 		"@anxionos/contracts": "workspace:*",
-		"nats": "^2.29.3"
+		"nats": "^2.29.3",
+		"pg": "^8.23.0"
 	}
 }

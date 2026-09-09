@@ -37,6 +37,11 @@ export {
 	type SyncPrincipalEmailDeps,
 } from "./application/commands/sync-principal-email";
 export {
+	linkAuthUserId,
+	type LinkAuthUserIdInput,
+	type LinkAuthUserIdDeps,
+} from "./application/commands/link-auth-user-id";
+export {
 	registerServiceIdentity,
 	type RegisterServiceIdentityDeps,
 } from "./application/commands/register-service-identity";

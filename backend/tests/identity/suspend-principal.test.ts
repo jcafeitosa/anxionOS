@@ -5,6 +5,7 @@ import {
 	suspendPrincipal,
 	type Principal,
 } from "@anxionos/identity";
+import { IdentityCommandError } from "../../modules/identity/src/application/errors";
 import {
 	createInMemoryPrincipalRepository,
 	createInMemoryServiceIdentityRepository,
@@ -55,5 +56,19 @@ describe("suspendPrincipal", () => {
 		);
 		expect(result.status).toBe("suspended");
 		expect(published).toHaveLength(0);
+	});
+
+	test("unknown principal fails closed", async () => {
+		const repository = createInMemoryPrincipalRepository();
+		const { unitOfWork } = createRecordingUnitOfWork(
+			repository,
+			createInMemoryServiceIdentityRepository(),
+		);
+		await expect(
+			suspendPrincipal(
+				{ repository, unitOfWork },
+				{ principalId: "00000000-0000-4000-8000-000000000000", reasonCode: "ops.manual" },
+			),
+		).rejects.toBeInstanceOf(IdentityCommandError);
 	});
 });

@@ -1,0 +1,26 @@
+import { z } from "zod";
+export const EXECUTION_MODULE_ERROR_CODES = {
+    CROSS_TENANT: "EX_CROSS_TENANT",
+    PERMIT_BYPASS: "EX_PERMIT_BYPASS",
+    DUPLICATE_FILL: "EX_DUPLICATE_FILL",
+    DUPLICATE_CLIENT_ORDER: "EX_DUPLICATE_CLIENT_ORDER",
+    MODE_FORBIDDEN: "EX_MODE_FORBIDDEN",
+    SESSION_NOT_FOUND: "EX_SESSION_NOT_FOUND",
+    PERMIT_STALE: "EX_PERMIT_STALE",
+};
+export const executionModuleErrorCodeSchema = z.enum(Object.values(EXECUTION_MODULE_ERROR_CODES) as [string, ...string[]]);
+export const EXECUTION_MODULE_ERROR_STATUS_MAP = {
+    EX_CROSS_TENANT: 403,
+    EX_PERMIT_BYPASS: 403,
+    EX_DUPLICATE_FILL: 409,
+    EX_DUPLICATE_CLIENT_ORDER: 409,
+    EX_MODE_FORBIDDEN: 422,
+    EX_SESSION_NOT_FOUND: 404,
+    EX_PERMIT_STALE: 409,
+};
+export type ExecutionErrorCode = (typeof EXECUTION_MODULE_ERROR_CODES)[keyof typeof EXECUTION_MODULE_ERROR_CODES];
+export function resolveExecutionModuleErrorStatus(code: ExecutionModuleErrorCode): number {
+    return EXECUTION_MODULE_ERROR_STATUS_MAP[code as keyof typeof EXECUTION_MODULE_ERROR_STATUS_MAP];
+}
+
+export type ExecutionModuleErrorCode = (typeof EXECUTION_MODULE_ERROR_CODES)[keyof typeof EXECUTION_MODULE_ERROR_CODES];

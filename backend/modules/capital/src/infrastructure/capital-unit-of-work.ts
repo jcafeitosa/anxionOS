@@ -1,0 +1,42 @@
+import type { Pool } from "pg";
+import type { CapitalUnitOfWork } from "../domain/ports/capital-unit-of-work";
+import { appendJournal, enqueueOutbox } from "@anxionos/eventing/postgres";
+import { createPgCommandJournalRepository } from "./persistence/command-journal-repository";
+import { createPgAllocationRepository, createPgBalanceLineRepository, createPgCapitalAccountRepository, createPgReservationRepository, } from "./persistence/repositories";
+
+function createTransactionContext(client) {
+    return {
+        commandJournal: createPgCommandJournalRepository(client),
+        accounts: createPgCapitalAccountRepository(client),
+        balanceLines: createPgBalanceLineRepository(client),
+        allocations: createPgAllocationRepository(client),
+        reservations: createPgReservationRepository(client),
+        async publishEvents(envelopes) {
+            for (const envelope of envelopes) {
+                await appendJournal(client, envelope);
+                await enqueueOutbox(client, envelope);
+            }
+        },
+    };
+}
+export function createCapitalUnitOfWork(pool: Pool): CapitalUnitOfWork {
+    return {
+        async runInTransaction(work) {
+            const client = await pool.connect();
+            try {
+                await client.query("BEGIN");
+                const ctx = createTransactionContext(client);
+                const result = await work(ctx);
+                await client.query("COMMIT");
+                return result;
+            }
+            catch (error) {
+                await client.query("ROLLBACK");
+                throw error;
+            }
+            finally {
+                client.release();
+            }
+        },
+    };
+}

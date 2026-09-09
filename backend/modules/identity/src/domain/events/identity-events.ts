@@ -3,6 +3,7 @@ import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import {
 	IDENTITY_EVENT_TYPES,
 	IDENTITY_OWNER_DOMAIN,
+	identityPrincipalAuthLinkedV1PayloadSchema,
 	identityPrincipalEmailUpdatedV1PayloadSchema,
 	identityPrincipalReactivatedV1PayloadSchema,
 	identityPrincipalRegisteredV1PayloadSchema,
@@ -69,6 +70,19 @@ export function createPrincipalReactivatedEvent(input: {
 			principalId: input.principalId,
 			reactivatedAt: input.reactivatedAt,
 			actorPrincipalId: input.actorPrincipalId,
+		}),
+	);
+}
+
+export function createPrincipalAuthLinkedEvent(input: {
+	principalId: string;
+	occurredAt?: string;
+}): DomainEventEnvelope {
+	return baseEnvelope(
+		IDENTITY_EVENT_TYPES.PRINCIPAL_AUTH_LINKED,
+		input.occurredAt ?? new Date().toISOString(),
+		identityPrincipalAuthLinkedV1PayloadSchema.parse({
+			principalId: input.principalId,
 		}),
 	);
 }

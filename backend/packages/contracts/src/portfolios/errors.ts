@@ -1,0 +1,22 @@
+import { z } from "zod";
+export const PORTFOLIOS_ERROR_CODES = {
+    DUPLICATE_POSITION_KEY: "PF_DUPLICATE_POSITION_KEY",
+    DUPLICATE_IDEMPOTENCY: "PF_DUPLICATE_IDEMPOTENCY",
+    CROSS_TENANT: "PF_CROSS_TENANT",
+    REAL_MODE_REJECTED: "PF_REAL_MODE_REJECTED",
+    PORTFOLIO_NOT_FOUND: "PF_PORTFOLIO_NOT_FOUND",
+    PORTFOLIO_CLOSED: "PF_PORTFOLIO_CLOSED",
+};
+export const portfoliosErrorCodeSchema = z.enum(Object.values(PORTFOLIOS_ERROR_CODES) as [string, ...string[]]);
+export const PORTFOLIOS_ERROR_STATUS_MAP = {
+    PF_DUPLICATE_POSITION_KEY: 409,
+    PF_DUPLICATE_IDEMPOTENCY: 409,
+    PF_CROSS_TENANT: 403,
+    PF_REAL_MODE_REJECTED: 422,
+    PF_PORTFOLIO_NOT_FOUND: 404,
+    PF_PORTFOLIO_CLOSED: 422,
+};
+export type PortfoliosErrorCode = (typeof PORTFOLIOS_ERROR_CODES)[keyof typeof PORTFOLIOS_ERROR_CODES];
+export function resolvePortfoliosErrorStatus(code: PortfoliosErrorCode): number {
+    return PORTFOLIOS_ERROR_STATUS_MAP[code as keyof typeof PORTFOLIOS_ERROR_STATUS_MAP];
+}

@@ -5,6 +5,7 @@ import {
 	reactivatePrincipal,
 	type Principal,
 } from "@anxionos/identity";
+import { IdentityCommandError } from "../../modules/identity/src/application/errors";
 import {
 	createInMemoryPrincipalRepository,
 	createInMemoryServiceIdentityRepository,
@@ -42,5 +43,39 @@ describe("reactivatePrincipal", () => {
 			actorPrincipalId: "22222222-2222-4222-8222-222222222222",
 		});
 		expect(await getPrincipalById(repository, suspendedPrincipal.id)).not.toBeNull();
+	});
+
+	test("re-reactivate is idempotent without duplicate event", async () => {
+		const activePrincipal: Principal = {
+			...suspendedPrincipal,
+			status: "active",
+			suspendedAt: null,
+			suspensionReason: null,
+		};
+		const repository = createInMemoryPrincipalRepository([activePrincipal]);
+		const { unitOfWork, published } = createRecordingUnitOfWork(
+			repository,
+			createInMemoryServiceIdentityRepository(),
+		);
+		const result = await reactivatePrincipal(
+			{ repository, unitOfWork },
+			{ principalId: activePrincipal.id },
+		);
+		expect(result.status).toBe("active");
+		expect(published).toHaveLength(0);
+	});
+
+	test("unknown principal fails closed", async () => {
+		const repository = createInMemoryPrincipalRepository();
+		const { unitOfWork } = createRecordingUnitOfWork(
+			repository,
+			createInMemoryServiceIdentityRepository(),
+		);
+		await expect(
+			reactivatePrincipal(
+				{ repository, unitOfWork },
+				{ principalId: "00000000-0000-4000-8000-000000000000" },
+			),
+		).rejects.toBeInstanceOf(IdentityCommandError);
 	});
 });

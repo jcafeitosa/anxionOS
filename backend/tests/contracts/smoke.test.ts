@@ -31,11 +31,22 @@ describe("eventing ports", () => {
 	});
 });
 
-describe("database stub", () => {
-	test("createConnection returns pingable handle", async () => {
+describe("database connection", () => {
+	test("createConnection exposes pool and url", async () => {
 		const conn = await createConnection({
 			url: "postgres://user:pass@localhost:5432/anxionos",
 		});
+		expect(conn.url).toContain("postgres");
+		expect(conn.pool).toBeDefined();
+		await conn.close();
+	});
+
+	test("ping succeeds when DATABASE_URL is reachable", async () => {
+		const url = process.env.DATABASE_URL;
+		if (!url) {
+			return;
+		}
+		const conn = await createConnection({ url });
 		expect(await conn.ping()).toBe(true);
 		await conn.close();
 	});
