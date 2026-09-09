@@ -78,3 +78,4 @@ jobs:
         run: |
           bun install
           bun test
+          bun run boundaries

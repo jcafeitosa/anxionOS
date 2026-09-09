@@ -39,6 +39,24 @@ module.exports = {
 				],
 			},
 		},
+		{
+			name: "application-not-infra",
+			comment:
+				"AR01: module application must not depend on sibling infrastructure or shared infra packages. Framework drivers (pg, drizzle, etc.) are enforced by tests/boundary/application-layer-imports.test.ts.",
+			severity: "error",
+			from: {
+				path: "^modules/.+/application/",
+				pathNot: "\\.d\\.ts$",
+			},
+			to: {
+				path: [
+					"^modules/.+/infrastructure/",
+					"^apps/",
+					"^packages/database/",
+					"^packages/eventing/",
+				],
+			},
+		},
 	],
 	options: {
 		doNotFollow: { path: "node_modules" },
