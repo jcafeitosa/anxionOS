@@ -20,7 +20,73 @@
 			"path": "./packages/observability"
 		},
 		{
+			"path": "./modules/accounting"
+		},
+		{
+			"path": "./modules/adapter-gateway"
+		},
+		{
+			"path": "./modules/audit"
+		},
+		{
+			"path": "./modules/billing"
+		},
+		{
+			"path": "./modules/capital"
+		},
+		{
+			"path": "./modules/connections"
+		},
+		{
+			"path": "./modules/decisions"
+		},
+		{
+			"path": "./modules/evaluation"
+		},
+		{
+			"path": "./modules/execution"
+		},
+		{
+			"path": "./modules/governance"
+		},
+		{
+			"path": "./modules/graph"
+		},
+		{
 			"path": "./modules/identity"
+		},
+		{
+			"path": "./modules/knowledge"
+		},
+		{
+			"path": "./modules/market-data"
+		},
+		{
+			"path": "./modules/operations"
+		},
+		{
+			"path": "./modules/orchestration"
+		},
+		{
+			"path": "./modules/organizations"
+		},
+		{
+			"path": "./modules/partners"
+		},
+		{
+			"path": "./modules/performance"
+		},
+		{
+			"path": "./modules/portfolios"
+		},
+		{
+			"path": "./modules/risk"
+		},
+		{
+			"path": "./modules/simulation"
+		},
+		{
+			"path": "./modules/strategies"
 		}
 	],
 	"compilerOptions": {
