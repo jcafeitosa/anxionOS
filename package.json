@@ -71,7 +71,8 @@
     "orchestration:install-global": "node scripts/install-orchestration-global.mjs",
     "orchestration:global": "node scripts/orchestration-global.mjs",
     "orchestration:migrate-runtime": "node .cursor/orchestration/agent-config/migrate-runtime-paths.mjs",
-    "orchestration:cursor-goals": "node .cursor/orchestration/agent-config/cursor-goals.mjs"
+    "orchestration:cursor-goals": "node .cursor/orchestration/agent-config/cursor-goals.mjs",
+    "orchestration:brain": "node .cursor/orchestration/agent-brain/brain-cli.mjs"
   },
   "repository": {
     "type": "git",
