@@ -239,7 +239,7 @@ Skills obrigatórias: `manage-taskboard` (claims, status, comentários) e `orche
 
 #### Políticas Zero (framework de orquestração)
 
-O framework Cursor mantém **19 Políticas Zero** (Z0–Z18) — violação = trabalho inválido. Incluem zero-trabalho-fora-do-board (Z0), tolerância zero de código (Z1/Z9), no silent work (Z3), dual-board (Z10) e visibilidade no chat (Z4/Z8). Catálogo canônico: [.cursor/orchestration/ZERO-POLICIES.md](.cursor/orchestration/ZERO-POLICIES.md) · `npm run orchestration:zero-policies`.
+O framework Cursor mantém **20 Políticas Zero** (Z0–Z19) — violação = trabalho inválido. Incluem zero-trabalho-fora-do-board (Z0), tolerância zero de código (Z1/Z9), no silent work (Z3), dual-board (Z10) e visibilidade no chat (Z4/Z8). Catálogo canônico: [.cursor/orchestration/ZERO-POLICIES.md](.cursor/orchestration/ZERO-POLICIES.md) · `npm run orchestration:zero-policies`.
 
 #### Política zero-trabalho-fora-do-board
 
