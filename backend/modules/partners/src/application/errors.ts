@@ -32,5 +32,6 @@ export function parseCommandResultSnapshot(
 		referralId: snapshot.referralId,
 		commissionAccrualId: snapshot.commissionAccrualId,
 		commissionAmount: snapshot.commissionAmount,
+		payoutId: snapshot.payoutId,
 	});
 }
