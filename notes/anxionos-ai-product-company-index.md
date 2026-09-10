@@ -73,10 +73,15 @@ tags:
 | `notes/anxionos-product-company-module-alignment.md` | ANX-250 |
 | `project-docs/plans/ai-product-company-execution-plan.md` | ANX-275 |
 | `notes/anxionos-owner-greenlight-package-adr0005.md` | ANX-276 |
+| `notes/anxionos-owner-acceptance-deliverable-8.md` | ANX-291 |
+
+## Issues P2 (done G7)
+
+ANX-276–279, ANX-289, ANX-290
 
 ## Issues P0 (done G7)
 
-ANX-265, 267, 268, 269, 270, 271, 272, 273, 274, 275, 281, 282
+ANX-265, 267, 268, 269, 270, 271, 272, 273, 274, 275, 281, 282, 283, 284, 285
 
 ## P2 — delegação (pós-greenlight)
 

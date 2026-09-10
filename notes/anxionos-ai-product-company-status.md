@@ -22,22 +22,22 @@ tags:
 | --- | --- | ---: | --- |
 | 1 | Auditoria documentação | 95% | `brain/notes/anxionos-ai-product-company-documentation-audit.md` |
 | 2 | Ciclo PC1–PC12 | 100% | CLI + Archify workflow |
-| 3 | Cognitive OS §12–25 | 90% doc | 8 notas OKF; runtime pendente |
+| 3 | Cognitive OS §12–25 | 95% | doc OKF + runtime P2 slices; §19–25 integral P3+ |
 | 4 | Alinhamento 30→23 | 100% | alignment note + spec 007 |
-| 5 | Specs/ADRs/workflows | 85% | **Proposed** — aguarda Owner |
+| 5 | Specs/ADRs/workflows | 100% | ADR0005 + spec 006 **accepted** (ANX-276) |
 | 6 | Issues ANX-* | 100% | P0 done + P2 backlog + critérios |
 | 7 | Implementação runtime | 95% | P2 slices + ANX-290 homologação live Neo4j/health |
-| 8 | Evidência completa | 85% | sandbox live comprovado; prod + Owner aceite pendente |
+| 8 | Evidência completa | 95% sandbox | pacote ANX-291 pronto; Owner G7 pendente |
 
-**Total estimado:** ~92% documentação · ~75% runtime P2 sandbox
+**Total estimado:** ~98% documentação · ~95% runtime sandbox P2
 
 ## Bloqueio atual
 
-Nenhum bloqueio P2 sandbox. Follow-ups: prod homologação; Owner aceite entregável 8.
+Bloqueio: **Owner G7** entregável 8 (ANX-291). Follow-up: prod homologação P3.
 
 ## Issues P2 concluídas (G7)
 
-ANX-276, ANX-277, ANX-278, ANX-279, ANX-289, ANX-290
+ANX-276–279, ANX-289, ANX-290
 
 ## Issues P0 concluídas (G7)
 
@@ -45,17 +45,21 @@ ANX-265, 267, 268, 269, 270, 271, 272, 273, 274, 275, 281, 282, 283, 284, 285
 
 ## Próximos passos
 
-1. Edges Product Graph deferred (TRACKED_IN/APPROVED)
-2. Homologação staging real (health live, sem --simulate)
-3. Owner aceite final entregável 8
+1. **Owner:** comentar aceite em ANX-291 (texto no pacote)
+2. Prod homologação Neo4j P3
+3. Cognitive OS §19–25 runtime integral
 
 ## Oráculos P0 (última verificação)
 
 ```bash
-bun test backend/tests/contracts                    # 55/55
+bun test backend/tests/contracts                    # 63/63
 node --test .cursor/orchestration/tests/product-company-stages.test.mjs  # 8/8
 npm run archify:validate                            # 4/4
 ```
+
+## Pacote aceite Owner
+
+- `notes/anxionos-owner-acceptance-deliverable-8.md` (ANX-291)
 
 ## Navegação
 
