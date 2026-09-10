@@ -216,10 +216,75 @@ No Cursor: `.graphify/.venv/bin/graphify cursor install` escreve `.cursor/rules/
 
 Prioridade para agentes: **code-review-graph** (se código indexado no MCP) → **Graphify** (se `.graphify/out/graph.json` existe) → documentação em `brain/` (local) → Grep/Glob.
 
-### Orquestração multi-agente (Cursor)
+### Framework de orquestração (Cursor) — carregamento obrigatório
 
-A pasta [.cursor/orchestration/](./.cursor/orchestration/) **estende** este `AGENTS.md` com personas, dialogue, pipeline G0–G7 e runbooks — não substitui regras canônicas. Todo agente orquestrado deve seguir [COMPLIANCE.md](./.cursor/orchestration/COMPLIANCE.md) e [ONBOARDING.md](./.cursor/orchestration/ONBOARDING.md) antes de trabalho técnico.
+A pasta [.cursor/orchestration/](./.cursor/orchestration/) **estende** este `AGENTS.md` com personas, dialogue, pipeline G0–G7, dispatch de subagentes e runbooks — **não** substitui regras canônicas do produto. **Todo agente no Cursor deve carregar o framework antes de trabalho técnico** (exploração, implementação, docs públicas, commits). Trabalho sem framework carregado = **inválido** (mesma severidade que zero-trabalho-fora-do-board).
 
+**Fronteira:** equipe Cursor (Renata, Lucas, Marina…) ≠ agentes institucionais do produto (`backend/modules/agents/`). Ver [SCOPE.md](.cursor/orchestration/SCOPE.md).
+
+#### O que carregar (leitura — nesta ordem)
+
+| # | Documento | Quando |
+| --- | --- | --- |
+| 1 | [MANDATORY-COMPLIANCE.md](.cursor/orchestration/MANDATORY-COMPLIANCE.md) | Sempre — sequência de gates executável |
+| 2 | [ONBOARDING.md](.cursor/orchestration/ONBOARDING.md) | Primeira sessão ou persona nova |
+| 3 | [COMPLIANCE.md](.cursor/orchestration/COMPLIANCE.md) | Antes de codar ou editar docs |
+| 4 | [RUNBOOK.md](.cursor/orchestration/RUNBOOK.md) | Comandos dialogue, broadcast, sessão |
+| 5 | [PERSONAS.md](.cursor/orchestration/PERSONAS.md) + workflow `workflow-{slug}.md` | Ao assumir uma persona |
+| 6 | [CURSOR-AGENTS-INTEGRATION.md](.cursor/orchestration/CURSOR-AGENTS-INTEGRATION.md) + [GROK-BOT-PARITY.md](.cursor/orchestration/GROK-BOT-PARITY.md) | Orquestrador / delegação via `Task` |
+
+Índice mestre: [README.md](.cursor/orchestration/README.md) · config: [`.cursor/orchestration.config.json`](.cursor/orchestration.config.json)
+
+#### Bootstrap de sessão (executar)
+
+```bash
+# 1. Board + contexto
+npm run taskboard:ensure || exit 1          # produto ANX-* — falhou = PARAR
+npm run taskboard:context
+# Meta-tooling (.cursor/orchestration/, regras): export CURSOR_GOAL_ID=<goal> ou registry em .cursor/orchestration-runtime/goals/
+
+# 2. Framework runtime (hooks sessionStart também rodam lifecycle + proactive + dispatch)
+npm run orchestration:lifecycle-cleanup
+npm run orchestration:proactive -- check --persona <slug>
+npm run orchestration:chat -- --check-pending    # colar saída se houver diálogo pendente
+
+# 3. Orquestrador — teammates pendentes na fila dispatch
+npm run orchestration:dispatch -- inject          # bloco CURSOR_DISPATCH_QUEUE → invocar Task AGORA
+# ou JSON batch: npm run orchestration:dispatch -- spawn-plan --json
+
+# 4. Após claim da issue
+npm run orchestration:session -- start --persona <slug> --issue ANX-N
+npm run orchestration:workflow -- sync --persona <slug> --issue ANX-N
+npm run orchestration:compliance -- --pre-work --issue ANX-N --persona <slug>   # exit 0 obrigatório
+npm run orchestration:broadcast -- --from-persona <slug> --type ack --issue ANX-N --body "..." --evidence "cmd:..."
+
+# 5. Level C (executores + críticos)
+npm run orchestration:workflow -- monitor --level C
+```
+
+**Dual-board:** produto (`backend/`, `frontend/`, `docs/`, `ANX-*`) → Dashi taskboard; framework (`.cursor/orchestration/`, regras Cursor) → Cursor taskboard (`CURSOR_GOAL_ID`). Ver [TASKBOARD-ROUTING.md](.cursor/orchestration/TASKBOARD-ROUTING.md). **Nunca misturar** boards na mesma unidade de trabalho.
+
+**Políticas Zero (Z0–Z19):** [ZERO-POLICIES.md](.cursor/orchestration/ZERO-POLICIES.md) · `npm run orchestration:zero-policies`
+
+#### Subagentes e delegação
+
+O agente **pai** que invoca `Task` deve incluir em todo prompt técnico:
+
+1. "Read AGENTS.md" + carregar [SUBAGENT-DELEGATION-PACKAGE.md](.cursor/orchestration/templates/SUBAGENT-DELEGATION-PACKAGE.md)
+2. Persona, issue `ANX-*`, compliance `pre-work`, dialogue (`ack` / `status` / `handoff`)
+3. Tooling: graphify, serena, open-knowledge para `brain/`, [SUBAGENT-PROMPT-TOOLING.md](.cursor/orchestration/templates/SUBAGENT-PROMPT-TOOLING.md)
+
+Hire → fila dispatch → `spawn-plan` / `inject` → `Task` com `subagent_type` de [levels.mjs](.cursor/orchestration/agent-hire/levels.mjs) (críticos: `code-reviewer`). Monitor: `npm run orchestration:delegate-monitor -- list`.
+
+#### Fim de turno
+
+```bash
+npm run orchestration:compliance -- --pre-commit --issue ANX-N --persona <slug>
+npm run orchestration:broadcast -- --from-persona <slug> --type handoff --issue ANX-N --body "..." --evidence "..."
+npm run orchestration:session -- end --persona <slug>
+```
+
+Skills obrigatórias: `manage-taskboard`, `orchestrate-work` (despacho multi-agente G0–G7).
 
 ### Frontend
 
@@ -476,3 +541,8 @@ Comunicação com o usuário em **português (PT-BR)**. Identificadores de códi
 | ADR — layout modular (aceito) | [brain/project-docs/decisions/0002-adopt-modular-backend-layout.md](brain/project-docs/decisions/0002-adopt-modular-backend-layout.md) |
 | ADR — grafo operacional (proposto) | [brain/project-docs/decisions/0001-graph-operational-domain-authority.md](brain/project-docs/decisions/0001-graph-operational-domain-authority.md) |
 | PRD mestre (draft) | [brain/project-docs/proposals/0001-anxionos-prd-mestre.md](brain/project-docs/proposals/0001-anxionos-prd-mestre.md) |
+| Framework orquestração (índice) | [.cursor/orchestration/README.md](.cursor/orchestration/README.md) |
+| Compliance obrigatório (enforcement) | [.cursor/orchestration/MANDATORY-COMPLIANCE.md](.cursor/orchestration/MANDATORY-COMPLIANCE.md) |
+| Onboarding agentes Cursor | [.cursor/orchestration/ONBOARDING.md](.cursor/orchestration/ONBOARDING.md) |
+| Dispatch Grok-style → Task | [.cursor/orchestration/GROK-BOT-PARITY.md](.cursor/orchestration/GROK-BOT-PARITY.md) |
+| Políticas Zero Z0–Z19 | [.cursor/orchestration/ZERO-POLICIES.md](.cursor/orchestration/ZERO-POLICIES.md) |
