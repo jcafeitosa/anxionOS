@@ -46,12 +46,12 @@ tags:
 
 ### Critérios de aceite (todos obrigatórios)
 
-- [ ] Sandbox Neo4j sobe via docker profile `graph-sandbox`
+- [x] Sandbox Neo4j sobe via docker profile `graph-sandbox` (ANX-290)
 - [ ] 1 evento `work_item.status_changed` → 1 nó `WorkItem` idempotente
 - [ ] Reprocessar mesmo `eventId` não duplica nó (inbox ACK)
 - [ ] Rebuild from inbox passa (`full-generation-swap`)
 - [ ] Labels prefixados `ProductGraph_*` / `AgentGraph_*` — separados do grafo institucional
-- [ ] `bun test backend/tests/graph` green
+- [x] `bun test backend/tests/graph` green
 - [ ] G2 Fernanda PASS com blast radius documentado
 - [ ] Zero escrita direta sem evento versionado
 
@@ -107,3 +107,21 @@ flowchart LR
   P273[ANX-273 runbooks doc] --> P279[ANX-279 executor]
   P277 -.-> P279
 ```
+
+
+## ANX-290 — P2 sandbox live homologation — **done G7**
+
+| Campo | Valor |
+| --- | --- |
+| Owners | Lucas `backend-executor` + Marina `backend-critic` |
+| Dependências | ANX-277/289 done, Neo4j graph-sandbox |
+| Gates | G3 → G7 |
+
+### Critérios de aceite
+
+- [x] Neo4j graph-sandbox profile running
+- [x] Integration test live: WorkItem + TRACKED_IN em Neo4j real
+- [x] Self-healing `sh-rb-002` sem `--simulate` com `/health` 200
+- [x] CLI report: `npm run p2:sandbox-homologation -- --issue ANX-290 --json`
+
+**Oráculos:** `npm run p2:sandbox-homologation -- --issue ANX-290 --json` → `overallOk: true`
