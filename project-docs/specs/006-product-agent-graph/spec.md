@@ -216,6 +216,21 @@ Feature → ADDRESSES → Problem
 - [ ] ADR proposta para projeção Neo4j (P3)
 - [ ] Issues ANX-* decompostas para implementação incremental
 
+## Cognitive OS — mapa de capacidades (P1 doc)
+
+Índice: `brain/notes/anxionos-ai-product-company-index.md`
+
+| Capacidade | Seção engine | Nota OKF | Runtime |
+| --- | --- | --- | --- |
+| Performance | §19 | `notes/anxionos-agent-performance-graph.md` | P2 |
+| Learning | §20 | `notes/anxionos-agent-learning-loop.md` | P0 CLI |
+| Experimentation | §21 | `notes/anxionos-experimentation-engine.md` | P2 |
+| Incidents | §22 | `notes/anxionos-incident-management-graph.md` | P2 |
+| Continuous architecture | §23 | `notes/anxionos-continuous-architecture-loop.md` | P0 ADR |
+| Self-healing | §24 | `notes/anxionos-self-healing-runbooks.md` | P2 |
+| Self-development | §25 | `notes/anxionos-self-development-loop.md` | P3+ |
+| Product intelligence | §12/PC12 | `notes/anxionos-product-intelligence-loop.md` | P2 |
+
 ## Schema registry P3 (ANX-271)
 
 Contratos TypeScript implementados:
