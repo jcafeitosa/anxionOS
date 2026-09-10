@@ -4,6 +4,8 @@ import {
 	operationsHealthStatusSchema,
 	operationsIncidentIdSchema,
 	operationsIncidentSeveritySchema,
+	operationsIncidentStatusSchema,
+	operationsRunbookIdSchema,
 } from "./types";
 export const operationsCommandResultSchema = z.object({
 	aggregateId: z.string().min(1),
@@ -43,3 +45,31 @@ export type CreateIncidentCommand = z.infer<typeof createIncidentCommandSchema>;
 /** HTTP alias per R04 openIncident */
 
 export type OpenIncidentCommand = CreateIncidentCommand;
+
+export const transitionIncidentStatusCommandSchema = z.object({
+	commandId: z.string().uuid(),
+	organizationId: z.string().uuid(),
+	incidentId: operationsIncidentIdSchema,
+	expectedRevision: z.number().int().positive(),
+	targetStatus: operationsIncidentStatusSchema,
+	reason: z.string().max(1024).optional(),
+});
+
+export const attachIncidentRunbookCommandSchema = z.object({
+	commandId: z.string().uuid(),
+	organizationId: z.string().uuid(),
+	incidentId: operationsIncidentIdSchema,
+	expectedRevision: z.number().int().positive(),
+	runbookId: operationsRunbookIdSchema,
+	runbookVersion: z.string().min(1).max(64),
+	responsiblePrincipalId: z.string().uuid().optional(),
+	evidence: z.string().max(4096).optional(),
+});
+
+export type TransitionIncidentStatusCommand = z.infer<
+	typeof transitionIncidentStatusCommandSchema
+>;
+export type AttachIncidentRunbookCommand = z.infer<
+	typeof attachIncidentRunbookCommandSchema
+>;
+

@@ -2,9 +2,13 @@ import type { PoolClient } from "pg";
 import type {
 	HealthCheckRecord,
 	HealthCheckRepository,
+	HealthCheckUpdateInput,
 	IncidentRecord,
 	IncidentRepository,
+	IncidentUpdateInput,
 } from "../../domain/ports/operations-unit-of-work";
+import { HealthCheckRevisionConflictError } from "../../domain/errors/health-check-errors";
+import { IncidentRevisionConflictError } from "../../domain/errors/incident-errors";
 
 function mapHealthCheck(row: Record<string, unknown>): HealthCheckRecord {
 	return {
@@ -27,6 +31,19 @@ function mapIncident(row: Record<string, unknown>): IncidentRecord {
 		status: String(row.status),
 		serviceId: row.service_id ? String(row.service_id) : null,
 		openedAt: (row.opened_at as Date).toISOString(),
+		revision: Number(row.revision ?? 1),
+		runbookId: row.runbook_id ? String(row.runbook_id) : null,
+		runbookVersion: row.runbook_version ? String(row.runbook_version) : null,
+		runbookAttachedAt: row.runbook_attached_at
+			? (row.runbook_attached_at as Date).toISOString()
+			: null,
+		responsiblePrincipalId: row.responsible_principal_id
+			? String(row.responsible_principal_id)
+			: null,
+		resolvedAt: row.resolved_at
+			? (row.resolved_at as Date).toISOString()
+			: null,
+		closedAt: row.closed_at ? (row.closed_at as Date).toISOString() : null,
 	};
 }
 export function createPgHealthCheckRepository(
@@ -58,20 +75,26 @@ export function createPgHealthCheckRepository(
 			);
 			return record;
 		},
-		async update(record: HealthCheckRecord) {
-			await client.query(
+		async update(record: HealthCheckUpdateInput) {
+			const result = await client.query(
 				`UPDATE operations_health_checks
 			 SET status = $2, probe_details = $3, checked_at = $4, revision = $5, updated_at = now()
-			 WHERE id = $1`,
+			 WHERE id = $1 AND revision = $6
+			 RETURNING *`,
 				[
 					record.id,
 					record.status,
 					record.probeDetails,
 					record.checkedAt,
 					record.revision,
+					record.expectedRevision,
 				],
 			);
-			return record;
+			const row = result.rows[0];
+			if (!row) {
+				throw new HealthCheckRevisionConflictError();
+			}
+			return mapHealthCheck(row);
 		},
 	};
 }
@@ -90,8 +113,10 @@ export function createPgIncidentRepository(
 		async save(record: IncidentRecord) {
 			await client.query(
 				`INSERT INTO operations_incidents (
-			   id, organization_id, title, description, severity, status, service_id, opened_at
-			 ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+			   id, organization_id, title, description, severity, status, service_id, opened_at,
+			   revision, runbook_id, runbook_version, runbook_attached_at,
+			   responsible_principal_id, resolved_at, closed_at
+			 ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
 				[
 					record.id,
 					record.organizationId,
@@ -101,9 +126,43 @@ export function createPgIncidentRepository(
 					record.status,
 					record.serviceId,
 					record.openedAt,
+					record.revision,
+					record.runbookId,
+					record.runbookVersion,
+					record.runbookAttachedAt,
+					record.responsiblePrincipalId,
+					record.resolvedAt,
+					record.closedAt,
 				],
 			);
 			return record;
+		},
+		async update(record: IncidentUpdateInput) {
+			const result = await client.query(
+				`UPDATE operations_incidents
+			 SET status = $2, revision = $3, runbook_id = $4, runbook_version = $5,
+			     runbook_attached_at = $6, responsible_principal_id = $7,
+			     resolved_at = $8, closed_at = $9, updated_at = now()
+			 WHERE id = $1 AND revision = $10
+			 RETURNING *`,
+				[
+					record.id,
+					record.status,
+					record.revision,
+					record.runbookId,
+					record.runbookVersion,
+					record.runbookAttachedAt,
+					record.responsiblePrincipalId,
+					record.resolvedAt,
+					record.closedAt,
+					record.expectedRevision,
+				],
+			);
+			const row = result.rows[0];
+			if (!row) {
+				throw new IncidentRevisionConflictError();
+			}
+			return mapIncident(row);
 		},
 	};
 }

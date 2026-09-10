@@ -6,6 +6,9 @@ export const operationsHealthCheckIdSchema = z
 export const operationsIncidentIdSchema = z
 	.string()
 	.regex(/^ops_inc_[0-9a-f-]{36}$/i);
+export const operationsRunbookIdSchema = z
+	.string()
+	.regex(/^ops_rnb_[0-9a-f-]{36}$/i);
 export const operationsHealthStatusSchema = z.enum([
 	"HEALTHY",
 	"DEGRADED",
@@ -19,6 +22,10 @@ export const operationsIncidentSeveritySchema = z.enum([
 ]);
 export const operationsIncidentStatusSchema = z.enum([
 	"OPEN",
+	"ACKNOWLEDGED",
+	"INVESTIGATING",
+	"MITIGATING",
+	"ESCALATED",
 	"RESOLVED",
 	"CLOSED",
 ]);
@@ -27,6 +34,7 @@ export type OperationsHealthCheckId = z.infer<
 	typeof operationsHealthCheckIdSchema
 >;
 export type OperationsIncidentId = z.infer<typeof operationsIncidentIdSchema>;
+export type OperationsRunbookId = z.infer<typeof operationsRunbookIdSchema>;
 export type OperationsHealthStatus = z.infer<
 	typeof operationsHealthStatusSchema
 >;

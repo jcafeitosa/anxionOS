@@ -69,6 +69,13 @@ export async function createIncident(
 			status: "OPEN",
 			serviceId: command.serviceId ?? null,
 			openedAt,
+			revision: 1,
+			runbookId: null,
+			runbookVersion: null,
+			runbookAttachedAt: null,
+			responsiblePrincipalId: null,
+			resolvedAt: null,
+			closedAt: null,
 		});
 		await ctx.publishEvents([
 			createIncidentOpenedEvent({

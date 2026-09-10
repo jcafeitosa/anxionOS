@@ -7,10 +7,12 @@ import {
 	operationsCommandResultSchema,
 	registerHealthCheckCommandSchema,
 } from "@anxionos/contracts/operations";
+import { HealthCheckRevisionConflictError } from "../../domain/errors/health-check-errors";
 import {
 	createHealthDegradedEvent,
 	isDegradedHealthStatus,
 } from "../../domain/events/operations-events";
+import { isCheckedAtMonotonic } from "../../domain/health-lifecycle";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { OperationsUnitOfWork } from "../../domain/ports/operations-unit-of-work";
 import {
@@ -72,13 +74,31 @@ export async function registerHealthCheck(
 					"health check organization mismatch",
 				);
 			}
-			const updated = await ctx.healthChecks.update({
-				...existing,
-				status: command.status,
-				probeDetails: command.probeDetails ?? null,
-				checkedAt: command.checkedAt,
-				revision: existing.revision + 1,
-			});
+			if (!isCheckedAtMonotonic(existing.checkedAt, command.checkedAt)) {
+				throwOperationsError(
+					"OPS_STALE_CHECKED_AT",
+					"checkedAt must be monotonic for service health updates",
+				);
+			}
+			let updated;
+			try {
+				updated = await ctx.healthChecks.update({
+					...existing,
+					status: command.status,
+					probeDetails: command.probeDetails ?? null,
+					checkedAt: command.checkedAt,
+					revision: existing.revision + 1,
+					expectedRevision: existing.revision,
+				});
+			} catch (error) {
+				if (error instanceof HealthCheckRevisionConflictError) {
+					throwOperationsError(
+						"OPS_REVISION_CONFLICT",
+						"health check revision conflict",
+					);
+				}
+				throw error;
+			}
 			const events = [];
 			if (isDegradedHealthStatus(command.status)) {
 				events.push(
@@ -98,7 +118,6 @@ export async function registerHealthCheck(
 				aggregateId: updated.id,
 				revision: updated.revision,
 				healthCheckId: updated.id,
-				idempotentReplay: true,
 			});
 			await ctx.commandJournal.save({
 				commandId: command.commandId,

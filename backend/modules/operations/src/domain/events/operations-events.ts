@@ -24,6 +24,45 @@ export function createIncidentOpenedEvent(input: {
 	};
 }
 
+export function createIncidentStatusChangedEvent(input: {
+	incidentId: string;
+	organizationId: string;
+	fromStatus: string;
+	toStatus: string;
+	revision: number;
+	reason?: string;
+	changedAt: string;
+}): DomainEventEnvelope {
+	return {
+		eventId: randomUUID(),
+		eventType: OPERATIONS_EVENT_TYPES.INCIDENT_STATUS_CHANGED,
+		schemaVersion: "0.1.0",
+		ownerDomain: OPERATIONS_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload: input,
+	};
+}
+
+export function createIncidentRunbookAttachedEvent(input: {
+	incidentId: string;
+	organizationId: string;
+	runbookId: string;
+	runbookVersion: string;
+	responsiblePrincipalId?: string;
+	evidence?: string;
+	attachedAt: string;
+	revision: number;
+}): DomainEventEnvelope {
+	return {
+		eventId: randomUUID(),
+		eventType: OPERATIONS_EVENT_TYPES.INCIDENT_RUNBOOK_ATTACHED,
+		schemaVersion: "0.1.0",
+		ownerDomain: OPERATIONS_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload: input,
+	};
+}
+
 export function createHealthDegradedEvent(input: {
 	healthCheckId: string;
 	organizationId: string;

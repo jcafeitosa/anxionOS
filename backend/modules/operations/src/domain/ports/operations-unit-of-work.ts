@@ -18,6 +18,19 @@ export interface IncidentRecord {
 	status: string;
 	serviceId: string | null;
 	openedAt: string;
+	revision: number;
+	runbookId: string | null;
+	runbookVersion: string | null;
+	runbookAttachedAt: string | null;
+	responsiblePrincipalId: string | null;
+	resolvedAt: string | null;
+	closedAt: string | null;
+}
+export interface IncidentUpdateInput extends IncidentRecord {
+	expectedRevision: number;
+}
+export interface HealthCheckUpdateInput extends HealthCheckRecord {
+	expectedRevision: number;
 }
 export interface HealthCheckRepository {
 	findByOrganizationAndServiceId(
@@ -25,11 +38,12 @@ export interface HealthCheckRepository {
 		serviceId: string,
 	): Promise<HealthCheckRecord | null>;
 	save(record: HealthCheckRecord): Promise<HealthCheckRecord>;
-	update(record: HealthCheckRecord): Promise<HealthCheckRecord>;
+	update(record: HealthCheckUpdateInput): Promise<HealthCheckRecord>;
 }
 export interface IncidentRepository {
 	findById(id: string): Promise<IncidentRecord | null>;
 	save(record: IncidentRecord): Promise<IncidentRecord>;
+	update(record: IncidentUpdateInput): Promise<IncidentRecord>;
 }
 export interface OperationsTransactionContext {
 	commandJournal: CommandJournalRepository;
