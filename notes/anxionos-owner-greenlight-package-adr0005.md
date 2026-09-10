@@ -31,6 +31,10 @@ tags:
 | 8 | Self-dev | `notes/anxionos-self-development-loop.md` | ☐ |
 | 9 | Self-healing | `notes/anxionos-self-healing-runbooks.md` (doc only) | ☐ |
 | 10 | Intelligence | `notes/anxionos-product-intelligence-loop.md` | ☐ |
+| 11 | Performance §19 | `notes/anxionos-agent-performance-graph.md` | ☐ |
+| 12 | Learning §20 | `notes/anxionos-agent-learning-loop.md` | ☐ |
+| 13 | Continuous arch §23 | `notes/anxionos-continuous-architecture-loop.md` | ☐ |
+| 14 | Projection worker design | `project-docs/specs/006-product-agent-graph/projection-worker-p2-design.md` | ☐ |
 
 ## Evidências P0
 
