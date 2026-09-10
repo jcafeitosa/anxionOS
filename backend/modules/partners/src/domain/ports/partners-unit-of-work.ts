@@ -39,6 +39,9 @@ export interface PayoutRecord {
 
 export interface PartnerRepository {
 	findById(id: string, organizationId: string): Promise<PartnerRecord | null>;
+	findByOrganizationId(
+		organizationId: string,
+	): Promise<PartnerRecord | null>;
 	findByReferralCode(
 		referralCode: string,
 		organizationId: string,
@@ -63,6 +66,10 @@ export interface CommissionAccrualRepository {
 		partnerId: string,
 		partnerOrganizationId: string,
 	): Promise<CommissionAccrualRecord[]>;
+	listByPartnerOrganization(
+		partnerOrganizationId: string,
+		partnerId?: string,
+	): Promise<CommissionAccrualRecord[]>;
 	save(record: CommissionAccrualRecord): Promise<CommissionAccrualRecord>;
 	update(record: CommissionAccrualRecord): Promise<CommissionAccrualRecord>;
 }
@@ -72,6 +79,10 @@ export interface PayoutRepository {
 		id: string,
 		partnerOrganizationId: string,
 	): Promise<PayoutRecord | null>;
+	listByPartnerOrganization(
+		partnerOrganizationId: string,
+		partnerId?: string,
+	): Promise<PayoutRecord[]>;
 	save(record: PayoutRecord): Promise<PayoutRecord>;
 	update(record: PayoutRecord): Promise<PayoutRecord>;
 }

@@ -20,6 +20,7 @@ import {
 } from "../../lib/auth";
 import { DecisionTrail } from "./DecisionTrail";
 import { HonestState } from "./HonestState";
+import { PartnerDashboard } from "./PartnerDashboard";
 
 interface ConsoleAppProps {
 	kind: ConsoleKind;
@@ -225,8 +226,14 @@ export function ConsoleApp({ kind, agencyId }: ConsoleAppProps) {
 								{
 									id: "loader",
 									type: "backend",
-									label: "post-login-context",
-									sublabel: "GET /v1/auth/post-login-context",
+									label:
+										kind === "partner"
+											? "partners-scoped loader"
+											: "post-login-context",
+									sublabel:
+										kind === "partner"
+											? "GET /v1/partners/organizations/:organizationId/*"
+											: "GET /v1/auth/post-login-context",
 								},
 								{
 									id: "console",
@@ -237,65 +244,77 @@ export function ConsoleApp({ kind, agencyId }: ConsoleAppProps) {
 								},
 							]}
 						/>
-						<section aria-labelledby="console-status-heading">
-							<h2
-								id="console-status-heading"
-								className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground"
-							>
-								Estado do console
-							</h2>
-							<div className="grid gap-4 sm:grid-cols-2">
-								<DashboardCard
-									title="Acesso confirmado"
-									description="Decisão vinda de GET /v1/auth/post-login-context — não do cliente."
-									icon={Shield}
-									status="online"
-									statusLabel="Autorizado"
-								>
-									<dl className="grid gap-2 text-xs">
-										<div>
-											<dt className="text-muted-foreground">decision.kind</dt>
-											<dd className="font-mono text-foreground">{context.decision.kind}</dd>
-										</div>
-										<div>
-											<dt className="text-muted-foreground">reason</dt>
-											<dd className="font-mono text-foreground">{context.decision.reason}</dd>
-										</div>
-									</dl>
-								</DashboardCard>
-								<DashboardCard
-									title="Capacidades de produto"
-									description="Agentes, portfólio e valuation não estão neste slice (ANX-143 / ANX-153)."
-									icon={Activity}
-									status="pending"
-									statusLabel="Pendente"
-								>
-									<p className="text-sm">
-										Placeholder P07 explícito: conteúdo operacional real só aparece quando a API
-										existir. Nenhum C-level, tenant demo ou número financeiro é inventado aqui.
-									</p>
-								</DashboardCard>
-							</div>
-						</section>
+						{kind === "partner" ? (
+							<PartnerDashboard context={context} />
+						) : (
+							<>
+								<section aria-labelledby="console-status-heading">
+									<h2
+										id="console-status-heading"
+										className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground"
+									>
+										Estado do console
+									</h2>
+									<div className="grid gap-4 sm:grid-cols-2">
+										<DashboardCard
+											title="Acesso confirmado"
+											description="Decisão vinda de GET /v1/auth/post-login-context — não do cliente."
+											icon={Shield}
+											status="online"
+											statusLabel="Autorizado"
+										>
+											<dl className="grid gap-2 text-xs">
+												<div>
+													<dt className="text-muted-foreground">decision.kind</dt>
+													<dd className="font-mono text-foreground">
+														{context.decision.kind}
+													</dd>
+												</div>
+												<div>
+													<dt className="text-muted-foreground">reason</dt>
+													<dd className="font-mono text-foreground">
+														{context.decision.reason}
+													</dd>
+												</div>
+											</dl>
+										</DashboardCard>
+										<DashboardCard
+											title="Capacidades de produto"
+											description="Agentes, portfólio e valuation não estão neste slice (ANX-143 / ANX-153)."
+											icon={Activity}
+											status="pending"
+											statusLabel="Pendente"
+										>
+											<p className="text-sm">
+												Placeholder P07 explícito: conteúdo operacional real só aparece quando a
+												API existir. Nenhum C-level, tenant demo ou número financeiro é inventado
+												aqui.
+											</p>
+										</DashboardCard>
+									</div>
+								</section>
 
-						<section aria-labelledby="empty-heading" id="team">
-							<h2
-								id="empty-heading"
-								className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground"
-							>
-								Dados operacionais
-							</h2>
-							<HonestState
-								kind="empty"
-								title="Nenhum dado autoritativo neste console"
-								description="A API de agentes/posições ainda não alimenta esta superfície. O estado vazio é intencional."
-							/>
-						</section>
+								<section aria-labelledby="empty-heading" id="team">
+									<h2
+										id="empty-heading"
+										className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground"
+									>
+										Dados operacionais
+									</h2>
+									<HonestState
+										kind="empty"
+										title="Nenhum dado autoritativo neste console"
+										description="A API de agentes/posições ainda não alimenta esta superfície. O estado vazio é intencional."
+									/>
+								</section>
+							</>
+						)}
 					</div>
 				</main>
 
 				<footer className="border-t border-border px-4 py-4 text-center text-xs text-muted-foreground lg:px-8">
-					anxionOS · {titles[kind]} · shells honestos ANX-297
+					anxionOS · {titles[kind]} ·{" "}
+					{kind === "partner" ? "partner console ANX-167" : "shells honestos ANX-297"}
 				</footer>
 			</div>
 		</div>

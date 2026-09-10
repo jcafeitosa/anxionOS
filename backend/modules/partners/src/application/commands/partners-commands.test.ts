@@ -56,7 +56,7 @@ describe("partners commands", () => {
 					referredOrganizationId: "00000000-0000-4000-8000-000000000099",
 				},
 			),
-		).rejects.toMatchObject({ code: "PTR_REFERRAL_CONFLICT" });
+		).rejects.toMatchObject({ partnersCode: "PTR_REFERRAL_CONFLICT" });
 	});
 
 	test("accrueCommissionFromInvoice calculates exact commission and is idempotent by invoice", async () => {
@@ -263,6 +263,6 @@ describe("partners commands", () => {
 					requestedAt: "2026-09-12T12:00:00.000Z",
 				},
 			),
-		).rejects.toMatchObject({ code: "PTR_INSUFFICIENT_ACCRUAL" });
+		).rejects.toMatchObject({ partnersCode: "PTR_INSUFFICIENT_ACCRUAL" });
 	});
 });

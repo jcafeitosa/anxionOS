@@ -1,16 +1,38 @@
+import { AppError } from "@anxionos/contracts/errors";
 import {
+	resolvePartnersErrorStatus,
 	type PartnersCommandResult,
 	type PartnersErrorCode,
 	partnersCommandResultSchema,
 } from "@anxionos/contracts/partners";
 
-export class PartnersCommandError extends Error {
-	readonly code: PartnersErrorCode;
+export class PartnersCommandError extends AppError {
+	partnersCode: PartnersErrorCode;
 
-	constructor(code: PartnersErrorCode, message: string) {
-		super(message);
-		this.code = code;
+	constructor(
+		partnersCode: PartnersErrorCode,
+		message: string,
+		options?: { cause?: unknown },
+	) {
+		const statusCode = resolvePartnersErrorStatus(partnersCode);
+		const appCode =
+			statusCode === 404
+				? "NOT_FOUND"
+				: statusCode === 403
+					? "FORBIDDEN"
+					: statusCode === 409
+						? "CONFLICT"
+						: "INTERNAL_ERROR";
+		super({
+			code: appCode,
+			message,
+			details: { code: partnersCode },
+			expose: true,
+			cause: options?.cause,
+		});
 		this.name = "PartnersCommandError";
+		this.partnersCode = partnersCode;
+		Object.defineProperty(this, "statusCode", { value: statusCode });
 	}
 }
 

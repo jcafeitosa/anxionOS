@@ -8,6 +8,7 @@ import { ensureGovernanceSchema } from "@anxionos/governance";
 import { createIdentityDb, ensureIdentitySchema } from "@anxionos/identity";
 import { createLogger } from "@anxionos/observability";
 import { ensureOrganizationsSchema } from "@anxionos/organizations";
+import { ensurePartnersSchema } from "@anxionos/partners";
 import { Elysia } from "elysia";
 import {
 	createBetterAuthRuntime,
@@ -30,6 +31,8 @@ import { createPostLoginPlugin } from "./auth/post-login-plugin";
 import { createOpenApiPlugin } from "./openapi-plugin";
 import { createOrganizationsPlugin } from "./organizations/plugin";
 import { configureInviteAcceptRateLimit } from "./organizations/rate-limit";
+import { createPartnersApiRuntime } from "./partners/bootstrap";
+import { createPartnersPlugin } from "./partners/plugin";
 import {
 	createRealtimePlugin,
 	createRealtimeRuntime,
@@ -48,6 +51,7 @@ if (pool) {
 	await ensureOrganizationsSchema(pool);
 	await ensureGovernanceSchema(pool);
 	await ensureAgentsSchema(pool);
+	await ensurePartnersSchema(pool);
 	await ensureInviteAcceptRateLimitSchema(pool);
 	configureInviteAcceptRateLimit(pool);
 	bootstrapIdentitySessionRevocation(pool);
@@ -99,6 +103,18 @@ if (pool && resolveBetterAuthConfig()) {
 	) as unknown as Elysia;
 	logger.info(
 		"Governance API mounted at /v1/agencies/:agencyId/grants, /v1/agencies/:agencyId/agents/:agentId/autonomy and /v1/governance/*",
+	);
+	const partnersRuntime = createPartnersApiRuntime(pool);
+	app = app.use(
+		createPartnersPlugin({
+			auth,
+			...partnersRuntime,
+			identityRepository: orgRuntime.identityRepository,
+			scopedPool: orgRuntime.scopedPool,
+		}),
+	) as unknown as Elysia;
+	logger.info(
+		"Partners API mounted at /v1/partners/organizations/:organizationId/*",
 	);
 	app = app.use(
 		createAgentsPlugin({

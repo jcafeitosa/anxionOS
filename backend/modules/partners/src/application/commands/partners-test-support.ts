@@ -51,6 +51,14 @@ export function createPartnersTestUow(initial?: {
 				const row = partners.get(id);
 				return row && row.organizationId === organizationId ? row : null;
 			},
+			async findByOrganizationId(organizationId) {
+				for (const row of partners.values()) {
+					if (row.organizationId === organizationId && row.status === "ACTIVE") {
+						return row;
+					}
+				}
+				return null;
+			},
 			async findByReferralCode(referralCode, organizationId) {
 				for (const row of partners.values()) {
 					if (
@@ -107,6 +115,15 @@ export function createPartnersTestUow(initial?: {
 						row.status === "ACCRUED",
 				);
 			},
+			async listByPartnerOrganization(partnerOrganizationId, partnerId) {
+				return [...accruals.values()]
+					.filter(
+						(row) =>
+							row.partnerOrganizationId === partnerOrganizationId &&
+							(partnerId === undefined || row.partnerId === partnerId),
+					)
+					.sort((a, b) => (a.accruedAt < b.accruedAt ? 1 : -1));
+			},
 			async save(record) {
 				accruals.set(record.id, record);
 				return record;
@@ -122,6 +139,15 @@ export function createPartnersTestUow(initial?: {
 				return row && row.partnerOrganizationId === partnerOrganizationId
 					? row
 					: null;
+			},
+			async listByPartnerOrganization(partnerOrganizationId, partnerId) {
+				return [...payouts.values()]
+					.filter(
+						(row) =>
+							row.partnerOrganizationId === partnerOrganizationId &&
+							(partnerId === undefined || row.partnerId === partnerId),
+					)
+					.sort((a, b) => (a.requestedAt < b.requestedAt ? 1 : -1));
 			},
 			async save(record) {
 				payouts.set(record.id, record);
@@ -146,6 +172,9 @@ export function createPartnersTestUow(initial?: {
 	return {
 		unitOfWork,
 		commandJournal: ctx.commandJournal,
+		partners: ctx.partners,
+		commissionAccruals: ctx.commissionAccruals,
+		payouts: ctx.payouts,
 		getPartners: () => partners,
 		getAccruals: () => accruals,
 		getPayouts: () => payouts,

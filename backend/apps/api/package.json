@@ -26,6 +26,7 @@
 		"@anxionos/governance": "workspace:*",
 		"@anxionos/identity": "workspace:*",
 		"@anxionos/organizations": "workspace:*",
+		"@anxionos/partners": "workspace:*",
 		"drizzle-orm": "^0.38.3"
 	}
 }
