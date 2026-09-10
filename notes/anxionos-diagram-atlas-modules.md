@@ -76,6 +76,8 @@ flowchart LR
 
 ## agents
 
+Debate serial: [PC 03](./anxionos-pc03-agents-debate.md).
+
 ```mermaid
 flowchart LR
   cfg[Agent AgentVersion Skill] --> bind[bindings modelo]
