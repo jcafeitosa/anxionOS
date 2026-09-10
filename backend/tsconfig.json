@@ -105,6 +105,7 @@
 		"verbatimModuleSyntax": true,
 		"isolatedModules": true,
 		"esModuleInterop": true,
-		"resolveJsonModule": true
+		"resolveJsonModule": true,
+		"types": ["bun"]
 	}
 }
