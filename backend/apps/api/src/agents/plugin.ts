@@ -22,6 +22,7 @@ import {
 	handleTransitionAgentStatus,
 } from "./handlers/agents";
 import { agencyIdParamSchema } from "../governance/handlers/grants";
+import { agentsOpenApi } from "../openapi-operations";
 import { parseIdempotencyKey } from "../organizations/middleware/idempotency-key";
 import { requireAgencyMembership } from "../organizations/middleware/require-agency-membership";
 import { resolvePrincipalFromSession } from "../organizations/resolve-principal";
@@ -81,25 +82,39 @@ export function createAgentsPlugin(deps: AgentsPluginDeps) {
 					);
 					return { principal, agencyId };
 				})
-				.post("", async ({ request, agencyId, principal }) => {
-					const commandId = parseIdempotencyKey(request.headers);
-					const body = await request.json();
-					return handleRegisterAgent(deps, {
-						commandId,
-						agencyId,
-						principalId: principal.id,
-						body,
-					});
-				})
-				.get("/:agentId", ({ agencyId, params }) => {
-					const { agentId } = agentIdParamSchema.parse(params);
-					return handleGetAgent(deps, { agencyId, agentId });
-				})
-				.get("/:agentId/versions", ({ agencyId, params }) => {
-					const { agentId } = agentIdParamSchema.parse(params);
-					return handleListAgentVersions(deps, { agencyId, agentId });
-				})
-				.post("/:agentId/versions", async ({ request, agencyId, params, principal }) => {
+				.post(
+					"",
+					async ({ request, agencyId, principal }) => {
+						const commandId = parseIdempotencyKey(request.headers);
+						const body = await request.json();
+						return handleRegisterAgent(deps, {
+							commandId,
+							agencyId,
+							principalId: principal.id,
+							body,
+						});
+					},
+					agentsOpenApi.register,
+				)
+				.get(
+					"/:agentId",
+					({ agencyId, params }) => {
+						const { agentId } = agentIdParamSchema.parse(params);
+						return handleGetAgent(deps, { agencyId, agentId });
+					},
+					agentsOpenApi.get,
+				)
+				.get(
+					"/:agentId/versions",
+					({ agencyId, params }) => {
+						const { agentId } = agentIdParamSchema.parse(params);
+						return handleListAgentVersions(deps, { agencyId, agentId });
+					},
+					agentsOpenApi.listVersions,
+				)
+				.post(
+					"/:agentId/versions",
+					async ({ request, agencyId, params, principal }) => {
 					const { agentId } = agentIdParamSchema.parse(params);
 					const commandId = parseIdempotencyKey(request.headers);
 					const body = await request.json();
@@ -110,8 +125,12 @@ export function createAgentsPlugin(deps: AgentsPluginDeps) {
 						principalId: principal.id,
 						body,
 					});
-				})
-				.post("/:agentId/versions/rollback", async ({ request, agencyId, params, principal }) => {
+					},
+					agentsOpenApi.publishVersion,
+				)
+				.post(
+					"/:agentId/versions/rollback",
+					async ({ request, agencyId, params, principal }) => {
 					const { agentId } = agentIdParamSchema.parse(params);
 					const commandId = parseIdempotencyKey(request.headers);
 					const body = await request.json();
@@ -122,8 +141,12 @@ export function createAgentsPlugin(deps: AgentsPluginDeps) {
 						principalId: principal.id,
 						body,
 					});
-				})
-				.patch("/:agentId/status", async ({ request, agencyId, params, principal }) => {
+					},
+					agentsOpenApi.rollbackVersion,
+				)
+				.patch(
+					"/:agentId/status",
+					async ({ request, agencyId, params, principal }) => {
 					const { agentId } = agentIdParamSchema.parse(params);
 					const commandId = parseIdempotencyKey(request.headers);
 					const body = await request.json();
@@ -134,8 +157,12 @@ export function createAgentsPlugin(deps: AgentsPluginDeps) {
 						principalId: principal.id,
 						body,
 					});
-				})
-				.post("/:agentId/invoke", async ({ request, agencyId, params, principal }) => {
+					},
+					agentsOpenApi.transitionStatus,
+				)
+				.post(
+					"/:agentId/invoke",
+					async ({ request, agencyId, params, principal }) => {
 					const { agentId } = agentIdParamSchema.parse(params);
 					const commandId = parseIdempotencyKey(request.headers);
 					const body = await request.json();
@@ -146,6 +173,8 @@ export function createAgentsPlugin(deps: AgentsPluginDeps) {
 						principalId: principal.id,
 						body,
 					});
-				}),
+					},
+					agentsOpenApi.invoke,
+				),
 		);
 }

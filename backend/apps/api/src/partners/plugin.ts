@@ -7,6 +7,7 @@ import type {
 } from "@anxionos/partners";
 import type { betterAuth } from "better-auth";
 import { Elysia } from "elysia";
+import { partnersOpenApi } from "../openapi-operations";
 import { mapPartnersError } from "./error-handler";
 import {
 	handleGetPartnerByOrganization,
@@ -63,20 +64,29 @@ export function createPartnersPlugin(deps: PartnersPluginDeps) {
 					);
 					return { principal, organizationId: params.organizationId };
 				})
-				.get("", async ({ organizationId }) =>
-					handleGetPartnerByOrganization(deps, { organizationId }),
+				.get(
+					"",
+					async ({ organizationId }) =>
+						handleGetPartnerByOrganization(deps, { organizationId }),
+					partnersOpenApi.getByOrganization,
 				)
-				.get("/commission-accruals", async ({ organizationId, query }) =>
-					handleListCommissionAccruals(deps, {
-						organizationId,
-						query,
-					}),
+				.get(
+					"/commission-accruals",
+					async ({ organizationId, query }) =>
+						handleListCommissionAccruals(deps, {
+							organizationId,
+							query,
+						}),
+					partnersOpenApi.listAccruals,
 				)
-				.get("/payouts", async ({ organizationId, query }) =>
-					handleListPayouts(deps, {
-						organizationId,
-						query,
-					}),
+				.get(
+					"/payouts",
+					async ({ organizationId, query }) =>
+						handleListPayouts(deps, {
+							organizationId,
+							query,
+						}),
+					partnersOpenApi.listPayouts,
 				),
 		);
 }

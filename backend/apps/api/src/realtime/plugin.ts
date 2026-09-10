@@ -5,6 +5,7 @@ import {
 } from "@anxionos/contracts/realtime";
 import type { betterAuth } from "better-auth";
 import { Elysia } from "elysia";
+import { realtimeOpenApi } from "../openapi-operations";
 import { resolveRealtimeSession } from "./session-context";
 import type { SubscriptionManager } from "./subscription-manager";
 import type { StoredRealtimeEvent } from "./types";
@@ -59,7 +60,9 @@ function waitForEvent(
 
 export function createRealtimePlugin(deps: RealtimePluginDeps) {
 	return new Elysia({ name: "realtime-gateway", prefix: "/api/realtime" })
-		.get("/events", async ({ request, set, query }) => {
+		.get(
+			"/events",
+			async ({ request, set, query }) => {
 			const session = await resolveRealtimeSession(deps, request.headers);
 			if (!session) {
 				set.status = 401;
@@ -121,8 +124,12 @@ export function createRealtimePlugin(deps: RealtimePluginDeps) {
 			});
 
 			return stream;
-		})
-		.get("/poll", async ({ request, set, query }) => {
+		},
+			realtimeOpenApi.sse,
+		)
+		.get(
+			"/poll",
+			async ({ request, set, query }) => {
 			const session = await resolveRealtimeSession(deps, request.headers);
 			if (!session) {
 				set.status = 401;
@@ -159,8 +166,11 @@ export function createRealtimePlugin(deps: RealtimePluginDeps) {
 				set.status = 429;
 				return { error: "REALTIME_CONNECTION_QUOTA_EXCEEDED" };
 			}
-		})
+		},
+			realtimeOpenApi.poll,
+		)
 		.ws("/ws", {
+			...realtimeOpenApi.ws,
 			async open(ws) {
 				const state = ws.data as RealtimeWsState;
 				const session = await resolveRealtimeSession(deps, state.request.headers);

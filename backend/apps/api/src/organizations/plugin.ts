@@ -24,6 +24,7 @@ import {
 	handleListMemberships,
 	handleRevokeMembership,
 } from "./handlers/memberships";
+import { organizationsOpenApi } from "../openapi-operations";
 import { parseIdempotencyKey } from "./middleware/idempotency-key";
 import { requireAgencyMembership } from "./middleware/require-agency-membership";
 import { assertInviteAcceptRateLimit } from "./rate-limit";
@@ -76,20 +77,28 @@ export function createOrganizationsPlugin(deps: OrganizationsPluginDeps) {
 			set.status = mapped.status;
 			return mapped.body;
 		})
-		.post("/agencies", async ({ request }) => {
-			const { principal } = await resolveSessionPrincipal(deps, request);
-			const commandId = parseIdempotencyKey(request.headers);
-			const body = await request.json();
-			return handleCreateAgency(deps, {
-				commandId,
-				principalId: principal.id,
-				body,
-			});
-		})
-		.get("/agencies", async ({ request }) => {
-			const { principal } = await resolveSessionPrincipal(deps, request);
-			return handleListAgencies(deps, principal.id);
-		})
+		.post(
+			"/agencies",
+			async ({ request }) => {
+				const { principal } = await resolveSessionPrincipal(deps, request);
+				const commandId = parseIdempotencyKey(request.headers);
+				const body = await request.json();
+				return handleCreateAgency(deps, {
+					commandId,
+					principalId: principal.id,
+					body,
+				});
+			},
+			organizationsOpenApi.createAgency,
+		)
+		.get(
+			"/agencies",
+			async ({ request }) => {
+				const { principal } = await resolveSessionPrincipal(deps, request);
+				return handleListAgencies(deps, principal.id);
+			},
+			organizationsOpenApi.listAgencies,
+		)
 		.group("/agencies/:agencyId", (scoped) =>
 			scoped
 				.resolve(async ({ request, params }) => {
@@ -101,45 +110,62 @@ export function createOrganizationsPlugin(deps: OrganizationsPluginDeps) {
 					);
 					return { principal };
 				})
-				.get("", async ({ params, principal }) =>
-					handleGetAgency(deps, {
-						agencyId: params.agencyId,
-						principalId: principal.id,
-					}),
+				.get(
+					"",
+					async ({ params, principal }) =>
+						handleGetAgency(deps, {
+							agencyId: params.agencyId,
+							principalId: principal.id,
+						}),
+					organizationsOpenApi.getAgency,
 				)
-				.patch("/markets", async ({ request, params, principal }) => {
-					const commandId = parseIdempotencyKey(request.headers);
-					const body = await request.json();
-					return handleUpdateAgencyMarkets(deps, {
-						commandId,
-						agencyId: params.agencyId,
-						principalId: principal.id,
-						body,
-					});
-				})
-				.get("/memberships", async ({ params, principal }) =>
-					handleListMemberships(deps, {
-						agencyId: params.agencyId,
-						principalId: principal.id,
-					}),
+				.patch(
+					"/markets",
+					async ({ request, params, principal }) => {
+						const commandId = parseIdempotencyKey(request.headers);
+						const body = await request.json();
+						return handleUpdateAgencyMarkets(deps, {
+							commandId,
+							agencyId: params.agencyId,
+							principalId: principal.id,
+							body,
+						});
+					},
+					organizationsOpenApi.updateAgencyMarkets,
 				)
-				.get("/memberships/:membershipId", async ({ params, principal }) =>
-					handleGetMembership(deps, {
-						agencyId: params.agencyId,
-						membershipId: params.membershipId,
-						principalId: principal.id,
-					}),
+				.get(
+					"/memberships",
+					async ({ params, principal }) =>
+						handleListMemberships(deps, {
+							agencyId: params.agencyId,
+							principalId: principal.id,
+						}),
+					organizationsOpenApi.listMemberships,
 				)
-				.post("/memberships/invite", async ({ request, params, principal }) => {
-					const commandId = parseIdempotencyKey(request.headers);
-					const body = await request.json();
-					return handleInviteMember(deps, {
-						commandId,
-						agencyId: params.agencyId,
-						principalId: principal.id,
-						body,
-					});
-				})
+				.get(
+					"/memberships/:membershipId",
+					async ({ params, principal }) =>
+						handleGetMembership(deps, {
+							agencyId: params.agencyId,
+							membershipId: params.membershipId,
+							principalId: principal.id,
+						}),
+					organizationsOpenApi.getMembership,
+				)
+				.post(
+					"/memberships/invite",
+					async ({ request, params, principal }) => {
+						const commandId = parseIdempotencyKey(request.headers);
+						const body = await request.json();
+						return handleInviteMember(deps, {
+							commandId,
+							agencyId: params.agencyId,
+							principalId: principal.id,
+							body,
+						});
+					},
+					organizationsOpenApi.inviteMember,
+				)
 				.post(
 					"/memberships/:membershipId/activate",
 					async ({ request, params, principal }) => {
@@ -151,6 +177,7 @@ export function createOrganizationsPlugin(deps: OrganizationsPluginDeps) {
 							principalId: principal.id,
 						});
 					},
+					organizationsOpenApi.activateMembership,
 				)
 				.post(
 					"/memberships/:membershipId/revoke",
@@ -163,23 +190,28 @@ export function createOrganizationsPlugin(deps: OrganizationsPluginDeps) {
 							principalId: principal.id,
 						});
 					},
+					organizationsOpenApi.revokeMembership,
 				),
 		)
-		.post("/invites/accept", async ({ request, server }) => {
-			await assertInviteAcceptRateLimit(
-				resolveClientIp(request, server?.requestIP),
-			);
-			const { principal, session } = await resolveSessionPrincipal(
-				deps,
-				request,
-			);
-			const commandId = parseIdempotencyKey(request.headers);
-			const body = await request.json();
-			return handleAcceptInvite(deps, {
-				commandId,
-				principalId: principal.id,
-				sessionEmail: session.user.email,
-				body,
-			});
-		});
+		.post(
+			"/invites/accept",
+			async ({ request, server }) => {
+				await assertInviteAcceptRateLimit(
+					resolveClientIp(request, server?.requestIP),
+				);
+				const { principal, session } = await resolveSessionPrincipal(
+					deps,
+					request,
+				);
+				const commandId = parseIdempotencyKey(request.headers);
+				const body = await request.json();
+				return handleAcceptInvite(deps, {
+					commandId,
+					principalId: principal.id,
+					sessionEmail: session.user.email,
+					body,
+				});
+			},
+			organizationsOpenApi.acceptInvite,
+		);
 }

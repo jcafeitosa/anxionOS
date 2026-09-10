@@ -34,6 +34,7 @@ import {
 	handleListGrants,
 	handleRevokeGrant,
 } from "./handlers/grants";
+import { governanceOpenApi } from "../openapi-operations";
 import { parseIdempotencyKey } from "../organizations/middleware/idempotency-key";
 import { requireAgencyMembership } from "../organizations/middleware/require-agency-membership";
 import { resolvePrincipalFromSession } from "../organizations/resolve-principal";
@@ -92,13 +93,18 @@ export function createGovernancePlugin(deps: GovernancePluginDeps) {
 					);
 					return { principal, agencyId };
 				})
-				.get("/grants", ({ principal, agencyId }) =>
-					handleListGrants(deps, {
-						agencyId,
-						principalId: principal.id,
-					}),
+				.get(
+					"/grants",
+					({ principal, agencyId }) =>
+						handleListGrants(deps, {
+							agencyId,
+							principalId: principal.id,
+						}),
+					governanceOpenApi.listGrants,
 				)
-				.post("/grants", async ({ request, agencyId }) => {
+				.post(
+					"/grants",
+					async ({ request, agencyId }) => {
 					const commandId = parseIdempotencyKey(request.headers);
 					const body = await request.json();
 					return handleIssueGrant(deps, {
@@ -106,8 +112,12 @@ export function createGovernancePlugin(deps: GovernancePluginDeps) {
 						agencyId,
 						body,
 					});
-				})
-				.delete("/grants/:grantId", async ({ request, params, agencyId }) => {
+					},
+					governanceOpenApi.issueGrant,
+				)
+				.delete(
+					"/grants/:grantId",
+					async ({ request, params, agencyId }) => {
 					const { grantId } = grantIdParamSchema.parse(params);
 					const commandId = parseIdempotencyKey(request.headers);
 					const body =
@@ -120,12 +130,20 @@ export function createGovernancePlugin(deps: GovernancePluginDeps) {
 						grantId,
 						body,
 					});
-				})
-				.get("/agents/:agentId/autonomy", ({ agencyId, params }) => {
+					},
+					governanceOpenApi.revokeGrant,
+				)
+				.get(
+					"/agents/:agentId/autonomy",
+					({ agencyId, params }) => {
 					const { agentId } = agentIdParamSchema.parse(params);
 					return handleGetEffectiveAutonomy(deps, { agencyId, agentId });
-				})
-				.post("/agents/:agentId/autonomy", async ({ request, agencyId, params }) => {
+					},
+					governanceOpenApi.getAutonomy,
+				)
+				.post(
+					"/agents/:agentId/autonomy",
+					async ({ request, agencyId, params }) => {
 					const { agentId } = agentIdParamSchema.parse(params);
 					const commandId = parseIdempotencyKey(request.headers);
 					const body = await request.json();
@@ -135,7 +153,9 @@ export function createGovernancePlugin(deps: GovernancePluginDeps) {
 						agentId,
 						body,
 					});
-				})
+					},
+					governanceOpenApi.assignAutonomy,
+				)
 				.post(
 					"/agents/:agentId/autonomy/transition",
 					async ({ request, agencyId, params, principal }) => {
@@ -150,6 +170,7 @@ export function createGovernancePlugin(deps: GovernancePluginDeps) {
 							body,
 						});
 					},
+					governanceOpenApi.transitionAutonomy,
 				),
 		);
 
@@ -162,7 +183,9 @@ export function createGovernancePlugin(deps: GovernancePluginDeps) {
 			set.status = mapped.status;
 			return mapped.body;
 		})
-		.post("/authorization/can", async ({ request }) => {
+		.post(
+			"/authorization/can",
+			async ({ request }) => {
 			const body = await request.json();
 			const { principal } = await resolveSessionPrincipal(deps, request);
 			const { agencyId } = authorizationCanBodySchema.parse(body);
@@ -175,12 +198,20 @@ export function createGovernancePlugin(deps: GovernancePluginDeps) {
 				principalId: principal.id,
 				body,
 			});
-		})
-		.get("/autonomy/matrix", async ({ request }) => {
+			},
+			governanceOpenApi.authorizationCan,
+		)
+		.get(
+			"/autonomy/matrix",
+			async ({ request }) => {
 			await resolveSessionPrincipal(deps, request);
 			return handleGetAutonomyMatrix();
-		})
-		.post("/autonomy/evaluate", async ({ request }) => {
+			},
+			governanceOpenApi.autonomyMatrix,
+		)
+		.post(
+			"/autonomy/evaluate",
+			async ({ request }) => {
 			const body = await request.json();
 			const { principal } = await resolveSessionPrincipal(deps, request);
 			const parsed = evaluateAutonomyBodySchema.parse(body);
@@ -190,7 +221,9 @@ export function createGovernancePlugin(deps: GovernancePluginDeps) {
 				principal.id,
 			);
 			return handleEvaluateAutonomyCapability(deps, { body });
-		});
+			},
+			governanceOpenApi.evaluateAutonomy,
+		);
 
 	return new Elysia({ name: "governance" }).use(agencies).use(authorization);
 }

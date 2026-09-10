@@ -28,6 +28,11 @@ import {
 } from "./organizations/bootstrap";
 import { ensureInviteAcceptRateLimitSchema } from "./organizations/invite-accept-rate-limit-store";
 import { createPostLoginPlugin } from "./auth/post-login-plugin";
+import {
+	hiddenAuthCatchAllDetail,
+	healthOpenApiDetail,
+	identityOpenApi,
+} from "./openapi-operations";
 import { createOpenApiPlugin } from "./openapi-plugin";
 import { createOrganizationsPlugin } from "./organizations/plugin";
 import { configureInviteAcceptRateLimit } from "./organizations/rate-limit";
@@ -71,9 +76,14 @@ if (pool && resolveBetterAuthConfig()) {
 		repository: identity.repository,
 		unitOfWork: identity.unitOfWork,
 	});
-	app = app.all("/api/auth/*", ({ request }) =>
-		auth.handler(request),
-	) as unknown as Elysia;
+	const handleAuth = ({ request }: { request: Request }) =>
+		auth.handler(request);
+	app = app
+		.post("/api/auth/sign-in/email", handleAuth, identityOpenApi.signInEmail)
+		.post("/api/auth/sign-up/email", handleAuth, identityOpenApi.signUpEmail)
+		.get("/api/auth/get-session", handleAuth, identityOpenApi.getSession)
+		.post("/api/auth/sign-out", handleAuth, identityOpenApi.signOut)
+		.all("/api/auth/*", handleAuth, hiddenAuthCatchAllDetail) as unknown as Elysia;
 	logger.info("Better Auth mounted at /api/auth/*");
 	const orgRuntime = createOrganizationsRuntime(pool, databaseUrl!);
 	const govRuntime = createGovernanceApiRuntime(pool);
@@ -137,16 +147,20 @@ if (pool && resolveBetterAuthConfig()) {
 	);
 }
 
-app = app.get("/health", async () => {
-	const body = healthResponseSchema.parse({
-		status: "ok",
-		schemaVersion,
-		service: "api",
-		timestamp: new Date().toISOString(),
-		deps: await probeHealthDeps(pool),
-	});
-	return body;
-}) as unknown as Elysia;
+app = app.get(
+	"/health",
+	async () => {
+		const body = healthResponseSchema.parse({
+			status: "ok",
+			schemaVersion,
+			service: "api",
+			timestamp: new Date().toISOString(),
+			deps: await probeHealthDeps(pool),
+		});
+		return body;
+	},
+	healthOpenApiDetail,
+) as unknown as Elysia;
 app.listen(port);
 
 logger.info("API listening", { port: app.server?.port ?? port });

@@ -1,0 +1,117 @@
+import { Elysia } from "elysia";
+import { createAgentsPlugin } from "./agents/plugin";
+import { createPostLoginPlugin } from "./auth/post-login-plugin";
+import { createGovernancePlugin } from "./governance/plugin";
+import {
+	hiddenAuthCatchAllDetail,
+	healthOpenApiDetail,
+	identityOpenApi,
+} from "./openapi-operations";
+import { createOpenApiPlugin } from "./openapi-plugin";
+import { createOrganizationsPlugin } from "./organizations/plugin";
+import { createPartnersPlugin } from "./partners/plugin";
+import { createRealtimePlugin } from "./realtime/plugin";
+import { SubscriptionManager } from "./realtime/subscription-manager";
+
+const stubAuth = {
+	api: {
+		getSession: async () => null,
+	},
+	handler: async (_request: Request) => new Response("ok"),
+};
+
+const unused = {} as never;
+
+/** In-memory composition of HTTP plugins for OpenAPI catalog tests (no DB). */
+export function createOpenApiCatalogApp() {
+	return new Elysia()
+		.use(createOpenApiPlugin())
+		.post(
+			"/api/auth/sign-in/email",
+			({ request }) => stubAuth.handler(request),
+			identityOpenApi.signInEmail,
+		)
+		.post(
+			"/api/auth/sign-up/email",
+			({ request }) => stubAuth.handler(request),
+			identityOpenApi.signUpEmail,
+		)
+		.get(
+			"/api/auth/get-session",
+			({ request }) => stubAuth.handler(request),
+			identityOpenApi.getSession,
+		)
+		.post(
+			"/api/auth/sign-out",
+			({ request }) => stubAuth.handler(request),
+			identityOpenApi.signOut,
+		)
+		.all(
+			"/api/auth/*",
+			({ request }) => stubAuth.handler(request),
+			hiddenAuthCatchAllDetail,
+		)
+		.get("/health", () => ({ status: "ok" }), healthOpenApiDetail)
+		.use(
+			createPostLoginPlugin({
+				auth: stubAuth as never,
+				membershipRepository: unused,
+				identityRepository: unused,
+			}),
+		)
+		.use(
+			createOrganizationsPlugin({
+				auth: stubAuth as never,
+				agencyRepository: unused,
+				membershipRepository: unused,
+				commandJournal: unused,
+				unitOfWork: unused,
+				principalLookup: unused,
+				inviteTokenHasher: unused,
+				identityRepository: unused,
+				scopedPool: unused,
+			}),
+		)
+		.use(
+			createGovernancePlugin({
+				auth: stubAuth as never,
+				grantRepository: unused,
+				autonomyAssignmentRepository: unused,
+				commandJournal: unused,
+				unitOfWork: unused,
+				principalLookup: unused,
+				membershipRepository: unused,
+				scopedPool: unused,
+				identityRepository: unused,
+				traversalEvaluator: unused,
+			}),
+		)
+		.use(
+			createAgentsPlugin({
+				auth: stubAuth as never,
+				agentRepository: unused,
+				agentVersionRepository: unused,
+				commandJournal: unused,
+				unitOfWork: unused,
+				membershipRepository: unused,
+				scopedPool: unused,
+				identityRepository: unused,
+			}),
+		)
+		.use(
+			createPartnersPlugin({
+				auth: stubAuth as never,
+				partners: unused,
+				commissionAccruals: unused,
+				payouts: unused,
+				identityRepository: unused,
+				scopedPool: unused,
+			}),
+		)
+		.use(
+			createRealtimePlugin({
+				auth: stubAuth as never,
+				manager: new SubscriptionManager(),
+			}),
+		);
+}

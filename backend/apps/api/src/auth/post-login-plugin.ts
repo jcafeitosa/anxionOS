@@ -11,7 +11,7 @@ import {
 	type ConsoleRole,
 	decidePostLoginContext,
 } from "./post-login-context";
-
+import { postLoginContextOpenApiDetail } from "../openapi-operations";
 
 export interface PostLoginPluginDeps {
 	auth: ReturnType<typeof betterAuth>;
@@ -130,5 +130,5 @@ export function createPostLoginPlugin(deps: PostLoginPluginDeps) {
 				partnerAccess: false,
 				now,
 			});
-		});
+		}, postLoginContextOpenApiDetail);
 }
