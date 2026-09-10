@@ -6,7 +6,7 @@ status: draft
 decision_status: proposed
 owner: Orchestration
 created: 2026-09-10
-version: "1.0"
+version: "1.1"
 tags:
   - owner
   - acceptance
@@ -17,13 +17,6 @@ tags:
 
 **Issue:** ANX-291 · **Goal thread:** `cursor-goal-decision-engine-1789038202`
 
-Oráculo principal: `npm run p2:sandbox-homologation -- --issue ANX-290 --json` → `overallOk: true`
+Oráculo: `npm run p2:sandbox-homologation -- --issue ANX-290 --json` → `overallOk: true`
 
-## Aceite Owner (copiar em ANX-291)
-
-```text
-ACEITE ENTREGÁVEL 8 — AI Product Company Engine (sandbox P2).
-Evidência: notes/anxionos-owner-acceptance-deliverable-8.md
-Oráculo: npm run p2:sandbox-homologation -- --issue ANX-290 --json
-Escopo: sandbox/staging conforme ADR0005; produção é fase separada.
-```
+Matriz completa e gates em `notes/anxionos-owner-acceptance-deliverable-8.md` (repo notes/ mirror).

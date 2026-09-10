@@ -112,13 +112,17 @@ Ver `brain/notes/anxionos-product-company-module-alignment.md`. Resumo:
 | Plano execução P2 | brain/plans/ai-product-company-execution-plan.md | atualizado ANX-275 |
 | Archify workflow 12 etapas | `.archify/specs/anxionos-product-company.workflow.json` | validado |
 
-## Não verificado (sem evidência runtime)
+## Não verificado (P3+ — fora escopo sandbox P2)
 
-- Product Graph Neo4j projection
-- Agentes permanentes autônomos
-- Self-healing/self-development implementados
-- Product Intelligence loop operacional
-- Deploy staging/prod da engine
+- Agentes permanentes autônomos (produto institucional)
+- Self-development runtime integral (§25 — doc only)
+- Deploy staging/prod institucional completo
+
+## Verificado sandbox P2 (ANX-277–279, 289, 290)
+
+- Product Graph Neo4j projection — `bun test backend/tests/graph` 18/18
+- Product Intelligence FEEDS_BACK — ANX-278
+- Self-healing executor staging — ANX-279 live homologation
 
 ## Critérios de aceite desta auditoria
 
@@ -130,13 +134,11 @@ Ver `brain/notes/anxionos-product-company-module-alignment.md`. Resumo:
 - [x] Slices P0 ANX-265–273 entregues com G7
 - [x] Entregáveis 1–6 documentais completos (certificado P1)
 - [x] Fase P1 documentação completa (ANX-265–287, índice hub, delegation P2)
-- [ ] Revisão Owner/CTO aceite ADR0005 + spec 006 (ANX-276)
-- [ ] Runtime P2 verificado (ANX-277–279)
+- [x] Revisão Owner/CTO aceite ADR0005 + spec 006 (ANX-276 done G7)
+- [x] Runtime P2 verificado (ANX-277–279, 289, 290)
 
-## Próximas ações
+## Próximas ações (P3+)
 
-1. **ANX-276** — @Owner greenlight ADR0005 + spec 006
-2. **ANX-277** — Neo4j projection worker sandbox (após greenlight)
-3. **ANX-278** — Product Intelligence runtime FEEDS_BACK
-4. **ANX-279** — Self-healing executor staging (G4 Isa)
-5. G4 Security review runbooks antes de preauthorize
+1. **ANX-291** — Owner G7 entregável 8 (sandbox)
+2. Prod homologação Neo4j
+3. Cognitive OS §19–25 runtime integral

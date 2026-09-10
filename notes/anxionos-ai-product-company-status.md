@@ -25,7 +25,7 @@ tags:
 | 3 | Cognitive OS §12–25 | 95% | doc OKF + runtime P2 slices; §19–25 integral P3+ |
 | 4 | Alinhamento 30→23 | 100% | alignment note + spec 007 |
 | 5 | Specs/ADRs/workflows | 100% | ADR0005 + spec 006 **accepted** (ANX-276) |
-| 6 | Issues ANX-* | 100% | P0 done + P2 backlog + critérios |
+| 6 | Issues ANX-* | 100% | P0 done + P2 done (ANX-276–279, 289, 290) |
 | 7 | Implementação runtime | 95% | P2 slices + ANX-290 homologação live Neo4j/health |
 | 8 | Evidência completa | 95% sandbox | pacote ANX-291 pronto; Owner G7 pendente |
 
