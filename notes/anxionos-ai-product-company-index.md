@@ -14,6 +14,8 @@ tags:
 ---
 # AI Product Company Engine — índice canônico
 
+**Status executivo @Owner:** `brain/notes/anxionos-ai-product-company-status.md`
+
 **Framework (repo):** `.cursor/orchestration/AI-PRODUCT-COMPANY-ENGINE.md` (26 seções)
 
 ## Governança e decisão
