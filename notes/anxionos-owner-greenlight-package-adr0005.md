@@ -19,6 +19,10 @@ tags:
 
 ## Checklist de revisão
 
+## Índice hub
+
+- `brain/notes/anxionos-ai-product-company-index.md` — navegação completa P0/P1
+
 | # | Documento | Pergunta | OK? |
 | --- | --- | --- | --- |
 | 1 | ADR0005 | Grafo Product separado do institucional? | ☐ |

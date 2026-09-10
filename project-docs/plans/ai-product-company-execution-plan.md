@@ -61,6 +61,11 @@ flowchart TD
 | ANX-271 | Schema registry P3 | done | product-agent-graph-schema 7/7 |
 | ANX-272 | Product Intelligence loop | done | brain/notes/anxionos-product-intelligence-loop.md |
 | ANX-273 | Self-healing runbooks P1 | done | brain/notes/anxionos-self-healing-runbooks.md |
+| ANX-274 | Google Team Playbook | done | google-team-rituals 4/4 |
+| ANX-275 | Audit P0 + plano P2 | done | brain/notes/anxionos-ai-product-company-documentation-audit.md |
+| ANX-281 | Cognitive OS §21–22–25 | done | experimentation, incidents, self-dev notes |
+| ANX-282 | Cognitive OS §19–20–23 | done | performance, learning, arch loop + projection design |
+| ANX-283 | P1 doc closure hub | done | brain/notes/anxionos-ai-product-company-index.md |
 
 ## Slices P2 (backlog — implementação após greenlight)
 
