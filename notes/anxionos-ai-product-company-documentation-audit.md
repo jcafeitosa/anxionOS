@@ -105,6 +105,8 @@ Ver `brain/notes/anxionos-product-company-module-alignment.md`. Resumo:
 | Product Intelligence loop doc | ANX-272 done · brain/notes/anxionos-product-intelligence-loop.md | **done G7** |
 | Self-healing runbooks P1 | ANX-273 done · brain/notes/anxionos-self-healing-runbooks.md | **done G7** |
 | Framework master doc | `.cursor/orchestration/AI-PRODUCT-COMPANY-ENGINE.md` (26 seções) | **done** |
+| Cognitive OS specs §21–25 | experimentation, incidents, self-dev notes ANX-281 | **done** |
+| Owner greenlight package | `brain/notes/anxionos-owner-greenlight-package-adr0005.md` | ANX-276 todo |
 | Spec Product/Agent Graph | brain/spec 006 + registry ANX-271 | draft/proposed |
 | ADR0005 Neo4j projection | brain/decisions/0005-product-graph-neo4j-projection.md | **proposed** |
 | Plano execução P2 | brain/plans/ai-product-company-execution-plan.md | atualizado ANX-275 |
