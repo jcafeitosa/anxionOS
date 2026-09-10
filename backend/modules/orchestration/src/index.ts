@@ -85,8 +85,8 @@ export {
 	type HierarchyModeResolverDeps,
 	type HierarchyModeResolution,
 } from "./application/services/hierarchy-mode-resolver";
-export { createFixturePrincipalLookup }
-export { createFixtureOperationalBudget } from "./infrastructure/adapters/fixture-operational-budget"; from "./infrastructure/adapters/fixture-principal-lookup";
+export { createFixturePrincipalLookup } from "./infrastructure/adapters/fixture-principal-lookup";
+export { createFixtureOperationalBudget } from "./infrastructure/adapters/fixture-operational-budget";
 export { createFixtureOrganizationScope } from "./infrastructure/adapters/fixture-organization-scope";
 export {
 	createFixtureTaskboardMirror,
@@ -224,4 +224,5 @@ export type {
 	TaskboardMirrorPort,
 	AgentRegistryPort,
 	LeaseClock,
+	OperationalBudgetPort,
 } from "./domain/ports";

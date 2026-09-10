@@ -2,6 +2,7 @@
 export const WORKER_PROFILE_GRAPH_GOVERNANCE = "graph-governance-projection";
 export const WORKER_PROFILE_GRAPH_PRODUCT = "graph-product-projection";
 export const WORKER_PROFILE_OUTBOX_RELAY = "outbox-relay";
+export const WORKER_PROFILE_ORCHESTRATION_S5 = "orchestration-s5";
 
 export const DEFAULT_NATS_EVENTS_STREAM = "EVENTS";
 export const DEFAULT_NATS_GRAPH_GOVERNANCE_SUBJECT = "events.governance.>";
@@ -17,6 +18,9 @@ export const DEFAULT_NATS_MAX_RECONNECT_ATTEMPTS = -1;
 export const DEFAULT_OUTBOX_RELAY_POLL_INTERVAL_MS = 1000;
 export const DEFAULT_OUTBOX_RELAY_BATCH_SIZE = 50;
 export const DEFAULT_OUTBOX_RELAY_LEASE_TTL_MS = 30_000;
+export const DEFAULT_ORCHESTRATION_LEASE_SWEEPER_POLL_INTERVAL_MS = 30_000;
+export const DEFAULT_ORCHESTRATION_HEARTBEAT_DEQUEUE_POLL_INTERVAL_MS = 120_000;
+export const DEFAULT_ORCHESTRATION_HEARTBEAT_DEQUEUE_BATCH_LIMIT = 50;
 
 export interface GraphGovernanceWorkerConfig {
 	profile: typeof WORKER_PROFILE_GRAPH_GOVERNANCE;
@@ -49,6 +53,16 @@ export interface OutboxRelayWorkerConfig {
 	batchSize: number;
 	leaseTtlMs: number;
 }
+
+export interface OrchestrationS5WorkerConfig {
+	profile: typeof WORKER_PROFILE_ORCHESTRATION_S5;
+	databaseUrl: string;
+	leaseSweeperPollIntervalMs: number;
+	leaseSweeperBatchSize: number;
+	heartbeatDequeuePollIntervalMs: number;
+	heartbeatDequeueBatchLimit: number;
+}
+
 
 function requireEnv(name: string): string {
 	const value = process.env[name]?.trim();
@@ -162,3 +176,34 @@ export function loadOutboxRelayWorkerConfig(): OutboxRelayWorkerConfig {
 		),
 	};
 }
+
+export function loadOrchestrationS5WorkerConfig(): OrchestrationS5WorkerConfig {
+	const profile =
+		process.env.WORKER_PROFILE?.trim() ?? WORKER_PROFILE_ORCHESTRATION_S5;
+	if (profile !== WORKER_PROFILE_ORCHESTRATION_S5) {
+		throw new Error(
+			`Unsupported WORKER_PROFILE "${profile}" — expected ${WORKER_PROFILE_ORCHESTRATION_S5}`,
+		);
+	}
+	return {
+		profile,
+		databaseUrl: requireEnv("DATABASE_URL"),
+		leaseSweeperPollIntervalMs: parsePositiveIntEnv(
+			"ORCHESTRATION_LEASE_SWEEPER_POLL_INTERVAL_MS",
+			DEFAULT_ORCHESTRATION_LEASE_SWEEPER_POLL_INTERVAL_MS,
+		),
+		leaseSweeperBatchSize: parsePositiveIntEnv(
+			"ORCHESTRATION_LEASE_SWEEPER_BATCH_SIZE",
+			100,
+		),
+		heartbeatDequeuePollIntervalMs: parsePositiveIntEnv(
+			"ORCHESTRATION_HEARTBEAT_DEQUEUE_POLL_INTERVAL_MS",
+			DEFAULT_ORCHESTRATION_HEARTBEAT_DEQUEUE_POLL_INTERVAL_MS,
+		),
+		heartbeatDequeueBatchLimit: parsePositiveIntEnv(
+			"ORCHESTRATION_HEARTBEAT_DEQUEUE_BATCH_LIMIT",
+			DEFAULT_ORCHESTRATION_HEARTBEAT_DEQUEUE_BATCH_LIMIT,
+		),
+	};
+}
+

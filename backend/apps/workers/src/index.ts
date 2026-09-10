@@ -1,19 +1,25 @@
 import { createLogger } from "@anxionos/observability";
 import {
 	bootstrapGraphGovernanceWorker,
+	bootstrapOrchestrationS5Worker,
 	bootstrapOutboxRelayWorker,
 	shutdownGraphGovernanceWorker,
+	shutdownOrchestrationS5Worker,
 	shutdownOutboxRelayWorker,
 } from "./bootstrap";
 import {
 	WORKER_PROFILE_GRAPH_GOVERNANCE,
 	WORKER_PROFILE_GRAPH_PRODUCT,
+	WORKER_PROFILE_ORCHESTRATION_S5,
 	WORKER_PROFILE_OUTBOX_RELAY,
 	loadGraphGovernanceWorkerConfig,
+	loadOrchestrationS5WorkerConfig,
 	loadGraphProductWorkerConfig,
 	loadOutboxRelayWorkerConfig,
 } from "./config";
 import { startAppOutboxRelayWorker } from "./eventing/outbox-relay-worker";
+import { startOrchestrationHeartbeatDequeue } from "./orchestration/heartbeat-dequeue";
+import { startOrchestrationLeaseSweeper } from "./orchestration/lease-sweeper";
 import { startGovernanceProjectionConsumer } from "./graph/governance-projection-worker";
 import { startOrganizationsProjectionConsumer } from "./graph/organizations-graph-projection-worker";
 import { startProductGraphProjectionConsumers } from "./graph/product-graph-projection-worker";
@@ -91,6 +97,54 @@ async function main(): Promise<void> {
 		return;
 	}
 
+
+	if (profile === WORKER_PROFILE_ORCHESTRATION_S5) {
+		const config = loadOrchestrationS5WorkerConfig();
+		const runtime = await bootstrapOrchestrationS5Worker(config);
+		const sweeperDeps = {
+			unitOfWork: runtime.unitOfWork,
+			leaseClock: runtime.leaseClock,
+		};
+		const heartbeatDeps = {
+			unitOfWork: runtime.unitOfWork,
+			leaseClock: runtime.leaseClock,
+			operationalBudget: runtime.operationalBudget,
+		};
+		const leaseSweeper = startOrchestrationLeaseSweeper({
+			deps: sweeperDeps,
+			config: {
+				pollIntervalMs: config.leaseSweeperPollIntervalMs,
+				batchSize: config.leaseSweeperBatchSize,
+			},
+			signal: abortController.signal,
+		});
+		const heartbeatDequeue = startOrchestrationHeartbeatDequeue({
+			deps: heartbeatDeps,
+			config: {
+				pollIntervalMs: config.heartbeatDequeuePollIntervalMs,
+				batchLimit: config.heartbeatDequeueBatchLimit,
+			},
+			signal: abortController.signal,
+		});
+
+		const shutdown = async (signal: string) => {
+			if (shuttingDown) {
+				return;
+			}
+			shuttingDown = true;
+			logger.info("Workers shutting down", { signal, profile: config.profile });
+			abortController.abort();
+			await Promise.all([leaseSweeper.stop(), heartbeatDequeue.stop()]);
+			await shutdownOrchestrationS5Worker(runtime);
+			process.exit(0);
+		};
+
+		process.on("SIGINT", () => void shutdown("SIGINT"));
+		process.on("SIGTERM", () => void shutdown("SIGTERM"));
+		logger.info("Workers running", { profile: config.profile });
+		return;
+	}
+
 	if (profile === WORKER_PROFILE_OUTBOX_RELAY) {
 		const config = loadOutboxRelayWorkerConfig();
 		const runtime = await bootstrapOutboxRelayWorker(config);
@@ -119,7 +173,7 @@ async function main(): Promise<void> {
 	}
 
 	throw new Error(
-		`Unsupported WORKER_PROFILE "${profile}" — expected ${WORKER_PROFILE_GRAPH_GOVERNANCE}, ${WORKER_PROFILE_GRAPH_PRODUCT}, or ${WORKER_PROFILE_OUTBOX_RELAY}`,
+		`Unsupported WORKER_PROFILE "${profile}" — expected ${WORKER_PROFILE_GRAPH_GOVERNANCE}, ${WORKER_PROFILE_GRAPH_PRODUCT}, ${WORKER_PROFILE_OUTBOX_RELAY}, or ${WORKER_PROFILE_ORCHESTRATION_S5}`,
 	);
 }
 

@@ -11,6 +11,16 @@ import {
 } from "@anxionos/graph/neo4j";
 import type { Driver } from "neo4j-driver";
 import type { Pool } from "pg";
+import {
+	createFixtureOperationalBudget,
+	createOrchestrationDb,
+	createSystemLeaseClock,
+	ensureOrchestrationSchema,
+	type LeaseClock,
+	type OperationalBudgetPort,
+	type OrchestrationUnitOfWork,
+} from "@anxionos/orchestration";
+import type { OrchestrationS5WorkerConfig } from "./config";
 import type {
 	GraphGovernanceWorkerConfig,
 	GraphProductWorkerConfig,
@@ -68,6 +78,36 @@ export async function bootstrapOutboxRelayWorker(
 
 export async function shutdownOutboxRelayWorker(
 	runtime: OutboxRelayWorkerRuntime,
+): Promise<void> {
+	await runtime.pool.end();
+}
+
+
+export interface OrchestrationS5WorkerRuntime {
+	pool: Pool;
+	unitOfWork: OrchestrationUnitOfWork;
+	leaseClock: LeaseClock;
+	operationalBudget: OperationalBudgetPort;
+}
+
+export async function bootstrapOrchestrationS5Worker(
+	config: OrchestrationS5WorkerConfig,
+): Promise<OrchestrationS5WorkerRuntime> {
+	const pool = createPgPool(config.databaseUrl);
+	await pool.query("SELECT 1");
+	await ensureEventingSchema(pool);
+	await ensureOrchestrationSchema(pool);
+	const { unitOfWork } = createOrchestrationDb(pool);
+	return {
+		pool,
+		unitOfWork,
+		leaseClock: createSystemLeaseClock(),
+		operationalBudget: createFixtureOperationalBudget(),
+	};
+}
+
+export async function shutdownOrchestrationS5Worker(
+	runtime: OrchestrationS5WorkerRuntime,
 ): Promise<void> {
 	await runtime.pool.end();
 }
