@@ -21,17 +21,17 @@ tags:
 
 | Campo | Valor |
 | --- | --- |
-| Status | in_progress |
+| Status | in_review |
 | Owner | infra-executor + infra-critic |
 | Gate | G3 |
 
 ### Critérios
 
-- [ ] Profile `graph-staging` no docker-compose (porta separada do sandbox)
-- [ ] `npm run p3:staging-homologation` → `overallOk: true`
-- [ ] Teste integração Neo4j staging com projeção WorkItem
-- [ ] Docs status/execution-plan sincronizados pós-ANX-291
-- [ ] ADR0005 corpo alinhado a `decision_status: accepted`
+- [x] Profile `graph-staging` no docker-compose (porta separada do sandbox)
+- [x] `npm run p3:staging-homologation` → `overallOk: true`
+- [x] Teste integração Neo4j staging com projeção WorkItem
+- [x] Docs status/execution-plan sincronizados pós-ANX-291
+- [x] ADR0005 corpo alinhado a `decision_status: accepted`
 
 ### Oráculo
 
