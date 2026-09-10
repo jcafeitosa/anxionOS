@@ -68,7 +68,7 @@ Versões resolvidas nos lockfiles em **2026-09-07**. Política: latest estável 
 | Pacote              | Versão (lock) |
 | ------------------- | ------------- |
 | `@biomejs/biome`    | 1.9.4         |
-| `typescript`        | 5.7.x         |
+| `typescript`        | 7.0.2         |
 | `dependency-cruiser`| 16.9.x        |
 
 ### `@anxionos/frontend` (P07 — `frontend/package-lock.json`)
@@ -83,6 +83,7 @@ Versões resolvidas nos lockfiles em **2026-09-07**. Política: latest estável 
 | `@tailwindcss/vite` | 4.3.3         | Plugin Vite (via Astro) |
 | `lucide-react`      | 1.42.0        | Ícones |
 | `better-auth`       | 1.7.3         | Cliente auth (React) |
+| `typescript`        | 7.0.2         | Compilador (pin estável; `baseUrl` removido do tsconfig) |
 
 ## Atualizar
 
