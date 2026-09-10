@@ -249,7 +249,7 @@ Contrato: `RealtimeEnvelope` em `@anxionos/contracts`. Docs: [realtime-connectio
 
 ### OpenAPI / Scalar
 
-Documentação interativa em **`http://localhost:3000/openapi`** (plugin `@elysia/openapi` + [Scalar API Reference](https://scalar.com/products/api-references/configuration)). Spec JSON em **`/openapi/json`**. Tema Kepler, cookie Better Auth (`cookieAuth`), servers a partir de `BETTER_AUTH_URL`/`PORT`, telemetry e Agent desligados. CDN Scalar pinada (`@scalar/api-reference@1.68.0`).
+Documentação interativa em **`http://localhost:3000/openapi`** (plugin `@elysia/openapi` com provider Scalar).
 
 ### Segurança (P02)
 

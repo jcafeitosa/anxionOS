@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "anxionOS — escrita autoritativa",
+    "quality_profile": "showcase",
+    "output": "anxionos-storage-authority.dataflow.html",
+    "viewBox": [1080, 720],
+    "views": [
+      {
+        "id": "confirm-path",
+        "label": "Confirmação",
+        "focus": ["command", "domain", "postgres", "nats"],
+        "note": "Comando autenticado confirma no dono PostgreSQL com journal e outbox."
+      },
+      {
+        "id": "project-path",
+        "label": "Projeção",
+        "focus": ["nats", "projector", "neo4j", "readers"],
+        "note": "NATS transporta; Neo4j projeta. Replay é idempotente."
+      }
+    ]
+  },
+  "stages": [
+    { "label": "Entrada" },
+    { "label": "Domínio" },
+    { "label": "Confirmação" },
+    { "label": "Trânsito" },
+    { "label": "Leitura" }
+  ],
+  "nodes": [
+    {
+      "id": "command",
+      "type": "backend",
+      "label": "API",
+      "sublabel": "comando autenticado",
+      "stage": 0,
+      "row": 1
+    },
+    {
+      "id": "domain",
+      "type": "backend",
+      "label": "Módulo dono",
+      "sublabel": "23 contexts",
+      "stage": 1,
+      "row": 1,
+      "tag": "ADR0002"
+    },
+    {
+      "id": "postgres",
+      "type": "database",
+      "label": "PostgreSQL",
+      "sublabel": "journal + outbox",
+      "stage": 2,
+      "row": 1,
+      "tag": "ADR0004"
+    },
+    {
+      "id": "nats",
+      "type": "messagebus",
+      "label": "NATS",
+      "sublabel": "transporte",
+      "stage": 3,
+      "row": 0
+    },
+    {
+      "id": "projector",
+      "type": "backend",
+      "label": "Projector",
+      "sublabel": "Graph Kernel",
+      "stage": 3,
+      "row": 2
+    },
+    {
+      "id": "neo4j",
+      "type": "database",
+      "label": "Neo4j",
+      "sublabel": "projeção temporal",
+      "stage": 4,
+      "row": 0,
+      "tag": "não ledger"
+    },
+    {
+      "id": "readers",
+      "type": "frontend",
+      "label": "Traversals",
+      "sublabel": "contexto operacional",
+      "stage": 4,
+      "row": 2
+    }
+  ],
+  "flows": [
+    {
+      "from": "command",
+      "to": "domain",
+      "label": "command",
+      "variant": "emphasis"
+    },
+    {
+      "from": "domain",
+      "to": "postgres",
+      "label": "TX atômica",
+      "variant": "emphasis"
+    },
+    {
+      "from": "postgres",
+      "to": "nats",
+      "label": "outbox"
+    },
+    {
+      "from": "nats",
+      "to": "projector",
+      "label": "evento",
+      "labelDy": 28
+    },
+    {
+      "from": "projector",
+      "to": "neo4j",
+      "label": "marcador",
+      "variant": "emphasis"
+    },
+    {
+      "from": "neo4j",
+      "to": "readers",
+      "label": "T01–T20",
+      "variant": "dashed",
+      "labelDy": 28
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Autoridade",
+      "items": [
+        "Um fato: um ownerDomain e confirmação em PostgreSQL",
+        "Neo4j é projeção operacional, não segundo ledger",
+        "SQLite só cache/local — mapa em storage-ownership (draft)"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Falha",
+      "items": [
+        "Crash após commit PG: replay de outbox",
+        "Grafo atrasado: stale/pendente; revalidar no domínio",
+        "NATS é transporte, não fonte de verdade"
+      ]
+    }
+  ]
+}

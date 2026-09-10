@@ -75,9 +75,9 @@
       "dot": "emerald",
       "title": "Estado atual",
       "items": [
-        "Fase de especificação — sem backend/ implantado",
-        "Layout modular aceito (ADR0002)",
-        "Implementação exige greenlight explícito"
+        "SDD 001 + ADR0002: sequência P01–P09 permanece o plano",
+        "Repo: esqueleto parcial (módulos + consoles); produção não verificada",
+        "Greenlight e gates G0–G7 por slice ANX-* no board"
       ]
     }
   ]
