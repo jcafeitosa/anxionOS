@@ -56,6 +56,12 @@ tags:
 | §25 Self-development | `notes/anxionos-self-development-loop.md` |
 | §12 Intelligence | `notes/anxionos-product-intelligence-loop.md` |
 
+## Capacidades compostas
+
+| Doc | Issue |
+| --- | --- |
+| `project-docs/specs/007-products-marketplace-capability/spec.md` | ANX-284 |
+
 ## Alinhamento e auditoria
 
 | Doc | Issue |

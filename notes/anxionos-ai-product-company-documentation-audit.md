@@ -74,7 +74,7 @@ Data: 2026-09-10. Método: leitura OKF + AGENTS.md + estrutura backend aceita + 
 | Lacuna | Prioridade | Ação |
 | --- | --- | --- |
 | ADR P3 Product Graph Neo4j projection | ALTA | **Criada** ADR0005 proposed — aceite Owner ANX-276 |
-| Spec Products/Marketplace (gaps) | MÉDIA | Não criar módulo; spec de capacidade composta |
+| Spec Products/Marketplace (gaps) | MÉDIA | **ANX-284 done** — spec 007 capability composite |
 | Runbooks self-healing P1 | BAIXA | **ANX-273 done** — automação ANX-279 |
 | CLI `orchestration:product-graph` | BAIXA | **ANX-269 done** (`orchestration:phase company`) |
 | Exemplos instanciados Product Graph | MÉDIA | **ANX-267 done** (4 exemplos) |

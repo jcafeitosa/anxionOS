@@ -66,6 +66,7 @@ flowchart TD
 | ANX-281 | Cognitive OS §21–22–25 | done | experimentation, incidents, self-dev notes |
 | ANX-282 | Cognitive OS §19–20–23 | done | performance, learning, arch loop + projection design |
 | ANX-283 | P1 doc closure hub | done | brain/notes/anxionos-ai-product-company-index.md |
+| ANX-284 | Spec 007 + ANX-277 blueprint | done | spec 007 + projection-worker design |
 
 ## Slices P2 (backlog — implementação após greenlight)
 
