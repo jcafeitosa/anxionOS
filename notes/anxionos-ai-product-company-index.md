@@ -14,7 +14,8 @@ tags:
 ---
 # AI Product Company Engine — índice canônico
 
-**Status executivo @Owner:** `brain/notes/anxionos-ai-product-company-status.md`
+**Status executivo @Owner:** `brain/notes/anxionos-ai-product-company-status.md`  
+**Certificado P1 (entregáveis 1–6):** `brain/notes/anxionos-p1-documentation-completion.md`
 
 **Framework (repo):** `.cursor/orchestration/AI-PRODUCT-COMPANY-ENGINE.md` (26 seções)
 

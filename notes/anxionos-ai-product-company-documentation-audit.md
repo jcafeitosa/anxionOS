@@ -128,7 +128,8 @@ Ver `brain/notes/anxionos-product-company-module-alignment.md`. Resumo:
 - [x] Alinhamento 30→23 referenciado
 - [x] ADR P3 criada (ADR0005 proposed)
 - [x] Slices P0 ANX-265–273 entregues com G7
-- [x] Fase P1 documentação completa (ANX-265–282, índice hub)
+- [x] Entregáveis 1–6 documentais completos (certificado P1)
+- [x] Fase P1 documentação completa (ANX-265–287, índice hub, delegation P2)
 - [ ] Revisão Owner/CTO aceite ADR0005 + spec 006 (ANX-276)
 - [ ] Runtime P2 verificado (ANX-277–279)
 

@@ -69,6 +69,7 @@ flowchart TD
 | ANX-284 | Spec 007 + ANX-277 blueprint | done | spec 007 + projection-worker design |
 | ANX-285 | P2 acceptance + ANX-276 enrich | done | p2-slices-acceptance-criteria + greenlight v15 |
 | ANX-286 | Delegation ANX-277 + status Owner | done | delegation-queue/ANX-277.md + status doc |
+| ANX-287 | Delegation ANX-278/279 + framework sync | done | delegation-queue 278/279 + roster fix |
 
 ## Slices P2 (backlog — implementação após greenlight)
 
