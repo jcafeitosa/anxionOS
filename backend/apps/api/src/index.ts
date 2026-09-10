@@ -27,6 +27,7 @@ import {
 } from "./organizations/bootstrap";
 import { ensureInviteAcceptRateLimitSchema } from "./organizations/invite-accept-rate-limit-store";
 import { createPostLoginPlugin } from "./auth/post-login-plugin";
+import { createOpenApiPlugin } from "./openapi-plugin";
 import { createOrganizationsPlugin } from "./organizations/plugin";
 import { configureInviteAcceptRateLimit } from "./organizations/rate-limit";
 import {
@@ -57,7 +58,8 @@ if (pool) {
 } else {
 	logger.info("DATABASE_URL unset — identity session consumer disabled");
 }
-let app: Elysia = new Elysia();
+let app: Elysia = new Elysia().use(createOpenApiPlugin()) as unknown as Elysia;
+logger.info("OpenAPI Scalar mounted at /openapi");
 
 if (pool && resolveBetterAuthConfig()) {
 	const identity = createIdentityDb(pool);
