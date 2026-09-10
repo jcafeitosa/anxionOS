@@ -20,9 +20,9 @@ export default defineConfig({
 			timeout: 180_000,
 		},
 		{
-			command: "npm run dev -- --host 127.0.0.1 --port 4321",
+			command: "node e2e/scripts/start-frontend-e2e.mjs",
 			url: "http://127.0.0.1:4321",
-			reuseExistingServer: !process.env.CI,
+			reuseExistingServer: process.env.E2E_REUSE_FRONTEND === "1",
 			timeout: 120_000,
 		},
 	],

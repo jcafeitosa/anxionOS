@@ -81,6 +81,25 @@ describe("canAccessConsole", () => {
 		assert.equal(canAccessConsole(loaded, "platform"), false);
 	});
 
+	it("rejects platform even if platformAccess is true but decision is not platform", () => {
+		const loaded = context({
+			platformAccess: true,
+			decision: { kind: "operator", reason: "MEMBERSHIP_OPERATOR" },
+			membershipsActive: [{ agencyId: AGENCY_ID, role: "operator" }],
+		});
+		assert.equal(canAccessConsole(loaded, "platform"), false);
+	});
+
+	it("allows operator membership on the operator console", () => {
+		const loaded = context({
+			decision: { kind: "operator", reason: "MEMBERSHIP_OPERATOR" },
+			membershipsActive: [{ agencyId: AGENCY_ID, role: "operator" }],
+		});
+		assert.equal(canAccessConsole(loaded, "operator", AGENCY_ID), true);
+		assert.equal(canAccessConsole(loaded, "owner", AGENCY_ID), false);
+		assert.equal(canAccessConsole(loaded, "platform"), false);
+	});
+
 	it("rejects partner without grant (fail-closed)", () => {
 		const loaded = context({
 			partnerAccess: false,

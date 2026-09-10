@@ -9,7 +9,6 @@ import {
 	X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { DashboardCard } from "../DashboardCard";
 import {
 	canAccessConsole,
 	fetchPostLoginContext,
@@ -18,8 +17,11 @@ import {
 	type PostLoginAuthContext,
 	PostLoginContextUnavailableError,
 } from "../../lib/auth";
+import { membershipForAgency } from "../../lib/owner-dashboard";
+import { ArchifyCanvas } from "./ArchifyCanvas";
 import { DecisionTrail } from "./DecisionTrail";
 import { HonestState } from "./HonestState";
+import { OwnerDashboard } from "./OwnerDashboard";
 import { PartnerDashboard } from "./PartnerDashboard";
 
 interface ConsoleAppProps {
@@ -49,6 +51,73 @@ function navFor(kind: ConsoleKind, agencyId?: string) {
 		{ label: "Atividade", href: `${root}#activity`, icon: Activity, current: false },
 		{ label: "Configurações", href: `${root}#settings`, icon: Settings, current: false },
 	];
+}
+
+function RoleArchifyDashboard({
+	kind,
+	context,
+	agencyId,
+}: {
+	kind: "operator" | "platform";
+	context: PostLoginAuthContext;
+	agencyId?: string;
+}) {
+	const membership = agencyId ? membershipForAgency(context, agencyId) : null;
+	const testPrefix = kind === "operator" ? "operator" : "platform";
+	return (
+		<ArchifyCanvas
+			title={
+				kind === "operator"
+					? "anxionOS — visão operator"
+					: "anxionOS — visão platform"
+			}
+			testId={`${testPrefix}-dashboard`}
+			defaultSelectedId="frontend"
+			passport={() => (
+				<div className="flex flex-col gap-4 border-t border-border pt-4">
+					<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+						Dados do loader
+					</p>
+					<dl className="grid gap-2 text-xs" data-testid={`${testPrefix}-membership`}>
+						<div>
+							<dt className="text-muted-foreground">agencyId</dt>
+							<dd className="break-all font-mono text-foreground">
+								{agencyId ?? "escopo PLATFORM — sem agencyId"}
+							</dd>
+						</div>
+						<div>
+							<dt className="text-muted-foreground">role</dt>
+							<dd className="font-mono text-foreground">
+								{membership?.role ?? context.decision.kind}
+							</dd>
+						</div>
+					</dl>
+					<p className="text-sm" data-testid={`${testPrefix}-platform-grant`}>
+						{context.platformAccess === true
+							? "O loader autorizou acesso PLATFORM."
+							: "platformAccess=false — console /platform permanece negado."}
+					</p>
+				</div>
+			)}
+			footer={
+				<section aria-labelledby={`${testPrefix}-empty-heading`} id="team">
+					<h2
+						id={`${testPrefix}-empty-heading`}
+						className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground"
+					>
+						Dados operacionais
+					</h2>
+					<div data-testid={`${testPrefix}-operational-empty`}>
+						<HonestState
+							kind="empty"
+							title="Agentes e portfólio ainda não alimentam este console"
+							description="O vazio é o estado autoritativo. ANX-143 e ANX-153 continuam abertos; nenhum tenant demo ou número financeiro é inventado aqui."
+						/>
+					</div>
+				</section>
+			}
+		/>
+	);
 }
 
 export function ConsoleApp({ kind, agencyId }: ConsoleAppProps) {
@@ -246,68 +315,14 @@ export function ConsoleApp({ kind, agencyId }: ConsoleAppProps) {
 						/>
 						{kind === "partner" ? (
 							<PartnerDashboard context={context} />
+						) : kind === "owner" && agencyId ? (
+							<OwnerDashboard context={context} agencyId={agencyId} />
 						) : (
-							<>
-								<section aria-labelledby="console-status-heading">
-									<h2
-										id="console-status-heading"
-										className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground"
-									>
-										Estado do console
-									</h2>
-									<div className="grid gap-4 sm:grid-cols-2">
-										<DashboardCard
-											title="Acesso confirmado"
-											description="Decisão vinda de GET /v1/auth/post-login-context — não do cliente."
-											icon={Shield}
-											status="online"
-											statusLabel="Autorizado"
-										>
-											<dl className="grid gap-2 text-xs">
-												<div>
-													<dt className="text-muted-foreground">decision.kind</dt>
-													<dd className="font-mono text-foreground">
-														{context.decision.kind}
-													</dd>
-												</div>
-												<div>
-													<dt className="text-muted-foreground">reason</dt>
-													<dd className="font-mono text-foreground">
-														{context.decision.reason}
-													</dd>
-												</div>
-											</dl>
-										</DashboardCard>
-										<DashboardCard
-											title="Capacidades de produto"
-											description="Agentes, portfólio e valuation não estão neste slice (ANX-143 / ANX-153)."
-											icon={Activity}
-											status="pending"
-											statusLabel="Pendente"
-										>
-											<p className="text-sm">
-												Placeholder P07 explícito: conteúdo operacional real só aparece quando a
-												API existir. Nenhum C-level, tenant demo ou número financeiro é inventado
-												aqui.
-											</p>
-										</DashboardCard>
-									</div>
-								</section>
-
-								<section aria-labelledby="empty-heading" id="team">
-									<h2
-										id="empty-heading"
-										className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground"
-									>
-										Dados operacionais
-									</h2>
-									<HonestState
-										kind="empty"
-										title="Nenhum dado autoritativo neste console"
-										description="A API de agentes/posições ainda não alimenta esta superfície. O estado vazio é intencional."
-									/>
-								</section>
-							</>
+							<RoleArchifyDashboard
+								kind={kind === "platform" ? "platform" : "operator"}
+								context={context}
+								agencyId={agencyId}
+							/>
 						)}
 					</div>
 				</main>
