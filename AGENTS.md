@@ -266,7 +266,7 @@ npm run orchestration:workflow -- monitor --level C
 
 **Dual-board:** produto (`backend/`, `frontend/`, `docs/`, `ANX-*`) → Dashi taskboard; framework (`.cursor/orchestration/`, regras Cursor) → Cursor taskboard (`CURSOR_GOAL_ID`). Ver [TASKBOARD-ROUTING.md](.cursor/orchestration/TASKBOARD-ROUTING.md). **Nunca misturar** boards na mesma unidade de trabalho.
 
-**Políticas Zero (Z0–Z19):** [ZERO-POLICIES.md](.cursor/orchestration/ZERO-POLICIES.md) · `npm run orchestration:zero-policies`
+**Políticas Zero (Z0–Z21):** [ZERO-POLICIES.md](.cursor/orchestration/ZERO-POLICIES.md) · `npm run orchestration:zero-policies`
 
 #### Subagentes e delegação
 
@@ -306,7 +306,7 @@ Skills obrigatórias: `manage-taskboard` (claims, status, comentários) e `orche
 
 #### Políticas Zero (framework de orquestração)
 
-O framework Cursor mantém **20 Políticas Zero** (Z0–Z19) — violação = trabalho inválido. Incluem zero-trabalho-fora-do-board (Z0), tolerância zero de código (Z1/Z9), no silent work (Z3), dual-board (Z10) e visibilidade no chat (Z4/Z8). Catálogo canônico: [.cursor/orchestration/ZERO-POLICIES.md](.cursor/orchestration/ZERO-POLICIES.md) · `npm run orchestration:zero-policies`.
+O framework Cursor mantém **22 Políticas Zero** (Z0–Z21) — violação = trabalho inválido. Incluem zero-trabalho-fora-do-board (Z0), tolerância zero de código (Z1/Z9), no silent work (Z3), dual-board (Z10) e visibilidade no chat (Z4/Z8). Catálogo canônico: [.cursor/orchestration/ZERO-POLICIES.md](.cursor/orchestration/ZERO-POLICIES.md) · `npm run orchestration:zero-policies`.
 
 #### Política zero-trabalho-fora-do-board
 
@@ -547,4 +547,4 @@ Comunicação com o usuário em **português (PT-BR)**. Identificadores de códi
 | Compliance obrigatório (enforcement) | [.cursor/orchestration/MANDATORY-COMPLIANCE.md](.cursor/orchestration/MANDATORY-COMPLIANCE.md) |
 | Onboarding agentes Cursor | [.cursor/orchestration/ONBOARDING.md](.cursor/orchestration/ONBOARDING.md) |
 | Dispatch Grok-style → Task | [.cursor/orchestration/GROK-BOT-PARITY.md](.cursor/orchestration/GROK-BOT-PARITY.md) |
-| Políticas Zero Z0–Z19 | [.cursor/orchestration/ZERO-POLICIES.md](.cursor/orchestration/ZERO-POLICIES.md) |
+| Políticas Zero Z0–Z21 | [.cursor/orchestration/ZERO-POLICIES.md](.cursor/orchestration/ZERO-POLICIES.md) |
