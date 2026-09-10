@@ -1,5 +1,11 @@
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
+import type { BackfillJobRepository } from "./backfill-repository";
 import type { CommandJournalRepository } from "./command-journal";
+import type {
+	CorporateActionRepository,
+	FxRateRepository,
+} from "./fx-corporate-actions-repository";
+import type { MarketCalendarRepository } from "./market-calendar-repository";
 export interface InstrumentRecord {
 	id: string;
 	organizationId: string;
@@ -66,6 +72,10 @@ export interface MarketDataTransactionContext {
 	commandJournal: CommandJournalRepository;
 	instruments: InstrumentRepository;
 	observations: ObservationRepository;
+	marketDataFxRates: FxRateRepository;
+	corporateActions: CorporateActionRepository;
+	backfillJobs: BackfillJobRepository;
+	calendarRepository: MarketCalendarRepository;
 	publishEvents(envelopes: DomainEventEnvelope[]): Promise<void>;
 }
 export interface MarketDataUnitOfWork {

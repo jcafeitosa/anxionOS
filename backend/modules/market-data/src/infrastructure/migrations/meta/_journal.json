@@ -8,6 +8,27 @@
 			"when": 1757548800000,
 			"tag": "0000_market_data_core",
 			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1788998400000,
+			"tag": "0001_market_data_backfill_jobs",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1791676800000,
+			"tag": "0002_market_data_fx_corporate_actions",
+			"breakpoints": false
+		},
+		{
+			"idx": 3,
+			"version": "7",
+			"when": 1795000000000,
+			"tag": "0003_market_data_calendars",
+			"breakpoints": true
 		}
 	]
 }

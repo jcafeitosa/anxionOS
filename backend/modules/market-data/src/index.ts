@@ -41,7 +41,6 @@ export {
 	RealtimeIngestReconnectHandler,
 	type RealtimeIngestEventFingerprint,
 	type RealtimeIngestReconnectHandlerOptions,
-	type RealtimeIngestStreamSnapshot,
 	type ReconnectAdmissionDecision,
 	type ReconnectConnectionPhase,
 	type ReconnectSkipReason,
@@ -72,3 +71,41 @@ export {
 	createPgInstrumentRepository,
 	createPgObservationRepository,
 } from "./infrastructure/persistence/repositories";
+export {
+	createPgCorporateActionRepository,
+	createPgFxRateRepository,
+} from "./infrastructure/persistence/fx-corporate-actions-repository";
+export {
+	recordFxRate,
+	type RecordFxRateDeps,
+} from "./application/commands/record-fx-rate";
+export {
+	recordCorporateAction,
+	type RecordCorporateActionDeps,
+} from "./application/commands/record-corporate-action";
+export {
+	getAdjustedPrice,
+	type GetAdjustedPriceDeps,
+	type GetAdjustedPriceInput,
+	type GetAdjustedPriceResult,
+} from "./application/queries/get-adjusted-price";
+export {
+	startBackfill,
+	type StartBackfillDeps,
+} from "./application/commands/start-backfill";
+export {
+	advanceBackfillCursor,
+	type AdvanceBackfillCursorDeps,
+} from "./application/commands/advance-backfill-cursor";
+export {
+	registerVenueCalendar,
+	type RegisterVenueCalendarDeps,
+} from "./application/commands/register-venue-calendar";
+export {
+	resolveTradingSession,
+	type ResolveTradingSessionDeps,
+	type ResolveTradingSessionInput,
+	type ResolveTradingSessionResult,
+} from "./application/queries/resolve-trading-session";
+export { createPgBackfillJobRepository } from "./infrastructure/persistence/backfill-repository";
+export { createPgMarketCalendarRepository } from "./infrastructure/persistence/market-calendar-repository";

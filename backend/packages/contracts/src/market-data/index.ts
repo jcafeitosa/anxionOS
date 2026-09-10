@@ -1,10 +1,18 @@
 export {
 	registerInstrumentCommandSchema,
 	recordObservationCommandSchema,
+	registerVenueCalendarCommandSchema,
+	startBackfillCommandSchema,
+	advanceBackfillCursorCommandSchema,
 	marketDataCommandResultSchema,
 	type MarketDataCommandResult,
+	type StartBackfillCommand,
+	type AdvanceBackfillCursorCommand,
 	type RegisterInstrumentCommand,
 	type RecordObservationCommand,
+	type RegisterVenueCalendarCommand,
+	type RecordFxRateCommand,
+	type RecordCorporateActionCommand,
 } from "./commands";
 export {
 	MARKET_DATA_EVENT_TYPES,
@@ -24,6 +32,10 @@ export {
 	mapObservedToConfirmInput,
 	type ConnectionsMarketDataObservedV1,
 } from "./observed-bridge";
+export {
+	recordFxRateCommandSchema,
+	recordCorporateActionCommandSchema,
+} from "./commands";
 export {
 	MARKET_DATA_OWNER_DOMAIN,
 	MarketDataContractError,

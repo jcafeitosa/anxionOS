@@ -15,7 +15,7 @@ export function shouldRunPgIntegrationTests(): boolean {
 }
 
 const MARKET_DATA_TRUNCATE_SQL =
-	"TRUNCATE market_data_observations_ts, market_data_observation_headers, market_data_command_journal, market_data_instruments, domain_journal, outbox";
+	"TRUNCATE market_data_observations_ts, market_data_observation_headers, market_data_command_journal, market_data_backfill_jobs, market_data_corporate_actions, market_data_trading_sessions, market_data_venue_calendars, market_data_fx_rates, market_data_instruments, domain_journal, outbox CASCADE";
 
 export async function withMarketDataPgHarness<T>(
 	work: (ctx: { pool: ReturnType<typeof createPgPool> }) => Promise<T>,

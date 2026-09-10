@@ -103,6 +103,50 @@ function createInMemoryUow(instrument: InstrumentRecord) {
 				timeseriesInserts += 1;
 			},
 		},
+		marketDataFxRates: {
+			async findLatestAsOf() {
+				return null;
+			},
+			async save(rate) {
+				return rate;
+			},
+		},
+		corporateActions: {
+			async findByInstrumentAsOf() {
+				return [];
+			},
+			async save(action) {
+				return action;
+			},
+		},
+		backfillJobs: {
+			async findById() {
+				return null;
+			},
+			async findActiveByInstrument() {
+				return null;
+			},
+			async save(record) {
+				return record;
+			},
+			async advanceCursor() {
+				return null;
+			},
+		},
+		calendarRepository: {
+			async findVenueCalendar() {
+				return null;
+			},
+			async findSession() {
+				return null;
+			},
+			async saveVenueCalendar(record) {
+				return record;
+			},
+			async saveSession(record) {
+				return record;
+			},
+		},
 		async publishEvents(envelopes) {
 			published = [...published, ...envelopes];
 		},

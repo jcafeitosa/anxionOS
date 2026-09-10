@@ -151,31 +151,31 @@ export function createPgObservationRepository(
 			return mapObservationHeader(result.rows[0]);
 		},
 		async insertTimeseries(record: {
-			eventTime: string;
-			receiveTime: string;
-			organizationId: string;
-			instrumentId: string;
-			observationHeaderId: string;
-			observationKind: string;
-			price: string;
-			volume: string | null;
-		}) {
-			await client.query(
-				`INSERT INTO market_data_observations_ts (
-					event_time, receive_time, organization_id, instrument_id, observation_header_id,
-					observation_kind, price, volume
-				) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
-				[
-					record.eventTime,
-					record.receiveTime,
-					record.organizationId,
-					record.instrumentId,
-					record.observationHeaderId,
-					record.observationKind,
-					record.price,
-					record.volume,
-				],
-			);
-		},
+		eventTime: string;
+		receiveTime: string;
+		organizationId: string;
+		instrumentId: string;
+		observationHeaderId: string;
+		observationKind: string;
+		price: string;
+		volume: string | null;
+	}) {
+		await client.query(
+			`INSERT INTO market_data_observations_ts (
+				event_time, receive_time, organization_id, instrument_id, observation_header_id,
+				observation_kind, price, volume
+			) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+			[
+				record.eventTime,
+				record.receiveTime,
+				record.organizationId,
+				record.instrumentId,
+				record.observationHeaderId,
+				record.observationKind,
+				record.price,
+				record.volume,
+			],
+		);
+	},
 	};
 }
