@@ -216,6 +216,20 @@ Feature → ADDRESSES → Problem
 - [ ] ADR proposta para projeção Neo4j (P3)
 - [ ] Issues ANX-* decompostas para implementação incremental
 
+## Schema registry P3 (ANX-271)
+
+Contratos TypeScript implementados:
+
+- `backend/packages/contracts/src/graph/schema/product-graph-schema.ts` — 15 node types, 16 edge types (`ownerDomain: product`)
+- `backend/packages/contracts/src/graph/schema/agent-graph-schema.ts` — 9 node types, 15 edge types (`ownerDomain: agents`)
+- `backend/modules/graph/src/domain/schema/product-agent-schema-registry.ts` — factories `createProductGraphSchemaRegistry`, `createAgentGraphSchemaRegistry`, `createProductAgentGraphSchemaRegistry`
+
+**Bridge cross-graph:** aresta `BRIDGES_PRODUCT_ROLE` (`AgentRoleTaxonomy` → `AgentRole`).
+
+**Oráculo:** `bun test backend/tests/contracts/product-agent-graph-schema.test.ts` — 7/7 pass
+
+**ADR:** `brain/project-docs/decisions/0005-product-graph-neo4j-projection.md` (proposed) — projeção Neo4j runtime permanece P3; registry é pré-requisito reconstruível.
+
 ## Fora de escopo desta spec
 
 - Implementação de módulos Products ou Marketplace (gaps documentados)

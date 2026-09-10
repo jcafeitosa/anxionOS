@@ -59,6 +59,7 @@
     "orchestration:who": "node .cursor/orchestration/agent-dialogue/roster-lookup.mjs",
     "orchestration:workflow": "node .cursor/orchestration/agent-workflow/monitor.mjs",
     "orchestration:progress": "node .cursor/orchestration/agent-workflow/progress-bar.mjs",
+    "orchestration:google-team": "node .cursor/orchestration/agent-dialogue/google-team-rituals.mjs",
     "postinstall": "node scripts/ensure-archify.mjs && node scripts/ensure-graphify.mjs",
     "serena:check": "npm run serena:health && npm run serena:memories",
     "serena:health": "uvx --from git+https://github.com/oraios/serena serena project health-check",
