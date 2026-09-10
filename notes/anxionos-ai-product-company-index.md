@@ -67,6 +67,7 @@ tags:
 | [Atlas 23 módulos](./anxionos-diagram-atlas-modules.md) | Mermaid por módulo físico ADR0002 |
 | [PC 01 Governance](./anxionos-pc01-governance-debate.md) | Unidade serial fechada ANX-351 |
 | [Spec capacidade governance](./anxionos-governance-capability-spec.md) | Gap R01 / ANX-348 |
+| [PC 02 Organization](./anxionos-pc02-organization-debate.md) | Unidade serial ANX-352 — organizations + identity |
 
 ## Capacidades compostas
 

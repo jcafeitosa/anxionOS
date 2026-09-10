@@ -24,11 +24,13 @@ flowchart LR
   ident --> api[rotas identity v1]
 ```
 
-Não possui: Agency, grants, sessão Better Auth no domain.
+Não possui: Agency, grants, sessão Better Auth no domain (BA fica em apps/api).
+
+Debate serial: [PC 02](./anxionos-pc02-organization-debate.md).
 
 ## organizations
 
-Fonte: [R06](../docs/orchestration/modules/organizations/R06-dependencies.md).
+Fonte: [R06](../docs/orchestration/modules/organizations/R06-dependencies.md) · [PC 02](./anxionos-pc02-organization-debate.md).
 
 ```mermaid
 flowchart LR

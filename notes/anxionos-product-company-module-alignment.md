@@ -77,7 +77,7 @@ A taxonomia conceitual do Owner lista 30 módulos. Ela é tratada como mapa de c
 
 ## Decisão CTO M01 (2026-09-10)
 
-Fechada a pergunta Approvals/Policies: **não** há módulos físicos novos. Serial PC 01 [debate](./anxionos-pc01-governance-debate.md) **fechado**. Próxima unidade: PC 02 Organization (`organizations` + `identity`) — ANX-352.
+Fechada a pergunta Approvals/Policies: **não** há módulos físicos novos. Serial PC 01 [debate](./anxionos-pc01-governance-debate.md) **fechado**. PC 02 Organization [debate](./anxionos-pc02-organization-debate.md) — duas pastas, não uma. Próxima unidade serial: PC 03 Agents (ANX-353).
 
 ## Próximo passo
 
