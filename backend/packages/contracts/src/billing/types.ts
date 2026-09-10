@@ -13,7 +13,11 @@ export const billingUsageAggregationIdSchema = z
 	.string()
 	.regex(/^bil_uag_[0-9a-f-]{36}$/i);
 export const billingSubscriptionStatusSchema = z.enum(["ACTIVE", "CANCELLED"]);
-export const billingInvoiceStatusSchema = z.enum(["DRAFT", "ISSUED"]);
+export const billingInvoiceStatusSchema = z.enum([
+	"DRAFT",
+	"ISSUED",
+	"REFUNDED",
+]);
 export const billingPeriodSchema = z.string().regex(/^\d{4}-\d{2}$/);
 export const decimalAmountSchema = z.string().regex(/^\d+(\.\d+)?$/);
 

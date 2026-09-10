@@ -46,6 +46,7 @@ export interface SubscriptionRepository {
 		planCode: string,
 	): Promise<SubscriptionRecord | null>;
 	save(record: SubscriptionRecord): Promise<SubscriptionRecord>;
+	updateStatus(id: string, status: string): Promise<SubscriptionRecord>;
 }
 export interface InvoiceRepository {
 	findById(id: string): Promise<InvoiceRecord | null>;

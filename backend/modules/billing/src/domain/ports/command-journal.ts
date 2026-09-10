@@ -3,12 +3,16 @@ export interface CommandJournalEntry {
 	organizationId: string;
 	commandName: string;
 	usageRecordId?: string;
+	webhookEventId?: string;
 	responseSnapshot: Record<string, unknown>;
 }
 export interface CommandJournalRepository {
 	findByCommandId(commandId: string): Promise<CommandJournalEntry | null>;
 	findByUsageRecordId(
 		usageRecordId: string,
+	): Promise<CommandJournalEntry | null>;
+	findByWebhookEventId(
+		webhookEventId: string,
 	): Promise<CommandJournalEntry | null>;
 	save(entry: CommandJournalEntry): Promise<void>;
 }

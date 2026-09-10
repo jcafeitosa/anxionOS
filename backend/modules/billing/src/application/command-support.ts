@@ -22,6 +22,16 @@ export async function loadIdempotentByUsageRecordId(
 	return { ...parsed, idempotentReplay: true };
 }
 
+export async function loadIdempotentByWebhookEventId(
+	commandJournal: CommandJournalRepository,
+	webhookEventId: string,
+): Promise<BillingCommandResult | null> {
+	const existing = await commandJournal.findByWebhookEventId(webhookEventId);
+	if (!existing) return null;
+	const parsed = parseCommandResultSnapshot(existing.responseSnapshot);
+	return { ...parsed, idempotentReplay: true };
+}
+
 export function toCommandResultSnapshot(
 	result: BillingCommandResult,
 ): Record<string, unknown> {

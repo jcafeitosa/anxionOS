@@ -97,6 +97,13 @@ export function createPgSubscriptionRepository(
 			);
 			return record;
 		},
+		async updateStatus(id, status) {
+			const result = await client.query(
+				`UPDATE billing_subscriptions SET status = $2 WHERE id = $1 RETURNING *`,
+				[id, status],
+			);
+			return mapSubscription(result.rows[0]);
+		},
 	};
 }
 export function createPgInvoiceRepository(
