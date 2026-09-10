@@ -46,6 +46,7 @@
       "name": "@anxionos/api",
       "version": "0.1.0",
       "dependencies": {
+        "@anxionos/agents": "workspace:*",
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
         "@anxionos/governance": "workspace:*",
