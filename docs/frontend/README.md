@@ -22,6 +22,16 @@ npm run build
 npm run preview
 ```
 
+Se o botão **Entrar** / **Criar conta** ficar `disabled` no dev (ilhas sem hidratar) e o browser mostrar `504 Outdated Optimize Dep`, limpe o cache do Vite e suba de novo:
+
+```bash
+cd frontend
+rm -rf node_modules/.vite
+npm run dev -- --host 127.0.0.1 --port 4321
+```
+
+Playwright (`npm run test:e2e`) já limpa `node_modules/.vite` ao subir o frontend. `E2E_REUSE_API=1` não reutiliza o UI stale; só `E2E_REUSE_FRONTEND=1` reusa `127.0.0.1:4321`.
+
 Da raiz do monorepo:
 
 ```bash
