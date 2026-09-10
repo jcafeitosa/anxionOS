@@ -60,4 +60,4 @@ Agency, Owner, Membership, onboarding estados — **não** grants (governance), 
 
 ## Gap código
 
-**Ausente** — debate R08 completo; zero pastas `backend/modules/organizations/`
+**Parcial (ANX-346, 2026-09-10)** — `backend/modules/organizations/src/index.ts` presente. Debate R08 em [modules/organizations/](../../modules/organizations/). **Não** G7 desta ficha.

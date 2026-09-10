@@ -115,7 +115,7 @@ Grafo atrasado: visualização com `stale: true`; **nunca** confirmar permissão
 
 ## Gap código
 
-**Ausente** — zero `backend/modules/graph/`; fixture F0 e bench T01–T20 não implementados; ANX-41 debate R01 iniciado.
+**Parcial (ANX-346, 2026-09-10)** — `backend/modules/graph/src/index.ts` presente. Fixture F0 e bench T01–T20 **não** homologados G7 nesta ficha. Debate ANX-41 R01 iniciado.
 
 ## Perguntas abertas (top 5 — ver Session D)
 
