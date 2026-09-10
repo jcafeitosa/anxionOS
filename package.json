@@ -45,6 +45,7 @@
     "orchestration:personas": "node .cursor/orchestration/agent-dialogue/personas.mjs list",
     "orchestration:persona-voice": "node .cursor/orchestration/agent-dialogue/persona-identity.mjs card",
     "orchestration:phase": "node .cursor/orchestration/agent-lifecycle/phase-check.mjs",
+    "orchestration:product-intelligence": "bun backend/scripts/product-intelligence-cycle.mjs",
     "orchestration:proactive": "node .cursor/orchestration/agent-proactive/initiative.mjs",
     "orchestration:roster": "node .cursor/orchestration/agent-hire/roster.mjs",
     "orchestration:session": "node .cursor/orchestration/agent-dialogue/session-tracker.mjs",

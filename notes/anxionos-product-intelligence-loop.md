@@ -127,7 +127,22 @@ Mudanças de produto materiais (priorização, deprecação) exigem `DecisionRec
 - [x] 1 ciclo manual demonstrado (exemplo grafo + passos)
 - [x] Agentes e outputs mapeados
 - [ ] Telemetria runtime autoritativa (P2+ módulo `analytics`)
-- [ ] Projeção Neo4j FEEDS_BACK (P3 ANX-271)
+- [x] Projeção FEEDS_BACK sandbox (ANX-278) — evento `product.intelligence.feeds_back.v1`
+
+---
+
+## Runtime sandbox (ANX-278)
+
+**Evento:** `product.intelligence.feeds_back.v1` → nós `Monitor` + `Problem` + aresta `FEEDS_BACK`.
+
+**Ciclo automático:**
+
+```bash
+bun test backend/tests/graph/product-intelligence-feeds-back.test.ts
+npm run orchestration:product-intelligence -- --issue ANX-N --json
+```
+
+Saída: `nodesProjected: 2`, `edgesProjected: 1`, `discoveryStage: PC2`.
 
 ---
 
