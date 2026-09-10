@@ -23,7 +23,7 @@ Definir autoridade institucional: quem pode conceder, revogar, delegar, mandatar
 
 ## Fora de escopo desta spec
 
-- RiskPolicy / kill switch — [D-GOV-002](./../docs/orchestration/modules/governance/R08-decision-log.md), spec [003](./../brain/project-docs/specs/003-investment-lifecycle/spec.md)
+- RiskPolicy / kill switch — [D-GOV-002 no R08](./../docs/orchestration/modules/governance/R08-decision-log.md) e spec 003 (authority vs risk)
 - DecisionRecord / TradeIntent / ExecutionPermit — módulo `decisions` ([contrato](./anxionos-decision-engine-contract.md))
 - Membership — `organizations`
 - Traverse Neo4j — `graph`
@@ -39,7 +39,7 @@ Definir autoridade institucional: quem pode conceder, revogar, delegar, mandatar
 
 ## Requisitos (derivados, rastreáveis)
 
-1. Grant, Delegation, Mandate, Approval, ChangeProposal, AuthorityEpoch persistidos em PostgreSQL do dono ([storage](./../brain/notes/anxionos-storage-ownership.md)).
+1. Grant, Delegation, Mandate, Approval, ChangeProposal, AuthorityEpoch persistidos em PostgreSQL do dono (mapa de armazenamento OKF).
 2. PolicyReference não duplica corpo; D-GOV-010: sem enforcement cross-risk até P06.
 3. IssueGrant / RevokeGrant / ResolveApproval que afete grants bump `authorityEpoch`.
 4. T01 ALLOW mutável não cacheado com `intentHash` ativo (graph).
