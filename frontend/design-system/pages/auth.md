@@ -4,27 +4,24 @@
 
 ## Tokens (inherit from MASTER)
 
-- Keep IBM Plex Sans, dark OLED palette (`#020617` background, `#22C55E` accent)
-- Do **not** use gold/purple overrides from generic fintech search
+- Plus Jakarta Sans (display) + Inter (body) + JetBrains Mono (ticker)
+- OLED palette, accent `--color-accent` (laranja institucional). **Sem acid-green.**
+- Do **not** use gold/purple overrides or cream+serif / broadsheet defaults
 
 ## Layout
 
-- Centered card (`max-w-md`), `AuthShell` with subtle radial accent glow
+- Split desktop: brand panel (grafo + ticker) | form panel
+- Mobile: form first
 - Min touch target 44px on all interactive elements
 - Visible labels on all form fields (no placeholder-only)
+- Skip-link in `BaseLayout`
 
 ## Forms
 
-- Inline errors below field (`role="alert"`)
+- Inline errors below field (`role="alert"`) with causa + correção
 - Disable submit + spinner during async
 - Password fields: `autocomplete` attributes set
-- MFA: `inputmode="numeric"`, `autocomplete="one-time-code"`
-
-## Accessibility
-
-- Focus rings via `--color-ring` (accent green)
-- `prefers-reduced-motion` respected (global.css)
-- Alert regions use `aria-live="polite"` or `role="alert"`
+- MFA/verify-email/reset: pending honesto — sem QR/SMTP fake
 
 ## Copy
 
