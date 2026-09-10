@@ -243,14 +243,16 @@ npm run taskboard:ensure || exit 1          # produto ANX-* — falhou = PARAR
 npm run taskboard:context
 # Meta-tooling (.cursor/orchestration/, regras): export CURSOR_GOAL_ID=<goal> ou registry em .cursor/orchestration-runtime/goals/
 
-# 2. Framework runtime (hooks sessionStart também rodam lifecycle + proactive + dispatch)
-npm run orchestration:lifecycle-cleanup
-npm run orchestration:proactive -- check --persona <slug>
-npm run orchestration:chat -- --check-pending    # colar saída se houver diálogo pendente
+# 2. Framework runtime (atalho único — equivalente aos passos abaixo)
+npm run orchestration:boot -- --persona <slug>
+# Meta-tooling sem Dashi: npm run orchestration:boot -- --skip-taskboard
 
-# 3. Orquestrador — teammates pendentes na fila dispatch
-npm run orchestration:dispatch -- inject          # bloco CURSOR_DISPATCH_QUEUE → invocar Task AGORA
-# ou JSON batch: npm run orchestration:dispatch -- spawn-plan --json
+# Equivalente manual (hooks sessionStart rodam lifecycle + proactive + dispatch parcial):
+# npm run orchestration:lifecycle-cleanup
+# npm run orchestration:proactive -- check --persona <slug>
+# npm run orchestration:chat -- --check-pending
+# npm run orchestration:dispatch -- inject
+# npm run orchestration:dispatch -- spawn-plan --json
 
 # 4. Após claim da issue
 npm run orchestration:session -- start --persona <slug> --issue ANX-N
