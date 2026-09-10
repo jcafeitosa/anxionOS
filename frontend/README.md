@@ -22,6 +22,7 @@ npm install
 npm run dev          # http://localhost:4321
 npm run build
 npm run preview
+npm run typecheck    # tsc --noEmit (TypeScript 7). astro check ainda não expõe a API do compilador nativo 7.x.
 ```
 
 Da raiz do monorepo:
