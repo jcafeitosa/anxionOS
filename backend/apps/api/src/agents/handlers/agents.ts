@@ -1,12 +1,18 @@
 import {
+	invokeBrainCapabilityCommandSchema,
 	publishAgentVersionCommandSchema,
 	registerAgentCommandSchema,
+	rollbackAgentVersionCommandSchema,
+	transitionAgentStatusCommandSchema,
 } from "@anxionos/contracts/agents";
 import {
 	getAgent,
+	invokeBrainCapability,
 	listAgentVersions,
 	publishAgentVersion,
 	registerAgent,
+	rollbackAgentVersion,
+	transitionAgentStatus,
 	type Agent,
 	type AgentVersion,
 } from "@anxionos/agents";
@@ -18,6 +24,18 @@ const registerAgentBodySchema = registerAgentCommandSchema
 	.strict();
 
 const publishAgentVersionBodySchema = publishAgentVersionCommandSchema
+	.omit({ commandId: true, agentId: true })
+	.strict();
+
+const transitionAgentStatusBodySchema = transitionAgentStatusCommandSchema
+	.omit({ commandId: true, agentId: true })
+	.strict();
+
+const rollbackAgentVersionBodySchema = rollbackAgentVersionCommandSchema
+	.omit({ commandId: true, agentId: true })
+	.strict();
+
+const invokeBrainCapabilityBodySchema = invokeBrainCapabilityCommandSchema
 	.omit({ commandId: true, agentId: true })
 	.strict();
 
@@ -133,6 +151,7 @@ export async function handlePublishAgentVersion(
 			unitOfWork: deps.unitOfWork,
 			commandJournal: deps.commandJournal,
 			agentRepository: deps.agentRepository,
+			publishGuard: deps.publishGuard,
 		},
 		{
 			commandId: input.commandId,
@@ -144,6 +163,99 @@ export async function handlePublishAgentVersion(
 	return {
 		...result,
 		agentVersionId: result.aggregateId,
-		agentRevision: agent.revision + 1,
+		agentRevision: result.revision,
 	};
+}
+
+export async function handleTransitionAgentStatus(
+	deps: AgentsPluginDeps,
+	input: {
+		commandId: string;
+		agencyId: string;
+		agentId: string;
+		principalId: string;
+		body: unknown;
+	},
+) {
+	const body = transitionAgentStatusBodySchema.parse(input.body);
+	await getAgent(
+		{ agentRepository: deps.agentRepository },
+		{ agentId: input.agentId, organizationId: input.agencyId },
+	);
+	return transitionAgentStatus(
+		{
+			unitOfWork: deps.unitOfWork,
+			commandJournal: deps.commandJournal,
+			agentRepository: deps.agentRepository,
+		},
+		{
+			commandId: input.commandId,
+			agentId: input.agentId,
+			...body,
+			actorPrincipalId: input.principalId,
+		},
+	);
+}
+
+export async function handleRollbackAgentVersion(
+	deps: AgentsPluginDeps,
+	input: {
+		commandId: string;
+		agencyId: string;
+		agentId: string;
+		principalId: string;
+		body: unknown;
+	},
+) {
+	const body = rollbackAgentVersionBodySchema.parse(input.body);
+	await getAgent(
+		{ agentRepository: deps.agentRepository },
+		{ agentId: input.agentId, organizationId: input.agencyId },
+	);
+	return rollbackAgentVersion(
+		{
+			unitOfWork: deps.unitOfWork,
+			commandJournal: deps.commandJournal,
+			agentRepository: deps.agentRepository,
+			agentVersionRepository: deps.agentVersionRepository,
+		},
+		{
+			commandId: input.commandId,
+			agentId: input.agentId,
+			...body,
+			actorPrincipalId: input.principalId,
+		},
+	);
+}
+
+export async function handleInvokeBrainCapability(
+	deps: AgentsPluginDeps,
+	input: {
+		commandId: string;
+		agencyId: string;
+		agentId: string;
+		principalId: string;
+		body: unknown;
+	},
+) {
+	const body = invokeBrainCapabilityBodySchema.parse(input.body);
+	await getAgent(
+		{ agentRepository: deps.agentRepository },
+		{ agentId: input.agentId, organizationId: input.agencyId },
+	);
+	return invokeBrainCapability(
+		{
+			unitOfWork: deps.unitOfWork,
+			commandJournal: deps.commandJournal,
+			agentRepository: deps.agentRepository,
+			agentVersionRepository: deps.agentVersionRepository,
+			invocationGuard: deps.invocationGuard,
+		},
+		{
+			commandId: input.commandId,
+			agentId: input.agentId,
+			...body,
+			actorPrincipalId: input.principalId,
+		},
+	);
 }

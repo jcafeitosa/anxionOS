@@ -123,3 +123,30 @@ export function shouldRunPgIntegrationTests(): boolean {
 		process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl())
 	);
 }
+
+const AGENTS_TRUNCATE_SQL =
+	"TRUNCATE agents_command_journal, agents_agent_versions, agents_agents, domain_journal, outbox";
+
+export async function withAgentsPgHarness<T>(
+	work: (ctx: { pool: import("pg").Pool }) => Promise<T>,
+): Promise<T | undefined> {
+	const url = getDatabaseUrl();
+	if (!shouldRunPgIntegrationTests() || !url) {
+		return undefined;
+	}
+
+	const { createPgPool, ensureEventingSchema } = await import(
+		"@anxionos/eventing/postgres"
+	);
+	const { ensureAgentsSchema } = await import("@anxionos/agents");
+
+	const pool = createPgPool(url);
+	try {
+		await ensureEventingSchema(pool);
+		await ensureAgentsSchema(pool);
+		await pool.query(AGENTS_TRUNCATE_SQL);
+		return await work({ pool });
+	} finally {
+		await pool.end();
+	}
+}

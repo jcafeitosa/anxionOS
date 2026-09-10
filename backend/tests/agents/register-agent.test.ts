@@ -141,4 +141,41 @@ describe("publishAgentVersion", () => {
 		const second = await publishAgentVersion(deps, input);
 		expect(second).toEqual({ ...first, idempotentReplay: true });
 	});
+
+	test("rejects publish when draft version already exists", async () => {
+		const { deps, agentVersionRepository } = createDeps();
+		const registered = await registerAgent(deps, {
+			commandId: "33333333-3333-4333-8333-333333333333",
+			displayName: "Draft Conflict",
+			kind: "PLATFORM",
+			organizationId,
+		});
+		const now = new Date();
+		await agentVersionRepository.save({
+			id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+			agentId: registered.aggregateId,
+			versionNumber: 1,
+			status: "draft",
+			instructionRef,
+			skillRefs: [],
+			capabilityManifestHash: "sha256:draft",
+			modelSlots: [],
+			autonomyLevel: "L0",
+			publishedAt: null,
+			createdAt: now,
+		});
+		await expect(
+			publishAgentVersion(deps, {
+				commandId: "44444444-4444-4444-8444-444444444444",
+				agentId: registered.aggregateId,
+				versionNumber: 1,
+				expectedRevision: 1,
+				instructionRef,
+				skillRefs: [],
+				capabilityManifestHash: "sha256:manifest-draft",
+				modelSlots: [],
+				autonomyLevel: "L0",
+			}),
+		).rejects.toMatchObject({ agentsCode: "AGT_VERSION_IMMUTABLE" });
+	});
 });

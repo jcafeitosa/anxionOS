@@ -87,6 +87,53 @@ describe("agents API handlers", () => {
 		expect(listed.versions[0]?.autonomyLevel).toBe("L1");
 	});
 
+	test("publish handler replays idempotently with stable agentRevision", async () => {
+		const deps = createHandlerDeps();
+		const registered = await handleRegisterAgent(deps, {
+			commandId: "66666666-6666-4666-8666-666666666666",
+			agencyId,
+			principalId,
+			body: {
+				displayName: "Replay Agent",
+				kind: "AGENCY",
+			},
+		});
+		const publishCommandId = "77777777-7777-4777-8777-777777777777";
+		const first = await handlePublishAgentVersion(deps, {
+			commandId: publishCommandId,
+			agencyId,
+			agentId: registered.agentId,
+			principalId,
+			body: {
+				versionNumber: 1,
+				expectedRevision: 1,
+				instructionRef,
+				skillRefs: [],
+				capabilityManifestHash: "sha256:manifest-replay",
+				modelSlots: [],
+				autonomyLevel: "L1",
+			},
+		});
+		expect(first.agentRevision).toBe(2);
+		const second = await handlePublishAgentVersion(deps, {
+			commandId: publishCommandId,
+			agencyId,
+			agentId: registered.agentId,
+			principalId,
+			body: {
+				versionNumber: 1,
+				expectedRevision: 1,
+				instructionRef,
+				skillRefs: [],
+				capabilityManifestHash: "sha256:manifest-replay",
+				modelSlots: [],
+				autonomyLevel: "L1",
+			},
+		});
+		expect(second.agentRevision).toBe(2);
+		expect(second.idempotentReplay).toBe(true);
+	});
+
 	test("publish handler rejects L4 at runtime", async () => {
 		const deps = createHandlerDeps();
 		const registered = await handleRegisterAgent(deps, {

@@ -1,3 +1,5 @@
+export type { AgentPublishGuardPort } from "./agent-publish-guard";
+export type { BrainInvocationGuardPort } from "./brain-invocation-guard";
 export type { AgentRepository } from "./agent-repository";
 export type { AgentVersionRepository } from "./agent-version-repository";
 export type {

@@ -1,12 +1,19 @@
+export { AGENTS_PUBLISH_CAPABILITY } from "./capabilities";
 export {
 	commandResultSchema,
+	invokeBrainCapabilityCommandSchema,
 	publishAgentVersionCommandSchema,
 	registerAgentCommandSchema,
+	rollbackAgentVersionCommandSchema,
+	transitionAgentStatusCommandSchema,
 } from "./commands";
 export type {
 	CommandResult,
+	InvokeBrainCapabilityCommand,
 	PublishAgentVersionCommand,
 	RegisterAgentCommand,
+	RollbackAgentVersionCommand,
+	TransitionAgentStatusCommand,
 } from "./commands";
 export {
 	AGENTS_ERROR_CODES,
@@ -20,13 +27,19 @@ export {
 	AGENTS_EVENT_TYPES,
 	AGENTS_OWNER_DOMAIN,
 	agentRegisteredPayloadSchema,
+	agentStatusChangedPayloadSchema,
 	agentVersionPublishedPayloadSchema,
+	agentVersionRolledBackPayloadSchema,
 	agentsEventPayloadSchema,
+	brainInvocationRequestedPayloadSchema,
 } from "./events";
 export type {
 	AgentRegisteredPayload,
+	AgentStatusChangedPayload,
 	AgentVersionPublishedPayload,
+	AgentVersionRolledBackPayload,
 	AgentsEventType,
+	BrainInvocationRequestedPayload,
 } from "./events";
 export {
 	agentKindSchema,

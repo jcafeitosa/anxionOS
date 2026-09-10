@@ -7,6 +7,7 @@ import {
 } from "@anxionos/contracts/agents";
 import { createAgentVersionPublishedEvent } from "../../domain/events/agent-events";
 import { isAutonomyLevelRuntimeEnabled } from "../../domain/policies/autonomy-runtime";
+import type { AgentPublishGuardPort } from "../../domain/ports/agent-publish-guard";
 import type { AgentRepository } from "../../domain/ports/agent-repository";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
@@ -36,6 +37,13 @@ export async function publishAgentVersion(
 	const preflightAgent = await deps.agentRepository.findById(command.agentId);
 	if (!preflightAgent) {
 		throwAgentsError("AGT_AGENT_NOT_FOUND", `Agent not found: ${command.agentId}`);
+	}
+	if (deps.publishGuard) {
+		const agencyId = preflightAgent.agencyId ?? preflightAgent.organizationId;
+		await deps.publishGuard.assertPublishAllowed({
+			agencyId,
+			agentId: command.agentId,
+		});
 	}
 
 	const agentVersionId = randomUUID();
@@ -67,12 +75,18 @@ export async function publishAgentVersion(
 				command.agentId,
 				command.versionNumber,
 			);
-			if (duplicate?.status === "published") {
-				return commandResultSchema.parse({
-					aggregateId: duplicate.id,
-					revision: agent.revision,
-					idempotentReplay: true,
-				});
+			if (duplicate) {
+				if (duplicate.status === "published") {
+					return commandResultSchema.parse({
+						aggregateId: duplicate.id,
+						revision: agent.revision,
+						idempotentReplay: true,
+					});
+				}
+				throwAgentsError(
+					"AGT_VERSION_IMMUTABLE",
+					`Agent version ${command.versionNumber} already exists as ${duplicate.status}`,
+				);
 			}
 
 			const nextRevision = agent.revision + 1;
@@ -135,4 +149,5 @@ export interface PublishAgentVersionDeps {
 	unitOfWork: AgentsUnitOfWork;
 	commandJournal: CommandJournalRepository;
 	agentRepository: AgentRepository;
+	publishGuard?: AgentPublishGuardPort;
 }

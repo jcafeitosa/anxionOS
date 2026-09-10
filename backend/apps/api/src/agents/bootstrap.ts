@@ -7,7 +7,12 @@ import type { AgentsPluginDeps } from "./plugin";
 
 export type AgentsApiRuntime = Omit<
 	AgentsPluginDeps,
-	"auth" | "membershipRepository" | "scopedPool" | "identityRepository"
+	| "auth"
+	| "membershipRepository"
+	| "scopedPool"
+	| "identityRepository"
+	| "publishGuard"
+	| "invocationGuard"
 >;
 
 export function createAgentsApiRuntime(pool: Pool): AgentsApiRuntime {

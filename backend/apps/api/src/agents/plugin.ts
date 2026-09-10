@@ -1,8 +1,10 @@
 import type { TenantScopedQueryable } from "@anxionos/database";
 import type {
+	AgentPublishGuardPort,
 	AgentRepository,
 	AgentVersionRepository,
 	AgentsUnitOfWork,
+	BrainInvocationGuardPort,
 	CommandJournalRepository,
 } from "@anxionos/agents";
 import type { createOrganizationsDb } from "@anxionos/organizations";
@@ -13,8 +15,11 @@ import {
 	agentIdParamSchema,
 	handleGetAgent,
 	handleListAgentVersions,
+	handleInvokeBrainCapability,
 	handlePublishAgentVersion,
 	handleRegisterAgent,
+	handleRollbackAgentVersion,
+	handleTransitionAgentStatus,
 } from "./handlers/agents";
 import { agencyIdParamSchema } from "../governance/handlers/grants";
 import { parseIdempotencyKey } from "../organizations/middleware/idempotency-key";
@@ -30,6 +35,8 @@ export interface AgentsPluginDeps {
 	agentVersionRepository: AgentVersionRepository;
 	commandJournal: CommandJournalRepository;
 	unitOfWork: AgentsUnitOfWork;
+	publishGuard?: AgentPublishGuardPort;
+	invocationGuard?: BrainInvocationGuardPort;
 	membershipRepository: OrganizationsDb["membershipRepository"];
 	scopedPool: TenantScopedQueryable;
 	identityRepository: PrincipalRepository;
@@ -97,6 +104,42 @@ export function createAgentsPlugin(deps: AgentsPluginDeps) {
 					const commandId = parseIdempotencyKey(request.headers);
 					const body = await request.json();
 					return handlePublishAgentVersion(deps, {
+						commandId,
+						agencyId,
+						agentId,
+						principalId: principal.id,
+						body,
+					});
+				})
+				.post("/:agentId/versions/rollback", async ({ request, agencyId, params, principal }) => {
+					const { agentId } = agentIdParamSchema.parse(params);
+					const commandId = parseIdempotencyKey(request.headers);
+					const body = await request.json();
+					return handleRollbackAgentVersion(deps, {
+						commandId,
+						agencyId,
+						agentId,
+						principalId: principal.id,
+						body,
+					});
+				})
+				.patch("/:agentId/status", async ({ request, agencyId, params, principal }) => {
+					const { agentId } = agentIdParamSchema.parse(params);
+					const commandId = parseIdempotencyKey(request.headers);
+					const body = await request.json();
+					return handleTransitionAgentStatus(deps, {
+						commandId,
+						agencyId,
+						agentId,
+						principalId: principal.id,
+						body,
+					});
+				})
+				.post("/:agentId/invoke", async ({ request, agencyId, params, principal }) => {
+					const { agentId } = agentIdParamSchema.parse(params);
+					const commandId = parseIdempotencyKey(request.headers);
+					const body = await request.json();
+					return handleInvokeBrainCapability(deps, {
 						commandId,
 						agencyId,
 						agentId,

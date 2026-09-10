@@ -13,9 +13,21 @@ export async function loadIdempotentCommandResult(
 	return parseCommandResultSnapshot(existing.responseSnapshot);
 }
 
-export function toCommandResultSnapshot(result: CommandResult): Record<string, unknown> {
+export function toCommandResultSnapshot(
+	result: CommandResult,
+	extras?: Record<string, unknown>,
+): Record<string, unknown> {
 	return {
 		aggregateId: result.aggregateId,
 		revision: result.revision,
+		...extras,
 	};
+}
+
+export function readSnapshotString(
+	snapshot: Record<string, unknown> | null | undefined,
+	key: string,
+): string | undefined {
+	const value = snapshot?.[key];
+	return typeof value === "string" ? value : undefined;
 }
