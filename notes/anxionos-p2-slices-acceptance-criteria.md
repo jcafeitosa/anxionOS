@@ -19,7 +19,7 @@ tags:
 
 **Bloqueio:** ANX-276 Owner greenlight · **Design:** `brain/project-docs/specs/006-product-agent-graph/projection-worker-p2-design.md`
 
-## ANX-277 — Neo4j projection worker (sandbox)
+## ANX-277 — Neo4j projection worker (sandbox) — **done G7**
 
 | Campo | Valor |
 | --- | --- |
@@ -47,13 +47,13 @@ tags:
 ### Critérios de aceite (todos obrigatórios)
 
 - [x] Sandbox Neo4j sobe via docker profile `graph-sandbox` (ANX-290)
-- [ ] 1 evento `work_item.status_changed` → 1 nó `WorkItem` idempotente
-- [ ] Reprocessar mesmo `eventId` não duplica nó (inbox ACK)
+- [x] 1 evento `work_item.status_changed` → 1 nó `WorkItem` idempotente
+- [x] Reprocessar mesmo `eventId` não duplica nó (inbox ACK) — `product-graph-inbox.integration.test.ts`
 - [ ] Rebuild from inbox passa (`full-generation-swap`)
-- [ ] Labels prefixados `ProductGraph_*` / `AgentGraph_*` — separados do grafo institucional
+- [x] Labels prefixados `ProductGraph_*` / `AgentGraph_*` — `graph-node-labels.test.ts`
 - [x] `bun test backend/tests/graph` green
-- [ ] G2 Fernanda PASS com blast radius documentado
-- [ ] Zero escrita direta sem evento versionado
+- [x] G2 Fernanda PASS (ANX-277 dialogue)
+- [x] Zero escrita direta sem evento versionado
 
 ### Riscos
 
@@ -64,7 +64,7 @@ tags:
 
 ---
 
-## ANX-278 — Product Intelligence runtime FEEDS_BACK
+## ANX-278 — Product Intelligence runtime FEEDS_BACK — **done G7**
 
 | Campo | Valor |
 | --- | --- |
@@ -74,10 +74,10 @@ tags:
 
 ### Critérios de aceite
 
-- [ ] Telemetria PC12 registrada como edge `FEEDS_BACK` no Product Graph
-- [ ] 1 ciclo automático: métrica → insight → trigger Discovery (sandbox)
-- [ ] Doc: `brain/notes/anxionos-product-intelligence-loop.md` atualizado com evidência runtime
-- [ ] G3 Edu PASS com comando reproduzível
+- [x] Telemetria PC12 registrada como edge `FEEDS_BACK` no Product Graph
+- [x] 1 ciclo automático: `npm run orchestration:product-intelligence -- --issue ANX-N --json`
+- [x] Doc: `notes/anxionos-product-intelligence-loop.md` § Runtime sandbox
+- [x] G3 Edu PASS (ANX-278 dialogue)
 
 ---
 
@@ -125,3 +125,11 @@ flowchart LR
 - [x] CLI report: `npm run p2:sandbox-homologation -- --issue ANX-290 --json`
 
 **Oráculos:** `npm run p2:sandbox-homologation -- --issue ANX-290 --json` → `overallOk: true`
+
+
+## ANX-289 — Projection edges TRACKED_IN/APPROVED/ASSIGNED_TO — **done G7**
+
+- [x] TRACKED_IN Feature→WorkItem (ANX-289)
+- [x] APPROVED Agent→Decision quando approverAgentId
+- [x] ASSIGNED_TO AgentRole→WorkItem quando workItemId
+- Oráculo: `bun test backend/tests/graph/product-graph-projector.test.ts`

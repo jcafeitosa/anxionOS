@@ -24,7 +24,7 @@ tags:
 | Doc | Issue | Status |
 | --- | --- | --- |
 | `project-docs/specs/anx-governance-decision-engine/design.md` | ANX-265 | done |
-| `project-docs/decisions/0005-product-graph-neo4j-projection.md` | ANX-276 greenlight | proposed |
+| `project-docs/decisions/0005-product-graph-neo4j-projection.md` | ANX-276 greenlight | accepted |
 | `.cursor/orchestration/AUTHORITY-LEVELS.md` | — | framework |
 | `.cursor/orchestration/DECISION-ENGINE-FRAMEWORK.md` | — | framework |
 
@@ -32,7 +32,7 @@ tags:
 
 | Doc | Issue | Status |
 | --- | --- | --- |
-| `project-docs/specs/006-product-agent-graph/spec.md` | ANX-276 | proposed |
+| `project-docs/specs/006-product-agent-graph/spec.md` | ANX-276 | accepted |
 | `project-docs/specs/006-product-agent-graph/projection-worker-p2-design.md` | ANX-277 prep | proposed |
 | `notes/agent-graph-registry.md` | ANX-268 | done |
 | `notes/product-graph-examples/` | ANX-267 | done |

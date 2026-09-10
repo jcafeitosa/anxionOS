@@ -71,12 +71,12 @@ flowchart TD
 | ANX-286 | Delegation ANX-277 + status Owner | done | delegation-queue/ANX-277.md + status doc |
 | ANX-287 | Delegation ANX-278/279 + framework sync | done | delegation-queue 278/279 + roster fix |
 
-## Slices P2 (backlog — implementação após greenlight)
+## Slices P2 (done G7 — sandbox homologado ANX-290)
 
 ### ANX-276 — Owner greenlight ADR0005 + spec 006
 | Campo | Valor |
 | --- | --- |
-| Status | backlog |
+| Status | done |
 | Owner | @Owner + orchestrator |
 | Gate | G7 Owner |
 | Inputs | ADR0005, spec 006, audit atualizada |
@@ -86,7 +86,7 @@ flowchart TD
 ### ANX-277 — Neo4j Product Graph projection worker (sandbox)
 | Campo | Valor |
 | --- | --- |
-| Status | backlog |
+| Status | done |
 | Owner | graph-executor + graph-critic |
 | Dependência | ANX-276 greenlight, ANX-271 schema |
 | Escopo | `backend/modules/graph/` projection worker, inbox, rebuild |
@@ -97,7 +97,7 @@ flowchart TD
 ### ANX-278 — Product Intelligence runtime FEEDS_BACK
 | Campo | Valor |
 | --- | --- |
-| Status | backlog |
+| Status | done |
 | Owner | product-executor + product-critic |
 | Dependência | ANX-277 |
 | Escopo | Telemetria → graph edge → Discovery trigger |
@@ -107,12 +107,24 @@ flowchart TD
 ### ANX-279 — Self-healing runbook executor (staging)
 | Campo | Valor |
 | --- | --- |
-| Status | backlog |
+| Status | done |
 | Owner | ops-executor + security-critic |
 | Dependência | ANX-273 doc + G4 Isa PASS |
 | Escopo | sh-rb-001..003 automation + DecisionRecord |
 | Critérios | Simulação staging com rollback |
 | Gates | G4 obrigatório |
+
+### ANX-289 — Projection edges
+| Status | done |
+| Evidência | TRACKED_IN/APPROVED/ASSIGNED_TO tests |
+
+### ANX-290 — Live homologation
+| Status | done |
+| Evidência | `npm run p2:sandbox-homologation` |
+
+### ANX-291 — Owner acceptance package
+| Status | in_review |
+| Evidência | `notes/anxionos-owner-acceptance-deliverable-8.md` |
 
 ## Slices históricos (referência)
 
