@@ -26,9 +26,6 @@
     },
     {
       "path": "../../modules/graph"
-    },
-    {
-      "path": "../../modules/orchestration"
     }
   ]
 }

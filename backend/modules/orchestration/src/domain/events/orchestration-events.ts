@@ -21,6 +21,7 @@ orchestrationTaskLeaseRenewedV1PayloadSchema,
 	orchestrationRunBudgetStoppedV1PayloadSchema,
 	type OrchestrationRunWaitingHumanRequestedV1Payload,
 	type OrchestrationRunResumedFromHumanV1Payload,
+	type OrchestrationRunRestartedFromCheckpointV1Payload,
 	type OrchestrationRunTerminatedV1Payload,
 	type OrchestrationRunBudgetStoppedV1Payload,
 } from "@anxionos/contracts/orchestration";
