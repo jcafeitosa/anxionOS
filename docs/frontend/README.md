@@ -20,6 +20,7 @@ npm install
 npm run dev          # http://localhost:4321
 npm run build
 npm run preview
+npm run typecheck    # tsc --noEmit (TypeScript 7). `astro check` ainda não suporta a API do compilador nativo 7.x.
 ```
 
 Se o botão **Entrar** / **Criar conta** ficar `disabled` no dev (ilhas sem hidratar) e o browser mostrar `504 Outdated Optimize Dep`, limpe o cache do Vite e suba de novo:
