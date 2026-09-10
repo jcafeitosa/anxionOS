@@ -71,6 +71,25 @@ export async function registerInstrument(
 			status: "ACTIVE",
 			revision: 1,
 		});
+		if (saved.id !== instrumentId) {
+			// Lost a concurrent race against another registerInstrument for the
+			// same natural key: the DB-level unique index (D-MD-001) caught what
+			// the earlier findActiveByNaturalKey check could not. Treat exactly
+			// like the "existing" branch above instead of fabricating a second
+			// ACTIVE instrument or surfacing a raw unique_violation.
+			const result = marketDataCommandResultSchema.parse({
+				aggregateId: saved.id,
+				revision: saved.revision,
+				instrumentId: saved.id,
+			});
+			await ctx.commandJournal.save({
+				commandId: command.commandId,
+				organizationId: command.organizationId,
+				commandName: "registerInstrument",
+				responseSnapshot: toCommandResultSnapshot(result),
+			});
+			return result;
+		}
 		await ctx.publishEvents([
 			createInstrumentRegisteredEvent({
 				instrumentId: saved.id,

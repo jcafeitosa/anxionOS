@@ -15,6 +15,7 @@
 	"dependencies": {
 		"@anxionos/contracts": "workspace:*",
 		"@anxionos/eventing": "workspace:*",
+		"@anxionos/observability": "workspace:*",
 		"drizzle-orm": "^0.38.3",
 		"pg": "^8.23.0"
 	},

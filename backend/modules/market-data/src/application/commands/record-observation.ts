@@ -70,20 +70,47 @@ export async function recordObservation(
 			return result;
 		}
 		const headerId = `md_obs_${randomUUID()}`;
-		await ctx.observations.saveHeader({
+		// receiveTime is captured here (server-side, monotonic wall clock),
+		// never accepted as caller input: the source cannot assert when
+		// market-data received the tick without opening a clock-spoofing
+		// vector for freshness/staleness checks (D-MD-005, P-R7-04).
+		const receiveTime = new Date().toISOString();
+		const savedHeader = await ctx.observations.saveHeader({
 			id: headerId,
 			organizationId: command.organizationId,
 			instrumentId: command.instrumentId,
 			observationKind: command.observationKind,
 			sourceEventId: command.sourceEventId,
 			eventTime: command.eventTime,
+			receiveTime,
 			price: command.price,
 			volume: command.volume ?? null,
 			executionMode: command.executionMode,
 			qualityFlag: command.qualityFlag,
 		});
+		if (savedHeader.id !== headerId) {
+			// Lost a concurrent race for the same sourceEventId: another
+			// recordObservation (different commandId, e.g. a reconnect replay)
+			// already committed this observation between our upfront
+			// findBySourceEventId check and this insert. Do not also insert a
+			// second timeseries row or publish a second event for it.
+			const result = marketDataCommandResultSchema.parse({
+				aggregateId: savedHeader.id,
+				revision: 1,
+				observationHeaderId: savedHeader.id,
+				idempotentReplay: true,
+			});
+			await ctx.commandJournal.save({
+				commandId: command.commandId,
+				organizationId: command.organizationId,
+				commandName: "recordObservation",
+				responseSnapshot: toCommandResultSnapshot(result),
+			});
+			return result;
+		}
 		await ctx.observations.insertTimeseries({
 			eventTime: command.eventTime,
+			receiveTime,
 			organizationId: command.organizationId,
 			instrumentId: command.instrumentId,
 			observationHeaderId: headerId,

@@ -18,6 +18,7 @@ export interface ObservationHeaderRecord {
 	observationKind: string;
 	sourceEventId: string;
 	eventTime: string;
+	receiveTime: string;
 	price: string;
 	volume: string | null;
 	executionMode: string;
@@ -40,9 +41,19 @@ export interface ObservationRepository {
 		organizationId: string,
 		sourceEventId: string,
 	): Promise<ObservationHeaderRecord | null>;
+	/**
+	 * Latest observation header for the instrument, ordered by eventTime desc.
+	 * Used by getPriceAsOf (D-MD-005); must never fabricate or interpolate a
+	 * result — null means no observation was ever recorded for this scope.
+	 */
+	findLatestByInstrument(
+		organizationId: string,
+		instrumentId: string,
+	): Promise<ObservationHeaderRecord | null>;
 	saveHeader(record: ObservationHeaderRecord): Promise<ObservationHeaderRecord>;
 	insertTimeseries(record: {
 		eventTime: string;
+		receiveTime: string;
 		organizationId: string;
 		instrumentId: string;
 		observationHeaderId: string;
