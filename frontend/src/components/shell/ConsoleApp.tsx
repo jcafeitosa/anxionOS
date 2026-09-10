@@ -97,6 +97,14 @@ function RoleArchifyDashboard({
 							? "O loader autorizou acesso PLATFORM."
 							: "platformAccess=false — console /platform permanece negado."}
 					</p>
+					<p
+						className="text-sm text-muted-foreground"
+						data-testid={`${testPrefix}-partner-grant`}
+					>
+						{context.partnerAccess === true
+							? "O loader autorizou acesso partner."
+							: "partnerAccess=false — console /partner permanece negado."}
+					</p>
 				</div>
 			)}
 			footer={
