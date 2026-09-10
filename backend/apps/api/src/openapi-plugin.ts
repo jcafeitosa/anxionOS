@@ -22,48 +22,49 @@ export function resolveOpenApiServerUrl(): string {
 
 export function createOpenApiPlugin() {
 	const serverUrl = resolveOpenApiServerUrl();
+	const documentation = {
+		info: {
+			title: OPENAPI_INFO_TITLE,
+			version: "0.1.0",
+			description:
+				"Composition root HTTP (Bun + Elysia). Sidebar grouped by the 23 baseline modules (ADR0002) plus Health/Realtime. Session cookie `better-auth.session_token`. Mutating commands require `Idempotency-Key`. Tags without a live handler are catalog placeholders (501 in the spec) — they do not register routes.",
+			contact: {
+				name: "anxionOS",
+				url: "https://github.com/jcafeitosa/anxionOS",
+			},
+			license: {
+				name: "MIT",
+				url: "https://opensource.org/licenses/MIT",
+			},
+		},
+		servers: [
+			{
+				url: serverUrl,
+				description: "API base (BETTER_AUTH_URL or local PORT)",
+			},
+		],
+		tags: [...OPENAPI_TAGS],
+		"x-tagGroups": [...OPENAPI_MODULE_TAG_GROUPS],
+		paths: plannedModuleOpenApiPaths(),
+		components: {
+			securitySchemes: {
+				cookieAuth: {
+					type: "apiKey" as const,
+					in: "cookie" as const,
+					name: "better-auth.session_token",
+					description:
+						"Better Auth session cookie set by POST /api/auth/sign-in/email.",
+				},
+			},
+		},
+	};
 	return openapi({
 		path: "/openapi",
 		provider: "scalar",
 		exclude: {
 			methods: ["options", "head", "trace"],
 		},
-		documentation: {
-			info: {
-				title: OPENAPI_INFO_TITLE,
-				version: "0.1.0",
-				description:
-					"Composition root HTTP (Bun + Elysia). Sidebar grouped by the 23 baseline modules (ADR0002) plus Health/Realtime. Session cookie `better-auth.session_token`. Mutating commands require `Idempotency-Key`. Tags without a live handler are catalog placeholders (501 in the spec) — they do not register routes.",
-				contact: {
-					name: "anxionOS",
-					url: "https://github.com/jcafeitosa/anxionOS",
-				},
-				license: {
-					name: "MIT",
-					url: "https://opensource.org/licenses/MIT",
-				},
-			},
-			servers: [
-				{
-					url: serverUrl,
-					description: "API base (BETTER_AUTH_URL or local PORT)",
-				},
-			],
-			tags: [...OPENAPI_TAGS],
-			"x-tagGroups": [...OPENAPI_MODULE_TAG_GROUPS],
-			paths: plannedModuleOpenApiPaths(),
-			components: {
-				securitySchemes: {
-					cookieAuth: {
-						type: "apiKey",
-						in: "cookie",
-						name: "better-auth.session_token",
-						description:
-							"Better Auth session cookie set by POST /api/auth/sign-in/email.",
-					},
-				},
-			},
-		},
+		documentation,
 		scalar: {
 			theme: "kepler",
 			layout: "modern",
