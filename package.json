@@ -30,6 +30,7 @@
     "orchestration:cto-accept": "node .cursor/orchestration/agent-proactive/cto-accept.mjs",
     "orchestration:cto-decide": "node .cursor/orchestration/agent-proactive/cto-decide.mjs",
     "orchestration:delegate-monitor": "node .cursor/orchestration/agent-workflow/delegate-monitor.mjs",
+    "orchestration:dispatch": "node .cursor/orchestration/agent-delegation/dispatch.mjs",
     "orchestration:lifecycle-cleanup": "node .cursor/orchestration/agent-workflow/lifecycle-cleanup.mjs",
     "orchestration:coordination": "node .cursor/orchestration/agent-workflow/coordination.mjs",
     "orchestration:diagram-check": "node .cursor/orchestration/agent-workflow/diagram-check.mjs",
