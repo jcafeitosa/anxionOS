@@ -4,6 +4,7 @@ import {
 	jsonb,
 	pgEnum,
 	pgTable,
+	primaryKey,
 	text,
 	timestamp,
 	uniqueIndex,
@@ -88,17 +89,22 @@ export const agentVersions = pgTable(
 	],
 );
 
-export const commandJournal = pgTable("agents_command_journal", {
-	commandId: uuid("command_id").primaryKey(),
-	commandName: text("command_name").notNull(),
-	aggregateId: uuid("aggregate_id").notNull(),
-	aggregateType: text("aggregate_type").notNull(),
-	revision: integer("revision").notNull(),
-	responseSnapshot: jsonb("response_snapshot"),
-	createdAt: timestamp("created_at", { withTimezone: true })
-		.notNull()
-		.defaultNow(),
-});
+export const commandJournal = pgTable(
+	"agents_command_journal",
+	{
+		tenantId: uuid("tenant_id").notNull(),
+		commandId: uuid("command_id").notNull(),
+		commandName: text("command_name").notNull(),
+		aggregateId: uuid("aggregate_id").notNull(),
+		aggregateType: text("aggregate_type").notNull(),
+		revision: integer("revision").notNull(),
+		responseSnapshot: jsonb("response_snapshot"),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [primaryKey({ columns: [table.tenantId, table.commandId] })],
+);
 
 export type AgentRow = typeof agents.$inferSelect;
 export type NewAgentRow = typeof agents.$inferInsert;

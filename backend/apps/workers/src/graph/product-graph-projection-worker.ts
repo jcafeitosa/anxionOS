@@ -5,6 +5,7 @@
  * User instruction (goal): "somente depois da documentação aprovada, desenvolver a plataforma incrementalmente" — slice ANX-277 projection worker.
  */
 import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
+import { AGENTS_EVENT_TYPES } from "@anxionos/contracts/agents";
 import {
 	AGENT_GRAPH_EVENT_TYPES,
 	PRODUCT_GRAPH_EVENT_TYPES,
@@ -35,6 +36,10 @@ const PRODUCT_PROJECTION_EVENT_TYPES = new Set<string>([
 const AGENT_PROJECTION_EVENT_TYPES = new Set<string>([
 	AGENT_GRAPH_EVENT_TYPES.DECISION_RECORDED,
 	AGENT_GRAPH_EVENT_TYPES.AGENT_ROLE_ASSIGNED,
+	AGENTS_EVENT_TYPES.AGENT_REGISTERED,
+	AGENTS_EVENT_TYPES.AGENT_STATUS_CHANGED,
+	AGENTS_EVENT_TYPES.AGENT_VERSION_PUBLISHED,
+	AGENTS_EVENT_TYPES.AGENT_VERSION_ROLLED_BACK,
 ]);
 
 export interface ProductGraphProjectionConsumerHandle {

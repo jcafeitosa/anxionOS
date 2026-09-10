@@ -20,7 +20,14 @@ export async function invokeBrainCapability(
 	input: InvokeBrainCapabilityInput,
 ): Promise<CommandResult & { invocationId: string; agentVersionId: string }> {
 	const command = invokeBrainCapabilityCommandSchema.parse(input);
-	const existingJournal = await deps.commandJournal.findByCommandId(command.commandId);
+	const preflightAgent = await deps.agentRepository.findById(command.agentId);
+	if (!preflightAgent) {
+		throwAgentsError("AGT_AGENT_NOT_FOUND", `Agent not found: ${command.agentId}`);
+	}
+	const existingJournal = await deps.commandJournal.findByCommandId(
+		preflightAgent.organizationId,
+		command.commandId,
+	);
 	if (existingJournal) {
 		const replay = parseCommandResultSnapshot(existingJournal.responseSnapshot);
 		const replayedAgentVersionId =
@@ -32,11 +39,6 @@ export async function invokeBrainCapability(
 			invocationId: replay.aggregateId,
 			agentVersionId: replayedAgentVersionId,
 		};
-	}
-
-	const preflightAgent = await deps.agentRepository.findById(command.agentId);
-	if (!preflightAgent) {
-		throwAgentsError("AGT_AGENT_NOT_FOUND", `Agent not found: ${command.agentId}`);
 	}
 	const agentVersionId =
 		command.agentVersionId ?? preflightAgent.activeVersionId;
@@ -74,7 +76,10 @@ export async function invokeBrainCapability(
 			principalId: input.actorPrincipalId,
 		}),
 		async (context) => {
-			const raced = await context.commandJournal.findByCommandId(command.commandId);
+			const raced = await context.commandJournal.findByCommandId(
+				preflightAgent.organizationId,
+				command.commandId,
+			);
 			if (raced) {
 				const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
 				const racedAgentVersionId =
@@ -100,6 +105,7 @@ export async function invokeBrainCapability(
 			});
 
 			await context.commandJournal.record({
+				tenantId: preflightAgent.organizationId,
 				commandId: command.commandId,
 				commandName: "InvokeBrainCapability",
 				aggregateId: invocationId,

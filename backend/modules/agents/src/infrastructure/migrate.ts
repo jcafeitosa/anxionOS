@@ -8,7 +8,11 @@ const migrationsFolder = join(dirname(fileURLToPath(import.meta.url)), "migratio
 
 export async function ensureAgentsSchema(pool: Pool): Promise<void> {
 	const db = drizzle(pool);
-	await migrate(db, { migrationsFolder });
+	await migrate(db, {
+		migrationsFolder,
+		migrationsSchema: "agents",
+		migrationsTable: "__drizzle_migrations",
+	});
 }
 
 const databaseUrl =

@@ -21,14 +21,17 @@ export async function transitionAgentStatus(
 	input: TransitionAgentStatusInput,
 ): Promise<CommandResult> {
 	const command = transitionAgentStatusCommandSchema.parse(input);
-	const replay = await loadIdempotentCommandResult(deps.commandJournal, command.commandId);
-	if (replay) {
-		return replay;
-	}
-
 	const preflightAgent = await deps.agentRepository.findById(command.agentId);
 	if (!preflightAgent) {
 		throwAgentsError("AGT_AGENT_NOT_FOUND", `Agent not found: ${command.agentId}`);
+	}
+	const replay = await loadIdempotentCommandResult(
+		deps.commandJournal,
+		preflightAgent.organizationId,
+		command.commandId,
+	);
+	if (replay) {
+		return replay;
 	}
 
 	return deps.unitOfWork.runInTransaction(
@@ -37,7 +40,10 @@ export async function transitionAgentStatus(
 			principalId: input.actorPrincipalId,
 		}),
 		async (context) => {
-			const raced = await context.commandJournal.findByCommandId(command.commandId);
+			const raced = await context.commandJournal.findByCommandId(
+				preflightAgent.organizationId,
+				command.commandId,
+			);
 			if (raced) {
 				return parseCommandResultSnapshot(raced.responseSnapshot);
 			}
@@ -85,6 +91,7 @@ export async function transitionAgentStatus(
 			});
 
 			await context.commandJournal.record({
+				tenantId: agent.organizationId,
 				commandId: command.commandId,
 				commandName: "TransitionAgentStatus",
 				aggregateId: agent.id,

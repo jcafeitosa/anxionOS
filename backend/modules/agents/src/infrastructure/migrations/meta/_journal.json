@@ -8,6 +8,13 @@
 			"when": 1757500000000,
 			"tag": "0000_agents_core",
 			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1757600000000,
+			"tag": "0001_agents_journal_tenant",
+			"breakpoints": true
 		}
 	]
 }

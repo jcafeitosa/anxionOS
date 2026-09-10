@@ -4,9 +4,10 @@ import { parseCommandResultSnapshot } from "./errors";
 
 export async function loadIdempotentCommandResult(
 	commandJournal: CommandJournalRepository,
+	tenantId: string,
 	commandId: string,
 ): Promise<CommandResult | null> {
-	const existing = await commandJournal.findByCommandId(commandId);
+	const existing = await commandJournal.findByCommandId(tenantId, commandId);
 	if (!existing) {
 		return null;
 	}

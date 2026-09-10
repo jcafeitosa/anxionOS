@@ -142,6 +142,25 @@ describe("publishAgentVersion", () => {
 		expect(second).toEqual({ ...first, idempotentReplay: true });
 	});
 
+	test("does not replay idempotency across different tenants", async () => {
+		const { deps } = createDeps();
+		const commandId = "abababab-abab-4aba-8aba-abababababab";
+		const first = await registerAgent(deps, {
+			commandId,
+			displayName: "Tenant A Agent",
+			kind: "PLATFORM",
+			organizationId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+		});
+		const second = await registerAgent(deps, {
+			commandId,
+			displayName: "Tenant B Agent",
+			kind: "PLATFORM",
+			organizationId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+		});
+		expect(second.aggregateId).not.toBe(first.aggregateId);
+		expect(second.idempotentReplay).toBeUndefined();
+	});
+
 	test("rejects publish when draft version already exists", async () => {
 		const { deps, agentVersionRepository } = createDeps();
 		const registered = await registerAgent(deps, {

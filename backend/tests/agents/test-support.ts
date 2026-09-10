@@ -57,18 +57,23 @@ export function createInMemoryAgentVersionRepository(
 	};
 }
 
+function journalKey(tenantId: string, commandId: string) {
+	return `${tenantId}:${commandId}`;
+}
+
 export function createInMemoryCommandJournalRepository(
 	seed: CommandJournalRecord[] = [],
 ): CommandJournalRepository {
 	const records = new Map(
-		seed.map((record) => [record.commandId, { ...record }]),
+		seed.map((record) => [journalKey(record.tenantId, record.commandId), { ...record }]),
 	);
 	return {
-		async findByCommandId(commandId) {
-			return records.get(commandId) ?? null;
+		async findByCommandId(tenantId, commandId) {
+			return records.get(journalKey(tenantId, commandId)) ?? null;
 		},
 		async record(entry: NewCommandJournalRecord) {
-			const existing = records.get(entry.commandId);
+			const key = journalKey(entry.tenantId, entry.commandId);
+			const existing = records.get(key);
 			if (existing) {
 				return existing;
 			}
@@ -76,7 +81,7 @@ export function createInMemoryCommandJournalRepository(
 				...entry,
 				createdAt: new Date(),
 			};
-			records.set(entry.commandId, stored);
+			records.set(key, stored);
 			return stored;
 		},
 	};
@@ -126,6 +131,18 @@ export function shouldRunPgIntegrationTests(): boolean {
 
 const AGENTS_TRUNCATE_SQL =
 	"TRUNCATE agents_command_journal, agents_agent_versions, agents_agents, domain_journal, outbox";
+
+export async function createAgentsPgDeps(pool: import("pg").Pool) {
+	const { createAgentsUnitOfWork, createAgentsRepositoriesFromPool } =
+		await import("@anxionos/agents");
+	const repos = createAgentsRepositoriesFromPool(pool);
+	return {
+		unitOfWork: createAgentsUnitOfWork(pool),
+		agentRepository: repos.agentRepository,
+		agentVersionRepository: repos.agentVersionRepository,
+		commandJournal: repos.commandJournal,
+	};
+}
 
 export async function withAgentsPgHarness<T>(
 	work: (ctx: { pool: import("pg").Pool }) => Promise<T>,

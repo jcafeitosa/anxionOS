@@ -20,7 +20,11 @@ export async function registerAgent(
 	input: RegisterAgentInput,
 ): Promise<CommandResult> {
 	const command = registerAgentCommandSchema.parse(input);
-	const replay = await loadIdempotentCommandResult(deps.commandJournal, command.commandId);
+	const replay = await loadIdempotentCommandResult(
+		deps.commandJournal,
+		input.organizationId,
+		command.commandId,
+	);
 	if (replay) {
 		return replay;
 	}
@@ -48,7 +52,10 @@ export async function registerAgent(
 			principalId: input.actorPrincipalId,
 		}),
 		async (context) => {
-			const raced = await context.commandJournal.findByCommandId(command.commandId);
+			const raced = await context.commandJournal.findByCommandId(
+				input.organizationId,
+				command.commandId,
+			);
 			if (raced) {
 				return parseCommandResultSnapshot(raced.responseSnapshot);
 			}
@@ -66,6 +73,7 @@ export async function registerAgent(
 			});
 
 			await context.commandJournal.record({
+				tenantId: input.organizationId,
 				commandId: command.commandId,
 				commandName: "RegisterAgent",
 				aggregateId: agentId,

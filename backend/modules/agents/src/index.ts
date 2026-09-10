@@ -25,4 +25,8 @@ export { buildOrganizationTenantContext } from "./application/services/tenant-co
 export { createAgentsDb } from "./infrastructure/create-db";
 export { ensureAgentsSchema } from "./infrastructure/migrate";
 export { createAgentsUnitOfWork } from "./infrastructure/agents-unit-of-work";
+export {
+	createAgentsCommandJournalFromPool,
+	createAgentsRepositoriesFromPool,
+} from "./infrastructure/persistence/create-command-journal-from-pool";
 export { agents, agentVersions, commandJournal } from "./infrastructure/persistence/schema";

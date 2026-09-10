@@ -14,6 +14,7 @@ import {
 import { GRAPH_AGENTS_CONSUMER_NAME } from "../../../domain/projections/constants";
 import { ProjectionError } from "../../../domain/projections/errors";
 import type { ProjectionHandlerContext } from "../inbox/projection-handler";
+import { projectAgentsCoreGraphEvent } from "./agents-core-graph-projector";
 
 function decisionNodeKey(scopeId: string, decisionId: string) {
 	return {
@@ -179,6 +180,13 @@ function toAssignedToEdge(
 
 /** Projects agents domain events into graph nodes (mock-friendly port). */
 export async function projectAgentGraphEvent(context: ProjectionHandlerContext) {
+	const coreHandled = await projectAgentsCoreGraphEvent(context);
+	if (coreHandled === false) {
+		// fall through to product-company agent graph events
+	} else {
+		return;
+	}
+
 	const { envelope, graphStore, projectionGeneration } = context;
 	switch (envelope.eventType) {
 		case AGENT_GRAPH_EVENT_TYPES.DECISION_RECORDED: {

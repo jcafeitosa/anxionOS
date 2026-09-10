@@ -1,4 +1,5 @@
 export interface CommandJournalRecord {
+	tenantId: string;
 	commandId: string;
 	commandName: string;
 	aggregateId: string;
@@ -9,6 +10,7 @@ export interface CommandJournalRecord {
 }
 
 export interface NewCommandJournalRecord {
+	tenantId: string;
 	commandId: string;
 	commandName: string;
 	aggregateId: string;
@@ -18,6 +20,6 @@ export interface NewCommandJournalRecord {
 }
 
 export interface CommandJournalRepository {
-	findByCommandId(commandId: string): Promise<CommandJournalRecord | null>;
+	findByCommandId(tenantId: string, commandId: string): Promise<CommandJournalRecord | null>;
 	record(entry: NewCommandJournalRecord): Promise<CommandJournalRecord>;
 }

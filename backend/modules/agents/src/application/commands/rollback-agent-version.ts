@@ -21,14 +21,17 @@ export async function rollbackAgentVersion(
 	input: RollbackAgentVersionInput,
 ): Promise<CommandResult> {
 	const command = rollbackAgentVersionCommandSchema.parse(input);
-	const replay = await loadIdempotentCommandResult(deps.commandJournal, command.commandId);
-	if (replay) {
-		return replay;
-	}
-
 	const preflightAgent = await deps.agentRepository.findById(command.agentId);
 	if (!preflightAgent) {
 		throwAgentsError("AGT_AGENT_NOT_FOUND", `Agent not found: ${command.agentId}`);
+	}
+	const replay = await loadIdempotentCommandResult(
+		deps.commandJournal,
+		preflightAgent.organizationId,
+		command.commandId,
+	);
+	if (replay) {
+		return replay;
 	}
 
 	const targetVersion = await deps.agentVersionRepository.findByAgentAndVersionNumber(
@@ -48,7 +51,10 @@ export async function rollbackAgentVersion(
 			principalId: input.actorPrincipalId,
 		}),
 		async (context) => {
-			const raced = await context.commandJournal.findByCommandId(command.commandId);
+			const raced = await context.commandJournal.findByCommandId(
+				preflightAgent.organizationId,
+				command.commandId,
+			);
 			if (raced) {
 				return parseCommandResultSnapshot(raced.responseSnapshot);
 			}
@@ -98,6 +104,7 @@ export async function rollbackAgentVersion(
 			});
 
 			await context.commandJournal.record({
+				tenantId: agent.organizationId,
 				commandId: command.commandId,
 				commandName: "RollbackAgentVersion",
 				aggregateId: agent.id,
