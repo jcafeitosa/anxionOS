@@ -16,7 +16,9 @@ tags:
 
 ## Resultado da auditoria
 
-O baseline real do backend contém 23 módulos: `accounting`, `adapter-gateway`, `audit`, `billing`, `capital`, `connections`, `decisions`, `evaluation`, `execution`, `governance`, `graph`, `identity`, `knowledge`, `market-data`, `operations`, `orchestration`, `organizations`, `partners`, `performance`, `portfolios`, `risk`, `simulation` e `strategies`.
+O baseline real do backend contém **23 módulos físicos ADR0002**: `identity`, `organizations`, `governance`, `graph`, `agents`, `orchestration`, `knowledge`, `connections`, `market-data`, `strategies`, `capital`, `portfolios`, `decisions`, `risk`, `execution`, `accounting`, `performance`, `audit`, `billing`, `partners`, `operations`, `evaluation`, `simulation`.
+
+`adapter-gateway` **não** é o 24º context aceito (ADR0006: composição/infra, não pasta de domínio). A lista anterior desta nota que incluía `adapter-gateway` e omitia `agents` estava **errada** — corrigida em 2026-09-10 (M01 / ANX-351).
 
 A taxonomia conceitual do Owner lista 30 módulos. Ela é tratada como mapa de capacidades, não como autorização para criar 30 diretórios ou alterar ownership.
 
@@ -47,13 +49,13 @@ A taxonomia conceitual do Owner lista 30 módulos. Ela é tratada como mapa de c
 | Experiments | `simulation` + `evaluation` | aderente por composição |
 | Analytics | `performance` + `market-data` | capacidade distribuída |
 | Decisions | `decisions` | aderente |
-| Approvals | `governance` | não duplicar em `decisions` |
-| Policies | `governance` + `risk` | governance genérico; risk é dono de RiskPolicy |
+| Approvals | `governance` | **CTO 2026-09-10:** sem pasta `approvals`. Nó Approval / ChangeProposal / PolicyReference genérico → `governance`. Não misturar com DecisionRecord |
+| Policies | `governance` + `risk` | **CTO 2026-09-10:** sem pasta `policies`. PolicyReference genérico → `governance`. PolicyVersion kind=RISK (RiskPolicy, limites, kill switch) → `risk` (D-GOV-002 / spec 003). Rejeitado RiskPolicy dentro de governance |
 | Audit | `audit` | aderente |
 | Memory | `knowledge` | Memory/Evidence/Document |
 | Learning | `evaluation` + `knowledge` + `operations` | ciclo distribuído |
 | Marketplace | sem módulo físico confirmado | gap proposto; não criar sem spec |
-| Integrations | `connections` + `adapter-gateway` | transversal, sem novo owner global |
+| Integrations | `connections` (+ adapters de infra, não 24º módulo) | transversal; `adapter-gateway` não é context ADR0002 |
 
 ## Regras de alinhamento
 
