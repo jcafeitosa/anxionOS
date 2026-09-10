@@ -26,18 +26,18 @@ tags:
 | 4 | Alinhamento 30→23 | 100% | alignment note + spec 007 |
 | 5 | Specs/ADRs/workflows | 85% | **Proposed** — aguarda Owner |
 | 6 | Issues ANX-* | 100% | P0 done + P2 backlog + critérios |
-| 7 | Implementação runtime | 75% | ANX-277/278/279 **done**; edges deferred ANX-277 |
-| 8 | Evidência completa | 60% | 3 slices sandbox; homologação prod pendente |
+| 7 | Implementação runtime | 85% | ANX-277/278/279/289 **done** (edges completos) |
+| 8 | Evidência completa | 70% | 4 slices sandbox; homologação prod/live pendente |
 
 **Total estimado:** ~92% documentação · ~75% runtime P2 sandbox
 
 ## Bloqueio atual
 
-Nenhum bloqueio P2 sandbox. Follow-ups: edges TRACKED_IN/APPROVED; homologação Neo4j prod.
+Nenhum bloqueio P2 sandbox. Follow-ups: homologação staging live (health API); Neo4j prod.
 
 ## Issues P2 concluídas (G7)
 
-ANX-276 (greenlight), ANX-277, ANX-278, ANX-279
+ANX-276 (greenlight), ANX-277, ANX-278, ANX-279, ANX-289
 
 ## Issues P0 concluídas (G7)
 
