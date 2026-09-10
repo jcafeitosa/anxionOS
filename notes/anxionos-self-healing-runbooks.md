@@ -183,6 +183,51 @@ Obrigatório antes de alterar `pool_max` — scope `engineering`, L4 CTO.
 - [ ] Execução real em staging (P2 — fora escopo P0 doc)
 - [ ] Automação agente SRE (P2 proposed)
 
+## Runtime executor (ANX-279)
+
+**Status:** staging sandbox · **CLI:** `npm run orchestration:self-healing`
+
+### Ativação (ordem obrigatória)
+
+1. G4 Isa `verdict` PASS → `approve-g4`
+2. Execução apenas `staging` / `dev` / `test` — produção bloqueada
+3. Runbooks com DecisionRecord exigem `--decision-record-id`
+
+### Comandos
+
+```bash
+# Listar runbooks P1
+npm run orchestration:self-healing -- list --json
+
+# G4 Security — registrar PASS (Isa)
+npm run orchestration:self-healing -- approve-g4 \
+  --runbook sh-rb-002-http-5xx --issue ANX-279 --persona security-lead \
+  --evidence "sandbox-only; no prod; canary restart pre-approved"
+
+# Executar runbook P1 em staging (simulate quando API offline)
+npm run orchestration:self-healing -- run \
+  --runbook sh-rb-002-http-5xx --issue ANX-279 --environment staging --simulate --json
+```
+
+### Evidência estruturada
+
+Logs em `.cursor/orchestration-runtime/self-healing/executions/` — schema `1.0`:
+
+| Campo | Descrição |
+| --- | --- |
+| `executionId` | UUID da execução |
+| `status` | `success` \| `rolled_back` \| `failed` |
+| `steps[]` | `{ id, status, at, data }` por passo de remediação |
+| `rollback` | `{ executed, reason?, steps[] }` |
+| `g4Approval` | Snapshot do PASS G4 |
+
+### Rollback (sh-rb-002)
+
+Quando `health_check` falha após canary restart:
+
+1. `rollback_deploy_revision` — restaura revisão capturada
+2. `verify_5xx_rate` — confirma taxa < 0.1% (simulado em sandbox)
+
 ## CLI / evidência P0
 
 ```bash
