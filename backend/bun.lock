@@ -72,6 +72,7 @@
         "@anxionos/eventing": "workspace:*",
         "@anxionos/graph": "workspace:*",
         "@anxionos/observability": "workspace:*",
+        "@anxionos/orchestration": "workspace:*",
         "nats": "^2.29.3",
         "pg": "^8.23.0",
       },
