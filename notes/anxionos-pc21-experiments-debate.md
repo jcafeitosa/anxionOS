@@ -24,6 +24,11 @@ type: debate
 - ExecutionPermit live
 - Pasta experiments
 
+## Non-goals
+
+- Não criar pasta `experiments`.
+- Twin não aplica ChangeProposal.
+
 ```mermaid
 flowchart LR
   snap[Snapshot] --> twin[SimulationRun]

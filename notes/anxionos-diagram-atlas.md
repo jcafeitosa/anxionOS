@@ -275,27 +275,45 @@ Cita: SDD [001](./../brain/project-docs/specs/001-institutional-contract/spec.md
 
 ## Cobertura visual (ANX-343, 2026-09-10)
 
-**Archify plataforma (5/5 validate PASS):** `anxionos-platform.architecture`, `anxionos-delivery-p01-p09.workflow`, `anxionos-product-company.workflow`, `anxionos-connections-inference.workflow`, `anxionos-storage-authority.dataflow`.
+**Archify plataforma (5 specs):** `anxionos-platform.architecture`, `anxionos-delivery-p01-p09.workflow`, `anxionos-product-company.workflow`, `anxionos-connections-inference.workflow`, `anxionos-storage-authority.dataflow`.
 
-**Visual-check** da architecture: HTML + PNG 1440x900 e 2048x1320 (light/dark) em `.archify/artifacts/`.
+**Archify por módulo (23 specs, showcase PASS):** `npm run archify:validate` = 28/28; `npm run archify:build` entregou 28 HTML em `.archify/artifacts/`.
 
-| Módulo físico | Mermaid | Archify |
+**Visual-check** da architecture: HTML + PNG 1440x900 e 2048x1320 (light/dark).
+
+| Módulo | Spec | Artifact HTML |
 | --- | --- | --- |
-| identity, organizations, governance | [atlas módulos](./anxionos-diagram-atlas-modules.md) | platform architecture |
-| graph | atlas + T01–T20 na ficha | platform architecture |
-| agents, orchestration, knowledge | atlas + ciclo P04 | platform + product-company workflow |
-| connections | atlas + PC 06/07/30 | connections-inference workflow |
-| market-data … audit (ciclo financeiro) | atlas + ciclo P06 | storage-authority dataflow |
-| billing, partners | atlas módulos | platform architecture |
-| operations, evaluation, simulation | atlas + PC 15–21 | delivery P01–P09 |
+| identity | `.archify/specs/anxionos-module-identity.workflow.json` | `.archify/artifacts/anxionos-module-identity.workflow.html` |
+| organizations | `anxionos-module-organizations.workflow.json` | `anxionos-module-organizations.workflow.html` |
+| governance | `anxionos-module-governance.workflow.json` | `anxionos-module-governance.workflow.html` |
+| graph | `anxionos-module-graph.workflow.json` | `anxionos-module-graph.workflow.html` |
+| agents | `anxionos-module-agents.workflow.json` | `anxionos-module-agents.workflow.html` |
+| orchestration | `anxionos-module-orchestration.workflow.json` | `anxionos-module-orchestration.workflow.html` |
+| knowledge | `anxionos-module-knowledge.workflow.json` | `anxionos-module-knowledge.workflow.html` |
+| connections | `anxionos-module-connections.workflow.json` | `anxionos-module-connections.workflow.html` |
+| market-data | `anxionos-module-market-data.workflow.json` | `anxionos-module-market-data.workflow.html` |
+| strategies | `anxionos-module-strategies.workflow.json` | `anxionos-module-strategies.workflow.html` |
+| capital | `anxionos-module-capital.workflow.json` | `anxionos-module-capital.workflow.html` |
+| portfolios | `anxionos-module-portfolios.workflow.json` | `anxionos-module-portfolios.workflow.html` |
+| decisions | `anxionos-module-decisions.workflow.json` | `anxionos-module-decisions.workflow.html` |
+| risk | `anxionos-module-risk.workflow.json` | `anxionos-module-risk.workflow.html` |
+| execution | `anxionos-module-execution.workflow.json` | `anxionos-module-execution.workflow.html` |
+| accounting | `anxionos-module-accounting.workflow.json` | `anxionos-module-accounting.workflow.html` |
+| performance | `anxionos-module-performance.workflow.json` | `anxionos-module-performance.workflow.html` |
+| audit | `anxionos-module-audit.workflow.json` | `anxionos-module-audit.workflow.html` |
+| billing | `anxionos-module-billing.workflow.json` | `anxionos-module-billing.workflow.html` |
+| partners | `anxionos-module-partners.workflow.json` | `anxionos-module-partners.workflow.html` |
+| operations | `anxionos-module-operations.workflow.json` | `anxionos-module-operations.workflow.html` |
+| evaluation | `anxionos-module-evaluation.workflow.json` | `anxionos-module-evaluation.workflow.html` |
+| simulation | `anxionos-module-simulation.workflow.json` | `anxionos-module-simulation.workflow.html` |
 
-HTML Archify **por módulo** (23 specs) **não** foi criado — seria 23º+ artefato visual, não um 24º módulo. Cobertura do **sistema** fecha ANX-343; specs por módulo ficam como follow-up opcional do coordenador.
+Mermaid complementar: [atlas módulos](./anxionos-diagram-atlas-modules.md). Sem spec `adapter-gateway` (não é context ADR0002).
 
 ## Questões abertas
 
-1. Debate serial 01-30? **Fechada em docs:** [indice](./anxionos-pc-serial-index.md). ANX-342 aberto para auditoria.
+1. Debate serial 01-30? **Fechada em docs:** [indice](./anxionos-pc-serial-index.md). ANX-342 aberto para auditoria/Owner G7.
 2. Não promover a taxonomia 30 a ADR de layout — **reafirmado** CTO: rejeitado 30 pastas. ADR0002 permanece.
-3. Archify por módulo: **não bloqueia** ANX-343. Plataforma 5/5 + visual-check + preview OK + Mermaid dos 23.
+3. Archify por módulo: **fechada** — 23 workflows showcase + HTML em `.archify/artifacts/`.
 
 ## Fontes
 
@@ -304,6 +322,6 @@ HTML Archify **por módulo** (23 specs) **não** foi criado — seria 23º+ arte
 - [lifecycle PC](./anxionos-ai-product-company-lifecycle.md)
 - [governance R02](./../docs/orchestration/modules/governance/R02-boundaries.md)
 - [atlas 23 módulos](./anxionos-diagram-atlas-modules.md)
-- `.archify/specs/` (cinco specs no repo; validate 2026-09-10 PASS)
+- `.archify/specs/` (5 plataforma + 23 módulos; validate 28/28 showcase PASS)
 - [briefing Owner](/external-sources/owner-briefing-product-company-2026-09-10) (ANX-344)
 - [CAPABILITY-MAP e fichas](/docs/orchestration/system-capabilities/CAPABILITY-MAP) (ANX-346/347)

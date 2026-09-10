@@ -23,6 +23,11 @@ type: debate
 - ChangeProposal de promocao — `governance`
 - DecisionRecord de trade — `decisions`
 
+## Non-goals
+
+- Não criar pasta `incidents`.
+- Incident permanece em `operations`.
+
 ```mermaid
 flowchart TD
   probe[probes] --> inc[Incident]

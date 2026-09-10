@@ -24,6 +24,11 @@ type: debate
 - Auto-promocao sem Approval
 - Pasta learning
 
+## Non-goals
+
+- Não criar pasta `learning`.
+- Sem auto-promoção live sem Approval.
+
 ```mermaid
 flowchart LR
   eval[evaluation] --> ev[knowledge Evidence]

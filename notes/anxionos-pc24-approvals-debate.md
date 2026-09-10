@@ -25,6 +25,11 @@ Fecha a capacidade Owner Approvals sem novo context. Ver [M01](./anxionos-pc01-g
 - DecisionRecord / ExecutionPermit — `decisions`
 - Pasta approvals
 
+## Non-goals
+
+- Não criar pasta `approvals`.
+- Approval não substitui DecisionRecord.
+
 ```mermaid
 flowchart LR
   chProp[ChangeProposal] --> appr[Approval]

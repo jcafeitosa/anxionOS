@@ -26,6 +26,11 @@ Ver [M01](./anxionos-pc01-governance-debate.md) · D-GOV-002.
 - Pasta policies
 - RiskPolicy dentro de governance (rejeitado)
 
+## Non-goals
+
+- Não criar pasta `policies`.
+- D-GOV-010: sem enforcement cross-risk até P06.
+
 ```mermaid
 flowchart LR
   govRef[PolicyReference] -.->|kind RISK| riskPol[risk PolicyVersion]

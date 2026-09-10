@@ -23,6 +23,11 @@ type: debate
 - StrategyVersion body — `strategies`
 - Pasta `deployments`
 
+## Non-goals
+
+- Não criar pasta `deployments`.
+- Não mover StrategyVersion para operations.
+
 ```mermaid
 flowchart LR
   cat[operations deploy catalog] --> env[Environment]

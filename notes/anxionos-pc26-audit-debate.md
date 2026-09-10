@@ -23,6 +23,11 @@ type: debate
 - Grants — `governance`
 - Ledger contabil — `accounting`
 
+## Non-goals
+
+- Audit não é dono de grants nem de ledger.
+- Replay não reescreve journal do dono.
+
 ```mermaid
 flowchart LR
   cmd[comandos] --> fr[Flight Recorder]

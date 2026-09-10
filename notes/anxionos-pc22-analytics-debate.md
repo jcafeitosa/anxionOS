@@ -23,6 +23,11 @@ type: debate
 - Preco ajustado como autoridade de ordem — so input para strategies/decisions
 - Invoice — `billing`
 
+## Non-goals
+
+- Não criar pasta `analytics`.
+- Observation não autoriza ordem.
+
 ```mermaid
 flowchart LR
   obs[market-data Observation] --> kpi[performance metrics]

@@ -24,6 +24,11 @@ type: debate
 - Ledger PnL autoritativo — `accounting`
 - Kill switch — `risk`
 
+## Non-goals
+
+- Não criar pasta `observability`.
+- Package observability não vira módulo físico.
+
 ```mermaid
 flowchart LR
   acc[accounting] --> perf[performance KPIs]

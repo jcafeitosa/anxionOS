@@ -18,6 +18,11 @@ type: debate
 - Probes, runbooks, recovery
 - Layout deploy (compose/k8s) fora dos 23 contexts
 
+## Non-goals
+
+- Não criar 24º módulo de infraestrutura.
+- `adapter-gateway` permanece infra, não context ADR0002.
+
 ## NAO POSSUI
 
 - adapter-gateway como 24o modulo
