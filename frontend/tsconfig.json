@@ -1,7 +1,9 @@
 {
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
+    "baseUrl": ".",
     "paths": {
+      "@/*": ["./src/*"],
       "@anxionos/api": ["../backend/apps/api/src/index.ts"],
       "@anxionos/contracts": ["../backend/packages/contracts/src/index.ts"]
     }
