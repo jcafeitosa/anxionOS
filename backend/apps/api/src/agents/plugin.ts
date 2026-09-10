@@ -2,10 +2,15 @@ import type { TenantScopedQueryable } from "@anxionos/database";
 import type {
 	AgentPublishGuardPort,
 	AgentRepository,
+	AgentSkillBindingRepository,
 	AgentVersionRepository,
 	AgentsUnitOfWork,
 	BrainInvocationGuardPort,
 	CommandJournalRepository,
+	SkillBindGuardPort,
+	SkillEvaluationGuardPort,
+	SkillRepository,
+	SkillVersionRepository,
 } from "@anxionos/agents";
 import type { createOrganizationsDb } from "@anxionos/organizations";
 import type { betterAuth } from "better-auth";
@@ -21,6 +26,15 @@ import {
 	handleRollbackAgentVersion,
 	handleTransitionAgentStatus,
 } from "./handlers/agents";
+import {
+	handleBindAgentSkill,
+	handleCreateSkillVersion,
+	handleRecordSkillVersionEvaluation,
+	handleRegisterSkill,
+	handleSubmitSkillVersion,
+	skillIdParamSchema,
+	skillVersionIdParamSchema,
+} from "./handlers/skills";
 import { agencyIdParamSchema } from "../governance/handlers/grants";
 import { agentsOpenApi } from "../openapi-operations";
 import { parseIdempotencyKey } from "../organizations/middleware/idempotency-key";
@@ -34,10 +48,15 @@ export interface AgentsPluginDeps {
 	auth: ReturnType<typeof betterAuth>;
 	agentRepository: AgentRepository;
 	agentVersionRepository: AgentVersionRepository;
+	skillRepository: SkillRepository;
+	skillVersionRepository: SkillVersionRepository;
+	agentSkillBindingRepository: AgentSkillBindingRepository;
 	commandJournal: CommandJournalRepository;
 	unitOfWork: AgentsUnitOfWork;
 	publishGuard?: AgentPublishGuardPort;
 	invocationGuard?: BrainInvocationGuardPort;
+	skillBindGuard?: SkillBindGuardPort;
+	skillEvaluationGuard?: SkillEvaluationGuardPort;
 	membershipRepository: OrganizationsDb["membershipRepository"];
 	scopedPool: TenantScopedQueryable;
 	identityRepository: PrincipalRepository;
@@ -175,6 +194,101 @@ export function createAgentsPlugin(deps: AgentsPluginDeps) {
 					});
 					},
 					agentsOpenApi.invoke,
+				)
+				.post(
+					"/:agentId/skills/bind",
+					async ({ request, agencyId, params, principal }) => {
+						const { agentId } = agentIdParamSchema.parse(params);
+						const commandId = parseIdempotencyKey(request.headers);
+						const body = await request.json();
+						return handleBindAgentSkill(deps, {
+							commandId,
+							agencyId,
+							agentId,
+							principalId: principal.id,
+							body,
+						});
+					},
+					agentsOpenApi.bindSkill,
+				),
+		)
+		.group("/:agencyId/skills", (skillsScoped) =>
+			skillsScoped
+				.resolve(async ({ request, params }) => {
+					const { agencyId } = agencyIdParamSchema.parse(params);
+					const { principal } = await resolveSessionPrincipal(deps, request);
+					await requireAgencyMembership(
+						deps.scopedPool,
+						agencyId,
+						principal.id,
+					);
+					return { principal, agencyId };
+				})
+				.post(
+					"",
+					async ({ request, agencyId, principal }) => {
+						const commandId = parseIdempotencyKey(request.headers);
+						const body = await request.json();
+						return handleRegisterSkill(deps, {
+							commandId,
+							agencyId,
+							principalId: principal.id,
+							body,
+						});
+					},
+					agentsOpenApi.registerSkill,
+				)
+				.post(
+					"/:skillId/versions",
+					async ({ request, agencyId, params, principal }) => {
+						const { skillId } = skillIdParamSchema.parse(params);
+						const commandId = parseIdempotencyKey(request.headers);
+						const body = await request.json();
+						return handleCreateSkillVersion(deps, {
+							commandId,
+							agencyId,
+							skillId,
+							principalId: principal.id,
+							body,
+						});
+					},
+					agentsOpenApi.createSkillVersion,
+				)
+				.post(
+					"/:skillId/versions/:skillVersionId/submit",
+					async ({ request, agencyId, params, principal }) => {
+						const { skillId } = skillIdParamSchema.parse(params);
+						const { skillVersionId } = skillVersionIdParamSchema.parse(params);
+						const commandId = parseIdempotencyKey(request.headers);
+						const body = await request.json();
+						return handleSubmitSkillVersion(deps, {
+							commandId,
+							agencyId,
+							skillId,
+							skillVersionId,
+							principalId: principal.id,
+							body,
+						});
+					},
+					agentsOpenApi.submitSkillVersion,
+				)
+				.post(
+					"/:skillId/versions/:skillVersionId/evaluate",
+					async ({ request, agencyId, params, principal }) => {
+						const { skillId } = skillIdParamSchema.parse(params);
+						const { skillVersionId } = skillVersionIdParamSchema.parse(params);
+						const commandId = parseIdempotencyKey(request.headers);
+						const body = await request.json();
+						return handleRecordSkillVersionEvaluation(deps, {
+							commandId,
+							agencyId,
+							skillId,
+							skillVersionId,
+							principalId: principal.id,
+							body,
+						});
+					},
+					agentsOpenApi.evaluateSkillVersion,
 				),
 		);
 }

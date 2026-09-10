@@ -15,6 +15,20 @@
 			"when": 1757600000000,
 			"tag": "0001_agents_journal_tenant",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1757700000000,
+			"tag": "0002_agents_skills_bindings",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "7",
+			"when": 1757800000000,
+			"tag": "0003_agents_routines_budget",
+			"breakpoints": true
 		}
 	]
 }

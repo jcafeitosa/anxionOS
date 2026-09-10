@@ -16,6 +16,10 @@ import {
 } from "./auth/create-better-auth";
 import { ensureBetterAuthSchema } from "./auth/ensure-better-auth-schema";
 import { createAgentsApiRuntime } from "./agents/bootstrap";
+import {
+	createGovernanceSkillBindGuard,
+	createGovernanceSkillEvaluationGuard,
+} from "./agents/governance-guards";
 import { createAgentsPlugin } from "./agents/plugin";
 import { createGovernanceApiRuntime } from "./governance/bootstrap";
 import { bootstrapGovernanceOrganizationsMembership } from "./governance/bootstrap-organizations-membership";
@@ -133,9 +137,19 @@ if (pool && resolveBetterAuthConfig()) {
 			membershipRepository: orgRuntime.membershipRepository,
 			scopedPool: orgRuntime.scopedPool,
 			identityRepository: orgRuntime.identityRepository,
+			skillBindGuard: createGovernanceSkillBindGuard({
+				autonomyAssignmentRepository: govRuntime.autonomyAssignmentRepository,
+				grantRepository: govRuntime.grantRepository,
+			}),
+			skillEvaluationGuard: createGovernanceSkillEvaluationGuard({
+				autonomyAssignmentRepository: govRuntime.autonomyAssignmentRepository,
+				grantRepository: govRuntime.grantRepository,
+			}),
 		}),
 	) as unknown as Elysia;
-	logger.info("Agents API mounted at /v1/agencies/:agencyId/agents");
+	logger.info(
+		"Agents API mounted at /v1/agencies/:agencyId/agents and /v1/agencies/:agencyId/skills",
+	);
 	const realtimeRuntime = createRealtimeRuntime(pool);
 	app = app.use(
 		createRealtimePlugin({ auth, manager: realtimeRuntime.manager }),

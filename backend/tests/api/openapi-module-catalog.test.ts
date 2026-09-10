@@ -120,6 +120,27 @@ const DOCUMENTED_OPERATIONS: Array<{
 		tag: "Agents",
 	},
 	{
+		path: "/v1/agencies/{agencyId}/agents/{agentId}/skills/bind",
+		method: "post",
+		tag: "Agents",
+	},
+	{ path: "/v1/agencies/{agencyId}/skills", method: "post", tag: "Agents" },
+	{
+		path: "/v1/agencies/{agencyId}/skills/{skillId}/versions",
+		method: "post",
+		tag: "Agents",
+	},
+	{
+		path: "/v1/agencies/{agencyId}/skills/{skillId}/versions/{skillVersionId}/submit",
+		method: "post",
+		tag: "Agents",
+	},
+	{
+		path: "/v1/agencies/{agencyId}/skills/{skillId}/versions/{skillVersionId}/evaluate",
+		method: "post",
+		tag: "Agents",
+	},
+	{
 		path: "/v1/partners/organizations/{organizationId}",
 		method: "get",
 		tag: "Partners",

@@ -825,6 +825,172 @@ export const agentsOpenApi = {
 			...ERROR_RESPONSES,
 		},
 	}),
+	bindSkill: op({
+		tag: "Agents",
+		operationId: "bindAgentSkill",
+		summary: "Bind verified skill version to draft agent version",
+		description:
+			"Module: agents. Binds a verified skill version to a draft agent version. Guarded by SkillBindGuard (`agents.skills.bind` grant).",
+		security: COOKIE_SECURITY,
+		parameters: [...commandParams, pathUuid("agentId", "Agent UUID.")],
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["agentVersionId", "skillVersionId", "expectedAgentRevision"],
+				properties: {
+					agentVersionId: UUID,
+					skillVersionId: UUID,
+					expectedAgentRevision: { type: "integer", minimum: 0 },
+					bindingConfig: { type: "object", additionalProperties: true },
+				},
+			},
+			"Binding payload without commandId/agentId.",
+		),
+		responses: {
+			"200": { description: "Binding id and agent revision." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	registerSkill: op({
+		tag: "Agents",
+		operationId: "registerSkill",
+		summary: "Register governed skill",
+		description:
+			"Module: agents. Registers a skill identity (slug) in the agency. Versions are created separately and must be evaluated before binding.",
+		security: COOKIE_SECURITY,
+		parameters: commandParams,
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["slug", "displayName"],
+				properties: {
+					slug: {
+						type: "string",
+						pattern: "^[a-z][a-z0-9-]*$",
+						minLength: 1,
+						maxLength: 64,
+					},
+					displayName: { type: "string", minLength: 1, maxLength: 256 },
+					description: { type: "string", maxLength: 2048 },
+					agencyId: UUID,
+				},
+			},
+			"Skill identity (commandId via Idempotency-Key).",
+		),
+		responses: {
+			"200": { description: "Skill id and revision." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	createSkillVersion: op({
+		tag: "Agents",
+		operationId: "createSkillVersion",
+		summary: "Create draft skill version",
+		description:
+			"Module: agents. Creates a draft skill version with content hash and sandbox policy.",
+		security: COOKIE_SECURITY,
+		parameters: [...commandParams, pathUuid("skillId", "Skill UUID.")],
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["schemaVersion", "contentRef", "contentHash"],
+				properties: {
+					schemaVersion: { type: "string", minLength: 1, maxLength: 32 },
+					contentRef: {
+						type: "object",
+						required: ["bucket", "key", "contentHash"],
+						properties: {
+							bucket: { type: "string" },
+							key: { type: "string" },
+							contentHash: { type: "string" },
+						},
+					},
+					contentHash: { type: "string", minLength: 1, maxLength: 128 },
+					permissionRequirements: { type: "array", items: { type: "object" } },
+					sandboxPolicy: { type: "object" },
+				},
+			},
+			"Draft version payload.",
+		),
+		responses: {
+			"200": { description: "Skill version id and skill revision." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	submitSkillVersion: op({
+		tag: "Agents",
+		operationId: "submitSkillVersion",
+		summary: "Submit skill version for evaluation",
+		description: "Module: agents. Moves skill version from draft to candidate.",
+		security: COOKIE_SECURITY,
+		parameters: [
+			...commandParams,
+			pathUuid("skillId", "Skill UUID."),
+			pathUuid("skillVersionId", "Skill version UUID."),
+		],
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["expectedRevision"],
+				properties: {
+					expectedRevision: { type: "integer", minimum: 0 },
+				},
+			},
+			"Expected skill aggregate revision.",
+		),
+		responses: {
+			"200": { description: "Submitted skill version id and revision." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	evaluateSkillVersion: op({
+		tag: "Agents",
+		operationId: "recordSkillVersionEvaluation",
+		summary: "Record skill version evaluation outcome",
+		description:
+			"Module: agents. Records evaluation outcome (verified/rejected) with evaluationRef evidence. Promotion gate requires evaluationRef.outcome pass for verified and fail for rejected.",
+		security: COOKIE_SECURITY,
+		parameters: [
+			...commandParams,
+			pathUuid("skillId", "Skill UUID."),
+			pathUuid("skillVersionId", "Skill version UUID."),
+		],
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["expectedRevision", "outcome", "evaluationRef"],
+				properties: {
+					expectedRevision: { type: "integer", minimum: 0 },
+					outcome: { type: "string", enum: ["verified", "rejected"] },
+					evaluationRef: {
+						type: "object",
+						required: [
+							"evaluationId",
+							"rubricVersion",
+							"outcome",
+							"evidenceHash",
+						],
+						properties: {
+							evaluationId: UUID,
+							rubricVersion: { type: "string" },
+							outcome: { type: "string", enum: ["pass", "fail"] },
+							evidenceHash: { type: "string" },
+						},
+					},
+				},
+			},
+			"Evaluation record with rubric evidence.",
+		),
+		responses: {
+			"200": { description: "Evaluated skill version id and revision." },
+			...ERROR_RESPONSES,
+		},
+	}),
 } as const;
 
 export const partnersOpenApi = {

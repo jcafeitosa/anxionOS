@@ -7,9 +7,17 @@ import {
 	handleRegisterAgent,
 } from "../../apps/api/src/agents/handlers/agents";
 import {
+	handleBindAgentSkill,
+	handleCreateSkillVersion,
+	handleRecordSkillVersionEvaluation,
+	handleRegisterSkill,
+	handleSubmitSkillVersion,
+} from "../../apps/api/src/agents/handlers/skills";
+import {
 	createInMemoryAgentRepository,
 	createInMemoryAgentVersionRepository,
 	createInMemoryCommandJournalRepository,
+	createInMemorySkillRepository,
 	createRecordingAgentsUnitOfWork,
 } from "./test-support";
 
@@ -22,18 +30,34 @@ const instructionRef = {
 	contentHash: "sha256:abc123",
 };
 
+const contentRef = {
+	bucket: "skills",
+	key: "org/test/skill-v1.md",
+	contentHash: "sha256:skill-content",
+};
+
+const evaluationRef = {
+	evaluationId: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+	rubricVersion: "rubric-v1",
+	outcome: "pass" as const,
+	evidenceHash: "sha256:evidence",
+};
+
 function createHandlerDeps() {
 	const agentRepository = createInMemoryAgentRepository();
 	const agentVersionRepository = createInMemoryAgentVersionRepository();
+	const skillRepository = createInMemorySkillRepository();
 	const commandJournal = createInMemoryCommandJournalRepository();
 	const { unitOfWork } = createRecordingAgentsUnitOfWork({
 		agentRepository,
 		agentVersionRepository,
+		skillRepository,
 		commandJournal,
 	});
 	return {
 		agentRepository,
 		agentVersionRepository,
+		skillRepository,
 		commandJournal,
 		unitOfWork,
 	};
@@ -162,6 +186,92 @@ describe("agents API handlers", () => {
 				},
 			}),
 		).rejects.toBeInstanceOf(AgentsCommandError);
+	});
+
+	test("skill handlers register, version, evaluate and bind", async () => {
+		const deps = createHandlerDeps();
+		const registeredAgent = await handleRegisterAgent(deps, {
+			commandId: "12121212-1212-4212-8212-121212121212",
+			agencyId,
+			principalId,
+			body: {
+				displayName: "Skill Host",
+				kind: "AGENCY",
+			},
+		});
+		const draftVersionId = crypto.randomUUID();
+		const now = new Date();
+		await deps.unitOfWork.runInTransaction(undefined, async (ctx) => {
+			await ctx.agentVersionRepository.save({
+				id: draftVersionId,
+				agentId: registeredAgent.agentId,
+				versionNumber: 1,
+				status: "draft",
+				instructionRef,
+				skillRefs: [],
+				capabilityManifestHash: "sha256:manifest",
+				modelSlots: [],
+				autonomyLevel: "L1",
+				createdAt: now,
+			});
+		});
+
+		const skill = await handleRegisterSkill(deps, {
+			commandId: "13131313-1313-4313-8313-131313131313",
+			agencyId,
+			principalId,
+			body: {
+				slug: "api-skill",
+				displayName: "API Skill",
+			},
+		});
+		const version = await handleCreateSkillVersion(deps, {
+			commandId: "14141414-1414-4414-8414-141414141414",
+			agencyId,
+			skillId: skill.skillId,
+			principalId,
+			body: {
+				schemaVersion: "1.0.0",
+				contentRef,
+				contentHash: "sha256:skill-hash",
+			},
+		});
+		await handleSubmitSkillVersion(deps, {
+			commandId: "15151515-1515-4515-8515-151515151515",
+			agencyId,
+			skillId: skill.skillId,
+			skillVersionId: version.skillVersionId,
+			principalId,
+			body: { expectedRevision: version.revision },
+		});
+		await handleRecordSkillVersionEvaluation(deps, {
+			commandId: "16161616-1616-4616-8616-161616161616",
+			agencyId,
+			skillId: skill.skillId,
+			skillVersionId: version.skillVersionId,
+			principalId,
+			body: {
+				expectedRevision: version.revision + 1,
+				outcome: "verified",
+				evaluationRef,
+			},
+		});
+
+		const agentRow = await deps.agentRepository.findById(registeredAgent.agentId);
+		if (!agentRow) throw new Error("agent missing");
+
+		const binding = await handleBindAgentSkill(deps, {
+			commandId: "17171717-1717-4717-8717-171717171717",
+			agencyId,
+			agentId: registeredAgent.agentId,
+			principalId,
+			body: {
+				agentVersionId: draftVersionId,
+				skillVersionId: version.skillVersionId,
+				expectedAgentRevision: agentRow.revision,
+			},
+		});
+		expect(binding.bindingId).toMatch(/^[0-9a-f-]{36}$/i);
 	});
 
 	test("get agent returns not found for wrong agency scope", async () => {

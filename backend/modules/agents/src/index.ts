@@ -6,14 +6,38 @@ export {
 export type {
 	AgentPublishGuardPort,
 	AgentRepository,
+	AgentSkillBindingRepository,
 	AgentVersionRepository,
 	AgentsUnitOfWork,
 	BrainInvocationGuardPort,
 	CommandJournalRepository,
+	SkillBindGuardPort,
+	SkillEvaluationGuardPort,
+	SkillRepository,
+	SkillVersionRepository,
+	AgentRoutineRepository,
+	AgentBudgetRepository,
+	RoutineRunDispatchPort,
+	ToolGatewayPort,
+	ComputerSessionPort,
+	ToolAuditPort,
+	ToolAuditAfterInput,
+	ToolAuditBeforeInput,
 } from "./domain/ports";
 export { createAgentRegistryAdapter } from "./infrastructure/adapters/agent-registry-adapter";
 export type { AgentRegistryAdapter } from "./infrastructure/adapters/agent-registry-adapter";
+export { bindAgentSkill } from "./application/commands/bind-agent-skill";
+export { createSkillVersion } from "./application/commands/create-skill-version";
+export { recordSkillVersionEvaluation } from "./application/commands/record-skill-version-evaluation";
 export { registerAgent } from "./application/commands/register-agent";
+export { registerSkill } from "./application/commands/register-skill";
+export { registerAgentRoutine } from "./application/commands/register-agent-routine";
+export { pauseAgentRoutine } from "./application/commands/pause-agent-routine";
+export { resumeAgentRoutine } from "./application/commands/resume-agent-routine";
+export { triggerAgentRoutine } from "./application/commands/trigger-agent-routine";
+export { setAgentBudgetPolicy } from "./application/commands/set-agent-budget-policy";
+export { consumeAgentBudget } from "./application/commands/consume-agent-budget";
+export { submitSkillVersion } from "./application/commands/submit-skill-version";
 export { publishAgentVersion } from "./application/commands/publish-agent-version";
 export { transitionAgentStatus } from "./application/commands/transition-agent-status";
 export { rollbackAgentVersion } from "./application/commands/rollback-agent-version";
@@ -22,6 +46,9 @@ export { getAgent } from "./application/queries/get-agent";
 export { listAgentVersions } from "./application/queries/list-agent-versions";
 export { AgentsCommandError } from "./application/errors";
 export { buildOrganizationTenantContext } from "./application/services/tenant-context";
+export { createEvaluationRefPromotionGate } from "./application/services/create-evaluation-ref-promotion-gate";
+export { createGovernanceToolGateway } from "./application/services/create-governance-tool-gateway";
+export { executeGovernedToolCall } from "./application/commands/execute-governed-tool-call";
 export { createAgentsDb } from "./infrastructure/create-db";
 export { ensureAgentsSchema } from "./infrastructure/migrate";
 export { createAgentsUnitOfWork } from "./infrastructure/agents-unit-of-work";
@@ -29,4 +56,13 @@ export {
 	createAgentsCommandJournalFromPool,
 	createAgentsRepositoriesFromPool,
 } from "./infrastructure/persistence/create-command-journal-from-pool";
-export { agents, agentVersions, commandJournal } from "./infrastructure/persistence/schema";
+export {
+	agents,
+	agentSkillBindings,
+	agentVersions,
+	commandJournal,
+	skillVersions,
+	skills,
+	agentRoutines,
+	agentBudgetPolicies,
+} from "./infrastructure/persistence/schema";

@@ -13,6 +13,8 @@ export type AgentsApiRuntime = Omit<
 	| "identityRepository"
 	| "publishGuard"
 	| "invocationGuard"
+	| "skillBindGuard"
+	| "skillEvaluationGuard"
 >;
 
 export function createAgentsApiRuntime(pool: Pool): AgentsApiRuntime {
@@ -20,6 +22,9 @@ export function createAgentsApiRuntime(pool: Pool): AgentsApiRuntime {
 	return {
 		agentRepository: agentsDb.agentRepository,
 		agentVersionRepository: agentsDb.agentVersionRepository,
+		skillRepository: agentsDb.skillRepository,
+		skillVersionRepository: agentsDb.skillVersionRepository,
+		agentSkillBindingRepository: agentsDb.agentSkillBindingRepository,
 		commandJournal: agentsDb.commandJournal,
 		unitOfWork: createAgentsUnitOfWork(pool),
 	};
