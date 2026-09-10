@@ -68,6 +68,6 @@ Resultado esperado (2026-09-10): **8/8 testes pass**, typecheck pass.
 
 ## Referências
 
-- [Estrutura do backend](./anxionos-backend-structure.md) — módulos `decisions` e `governance`
-- [Contrato institucional v1](../project-docs/specs/001-institutional-contract/spec.md)
-- [Evolução institucional](../project-docs/specs/004-institutional-evolution/spec.md) — níveis L0–L6
+- Estrutura do backend — `brain/notes/anxionos-backend-structure.md` (módulos `decisions` e `governance`)
+- Contrato institucional v1 — `brain/project-docs/specs/001-institutional-contract/spec.md`
+- Evolução institucional — `brain/project-docs/specs/004-institutional-evolution/spec.md` (níveis L0–L6)

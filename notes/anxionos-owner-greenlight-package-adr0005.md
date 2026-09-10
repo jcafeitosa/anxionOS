@@ -39,6 +39,7 @@ tags:
 | 12 | Learning §20 | `notes/anxionos-agent-learning-loop.md` | ☐ |
 | 13 | Continuous arch §23 | `notes/anxionos-continuous-architecture-loop.md` | ☐ |
 | 14 | Projection worker design | `project-docs/specs/006-product-agent-graph/projection-worker-p2-design.md` | ☐ |
+| 15 | Spec 007 Products/Marketplace | `project-docs/specs/007-products-marketplace-capability/spec.md` | ☐ |
 
 ## Evidências P0
 
