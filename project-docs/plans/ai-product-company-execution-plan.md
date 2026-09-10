@@ -24,19 +24,88 @@ tags:
 
 ## Fases e dependências
 
+### P0 — Documentação + contratos (COMPLETO 2026-09-10)
+
 ```mermaid
 flowchart TD
-  P0[ANX-250 Audit e mapeamento] --> P1[ANX-265 Decision Engine contract]
-  P1 --> P2[ANX-266 Governance bridge]
-  P2 --> P3[ANX-267 Product Graph P0 index]
-  P3 --> P4[ANX-268 Agent Graph registry]
-  P4 --> P5[ANX-269 Orchestration product-company hooks]
-  P5 --> P6[ANX-270 Graph projection schema P3]
-  P6 --> P7[ANX-271 Product Intelligence loop]
-  P7 --> P8[ANX-272 Self-healing runbooks P1]
+  A[ANX-265 Decision Engine] --> B[ANX-270 Governance bridge]
+  B --> C[ANX-267 Product Graph P0]
+  C --> D[ANX-268 Agent Graph registry]
+  D --> E[ANX-269 PC stage hooks]
+  E --> F[ANX-271 Schema registry P3]
+  F --> G[ANX-272 Product Intelligence doc]
+  G --> H[ANX-273 Self-healing runbooks]
 ```
 
-## Slices detalhados
+**Status:** ANX-265, 267–273, 270 — **done G7**. Contratos: `bun test backend/tests/contracts` 55/55.
+
+### P2 — Runtime sandbox (proposed, requer greenlight Owner)
+
+```mermaid
+flowchart TD
+  GL[ANX-276 Owner greenlight ADR0005] --> PG[ANX-277 Neo4j projection worker]
+  PG --> PI[ANX-278 Product Intelligence runtime]
+  SH[ANX-273 runbooks doc] --> SE[ANX-279 Self-healing executor]
+  GL -.-> SE
+```
+
+## Slices P0 (done)
+
+| Issue | Título | Status | Oracle |
+| --- | --- | --- | --- |
+| ANX-265 | Decision Engine contract | done | bun test contracts 55/55 |
+| ANX-270 | Governance bridge | done | authority-grant-bridge.test.ts |
+| ANX-267 | Product Graph P0 index | done | brain/product-graph-examples/ |
+| ANX-268 | Agent Graph registry | done | 18/18 personas |
+| ANX-269 | PC stage hooks | done | product-company-stages 8/8 |
+| ANX-271 | Schema registry P3 | done | product-agent-graph-schema 7/7 |
+| ANX-272 | Product Intelligence loop | done | brain/notes/anxionos-product-intelligence-loop.md |
+| ANX-273 | Self-healing runbooks P1 | done | brain/notes/anxionos-self-healing-runbooks.md |
+
+## Slices P2 (backlog — implementação após greenlight)
+
+### ANX-276 — Owner greenlight ADR0005 + spec 006
+| Campo | Valor |
+| --- | --- |
+| Status | backlog |
+| Owner | @Owner + orchestrator |
+| Gate | G7 Owner |
+| Inputs | ADR0005, spec 006, audit atualizada |
+| Outputs | `decision_status: accepted` nos docs |
+| Bloqueia | ANX-277 |
+
+### ANX-277 — Neo4j Product Graph projection worker (sandbox)
+| Campo | Valor |
+| --- | --- |
+| Status | backlog |
+| Owner | graph-executor + graph-critic |
+| Dependência | ANX-276 greenlight, ANX-271 schema |
+| Escopo | `backend/modules/graph/` projection worker, inbox, rebuild |
+| Critérios | Demo reconstruível sandbox; zero write sem evento |
+| Gates | G0→G2→G3 |
+| Riscos | Neo4j não homologado prod |
+
+### ANX-278 — Product Intelligence runtime FEEDS_BACK
+| Campo | Valor |
+| --- | --- |
+| Status | backlog |
+| Owner | product-executor + product-critic |
+| Dependência | ANX-277 |
+| Escopo | Telemetria → graph edge → Discovery trigger |
+| Critérios | 1 ciclo automático demonstrado sandbox |
+| Gates | G3 |
+
+### ANX-279 — Self-healing runbook executor (staging)
+| Campo | Valor |
+| --- | --- |
+| Status | backlog |
+| Owner | ops-executor + security-critic |
+| Dependência | ANX-273 doc + G4 Isa PASS |
+| Escopo | sh-rb-001..003 automation + DecisionRecord |
+| Critérios | Simulação staging com rollback |
+| Gates | G4 obrigatório |
+
+## Slices históricos (referência)
 
 ### ANX-250 — Audit documentação e alinhamento 30→23 módulos
 | Campo | Valor |
@@ -141,21 +210,22 @@ flowchart TD
 | Gates | G0→G4 (security) |
 | Riscos | Autoelevação — mitigado por whitelist de procedimentos |
 
-## Matriz gate × slice
+## Matriz gate × slice (P0 completo)
 
-| Slice | G0 | G1 | G2 | G3 | G4 | G5 | G6 | G7 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ANX-250 | ✓ | — | — | — | — | — | — | Owner |
-| ANX-265 | ✓ | em curso | pend | — | — | — | — | — |
-| ANX-266 | pend | pend | pend | — | — | — | — | — |
-| ANX-267–272 | pend | pend | variável | variável | ANX-272 | — | — | — |
+| Slice | G7 | Notas |
+| --- | --- | --- |
+| ANX-265–273, 270 | ✓ done | Doc + contratos P0 |
+| ANX-276 | pend Owner | Greenlight ADR0005 |
+| ANX-277 | — | G2 arquitetura antes de código |
+| ANX-278 | — | G3 após projection worker |
+| ANX-279 | — | G4 Isa antes de ativar runbooks |
 
 ## Próximas ações imediatas
 
-1. Concluir G1 PASS em ANX-265 (contratos decisions).
-2. Criar issues ANX-266 a ANX-272 no taskboard com dependências.
-3. Validar spec 006-product-agent-graph com exemplos reais.
-4. Propor ADR para projeção Neo4j (P3) após ANX-266.
+1. **@Owner** — revisar e aceitar ADR0005 + spec 006 (ANX-276).
+2. Após greenlight — claim ANX-277 projection worker sandbox.
+3. G4 Security — review runbooks ANX-273 antes de ANX-279.
+4. Manter audit em `brain/notes/anxionos-ai-product-company-documentation-audit.md` sincronizada.
 
 ## Fora de escopo deste plano
 

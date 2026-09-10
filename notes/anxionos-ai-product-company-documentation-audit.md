@@ -73,13 +73,15 @@ Data: 2026-09-10. Método: leitura OKF + AGENTS.md + estrutura backend aceita + 
 
 | Lacuna | Prioridade | Ação |
 | --- | --- | --- |
-| ADR P3 Product Graph Neo4j projection | ALTA | Criar ADR proposed neste goal |
+| ADR P3 Product Graph Neo4j projection | ALTA | **Criada** ADR0005 proposed — aceite Owner ANX-276 |
 | Spec Products/Marketplace (gaps) | MÉDIA | Não criar módulo; spec de capacidade composta |
-| Runbooks self-healing P1 | BAIXA | ANX-273 |
-| CLI `orchestration:product-graph` | BAIXA | ANX-267 |
-| Exemplos instanciados Product Graph (3 casos) | MÉDIA | ANX-267 |
-| AgentRole coverageStatus 100% personas | MÉDIA | ANX-268 |
+| Runbooks self-healing P1 | BAIXA | **ANX-273 done** — automação ANX-279 |
+| CLI `orchestration:product-graph` | BAIXA | **ANX-269 done** (`orchestration:phase company`) |
+| Exemplos instanciados Product Graph | MÉDIA | **ANX-267 done** (4 exemplos) |
+| AgentRole coverageStatus 100% personas | MÉDIA | **ANX-268 done** (18/18) |
 | Integração Connections como camada transversal | MÉDIA | Referenciar spec 005; não duplicar |
+| Neo4j projection worker runtime | ALTA | ANX-277 (bloqueado ANX-276) |
+| Product Intelligence runtime | MÉDIA | ANX-278 (bloqueado ANX-277) |
 
 ## Alinhamento 30 módulos → 23 físicos
 
@@ -90,15 +92,23 @@ Ver `brain/notes/anxionos-product-company-module-alignment.md`. Resumo:
 - **Gaps:** Products, Marketplace → capacidades conceituais sem módulo físico
 - **Transversal:** Connections → spec 005, não módulo separado dos 23
 
-## Evidências de implementação verificada
+## Evidências de implementação verificada (P0 — 2026-09-10)
 
 | Item | Evidência | Status |
 | --- | --- | --- |
-| Decision Engine contract v1 | ANX-265, 8/8 testes, G1 PASS | in_review G2 |
-| Spec Product/Agent Graph | brain/spec 006 | draft |
-| Plano execução | brain/plans/ai-product-company-execution-plan | draft |
-| Issues ANX-267–273 | taskboard | criadas |
-| Archify workflow 12 etapas | .archify/specs/anxionos-product-company.workflow.json | existe |
+| Decision Engine contract v1 | ANX-265 done · `bun test backend/tests/contracts` 55/55 | **done G7** |
+| Governance bridge | ANX-270 done · authority-grant-bridge.ts | **done G7** |
+| Product Graph P0 index | ANX-267 done · exemplos brain/product-graph-examples/ | **done G7** |
+| Agent Graph registry | ANX-268 done · brain/notes/agent-graph-registry.md | **done G7** |
+| PC stage hooks CLI | ANX-269 done · product-company-stages.test.mjs 8/8 | **done G7** |
+| Schema registry P3 | ANX-271 done · product-graph-schema.ts + agent-graph-schema.ts | **done G7** |
+| Product Intelligence loop doc | ANX-272 done · brain/notes/anxionos-product-intelligence-loop.md | **done G7** |
+| Self-healing runbooks P1 | ANX-273 done · brain/notes/anxionos-self-healing-runbooks.md | **done G7** |
+| Framework master doc | `.cursor/orchestration/AI-PRODUCT-COMPANY-ENGINE.md` (26 seções) | **done** |
+| Spec Product/Agent Graph | brain/spec 006 + registry ANX-271 | draft/proposed |
+| ADR0005 Neo4j projection | brain/decisions/0005-product-graph-neo4j-projection.md | **proposed** |
+| Plano execução P2 | brain/plans/ai-product-company-execution-plan.md | atualizado ANX-275 |
+| Archify workflow 12 etapas | `.archify/specs/anxionos-product-company.workflow.json` | validado |
 
 ## Não verificado (sem evidência runtime)
 
@@ -114,12 +124,15 @@ Ver `brain/notes/anxionos-product-company-module-alignment.md`. Resumo:
 - [x] Conflitos documentados com severidade e resolução
 - [x] Lacunas com prioridade e issue/ação
 - [x] Alinhamento 30→23 referenciado
-- [ ] ADR P3 criada (pendente)
-- [ ] Revisão Owner/CTO (pendente)
+- [x] ADR P3 criada (ADR0005 proposed)
+- [x] Slices P0 ANX-265–273 entregues com G7
+- [ ] Revisão Owner/CTO aceite ADR0005 + spec 006 (ANX-276)
+- [ ] Runtime P2 verificado (ANX-277–279)
 
 ## Próximas ações
 
-1. G2 code review ANX-265
-2. ADR P3 Product Graph projection (proposed)
-3. Claim ANX-267 após G2 PASS
-4. Validar archify workflow JSON
+1. **ANX-276** — @Owner greenlight ADR0005 + spec 006
+2. **ANX-277** — Neo4j projection worker sandbox (após greenlight)
+3. **ANX-278** — Product Intelligence runtime FEEDS_BACK
+4. **ANX-279** — Self-healing executor staging (G4 Isa)
+5. G4 Security review runbooks antes de preauthorize
