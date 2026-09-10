@@ -38,7 +38,7 @@ flowchart LR
   RT --> CMD[commands]
   CMD --> PL[PrincipalLookup]
   CMD -->|membership.activated| gov[governance grant baseline]
-  CMD -->|agency.created| graph[graph projector]
+  CMD -->|agency created| gproj[graph projector]
 ```
 
 ## governance
