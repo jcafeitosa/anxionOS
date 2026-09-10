@@ -77,6 +77,14 @@ tags:
 
 ANX-265, 267, 268, 269, 270, 271, 272, 273, 274, 275, 281, 282
 
+## P2 — delegação (pós-greenlight)
+
+| Issue | Pacote |
+| --- | --- |
+| ANX-277 | `.cursor/orchestration/examples/project-anxionos/delegation-queue/ANX-277.md` |
+| ANX-278 | `.cursor/orchestration/examples/project-anxionos/delegation-queue/ANX-278.md` |
+| ANX-279 | `.cursor/orchestration/examples/project-anxionos/delegation-queue/ANX-279.md` |
+
 ## P2 — critérios de aceite
 
 `brain/notes/anxionos-p2-slices-acceptance-criteria.md` — ANX-277/278/279 detalhado

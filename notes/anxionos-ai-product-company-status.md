@@ -43,9 +43,9 @@ ANX-265, 267, 268, 269, 270, 271, 272, 273, 274, 275, 281, 282, 283, 284, 285
 
 ## Próximos 3 passos (após greenlight)
 
-1. **ANX-277** — projection worker sandbox (delegation: `.cursor/orchestration/examples/project-anxionos/delegation-queue/ANX-277.md`)
-2. **ANX-278** — Product Intelligence FEEDS_BACK runtime
-3. **ANX-279** — Self-healing executor (G4 Isa)
+1. **ANX-277** — projection worker (`delegation-queue/ANX-277.md`)
+2. **ANX-278** — intelligence FEEDS_BACK (`delegation-queue/ANX-278.md`)
+3. **ANX-279** — self-healing executor (`delegation-queue/ANX-279.md`)
 
 ## Oráculos P0 (última verificação)
 

@@ -68,7 +68,7 @@ tags:
 
 | Campo | Valor |
 | --- | --- |
-| Owners | product-executor + product-critic |
+| Owners | Lucas `backend-executor` + Marina `backend-critic` |
 | Dependência | ANX-277 done |
 | Gates | G3 |
 
@@ -85,7 +85,7 @@ tags:
 
 | Campo | Valor |
 | --- | --- |
-| Owners | sre-executor + sre-critic |
+| Owners | Rafael `infra-executor` + Beatriz `infra-critic` |
 | Dependências | ANX-273 (doc done), G4 Isa review |
 | Gates | G4 → G3 |
 
