@@ -81,7 +81,7 @@ tags:
 
 ---
 
-## ANX-279 — Self-healing runbook executor (staging)
+## ANX-279 — Self-healing runbook executor (staging) — **done G7**
 
 | Campo | Valor |
 | --- | --- |
@@ -91,10 +91,12 @@ tags:
 
 ### Critérios de aceite
 
-- [ ] 1 runbook P1 executado em staging autorizado (não prod)
-- [ ] Evidência: log estruturado + rollback documentado
-- [ ] G4 Isa PASS antes de ativar
-- [ ] Doc: `brain/notes/anxionos-self-healing-runbooks.md` com seção runtime
+- [x] 1 runbook P1 executado em staging autorizado (não prod)
+- [x] Evidência: log estruturado + rollback documentado
+- [x] G4 Isa PASS antes de ativar
+- [x] Doc: `brain/notes/anxionos-self-healing-runbooks.md` com seção runtime
+
+**Oráculos:** `node --test .cursor/orchestration/tests/self-healing-executor.test.mjs` (6/6); `npm run orchestration:self-healing -- run --runbook sh-rb-002-http-5xx --issue ANX-279 --environment staging --simulate --json`
 
 ## Sequência
 

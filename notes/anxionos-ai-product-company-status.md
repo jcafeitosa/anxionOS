@@ -26,26 +26,28 @@ tags:
 | 4 | Alinhamento 30→23 | 100% | alignment note + spec 007 |
 | 5 | Specs/ADRs/workflows | 85% | **Proposed** — aguarda Owner |
 | 6 | Issues ANX-* | 100% | P0 done + P2 backlog + critérios |
-| 7 | Implementação runtime | 0% | **Bloqueado ANX-276** |
-| 8 | Evidência completa | 0% | Requer 7 |
+| 7 | Implementação runtime | 75% | ANX-277/278/279 **done**; edges deferred ANX-277 |
+| 8 | Evidência completa | 60% | 3 slices sandbox; homologação prod pendente |
 
-**Total estimado:** ~72% documentação · ~0% runtime
+**Total estimado:** ~92% documentação · ~75% runtime P2 sandbox
 
 ## Bloqueio atual
 
-| Issue | Status | Ação Owner |
-| --- | --- | --- |
-| **ANX-276** | `todo` | Comentar: `GREENLIGHT ADR0005 + spec 006 — aceito para P2 sandbox.` |
+Nenhum bloqueio P2 sandbox. Follow-ups: edges TRACKED_IN/APPROVED; homologação Neo4j prod.
+
+## Issues P2 concluídas (G7)
+
+ANX-276 (greenlight), ANX-277, ANX-278, ANX-279
 
 ## Issues P0 concluídas (G7)
 
 ANX-265, 267, 268, 269, 270, 271, 272, 273, 274, 275, 281, 282, 283, 284, 285
 
-## Próximos 3 passos (após greenlight)
+## Próximos passos
 
-1. **ANX-277** — projection worker (`delegation-queue/ANX-277.md`)
-2. **ANX-278** — intelligence FEEDS_BACK (`delegation-queue/ANX-278.md`)
-3. **ANX-279** — self-healing executor (`delegation-queue/ANX-279.md`)
+1. Edges Product Graph deferred (TRACKED_IN/APPROVED)
+2. Homologação staging real (health live, sem --simulate)
+3. Owner aceite final entregável 8
 
 ## Oráculos P0 (última verificação)
 
