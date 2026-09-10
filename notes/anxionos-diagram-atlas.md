@@ -28,8 +28,10 @@ tags:
 | Product Company 12 etapas | Archify workflow | `.archify/artifacts/anxionos-product-company.workflow.html` |
 | Connections / inferência | Archify workflow | `.archify/artifacts/anxionos-connections-inference.workflow.html` |
 | Storage / autoridade | Archify dataflow | `.archify/artifacts/anxionos-storage-authority.dataflow.html` |
+| Plataforma visual-check | Archify HTML + PNG | `.archify/artifacts/anxionos-platform.architecture.visual-check.html` |
 | Ciclo PC (Mermaid) | [lifecycle](./anxionos-ai-product-company-lifecycle.md) | abaixo |
-| 23 módulos | Mermaid | [atlas módulos](./anxionos-diagram-atlas-modules.md) |
+| 23 módulos | Mermaid + fichas | [atlas módulos](./anxionos-diagram-atlas-modules.md) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP) |
+| Briefing Owner | Ingest OK | [briefing 2026-09-10](/external-sources/owner-briefing-product-company-2026-09-10) |
 
 ## 1. Visão da plataforma
 
@@ -271,11 +273,29 @@ flowchart LR
 
 Cita: SDD [001](./../brain/project-docs/specs/001-institutional-contract/spec.md).
 
+## Cobertura visual (ANX-343, 2026-09-10)
+
+**Archify plataforma (5/5 validate PASS):** `anxionos-platform.architecture`, `anxionos-delivery-p01-p09.workflow`, `anxionos-product-company.workflow`, `anxionos-connections-inference.workflow`, `anxionos-storage-authority.dataflow`.
+
+**Visual-check** da architecture: HTML + PNG 1440x900 e 2048x1320 (light/dark) em `.archify/artifacts/`.
+
+| Módulo físico | Mermaid | Archify |
+| --- | --- | --- |
+| identity, organizations, governance | [atlas módulos](./anxionos-diagram-atlas-modules.md) | platform architecture |
+| graph | atlas + T01–T20 na ficha | platform architecture |
+| agents, orchestration, knowledge | atlas + ciclo P04 | platform + product-company workflow |
+| connections | atlas + PC 06/07/30 | connections-inference workflow |
+| market-data … audit (ciclo financeiro) | atlas + ciclo P06 | storage-authority dataflow |
+| billing, partners | atlas módulos | platform architecture |
+| operations, evaluation, simulation | atlas + PC 15–21 | delivery P01–P09 |
+
+HTML Archify **por módulo** (23 specs) **não** foi criado — seria 23º+ artefato visual, não um 24º módulo. Cobertura do **sistema** fecha ANX-343; specs por módulo ficam como follow-up opcional do coordenador.
+
 ## Questões abertas
 
 1. Debate serial 01-30? **Fechada em docs:** [indice](./anxionos-pc-serial-index.md). ANX-342 aberto para auditoria.
 2. Não promover a taxonomia 30 a ADR de layout — **reafirmado** CTO: rejeitado 30 pastas. ADR0002 permanece.
-3. Archify de **cada** módulo ainda não existe; este atlas Mermaid é o preenchimento documental. HTML por módulo é follow-up ANX-343 (atlas contínuo, não bloqueia fechar PC 01).
+3. Archify por módulo: **não bloqueia** ANX-343. Plataforma 5/5 + visual-check + preview OK + Mermaid dos 23.
 
 ## Fontes
 
@@ -284,4 +304,6 @@ Cita: SDD [001](./../brain/project-docs/specs/001-institutional-contract/spec.md
 - [lifecycle PC](./anxionos-ai-product-company-lifecycle.md)
 - [governance R02](./../docs/orchestration/modules/governance/R02-boundaries.md)
 - [atlas 23 módulos](./anxionos-diagram-atlas-modules.md)
-- `.archify/specs/` (cinco specs no repo)
+- `.archify/specs/` (cinco specs no repo; validate 2026-09-10 PASS)
+- [briefing Owner](/external-sources/owner-briefing-product-company-2026-09-10) (ANX-344)
+- [CAPABILITY-MAP e fichas](/docs/orchestration/system-capabilities/CAPABILITY-MAP) (ANX-346/347)
