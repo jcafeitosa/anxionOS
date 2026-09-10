@@ -75,6 +75,18 @@ A taxonomia conceitual do Owner lista 30 módulos. Ela é tratada como mapa de c
 - A existência de um módulo ou package não prova que seus critérios funcionais estejam implementados ou homologados.
 - Testes de integração reais, engines reais, performance e runtime permanecem gates específicos das issues de implementação.
 
+## Evidência ANX-345 (2026-09-10)
+
+**Defeito original desta nota:** a lista de 23 módulos incluía `adapter-gateway` e **omitia** `agents`.
+
+**Correção aplicada:**
+
+- 23 contexts ADR0002: `identity`, `organizations`, `governance`, `graph`, `agents`, `orchestration`, `knowledge`, `connections`, `market-data`, `strategies`, `capital`, `portfolios`, `decisions`, `risk`, `execution`, `accounting`, `performance`, `audit`, `billing`, `partners`, `operations`, `evaluation`, `simulation`.
+- `adapter-gateway` = infra/composição (ADR0006), **não** context de domínio.
+- `agents` restaurado na lista e na linha da taxonomia Owner «Agents».
+
+Prova: parágrafo «Resultado da auditoria» acima + [briefing ingestido](./../external-sources/owner-briefing-product-company-2026-09-10.md).
+
 ## Decisão CTO M01 (2026-09-10)
 
 Fechada a pergunta Approvals/Policies: **não** há módulos físicos novos. Serial PC 01–30 **fechado em docs** — [indice](./anxionos-pc-serial-index.md). ANX-342 permanece aberto para auditoria do coordenador.
