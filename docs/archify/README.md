@@ -18,11 +18,15 @@
 
 ## Specs atuais
 
+Fonte canônica: OpenKnowledge (`brain/notes/anxionos-backend-structure.md`, ADR0002, ADR0004, mapa de armazenamento). Diagramas são visão de plataforma, não 23 caixas por módulo (limite showcase).
+
 | Spec | Tipo | Artefato |
 | --- | --- | --- |
 | `anxionos-platform.architecture.json` | architecture | `artifacts/anxionos-platform.architecture.html` |
+| `anxionos-storage-authority.dataflow.json` | dataflow | `artifacts/anxionos-storage-authority.dataflow.html` |
 | `anxionos-delivery-p01-p09.workflow.json` | workflow | `artifacts/anxionos-delivery-p01-p09.workflow.html` |
 | `anxionos-connections-inference.workflow.json` | workflow | `artifacts/anxionos-connections-inference.workflow.html` |
+| `anxionos-product-company.workflow.json` | workflow | `artifacts/anxionos-product-company.workflow.html` |
 
 ## Comandos (raiz do repo)
 
