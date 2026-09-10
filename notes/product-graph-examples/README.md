@@ -13,7 +13,8 @@ Instâncias para indexação P0 (sem Neo4j). Spec canônica: `brain/project-docs
 | --- | --- | --- |
 | [ANX-135 Organizations invites](./anx-135-organizations-invites.md) | ANX-135 | referência |
 | [ANX-265 Decision Engine contract](./anx-265-decision-engine-contract.md) | ANX-265 | evidência G1/G2 |
-| [ANX-267 P0 indexação](./anx-267-product-graph-p0-index.md) | ANX-267 | planejado |
+| [ANX-267 P0 indexação](./anx-267-product-graph-p0-index.md) | ANX-267 | done |
+| [ANX-272 Intelligence loop](./anx-272-product-intelligence-loop.md) | ANX-272 | FEEDS_BACK demo |
 
 ## Queries P0
 
