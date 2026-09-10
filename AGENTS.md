@@ -17,9 +17,9 @@ Guia operacional do repositório. Leia antes de codar, propor arquitetura ou alt
 | Violação | Trabalho **inválido** — mesma severidade da [política zero-trabalho-fora-do-board](#dashi-taskboard-obrigatório--tempo-real) |
 | Exceção | Consulta pura sem alterar arquivos; ainda assim, recomenda-se ler para precisão |
 
-**Ordem de gates (sem atalhos):** (1) ler `AGENTS.md` → (2) `npm run taskboard:ensure` + claim `ANX-*` → (3) graphify antes de Grep/Glob/Read em massa → (4) executar escopo da issue.
+**Ordem de gates (sem atalhos):** (1) ler `AGENTS.md` → (2) **carregar o framework** de orquestração (§ abaixo) → (3) `npm run taskboard:ensure` + claim `ANX-*` (ou `CURSOR_GOAL_ID` para meta-tooling) → (4) `orchestration:compliance --pre-work` exit 0 → (5) graphify antes de Grep/Glob/Read em massa → (6) executar escopo da issue.
 
-Regras Cursor: `.cursor/rules/agents-md-required.mdc`, `taskboard-required.mdc`, `graphify.mdc`.
+Regras Cursor (alwaysApply — carregadas com o workspace): `.cursor/rules/mandatory-orchestration.mdc`, `orchestration-compliance.mdc`, `no-silent-work.mdc`, `agents-in-chat.mdc`, `taskboard-required.mdc`, `graphify.mdc`, `tooling-mandatory.mdc`.
 
 ## O que é o projeto
 
