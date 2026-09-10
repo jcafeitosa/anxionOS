@@ -57,7 +57,9 @@ flowchart TB
   risk[risk PolicyVersion] -.->|referência| govRef[PolicyReference]
 ```
 
-Não possui: RiskPolicy, kill switch, ExecutionPermit final, Cypher.
+Não possui: RiskPolicy, kill switch, ExecutionPermit final, Cypher, pasta `approvals`/`policies`.
+
+**CTO 2026-09-10 (M01):** Approval / ChangeProposal / PolicyReference genérico neste módulo; PolicyVersion kind=RISK em `risk`; DecisionRecord em `decisions`. Debate: [PC 01](./anxionos-pc01-governance-debate.md).
 
 ## graph
 

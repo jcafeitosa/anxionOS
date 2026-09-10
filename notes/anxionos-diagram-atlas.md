@@ -177,9 +177,11 @@ flowchart TD
   L5 --> L6[L6 Owner humano]
 ```
 
-Autonomia de **investimento** L0–L4 (spec 004 / ANX-137) é eixo **distinto** destes níveis organizacionais. Não misturar no mesmo enum sem ADR.
+Autonomia de **investimento** L0–L4 (spec 004 / ANX-137) é eixo **distinto** destes níveis organizacionais. Não misturar no mesmo enum sem ADR. Mapeamento fechado no [debate M01](./anxionos-pc01-governance-debate.md) (ANX-349).
 
 Fronteira física: [governance R02](./../docs/orchestration/modules/governance/R02-boundaries.md) — grants/epoch vs `risk` vs `decisions`.
+
+**CTO 2026-09-10:** nós Approval / ChangeProposal / PolicyReference → `governance`; PolicyVersion kind=RISK → `risk`; DecisionRecord / TradeIntent / ExecutionPermit → `decisions`. Sem pastas `approvals` ou `policies`.
 
 ## 7. Decision Engine
 
@@ -271,9 +273,9 @@ Cita: SDD [001](./../brain/project-docs/specs/001-institutional-contract/spec.md
 
 ## Questões abertas
 
-1. Confirmar se o debate serial começa e **fecha** em `governance` antes de `organizations` (pedido Owner).
-2. Não promover a taxonomia 30 a ADR de layout sem aceite explícito — ADR0002 permanece.
-3. Archify de **cada** módulo ainda não existe; este atlas Mermaid é o preenchimento documental. HTML por módulo é follow-up de issue.
+1. Debate serial começa em governance? **Fechada (PC 01 / ANX-351):** M01 fechado; próximo é PC 02 Organization (ANX-352).
+2. Não promover a taxonomia 30 a ADR de layout — **reafirmado** CTO: rejeitado 30 pastas. ADR0002 permanece.
+3. Archify de **cada** módulo ainda não existe; este atlas Mermaid é o preenchimento documental. HTML por módulo é follow-up ANX-343 (atlas contínuo, não bloqueia fechar PC 01).
 
 ## Fontes
 

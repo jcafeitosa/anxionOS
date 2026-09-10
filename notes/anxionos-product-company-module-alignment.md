@@ -64,8 +64,9 @@ A taxonomia conceitual do Owner lista 30 módulos. Ela é tratada como mapa de c
 3. `Connections` permanece camada transversal para providers, APIs, modelos, MCPs, ferramentas e serviços externos; não concede autoridade de domínio.
 4. `Product Graph` e `Agent Graph` são modelos de relação sobre owners existentes; `graph` projeta eventos e não se torna escritor de capital, grants, tasks, modelos ou decisões.
 5. `Code`, `Testing`, `Security`, `Analytics`, `Capabilities` e `Engineering` são capacidades compostas enquanto não houver decisão aceita de módulo físico.
-6. `governance` mantém autoridade, grants, mandatos e aprovações; `decisions` mantém decisões/intents; `audit` mantém linhagem/replay.
+6. `governance` mantém autoridade, grants, mandatos e aprovações; `decisions` mantém DecisionRecord / TradeIntent / ExecutionPermit; `audit` mantém linhagem/replay. **Não** criar pastas `approvals` ou `policies` (decisão CTO 2026-09-10 / ANX-351).
 7. Qualquer novo módulo exige ADR ou atualização de decisão arquitetural, spec de domínio e plano de migração; não nasce de uma linha da taxonomia.
+8. Product Graph: nós Approval / ChangeProposal / PolicyReference genérico → owner `governance`; PolicyVersion kind=RISK → owner `risk`. Ver [debate M01](./anxionos-pc01-governance-debate.md).
 
 ## Lacunas verificadas
 
@@ -74,6 +75,10 @@ A taxonomia conceitual do Owner lista 30 módulos. Ela é tratada como mapa de c
 - A existência de um módulo ou package não prova que seus critérios funcionais estejam implementados ou homologados.
 - Testes de integração reais, engines reais, performance e runtime permanecem gates específicos das issues de implementação.
 
+## Decisão CTO M01 (2026-09-10)
+
+Fechada a pergunta Approvals/Policies: **não** há módulos físicos novos. Serial PC 01 [debate](./anxionos-pc01-governance-debate.md) **fechado**. Próxima unidade: PC 02 Organization (`organizations` + `identity`) — ANX-352.
+
 ## Próximo passo
 
-Criar issues separadas para os gaps `products` e `marketplace` somente após Product Definition/Architecture; tratar as demais capacidades por contratos e eventos nos owners existentes. A primeira unidade executável segue ANX-265 (Decision Engine contracts), respeitando G0–G7.
+Criar issues separadas para os gaps `products` e `marketplace` somente após Product Definition/Architecture (spec 007 composta). D-GOV-010 permanece deferido até P06 ([ANX-350](./anxionos-pc01-governance-debate.md#d-gov-010)).

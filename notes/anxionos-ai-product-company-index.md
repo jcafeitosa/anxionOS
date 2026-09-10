@@ -65,6 +65,8 @@ tags:
 | --- | --- |
 | [Atlas sistema](./anxionos-diagram-atlas.md) | Plataforma, PC 12 etapas, graph cognitivo, G0–G7, Archify |
 | [Atlas 23 módulos](./anxionos-diagram-atlas-modules.md) | Mermaid por módulo físico ADR0002 |
+| [PC 01 Governance](./anxionos-pc01-governance-debate.md) | Unidade serial fechada ANX-351 |
+| [Spec capacidade governance](./anxionos-governance-capability-spec.md) | Gap R01 / ANX-348 |
 
 ## Capacidades compostas
 
