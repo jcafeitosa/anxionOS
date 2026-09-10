@@ -1,6 +1,6 @@
 # @anxionos/frontend
 
-Consoles web anxionOS — **Astro 7** + **React 19** + **TypeScript** + **Tailwind CSS 4** + **Better Auth**.
+Consoles web anxionOS — **Astro 7** + **React 19** + **TypeScript 7** + **Tailwind CSS 4** + **Better Auth**.
 
 ## Stack obrigatória
 

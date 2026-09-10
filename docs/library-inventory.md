@@ -1,6 +1,6 @@
 # Inventário de bibliotecas — anxionOS
 
-Versões resolvidas nos lockfiles em **2026-09-07**. Política: latest estável no momento da instalação, fixado no lockfile.
+Versões resolvidas nos lockfiles em **2026-09-10** (TypeScript 7.0.2 — ANX-341). Política: latest estável no momento da instalação, fixado no lockfile.
 
 ## Decisões de stack (frontend)
 

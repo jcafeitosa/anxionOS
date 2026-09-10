@@ -1,6 +1,6 @@
 # @anxionos/frontend
 
-Consoles web anxionOS — **Astro 7** + **React 19** + **TypeScript** + **Tailwind CSS 4**.
+Consoles web anxionOS — **Astro 7** + **React 19** + **TypeScript 7** + **Tailwind CSS 4**.
 
 ## Stack obrigatória
 
@@ -9,7 +9,7 @@ Consoles web anxionOS — **Astro 7** + **React 19** + **TypeScript** + **Tailwi
 | Framework | [Astro](https://astro.build) | Páginas `.astro`, SSG/SSR conforme necessidade |
 | Interatividade | `@astrojs/react` | React islands (`client:load`, etc.) |
 | Estilo | Tailwind CSS 4 (`@tailwindcss/vite`) | Tokens em [design-system](../../frontend/design-system/MASTER.md) e `src/styles/global.css` |
-| Linguagem | TypeScript | `tsconfig.json` na raiz do pacote |
+| Linguagem | TypeScript 7.0.2 | `tsconfig.json` na raiz do pacote (`paths` sem `baseUrl`) |
 
 **Proibido** para consoles web deste repositório: Next.js, Vite SPA standalone (sem Astro), React Native.
 

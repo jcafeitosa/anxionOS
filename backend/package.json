@@ -59,6 +59,6 @@
 		"elysia": "^1.2.25",
 		"nats": "^2.29.3",
 		"neo4j-driver": "6.2.0",
-		"typescript": "^5.9.3"
+		"typescript": "7.0.2"
 	}
 }
