@@ -123,8 +123,20 @@ flowchart TD
 | Evidência | `npm run p2:sandbox-homologation` |
 
 ### ANX-291 — Owner acceptance package
-| Status | in_review |
-| Evidência | `notes/anxionos-owner-acceptance-deliverable-8.md` |
+| Status | done |
+| Evidência | `notes/anxionos-owner-acceptance-deliverable-8.md` · G7 CTO |
+
+## Slices P3 (em andamento)
+
+### ANX-292 — Neo4j staging homologation + doc sync
+| Campo | Valor |
+| --- | --- |
+| Status | in_progress |
+| Owner | infra-executor + infra-critic |
+| Dependência | ANX-290/291 done |
+| Escopo | profile `graph-staging`, oráculo `p3:staging-homologation`, docs pós-G7 |
+| Critérios | `overallOk: true`; ADR0005 body accepted |
+| Gates | G3 |
 
 ## Slices históricos (referência)
 

@@ -18,7 +18,7 @@ tags:
 
 ## Status
 
-**Proposed** — não implementar até aceite explícito e issue ANX-271 claimada.
+**Accepted** — greenlight Owner ANX-276; sandbox P2 homologado ANX-290; staging P3 em ANX-292.
 
 ## Contexto
 
@@ -80,11 +80,12 @@ Módulos afetados: `graph` (schema registry), `audit` (linhagem), apps/workers (
 
 ## Critérios de aceite
 
-- [ ] ADR aceito pelo Owner
-- [ ] Spec 006 atualizada com referência a este ADR
-- [ ] ANX-271 claimada com matriz requisito→teste
-- [ ] Projeção reconstruível demonstrada em sandbox
-- [ ] Zero escrita direta de agentes no grafo sem evento
+- [x] ADR aceito pelo Owner (ANX-276)
+- [x] Spec 006 atualizada com referência a este ADR
+- [x] ANX-271 claimada com matriz requisito→teste
+- [x] Projeção reconstruível demonstrada em sandbox (ANX-290)
+- [x] Zero escrita direta de agentes no grafo sem evento
+- [ ] Homologação staging (ANX-292) e produção (fase posterior)
 
 ## Referências
 
