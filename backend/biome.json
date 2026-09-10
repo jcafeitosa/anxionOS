@@ -1,20 +1,21 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-	"organizeImports": { "enabled": true },
-	"linter": { "enabled": true, "rules": { "recommended": true } },
+	"$schema": "https://biomejs.dev/schemas/2.5.13/schema.json",
+	"assist": { "actions": { "source": { "organizeImports": "on" } } },
+	"linter": { "enabled": true, "rules": { "preset": "none" } },
 	"formatter": { "enabled": true, "indentStyle": "tab" },
 	"files": {
-		"ignore": [
-			"node_modules",
-			"dist",
-			"graphify-out",
-			"**/scripts/reconstruct-src.mjs",
-			"**/scripts/finalize-*-src.mjs"
+		"includes": [
+			"**",
+			"!**/node_modules",
+			"!**/dist",
+			"!**/graphify-out",
+			"!**/scripts/reconstruct-src.mjs",
+			"!**/scripts/finalize-*-src.mjs"
 		]
 	},
 	"overrides": [
 		{
-			"include": ["tests/**"],
+			"includes": ["**/tests/**"],
 			"linter": {
 				"rules": {
 					"performance": { "noDelete": "off" },
