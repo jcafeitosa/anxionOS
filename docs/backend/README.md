@@ -251,7 +251,7 @@ Contrato: `RealtimeEnvelope` em `@anxionos/contracts`. Docs: [realtime-connectio
 
 Documentação interativa em **`http://localhost:3000/openapi`** (plugin `@elysia/openapi` + [Scalar API Reference](https://scalar.com/products/api-references/configuration)). Spec JSON em **`/openapi/json`**. Tema Kepler, cookie Better Auth (`cookieAuth`), servers a partir de `BETTER_AUTH_URL`/`PORT`, telemetry e Agent desligados. CDN Scalar pinada (`@scalar/api-reference@1.68.0`).
 
-Operações agrupadas por módulo dono (`x-tagGroups` + tags): **Health**, **Auth** (identity / Better Auth), **Organizations**, **Governance**, **Agents**, **Partners**, **Realtime**. Cada operação tem `summary`, `description`, `operationId`, segurança de cookie quando autenticada, `Idempotency-Key` nos comandos e requestBody alinhado aos contratos Zod. Módulos do baseline sem HTTP montado (graph, orchestration, connections, market-data, etc.) não aparecem como rotas — só na descrição do documento.
+Operações agrupadas pelos **23 módulos** do baseline (ADR0002) mais Health/Realtime (`x-tagGroups`). Identity documenta sign-in/sign-up/get-session/sign-out; o catch-all `/api/auth/*` fica oculto no Scalar. Módulos ainda sem HTTP em `apps/api` aparecem como `GET /v1/<módulo>` no spec (501 catalog) — não são handlers reais.
 
 ### Segurança (P02)
 
