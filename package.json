@@ -51,6 +51,7 @@
     "p2:sandbox-homologation": "bun backend/scripts/p2-sandbox-homologation.mjs",
     "p3:staging-homologation": "bun backend/scripts/p3-staging-homologation.mjs",
     "p4:rebuild-homologation": "bun backend/scripts/p4-rebuild-homologation.mjs",
+    "openbot:homologation": "bun backend/scripts/openbot-homologation.mjs",
     "orchestration:proactive": "node .cursor/orchestration/agent-proactive/initiative.mjs",
     "orchestration:roster": "node .cursor/orchestration/agent-hire/roster.mjs",
     "orchestration:session": "node .cursor/orchestration/agent-dialogue/session-tracker.mjs",
