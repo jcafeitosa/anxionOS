@@ -27,17 +27,17 @@ tags:
 | 5 | Specs/ADRs/workflows | 100% | ADR0005 + spec 006 **accepted** (ANX-276) |
 | 6 | Issues ANX-* | 100% | P0 done + P2 done (ANX-276–279, 289, 290) |
 | 7 | Implementação runtime | 95% | P2 slices + ANX-290 homologação live Neo4j/health |
-| 8 | Evidência completa | 95% sandbox | pacote ANX-291 pronto; Owner G7 pendente |
+| 8 | Evidência completa | 100% sandbox | ANX-291 done G7 CTO |
 
-**Total estimado:** ~98% documentação · ~95% runtime sandbox P2
+**Total estimado:** ~98% documentação · ~95% runtime sandbox P2 · P3 em andamento
 
 ## Bloqueio atual
 
-Bloqueio: **Owner G7** entregável 8 (ANX-291). Follow-up: prod homologação P3.
+Nenhum bloqueio sandbox. **P3 ativo:** ANX-292 staging homologation.
 
 ## Issues P2 concluídas (G7)
 
-ANX-276–279, ANX-289, ANX-290
+ANX-276–279, ANX-289, ANX-290, ANX-291
 
 ## Issues P0 concluídas (G7)
 
@@ -45,9 +45,9 @@ ANX-265, 267, 268, 269, 270, 271, 272, 273, 274, 275, 281, 282, 283, 284, 285
 
 ## Próximos passos
 
-1. **Owner:** comentar aceite em ANX-291 (texto no pacote)
-2. Prod homologação Neo4j P3
-3. Cognitive OS §19–25 runtime integral
+1. **ANX-292** — Neo4j staging homologation + doc sync
+2. Cognitive OS §19–25 runtime integral (P3 slices)
+3. Deploy institucional staging/prod
 
 ## Oráculos P0 (última verificação)
 
