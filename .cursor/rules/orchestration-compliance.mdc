@@ -13,7 +13,7 @@ Regras extraídas de [AGENTS.md](../../AGENTS.md) e [.cursor/orchestration/COMPL
 2. **Ler [SCOPE.md](../orchestration/SCOPE.md)** — personas de orquestração ≠ módulo `backend/modules/agents/` (agentes institucionais do produto).
 3. **`npm run taskboard:ensure`** — falhou = abortar; não codar nem editar docs públicas (gate G0.5).
 4. **Claim `ANX-*`** em `in_progress` com thread binding antes de alterar `backend/`, `frontend/`, `docs/`, `AGENTS.md`, `.github/`.
-5. **OpenKnowledge MCP** para ler/escrever `brain/` — nunca ferramentas nativas em markdown de `brain/` quando MCP disponível.
+5. **OpenKnowledge MCP** para ler/escrever `brain/` — nunca ferramentas nativas em markdown de `brain/` quando MCP disponível. Loop: [OPENKNOWLEDGE-BRAIN.md](../orchestration/OPENKNOWLEDGE-BRAIN.md) · `npm run orchestration:brain` · warnings `BRAIN_NOT_CONSULTED` / `REFLECTION_PENDING`.
 6. **Pacote de contexto** na issue (fonte `brain/`, capability, owner, oráculos) antes de código.
 
 ## Exploração e implementação
@@ -39,6 +39,7 @@ Regras extraídas de [AGENTS.md](../../AGENTS.md) e [.cursor/orchestration/COMPL
 - Frontmatter OKF (`title`, `description`); respeitar `status: accepted` vs `proposed`.
 - Fontes ingeridas e citadas localmente; claims factuais rastreáveis.
 - Templates de pasta via `exec("ls -A <folder>")` antes de `write`.
+- Após gate verdict ou erro: reflect staging + checkpoint/postmortem OKF; Supermemory **não** substitui `brain/` para verdade institucional.
 
 ## Proibido
 

@@ -1,20 +1,33 @@
 export {
-  ingestDomainEventTapCommandSchema,
-  auditCommandResultSchema,
-  type AuditCommandResult,
-  type IngestDomainEventTapCommand,
+	ingestDomainEventTapCommandSchema,
+	verifyManifestIntegrityCommandSchema,
+	verifyManifestIntegrityResultSchema,
+	auditCommandResultSchema,
+	type AuditCommandResult,
+	type IngestDomainEventTapCommand,
+	type VerifyManifestIntegrityCommand,
+	type VerifyManifestIntegrityResult,
 } from "./commands";
-export { AUDIT_EVENT_TYPES, auditEventPayloadSchema, manifestRecordedPayloadSchema, } from "./events";
 export {
-  AUDIT_ERROR_CODES,
-  AUDIT_ERROR_STATUS_MAP,
-  auditErrorCodeSchema,
-  resolveAuditErrorStatus,
-  type AuditErrorCode,
+	AUDIT_EVENT_TYPES,
+	auditEventPayloadSchema,
+	manifestRecordedPayloadSchema,
+} from "./events";
+export {
+	AUDIT_ERROR_CODES,
+	AUDIT_ERROR_STATUS_MAP,
+	auditErrorCodeSchema,
+	resolveAuditErrorStatus,
+	type AuditErrorCode,
 } from "./errors";
 export {
-  domainEventTapBridgeSchema,
-  mapDomainEventTapToAuditInput,
-  type DomainEventTapBridge,
+	domainEventTapBridgeSchema,
+	mapDomainEventTapToAuditInput,
+	type DomainEventTapBridge,
 } from "./domain-event-tap-bridge";
-export { AUDIT_OWNER_DOMAIN, auditManifestIdSchema, auditFlightRecorderEntryIdSchema, payloadHashSchema, } from "./types";
+export {
+	AUDIT_OWNER_DOMAIN,
+	auditManifestIdSchema,
+	auditFlightRecorderEntryIdSchema,
+	payloadHashSchema,
+} from "./types";

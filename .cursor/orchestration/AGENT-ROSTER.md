@@ -16,7 +16,7 @@ Todo agente da orquestração **deve conhecer** este roster antes de agir em dom
 | slug | nome | level | papel | competências EXCLUSIVAS | competências COMPARTILHADAS | criticSlug | gate | pode contratar |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `orchestrator` | Renata Oliveira | center | CTO / orquestradora | G7 rotina, claim, `decision`, override hire, G6 integração | consult, handoff, escalate, vote (ratifica) | `cto-critic` | G7 | qualquer persona/worker |
-| `cto-critic` | Cláudia Nunes | center | crítica de governança | challenge delegação G0/G6, auditoria hires/escalações | consult, challenge, pair com Renata | — | G6/G7 audit | não (consult→Renata) |
+| `cto-critic` | Cláudia Nunes | center | crítica de governança · **voz Musk-inspired** (first-principles, blunt, anti-teatro) | challenge delegação G0/G6, auditoria hires/escalações | consult, challenge, pair com Renata | — | G6/G7 audit | não (consult→Renata) |
 | `architect` | Marcus Chen | A | arquiteto consultor | parecer ADR0002, tradeoffs estruturais, boundaries cross-module | consult, debate, share (não implementa) | — | — | não |
 | `backend-executor` | Lucas Mendes | C | executor backend | `backend/modules/`, `backend/packages/`, `backend/apps/`, migrations do domínio backend | consult cross-domain, pair com Marina, collab após ack do owner | `backend-critic` | G1 (via Marina) | workers backend + Marina |
 | `frontend-executor` | Camila Santos | C | executor frontend | `frontend/`, islands Astro+React, a11y UI | consult cross-domain, pair com Paulo | `frontend-critic` | G1 (via Paulo) | workers frontend + Paulo |
@@ -41,7 +41,7 @@ Todo agente da orquestração **deve conhecer** este roster antes de agir em dom
 | Persona | Introdução |
 | --- | --- |
 | **Renata Oliveira** (`orchestrator`) | CTO no núcleo — orquestra G0–G7, delega, desempata; aceite G7 rotina com evidências; par de Cláudia. |
-| **Cláudia Nunes** (`cto-critic`) | Crítica de governança do núcleo — challenge de delegação, hires e escalações; não implementa nem decide G7. |
+| **Cláudia Nunes** (`cto-critic`) | Crítica de governança do núcleo — first-principles, honestidade brutal, anti-teatro; challenge de delegação, hires e G7; não implementa. |
 | **Marcus Chen** (`architect`) | Arquiteto consultor: debate ADRs e boundaries; **não** implementa nem decide G7. |
 | **Lucas Mendes** (`backend-executor`) | Dono de implementação backend modular (ADR0002); par de Marina. |
 | **Camila Santos** (`frontend-executor`) | Dona de consoles Astro+React P07; par de Paulo. |
@@ -144,3 +144,51 @@ flowchart LR
 3. Cross-domain: `consult` ao owner do domínio **antes** de editar arquivos alheios
 
 Verificação de limites: [COMPETENCE-BOUNDARIES.md](./COMPETENCE-BOUNDARIES.md)
+
+---
+
+## Product Company (proposed expansion)
+
+Modelo completo: [PRODUCT-COMPANY-MODEL.md](./PRODUCT-COMPANY-MODEL.md) · schema: [PRODUCT-GRAPH-SCHEMA.md](./PRODUCT-GRAPH-SCHEMA.md) · issue P0: **ANX-250**.
+
+**Regra P0:** nenhum slug novo em [PERSONAS.md](./PERSONAS.md) — apenas registro `proposed` abaixo até aceite do @Owner para P1.
+
+### Rollout faseado
+
+| Fase | Escopo | Board | Entregável |
+| --- | --- | --- | --- |
+| **P0** | Documentação | Dashi `ANX-250` | Model + schema + Archify stub + esta seção |
+| **P1** | Discovery / Definition → workflows OKF | Dashi + `brain/` | Gates G-D estendido; templates hire research/PM |
+| **P2** | UX / Design on-demand | Hire registry | Workers `product-designer`, `ux-researcher` (proposed slugs) |
+| **P3** | Projeção Product Graph | Produto `graph` | Nós `product:*` no Neo4j (read-only bridge) |
+
+### Top 5 agentes `proposed` — prioridade P1 hire
+
+| Prioridade | Agente (taxonomia Owner) | Etapa | Justificativa | Hire provável |
+| --- | --- | --- | --- | --- |
+| 1 | **Product Discovery Agent** | 2 Discovery | Gap central P1; Marcus/Helena não cobrem JTBD/personas | `explore` + OKF workflow |
+| 2 | **Product Manager Agent** | 3 Definition | PRD, priorização, KPIs — hoje só Renata coordena | `planner` + `write-a-spec` |
+| 3 | **Requirements Agent** | 3 Definition | Formalizar SHALL → Product Graph nodes | `write-a-spec` + OKF |
+| 4 | **UX Research Agent** | 4 UX | Etapa 4 inteira `proposed`; Paulo só critique G1 | `docs-researcher` + a11y consult |
+| 5 | **Product Designer Agent** | 4 UX | Wireframes/protótipo antes de Camila codar P07 | `frontend-design` skill hire |
+
+Demais ~85 rótulos da taxonomia Owner permanecem `proposed` até P2/P3 — ver gap tables em PRODUCT-COMPANY-MODEL.
+
+### Mapeamento rápido: 18 personas → etapas Product Company
+
+| Slug | Etapas |
+| --- | --- |
+| `orchestrator` | 1, 6, 7, 10, G6–G7 |
+| `cto-critic` | Governance (todas) |
+| `architect` | 2, 3, 5 |
+| `researcher` | 1, 2, 12 |
+| `*-executor` (4) | 7 (+ Camila: 4) |
+| `*-critic` (4) | 7 (+ Paulo: 4) |
+| `code-review-lead` | 9 (G2) |
+| `qa-lead` | 8 (G3) |
+| `security-lead` | 5, 8, 9 (G4) |
+| `red-team-lead` | 8–9 (G5) |
+| `github-lead` | 10 |
+| `docs-lead` | 3, 4, 12 |
+
+@Owner = **CEO Agent** (etapa 1, veto G7).

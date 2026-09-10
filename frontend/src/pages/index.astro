@@ -1,18 +1,10 @@
 ---
 import "../styles/global.css";
-import { OwnerShell } from "../components/OwnerShell";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { LandingPage } from "../components/marketing/LandingPage";
+import { PostLoginRouter } from "../components/PostLoginRouter";
 ---
-
-<html lang="pt-BR">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="description" content="anxionOS — Company Dashboard (Owner Console)" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Company Dashboard | anxionOS</title>
-	</head>
-	<body>
-		<OwnerShell client:load />
-	</body>
-</html>
+<BaseLayout title="anxionOS" description="Investimentos autônomos com governança institucional.">
+	<LandingPage client:load />
+	<PostLoginRouter client:load mode="landing" />
+</BaseLayout>

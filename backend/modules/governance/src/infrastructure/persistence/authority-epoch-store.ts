@@ -4,10 +4,12 @@ import type {
 	AuthorityEpochRecord,
 	AuthorityEpochStore,
 } from "../../domain/ports/authority-epoch-store";
-import { authorityEpochs, type AuthorityEpochRow } from "./schema";
+import { type AuthorityEpochRow, authorityEpochs } from "./schema";
 
 function toAuthorityEpochRecord(row: AuthorityEpochRow): AuthorityEpochRecord {
 	return {
+		tenantId: row.tenantId,
+		agencyId: row.agencyId,
 		scopeId: row.scopeId,
 		epoch: row.epoch,
 		updatedAt: row.updatedAt,
@@ -29,15 +31,17 @@ export function createDrizzleAuthorityEpochStore(
 				return toAuthorityEpochRecord(row);
 			}
 			return {
+				tenantId: "",
+				agencyId: "",
 				scopeId,
 				epoch: 0,
 				updatedAt: new Date(0),
 			};
 		},
-		async increment(scopeId: string) {
+		async increment(scopeId: string, tenantId: string, agencyId: string) {
 			const rows = await db
 				.insert(authorityEpochs)
-				.values({ scopeId, epoch: 1 })
+				.values({ scopeId, epoch: 1, tenantId, agencyId })
 				.onConflictDoUpdate({
 					target: authorityEpochs.scopeId,
 					set: {

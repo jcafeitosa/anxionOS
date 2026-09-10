@@ -1,7 +1,7 @@
 import {
 	createScopedPool,
-	runDatabaseMigrations,
 	rollbackDatabaseMigrations,
+	runDatabaseMigrations,
 } from "@anxionos/database";
 
 export const FIXTURE_TABLE = "anxionos_tenant_records";
@@ -11,7 +11,9 @@ export function getDatabaseUrl(): string | undefined {
 }
 
 export function shouldRunPgIntegrationTests(): boolean {
-	return process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl());
+	return (
+		process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl())
+	);
 }
 
 export async function withPgTestHarness<T>(
@@ -33,7 +35,8 @@ export async function withPgTestHarness<T>(
 	try {
 		await runDatabaseMigrations(pool.pool, {
 			includeRoles: true,
-			rolePassword: process.env.DATABASE_ROLE_PASSWORD ?? "change-me-in-production",
+			rolePassword:
+				process.env.DATABASE_ROLE_PASSWORD ?? "change-me-in-production",
 		});
 		await pool.pool.query(`TRUNCATE ${FIXTURE_TABLE}`);
 		return await work({ pool, tenantA, tenantB });
@@ -65,7 +68,9 @@ export async function countRowsForTenant(
 	tenantId: string,
 ): Promise<number> {
 	return pool.withContext({ tenantId }, async (client) => {
-		const result = await client.query(`SELECT count(*)::int AS count FROM ${FIXTURE_TABLE}`);
+		const result = await client.query(
+			`SELECT count(*)::int AS count FROM ${FIXTURE_TABLE}`,
+		);
 		return result.rows[0]?.count ?? 0;
 	});
 }

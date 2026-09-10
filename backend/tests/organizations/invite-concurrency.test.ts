@@ -21,7 +21,7 @@ const agency: Agency = {
 	id: agencyId,
 	ownerPrincipalId,
 	displayName: "Acme Capital",
-	marketScope: { regions: ["US"], assetClasses: ["equity"] },
+	marketScope: "both",
 	status: "ready",
 	onboardingStep: "ready",
 	revision: 1,
@@ -49,7 +49,9 @@ const ownerMembership: Membership = {
 describe("organizations invite concurrency", () => {
 	test("serial duplicate invites for same email yield one membership", async () => {
 		const agencyRepository = createInMemoryAgencyRepository([agency]);
-		const membershipRepository = createInMemoryMembershipRepository([ownerMembership]);
+		const membershipRepository = createInMemoryMembershipRepository([
+			ownerMembership,
+		]);
 		const commandJournal = createInMemoryCommandJournalRepository();
 		const { unitOfWork, published } = createRecordingOrganizationUnitOfWork({
 			agencyRepository,
@@ -78,13 +80,16 @@ describe("organizations invite concurrency", () => {
 				actorPrincipalId: ownerPrincipalId,
 			}),
 		).rejects.toBeInstanceOf(OrganizationCommandError);
-		const invitedMemberships = (await membershipRepository.listByAgency(agencyId)).filter(
-			(membership) => membership.status === "invited",
-		);
+		const invitedMemberships = (
+			await membershipRepository.listByAgency(agencyId)
+		).filter((membership) => membership.status === "invited");
 		expect(invitedMemberships).toHaveLength(1);
 		expect(invitedMemberships[0]?.id).toBe(first.result.aggregateId);
 		expect(
-			published.filter((event) => event.eventType === ORGANIZATION_EVENT_TYPES.MEMBERSHIP_INVITED),
+			published.filter(
+				(event) =>
+					event.eventType === ORGANIZATION_EVENT_TYPES.MEMBERSHIP_INVITED,
+			),
 		).toHaveLength(1);
 	});
 });

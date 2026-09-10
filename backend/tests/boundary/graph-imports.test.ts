@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import {
 	BACKEND_ROOT,
+	type ForbiddenPattern,
 	collectAllModuleFiles,
 	collectModuleLayerFiles,
 	findForbiddenImports,
 	formatViolations,
-	type ForbiddenPattern,
 } from "./scan-imports";
 
 /**

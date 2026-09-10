@@ -1,13 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
-import { join } from "node:path";
 import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
-	createSecretVaultFromEnv,
 	DevVaultNotAllowedError,
 	IdempotentSecretRotation,
 	LocalFileSecretVault,
 	assertNoPlaintextSecrets,
+	createSecretVaultFromEnv,
 	redactString,
 	redactValue,
 	resolveLocalVaultPath,
@@ -57,15 +57,10 @@ describe("secrets redaction", () => {
 
 describe("dev vault production guard", () => {
 	test("blocks ENABLE_DEV_VAULT when NODE_ENV=production", async () => {
-		await withEnv(
-			{ NODE_ENV: "production", ENABLE_DEV_VAULT: "true" },
-			() => {
-				expect(() => resolveLocalVaultPath()).toThrow(DevVaultNotAllowedError);
-				expect(() => createSecretVaultFromEnv()).toThrow(
-					DevVaultNotAllowedError,
-				);
-			},
-		);
+		await withEnv({ NODE_ENV: "production", ENABLE_DEV_VAULT: "true" }, () => {
+			expect(() => resolveLocalVaultPath()).toThrow(DevVaultNotAllowedError);
+			expect(() => createSecretVaultFromEnv()).toThrow(DevVaultNotAllowedError);
+		});
 	});
 
 	test("blocks SECRETS_LOCAL_VAULT_PATH when NODE_ENV=production", async () => {

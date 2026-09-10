@@ -19,10 +19,15 @@ export function createHmacInviteTokenHasher(pepper: string): InviteTokenHasher {
 	};
 }
 
+const DEV_ORG_INVITE_TOKEN_PEPPER = "dev-local-pepper-change-me";
+
 export function createHmacInviteTokenHasherFromEnv(): InviteTokenHasher {
-	const pepper = process.env.ORG_INVITE_TOKEN_PEPPER;
-	if (!pepper?.trim()) {
+	const pepper = process.env.ORG_INVITE_TOKEN_PEPPER?.trim();
+	if (pepper) {
+		return createHmacInviteTokenHasher(pepper);
+	}
+	if (process.env.NODE_ENV === "production") {
 		throw new Error("ORG_INVITE_TOKEN_PEPPER is required");
 	}
-	return createHmacInviteTokenHasher(pepper);
+	return createHmacInviteTokenHasher(DEV_ORG_INVITE_TOKEN_PEPPER);
 }

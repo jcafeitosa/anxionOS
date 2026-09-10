@@ -14,8 +14,14 @@ describe("contracts", () => {
 			schemaVersion,
 			service: "api",
 			timestamp: new Date().toISOString(),
+			deps: {
+				postgres: "ok",
+				nats: "ok",
+				neo4j: "ok",
+			},
 		});
 		expect(parsed.status).toBe("ok");
+		expect(parsed.deps.postgres).toBe("ok");
 	});
 });
 

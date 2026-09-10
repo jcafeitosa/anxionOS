@@ -6,10 +6,10 @@ import {
 	renewOutboxRelayLeases,
 } from "./postgres";
 import {
-	moveToDeadLetter,
-	relayPendingOutbox,
 	type OutboxPublisher,
 	type RelayBatchResult,
+	moveToDeadLetter,
+	relayPendingOutbox,
 } from "./relay";
 import { DEFAULT_RETRY_POLICY, type RetryPolicy } from "./retry";
 
@@ -107,7 +107,6 @@ export function startOutboxRelayWorker(
 		);
 	}
 	let stopRequested = false;
-	let loopPromise: Promise<void> | undefined;
 	let stopPromise: Promise<void> | undefined;
 
 	const runLoop = async () => {
@@ -126,7 +125,7 @@ export function startOutboxRelayWorker(
 		}
 	};
 
-	loopPromise = runLoop();
+	const loopPromise = runLoop();
 
 	return {
 		stop: async () => {
@@ -136,10 +135,7 @@ export function startOutboxRelayWorker(
 			stopPromise = (async () => {
 				stopRequested = true;
 				await loopPromise;
-				await releaseOutboxRelayClaims(
-					options.pool,
-					options.config.relayId,
-				);
+				await releaseOutboxRelayClaims(options.pool, options.config.relayId);
 			})();
 			return stopPromise;
 		},

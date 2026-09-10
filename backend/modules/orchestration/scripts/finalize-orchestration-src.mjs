@@ -15,7 +15,10 @@ const write = (p, c) => {
 
 function fixContractsImport(text) {
 	return text
-		.replace(/from "@anxionos\/contracts"/g, 'from "@anxionos/contracts/orchestration"')
+		.replace(
+			/from "@anxionos\/contracts"/g,
+			'from "@anxionos/contracts/orchestration"',
+		)
 		.replace(
 			/import type \{ DomainEventEnvelope(?:,|\s)/,
 			'import type { DomainEventEnvelope } from "@anxionos/contracts/events";\nimport type {',
@@ -96,7 +99,9 @@ function implFromJs(js, dts) {
 		for (const head of heads) {
 			const asyncPart = head.includes("async function") ? "async " : "";
 			const next = body.replace(
-				new RegExp(`export ${asyncPart}function ${sig.name}\\([\\s\\S]*?\\)\\s*\\{`),
+				new RegExp(
+					`export ${asyncPart}function ${sig.name}\\([\\s\\S]*?\\)\\s*\\{`,
+				),
 				`${head} {`,
 			);
 			if (next !== body) {
@@ -114,7 +119,7 @@ function merge(rel) {
 	if (!fs.existsSync(dtsPath) || !fs.existsSync(jsPath)) return;
 	const dts = read(dtsPath);
 	const js = read(jsPath);
-	if (!dts.includes('declare function') && !dts.includes('declare class')) {
+	if (!dts.includes("declare function") && !dts.includes("declare class")) {
 		write(path.join(src, rel), `${typesFromDts(dts)}\n`);
 		return;
 	}
@@ -123,11 +128,30 @@ function merge(rel) {
 		return;
 	}
 	const types = typesFromDts(dts);
-	const jsImports = js.split("\n").filter((l) => l.startsWith("import ")).join("\n");
-	const typeImports = types.split("\n").filter((l) => l.startsWith("import ")).join("\n");
-	const typeDecls = types.split("\n").filter((l) => !l.startsWith("import ")).join("\n").trim();
-	const imports = [...new Set([...typeImports.split("\n"), ...jsImports.split("\n")])].filter(Boolean).join("\n");
-	write(path.join(src, rel), fixContractsImport(`${imports}\n\n${typeDecls}\n\n${implFromJs(js, dts)}\n`));
+	const jsImports = js
+		.split("\n")
+		.filter((l) => l.startsWith("import "))
+		.join("\n");
+	const typeImports = types
+		.split("\n")
+		.filter((l) => l.startsWith("import "))
+		.join("\n");
+	const typeDecls = types
+		.split("\n")
+		.filter((l) => !l.startsWith("import "))
+		.join("\n")
+		.trim();
+	const imports = [
+		...new Set([...typeImports.split("\n"), ...jsImports.split("\n")]),
+	]
+		.filter(Boolean)
+		.join("\n");
+	write(
+		path.join(src, rel),
+		fixContractsImport(
+			`${imports}\n\n${typeDecls}\n\n${implFromJs(js, dts)}\n`,
+		),
+	);
 }
 
 for (const dtsPath of fs.globSync("dist/**/*.d.ts")) {
@@ -244,24 +268,30 @@ const patches = {
 	],
 	"domain/policies/taskboard-hmac.ts": [
 		["env?: NodeJS.ProcessEnv", "env: NodeJS.ProcessEnv = process.env"],
-		["function normalizeSignature(signature)", "function normalizeSignature(signature: string)"],
+		[
+			"function normalizeSignature(signature)",
+			"function normalizeSignature(signature: string)",
+		],
 	],
 	"application/commands/ingest-taskboard-webhook.ts": [
-		["command.signature, deps.hmacConfig", 'command.signature ?? "", deps.hmacConfig'],
+		[
+			"command.signature, deps.hmacConfig",
+			'command.signature ?? "", deps.hmacConfig',
+		],
 	],
 	"infrastructure/orchestration-unit-of-work.ts": [
 		['from "@anxionos/eventing"', 'from "@anxionos/eventing/postgres"'],
 		[
 			"function createTransactionContext(client)",
-			"function createTransactionContext(client: import(\"pg\").PoolClient)",
+			'function createTransactionContext(client: import("pg").PoolClient)',
 		],
 		[
 			"async publishEvents(envelopes)",
-			"async publishEvents(envelopes: import(\"@anxionos/contracts/events\").DomainEventEnvelope[])",
+			'async publishEvents(envelopes: import("@anxionos/contracts/events").DomainEventEnvelope[])',
 		],
 		[
 			"async runInTransaction(work)",
-			"async runInTransaction<T>(work: (context: import(\"../domain/ports/orchestration-unit-of-work\").OrchestrationTransactionContext) => Promise<T>)",
+			'async runInTransaction<T>(work: (context: import("../domain/ports/orchestration-unit-of-work").OrchestrationTransactionContext) => Promise<T>)',
 		],
 	],
 };
@@ -278,16 +308,30 @@ const rowFns = {
 	],
 	"infrastructure/persistence/run-repository.ts": [["toRun", "RunRow"]],
 	"infrastructure/persistence/goal-repository.ts": [["toGoal", "GoalRow"]],
-	"infrastructure/persistence/gate-binding-repository.ts": [["toGateBinding", "GateBindingRow"]],
-	"infrastructure/persistence/run-heartbeat-repository.ts": [["toHeartbeat", "RunHeartbeatRow"]],
-	"infrastructure/persistence/task-lease-repository.ts": [["toLease", "TaskLeaseRow"]],
-	"infrastructure/persistence/taskboard-mirror-repository.ts": [["toRecord", "TaskboardMirrorRow"]],
+	"infrastructure/persistence/gate-binding-repository.ts": [
+		["toGateBinding", "GateBindingRow"],
+	],
+	"infrastructure/persistence/run-heartbeat-repository.ts": [
+		["toHeartbeat", "RunHeartbeatRow"],
+	],
+	"infrastructure/persistence/task-lease-repository.ts": [
+		["toLease", "TaskLeaseRow"],
+	],
+	"infrastructure/persistence/taskboard-mirror-repository.ts": [
+		["toRecord", "TaskboardMirrorRow"],
+	],
 };
 for (const [rel, fns] of Object.entries(rowFns)) {
 	let c = read(path.join(src, rel));
 	for (const [fn, type] of fns)
-		c = c.replace(`function ${fn}(row)`, `function ${fn}(row: import("./schema").${type})`);
-	c = c.replace(/goalAncestry: row.goalAncestry,/g, "goalAncestry: row.goalAncestry as string[],");
+		c = c.replace(
+			`function ${fn}(row)`,
+			`function ${fn}(row: import("./schema").${type})`,
+		);
+	c = c.replace(
+		/goalAncestry: row.goalAncestry,/g,
+		"goalAncestry: row.goalAncestry as string[],",
+	);
 	if (rel.includes("run-repository"))
 		c = c.replace(
 			"inArray(runs.status, ACTIVE_RUN_STATUSES)",
@@ -307,15 +351,61 @@ write(
 	read(path.join(root, "scripts/command-support.template.ts")),
 );
 
-let cj = read(path.join(src, "infrastructure/persistence/command-journal-repository.ts"));
-cj = cj.replace(/import \{ commandJournal, type CommandJournalRow \} from "\.\/schema";\nimport \{ eq \} from "drizzle-orm";\nimport \{ assertCommandJournalReplay, CommandJournalHashMismatchError, \} from "\.\.\/\.\.\/application\/command-support";\nimport \{ commandJournal \} from "\.\/schema";\n\n/, 'import { eq } from "drizzle-orm";\nimport { assertCommandJournalReplay, CommandJournalHashMismatchError } from "../../application/command-support";\nimport { commandJournal, type CommandJournalRow } from "./schema";\n\n');
-write(path.join(src, "infrastructure/persistence/command-journal-repository.ts"), cj);
+let cj = read(
+	path.join(src, "infrastructure/persistence/command-journal-repository.ts"),
+);
+cj = cj.replace(
+	/import \{ commandJournal, type CommandJournalRow \} from "\.\/schema";\nimport \{ eq \} from "drizzle-orm";\nimport \{ assertCommandJournalReplay, CommandJournalHashMismatchError, \} from "\.\.\/\.\.\/application\/command-support";\nimport \{ commandJournal \} from "\.\/schema";\n\n/,
+	'import { eq } from "drizzle-orm";\nimport { assertCommandJournalReplay, CommandJournalHashMismatchError } from "../../application/command-support";\nimport { commandJournal, type CommandJournalRow } from "./schema";\n\n',
+);
+write(
+	path.join(src, "infrastructure/persistence/command-journal-repository.ts"),
+	cj,
+);
 
-write(path.join(src, "infrastructure/migrate.ts"), read(path.join(src, "infrastructure/migrate.ts")).replace("export async function ensureOrchestrationSchema(pool)", "export async function ensureOrchestrationSchema(pool: import(\"pg\").Pool)"));
-write(path.join(src, "infrastructure/adapters/governance-traversal-adapter.ts"), read(path.join(src, "infrastructure/adapters/governance-traversal-adapter.ts")).replace("config = {})", "config: { timeoutMs?: number; evaluate?: (input: import(\"../../domain/ports/traversal-evaluator\").TraversalEvaluationInput) => Promise<{ decision: import(\"../../domain/ports/traversal-evaluator\").TraversalDecision }> } = {}").replace("(async () => ({ decision: \"ALLOW\" }))", "(async () => ({ decision: \"ALLOW\" as const }))"));
-write(path.join(src, "infrastructure/adapters/graph-query-adapter.ts"), read(path.join(src, "infrastructure/adapters/graph-query-adapter.ts")).replace("config = {})", "config: { graphQuery?: import(\"../../domain/ports/graph-query\").GraphQueryPort } = {}"));
-write(path.join(src, "infrastructure/persistence/command-journal-repository.ts"), read(path.join(src, "infrastructure/persistence/command-journal-repository.ts")).replace("responseSnapshot: row.responseSnapshot,", "responseSnapshot: row.responseSnapshot as Record<string, unknown> | null,"));
-write(path.join(src, "domain/constants.ts"), read(path.join(dist, "domain/constants.js")).trim() + "\n");
+write(
+	path.join(src, "infrastructure/migrate.ts"),
+	read(path.join(src, "infrastructure/migrate.ts")).replace(
+		"export async function ensureOrchestrationSchema(pool)",
+		'export async function ensureOrchestrationSchema(pool: import("pg").Pool)',
+	),
+);
+write(
+	path.join(src, "infrastructure/adapters/governance-traversal-adapter.ts"),
+	read(
+		path.join(src, "infrastructure/adapters/governance-traversal-adapter.ts"),
+	)
+		.replace(
+			"config = {})",
+			'config: { timeoutMs?: number; evaluate?: (input: import("../../domain/ports/traversal-evaluator").TraversalEvaluationInput) => Promise<{ decision: import("../../domain/ports/traversal-evaluator").TraversalDecision }> } = {}',
+		)
+		.replace(
+			'(async () => ({ decision: "ALLOW" }))',
+			'(async () => ({ decision: "ALLOW" as const }))',
+		),
+);
+write(
+	path.join(src, "infrastructure/adapters/graph-query-adapter.ts"),
+	read(
+		path.join(src, "infrastructure/adapters/graph-query-adapter.ts"),
+	).replace(
+		"config = {})",
+		'config: { graphQuery?: import("../../domain/ports/graph-query").GraphQueryPort } = {}',
+	),
+);
+write(
+	path.join(src, "infrastructure/persistence/command-journal-repository.ts"),
+	read(
+		path.join(src, "infrastructure/persistence/command-journal-repository.ts"),
+	).replace(
+		"responseSnapshot: row.responseSnapshot,",
+		"responseSnapshot: row.responseSnapshot as Record<string, unknown> | null,",
+	),
+);
+write(
+	path.join(src, "domain/constants.ts"),
+	read(path.join(dist, "domain/constants.js")).trim() + "\n",
+);
 
 write(
 	path.join(src, "domain/events/orchestration-events.ts"),
@@ -370,15 +460,49 @@ export function createGateDispositionRecordedEvent(payload: OrchestrationGateDis
 `,
 );
 
-let syncStatus = read(path.join(src, "application/commands/sync-taskboard-status.ts"));
-syncStatus = syncStatus.replace(/\nexport \{ TASKBOARD_POLL_INTERVAL_MS \};\n\n\/\*\*/g, "\n\n/**");
+let syncStatus = read(
+	path.join(src, "application/commands/sync-taskboard-status.ts"),
+);
+syncStatus = syncStatus.replace(
+	/\nexport \{ TASKBOARD_POLL_INTERVAL_MS \};\n\n\/\*\*/g,
+	"\n\n/**",
+);
 syncStatus = syncStatus.replace(
 	/export async function syncTaskboardStatus\(deps\)/,
 	"export async function syncTaskboardStatus(deps: SyncTaskboardStatusDeps): Promise<SyncTaskboardStatusResult>",
 );
-write(path.join(src, "application/commands/sync-taskboard-status.ts"), syncStatus);
+write(
+	path.join(src, "application/commands/sync-taskboard-status.ts"),
+	syncStatus,
+);
 
-write(path.join(src, "domain/ports/organization-scope.ts"), read(path.join(src, "domain/ports/organization-scope.ts")).replace(/export declare class OrganizationScopeDeniedError[\s\S]*?\n\}\n\n/, "").replace("constructor(message = \"Organization scope denied\", options)", "constructor(message = \"Organization scope denied\", options?: ErrorOptions)"));
-write(path.join(src, "domain/ports/principal-lookup.ts"), read(path.join(src, "domain/ports/principal-lookup.ts")).replace(/export declare class PrincipalLookupUnavailableError[\s\S]*?\n\}\n\n/, "").replace("constructor(message = \"Principal lookup unavailable\", options)", "constructor(message = \"Principal lookup unavailable\", options?: ErrorOptions)").replace("assertPrincipalActive(principalId, options)", "assertPrincipalActive(principalId: string, options: { organizationId: string })"));
+write(
+	path.join(src, "domain/ports/organization-scope.ts"),
+	read(path.join(src, "domain/ports/organization-scope.ts"))
+		.replace(
+			/export declare class OrganizationScopeDeniedError[\s\S]*?\n\}\n\n/,
+			"",
+		)
+		.replace(
+			'constructor(message = "Organization scope denied", options)',
+			'constructor(message = "Organization scope denied", options?: ErrorOptions)',
+		),
+);
+write(
+	path.join(src, "domain/ports/principal-lookup.ts"),
+	read(path.join(src, "domain/ports/principal-lookup.ts"))
+		.replace(
+			/export declare class PrincipalLookupUnavailableError[\s\S]*?\n\}\n\n/,
+			"",
+		)
+		.replace(
+			'constructor(message = "Principal lookup unavailable", options)',
+			'constructor(message = "Principal lookup unavailable", options?: ErrorOptions)',
+		)
+		.replace(
+			"assertPrincipalActive(principalId, options)",
+			"assertPrincipalActive(principalId: string, options: { organizationId: string })",
+		),
+);
 
 console.log("finalized orchestration src");

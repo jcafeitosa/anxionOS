@@ -1,0 +1,10 @@
+---
+import "../../styles/global.css";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { ConsoleApp } from "../../components/shell/ConsoleApp";
+
+const { agencyId } = Astro.params;
+---
+<BaseLayout title="Owner Console | anxionOS" description="Console Owner da agência autorizada.">
+	<ConsoleApp client:load kind="owner" agencyId={agencyId} />
+</BaseLayout>

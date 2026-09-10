@@ -13,13 +13,27 @@ import { getPersona } from "../agent-dialogue/personas.mjs";
 import { canHire } from "./levels.mjs";
 import { registerHire, findActiveByTarget } from "./roster.mjs";
 import { assertIssueId } from "./registry.mjs";
+import { fetchIssue } from "../agent-compliance/compliance-lib.mjs";
+import { validateIssueForWrite } from "../agent-compliance/taskboard-gate.mjs";
+import { maybeAutoSyncAgents } from "../agent-config/agent-taskboard-drift.mjs";
+import { syncHireToTaskboard, HIRE_TASKBOARD_SYNC_WARNING } from "./hire-taskboard-sync.mjs";
+import { enqueueFromHire } from "../agent-delegation/dispatch-queue.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
 function parseArgs(argv) {
   if (argv[0] === "delegate") return { delegate: true, issue: null, json: argv.includes("--json") };
   if (argv[0] === "bootstrap") return { bootstrap: true, json: argv.includes("--json") };
-  const opts = { byPersona: null, persona: null, issue: null, reason: null, evidence: null, json: false, speak: false };
+  const opts = {
+    byPersona: null,
+    persona: null,
+    issue: null,
+    reason: null,
+    evidence: null,
+    json: false,
+    speak: false,
+    skipTaskboardSync: false,
+  };
   for (let i = 0; i < argv.length; i += 1) {
     const a = argv[i];
     if (a === "--by-persona") opts.byPersona = argv[++i];
@@ -29,6 +43,7 @@ function parseArgs(argv) {
     else if (a === "--evidence") opts.evidence = argv[++i];
     else if (a === "--json") opts.json = true;
     else if (a === "--speak") opts.speak = true;
+    else if (a === "--skip-taskboard-sync") opts.skipTaskboardSync = true;
     else if (a === "--help" || a === "-h") return { ...opts, help: true };
     else throw new Error(`Opção desconhecida: ${a}`);
   }
@@ -37,7 +52,7 @@ function parseArgs(argv) {
 
 function usage() {
   console.log(`Usage:
-  npm run orchestration:hire -- --by-persona SLUG --persona TARGET --issue ANX-N --reason TEXT --evidence TEXT [--speak] [--json]`);
+  npm run orchestration:hire -- --by-persona SLUG --persona TARGET --issue ANX-N --reason TEXT --evidence TEXT [--speak] [--skip-taskboard-sync] [--json]`);
 }
 
 function postSpeak(hirer, target, issueId, reason, entry) {
@@ -71,15 +86,19 @@ function postSpeak(hirer, target, issueId, reason, entry) {
   );
 }
 
-function runBootstrap(opts) {
+async function runBootstrap(opts) {
   const r = spawnSync("node", [".cursor/orchestration/agent-hire/bootstrap.mjs", ...(opts.json ? ["--json"] : [])], { cwd: root, encoding: "utf8" });
   if (r.status !== 0) { console.error(r.stderr); process.exit(1); }
   console.log(r.stdout.trim());
+  const sync = await maybeAutoSyncAgents("hire:bootstrap");
+  if (!opts.json && sync.ok && !sync.skipped && sync.agentCount) {
+    console.log(`✓ ${sync.agentCount} personas sincronizadas no taskboard (hire bootstrap)`);
+  }
 }
 
-function main() {
+async function main() {
   const opts = parseArgs(process.argv.slice(2));
-  if (opts.bootstrap) { runBootstrap(opts); return; }
+  if (opts.bootstrap) { await runBootstrap(opts); return; }
   if (opts.delegate) {
     for (let i = 2; i < process.argv.length; i++) if (process.argv[i] === '--issue') opts.issue = process.argv[++i]?.toUpperCase();
     if (!opts.issue) throw new Error('delegate requer --issue ANX-N');
@@ -95,6 +114,8 @@ function main() {
   if (!opts.byPersona) opts.byPersona = "orchestrator";
   if (!opts.persona) throw new Error("--persona obrigatório");
   assertIssueId(opts.issue);
+  const issueOk = await validateIssueForWrite(opts.issue, fetchIssue, { label: "orchestration:hire" });
+  if (!issueOk) process.exit(1);
   if (!opts.reason?.trim()) throw new Error("--reason obrigatório");
   if (!opts.evidence?.trim() && opts.byPersona !== "orchestrator") throw new Error("--evidence obrigatório (por que agora)");
   if (!opts.evidence?.trim()) opts.evidence = opts.reason;
@@ -116,15 +137,30 @@ function main() {
     evidence: opts.evidence,
   });
 
-  const result = { ok: true, hire: entry };
+  let taskboardSync = { ok: true, skipped: true };
+  if (!opts.skipTaskboardSync) {
+    taskboardSync = await syncHireToTaskboard(entry);
+    if (!taskboardSync.ok && !opts.json) {
+      console.warn(`⚠ ${HIRE_TASKBOARD_SYNC_WARNING}: hire registrado localmente; board não atualizado`);
+    }
+  }
+
+  const dispatch = enqueueFromHire(entry);
+
+  const result = { ok: true, hire: entry, taskboardSync, dispatch };
   if (opts.json) console.log(JSON.stringify(result, null, 2));
   else {
     const hirer = getPersona(opts.byPersona);
     console.log(`✓ Hire OK: ${opts.persona} · ${hirer.shortName} (Level ${auth.level}) · ${opts.issue}`);
     console.log(`  id: ${entry.id}`);
+    console.log(`  dispatch: ${dispatch.id} → spawn Task: npm run orchestration:dispatch -- next`);
   }
 
   if (opts.speak) postSpeak(opts.byPersona, opts.persona, opts.issue, opts.reason, entry);
+
+  if (!opts.skipTaskboardSync) {
+    await maybeAutoSyncAgents("hire:after-hire");
+  }
 }
 
-main();
+main().catch((e) => { console.error(e.message); process.exit(1); });

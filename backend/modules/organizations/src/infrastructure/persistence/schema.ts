@@ -31,6 +31,8 @@ export const membershipStatusEnum = pgEnum("organizations_membership_status", [
 ]);
 export const agencies = pgTable("organizations_agencies", {
     id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id").notNull(),
+    agencyId: uuid("agency_id").notNull(),
     ownerPrincipalId: uuid("owner_principal_id").notNull(),
     displayName: text("display_name").notNull(),
     marketScope: marketScopeEnum("market_scope").notNull(),
@@ -48,9 +50,13 @@ export const agencies = pgTable("organizations_agencies", {
 }, (table) => [
     index("organizations_agencies_owner_principal_id_idx").on(table.ownerPrincipalId),
     index("organizations_agencies_status_idx").on(table.status),
+    index("organizations_agencies_tenant_id_idx").on(table.tenantId),
+    index("organizations_agencies_agency_id_idx").on(table.agencyId),
 ]);
 export const owners = pgTable("organizations_owners", {
     id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id").notNull(),
+    agencyId: uuid("agency_id").notNull(),
     principalId: uuid("principal_id").notNull(),
     defaultOrganizationId: uuid("default_organization_id"),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -58,9 +64,12 @@ export const owners = pgTable("organizations_owners", {
         .defaultNow(),
 }, (table) => [
     uniqueIndex("organizations_owners_principal_id_unique").on(table.principalId),
+    index("organizations_owners_tenant_id_idx").on(table.tenantId),
+    index("organizations_owners_agency_id_idx").on(table.agencyId),
 ]);
 export const memberships = pgTable("organizations_memberships", {
     id: uuid("id").primaryKey().defaultRandom(),
+    tenantId: uuid("tenant_id").notNull(),
     agencyId: uuid("agency_id").notNull(),
     principalId: uuid("principal_id"),
     inviteEmail: text("invite_email"),
@@ -81,6 +90,7 @@ export const memberships = pgTable("organizations_memberships", {
 }, (table) => [
     index("organizations_memberships_agency_id_idx").on(table.agencyId),
     index("organizations_memberships_principal_id_idx").on(table.principalId),
+    index("organizations_memberships_tenant_id_idx").on(table.tenantId),
 ]);
 export const commandJournal = pgTable("organizations_command_journal", {
     commandId: uuid("command_id").primaryKey(),

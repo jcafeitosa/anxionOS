@@ -5,10 +5,10 @@ export const principalStatusEnum = pgEnum("identity_principal_status", [
 	"suspended",
 ]);
 
-export const serviceIdentityStatusEnum = pgEnum("identity_service_identity_status", [
-	"active",
-	"revoked",
-]);
+export const serviceIdentityStatusEnum = pgEnum(
+	"identity_service_identity_status",
+	["active", "revoked"],
+);
 
 export const principals = pgTable("identity_principals", {
 	id: uuid("id").primaryKey().defaultRandom(),

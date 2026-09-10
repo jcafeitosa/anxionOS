@@ -10,6 +10,7 @@ import {
 	membershipActivatedPayloadSchema,
 	membershipInvitedPayloadSchema,
 	membershipRevokedPayloadSchema,
+	ownershipTransferredPayloadSchema,
 	type AgencyCreatedPayload,
 	type AgencyMarketsUpdatedPayload,
 	type AgencyStatusChangedPayload,
@@ -17,19 +18,39 @@ import {
 	type MembershipInvitedPayload,
 	type MembershipRevokedPayload,
 	type OrganizationEventType,
+	type OwnershipTransferredPayload,
 } from "@anxionos/contracts/organizations";
+
+function extractAgencyIdFromPayload(
+	payload: unknown,
+	eventType: OrganizationEventType,
+): string {
+	if (
+		payload &&
+		typeof payload === "object" &&
+		"agencyId" in payload &&
+		typeof (payload as { agencyId: unknown }).agencyId === "string"
+	) {
+		return (payload as { agencyId: string }).agencyId;
+	}
+	throw new Error(
+		`Organization event payload must include agencyId (eventType=${eventType})`,
+	);
+}
 
 function createOrganizationEvent(
 	eventType: OrganizationEventType,
 	payload: unknown,
 	occurredAt = new Date(),
 ): DomainEventEnvelope {
+	const agencyId = extractAgencyIdFromPayload(payload, eventType);
 	return domainEventEnvelopeSchema.parse({
 		eventId: randomUUID(),
 		schemaVersion: "0.1.0",
 		ownerDomain: ORGANIZATIONS_OWNER_DOMAIN,
 		eventType,
 		occurredAt: occurredAt.toISOString(),
+		agencyId,
 		payload,
 	});
 }
@@ -96,6 +117,17 @@ export function createMembershipRevokedEvent(
 	return createOrganizationEvent(
 		ORGANIZATION_EVENT_TYPES.MEMBERSHIP_REVOKED,
 		membershipRevokedPayloadSchema.parse(payload),
+		occurredAt,
+	);
+}
+
+export function createOwnershipTransferredEvent(
+	payload: OwnershipTransferredPayload,
+	occurredAt?: Date,
+): DomainEventEnvelope {
+	return createOrganizationEvent(
+		ORGANIZATION_EVENT_TYPES.OWNERSHIP_TRANSFERRED,
+		ownershipTransferredPayloadSchema.parse(payload),
 		occurredAt,
 	);
 }

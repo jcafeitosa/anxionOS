@@ -2,6 +2,8 @@
 
 Política operacional: a orquestração anxionOS **usa os subagentes nativos do Cursor** (`Task`) e cada agente **deve consumir skills, tools, MCP e plugins** disponíveis no workspace — não improvisar fluxos paralelos fora do Cursor.
 
+**Modelo alvo:** paridade **Grok Bot** (teammates nomeados, paralelos, autônomos) — ver [GROK-BOT-PARITY.md](./GROK-BOT-PARITY.md) · fila: `npm run orchestration:dispatch`.
+
 **Relacionados:** [DELEGATION.md](./DELEGATION.md) · [HIRE-DELEGATION.md](./HIRE-DELEGATION.md) · [SKILLS-TOOLS-MCP-REGISTRY.md](./SKILLS-TOOLS-MCP-REGISTRY.md) · [TOOLING-INTEGRATION.md](./TOOLING-INTEGRATION.md) · [templates/SUBAGENT-DELEGATION-PACKAGE.md](./templates/SUBAGENT-DELEGATION-PACKAGE.md) · regra [cursor-agents-orchestration.mdc](../rules/cursor-agents-orchestration.mdc)
 
 ---
@@ -16,6 +18,17 @@ Política operacional: a orquestração anxionOS **usa os subagentes nativos do 
 | **Dialogue + taskboard** | Evidência auditável de marcos e entregas |
 
 O orquestrador **não** substitui subagentes em trabalho substancial — despacha via `Task` (Multitask Mode quando aplicável).
+
+### Fila de dispatch (Grok-style)
+
+```bash
+npm run orchestration:hire -- ...          # auto-enfileira
+npm run orchestration:dispatch -- inject   # bloco CURSOR_DISPATCH_QUEUE → spawn Task
+npm run orchestration:dispatch -- next     # próximo prompt completo
+npm run orchestration:dispatch -- mark-dispatched --id UUID
+```
+
+Warning compliance: `DISPATCH_PENDING` quando há teammates na fila sem `Task` spawnado.
 
 ---
 
@@ -44,7 +57,7 @@ Ao despachar `Task`, Renata (ou gate lead B) escolhe `subagent_type` conforme a 
 | --- | --- | --- | --- |
 | Renata (`orchestrator`) | G0, G6, G7 | *(despacha Task)* | Não executa diff grande inline |
 | Lucas (`backend-executor`) | G1 executor | `generalPurpose` | **Não** `explore` para implementação |
-| Marina (`backend-critic`) | G1 crítico | `critic-reviewer` | Revisão adversarial independente |
+| Marina (`backend-critic`) | G1 crítico | `code-reviewer` | Revisão adversarial independente |
 | Fernanda (`code-review-lead`) | G2 | `code-reviewer` | Pode contratar `typescript-reviewer`, `thermo-nuclear-code-quality-review` |
 | Edu (`qa-lead`) | G3 | `e2e-runner` ou `validation-review` | `pr-test-analyzer` para cobertura |
 | Isa (`security-lead`) | G4 | `security-review` | `mantis-threat-model` quando threat model |
@@ -99,6 +112,8 @@ Detalhes: [TOOLING-INTEGRATION.md](./TOOLING-INTEGRATION.md).
 
 Todo `Task` **deve** incluir o pacote em [templates/SUBAGENT-DELEGATION-PACKAGE.md](./templates/SUBAGENT-DELEGATION-PACKAGE.md) + bloco tooling em [templates/SUBAGENT-PROMPT-TOOLING.md](./templates/SUBAGENT-PROMPT-TOOLING.md).
 
+**Chat nativo:** incluir também o bloco **Participação nativa no chat Cursor** do pacote de delegação — subagente responde só com blocos persona (`---`); parent cola `orchestration:chat --new-only` verbatim. Ver [CHAT-PARTICIPATION.md](./CHAT-PARTICIPATION.md) § Coordinator anti-patterns.
+
 ---
 
 ## Lifecycle P0–P7 × subagentes Cursor
@@ -109,7 +124,7 @@ Todo `Task` **deve** incluir o pacote em [templates/SUBAGENT-DELEGATION-PACKAGE.
 | **P1 Discovery** | Marcus + Renata | `explore`, `architect` | `write-a-spec`, open-knowledge |
 | **P2 Architecture** | Marcus | `architect`, `code-architect` | archify, `record-a-decision` |
 | **P3 Planning** | Renata | `planner` (opcional) | `orchestrate-work`, manage-taskboard |
-| **P4 Development** | Executores + gates | `generalPurpose`, `critic-reviewer`, G2–G5 types | Pipeline G0–G7 completo |
+| **P4 Development** | Executores + gates | `generalPurpose`, `code-reviewer`, G2–G5 types | Pipeline G0–G7 completo |
 | **P5 Staging** | Ju + Isa | `validation-review`, `security-review` | `fix-ci`, E2E |
 | **P6 Launch Review** | Renata + Owner | — (coordenação) | `verification-before-completion` |
 | **P7 Production** | Ju + Renata | `ci-watcher`, `docs-reliability-review` | postmortem skill |

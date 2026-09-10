@@ -2,11 +2,13 @@ import { eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Approval } from "../../domain/entities/approval";
 import type { ApprovalRepository } from "../../domain/ports/approval-repository";
-import { approvals, type ApprovalRow } from "./schema";
+import { type ApprovalRow, approvals } from "./schema";
 
 export function toApproval(row: ApprovalRow): Approval {
 	return {
 		id: row.id,
+		tenantId: row.tenantId,
+		agencyId: row.agencyId,
 		changeProposalId: row.changeProposalId,
 		actionRef: row.actionRef,
 		resolverPrincipalId: row.resolverPrincipalId,
@@ -46,6 +48,8 @@ export function createDrizzleApprovalRepository(
 				.insert(approvals)
 				.values({
 					id: approval.id,
+					tenantId: approval.tenantId,
+					agencyId: approval.agencyId,
 					changeProposalId: approval.changeProposalId,
 					actionRef: approval.actionRef,
 					resolverPrincipalId: approval.resolverPrincipalId,

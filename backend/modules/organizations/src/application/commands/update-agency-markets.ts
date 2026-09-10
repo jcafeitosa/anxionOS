@@ -10,6 +10,7 @@ import type { OrganizationUnitOfWork } from "../../domain/ports/organization-uni
 import { loadIdempotentCommandResult, toCommandResultSnapshot } from "../command-support";
 import { parseCommandResultSnapshot, throwOrganizationError } from "../errors";
 import { assertActorIsOwnerOrAdmin } from "../services/membership-role-guard";
+import { buildAgencyTenantContext } from "../services/tenant-context";
 
 export async function updateAgencyMarkets(
 	deps: UpdateAgencyMarketsDeps,
@@ -20,7 +21,9 @@ export async function updateAgencyMarkets(
 	if (replay) {
 		return replay;
 	}
-	return deps.unitOfWork.runInTransaction(async (context) => {
+	return deps.unitOfWork.runInTransaction(
+		buildAgencyTenantContext(command.agencyId, input.actorPrincipalId),
+		async (context) => {
 		const raced = await context.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
 			return parseCommandResultSnapshot(raced.responseSnapshot);
@@ -75,7 +78,8 @@ export async function updateAgencyMarkets(
 		});
 		await context.publishEvents([event]);
 		return result;
-	});
+		},
+	);
 }
 
 export interface UpdateAgencyMarketsInput extends UpdateAgencyMarketsCommand {

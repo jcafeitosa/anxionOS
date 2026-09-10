@@ -1,4 +1,4 @@
 export interface LeaseClock {
-    now(): Date;
-    expiresIn(ttlMs: number): Date;
+	now(): Date;
+	expiresIn(ttlMs: number): Date;
 }

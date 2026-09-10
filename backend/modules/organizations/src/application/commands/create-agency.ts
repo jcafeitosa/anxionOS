@@ -12,6 +12,7 @@ import type { PrincipalLookup } from "../../domain/ports/principal-lookup";
 import { loadIdempotentCommandResult, toCommandResultSnapshot } from "../command-support";
 import { parseCommandResultSnapshot } from "../errors";
 import { assertPrincipalExists } from "../services/principal-guard";
+import { buildAgencyTenantContext } from "../services/tenant-context";
 
 export async function createAgency(
 	deps: CreateAgencyDeps,
@@ -41,7 +42,9 @@ export async function createAgency(
 		onboardingStep: "created",
 		revision,
 	});
-	return deps.unitOfWork.runInTransaction(async (context) => {
+	return deps.unitOfWork.runInTransaction(
+		buildAgencyTenantContext(agencyId, input.ownerPrincipalId),
+		async (context) => {
 		const raced = await context.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
 			return parseCommandResultSnapshot(raced.responseSnapshot);
@@ -62,6 +65,7 @@ export async function createAgency(
 			await context.ownerRepository.save({
 				id: ownerId,
 				principalId: input.ownerPrincipalId,
+				defaultOrganizationId: agencyId,
 				createdAt: now,
 			});
 		}
@@ -91,7 +95,8 @@ export async function createAgency(
 		});
 		await context.publishEvents([event]);
 		return result;
-	});
+		},
+	);
 }
 
 export interface CreateAgencyInput extends CreateAgencyCommand {

@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Tooling obrigatório — graphify, serena, archify, MCPs
 
-Política completa: [.cursor/orchestration/TOOLING-INTEGRATION.md](../orchestration/TOOLING-INTEGRATION.md) · enforcement: [MANDATORY-COMPLIANCE.md](../orchestration/MANDATORY-COMPLIANCE.md)
+Política completa: [.cursor/orchestration/AGENT-CAPABILITIES.md](../orchestration/AGENT-CAPABILITIES.md) · [TOOLING-INTEGRATION.md](../orchestration/TOOLING-INTEGRATION.md) · enforcement: [MANDATORY-COMPLIANCE.md](../orchestration/MANDATORY-COMPLIANCE.md)
 
 ## Obrigatório
 
@@ -15,7 +15,8 @@ Política completa: [.cursor/orchestration/TOOLING-INTEGRATION.md](../orchestrat
 4. **open-knowledge** — qualquer leitura/escrita em `brain/` somente via MCP; nunca ferramentas nativas em markdown de `brain/`
 5. **code-review-graph** — análise de impacto e review G2 quando código indexado no MCP
 6. **Supermemory** — `supermemory_search` com `workspaceRoot` absoluto no início de turnos substantivos
-7. **Subagentes** — incluir bloco em [.cursor/orchestration/templates/SUBAGENT-PROMPT-TOOLING.md](../orchestration/templates/SUBAGENT-PROMPT-TOOLING.md) em todo Task/delegation com trabalho técnico
+7. **Internet / RAG + shell** — WebSearch/WebFetch/context7 para fatos externos; executar comandos (não describe-only) — ver AGENT-CAPABILITIES.md
+8. **Subagentes** — incluir bloco em [.cursor/orchestration/templates/SUBAGENT-PROMPT-TOOLING.md](../orchestration/templates/SUBAGENT-PROMPT-TOOLING.md) em todo Task/delegation com trabalho técnico
 
 ## Sequência rápida (G0.14)
 

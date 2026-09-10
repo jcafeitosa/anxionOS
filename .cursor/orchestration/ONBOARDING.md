@@ -11,6 +11,7 @@ Fluxo mínimo antes do primeiro claim. Detalhes em [RUNBOOK.md](./RUNBOOK.md) e 
 | # | Passo | Comando / doc |
 | --- | --- | --- |
 | 1 | **Escopo** — equipe Cursor ≠ produto | Ler [SCOPE.md](./SCOPE.md) |
+| 1b | **Boot framework** | `npm run orchestration:boot -- --persona <slug>` |
 | 2 | **Prework** — board online + issue | `npm run taskboard:prework` |
 | 3 | **Sessão** — binding persona + issue | `npm run orchestration:session -- start --persona <slug> --issue ANX-N` |
 | 4 | **Sync** — estado do workflow | `npm run orchestration:workflow -- sync --persona <slug> --issue ANX-N` |

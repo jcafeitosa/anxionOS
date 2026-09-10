@@ -9,6 +9,7 @@ import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { evaluateDialogueDisplayWarnings } from "../orchestration/agent-compliance/compliance-lib.mjs";
+import { buildChatFeedOutput } from "../orchestration/agent-dialogue/chat-feed.mjs";
 import { loadSessions } from "../orchestration/agent-dialogue/session-tracker.mjs";
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -27,11 +28,25 @@ function readStdin() {
 async function main() {
   await readStdin();
 
-  for (const warning of evaluateDialogueDisplayWarnings({ projectRoot: repoRoot })) {
+  const dialogueWarnings = evaluateDialogueDisplayWarnings({ projectRoot: repoRoot });
+  for (const warning of dialogueWarnings) {
     process.stderr.write(
       `agent-compliance-precheck: ${warning.code} — ${warning.message}\n`,
     );
     process.stderr.write(`  Corrigir: ${warning.fix}\n`);
+  }
+
+  if (dialogueWarnings.some((w) => w.code === "PENDING_CHAT_DISPLAY")) {
+    try {
+      const feed = await buildChatFeedOutput({ checkPending: true, markRead: false });
+      if (feed) {
+        process.stderr.write("\n--- PENDING CHAT (colar verbatim na resposta) ---\n");
+        process.stderr.write(feed);
+        process.stderr.write("\n--- END PENDING CHAT ---\n");
+      }
+    } catch (err) {
+      process.stderr.write(`agent-compliance-precheck: chat-feed failed: ${err.message}\n`);
+    }
   }
 
   const store = loadSessions();

@@ -10,7 +10,9 @@ export function getNatsUrl(): string | undefined {
 }
 
 export function shouldRunPgIntegrationTests(): boolean {
-	return process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl());
+	return (
+		process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl())
+	);
 }
 
 export function shouldRunNatsIntegrationTests(): boolean {

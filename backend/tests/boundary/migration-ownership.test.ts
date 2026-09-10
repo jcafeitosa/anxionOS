@@ -8,13 +8,13 @@ import {
 	statSync,
 	writeFileSync,
 } from "node:fs";
-import { join, relative } from "node:path";
 import { tmpdir } from "node:os";
+import { join, relative } from "node:path";
 import {
 	BACKEND_ROOT,
-	collectBackendSqlFiles,
 	MODULE_MIGRATION_SQL_PATH,
 	type MigrationOwnershipViolation,
+	collectBackendSqlFiles,
 } from "./scan-imports";
 
 const MIGRATE_FILE_RE =
@@ -63,12 +63,13 @@ function findMigrationOwnershipViolations(
 					"migrate.js",
 				);
 
-				const resolved =
-					statSync(migratePath, { throwIfNoEntry: false })?.isFile()
-						? migratePath
-						: statSync(migrateJsPath, { throwIfNoEntry: false })?.isFile()
-							? migrateJsPath
-							: null;
+				const resolved = statSync(migratePath, {
+					throwIfNoEntry: false,
+				})?.isFile()
+					? migratePath
+					: statSync(migrateJsPath, { throwIfNoEntry: false })?.isFile()
+						? migrateJsPath
+						: null;
 
 				if (!resolved) {
 					continue;

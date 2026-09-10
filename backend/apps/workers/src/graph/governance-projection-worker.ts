@@ -1,15 +1,13 @@
-import {
-	domainEventEnvelopeSchema
-} from "@anxionos/contracts/events";
+import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
 import { GOVERNANCE_EVENT_TYPES } from "@anxionos/contracts/governance";
 import {
 	GRAPH_PROJECTION_DEFAULT_CHECKPOINT,
+	type GraphStore,
 	governanceProjectionConsumer,
 	handleProjectionMessage,
-	type GraphStore,
 } from "@anxionos/graph";
 import { createLogger } from "@anxionos/observability";
-import { AckPolicy, connect, DeliverPolicy, JSONCodec, type JsMsg } from "nats";
+import { AckPolicy, DeliverPolicy, JSONCodec, type JsMsg, connect } from "nats";
 import type { Pool } from "pg";
 import {
 	DEFAULT_NATS_MAX_RECONNECT_ATTEMPTS,
@@ -66,10 +64,13 @@ export async function processGovernanceNatsMessage(input: {
 		return { status: "duplicate" as const };
 	}
 	if (!GOVERNANCE_PROJECTION_EVENT_TYPES.has(envelope.eventType)) {
-		logger.info("Skipping governance event not handled by graph:governance:v1", {
-			eventType: envelope.eventType,
-			eventId: envelope.eventId,
-		});
+		logger.info(
+			"Skipping governance event not handled by graph:governance:v1",
+			{
+				eventType: envelope.eventType,
+				eventId: envelope.eventId,
+			},
+		);
 		input.msg.ack();
 		return { status: "duplicate" as const };
 	}
@@ -84,7 +85,9 @@ export async function processGovernanceNatsMessage(input: {
 }
 
 async function assertJetStreamStream(
-	jsm: Awaited<ReturnType<Awaited<ReturnType<typeof connect>>["jetstreamManager"]>>,
+	jsm: Awaited<
+		ReturnType<Awaited<ReturnType<typeof connect>>["jetstreamManager"]>
+	>,
 	streamName: string,
 ) {
 	try {

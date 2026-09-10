@@ -13,7 +13,7 @@ Como as skills externas **karpathy-guidelines**, **ecc-guide** (subagentes ECC) 
 | Todos executores + críticos | **karpathy-guidelines** | Escrever, revisar ou refatorar código | G0–G1 |
 | Renata (`orchestrator`) | karpathy + ecc-guide | Dispatch com escopo fechado; escolher subagente ECC | G0, G6–G7 |
 | Lucas (`backend-executor`) | karpathy | Diff mínimo; oráculos antes de `handoff` | G0–G1 |
-| Marina (`backend-critic`) | karpathy + `critic-reviewer` | Bloquear over-engineering; `challenge` → `verdict` | G1 |
+| Marina (`backend-critic`) | karpathy + `code-reviewer` | Bloquear over-engineering; `challenge` → `verdict` | G1 |
 | Camila (`frontend-executor`) | karpathy + **ui-ux-pro-max** | Toda alteração visual em `frontend/`; Chrome DevTools MCP após diff | G0–G1 |
 | Paulo (`frontend-critic`) | karpathy + ui-ux-pro-max | Auditar a11y, touch targets, hierarquia | G1 |
 | Rafael, Diego (infra/adapters) | karpathy | Config tipada; sem hardcode não documentado | G0–G1 |
@@ -88,7 +88,7 @@ O ecc-guide orienta **qual componente ECC usar**; na prática a equipe invoca **
 
 | Gate | Lead | Subagentes ECC primários | Foco |
 | --- | --- | --- | --- |
-| **G1** | Crítico 1:1 | `critic-reviewer`, `silent-failure-hunter` | Zero-tolerância, erros engolidos |
+| **G1** | Crítico 1:1 | `code-reviewer`, `silent-failure-hunter` | Zero-tolerância, erros engolidos |
 | **G2** | Fernanda | `code-reviewer`, `typescript-reviewer`, `thermo-nuclear-code-quality-review` | Contratos, manutenção, blast radius |
 | **G3** | Eduardo | `e2e-runner`, `validation-review`, `pr-test-analyzer` | Comportamento reproduzível |
 | **G4** | Isabella | `security-reviewer`, `mantis-threat-model` | Trust boundaries, secrets, tenancy |
@@ -187,7 +187,7 @@ Cada `workflow-{slug}.md` deve referenciar esta página na seção **Ferramentas
 | --- | --- | --- | --- |
 | `orchestrator` | dispatch escopo fechado | `dispatching-parallel-agents` | — |
 | `backend-executor` | ✅ obrigatório | `typescript-reviewer`, `database-reviewer` | — |
-| `backend-critic` | ✅ bloqueia complexidade | `critic-reviewer` | — |
+| `backend-critic` | ✅ bloqueia complexidade | `code-reviewer` | — |
 | `frontend-executor` | ✅ | `react-reviewer` | ✅ obrigatório |
 | `frontend-critic` | ✅ | `a11y-architect` | ✅ validação |
 | `code-review-lead` | ✅ relatório cirúrgico | `code-reviewer`, `thermo-nuclear-*` | — |

@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
 /** Backend workspace root (`backend/`). */
@@ -133,9 +133,7 @@ export function collectModuleLayerFiles(
 /**
  * Collect all module sources under `modules/` for cross-module scans.
  */
-export function collectAllModuleFiles(
-	backendRoot = BACKEND_ROOT,
-): string[] {
+export function collectAllModuleFiles(backendRoot = BACKEND_ROOT): string[] {
 	const modulesDir = join(backendRoot, "modules");
 	const files: string[] = [];
 
@@ -246,7 +244,9 @@ export function findForbiddenImports(
 	return violations;
 }
 
-export function formatViolations(violations: readonly ImportViolation[]): string {
+export function formatViolations(
+	violations: readonly ImportViolation[],
+): string {
 	if (violations.length === 0) {
 		return "";
 	}
@@ -258,7 +258,6 @@ export function formatViolations(violations: readonly ImportViolation[]): string
 		)
 		.join("\n");
 }
-
 
 /**
  * SQL migrations must live under the owning module infrastructure layer.

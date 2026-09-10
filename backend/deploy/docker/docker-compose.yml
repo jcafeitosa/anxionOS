@@ -29,6 +29,8 @@ services:
 
   neo4j:
     image: neo4j:5.26.2-community
+    profiles:
+      - graph-sandbox
     environment:
       NEO4J_AUTH: neo4j/anxionos
       NEO4J_PLUGINS: '["apoc"]'
@@ -44,6 +46,26 @@ services:
       retries: 10
       start_period: 30s
 
+  neo4j-staging:
+    image: neo4j:5.26.2-community
+    profiles:
+      - graph-staging
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_STAGING_PASSWORD:-anxionos-staging}
+      NEO4J_PLUGINS: '["apoc"]'
+    ports:
+      - "7475:7474"
+      - "7688:7687"
+    volumes:
+      - neo4jstaging:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
 volumes:
   pgdata:
   neo4jdata:
+  neo4jstaging:

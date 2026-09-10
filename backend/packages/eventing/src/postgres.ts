@@ -1,8 +1,8 @@
-import { Pool, type PoolClient } from "pg";
 import {
-	domainEventEnvelopeSchema,
 	type DomainEventEnvelope,
+	domainEventEnvelopeSchema,
 } from "@anxionos/contracts/events";
+import { Pool, type PoolClient } from "pg";
 import { EVENTING_DDL } from "./schema";
 
 export type Queryable = Pick<Pool, "query"> | Pick<PoolClient, "query">;
@@ -206,11 +206,11 @@ export async function processWithInbox(
 	try {
 		await client.query("BEGIN");
 		await client.query(
-			`SELECT pg_advisory_xact_lock(hashtext($1::text), hashtext($2::text))`,
+			"SELECT pg_advisory_xact_lock(hashtext($1::text), hashtext($2::text))",
 			[parsed.eventId, consumer.name],
 		);
 		const existing = await client.query(
-			`SELECT 1 FROM inbox WHERE event_id = $1 AND consumer_name = $2`,
+			"SELECT 1 FROM inbox WHERE event_id = $1 AND consumer_name = $2",
 			[parsed.eventId, consumer.name],
 		);
 		if (existing.rowCount && existing.rowCount > 0) {

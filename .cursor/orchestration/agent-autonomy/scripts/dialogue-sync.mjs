@@ -5,7 +5,8 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { getOrchestrationPaths } from "../../agent-config/load-config.mjs";
-import { getDialogueLogPath, readDialogueMessages } from "../../agent-dialogue/dialogue-log.mjs";
+import { readDialogueMessages } from "../../agent-dialogue/dialogue-log.mjs";
+import { writePendingChatDisplay } from "../../agent-dialogue/chat-feed.mjs";
 
 const checkpointPath = join(
   getOrchestrationPaths().paths.autonomy,
@@ -35,9 +36,15 @@ for (const m of messages) {
 }
 
 const last = messages[messages.length - 1];
+writePendingChatDisplay(last.issueId ?? null, last.id);
 saveCheckpoint({
   lastTimestamp: last.timestamp,
   lastCount: (state.lastCount ?? 0) + messages.length,
   syncedAt: new Date().toISOString(),
+  lastMessageId: last.id,
+  lastIssueId: last.issueId ?? null,
 });
-console.log(`dialogue-sync: ${messages.length} new message(s)`);
+console.log(
+  `dialogue-sync: ${messages.length} new message(s); pending-chat-display → ${last.issueId ?? "?"}`,
+);
+console.log("  Corrigir no chat: npm run orchestration:chat -- --check-pending");

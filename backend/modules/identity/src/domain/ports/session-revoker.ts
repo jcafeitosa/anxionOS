@@ -3,7 +3,10 @@ export interface SessionRevoker {
 }
 
 export class SessionRevocationUnavailableError extends Error {
-	constructor(message = "Session revocation unavailable", options?: { cause?: unknown }) {
+	constructor(
+		message = "Session revocation unavailable",
+		options?: { cause?: unknown },
+	) {
 		super(message, options);
 		this.name = "SessionRevocationUnavailableError";
 	}

@@ -72,6 +72,17 @@ npm run orchestration:workflow -- monitor --level C
 | [GUIDELINES-INTEGRATION.md](./GUIDELINES-INTEGRATION.md) | karpathy + ECC + ui-ux-pro-max por persona/gate |
 | [PROJECT-GREENLIGHT.md](./PROJECT-GREENLIGHT.md) | Produto BLOCKED até @Owner; framework ALLOWED |
 | [COMPLIANCE.md](./COMPLIANCE.md) | Gates G0–G0.8, OpenKnowledge, zero-trabalho-fora-do-board |
+| [ZERO-POLICIES.md](./ZERO-POLICIES.md) | **Catálogo canônico Z0–Z19** — Políticas Zero, enforcement, compliance codes |
+| [AI-PRODUCT-COMPANY-ENGINE.md](./AI-PRODUCT-COMPANY-ENGINE.md) | **Documento mestre** — 26 seções (12 etapas + governance + graph + self-dev) |
+| [PRODUCT-COMPANY-MODEL.md](./PRODUCT-COMPANY-MODEL.md) | Mapeamento operacional 12 etapas → personas Cursor (ANX-250 P0) |
+| [PRODUCT-GRAPH-SCHEMA.md](./PRODUCT-GRAPH-SCHEMA.md) | Schema do Product Graph (Problem→Code→Deploy) |
+| [AGENT-GRAPH-SCHEMA.md](./AGENT-GRAPH-SCHEMA.md) | Schema do Agent Graph (agentes, teams, capabilities) |
+| [AUTHORITY-LEVELS.md](./AUTHORITY-LEVELS.md) | Níveis L0–L6 de autoridade decisória |
+| [SELF-HEALING-RUNBOOKS.md](./SELF-HEALING-RUNBOOKS.md) | Runbooks P1 sandbox (ANX-273) — pointer para OKF |
+| [DECISION-ENGINE-FRAMEWORK.md](./DECISION-ENGINE-FRAMEWORK.md) | Decision Engine produto + engenharia |
+| [AGENT-TASKBOARD-SIGNATURE.md](./AGENT-TASKBOARD-SIGNATURE.md) | Personas assinam ações no Dashi (`orchestration:taskboard`) — ANX-252 |
+| [CURSOR-TASKBOARD-INTEGRATION.md](./CURSOR-TASKBOARD-INTEGRATION.md) | Setup Cursor + headers `x-taskboard-client: cursor` — ANX-253 |
+| [9ROUTER-INTEGRATION.md](./9ROUTER-INTEGRATION.md) | Gateway OpenAI-compatible local (9Router) — env + Cursor — ANX-254 |
 | [PIPELINE.md](./PIPELINE.md) | Gates G0–G7, critérios de saída, independência de revisores |
 | [VISUAL-DOCUMENTATION.md](./VISUAL-DOCUMENTATION.md) | Política obrigatória de diagramas Mermaid/Archify |
 | [COLLECTIVE-WORKFLOW.md](./COLLECTIVE-WORKFLOW.md) | Pipeline coletivo G0–G7 + plug-in workflows |
@@ -86,6 +97,8 @@ npm run orchestration:workflow -- monitor --level C
 | Documento | Conteúdo |
 | --- | --- |
 | [TEAM.md](./TEAM.md) | Roster Google-style, skills karpathy + ECC |
+| [GOOGLE-TEAM-PLAYBOOK.md](./GOOGLE-TEAM-PLAYBOOK.md) | **Playbook Google** — rituais, papéis, conversa natural de time |
+| [GOOGLE-PRACTICES.md](./GOOGLE-PRACTICES.md) | Mapeamento práticas bigtech → gates P0–P7 |
 | [AGENT-ROSTER.md](./AGENT-ROSTER.md) | Roster mutuo + matriz de competências |
 | [COMPETENCE-BOUNDARIES.md](./COMPETENCE-BOUNDARIES.md) | Anti-invasão de competência |
 | [INTER-AGENT-PROTOCOL.md](./INTER-AGENT-PROTOCOL.md) | Interação livre na hierarquia |

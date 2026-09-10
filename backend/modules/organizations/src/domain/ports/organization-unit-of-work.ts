@@ -3,6 +3,7 @@ import type { AgencyRepository } from "./agency-repository";
 import type { CommandJournalRepository } from "./command-journal";
 import type { MembershipRepository } from "./membership-repository";
 import type { OwnerRepository } from "./owner-repository";
+import type { TenantContext } from "./tenant-context";
 
 export interface OrganizationTransactionContext {
 	client: unknown;
@@ -20,5 +21,8 @@ export interface OrganizationCommandOutcome<TResponse = Record<string, unknown>>
  * Atomic state + command journal + eventing journal/outbox — implemented in S3.
  */
 export interface OrganizationUnitOfWork {
-    runInTransaction<T>(work: (context: OrganizationTransactionContext) => Promise<T>): Promise<T>;
+	runInTransaction<T>(
+		ctx: TenantContext | undefined,
+		work: (context: OrganizationTransactionContext) => Promise<T>,
+	): Promise<T>;
 }

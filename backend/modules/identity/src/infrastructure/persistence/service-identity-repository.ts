@@ -5,7 +5,7 @@ import type {
 	ServiceIdentity,
 } from "../../domain/entities/service-identity";
 import type { ServiceIdentityRepository } from "../../domain/ports/service-identity-repository";
-import { serviceIdentities, type ServiceIdentityRow } from "./schema";
+import { type ServiceIdentityRow, serviceIdentities } from "./schema";
 
 function toServiceIdentity(row: ServiceIdentityRow): ServiceIdentity {
 	return {
@@ -19,7 +19,10 @@ function toServiceIdentity(row: ServiceIdentityRow): ServiceIdentity {
 }
 
 export function createDrizzleServiceIdentityRepository(
-	db: NodePgDatabase<{ serviceIdentities: typeof serviceIdentities; principals: typeof import("./schema").principals }>,
+	db: NodePgDatabase<{
+		serviceIdentities: typeof serviceIdentities;
+		principals: typeof import("./schema").principals;
+	}>,
 ): ServiceIdentityRepository {
 	return {
 		async findById(id: string): Promise<ServiceIdentity | null> {
@@ -30,13 +33,13 @@ export function createDrizzleServiceIdentityRepository(
 				.limit(1);
 			return rows[0] ? toServiceIdentity(rows[0]) : null;
 		},
-		async findActiveByPrincipalId(principalId: string): Promise<ServiceIdentity[]> {
+		async findActiveByPrincipalId(
+			principalId: string,
+		): Promise<ServiceIdentity[]> {
 			const rows = await db
 				.select()
 				.from(serviceIdentities)
-				.where(
-					eq(serviceIdentities.principalId, principalId),
-				);
+				.where(eq(serviceIdentities.principalId, principalId));
 			return rows
 				.filter((row) => row.status === "active")
 				.map(toServiceIdentity);

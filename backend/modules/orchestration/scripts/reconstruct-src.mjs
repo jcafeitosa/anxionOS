@@ -3,7 +3,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const moduleRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const moduleRoot = path.resolve(
+	path.dirname(fileURLToPath(import.meta.url)),
+	"..",
+);
 const distRoot = path.join(moduleRoot, "dist");
 const srcRoot = path.join(moduleRoot, "src");
 
@@ -119,7 +122,9 @@ function mergeImplFile(dtsPath, jsPath) {
 		.filter((l) => !l.startsWith("import "))
 		.join("\n")
 		.trim();
-	const imports = [...new Set([...headerImports.split("\n"), ...jsImports.split("\n")])]
+	const imports = [
+		...new Set([...headerImports.split("\n"), ...jsImports.split("\n")]),
+	]
 		.filter(Boolean)
 		.join("\n");
 	const sections = [imports, headerTypes, jsBody].filter(Boolean);
@@ -172,7 +177,8 @@ function fixImports(content) {
 }
 
 function reconstruct() {
-	if (fs.existsSync(srcRoot)) fs.rmSync(srcRoot, { recursive: true, force: true });
+	if (fs.existsSync(srcRoot))
+		fs.rmSync(srcRoot, { recursive: true, force: true });
 	fs.mkdirSync(srcRoot, { recursive: true });
 	let count = 0;
 	walk(distRoot, (file) => {

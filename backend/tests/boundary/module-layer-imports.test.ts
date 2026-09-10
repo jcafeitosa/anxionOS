@@ -3,10 +3,10 @@ import { readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import {
 	BACKEND_ROOT,
+	type ForbiddenPattern,
 	collectModuleLayerFiles,
 	findForbiddenImports,
 	formatViolations,
-	type ForbiddenPattern,
 } from "./scan-imports";
 
 /**

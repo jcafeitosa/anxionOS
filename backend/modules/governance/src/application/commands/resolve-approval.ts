@@ -1,15 +1,17 @@
 import { randomUUID } from "node:crypto";
 import {
-	governanceCommandResultSchema,
-	resolveApprovalCommandSchema,
 	type GovernanceCommandResult,
 	type ResolveApprovalCommand,
+	governanceCommandResultSchema,
+	resolveApprovalCommandSchema,
 } from "@anxionos/contracts/governance";
 import { isChangeProposalPending } from "../../domain/entities/change-proposal";
 import { createApprovalResolvedEvent } from "../../domain/events/governance-events";
 import { hasOwnerAuthority, requiresOwnerApproval } from "../../domain/policies/owner-approval-policy";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
+import type { ChangeProposalRepository } from "../../domain/ports/change-proposal-repository";
 import type { GovernanceUnitOfWork } from "../../domain/ports/governance-unit-of-work";
+import type { TenantContext } from "../../domain/ports/tenant-context";
 import { loadIdempotentCommandResult, toCommandResultSnapshot } from "../command-support";
 import { parseCommandResultSnapshot, throwGovernanceError } from "../errors";
 
@@ -20,6 +22,7 @@ export interface ResolveApprovalInput extends ResolveApprovalCommand {
 export interface ResolveApprovalDeps {
 	unitOfWork: GovernanceUnitOfWork;
 	commandJournal: CommandJournalRepository;
+	changeProposalRepository: ChangeProposalRepository;
 }
 
 export async function resolveApproval(
@@ -27,11 +30,29 @@ export async function resolveApproval(
 	input: ResolveApprovalInput,
 ): Promise<GovernanceCommandResult> {
 	const command = resolveApprovalCommandSchema.parse(input);
-	const replay = await loadIdempotentCommandResult(deps.commandJournal, command.commandId);
+	const replay = await loadIdempotentCommandResult(
+		deps.commandJournal,
+		command.commandId,
+	);
 	if (replay) {
 		return replay;
 	}
-	return deps.unitOfWork.runInTransaction(async (context) => {
+	// Fetch proposal outside transaction to derive TenantContext (Pattern B híbrido)
+	const proposal = await deps.changeProposalRepository.findById(
+		command.changeProposalId,
+	);
+	if (!proposal) {
+		throwGovernanceError(
+			"GOV_CHANGE_PROPOSAL_NOT_FOUND",
+			`ChangeProposal ${command.changeProposalId} not found`,
+		);
+	}
+	const tenantContext: TenantContext = {
+		tenantId: proposal.tenantId,
+		agencyId: proposal.agencyId,
+		principalId: input.resolverPrincipalId,
+	};
+	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
 		const raced = await context.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
 			return parseCommandResultSnapshot(raced.responseSnapshot);
@@ -68,6 +89,8 @@ export async function resolveApproval(
 		const nextStatus = command.decision === "APPROVED" ? "approved" : "rejected";
 		const savedApproval = await context.approvalRepository.save({
 			id: approvalId,
+			tenantId: proposal.tenantId,
+			agencyId: proposal.agencyId,
 			changeProposalId: proposal.id,
 			actionRef: null,
 			resolverPrincipalId: input.resolverPrincipalId,

@@ -3,7 +3,15 @@
  */
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { canHire, EXECUTOR_CRITIC_PAIR, ORCHESTRATOR_CRITIC_PAIR, getCursorSubagentType, HIRE_AUTHORITY } from "../agent-hire/levels.mjs";
+import {
+  canHire,
+  CRITIC_CURSOR_SUBAGENT,
+  EXECUTOR_CRITIC_PAIR,
+  getCursorSubagentType,
+  getPairedCriticSubagentType,
+  HIRE_AUTHORITY,
+  ORCHESTRATOR_CRITIC_PAIR,
+} from "../agent-hire/levels.mjs";
 
 test("backend-executor não pode contratar code-review-lead (Level B)", () => {
   const result = canHire("backend-executor", "code-review-lead", "ANX-222");
@@ -47,8 +55,14 @@ test("getCursorSubagentType mapeia workers e personas", () => {
   assert.equal(getCursorSubagentType("build-error-resolver"), "build-error-resolver");
   assert.equal(getCursorSubagentType("security-reviewer"), "security-review");
   assert.equal(getCursorSubagentType("backend-executor"), "generalPurpose");
+  assert.equal(getCursorSubagentType("backend-critic"), CRITIC_CURSOR_SUBAGENT);
   assert.equal(getCursorSubagentType("code-review-lead"), "code-reviewer");
   assert.equal(getCursorSubagentType("unknown-slug"), null);
+});
+
+test("getPairedCriticSubagentType retorna code-reviewer para executores", () => {
+  assert.equal(getPairedCriticSubagentType("backend-executor"), CRITIC_CURSOR_SUBAGENT);
+  assert.equal(getPairedCriticSubagentType("orchestrator"), null);
 });
 
 test("ORCHESTRATOR_CRITIC_PAIR mapeia Renata para cto-critic", () => {

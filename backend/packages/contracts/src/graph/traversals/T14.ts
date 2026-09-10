@@ -1,17 +1,25 @@
 import { z } from "zod";
+import { nodeKeySchema } from "../types";
 import { traversalMetaSchema } from "./common";
+
 export const TRAVERSAL_T14_META = traversalMetaSchema.parse({
-    traversalId: "T14",
-    queryVersion: 1,
-    name: "mandate.check",
-    class: "domain",
-    cacheable: "never",
+	traversalId: "T14",
+	queryVersion: 1,
+	name: "connection.revokeImpact",
+	class: "kernel",
+	cacheable: "never",
 });
+
 export const T14_INPUT_SCHEMA = z.object({
-    validAt: z.string().datetime(),
+	connectionNodeKey: nodeKeySchema,
+	validAt: z.string().datetime(),
 });
+
 export const T14_OUTPUT_SCHEMA = z.object({
-    complete: z.boolean(),
+	complete: z.boolean(),
+	impactedBindingIds: z.array(z.string().uuid()),
+	impactedInferenceRequestIds: z.array(z.string().uuid()),
+	incompleteReasons: z.array(z.string()).optional(),
 });
 
 export type T14Input = z.infer<typeof T14_INPUT_SCHEMA>;

@@ -40,6 +40,7 @@ export function suggestNextAction(persona, issueId, signals = {}) {
   if (role === "architect") return nextArchitect(state, signals);
   if (role === "researcher") return nextResearcher(state, signals);
   if (role === "executor") return nextExecutor(state, signals, p);
+  if (persona === "cto-critic") return nextCtoCritic(state, signals);
   if (role === "critic") return nextCritic(state, signals, p);
   if (GATE_LEAD_MAP[persona]) return nextGateLead(persona, state, signals);
   if (role === "github") return nextGithubLead(state, signals);
@@ -197,6 +198,54 @@ function nextExecutor(state, signals, persona) {
     reason: "Continuar implementação com status periódico",
     step: "implement",
     dialogueType: "status",
+  };
+}
+
+function nextCtoCritic(state, signals) {
+  if (!signals.taskboardOnline) {
+    return {
+      action: "abort-work",
+      reason: "taskboard offline",
+      step: "monitor-board",
+      command: "npm run taskboard:ensure",
+    };
+  }
+  const sessionReady =
+    state.checklist?.sessionStarted || signals.sessionStarted || signals.sessionActive;
+  if (!sessionReady) {
+    return {
+      action: "start-session",
+      reason: "Sessão No Silent Work não iniciada",
+      step: "governance-audit",
+      command: `npm run orchestration:session -- start --persona cto-critic --issue ${state.issueId}`,
+      dialogueType: "ack",
+    };
+  }
+  if (signals.issueStatus === "in_review" && signals.allGatesPass) {
+    return {
+      action: "audit-g7-package",
+      reason: "G2–G6 PASS — auditar evidências G7 antes de aceite",
+      step: "g7-audit",
+      command: `npm run orchestration:cto-decide -- --issue ${state.issueId}`,
+      dialogueType: "consult",
+      handoffTo: "orchestrator",
+    };
+  }
+  if (staleDialogue(state.checklist)) {
+    return {
+      action: "delegate-monitor",
+      reason: "Monitorar delegações stale e hires sem evidência",
+      step: "governance-audit",
+      command: "npm run orchestration:delegate-monitor -- list",
+      dialogueType: "status",
+    };
+  }
+  return {
+    action: "challenge-governance",
+    reason: "Auditar handoffs, hires e pacote G6",
+    step: "governance-audit",
+    dialogueType: "challenge",
+    handoffTo: "orchestrator",
   };
 }
 

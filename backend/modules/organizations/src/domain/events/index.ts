@@ -1,1 +1,1 @@
-export { createAgencyCreatedEvent, createAgencyMarketsUpdatedEvent, createAgencyStatusChangedEvent, createMembershipActivatedEvent, createMembershipInvitedEvent, createMembershipRevokedEvent, } from "./organization-events";
+export { createAgencyCreatedEvent, createAgencyMarketsUpdatedEvent, createAgencyStatusChangedEvent, createMembershipActivatedEvent, createMembershipInvitedEvent, createMembershipRevokedEvent, createOwnershipTransferredEvent, } from "./organization-events";

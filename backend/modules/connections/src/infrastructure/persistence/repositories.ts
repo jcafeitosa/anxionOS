@@ -9,7 +9,9 @@ import type {
 	UsageRecordRepository,
 } from "../../domain/ports/connections-unit-of-work";
 
-export function createPgAiAccountRepository(client: PoolClient): AiAccountRepository {
+export function createPgAiAccountRepository(
+	client: PoolClient,
+): AiAccountRepository {
 	return {
 		async findDraftByNaturalKey(input) {
 			const result = await client.query(
@@ -142,7 +144,9 @@ export function createPgInferenceRepository(
 	};
 }
 
-export function createPgUsageRepository(client: PoolClient): UsageRecordRepository {
+export function createPgUsageRepository(
+	client: PoolClient,
+): UsageRecordRepository {
 	return {
 		async save(record) {
 			await client.query(

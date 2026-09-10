@@ -1,22 +1,32 @@
 import {
-	domainEventEnvelopeSchema,
 	type DomainEventEnvelope,
+	assertTenantScopedEnvelopeAgencyId,
+	domainEventEnvelopeSchema,
 } from "@anxionos/contracts/events";
 import {
-	connect,
 	JSONCodec,
-	StorageType,
 	type JetStreamManager,
 	type NatsConnection,
+	StorageType,
+	connect,
 } from "nats";
-import { DEFAULT_RETENTION_POLICY } from "./retention";
 import type { OutboxPublisher } from "./relay";
+import { DEFAULT_RETENTION_POLICY } from "./retention";
 
 const codec = JSONCodec<DomainEventEnvelope>();
 
 export const DEFAULT_NATS_EVENTS_STREAM = "EVENTS";
 
-export function resolveEventSubject(eventType: string): string {
+/** JetStream subjects for platform-wide and agency-scoped domain events. */
+export const NATS_EVENTS_STREAM_SUBJECTS = ["events.>", "agency.>.events.>"];
+
+export function resolveEventSubject(
+	eventType: string,
+	agencyId?: string,
+): string {
+	if (agencyId) {
+		return `agency.${agencyId}.events.${eventType}`;
+	}
 	return `events.${eventType}`;
 }
 
@@ -25,12 +35,19 @@ export async function ensureEventsJetStream(
 	streamName: string,
 ): Promise<void> {
 	try {
-		await jsm.streams.info(streamName);
+		const info = await jsm.streams.info(streamName);
+		const existing = info.config.subjects ?? [];
+		const merged = [
+			...new Set([...existing, ...NATS_EVENTS_STREAM_SUBJECTS]),
+		];
+		if (merged.length !== existing.length) {
+			await jsm.streams.update(streamName, { subjects: merged });
+		}
 		return;
 	} catch {
 		await jsm.streams.add({
 			name: streamName,
-			subjects: ["events.>"],
+			subjects: [...NATS_EVENTS_STREAM_SUBJECTS],
 			storage: StorageType.File,
 			max_age: DEFAULT_RETENTION_POLICY.jetStreamMaxAgeNs,
 		});
@@ -62,7 +79,8 @@ export async function createNatsOutboxPublisher(
 	const publisher: OutboxPublisher = {
 		async publish(envelope: DomainEventEnvelope): Promise<void> {
 			const parsed = domainEventEnvelopeSchema.parse(envelope);
-			const subject = resolveEventSubject(parsed.eventType);
+			assertTenantScopedEnvelopeAgencyId(parsed);
+			const subject = resolveEventSubject(parsed.eventType, parsed.agencyId);
 			await js.publish(subject, codec.encode(parsed), {
 				msgID: parsed.eventId,
 			});

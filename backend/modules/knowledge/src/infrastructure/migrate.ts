@@ -4,27 +4,31 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import type { Pool } from "pg";
 
-const migrationsFolder = join(dirname(fileURLToPath(import.meta.url)), "migrations");
+const migrationsFolder = join(
+	dirname(fileURLToPath(import.meta.url)),
+	"migrations",
+);
 
 export async function ensureKnowledgeSchema(pool: Pool): Promise<void> {
-  const db = drizzle(pool);
-  await migrate(db, { migrationsFolder });
+	const db = drizzle(pool);
+	await migrate(db, { migrationsFolder });
 }
 
 const databaseUrl =
-  process.env.DATABASE_URL ?? "postgres://anxionos:anxionos@localhost:5432/anxionos";
+	process.env.DATABASE_URL ??
+	"postgres://anxionos:anxionos@localhost:5432/anxionos";
 
 async function main(): Promise<void> {
-  const { Pool: PgPool } = await import("pg");
-  const pool = new PgPool({ connectionString: databaseUrl });
-  await ensureKnowledgeSchema(pool);
-  await pool.end();
-  console.log("knowledge migrations applied");
+	const { Pool: PgPool } = await import("pg");
+	const pool = new PgPool({ connectionString: databaseUrl });
+	await ensureKnowledgeSchema(pool);
+	await pool.end();
+	console.log("knowledge migrations applied");
 }
 
 if (import.meta.main) {
-  main().catch((error: unknown) => {
-    console.error(error);
-    process.exit(1);
-  });
+	main().catch((error: unknown) => {
+		console.error(error);
+		process.exit(1);
+	});
 }

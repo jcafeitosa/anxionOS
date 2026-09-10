@@ -19,6 +19,18 @@ import { fileURLToPath } from "node:url";
 import { getOrchestrationPaths, repoRoot } from "../agent-config/load-config.mjs";
 import { readDialogueMessages } from "./dialogue-log.mjs";
 import { getPersona } from "./personas.mjs";
+import { formatPersonalityCard } from "./persona-identity.mjs";
+import { setPresence } from "./slack-store.mjs";
+import { fetchIssue } from "../agent-compliance/compliance-lib.mjs";
+import { validateIssueForWrite } from "../agent-compliance/taskboard-gate.mjs";
+import {
+  acquireIssueLock,
+  heartbeatIssueLock,
+  releaseIssueLock,
+  resolveThreadId,
+} from "../agent-workflow/issue-coordination.mjs";
+import { maybeAutoSyncAgents } from "../agent-config/agent-taskboard-drift.mjs";
+import { taskboardComment } from "../agent-config/agent-taskboard-write.mjs";
 
 const autonomyDir = getOrchestrationPaths().paths.autonomy;
 const sessionsPath = join(autonomyDir, "active-sessions.json");
@@ -126,20 +138,21 @@ export function startSession(persona, issueId, opts = {}) {
     persona,
     issueId,
     criticSlug: p.criticSlug ?? opts.criticSlug ?? null,
-    threadId:
-      process.env.CURSOR_THREAD_ID ??
-      process.env.CODEX_THREAD_ID ??
-      process.env.CLAUDE_CODE_SESSION_ID ??
-      null,
+    threadId: resolveThreadId(),
     startedAt: existing?.startedAt ?? now,
     lastActivityAt: now,
     lastDialogueAt: existing?.lastDialogueAt ?? null,
     dialogueCount: existing?.dialogueCount ?? 0,
     lastMessageId: existing?.lastMessageId ?? null,
+    personalitySlug: persona,
+    personalityAckAt: now,
+    personalityCard: formatPersonalityCard(persona),
   };
 
   saveSessions(store);
+  acquireIssueLock(issueId, persona, { threadId: store.sessions[persona].threadId });
   resetTurnState(persona);
+  setPresence(persona, "active", issueId);
   return store.sessions[persona];
 }
 
@@ -178,6 +191,7 @@ export function heartbeatSession(persona) {
   }
   session.lastActivityAt = new Date().toISOString();
   saveSessions(store);
+  if (session.issueId) heartbeatIssueLock(session.issueId, session.threadId);
   return session;
 }
 
@@ -216,12 +230,18 @@ export function endSession(persona, opts = {}) {
     }
   }
 
+  if (session.issueId) {
+    releaseIssueLock(session.issueId, session.threadId);
+  }
+
   delete store.sessions[persona];
   saveSessions(store);
 
   const turnState = loadTurnState();
   delete turnState[persona];
   saveTurnState(turnState);
+
+  setPresence(persona, "offline", null);
 
   return session;
 }
@@ -248,9 +268,9 @@ function usage(exitCode = 0) {
   console.log(`${getCliBrand()} — session tracker — No Silent Work
 
 Commands:
-  start --persona SLUG --issue ANX-N
+  start --persona SLUG --issue ANX-N [--taskboard-comment]
   heartbeat --persona SLUG
-  end --persona SLUG [--final-message-id ID] [--force]
+  end --persona SLUG [--final-message-id ID] [--force] [--taskboard-comment]
   touch --persona SLUG [--message-id ID]
   list [--json]
 
@@ -265,6 +285,7 @@ function parseOpts(argv) {
     finalMessageId: null,
     messageId: null,
     force: false,
+    taskboardComment: false,
     asJson: false,
   };
   for (let i = 0; i < argv.length; i += 1) {
@@ -274,18 +295,38 @@ function parseOpts(argv) {
     else if (a === "--final-message-id") opts.finalMessageId = argv[++i];
     else if (a === "--message-id") opts.messageId = argv[++i];
     else if (a === "--force") opts.force = true;
+    else if (a === "--taskboard-comment") opts.taskboardComment = true;
     else if (a === "--json") opts.asJson = true;
     else throw new Error(`Opção desconhecida: ${a}`);
   }
   return opts;
 }
 
-function cmdStart(argv) {
+
+async function maybePostSessionTaskboardComment(persona, issueId, kind) {
+  const p = getPersona(persona);
+  const body = `[session] **${p.shortName}** · ${kind} · ${issueId}`;
+  const result = await taskboardComment({
+    issueId,
+    persona,
+    body,
+    idempotentMarker: `[session] **${p.shortName}** · ${kind} · ${issueId}`,
+  });
+  if (!result.ok && !result.offline) {
+    console.warn(`session-tracker: taskboard comment falhou: ${result.error}`);
+  }
+}
+
+async function cmdStart(argv) {
   const opts = parseOpts(argv);
   if (!opts.persona || !opts.issueId) {
     throw new Error("start requer --persona e --issue");
   }
+  const ok = await validateIssueForWrite(opts.issueId, fetchIssue, { label: "orchestration:session" });
+  if (!ok) process.exit(1);
   const session = startSession(opts.persona, opts.issueId);
+  await maybeAutoSyncAgents("session:start");
+  if (opts.taskboardComment) await maybePostSessionTaskboardComment(opts.persona, opts.issueId, "start");
   console.log(`Sessão iniciada: ${opts.persona} · ${opts.issueId}`);
   if (opts.asJson) console.log(JSON.stringify(session, null, 2));
 }
@@ -297,13 +338,14 @@ function cmdHeartbeat(argv) {
   console.log(`Heartbeat: ${opts.persona} · lastActivity=${session.lastActivityAt}`);
 }
 
-function cmdEnd(argv) {
+async function cmdEnd(argv) {
   const opts = parseOpts(argv);
   if (!opts.persona) throw new Error("end requer --persona");
   const session = endSession(opts.persona, {
     finalMessageId: opts.finalMessageId,
     force: opts.force,
   });
+  if (opts.taskboardComment) await maybePostSessionTaskboardComment(opts.persona, session.issueId, "end");
   console.log(`Sessão encerrada: ${opts.persona} · ${session.issueId}`);
 }
 
@@ -339,19 +381,20 @@ const isMain =
   fileURLToPath(import.meta.url) === process.argv[1];
 
 if (isMain) {
+  (async () => {
   const [cmd, ...rest] = process.argv.slice(2);
   if (!cmd || cmd === "--help" || cmd === "-h") usage();
 
   try {
     switch (cmd) {
       case "start":
-        cmdStart(rest);
+        await cmdStart(rest);
         break;
       case "heartbeat":
         cmdHeartbeat(rest);
         break;
       case "end":
-        cmdEnd(rest);
+        await cmdEnd(rest);
         break;
       case "touch":
         cmdTouch(rest);
@@ -366,4 +409,5 @@ if (isMain) {
     console.error(`session-tracker error: ${err.message}`);
     process.exit(1);
   }
+  })();
 }

@@ -54,10 +54,17 @@ export {
 	type HandlePrincipalSuspendedDeps,
 } from "./application/consumers/handle-principal-suspended";
 export {
+	reconcileSuspendedPrincipalSessions,
+	type ReconcileSuspendedPrincipalSessionsResult,
+} from "./application/consumers/reconcile-suspended-principal-sessions";
+export {
 	getPrincipalById,
 	getPrincipalByAuthUserId,
 } from "./application/queries/get-principal";
 export { createIdentityDb } from "./infrastructure/create-db";
 export { createIdentityUnitOfWork } from "./infrastructure/identity-unit-of-work";
 export { ensureIdentitySchema } from "./infrastructure/migrate";
-export { principals, serviceIdentities } from "./infrastructure/persistence/schema";
+export {
+	principals,
+	serviceIdentities,
+} from "./infrastructure/persistence/schema";

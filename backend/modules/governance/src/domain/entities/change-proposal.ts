@@ -1,7 +1,12 @@
-import type { ChangeProposalKind, ChangeProposalStatus } from "@anxionos/contracts/governance";
+import type {
+	ChangeProposalKind,
+	ChangeProposalStatus,
+} from "@anxionos/contracts/governance";
 
 export interface ChangeProposal {
 	id: string;
+	tenantId: string;
+	agencyId: string;
 	scopeId: string;
 	kind: ChangeProposalKind;
 	payloadHash: string;

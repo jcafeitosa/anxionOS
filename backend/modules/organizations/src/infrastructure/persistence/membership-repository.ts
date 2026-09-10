@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, or, sql } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Membership } from "../../domain/entities/membership";
 import type { MembershipRepository } from "../../domain/ports/membership-repository";
@@ -69,6 +69,7 @@ export function createDrizzleMembershipRepository(
 				.insert(memberships)
 				.values({
 					id: membership.id,
+					tenantId: membership.agencyId,
 					agencyId: membership.agencyId,
 					principalId: membership.principalId,
 					inviteEmail: membership.inviteEmail,
@@ -135,6 +136,21 @@ export function createDrizzleMembershipRepository(
 				.select()
 				.from(memberships)
 				.where(and(eq(memberships.principalId, principalId), eq(memberships.status, "active")));
+			return rows.map(toMembership);
+		},
+		async listInvitedForActor(input: { principalId: string; email: string }) {
+			const rows = await db
+				.select()
+				.from(memberships)
+				.where(
+					and(
+						eq(memberships.status, "invited"),
+						or(
+							eq(memberships.principalId, input.principalId),
+							sql`lower(${memberships.inviteEmail}) = lower(${input.email})`,
+						),
+					),
+				);
 			return rows.map(toMembership);
 		},
 	};

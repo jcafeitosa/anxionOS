@@ -6,12 +6,15 @@ import {
 	processWithInbox,
 } from "@anxionos/eventing/postgres";
 import {
+	type OutboxPublisher,
 	moveToDeadLetter,
 	relayPendingOutbox,
-	type OutboxPublisher,
 } from "@anxionos/eventing/relay";
 import { DEFAULT_RETRY_POLICY } from "@anxionos/eventing/retry";
-import { shouldRunPgIntegrationTests, withEventingPgHarness } from "./test-support";
+import {
+	shouldRunPgIntegrationTests,
+	withEventingPgHarness,
+} from "./test-support";
 
 const sampleEnvelope: DomainEventEnvelope = {
 	eventId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",

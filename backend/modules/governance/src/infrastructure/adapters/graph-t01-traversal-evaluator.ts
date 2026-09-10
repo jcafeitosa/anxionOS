@@ -1,6 +1,13 @@
-import type { ScopeContext, T01Input, T01Output } from "@anxionos/contracts/graph";
+import type {
+	ScopeContext,
+	T01Input,
+	T01Output,
+} from "@anxionos/contracts/graph";
 import type { AuthorityEpochStore } from "../../domain/ports/authority-epoch-store";
-import type { EvaluateT01Input, TraversalEvaluator } from "../../domain/ports/traversal-evaluator";
+import type {
+	EvaluateT01Input,
+	TraversalEvaluator,
+} from "../../domain/ports/traversal-evaluator";
 
 export const GOVERNANCE_T01_TIMEOUT_MS = 2_000;
 export const GOVERNANCE_T01_DENY_REASONS = {
@@ -63,7 +70,9 @@ export function createGraphT01TraversalEvaluator(
 	const timeoutMs = deps.timeoutMs ?? GOVERNANCE_T01_TIMEOUT_MS;
 	return {
 		async evaluateT01(input: EvaluateT01Input): Promise<T01Output> {
-			const localEpoch = await deps.authorityEpochStore.get(input.authorityScopeId);
+			const localEpoch = await deps.authorityEpochStore.get(
+				input.authorityScopeId,
+			);
 			if (
 				input.params.expectedAuthorityEpoch !== undefined &&
 				input.params.expectedAuthorityEpoch !== localEpoch.epoch
@@ -92,7 +101,10 @@ export function createGraphT01TraversalEvaluator(
 					error instanceof Error &&
 					error.message === GOVERNANCE_T01_DENY_REASONS.TIMEOUT
 				) {
-					return denyOutput(GOVERNANCE_T01_DENY_REASONS.TIMEOUT, localEpoch.epoch);
+					return denyOutput(
+						GOVERNANCE_T01_DENY_REASONS.TIMEOUT,
+						localEpoch.epoch,
+					);
 				}
 				return denyOutput(
 					GOVERNANCE_T01_DENY_REASONS.GRAPH_UNAVAILABLE,

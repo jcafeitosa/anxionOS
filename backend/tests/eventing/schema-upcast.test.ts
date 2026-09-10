@@ -21,7 +21,10 @@ describe("schema upcast", () => {
 
 	test("upcastEnvelopeForPublish rejects unknown versions", () => {
 		expect(() =>
-			upcastEnvelopeForPublish({ ...sampleEnvelope, schemaVersion: "9.9.9" as "0.1.0" }),
+			upcastEnvelopeForPublish({
+				...sampleEnvelope,
+				schemaVersion: "9.9.9" as "0.1.0",
+			}),
 		).toThrow(UnknownSchemaVersionError);
 	});
 

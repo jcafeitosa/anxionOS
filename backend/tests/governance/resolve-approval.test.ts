@@ -56,7 +56,9 @@ function createResolveApprovalDeps(options?: {
 	const changeProposalRepository = createInMemoryChangeProposalRepository([
 		options?.proposal ?? pendingProposal,
 	]);
-	const grantRepository = createInMemoryGrantRepository(options?.grants ?? [ownerGrant]);
+	const grantRepository = createInMemoryGrantRepository(
+		options?.grants ?? [ownerGrant],
+	);
 	const commandJournal = createInMemoryCommandJournalRepository();
 	const { unitOfWork, published } = createRecordingGovernanceUnitOfWork({
 		grantRepository,
@@ -66,7 +68,7 @@ function createResolveApprovalDeps(options?: {
 		commandJournal,
 	});
 	return {
-		deps: { unitOfWork, commandJournal },
+		deps: { unitOfWork, commandJournal, changeProposalRepository },
 		changeProposalRepository,
 		published,
 	};
@@ -74,7 +76,8 @@ function createResolveApprovalDeps(options?: {
 
 describe("resolveApproval", () => {
 	test("owner approves institutional proposal and emits approval resolved event", async () => {
-		const { deps, changeProposalRepository, published } = createResolveApprovalDeps();
+		const { deps, changeProposalRepository, published } =
+			createResolveApprovalDeps();
 		const commandId = "70707070-7070-4707-8707-707070707070";
 		const result = await resolveApproval(deps, {
 			commandId,
@@ -85,7 +88,9 @@ describe("resolveApproval", () => {
 		expect(result.revision).toBe(1);
 		const updated = await changeProposalRepository.findById(proposalId);
 		expect(updated?.status).toBe("approved");
-		expect(published[0]?.eventType).toBe(GOVERNANCE_EVENT_TYPES.APPROVAL_RESOLVED);
+		expect(published[0]?.eventType).toBe(
+			GOVERNANCE_EVENT_TYPES.APPROVAL_RESOLVED,
+		);
 	});
 
 	test("resolver without owner authority fails closed", async () => {
@@ -101,7 +106,10 @@ describe("resolveApproval", () => {
 	});
 
 	test("non-pending proposal cannot be resolved", async () => {
-		const approvedProposal: ChangeProposal = { ...pendingProposal, status: "approved" };
+		const approvedProposal: ChangeProposal = {
+			...pendingProposal,
+			status: "approved",
+		};
 		const { deps } = createResolveApprovalDeps({ proposal: approvedProposal });
 		await expect(
 			resolveApproval(deps, {

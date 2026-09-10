@@ -7,20 +7,18 @@ import { join } from "node:path";
 import { getOrchestrationPaths } from "../agent-config/load-config.mjs";
 import { formatDialogueMessage, parseDialogueMessage } from "./protocol.mjs";
 
-const dialogueDir = getOrchestrationPaths().paths.dialogue;
-const dialogueLogPath = join(dialogueDir, "dialogue.jsonl");
-
 export function getDialogueDir() {
-  return dialogueDir;
+  return getOrchestrationPaths().paths.dialogue;
 }
 
 export function getDialogueLogPath() {
-  return dialogueLogPath;
+  return join(getDialogueDir(), "dialogue.jsonl");
 }
 
 export function ensureDialogueDir() {
-  if (!existsSync(dialogueDir)) {
-    mkdirSync(dialogueDir, { recursive: true });
+  const dir = getDialogueDir();
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true });
   }
 }
 
@@ -30,7 +28,7 @@ export function ensureDialogueDir() {
 export function appendDialogueMessage(message) {
   const parsed = parseDialogueMessage(message);
   ensureDialogueDir();
-  appendFileSync(dialogueLogPath, `${JSON.stringify(parsed)}\n`, "utf8");
+  appendFileSync(getDialogueLogPath(), `${JSON.stringify(parsed)}\n`, "utf8");
   return parsed;
 }
 
@@ -46,11 +44,12 @@ export function appendDialogueMessage(message) {
  * @param {boolean} [filters.newestFirst]
  */
 export function readDialogueMessages(filters = {}) {
-  if (!existsSync(dialogueLogPath)) {
+  const logPath = getDialogueLogPath();
+  if (!existsSync(logPath)) {
     return [];
   }
 
-  const lines = readFileSync(dialogueLogPath, "utf8").split("\n").filter(Boolean);
+  const lines = readFileSync(logPath, "utf8").split("\n").filter(Boolean);
   /** @type {import("./protocol.mjs").DialogueMessage[]} */
   const messages = [];
 

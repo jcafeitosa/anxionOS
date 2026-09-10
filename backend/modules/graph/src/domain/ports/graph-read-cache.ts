@@ -1,6 +1,5 @@
 import type {
-
-CacheableTraversalId,
+	CacheableTraversalId,
 	GraphCacheInvalidate,
 } from "@anxionos/contracts/graph";
 

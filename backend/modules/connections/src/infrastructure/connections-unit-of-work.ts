@@ -13,7 +13,9 @@ import {
 	createPgUsageRepository,
 } from "./persistence/repositories";
 
-function createTransactionContext(client: PoolClient): ConnectionsTransactionContext {
+function createTransactionContext(
+	client: PoolClient,
+): ConnectionsTransactionContext {
 	return {
 		commandJournal: createPgCommandJournalRepository(client),
 		aiAccounts: createPgAiAccountRepository(client),

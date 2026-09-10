@@ -11,7 +11,7 @@ Guia **documental** para spawn da equipe completa quando o @Owner autorizar trab
 | Check | Comando / artefato |
 | --- | --- |
 | Taskboard online | `npm run taskboard:ensure` |
-| Framework verify | `npm run orchestration:verify` (esperado 73/73) |
+| Framework verify | `npm run orchestration:verify` (esperado 73/73 — validado pós-commit `a161f00`) |
 | Greenlight Owner | Comentário explícito na issue — ver [OWNER-GREENLIGHT.anxionos.md](./OWNER-GREENLIGHT.anxionos.md) |
 | Config projeto | [`.cursor/orchestration.config.json`](../../../orchestration.config.json) |
 | Roster anxionOS | [roster.anxionos.json](./roster.anxionos.json) |
@@ -117,10 +117,10 @@ node scripts/taskboard.mjs move ANX-N in_progress
 
 | Domínio | Executor (Task) | Crítico (Task) |
 | --- | --- | --- |
-| Backend | `generalPurpose` (Lucas) | `critic-reviewer` (Marina) |
-| Frontend | `generalPurpose` (Camila) | `critic-reviewer` (Paulo) |
-| Infra | `generalPurpose` (Rafael) | `critic-reviewer` (Bia) |
-| Adapters | `generalPurpose` (Diego) | `critic-reviewer` (Gustavo) |
+| Backend | `generalPurpose` (Lucas) | `code-reviewer` (Marina) |
+| Frontend | `generalPurpose` (Camila) | `code-reviewer` (Paulo) |
+| Infra | `generalPurpose` (Rafael) | `code-reviewer` (Bia) |
+| Adapters | `generalPurpose` (Diego) | `code-reviewer` (Gustavo) |
 
 Incluir: Read AGENTS.md, graphify, [SUBAGENT-PROMPT-TOOLING.md](../../templates/SUBAGENT-PROMPT-TOOLING.md).
 
@@ -148,8 +148,8 @@ npm run orchestration:chat -- --issue ANX-N
 | Gate | karpathy-guidelines | ECC | ui-ux-pro-max |
 | --- | --- | --- | --- |
 | G0 | Escopo fechado, plano com verify | Scan opcional (baseline 43/100) | — |
-| G1 backend | Diff cirúrgico | critic-reviewer | — |
-| G1 frontend | Islands mínimas | critic-reviewer, a11y-architect | Obrigatório |
+| G1 backend | Diff cirúrgico | code-reviewer | — |
+| G1 frontend | Islands mínimas | code-reviewer, a11y-architect | Obrigatório |
 | G2–G5 | Evidência rastreável | Subagentes por gate | G3 frontend only |
 | G6–G7 | Sem promessas sem prova | — | — |
 
@@ -178,4 +178,4 @@ Framework (ANX-237) permanece ALLOWED — [PROJECT-GREENLIGHT.md](../../PROJECT-
 
 ---
 
-**Última atualização:** 2026-09-09 · ANX-237
+**Última atualização:** 2026-09-09 · ANX-237 **done** (G7 PASS, commit `a161f00`) — aguarda @Owner `"autorizo anxionOS"`

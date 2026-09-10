@@ -36,7 +36,7 @@ export function createPgKnowledgeSourceRepository(
 	return {
 		async findById(sourceId, organizationId) {
 			const result = await client.query(
-				`SELECT * FROM knowledge_sources WHERE id = $1 AND organization_id = $2`,
+				"SELECT * FROM knowledge_sources WHERE id = $1 AND organization_id = $2",
 				[sourceId, organizationId],
 			);
 			const row = result.rows[0];
@@ -72,11 +72,13 @@ export function createPgKnowledgeSourceRepository(
 	};
 }
 
-export function createPgDocumentRepository(client: PoolClient): DocumentRepository {
+export function createPgDocumentRepository(
+	client: PoolClient,
+): DocumentRepository {
 	return {
 		async findById(documentId, organizationId) {
 			const result = await client.query(
-				`SELECT * FROM knowledge_documents WHERE id = $1 AND organization_id = $2`,
+				"SELECT * FROM knowledge_documents WHERE id = $1 AND organization_id = $2",
 				[documentId, organizationId],
 			);
 			const row = result.rows[0] as Record<string, unknown> | undefined;
@@ -89,7 +91,9 @@ export function createPgDocumentRepository(client: PoolClient): DocumentReposito
 				classification: String(row.classification),
 				aclId: String(row.acl_id),
 				aclEpoch: Number(row.acl_epoch),
-				activeVersionId: row.active_version_id ? String(row.active_version_id) : null,
+				activeVersionId: row.active_version_id
+					? String(row.active_version_id)
+					: null,
 				status: String(row.status),
 				revision: Number(row.revision),
 			};
@@ -118,7 +122,13 @@ export function createPgDocumentRepository(client: PoolClient): DocumentReposito
 			await client.query(
 				`UPDATE knowledge_documents SET active_version_id = $3, status = $4, revision = $5, updated_at = now()
 				 WHERE id = $1 AND organization_id = $2`,
-				[record.id, record.organizationId, record.activeVersionId, record.status, record.revision],
+				[
+					record.id,
+					record.organizationId,
+					record.activeVersionId,
+					record.status,
+					record.revision,
+				],
 			);
 			return record;
 		},
@@ -131,7 +141,7 @@ export function createPgDocumentVersionRepository(
 	return {
 		async findById(id, organizationId) {
 			const result = await client.query(
-				`SELECT * FROM knowledge_document_versions WHERE id = $1 AND organization_id = $2`,
+				"SELECT * FROM knowledge_document_versions WHERE id = $1 AND organization_id = $2",
 				[id, organizationId],
 			);
 			const row = result.rows[0] as Record<string, unknown> | undefined;
@@ -169,7 +179,7 @@ export function createPgDocumentVersionRepository(
 		},
 		async countByDocument(documentId) {
 			const result = await client.query(
-				`SELECT count(*)::int AS c FROM knowledge_document_versions WHERE document_id = $1`,
+				"SELECT count(*)::int AS c FROM knowledge_document_versions WHERE document_id = $1",
 				[documentId],
 			);
 			return Number(result.rows[0].c);
@@ -183,7 +193,7 @@ export function createPgIndexGenerationRepository(
 	return {
 		async findById(id, organizationId) {
 			const result = await client.query(
-				`SELECT * FROM knowledge_index_generations WHERE id = $1 AND organization_id = $2`,
+				"SELECT * FROM knowledge_index_generations WHERE id = $1 AND organization_id = $2",
 				[id, organizationId],
 			);
 			const row = result.rows[0] as Record<string, unknown> | undefined;
@@ -222,7 +232,13 @@ export function createPgIndexGenerationRepository(
 				`UPDATE knowledge_index_generations SET status = $3::knowledge_index_status, chunk_count = $4, embedded_count = $5,
 				 activated_at = CASE WHEN $3::text = 'ACTIVE' THEN now() ELSE activated_at END
 				 WHERE id = $1 AND organization_id = $2`,
-				[record.id, record.organizationId, record.status, record.chunkCount, record.embeddedCount],
+				[
+					record.id,
+					record.organizationId,
+					record.status,
+					record.chunkCount,
+					record.embeddedCount,
+				],
 			);
 			return record;
 		},
@@ -251,7 +267,7 @@ export function createPgChunkRepository(client: PoolClient): ChunkRepository {
 		},
 		async listByIndexGeneration(indexGenerationId) {
 			const result = await client.query(
-				`SELECT * FROM knowledge_chunks WHERE index_generation_id = $1 ORDER BY sequence`,
+				"SELECT * FROM knowledge_chunks WHERE index_generation_id = $1 ORDER BY sequence",
 				[indexGenerationId],
 			);
 			return result.rows.map((row: Record<string, unknown>) => ({
@@ -267,7 +283,9 @@ export function createPgChunkRepository(client: PoolClient): ChunkRepository {
 	};
 }
 
-export function createPgEmbeddingRepository(client: PoolClient): EmbeddingRepository {
+export function createPgEmbeddingRepository(
+	client: PoolClient,
+): EmbeddingRepository {
 	return {
 		async save(record) {
 			const vectorLiteral = `[${record.vector.join(",")}]`;
@@ -302,7 +320,7 @@ export function createPgEmbeddingSpaceRepository(
 	return {
 		async findById(id, organizationId) {
 			const result = await client.query(
-				`SELECT * FROM knowledge_embedding_spaces WHERE id = $1 AND organization_id = $2`,
+				"SELECT * FROM knowledge_embedding_spaces WHERE id = $1 AND organization_id = $2",
 				[id, organizationId],
 			);
 			const row = result.rows[0] as Record<string, unknown> | undefined;
@@ -319,7 +337,13 @@ export function createPgEmbeddingSpaceRepository(
 			await client.query(
 				`INSERT INTO knowledge_embedding_spaces (id, organization_id, display_name, dimensions, model_ref)
 				 VALUES ($1,$2,$3,$4,$5)`,
-				[record.id, record.organizationId, record.displayName, record.dimensions, record.modelRef],
+				[
+					record.id,
+					record.organizationId,
+					record.displayName,
+					record.dimensions,
+					record.modelRef,
+				],
 			);
 			return record;
 		},

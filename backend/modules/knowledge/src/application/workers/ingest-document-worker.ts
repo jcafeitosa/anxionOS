@@ -2,8 +2,8 @@ import type {
 	IngestDocumentCommand,
 	KnowledgeCommandResult,
 } from "@anxionos/contracts/knowledge";
-import type { EmbeddingPort } from "../../domain/ports/embedding-port";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
+import type { EmbeddingPort } from "../../domain/ports/embedding-port";
 import type { KnowledgeUnitOfWork } from "../../domain/ports/knowledge-unit-of-work";
 import { ingestDocument } from "../commands/ingest-document";
 

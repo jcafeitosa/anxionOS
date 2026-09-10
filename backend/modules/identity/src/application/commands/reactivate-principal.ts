@@ -22,7 +22,9 @@ export async function reactivatePrincipal(
 	const command = reactivatePrincipalCommandSchema.parse(input);
 	const reactivatedAt = new Date();
 	return deps.unitOfWork.runInTransaction(async (context) => {
-		const principal = await context.principalRepository.reactivate(command.principalId);
+		const principal = await context.principalRepository.reactivate(
+			command.principalId,
+		);
 		if (principal) {
 			await context.publishEvents([
 				createPrincipalReactivatedEvent({
@@ -33,7 +35,9 @@ export async function reactivatePrincipal(
 			]);
 			return principal;
 		}
-		const existing = await context.principalRepository.findById(command.principalId);
+		const existing = await context.principalRepository.findById(
+			command.principalId,
+		);
 		if (!existing) {
 			throwIdentityError("PRINCIPAL_NOT_FOUND", "Principal not found");
 		}

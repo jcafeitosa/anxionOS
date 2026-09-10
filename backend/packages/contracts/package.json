@@ -5,6 +5,7 @@
 	"type": "module",
 	"exports": {
 		".": "./src/index.ts",
+		"./agents": "./src/agents/index.ts",
 		"./events": "./src/events.ts",
 		"./errors": "./src/errors.ts",
 		"./envelope-v02": "./src/envelope-v02.ts",

@@ -1,12 +1,15 @@
 export interface CommandJournalEntry {
-    commandId: string;
-    organizationId: string;
-    commandName: string;
-    intentHash?: string;
-    responseSnapshot: Record<string, unknown>;
+	commandId: string;
+	organizationId: string;
+	commandName: string;
+	intentHash?: string;
+	responseSnapshot: Record<string, unknown>;
 }
 export interface CommandJournalRepository {
-    findByCommandId(commandId: string): Promise<CommandJournalEntry | null>;
-    findByIntentHash(organizationId: string, intentHash: string): Promise<CommandJournalEntry | null>;
-    save(entry: CommandJournalEntry): Promise<void>;
+	findByCommandId(commandId: string): Promise<CommandJournalEntry | null>;
+	findByIntentHash(
+		organizationId: string,
+		intentHash: string,
+	): Promise<CommandJournalEntry | null>;
+	save(entry: CommandJournalEntry): Promise<void>;
 }

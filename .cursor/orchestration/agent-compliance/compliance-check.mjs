@@ -8,13 +8,14 @@ import { inferPersonaFromSessions, runComplianceCheck } from "./compliance-lib.m
 import { formatIssueIdHint, getProjectName } from "../agent-config/load-config.mjs";
 
 function parseArgs(argv) {
-  const opts = { persona: null, issueId: null, mode: "full", json: false, help: false };
+  const opts = { persona: null, issueId: null, mode: "full", scope: "auto", json: false, help: false };
   for (let i = 0; i < argv.length; i += 1) {
     const a = argv[i];
     if (a === "--persona") opts.persona = argv[++i];
     else if (a === "--issue") opts.issueId = argv[++i];
     else if (a === "--pre-work") opts.mode = "pre-work";
     else if (a === "--pre-commit") opts.mode = "pre-commit";
+    else if (a === "--scope") opts.scope = argv[++i];
     else if (a === "--json") opts.json = true;
     else if (a === "--help" || a === "-h") opts.help = true;
     else throw new Error(`Opcao desconhecida: ${a}`);
@@ -27,6 +28,7 @@ function usage() {
 
   npm run orchestration:compliance -- --persona SLUG --issue ${formatIssueIdHint()}
   npm run orchestration:compliance -- --pre-work --issue ${formatIssueIdHint()} [--persona SLUG]
+  npm run orchestration:compliance -- --pre-work --scope project|framework|auto --issue ${formatIssueIdHint()} [--persona SLUG]
   npm run orchestration:compliance -- --pre-commit --issue ${formatIssueIdHint()} [--persona SLUG]
 
 Exit 0 = compliant · Exit 1 = violations (com fix commands)
@@ -45,7 +47,8 @@ function printWarnings(warnings) {
 export function printReport(result) {
   printWarnings(result.warnings);
   if (result.compliant) {
-    console.log(`✅ COMPLIANT · ${result.persona} · ${result.issueId} · mode=${result.mode}`);
+    const boardHint = result.routing ? ` · scope=${result.routing.scope} · board=${result.routing.board}` : "";
+    console.log(`✅ COMPLIANT · ${result.persona} · ${result.issueId} · mode=${result.mode}${boardHint}`);
     if (result.workflow) {
       console.log(`   step=${result.workflow.step} · ack=${result.workflow.checklist?.ackPosted}`);
     }
@@ -71,7 +74,7 @@ async function main() {
   if (opts.help) { usage(); process.exit(0); }
   if (!opts.issueId) { console.error(`Erro: --issue ${formatIssueIdHint()} obrigatorio`); usage(); process.exit(1); }
   const persona = opts.persona ?? inferPersonaFromSessions(opts.issueId);
-  const result = await runComplianceCheck({ persona, issueId: opts.issueId, mode: opts.mode });
+  const result = await runComplianceCheck({ persona, issueId: opts.issueId, mode: opts.mode, scope: opts.scope });
   if (opts.json) console.log(JSON.stringify(result, null, 2));
   else printReport(result);
   process.exit(result.compliant ? 0 : 1);

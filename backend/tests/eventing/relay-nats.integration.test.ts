@@ -1,14 +1,17 @@
 import { describe, expect, test } from "bun:test";
-import { AckPolicy, DeliverPolicy, JSONCodec, connect } from "nats";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
-import { appendEventAtomic, fetchPendingOutbox } from "@anxionos/eventing/postgres";
 import {
-	createNatsOutboxPublisher,
 	DEFAULT_NATS_EVENTS_STREAM,
+	createNatsOutboxPublisher,
 	resolveEventSubject,
 } from "@anxionos/eventing/nats-publisher";
+import {
+	appendEventAtomic,
+	fetchPendingOutbox,
+} from "@anxionos/eventing/postgres";
 import { relayPendingOutbox } from "@anxionos/eventing/relay";
 import { DEFAULT_RETRY_POLICY } from "@anxionos/eventing/retry";
+import { AckPolicy, DeliverPolicy, JSONCodec, connect } from "nats";
 import {
 	getNatsUrl,
 	shouldRunNatsIntegrationTests,
@@ -39,7 +42,8 @@ describe("eventing relay nats integration", () => {
 			return;
 		}
 
-		const streamName = process.env.NATS_EVENTS_STREAM?.trim() ?? DEFAULT_NATS_EVENTS_STREAM;
+		const streamName =
+			process.env.NATS_EVENTS_STREAM?.trim() ?? DEFAULT_NATS_EVENTS_STREAM;
 		const durable = `relay_test_${crypto.randomUUID().replace(/-/g, "")}`;
 		const sampleEnvelope = createSampleEnvelope();
 		const subject = resolveEventSubject(sampleEnvelope.eventType);
@@ -73,7 +77,10 @@ describe("eventing relay nats integration", () => {
 			});
 			expect(result.dispatched).toBe(1);
 
-			const messages = await consumer.fetch({ max_messages: 1, expires: 5_000 });
+			const messages = await consumer.fetch({
+				max_messages: 1,
+				expires: 5_000,
+			});
 			const received: DomainEventEnvelope[] = [];
 			for await (const msg of messages) {
 				received.push(codec.decode(msg.data));

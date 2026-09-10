@@ -1,1456 +1,266 @@
-export const goalStatusEnum: import("drizzle-orm/pg-core").PgEnum<["draft", "active", "completed", "archived"]>;
-export const checkoutStatusEnum: import("drizzle-orm/pg-core").PgEnum<["UNCLAIMED", "LEASED", "COMPLETED", "BLOCKED"]>;
-export const runStatusEnum: import("drizzle-orm/pg-core").PgEnum<["SCHEDULED", "WAKING", "ACTIVE", "PAUSED", "COMPLETED", "ORPHANED", "BUDGET_STOPPED", "TERMINATED"]>;
-export const gateIdEnum: import("drizzle-orm/pg-core").PgEnum<["G0", "G1", "G2", "G3", "G4", "G5", "G6", "G7"]>;
-export const gateDispositionEnum: import("drizzle-orm/pg-core").PgEnum<["PASS", "CHANGES_REQUIRED", "BLOCKED", "NOT_APPLICABLE"]>;
-export const hierarchyModeEnum: import("drizzle-orm/pg-core").PgEnum<["HIERARCHY_TREE", "HIERARCHY_CIRCULAR"]>;
-export const heartbeatStatusEnum: import("drizzle-orm/pg-core").PgEnum<["pending", "processing", "done", "cancelled"]>;
-export const goals: import("drizzle-orm/pg-core").PgTableWithColumns<{
-    name: "orchestration_goals";
-    schema: undefined;
-    columns: {
-        id: import("drizzle-orm/pg-core").PgColumn<{
-            name: "id";
-            tableName: "orchestration_goals";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: true;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        organizationId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "organization_id";
-            tableName: "orchestration_goals";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        parentGoalId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "parent_goal_id";
-            tableName: "orchestration_goals";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        title: import("drizzle-orm/pg-core").PgColumn<{
-            name: "title";
-            tableName: "orchestration_goals";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        priority: import("drizzle-orm/pg-core").PgColumn<{
-            name: "priority";
-            tableName: "orchestration_goals";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        status: import("drizzle-orm/pg-core").PgColumn<{
-            name: "status";
-            tableName: "orchestration_goals";
-            dataType: "string";
-            columnType: "PgEnumColumn";
-            data: "active" | "draft" | "archived" | "completed";
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: ["draft", "active", "completed", "archived"];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        revision: import("drizzle-orm/pg-core").PgColumn<{
-            name: "revision";
-            tableName: "orchestration_goals";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        createdAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "created_at";
-            tableName: "orchestration_goals";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        updatedAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "updated_at";
-            tableName: "orchestration_goals";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-    };
-    dialect: "pg";
-}>;
-export const tasks: import("drizzle-orm/pg-core").PgTableWithColumns<{
-    name: "orchestration_tasks";
-    schema: undefined;
-    columns: {
-        id: import("drizzle-orm/pg-core").PgColumn<{
-            name: "id";
-            tableName: "orchestration_tasks";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: true;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        organizationId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "organization_id";
-            tableName: "orchestration_tasks";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        goalId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "goal_id";
-            tableName: "orchestration_tasks";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        goalAncestry: import("drizzle-orm/pg-core").PgColumn<{
-            name: "goal_ancestry";
-            tableName: "orchestration_tasks";
-            dataType: "json";
-            columnType: "PgJsonb";
-            data: unknown;
-            driverParam: unknown;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        parentTaskId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "parent_task_id";
-            tableName: "orchestration_tasks";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        issueIdentifier: import("drizzle-orm/pg-core").PgColumn<{
-            name: "issue_identifier";
-            tableName: "orchestration_tasks";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        title: import("drizzle-orm/pg-core").PgColumn<{
-            name: "title";
-            tableName: "orchestration_tasks";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        checkoutStatus: import("drizzle-orm/pg-core").PgColumn<{
-            name: "checkout_status";
-            tableName: "orchestration_tasks";
-            dataType: "string";
-            columnType: "PgEnumColumn";
-            data: "BLOCKED" | "UNCLAIMED" | "LEASED" | "COMPLETED";
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: ["UNCLAIMED", "LEASED", "COMPLETED", "BLOCKED"];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        revision: import("drizzle-orm/pg-core").PgColumn<{
-            name: "revision";
-            tableName: "orchestration_tasks";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        createdAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "created_at";
-            tableName: "orchestration_tasks";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        updatedAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "updated_at";
-            tableName: "orchestration_tasks";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-    };
-    dialect: "pg";
-}>;
-export const runs: import("drizzle-orm/pg-core").PgTableWithColumns<{
-    name: "orchestration_runs";
-    schema: undefined;
-    columns: {
-        id: import("drizzle-orm/pg-core").PgColumn<{
-            name: "id";
-            tableName: "orchestration_runs";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: true;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        taskId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "task_id";
-            tableName: "orchestration_runs";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        agentId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "agent_id";
-            tableName: "orchestration_runs";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        organizationId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "organization_id";
-            tableName: "orchestration_runs";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        goalAncestry: import("drizzle-orm/pg-core").PgColumn<{
-            name: "goal_ancestry";
-            tableName: "orchestration_runs";
-            dataType: "json";
-            columnType: "PgJsonb";
-            data: unknown;
-            driverParam: unknown;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        issueIdentifier: import("drizzle-orm/pg-core").PgColumn<{
-            name: "issue_identifier";
-            tableName: "orchestration_runs";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        parentRunId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "parent_run_id";
-            tableName: "orchestration_runs";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        status: import("drizzle-orm/pg-core").PgColumn<{
-            name: "status";
-            tableName: "orchestration_runs";
-            dataType: "string";
-            columnType: "PgEnumColumn";
-            data: "COMPLETED" | "SCHEDULED" | "WAKING" | "ACTIVE" | "PAUSED" | "ORPHANED" | "BUDGET_STOPPED" | "TERMINATED";
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: ["SCHEDULED", "WAKING", "ACTIVE", "PAUSED", "COMPLETED", "ORPHANED", "BUDGET_STOPPED", "TERMINATED"];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        coalesceKey: import("drizzle-orm/pg-core").PgColumn<{
-            name: "coalesce_key";
-            tableName: "orchestration_runs";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        revision: import("drizzle-orm/pg-core").PgColumn<{
-            name: "revision";
-            tableName: "orchestration_runs";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        startedAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "started_at";
-            tableName: "orchestration_runs";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        completedAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "completed_at";
-            tableName: "orchestration_runs";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        createdAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "created_at";
-            tableName: "orchestration_runs";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        updatedAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "updated_at";
-            tableName: "orchestration_runs";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-    };
-    dialect: "pg";
-}>;
-export const taskLeases: import("drizzle-orm/pg-core").PgTableWithColumns<{
-    name: "orchestration_task_leases";
-    schema: undefined;
-    columns: {
-        id: import("drizzle-orm/pg-core").PgColumn<{
-            name: "id";
-            tableName: "orchestration_task_leases";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: true;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        taskId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "task_id";
-            tableName: "orchestration_task_leases";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        runId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "run_id";
-            tableName: "orchestration_task_leases";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        agentId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "agent_id";
-            tableName: "orchestration_task_leases";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        leaseToken: import("drizzle-orm/pg-core").PgColumn<{
-            name: "lease_token";
-            tableName: "orchestration_task_leases";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        leasedAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "leased_at";
-            tableName: "orchestration_task_leases";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        expiresAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "expires_at";
-            tableName: "orchestration_task_leases";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        heartbeatDueAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "heartbeat_due_at";
-            tableName: "orchestration_task_leases";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        releasedAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "released_at";
-            tableName: "orchestration_task_leases";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        createdAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "created_at";
-            tableName: "orchestration_task_leases";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-    };
-    dialect: "pg";
-}>;
-export const runHeartbeats: import("drizzle-orm/pg-core").PgTableWithColumns<{
-    name: "orchestration_run_heartbeats";
-    schema: undefined;
-    columns: {
-        id: import("drizzle-orm/pg-core").PgColumn<{
-            name: "id";
-            tableName: "orchestration_run_heartbeats";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: true;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        runId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "run_id";
-            tableName: "orchestration_run_heartbeats";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        taskId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "task_id";
-            tableName: "orchestration_run_heartbeats";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        agentId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "agent_id";
-            tableName: "orchestration_run_heartbeats";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        coalesceKey: import("drizzle-orm/pg-core").PgColumn<{
-            name: "coalesce_key";
-            tableName: "orchestration_run_heartbeats";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        nextWakeAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "next_wake_at";
-            tableName: "orchestration_run_heartbeats";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        status: import("drizzle-orm/pg-core").PgColumn<{
-            name: "status";
-            tableName: "orchestration_run_heartbeats";
-            dataType: "string";
-            columnType: "PgEnumColumn";
-            data: "pending" | "processing" | "done" | "cancelled";
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: ["pending", "processing", "done", "cancelled"];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        attempt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "attempt";
-            tableName: "orchestration_run_heartbeats";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        createdAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "created_at";
-            tableName: "orchestration_run_heartbeats";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        processedAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "processed_at";
-            tableName: "orchestration_run_heartbeats";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-    };
-    dialect: "pg";
-}>;
-export const gateBindings: import("drizzle-orm/pg-core").PgTableWithColumns<{
-    name: "orchestration_gate_bindings";
-    schema: undefined;
-    columns: {
-        id: import("drizzle-orm/pg-core").PgColumn<{
-            name: "id";
-            tableName: "orchestration_gate_bindings";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: true;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        organizationId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "organization_id";
-            tableName: "orchestration_gate_bindings";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        gateId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "gate_id";
-            tableName: "orchestration_gate_bindings";
-            dataType: "string";
-            columnType: "PgEnumColumn";
-            data: "G0" | "G1" | "G2" | "G3" | "G4" | "G5" | "G6" | "G7";
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: ["G0", "G1", "G2", "G3", "G4", "G5", "G6", "G7"];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        issueIdentifier: import("drizzle-orm/pg-core").PgColumn<{
-            name: "issue_identifier";
-            tableName: "orchestration_gate_bindings";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        runId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "run_id";
-            tableName: "orchestration_gate_bindings";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        disposition: import("drizzle-orm/pg-core").PgColumn<{
-            name: "disposition";
-            tableName: "orchestration_gate_bindings";
-            dataType: "string";
-            columnType: "PgEnumColumn";
-            data: "PASS" | "CHANGES_REQUIRED" | "BLOCKED" | "NOT_APPLICABLE";
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: ["PASS", "CHANGES_REQUIRED", "BLOCKED", "NOT_APPLICABLE"];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        reviewerId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "reviewer_id";
-            tableName: "orchestration_gate_bindings";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        artifactDigest: import("drizzle-orm/pg-core").PgColumn<{
-            name: "artifact_digest";
-            tableName: "orchestration_gate_bindings";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        artifactRevision: import("drizzle-orm/pg-core").PgColumn<{
-            name: "artifact_revision";
-            tableName: "orchestration_gate_bindings";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        notApplicableReason: import("drizzle-orm/pg-core").PgColumn<{
-            name: "not_applicable_reason";
-            tableName: "orchestration_gate_bindings";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        hierarchyModeAtRecord: import("drizzle-orm/pg-core").PgColumn<{
-            name: "hierarchy_mode_at_record";
-            tableName: "orchestration_gate_bindings";
-            dataType: "string";
-            columnType: "PgEnumColumn";
-            data: "HIERARCHY_TREE" | "HIERARCHY_CIRCULAR";
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: ["HIERARCHY_TREE", "HIERARCHY_CIRCULAR"];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        schemaVersion: import("drizzle-orm/pg-core").PgColumn<{
-            name: "schema_version";
-            tableName: "orchestration_gate_bindings";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        recordedAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "recorded_at";
-            tableName: "orchestration_gate_bindings";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        invalidatedAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "invalidated_at";
-            tableName: "orchestration_gate_bindings";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-    };
-    dialect: "pg";
-}>;
-export const commandJournal: import("drizzle-orm/pg-core").PgTableWithColumns<{
-    name: "orchestration_command_journal";
-    schema: undefined;
-    columns: {
-        commandId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "command_id";
-            tableName: "orchestration_command_journal";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: true;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        commandName: import("drizzle-orm/pg-core").PgColumn<{
-            name: "command_name";
-            tableName: "orchestration_command_journal";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        aggregateId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "aggregate_id";
-            tableName: "orchestration_command_journal";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        aggregateType: import("drizzle-orm/pg-core").PgColumn<{
-            name: "aggregate_type";
-            tableName: "orchestration_command_journal";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        revision: import("drizzle-orm/pg-core").PgColumn<{
-            name: "revision";
-            tableName: "orchestration_command_journal";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        responseSnapshot: import("drizzle-orm/pg-core").PgColumn<{
-            name: "response_snapshot";
-            tableName: "orchestration_command_journal";
-            dataType: "json";
-            columnType: "PgJsonb";
-            data: unknown;
-            driverParam: unknown;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        createdAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "created_at";
-            tableName: "orchestration_command_journal";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-    };
-    dialect: "pg";
-}>;
-export const taskboardMirror: import("drizzle-orm/pg-core").PgTableWithColumns<{
-    name: "orchestration_taskboard_mirror";
-    schema: undefined;
-    columns: {
-        issueIdentifier: import("drizzle-orm/pg-core").PgColumn<{
-            name: "issue_identifier";
-            tableName: "orchestration_taskboard_mirror";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        boardVersion: import("drizzle-orm/pg-core").PgColumn<{
-            name: "board_version";
-            tableName: "orchestration_taskboard_mirror";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        status: import("drizzle-orm/pg-core").PgColumn<{
-            name: "status";
-            tableName: "orchestration_taskboard_mirror";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        threadId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "thread_id";
-            tableName: "orchestration_taskboard_mirror";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        occurredAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "occurred_at";
-            tableName: "orchestration_taskboard_mirror";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        ingestedAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "ingested_at";
-            tableName: "orchestration_taskboard_mirror";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-    };
-    dialect: "pg";
-}>;
+import {
+	index,
+	integer,
+	jsonb,
+	pgEnum,
+	pgTable,
+	primaryKey,
+	text,
+	timestamp,
+	uniqueIndex,
+	uuid,
+} from "drizzle-orm/pg-core";
+
+export const goalStatusEnum = pgEnum("orchestration_goal_status", [
+	"draft",
+	"active",
+	"completed",
+	"archived",
+]);
+
+export const checkoutStatusEnum = pgEnum("orchestration_checkout_status", [
+	"UNCLAIMED",
+	"LEASED",
+	"COMPLETED",
+	"BLOCKED",
+]);
+
+export const runStatusEnum = pgEnum("orchestration_run_status", [
+	"SCHEDULED",
+	"WAKING",
+	"ACTIVE",
+	"PAUSED",
+	"WAITING_HUMAN_INPUT",
+	"COMPLETED",
+	"ORPHANED",
+	"BUDGET_STOPPED",
+	"TERMINATED",
+]);
+
+export const gateIdEnum = pgEnum("orchestration_gate_id", [
+	"G0",
+	"G1",
+	"G2",
+	"G3",
+	"G4",
+	"G5",
+	"G6",
+	"G7",
+]);
+
+export const gateDispositionEnum = pgEnum("orchestration_gate_disposition", [
+	"PASS",
+	"CHANGES_REQUIRED",
+	"BLOCKED",
+	"NOT_APPLICABLE",
+]);
+
+export const hierarchyModeEnum = pgEnum("orchestration_hierarchy_mode", [
+	"HIERARCHY_TREE",
+	"HIERARCHY_CIRCULAR",
+]);
+
+export const heartbeatStatusEnum = pgEnum("orchestration_heartbeat_status", [
+	"pending",
+	"processing",
+	"done",
+	"cancelled",
+]);
+
+export const goals = pgTable(
+	"orchestration_goals",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		organizationId: text("organization_id").notNull(),
+		parentGoalId: uuid("parent_goal_id"),
+		title: text("title").notNull(),
+		priority: integer("priority").notNull().default(0),
+		status: goalStatusEnum("status").notNull().default("draft"),
+		revision: integer("revision").notNull().default(1),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [
+		index("orchestration_goals_organization_id_idx").on(table.organizationId),
+		index("orchestration_goals_parent_goal_id_idx").on(table.parentGoalId),
+	],
+);
+
+export const tasks = pgTable(
+	"orchestration_tasks",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		organizationId: text("organization_id").notNull(),
+		goalId: uuid("goal_id").notNull(),
+		goalAncestry: jsonb("goal_ancestry").notNull(),
+		parentTaskId: uuid("parent_task_id"),
+		issueIdentifier: text("issue_identifier").notNull(),
+		title: text("title").notNull(),
+		checkoutStatus: checkoutStatusEnum("checkout_status")
+			.notNull()
+			.default("UNCLAIMED"),
+		revision: integer("revision").notNull().default(1),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [
+		index("orchestration_tasks_organization_id_idx").on(table.organizationId),
+		uniqueIndex("orchestration_tasks_issue_identifier_uidx").on(
+			table.issueIdentifier,
+		),
+		index("orchestration_tasks_goal_id_idx").on(table.goalId),
+		index("orchestration_tasks_checkout_status_idx").on(table.checkoutStatus),
+	],
+);
+
+export const runs = pgTable(
+	"orchestration_runs",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		taskId: uuid("task_id").notNull(),
+		agentId: text("agent_id").notNull(),
+		organizationId: text("organization_id").notNull(),
+		goalAncestry: jsonb("goal_ancestry").notNull(),
+		issueIdentifier: text("issue_identifier").notNull(),
+		parentRunId: uuid("parent_run_id"),
+		status: runStatusEnum("status").notNull().default("SCHEDULED"),
+		coalesceKey: text("coalesce_key").notNull(),
+		waitingHumanContext: jsonb("waiting_human_context"),
+		revision: integer("revision").notNull().default(1),
+		startedAt: timestamp("started_at", { withTimezone: true }),
+		completedAt: timestamp("completed_at", { withTimezone: true }),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [
+		index("orchestration_runs_task_id_idx").on(table.taskId),
+		index("orchestration_runs_agent_id_idx").on(table.agentId),
+		index("orchestration_runs_issue_identifier_idx").on(table.issueIdentifier),
+		index("orchestration_runs_status_active_idx").on(table.status),
+	],
+);
+
+export const taskLeases = pgTable(
+	"orchestration_task_leases",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		taskId: uuid("task_id").notNull(),
+		runId: uuid("run_id").notNull(),
+		agentId: text("agent_id").notNull(),
+		leaseToken: uuid("lease_token").notNull(),
+		leasedAt: timestamp("leased_at", { withTimezone: true }).notNull(),
+		expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+		heartbeatDueAt: timestamp("heartbeat_due_at", { withTimezone: true }),
+		releasedAt: timestamp("released_at", { withTimezone: true }),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [
+		index("orchestration_task_leases_expires_at_idx").on(table.expiresAt),
+	],
+);
+
+export const runHeartbeats = pgTable(
+	"orchestration_run_heartbeats",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		runId: uuid("run_id").notNull(),
+		taskId: uuid("task_id").notNull(),
+		agentId: text("agent_id").notNull(),
+		coalesceKey: text("coalesce_key").notNull(),
+		waitingHumanContext: jsonb("waiting_human_context"),
+		nextWakeAt: timestamp("next_wake_at", { withTimezone: true }).notNull(),
+		status: heartbeatStatusEnum("status").notNull().default("pending"),
+		attempt: integer("attempt").notNull().default(0),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+		processedAt: timestamp("processed_at", { withTimezone: true }),
+	},
+	(table) => [
+		index("orchestration_run_heartbeats_pending_wake_idx").on(table.nextWakeAt),
+	],
+);
+
+export const gateBindings = pgTable(
+	"orchestration_gate_bindings",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		organizationId: text("organization_id").notNull(),
+		gateId: gateIdEnum("gate_id").notNull(),
+		issueIdentifier: text("issue_identifier").notNull(),
+		runId: uuid("run_id"),
+		disposition: gateDispositionEnum("disposition").notNull(),
+		reviewerId: text("reviewer_id").notNull(),
+		artifactDigest: text("artifact_digest"),
+		artifactRevision: integer("artifact_revision"),
+		notApplicableReason: text("not_applicable_reason"),
+		hierarchyModeAtRecord: hierarchyModeEnum(
+			"hierarchy_mode_at_record",
+		).notNull(),
+		schemaVersion: text("schema_version").notNull().default("1.0.0"),
+		recordedAt: timestamp("recorded_at", { withTimezone: true }).notNull(),
+		invalidatedAt: timestamp("invalidated_at", { withTimezone: true }),
+	},
+	(table) => [
+		index("orchestration_gate_bindings_issue_gate_idx").on(
+			table.issueIdentifier,
+			table.gateId,
+			table.recordedAt,
+		),
+		index("orchestration_gate_bindings_digest_idx").on(table.artifactDigest),
+	],
+);
+
+export const commandJournal = pgTable("orchestration_command_journal", {
+	commandId: uuid("command_id").primaryKey(),
+	commandName: text("command_name").notNull(),
+	aggregateId: uuid("aggregate_id").notNull(),
+	aggregateType: text("aggregate_type").notNull(),
+	revision: integer("revision").notNull(),
+	responseSnapshot: jsonb("response_snapshot"),
+	createdAt: timestamp("created_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+});
+
+export const taskboardMirror = pgTable(
+	"orchestration_taskboard_mirror",
+	{
+		issueIdentifier: text("issue_identifier").notNull(),
+		boardVersion: integer("board_version").notNull(),
+		status: text("status").notNull(),
+		threadId: text("thread_id"),
+		occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
+		ingestedAt: timestamp("ingested_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [
+		primaryKey({
+			columns: [table.issueIdentifier, table.boardVersion, table.status],
+		}),
+	],
+);
+
 export type GoalRow = typeof goals.$inferSelect;
-export type NewGoalRow = typeof goals.$inferInsert;
 export type TaskRow = typeof tasks.$inferSelect;
-export type NewTaskRow = typeof tasks.$inferInsert;
 export type RunRow = typeof runs.$inferSelect;
-export type NewRunRow = typeof runs.$inferInsert;
 export type TaskLeaseRow = typeof taskLeases.$inferSelect;
-export type NewTaskLeaseRow = typeof taskLeases.$inferInsert;
 export type RunHeartbeatRow = typeof runHeartbeats.$inferSelect;
-export type NewRunHeartbeatRow = typeof runHeartbeats.$inferInsert;
 export type GateBindingRow = typeof gateBindings.$inferSelect;
-export type NewGateBindingRow = typeof gateBindings.$inferInsert;
 export type CommandJournalRow = typeof commandJournal.$inferSelect;
-export type NewCommandJournalRow = typeof commandJournal.$inferInsert;
 export type TaskboardMirrorRow = typeof taskboardMirror.$inferSelect;
-export type NewTaskboardMirrorRow = typeof taskboardMirror.$inferInsert;

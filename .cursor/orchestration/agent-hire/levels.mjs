@@ -51,10 +51,13 @@ export const ON_DEMAND_WORKERS = [
   "generalPurpose",
 ];
 
+/** Subagent_type Cursor válido para críticos Level C (não existe `critic-reviewer` no Cursor) */
+export const CRITIC_CURSOR_SUBAGENT = "code-reviewer";
+
 /** Personas permanentes → subagent_type Cursor (Task tool) */
 export const PERSONA_CURSOR_SUBAGENT = {
   orchestrator: null,
-  "cto-critic": "critic-reviewer",
+  "cto-critic": CRITIC_CURSOR_SUBAGENT,
   architect: "architect",
   researcher: "explore",
   "code-review-lead": "code-reviewer",
@@ -67,10 +70,10 @@ export const PERSONA_CURSOR_SUBAGENT = {
   "frontend-executor": "generalPurpose",
   "infra-executor": "generalPurpose",
   "adapters-executor": "generalPurpose",
-  "backend-critic": "critic-reviewer",
-  "frontend-critic": "critic-reviewer",
-  "infra-critic": "critic-reviewer",
-  "adapters-critic": "critic-reviewer",
+  "backend-critic": CRITIC_CURSOR_SUBAGENT,
+  "frontend-critic": CRITIC_CURSOR_SUBAGENT,
+  "infra-critic": CRITIC_CURSOR_SUBAGENT,
+  "adapters-critic": CRITIC_CURSOR_SUBAGENT,
 };
 
 /** Workers/specialists on-demand → subagent_type Cursor (1:1 quando possível) */
@@ -105,6 +108,12 @@ export const ON_DEMAND_CURSOR_SUBAGENT = {
 /** @param {string} slug persona ou worker slug */
 export function getCursorSubagentType(slug) {
   return PERSONA_CURSOR_SUBAGENT[slug] ?? ON_DEMAND_CURSOR_SUBAGENT[slug] ?? null;
+}
+
+/** @param {string} executorSlug */
+export function getPairedCriticSubagentType(executorSlug) {
+  const criticSlug = EXECUTOR_CRITIC_PAIR[executorSlug];
+  return criticSlug ? getCursorSubagentType(criticSlug) : null;
 }
 
 

@@ -2,9 +2,9 @@
 
 Inventário formal do sistema de equipe estilo Google eng (personas + dialogue log + pipeline G0–G7).
 
-**Data:** 2026-09-09T16:10Z · **Escopo:** `.cursor/orchestration/`, hooks, rules — framework-only (ANX-237)  
-**Completude estimada:** **~98%** (ver [GOAL-STATUS.md](./GOAL-STATUS.md))  
-**Auditoria:** `orchestration:verify` 72/72 + diagram 36/36 + 18 personas + 7 crons on
+**Data:** 2026-09-10T14:35Z · **Escopo:** `.cursor/orchestration/`, hooks, rules — framework-only  
+**Completude estimada:** **~98% tooling** · **~40% autonomia comportamental real** (ver § Autonomia real vs simulação)  
+**Auditoria:** `orchestration:verify` **205/205** + diagram **18/18** + 18 personas + 7 crons on
 
 ---
 
@@ -71,7 +71,7 @@ Inventário formal do sistema de equipe estilo Google eng (personas + dialogue l
 | Gap anterior | Status | Evidência |
 | --- | --- | --- |
 | 17 tipos de interação | ✅ Fechado | `INTERACTIONS.md` + `protocol.mjs` = **24 tipos** |
-| Workflows individuais ausentes | ✅ Fechado | 18× `workflows/workflow-*.md` (incl. cto-critic); `diagram-check` 36/36 OK |
+| Workflows individuais ausentes | ✅ Fechado | 18× `workflows/workflow-*.md` (incl. cto-critic); `diagram-check` 18/18 OK |
 | Hire on-demand não documentado | ✅ Fechado | `HIRE-DELEGATION.md`, `agent-hire/`, regra `hierarchy-circular.mdc` |
 | CTO G7 sem oráculos | ✅ Fechado | `CTO-AUTHORITY.md`, `cto-decide`, `cto-accept` |
 | Roster/competências dispersos | ✅ Fechado | `AGENT-ROSTER.md`, `orchestration:who --can-i` |
@@ -102,9 +102,44 @@ Inventário formal do sistema de equipe estilo Google eng (personas + dialogue l
 
 ---
 
+## Autonomia real vs simulação (auditoria 2026-09-10)
+
+O framework mede **cobertura de CLI/docs** (~98%), não **fidelidade de equipe autônoma**. Hoje:
+
+| Promessa documental | Realidade implementada |
+| --- | --- |
+| Personas independentes | Um LLM coordenador formata blocos `---` |
+| Task dispatch automático | Fila `dispatch` + `inject`/`spawn-plan --json`; parent ainda invoca `Task` (sem API Cursor de spawn) |
+| Hooks bloqueiam violações | Hooks **avisam** (stderr); block real só em `compliance --pre-commit` manual |
+| Chat visível ao @Owner | Exige colar `orchestration:chat` — agora **pré-injetado** no `beforeSubmitPrompt` quando há `PENDING_CHAT_DISPLAY` |
+| Crons autônomos | Daemon opt-in; `sessionStart` roda proactive + **lifecycle-cleanup** |
+| Escalations consumidas | `pending-escalate.json` agora drenado por proactive triggers + `lifecycle-cleanup drain-escalate` |
+
+**Correções aplicadas 2026-09-10:**
+
+- `orchestration:lifecycle-cleanup` — encerra sessões/hires quando issue `done`/`canceled` ou TTL
+- `delegationFromHire` — stale por silêncio (antes hardcoded `false`)
+- `delegate-monitor status` — `ok` falha com delegações stale
+- `PARENT_DELEGATION_STALE` — warning para orquestrador
+- `dialogue-sync` — marca `pending-chat-display` em novas mensagens
+- `beforeSubmitPrompt` — injeta feed de chat pendente no stderr do agente
+- Proactive — lê `pending-escalate.json` como trigger
+- `orchestration:dispatch spawn-plan --json` — payload Task batch (executor + crítico)
+- `enqueueDispatch` — auto-enfileira crítico pareado (`code-reviewer`, não `critic-reviewer`)
+- `levels.mjs` — `CRITIC_CURSOR_SUBAGENT` = `code-reviewer` (tipo Cursor válido)
+- `orchestration:boot` — bootstrap único (taskboard + lifecycle + proactive + dispatch)
+- `decision-tree` — árvore dedicada `cto-critic` (não herda notify-g2 de Level C)
+- `diagram-check` — deduplica workflows (18, não 36)
+- `workflow-roster.test` — 1:1 `PERSONA_SLUGS` ↔ `workflow-{slug}.md`
+- `agent-proactive` hook — paridade com boot (`chat --check-pending`, `dispatch status`, hint `spawn-plan`)
+
+**Ainda arquitetural (não fechável só com CLI):** spawn mecânico de `Task` sem parent LLM; bloqueio hard no hook `stop`; espelhamento bidirecional taskboard↔dialogue.
+
+---
+
 ## Gaps remanescentes
 
-Fonte: auditoria c33417ce · smoke 2026-09-09
+Fonte: auditoria c33417ce · smoke 2026-09-09 · revalidação 2026-09-10
 
 ### Crítico (bloqueia goal COMPLETE)
 
@@ -119,13 +154,15 @@ Fonte: auditoria c33417ce · smoke 2026-09-09
 | --- | --- | --- |
 | ~~Zero testes automatizados do CLI~~ | ✅ | `orchestration:test` **72/72** + `orchestration:verify` agregado |
 | ~~Sem CI para smoke de orquestração~~ | ✅ | `.github/workflows/orchestration-verify.yml` (2026-09-09) |
-| **Cobertura visual ~67%, não 100%** | A/B | `diagram-check`: 72/107 arquivos com Mermaid; workflows **36/36** OK (18 personas) |
+| **Cobertura visual ~67%, não 100%** | A/B | `diagram-check`: 72/107 arquivos com Mermaid; workflows **18/18** OK (18 personas) |
 | ~~`agent-proactive.mjs` não wired~~ | ✅ | `sessionStart` em `.cursor/hooks.json` (2026-09-09) |
 | ~~`orchestration-dialogue.mdc` fora de `.cursor/rules/`~~ | ✅ | `.cursor/rules/orchestration-dialogue.mdc` alwaysApply (ANX-231) |
-| **Compliance dialogue na prática** | E | Agentes às vezes omitam `orchestration:chat` — regras existem em CHAT-PARTICIPATION |
+| **Compliance dialogue na prática** | E→mitigado | `beforeSubmitPrompt` injeta chat pendente; regras CHAT-PARTICIPATION permanecem |
 | **`mirror-taskboard` opcional e frágil** | C | Requer `taskctl`; dialogue e board podem divergir |
 | **Auto-hire via `taskboard-sync` não provado E2E** | E | Código existe; fluxo hire→dismiss→gate não auditado |
-| ~~Sessões abertas sem `session end`~~ | ✅ | Regra + docs; órfãs encerradas 2026-09-09 (ver [GOAL-STATUS.md](./GOAL-STATUS.md)) |
+| ~~Sessões abertas sem `session end`~~ | ✅ | `orchestration:lifecycle-cleanup` no `sessionStart` + TTL/issue done |
+| ~~Hires stale no delegate-monitor~~ | ✅ | `delegationFromHire` calcula stale; cleanup auto-dismiss |
+| ~~`pending-escalate.json` write-only~~ | ✅ | Proactive trigger + drain CLI |
 
 ### Opcional (melhorias)
 
@@ -146,9 +183,11 @@ Fonte: auditoria c33417ce · smoke 2026-09-09
 1. ~~Commit git inicial (Owner)~~ ✅ ANX-230
 2. Auto-hire E2E (`taskboard-sync`) — código existe; fluxo não auditado
 3. Robustez `mirror-taskboard` / `taskctl`
-4. Despacho subagent automatizado (fora de escopo v1)
-5. Cobertura Mermaid 100% (opcional — atual 67%)
-6. Compliance dialogue na prática (`PENDING_CHAT_DISPLAY` em sessões ativas)
+4. **Despacho subagent automatizado** — fila executável pós-hire (gap arquitetural #1)
+5. Cobertura Mermaid 100% (opcional — atual ~61%)
+6. ~~Lifecycle cleanup sessões/hires~~ ✅ `orchestration:lifecycle-cleanup`
+7. ~~Pending escalate consumido~~ ✅ proactive + drain
+8. Compliance dialogue — mitigado via hook precheck; monitorar adoção
 
 
 ## Roadmap (não automatizável aqui)

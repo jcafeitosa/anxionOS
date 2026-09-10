@@ -9,9 +9,11 @@ import { createMembershipActivatedEvent } from "../../domain/events/organization
 import { MembershipRevisionConflictError } from "../../domain/errors/membership-errors";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { InviteTokenHasher } from "../../domain/ports/invite-token-hasher";
+import type { MembershipRepository } from "../../domain/ports/membership-repository";
 import type { OrganizationUnitOfWork } from "../../domain/ports/organization-unit-of-work";
 import { loadIdempotentCommandResult, toCommandResultSnapshot } from "../command-support";
 import { parseCommandResultSnapshot, throwOrganizationError } from "../errors";
+import { buildAgencyTenantContext } from "../services/tenant-context";
 
 /**
  * Accept invite by token — requires session email match (D-ORG-034).
@@ -27,12 +29,26 @@ export async function acceptInviteByToken(
 		return replay;
 	}
 	const tokenHash = deps.inviteTokenHasher.hash(command.token);
-	return deps.unitOfWork.runInTransaction(async (context) => {
+	const invitedMembership =
+		await deps.membershipRepository.findInvitedByTokenHash(tokenHash);
+	if (!invitedMembership) {
+		throwOrganizationError(
+			"ORG_AGENCY_NOT_FOUND",
+			"Invite token is invalid or already consumed",
+		);
+	}
+	return deps.unitOfWork.runInTransaction(
+		buildAgencyTenantContext(
+			invitedMembership.agencyId,
+			input.sessionPrincipalId,
+		),
+		async (context) => {
 		const raced = await context.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
 			return parseCommandResultSnapshot(raced.responseSnapshot);
 		}
-		const membership = await context.membershipRepository.findInvitedByTokenHash(tokenHash);
+		const membership =
+			await context.membershipRepository.findInvitedByTokenHash(tokenHash);
 		if (!membership) {
 			throwOrganizationError("ORG_AGENCY_NOT_FOUND", "Invite token is invalid or already consumed");
 		}
@@ -101,7 +117,8 @@ export async function acceptInviteByToken(
 		});
 		await context.publishEvents([event]);
 		return result;
-	});
+		},
+	);
 }
 
 export interface AcceptInviteByTokenInput extends AcceptInviteByTokenCommand {
@@ -112,5 +129,6 @@ export interface AcceptInviteByTokenInput extends AcceptInviteByTokenCommand {
 export interface AcceptInviteByTokenDeps {
 	unitOfWork: OrganizationUnitOfWork;
 	commandJournal: CommandJournalRepository;
+	membershipRepository: MembershipRepository;
 	inviteTokenHasher: InviteTokenHasher;
 }

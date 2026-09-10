@@ -17,6 +17,20 @@ const G6_INTEGRATED_RE = /disposi[cç][aã]o integrada[^\n]*(PASS_WITH_CONDITION
 const VERDICT_VALUES = ["BLOCKED", "PASS_WITH_CONDITIONS", "PASS", "CHANGES_REQUIRED", "NOT_APPLICABLE"];
 const VERDICT_ALT = VERDICT_VALUES.join("|");
 
+
+const RESERVATIONS_RE = /\b(COM\s+RESSALVAS|done\s+com\s+ressalvas|ressalvas\s+(permanecem|pendentes)|MEDIUM\s+pendente|follow-?up\s+(MEDIUM|aberto))/i;
+const OPEN_FOLLOWUP_RE = /\bANX-\d{2,}\b[^\n]{0,120}\b(todo|in_progress|blocked)\b/i;
+
+export function detectReservationsInCorpus(corpus) {
+  if (/\b(ressalvas cleared|zero ressalvas|sem ressalvas|nenhuma ressalva|filhos resolvidos)\b/i.test(corpus)) {
+    return [];
+  }
+  const hits = [];
+  if (RESERVATIONS_RE.test(corpus)) hits.push("Comentário menciona ressalvas ou MEDIUM pendente");
+  if (OPEN_FOLLOWUP_RE.test(corpus)) hits.push("Follow-up ANX-* ainda aberto mencionado nos comentários");
+  return hits;
+}
+
 const ESCALATE_PATTERNS = [
   { re: /\bADR\s*conflict|conflito.*ADR/i, reason: "Conflito ADR arquitetural" },
   { re: /TODO\(|FIXME|not implemented|placeholder.*prod/i, reason: "Violação tolerância zero no diff" },
@@ -230,6 +244,11 @@ export function evaluateEvidence(issueId, task, comments, root) {
       criteria,
       git,
     };
+  }
+
+  const reservationHits = detectReservationsInCorpus(latestCorpus);
+  if (reservationHits.length > 0) {
+    reasons.push(`DONE_WITH_RESERVATIONS: ${reservationHits.join('; ')}`);
   }
 
   if (/fora do escopo|out of scope|scope creep/i.test(latestCorpus)) reasons.push("Alterações fora do escopo (comentário recente)");

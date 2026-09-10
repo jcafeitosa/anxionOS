@@ -29,5 +29,34 @@
       "CODEX_TASKBOARD_URL"
     ],
     "defaultUrl": "http://127.0.0.1:47823"
+  },
+  "taskboardRouting": {
+    "project": "dashi",
+    "nonProject": "cursor",
+    "frameworkIssuePatterns": [
+      "^ANX-23[0-9]$",
+      "^ANX-240$",
+      "^ANX-242$"
+    ],
+    "frameworkPathPrefixes": [
+      ".cursor/orchestration/",
+      ".cursor/rules/",
+      ".cursor/hooks/",
+      ".cursor/skills/",
+      ".cursor/commands/",
+      ".cursor/orchestration.config.json",
+      ".cursor/orchestration-runtime/"
+    ],
+    "projectPathPrefixes": [
+      "backend/",
+      "frontend/",
+      "docs/",
+      "brain/"
+    ]
+  },
+  "llmRouter": {
+    "provider": "9router",
+    "defaultBaseUrl": "http://localhost:20128/v1",
+    "defaultModel": null
   }
 }

@@ -1,10 +1,13 @@
-import type { Driver } from "neo4j-driver";
+import type { Driver, Record as Neo4jRecord } from "neo4j-driver";
+import type { GraphNodeRecord } from "../../../domain/ports/graph-store";
 import type { TraversalEvaluator } from "../../../domain/ports/traversal-evaluator";
 import neo4j from "neo4j-driver";
+import type { GrantScope } from "../../../application/traversal/t01-grant-evaluation";
 import { evaluateT01Grants, resolveGrantScope, toT03Output, } from "../../../application/traversal/t01-grant-evaluation";
+import { evaluateT02Temporal } from "../../../application/traversal/t02-temporal-evaluation";
 import { parseNodeKey } from "../../../domain/node-key";
 
-function toNumber(value) {
+function toNumber(value: unknown): number {
     if (neo4j.isInt(value)) {
         return value.toNumber();
     }
@@ -13,7 +16,7 @@ function toNumber(value) {
     }
     return 0;
 }
-function parsePayload(value) {
+function parsePayload(value: unknown): Record<string, unknown> {
     if (value === null || value === undefined) {
         return {};
     }
@@ -21,11 +24,11 @@ function parsePayload(value) {
         return JSON.parse(value);
     }
     if (typeof value === "object") {
-        return value;
+        return value as Record<string, unknown>;
     }
     return {};
 }
-function recordToGrantNode(record) {
+function recordToGrantNode(record: Neo4jRecord): GraphNodeRecord {
     const nodeKey = parseNodeKey(String(record.get("nodeKey")));
     return {
         nodeKey,
@@ -37,7 +40,10 @@ function recordToGrantNode(record) {
         payload: parsePayload(record.get("payloadJson")),
     };
 }
-async function queryGrantNodes(driver, grantScope) {
+async function queryGrantNodes(
+	driver: Driver,
+	grantScope: GrantScope,
+): Promise<GraphNodeRecord[]> {
     const session = driver.session();
     try {
         const result = await session.run(`MATCH (n:GraphNode)
@@ -66,8 +72,24 @@ export function createNeo4jTraversalEvaluator(deps: CreateNeo4jTraversalEvaluato
     return {
         async evaluate(input) {
             const checkpoint = await deps.getCheckpoint();
-            if (input.traversalId === "T02" ||
-                input.traversalId === "T04" ||
+            if (input.traversalId === "T02") {
+                const t02Input = input.input;
+                if (!("validAt" in t02Input)) {
+                    throw new Error("T02 requires temporal params");
+                }
+                const t02Result = evaluateT02Temporal({
+                    params: t02Input,
+                    knownAt: input.temporal.knownAt,
+                });
+                return {
+                    data: { complete: t02Result.complete },
+                    authorityEpoch: 0,
+                    riskEpoch: defaultRiskEpoch,
+                    projectionGeneration: 0,
+                    checkpoint,
+                };
+            }
+            if (input.traversalId === "T04" ||
                 input.traversalId === "T05") {
                 return {
                     data: { complete: true },
@@ -88,7 +110,11 @@ export function createNeo4jTraversalEvaluator(deps: CreateNeo4jTraversalEvaluato
             }
             const grantScope = resolveGrantScope(input.scope, t01Input.resourceNodeKey);
             const grants = await queryGrantNodes(deps.driver, grantScope);
-            const evaluation = evaluateT01Grants({ scope: input.scope, params: t01Input }, grants);
+            const evaluation = evaluateT01Grants({
+                scope: input.scope,
+                params: t01Input,
+                knownAt: input.temporal.knownAt,
+            }, grants);
             const t01Output = evaluation.output;
             const data = input.traversalId === "T03" ? toT03Output(t01Output) : t01Output;
             return {

@@ -3,7 +3,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const moduleRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const moduleRoot = path.resolve(
+	path.dirname(fileURLToPath(import.meta.url)),
+	"..",
+);
 const distRoot = path.join(moduleRoot, "dist");
 const srcRoot = path.join(moduleRoot, "src");
 
@@ -25,7 +28,8 @@ function isReexportOnly(js) {
 }
 
 function parseDeclareFunctions(dts) {
-	const regex = /export declare (async )?function (\w+)\(([\s\S]*?)\)(:\s*[\s\S]*?)?;/g;
+	const regex =
+		/export declare (async )?function (\w+)\(([\s\S]*?)\)(:\s*[\s\S]*?)?;/g;
 	const out = [];
 	let match;
 	while ((match = regex.exec(dts)) !== null) {
@@ -54,9 +58,13 @@ function applyFunctionSignatures(js, signatures) {
 	for (const sig of signatures) {
 		const asyncPart = sig.async ? "async " : "";
 		const typedHead = `export ${asyncPart}function ${sig.name}(${sig.params})${sig.returnType} {`;
-		const pattern = new RegExp(`export ${asyncPart}function ${sig.name}\\([^)]*\\)\\s*\\{`);
+		const pattern = new RegExp(
+			`export ${asyncPart}function ${sig.name}\\([^)]*\\)\\s*\\{`,
+		);
 		if (!pattern.test(result)) {
-			const multiline = new RegExp(`export ${asyncPart}function ${sig.name}\\([\\s\\S]*?\\)\\s*\\{`);
+			const multiline = new RegExp(
+				`export ${asyncPart}function ${sig.name}\\([\\s\\S]*?\\)\\s*\\{`,
+			);
 			result = result.replace(multiline, typedHead);
 		} else {
 			result = result.replace(pattern, typedHead);
@@ -92,48 +100,98 @@ function mergeImplFile(dtsPath, jsPath) {
 	let typedJs = applyFunctionSignatures(js, signatures);
 	typedJs = applyClassSignatures(typedJs, rawDts);
 	const header = typeOnlySection(rawDts);
-	const headerImports = header.split("\n").filter((l) => l.startsWith("import ")).join("\n");
-	const headerTypes = header.split("\n").filter((l) => !l.startsWith("import ")).join("\n").trim();
-	const jsImports = typedJs.split("\n").filter((l) => l.startsWith("import ")).join("\n");
-	const jsBody = typedJs.split("\n").filter((l) => !l.startsWith("import ")).join("\n").trim();
-	const imports = [...new Set([...headerImports.split("\n"), ...jsImports.split("\n")])].filter(Boolean).join("\n");
+	const headerImports = header
+		.split("\n")
+		.filter((l) => l.startsWith("import "))
+		.join("\n");
+	const headerTypes = header
+		.split("\n")
+		.filter((l) => !l.startsWith("import "))
+		.join("\n")
+		.trim();
+	const jsImports = typedJs
+		.split("\n")
+		.filter((l) => l.startsWith("import "))
+		.join("\n");
+	const jsBody = typedJs
+		.split("\n")
+		.filter((l) => !l.startsWith("import "))
+		.join("\n")
+		.trim();
+	const imports = [
+		...new Set([...headerImports.split("\n"), ...jsImports.split("\n")]),
+	]
+		.filter(Boolean)
+		.join("\n");
 	return `${[imports, headerTypes, jsBody].filter(Boolean).join("\n\n")}\n`;
 }
 
 function fixImports(content) {
-	let out = content.replace(/import type \{([^}]*)\} from "@anxionos\/contracts";/g, (_m, specifiers) => {
-		const names = specifiers.split(",").map((s) => s.trim()).filter(Boolean);
-		const events = [];
-		const strategies = [];
-		for (const name of names) {
-			const bare = name.replace(/^type\s+/, "").trim();
-			if (bare === "DomainEventEnvelope") events.push(name);
-			else strategies.push(name);
-		}
-		const parts = [];
-		if (events.length) parts.push(`import type { ${events.join(", ")} } from "@anxionos/contracts/events";`);
-		if (strategies.length) parts.push(`import type { ${strategies.join(", ")} } from "@anxionos/contracts/strategies";`);
-		return parts.join("\n");
-	});
-	out = out.replace(/import\s*\{([^}]*)\}\s*from\s*"@anxionos\/contracts";/g, (_match, specifiers) => {
-		const names = specifiers.split(",").map((s) => s.trim()).filter(Boolean);
-		const events = [];
-		const strategies = [];
-		for (const name of names) {
-			const bare = name.replace(/^type\s+/, "").trim();
-			if (bare === "DomainEventEnvelope" || bare === "domainEventEnvelopeSchema") events.push(name);
-			else strategies.push(name);
-		}
-		const parts = [];
-		if (events.length) parts.push(`import { ${events.join(", ")} } from "@anxionos/contracts/events";`);
-		if (strategies.length) parts.push(`import { ${strategies.join(", ")} } from "@anxionos/contracts/strategies";`);
-		return parts.join("\n");
-	});
-	return out.replace(/from "@anxionos\/eventing"/g, 'from "@anxionos/eventing/postgres"');
+	let out = content.replace(
+		/import type \{([^}]*)\} from "@anxionos\/contracts";/g,
+		(_m, specifiers) => {
+			const names = specifiers
+				.split(",")
+				.map((s) => s.trim())
+				.filter(Boolean);
+			const events = [];
+			const strategies = [];
+			for (const name of names) {
+				const bare = name.replace(/^type\s+/, "").trim();
+				if (bare === "DomainEventEnvelope") events.push(name);
+				else strategies.push(name);
+			}
+			const parts = [];
+			if (events.length)
+				parts.push(
+					`import type { ${events.join(", ")} } from "@anxionos/contracts/events";`,
+				);
+			if (strategies.length)
+				parts.push(
+					`import type { ${strategies.join(", ")} } from "@anxionos/contracts/strategies";`,
+				);
+			return parts.join("\n");
+		},
+	);
+	out = out.replace(
+		/import\s*\{([^}]*)\}\s*from\s*"@anxionos\/contracts";/g,
+		(_match, specifiers) => {
+			const names = specifiers
+				.split(",")
+				.map((s) => s.trim())
+				.filter(Boolean);
+			const events = [];
+			const strategies = [];
+			for (const name of names) {
+				const bare = name.replace(/^type\s+/, "").trim();
+				if (
+					bare === "DomainEventEnvelope" ||
+					bare === "domainEventEnvelopeSchema"
+				)
+					events.push(name);
+				else strategies.push(name);
+			}
+			const parts = [];
+			if (events.length)
+				parts.push(
+					`import { ${events.join(", ")} } from "@anxionos/contracts/events";`,
+				);
+			if (strategies.length)
+				parts.push(
+					`import { ${strategies.join(", ")} } from "@anxionos/contracts/strategies";`,
+				);
+			return parts.join("\n");
+		},
+	);
+	return out.replace(
+		/from "@anxionos\/eventing"/g,
+		'from "@anxionos/eventing/postgres"',
+	);
 }
 
 function reconstruct() {
-	if (fs.existsSync(srcRoot)) fs.rmSync(srcRoot, { recursive: true, force: true });
+	if (fs.existsSync(srcRoot))
+		fs.rmSync(srcRoot, { recursive: true, force: true });
 	fs.mkdirSync(srcRoot, { recursive: true });
 	let count = 0;
 	walk(distRoot, (file) => {
@@ -143,9 +201,11 @@ function reconstruct() {
 		const tsPath = path.join(srcRoot, rel.replace(/\.d\.ts$/, ".ts"));
 		fs.mkdirSync(path.dirname(tsPath), { recursive: true });
 		const rawDts = fs.readFileSync(file, "utf8");
-		const hasImpl = rawDts.includes("declare function") || rawDts.includes("declare class");
+		const hasImpl =
+			rawDts.includes("declare function") || rawDts.includes("declare class");
 		let content;
-		if (!hasImpl || !fs.existsSync(jsPath)) content = `${typeOnlySection(rawDts)}\n`;
+		if (!hasImpl || !fs.existsSync(jsPath))
+			content = `${typeOnlySection(rawDts)}\n`;
 		else content = mergeImplFile(file, jsPath);
 		fs.writeFileSync(tsPath, fixImports(content));
 		count++;

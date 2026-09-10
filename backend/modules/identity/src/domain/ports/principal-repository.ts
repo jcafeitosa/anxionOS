@@ -4,6 +4,7 @@ export interface PrincipalRepository {
 	findById(id: string): Promise<Principal | null>;
 	findByAuthUserId(authUserId: string): Promise<Principal | null>;
 	findByEmail(email: string): Promise<Principal | null>;
+	listSuspended(): Promise<Principal[]>;
 	create(input: NewPrincipal): Promise<Principal>;
 	markSuspended(
 		id: string,

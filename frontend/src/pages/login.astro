@@ -1,0 +1,10 @@
+---
+import "../styles/global.css";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { LoginForm } from "../components/auth/LoginForm";
+import { PostLoginRouter } from "../components/PostLoginRouter";
+---
+<BaseLayout title="Entrar | anxionOS" description="Acesse sua conta anxionOS.">
+	<LoginForm client:load />
+	<PostLoginRouter client:load mode="login" />
+</BaseLayout>

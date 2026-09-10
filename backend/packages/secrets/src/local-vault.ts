@@ -1,10 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import type {
-	SecretMaterial,
-	SecretReference,
-	SecretVault,
-} from "./ports";
+import type { SecretMaterial, SecretReference, SecretVault } from "./ports";
 
 const DEV_VAULT_BLOCKED_MESSAGE =
 	"LocalFileSecretVault is dev-only and cannot run when NODE_ENV=production. Configure a production secrets provider (KMS/Vault).";

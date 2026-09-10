@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { schemaVersion } from "@anxionos/contracts";
+import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import {
 	KNOWLEDGE_EVENT_TYPES,
 	KNOWLEDGE_OWNER_DOMAIN,
 } from "@anxionos/contracts/knowledge";
-import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 
 export function createDocumentIndexedEvent(input: {
 	documentId: string;

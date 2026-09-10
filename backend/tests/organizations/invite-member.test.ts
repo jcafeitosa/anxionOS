@@ -21,7 +21,7 @@ const agency: Agency = {
 	id: agencyId,
 	ownerPrincipalId,
 	displayName: "Acme Capital",
-	marketScope: { regions: ["US"], assetClasses: ["equity"] },
+	marketScope: "both",
 	status: "ready",
 	onboardingStep: "ready",
 	revision: 1,
@@ -55,7 +55,8 @@ const viewerMembership: Membership = {
 
 function createInviteDeps(seedMemberships: Membership[] = [ownerMembership]) {
 	const agencyRepository = createInMemoryAgencyRepository([agency]);
-	const membershipRepository = createInMemoryMembershipRepository(seedMemberships);
+	const membershipRepository =
+		createInMemoryMembershipRepository(seedMemberships);
 	const commandJournal = createInMemoryCommandJournalRepository();
 	const { unitOfWork, published } = createRecordingOrganizationUnitOfWork({
 		agencyRepository,
@@ -87,7 +88,9 @@ describe("inviteMember", () => {
 		});
 		expect(invited.result.aggregateId).toMatch(/^[0-9a-f-]{36}$/i);
 		expect(invited.inviteToken.length).toBeGreaterThan(0);
-		expect(published[0]?.eventType).toBe(ORGANIZATION_EVENT_TYPES.MEMBERSHIP_INVITED);
+		expect(published[0]?.eventType).toBe(
+			ORGANIZATION_EVENT_TYPES.MEMBERSHIP_INVITED,
+		);
 	});
 
 	test("duplicate pending invite is rejected", async () => {

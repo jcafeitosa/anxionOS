@@ -1,0 +1,8 @@
+---
+import "../styles/global.css";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { MfaPendingPanel } from "../components/auth/AuthPanels";
+---
+<BaseLayout title="MFA | anxionOS" description="Verificação em duas etapas pendente.">
+	<MfaPendingPanel client:load />
+</BaseLayout>

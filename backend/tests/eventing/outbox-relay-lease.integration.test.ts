@@ -6,9 +6,15 @@ import {
 	markOutboxDispatchedForRelay,
 	releaseOutboxRelayClaims,
 } from "@anxionos/eventing/postgres";
-import { relayPendingOutbox, type OutboxPublisher } from "@anxionos/eventing/relay";
+import {
+	type OutboxPublisher,
+	relayPendingOutbox,
+} from "@anxionos/eventing/relay";
 import { DEFAULT_RETRY_POLICY } from "@anxionos/eventing/retry";
-import { shouldRunPgIntegrationTests, withEventingPgHarness } from "./test-support";
+import {
+	shouldRunPgIntegrationTests,
+	withEventingPgHarness,
+} from "./test-support";
 
 const sampleEnvelope: DomainEventEnvelope = {
 	eventId: "99999999-9999-4999-8999-999999999999",

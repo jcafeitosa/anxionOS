@@ -1,0 +1,8 @@
+---
+import "../../styles/global.css";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { ConsoleApp } from "../../components/shell/ConsoleApp";
+---
+<BaseLayout title="Platform Console | anxionOS" description="Operação multi-tenant da plataforma.">
+	<ConsoleApp client:load kind="platform" />
+</BaseLayout>

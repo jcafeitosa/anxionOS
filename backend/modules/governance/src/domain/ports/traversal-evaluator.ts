@@ -1,4 +1,8 @@
-import type { ScopeContext, T01Input, T01Output } from "@anxionos/contracts/graph";
+import type {
+	ScopeContext,
+	T01Input,
+	T01Output,
+} from "@anxionos/contracts/graph";
 
 export interface EvaluateT01Input {
 	scope: ScopeContext;

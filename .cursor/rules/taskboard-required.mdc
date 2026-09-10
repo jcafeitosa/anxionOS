@@ -13,14 +13,16 @@ alwaysApply: true
 2. `npm run taskboard:context` + `npm run taskboard:list` ou `node scripts/taskboard.mjs get ANX-<N>`.
 3. Criar issue se não existir (buscar duplicatas primeiro).
 4. Claim: `in_progress` com binding de thread (`manage-taskboard`).
-5. Trabalhar **somente** no escopo da issue claimada.
-6. Ao terminar: comentário → `in_review`. `done` só com aceite explícito.
+5. **Lock (Z21):** `npm run orchestration:coordination -- claim-check --issue ANX-N --persona SLUG --acquire` + comentario `CLAIM + LOCK` na issue.
+6. Trabalhar **somente** no escopo da issue claimada.
+7. Ao terminar: comentário → `in_review`. `done` só com aceite explícito.
 
 Atalho: `npm run taskboard:prework`.
 
 ## Proibido
 
 - Trabalho “de cabeça” sem claim.
+- Codar sem lock (`MISSING_ISSUE_LOCK`) — outro agente pode estar na mesma issue.
 - Continuar com board offline.
 - Fechar sessão com issue desatualizada.
 - PR sem `ANX-*` no título/corpo.

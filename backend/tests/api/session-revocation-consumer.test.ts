@@ -1,9 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { IDENTITY_EVENT_TYPES } from "@anxionos/contracts/identity";
-import type { Principal } from "@anxionos/identity";
 import {
-	consumeIdentitySuspendedEvent,
+	IDENTITY_EVENT_TYPES,
+	identityPrincipalSuspendedV1PayloadSchema,
+} from "@anxionos/contracts/identity";
+import type { Principal } from "@anxionos/identity";
+
+import {
+	SessionRevocationUnavailableError,
+	reconcileSuspendedPrincipalSessions,
+} from "@anxionos/identity";
+import {
 	IDENTITY_SESSIONS_CONSUMER_NAME,
+	classifyIdentitySessionRevocationError,
+	consumeIdentitySuspendedEvent,
 } from "../../apps/api/src/identity/session-revocation-consumer";
 import { createInMemoryPrincipalRepository } from "../identity/test-support";
 
@@ -18,15 +27,43 @@ const suspendedPrincipal: Principal = {
 };
 
 describe("session revocation consumer", () => {
+	describe("classifyIdentitySessionRevocationError", () => {
+		test("treats Zod validation failures as permanent (ack poison)", () => {
+			let validationError: unknown;
+			try {
+				identityPrincipalSuspendedV1PayloadSchema.parse({
+					principalId: suspendedPrincipal.id,
+				});
+			} catch (error) {
+				validationError = error;
+			}
+			expect(classifyIdentitySessionRevocationError(validationError)).toBe(
+				"permanent",
+			);
+		});
+
+		test("treats session revoker outages as transient (nak retry)", () => {
+			expect(
+				classifyIdentitySessionRevocationError(
+					new SessionRevocationUnavailableError("down"),
+				),
+			).toBe("transient");
+		});
+	});
+
 	test("consumer name matches R09 durable identity-sessions contract", () => {
-		expect(IDENTITY_SESSIONS_CONSUMER_NAME).toBe("apps/api:identity-sessions:v1");
+		expect(IDENTITY_SESSIONS_CONSUMER_NAME).toBe(
+			"apps/api:identity-sessions:v1",
+		);
 	});
 
 	test("consumeIdentitySuspendedEvent revokes sessions for suspended principal", async () => {
 		const revoked: string[] = [];
 		await consumeIdentitySuspendedEvent(
 			{
-				principalRepository: createInMemoryPrincipalRepository([suspendedPrincipal]),
+				principalRepository: createInMemoryPrincipalRepository([
+					suspendedPrincipal,
+				]),
 				sessionRevoker: {
 					async revokeAllForAuthUser(authUserId) {
 						revoked.push(authUserId);
@@ -53,7 +90,9 @@ describe("session revocation consumer", () => {
 		const revoked: string[] = [];
 		await consumeIdentitySuspendedEvent(
 			{
-				principalRepository: createInMemoryPrincipalRepository([suspendedPrincipal]),
+				principalRepository: createInMemoryPrincipalRepository([
+					suspendedPrincipal,
+				]),
 				sessionRevoker: {
 					async revokeAllForAuthUser(authUserId) {
 						revoked.push(authUserId);
@@ -74,4 +113,29 @@ describe("session revocation consumer", () => {
 		);
 		expect(revoked).toEqual([]);
 	});
+
+	test("reconcileSuspendedPrincipalSessions revokes all suspended principals", async () => {
+		const revoked: string[] = [];
+		const result = await reconcileSuspendedPrincipalSessions({
+			principalRepository: createInMemoryPrincipalRepository([
+				suspendedPrincipal,
+				{
+					...suspendedPrincipal,
+					id: "22222222-2222-4222-8222-222222222222",
+					authUserId: "auth-2",
+					email: "other@example.com",
+				},
+			]),
+			sessionRevoker: {
+				async revokeAllForAuthUser(authUserId) {
+					revoked.push(authUserId);
+				},
+			},
+		});
+		expect(result.revokedPrincipalCount).toBe(2);
+		expect(revoked.sort()).toEqual(["auth-1", "auth-2"]);
+	});
 });
+
+
+	

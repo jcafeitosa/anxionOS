@@ -1,0 +1,41 @@
+{
+	"version": "7",
+	"dialect": "postgresql",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "7",
+			"when": 1757400000000,
+			"tag": "0000_organizations_core",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1788863000001,
+			"tag": "0001_organizations_membership_indexes",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1788863000002,
+			"tag": "0002_organizations_rls_policies_part1",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "7",
+			"when": 1788863000003,
+			"tag": "0003_organizations_rls_policies_part2",
+			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "7",
+			"when": 1788863000004,
+			"tag": "0004_organizations_rls_grants",
+			"breakpoints": true
+		}
+	]
+}

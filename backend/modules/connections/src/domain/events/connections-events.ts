@@ -3,7 +3,7 @@ import {
 	CONNECTIONS_EVENT_TYPES,
 	CONNECTIONS_OWNER_DOMAIN,
 } from "@anxionos/contracts/connections";
-import { type DomainEventEnvelope } from "@anxionos/contracts/events";
+import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 
 export function createAiAccountRegisteredEvent(input: {
 	aiAccountId: string;
@@ -68,6 +68,27 @@ export function createUsageRecordedEvent(input: {
 			unit: input.unit,
 			consumerKind: input.consumerKind,
 			taskId: input.taskId,
+		},
+	};
+}
+
+export function createInferenceWaitingHumanEvent(input: {
+	inferenceRequestId: string;
+	bindingId: string;
+	operationId: string;
+	issueIdentifier?: string;
+}): DomainEventEnvelope {
+	return {
+		eventId: randomUUID(),
+		eventType: CONNECTIONS_EVENT_TYPES.INFERENCE_WAITING_HUMAN,
+		schemaVersion: "0.1.0",
+		ownerDomain: CONNECTIONS_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload: {
+			inferenceRequestId: input.inferenceRequestId,
+			bindingId: input.bindingId,
+			operationId: input.operationId,
+			issueIdentifier: input.issueIdentifier,
 		},
 	};
 }

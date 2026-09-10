@@ -1,0 +1,40 @@
+---
+description: Colaboração Google-style — conversa natural entre personas como time de engenharia
+alwaysApply: true
+---
+
+# Colaboração Google-style (time de engenharia)
+
+Playbook completo: [.cursor/orchestration/GOOGLE-TEAM-PLAYBOOK.md](../orchestration/GOOGLE-TEAM-PLAYBOOK.md) · exemplos: [templates/GOOGLE-NATURAL-TEAM-EXAMPLES.md](../orchestration/templates/GOOGLE-NATURAL-TEAM-EXAMPLES.md)
+
+## Obrigatório
+
+1. **Personas conversam entre si** — `@mention` direto (executor↔crítico, executor↔TL, cross-domain `consult`). Orquestrador **roteia**, não faz proxy técnico.
+2. **Mínimo 2 blocos persona** (`---`) em threads de implementação, delegação ou gates — ver [agents-in-chat.mdc](./agents-in-chat.mdc).
+3. **Rituais Google** mapeados a tipos dialogue — [INTERACTIONS.md § Catálogo Google-style](../orchestration/INTERACTIONS.md#catálogo-google-style--padrões-de-equipe--tipos-de-dialogue):
+   - Standup: `npm run orchestration:standup -- --issue ANX-N --post`
+   - Design review: `consult` + `debate` antes de código (P1–P2)
+   - Code review: `review` → `verdict` G2+
+   - Launch readiness: P6 checklist
+   - Postmortem: skill `write-a-postmortem` (P7)
+4. **Voz natural PT-BR** por persona — [PERSONA-VOICE.md](../orchestration/PERSONA-VOICE.md); warning `PERSONA_ROBOTIC`.
+5. **Verificar peer chat** em issues `in_progress`: `npm run orchestration:google-team -- check --issue ANX-N`
+
+## Proibido
+
+- Monólogo genérico de Assistant sem blocos persona
+- Responder técnico em nome de outra persona (warning `HIERARCHY_PROXY_ANSWER`)
+- Só orchestrator falar em thread com executor ativo (warning `GOOGLE_TEAM_NO_PEER_CHAT`)
+- LGTM ou PASS sem evidência (`command:` / `file:` / `issue:`)
+- Debate >3 ciclos sem `escalate` a Renata
+
+## CLI
+
+```bash
+npm run orchestration:google-team -- list
+npm run orchestration:google-team -- check --issue ANX-N
+npm run orchestration:google-team -- ritual standup
+npm run orchestration:standup -- --issue ANX-N --post
+```
+
+**Violações → `npm run orchestration:compliance`**

@@ -1,9 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import { IDENTITY_EVENT_TYPES } from "@anxionos/contracts/identity";
 import {
+	IDENTITY_EVENT_TYPES,
+	reactivatePrincipalCommandSchema,
+} from "@anxionos/contracts/identity";
+import {
+	type Principal,
 	getPrincipalById,
 	reactivatePrincipal,
-	type Principal,
 } from "@anxionos/identity";
 import { IdentityCommandError } from "../../modules/identity/src/application/errors";
 import {
@@ -37,12 +40,16 @@ describe("reactivatePrincipal", () => {
 			},
 		);
 		expect(reactivated.status).toBe("active");
-		expect(published[0]?.eventType).toBe(IDENTITY_EVENT_TYPES.PRINCIPAL_REACTIVATED);
+		expect(published[0]?.eventType).toBe(
+			IDENTITY_EVENT_TYPES.PRINCIPAL_REACTIVATED,
+		);
 		expect(published[0]?.payload).toMatchObject({
 			principalId: suspendedPrincipal.id,
 			actorPrincipalId: "22222222-2222-4222-8222-222222222222",
 		});
-		expect(await getPrincipalById(repository, suspendedPrincipal.id)).not.toBeNull();
+		expect(
+			await getPrincipalById(repository, suspendedPrincipal.id),
+		).not.toBeNull();
 	});
 
 	test("re-reactivate is idempotent without duplicate event", async () => {
@@ -63,6 +70,14 @@ describe("reactivatePrincipal", () => {
 		);
 		expect(result.status).toBe("active");
 		expect(published).toHaveLength(0);
+	});
+
+	test("command schema requires principalId uuid", () => {
+		expect(() =>
+			reactivatePrincipalCommandSchema.parse({
+				principalId: "not-a-uuid",
+			}),
+		).toThrow();
 	});
 
 	test("unknown principal fails closed", async () => {

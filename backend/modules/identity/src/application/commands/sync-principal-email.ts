@@ -28,7 +28,9 @@ export async function syncPrincipalEmail(
 		return existing;
 	}
 	return deps.unitOfWork.runInTransaction(async (context) => {
-		const emailTaken = await context.principalRepository.findByEmail(command.email);
+		const emailTaken = await context.principalRepository.findByEmail(
+			command.email,
+		);
 		if (emailTaken && emailTaken.id !== command.principalId) {
 			throwIdentityError("PRINCIPAL_EMAIL_TAKEN", "Email already registered");
 		}

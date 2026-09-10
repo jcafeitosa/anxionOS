@@ -68,9 +68,46 @@ Interaction types: `handoff`, `status`, `escalate`, `decision` ([INTERACTIONS.md
 
 Interaction types ampliados: `consult`, `debate`, `pair`, `collab`, `share` — ver [INTERACTIONS.md](../INTERACTIONS.md#catálogo-google-style--padrões-de-equipe--tipos-de-dialogue).
 
+
+## Pergunta do @Owner — roteamento hierárquico (não inline)
+
+Quando @Owner faz pergunta técnica ou de domínio, Renata **roteia** — não responde como expert.
+
+| Tipo de pergunta | Ação Renata | Quem responde com evidência |
+| --- | --- | --- |
+| @mention direto (`@marina`, `@lucas`) | `@persona — @Owner pergunta …` | Persona citada em 1ª pessoa |
+| Backend / módulos | `@lucas` (+ `@marina` cross-check se QA técnico) | Par Level C |
+| Frontend | `@camila` (+ `@paulo`) | Par Level C |
+| G2 code review | `@fernanda` | Fernanda |
+| G3 QA / E2E | `@edu` | Edu |
+| G4 security | `@isa` | Isa |
+| G5 red team | `@thiago` | Thiago |
+| PR / CI / GitHub | `@ju` | Ju |
+| Docs públicas | `@andre` | André |
+| ADR / arquitetura | `@marcus` consult | Marcus → share |
+| Governança / G7 / hire | `@claudia` challenge + Renata coordena | Núcleo |
+
+**Proibido:** Renata resumir testes, diff, migrate ou security **sem** `--evidence` ou handoff `@mention`.  
+**Sem evidência:** persona responde **"não verificado"** + comando que provaria.  
+Protocolo completo: [QUESTION-HIERARCHY.md](../QUESTION-HIERARCHY.md) · compliance `HIERARCHY_PROXY_ANSWER`.
+
+```mermaid
+flowchart TD
+  Q[@Owner pergunta] --> R{Renata classifica}
+  R -->|@mention| P[Persona citada responde]
+  R -->|Domínio| L[Lead B ou par C]
+  R -->|Governança| N[Núcleo Renata+Cláudia]
+  P --> E[Evidência command/file/issue]
+  L --> E
+  E -->|ausente| NV[não verificado + cmd]
+```
+
 ## Checklist por turno
 
 1. [ ] `npm run orchestration:workflow -- monitor --level C` *(Level C no início)* ou `status --persona orchestrator --issue ANX-N`
+1b. [ ] Boot de sessão: `npm run orchestration:boot -- --persona orchestrator` (ou hooks `sessionStart`)
+1c. [ ] Dispatch: `npm run orchestration:dispatch -- inject` ou `spawn-plan --json` → invocar `Task` para cada teammate pendente
+1d. [ ] Multitask: `npm run orchestration:delegate-monitor -- list` a cada ~10min; nunca deixar Task concluída sem síntese no chat ([DELEGATION-MONITORING.md](../DELEGATION-MONITORING.md))
 2. [ ] Ler [AGENTS.md](../../../AGENTS.md) se nova sessão
 3. [ ] `npm run taskboard:ensure`
 4. [ ] Executar árvore de decisão → próxima ação (`npm run orchestration:workflow -- next --persona orchestrator --issue ANX-N`)

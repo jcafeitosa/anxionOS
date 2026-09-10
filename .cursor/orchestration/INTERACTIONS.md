@@ -155,3 +155,45 @@ CLI: `npm run orchestration:standup -- --issue ANX-N` (template) ou `--post` (pu
 
 Ver: [CHAT-PARTICIPATION.md](./CHAT-PARTICIPATION.md) · [GOOGLE-PRACTICES.md](./GOOGLE-PRACTICES.md).
 
+
+
+---
+
+## Camada Slack-style — colaboração assíncrona
+
+Mapeamento Slack → CLI do framework (persistência em `.cursor/orchestration-runtime/dialogue/` + `autonomy/presence.json`).
+
+| Slack | CLI | Persistência |
+| --- | --- | --- |
+| Channels | `orchestration:channel` list/join/info/read | `channels.json`, `channel-reads.json` |
+| Threads | `--reply-to` / `--thread-id` em broadcast/speak | `dialogue.jsonl` (campos `replyTo`, `threadId`) |
+| Reactions | `orchestration:react` add/remove/list | `reactions.json` |
+| @mentions | highlight em `orchestration:chat` | parsing em `highlightMentions()` |
+| Pins | `orchestration:pin` add/remove/list | `pins.json` |
+| Presence | `orchestration:presence` + `orchestration:session` | `autonomy/presence.json` |
+| Search | `orchestration:search` | scan `dialogue.jsonl` |
+| Unread | header em `orchestration:chat` + `channel read` | `channel-reads.json` |
+
+```mermaid
+flowchart LR
+  subgraph post [Post]
+    B[broadcast/speak] --> D[dialogue.jsonl]
+    B --> C[channels.json]
+  end
+  subgraph slack [Slack layer]
+    R[react] --> RX[reactions.json]
+    P[pin] --> PN[pins.json]
+    S[search] --> D
+    CH[channel read] --> CR[channel-reads.json]
+  end
+  subgraph view [View]
+    CHAT[orchestration:chat] --> D
+    CHAT --> CR
+    CHAT --> RX
+    CHAT --> PN
+  end
+```
+
+**Deferred (issue futura):** integração Slack real / webhooks externos → ANX-241 proposto.
+
+Ver [TOOLING-INTEGRATION.md](./TOOLING-INTEGRATION.md) · [CHAT-PARTICIPATION.md](./CHAT-PARTICIPATION.md).

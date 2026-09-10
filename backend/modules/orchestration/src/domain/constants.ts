@@ -8,3 +8,9 @@ export const LEASE_SWEEPER_BATCH_SIZE = 100;
 export const LEASE_SWEEPER_JITTER_MAX_MS = 30000;
 /** T01 traversal evaluation timeout (R09 S6 / G3-10). */
 export const T01_EVAL_TIMEOUT_MS = 2000;
+/** Max gate disposition records per org per quota window (ANX-308). */
+export const GATE_DISPOSITION_QUOTA_PER_ORG_PER_WINDOW = 500;
+/** Rolling window for gate disposition quota in ms (1 hour). */
+export const GATE_DISPOSITION_QUOTA_WINDOW_MS = 3_600_000;
+/** Max wakeup units consumed per org before hard-stop (operational budget). */
+export const OPERATIONAL_BUDGET_WAKEUP_UNITS_CAP_PER_ORG = 10_000;

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { IDENTITY_EVENT_TYPES } from "@anxionos/contracts/identity";
-import { linkAuthUserId, type Principal } from "@anxionos/identity";
+import { type Principal, linkAuthUserId } from "@anxionos/identity";
 import {
 	createInMemoryPrincipalRepository,
 	createInMemoryServiceIdentityRepository,
@@ -19,7 +19,9 @@ const principalWithoutAuth: Principal = {
 
 describe("linkAuthUserId", () => {
 	test("links Better Auth user and emits audited auth_linked event without authUserId in payload", async () => {
-		const repository = createInMemoryPrincipalRepository([principalWithoutAuth]);
+		const repository = createInMemoryPrincipalRepository([
+			principalWithoutAuth,
+		]);
 		const { unitOfWork, published } = createRecordingUnitOfWork(
 			repository,
 			createInMemoryServiceIdentityRepository(),
@@ -32,8 +34,12 @@ describe("linkAuthUserId", () => {
 			},
 		);
 		expect(linked.authUserId).toBe("better-auth-user-42");
-		expect(published[0]?.eventType).toBe(IDENTITY_EVENT_TYPES.PRINCIPAL_AUTH_LINKED);
-		expect(published[0]?.payload).toEqual({ principalId: principalWithoutAuth.id });
+		expect(published[0]?.eventType).toBe(
+			IDENTITY_EVENT_TYPES.PRINCIPAL_AUTH_LINKED,
+		);
+		expect(published[0]?.payload).toEqual({
+			principalId: principalWithoutAuth.id,
+		});
 		expect(published[0]?.payload).not.toHaveProperty("authUserId");
 	});
 

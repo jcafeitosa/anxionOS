@@ -4,27 +4,33 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import type { Pool, PoolClient } from "pg";
 
-const migrationsFolder = join(dirname(fileURLToPath(import.meta.url)), "migrations");
+const migrationsFolder = join(
+	dirname(fileURLToPath(import.meta.url)),
+	"migrations",
+);
 
-export async function ensureExecutionSchema(poolOrClient: Pool | PoolClient): Promise<void> {
-  const db = drizzle(poolOrClient);
-  await migrate(db, { migrationsFolder });
+export async function ensureExecutionSchema(
+	poolOrClient: Pool | PoolClient,
+): Promise<void> {
+	const db = drizzle(poolOrClient);
+	await migrate(db, { migrationsFolder });
 }
 
 const databaseUrl =
-  process.env.DATABASE_URL ?? "postgres://anxionos:anxionos@localhost:5432/anxionos";
+	process.env.DATABASE_URL ??
+	"postgres://anxionos:anxionos@localhost:5432/anxionos";
 
 async function main(): Promise<void> {
-  const { Pool: PgPool } = await import("pg");
-  const pool = new PgPool({ connectionString: databaseUrl });
-  await ensureExecutionSchema(pool);
-  await pool.end();
-  console.log("execution migrations applied");
+	const { Pool: PgPool } = await import("pg");
+	const pool = new PgPool({ connectionString: databaseUrl });
+	await ensureExecutionSchema(pool);
+	await pool.end();
+	console.log("execution migrations applied");
 }
 
 if (import.meta.main) {
-  main().catch((error: unknown) => {
-    console.error(error);
-    process.exit(1);
-  });
+	main().catch((error: unknown) => {
+		console.error(error);
+		process.exit(1);
+	});
 }

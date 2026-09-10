@@ -99,3 +99,18 @@ Qualquer alteração invalida PASS anteriores. Repetir gates afetados ou revalid
 | ANX-222 | Aguarda ANX-221 done (CTO ou Owner) + commit autorizado |
 | ANX-134 | blocked — ANX-127, ANX-128 |
 | ANX-136 | blocked — ANX-130, ANX-134 |
+
+---
+
+## Hooks OpenKnowledge (brain loop)
+
+Ver [OPENKNOWLEDGE-BRAIN.md](./OPENKNOWLEDGE-BRAIN.md).
+
+| Gate | Hook |
+| --- | --- |
+| **G0** | `search` + `exec("cat brain/…")`; comentário na issue com `source: brain/…` e seção da spec |
+| **G1 fim** | Executor + crítico: `npm run orchestration:brain -- reflect` se aprendizado material; promover via MCP |
+| **G7** | Handoff note em `brain/` se o slice altera comportamento institucional |
+
+Warnings compliance: `BRAIN_NOT_CONSULTED` (pre-work executores) · `REFLECTION_PENDING` (in_review pós CHANGES_REQUIRED).
+

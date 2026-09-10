@@ -10,6 +10,7 @@ import { registerHire, findActiveByTarget, listActive } from "./roster.mjs";
 import { dismissHire } from "./roster.mjs";
 import { assertIssueId, repoRoot } from "./registry.mjs";
 import { formatIssueIdHint } from "../agent-config/load-config.mjs";
+import { syncHireToTaskboard } from "./hire-taskboard-sync.mjs";
 
 function fetchIssue(issueId) {
   const r = spawnSync("node", ["scripts/taskboard.mjs", "get", issueId], { cwd: repoRoot, encoding: "utf8" });
@@ -41,17 +42,18 @@ export function detectHiresFromIssue(issue) {
   return hires;
 }
 
-export function delegateAutoHire(issueId) {
+export async function delegateAutoHire(issueId, opts = {}) {
   assertIssueId(issueId);
   const issue = fetchIssue(issueId);
   const suggestions = detectHiresFromIssue(issue);
   const hired = [];
+  const taskboardSyncs = [];
   for (const s of suggestions) {
     if (findActiveByTarget(issueId, s.slug)) continue;
     const isWorker = ON_DEMAND_WORKERS.includes(s.slug);
     const hirer = isWorker ? "orchestrator" : "orchestrator";
     try {
-      hired.push(registerHire({
+      const entry = registerHire({
         issueId,
         target: s.slug,
         targetType: isWorker ? "worker" : "specialist",
@@ -59,12 +61,16 @@ export function delegateAutoHire(issueId) {
         hiredByLevel: "A",
         reason: s.reason,
         evidence: `auto-delegate ${issueId}`,
-      }));
+      });
+      hired.push(entry);
+      if (!opts.skipTaskboardSync) {
+        taskboardSyncs.push(await syncHireToTaskboard(entry));
+      }
     } catch (e) {
       if (!e.message.includes("Máximo") && !e.message.includes("já contratado")) throw e;
     }
   }
-  return { issueId, hired };
+  return { issueId, hired, taskboardSyncs };
 }
 
 export function dismissAllForIssue(issueId, evidence = "issue done") {
@@ -76,11 +82,16 @@ export function dismissAllForIssue(issueId, evidence = "issue done") {
 
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 if (isMain) {
+  (async () => {
   const args = process.argv.slice(2);
   const cmd = args[0];
   const issueIdx = args.indexOf("--issue");
   const issueId = issueIdx >= 0 ? args[issueIdx + 1]?.toUpperCase() : null;
   if (!issueId) { console.error(`Usage: taskboard-sync.mjs delegate|done --issue ${formatIssueIdHint()}`); process.exit(1); }
-  const result = cmd === "done" ? dismissAllForIssue(issueId) : delegateAutoHire(issueId);
+  const skipSync = args.includes("--skip-taskboard-sync");
+  const result = cmd === "done"
+    ? dismissAllForIssue(issueId)
+    : await delegateAutoHire(issueId, { skipTaskboardSync: skipSync });
   console.log(JSON.stringify(result, null, 2));
+  })().catch((e) => { console.error(e.message); process.exit(1); });
 }

@@ -103,7 +103,7 @@ Marina **desafia** Lucas em voz própria no chat — nunca proxy da orquestrador
 ## Quando hire/dismiss
 Matriz e comandos CLI: [HIRE-DELEGATION.md](../HIRE-DELEGATION.md).
 
-**Hire:** critic-reviewer, silent-failure-hunter — registrar evidência de bloqueio antes.
+**Hire:** `code-reviewer` (Task), silent-failure-hunter — registrar evidência de bloqueio antes.
 
 **Dismiss:** worker entregou subtask; remover de active-on-demand.
 

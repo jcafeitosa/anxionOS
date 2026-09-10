@@ -1,0 +1,8 @@
+---
+import "../styles/global.css";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { RegisterForm } from "../components/auth/RegisterForm";
+---
+<BaseLayout title="Criar conta | anxionOS" description="Cadastro anxionOS com sessão Better Auth.">
+	<RegisterForm client:load />
+</BaseLayout>

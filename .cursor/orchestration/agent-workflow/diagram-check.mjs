@@ -67,11 +67,14 @@ function analyzeFile(filePath) {
 
 function main() {
   const opts = parseArgs(process.argv.slice(2));
-  const files = [];
+  const fileSet = new Set();
   for (const p of opts.paths) {
     const abs = p.startsWith("/") ? p : join(root, p);
-    collectMarkdownFiles(abs, files);
+    for (const file of collectMarkdownFiles(abs, [])) {
+      fileSet.add(file);
+    }
   }
+  const files = [...fileSet].sort((a, b) => a.localeCompare(b));
   const results = files.map(analyzeFile).sort((a, b) => a.filePath.localeCompare(b.filePath));
   const withMermaid = results.filter((r) => r.types.total > 0);
   const workflowFiles = results.filter((r) => r.isWorkflow);

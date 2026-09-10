@@ -21,7 +21,7 @@ const agency: Agency = {
 	id: agencyId,
 	ownerPrincipalId,
 	displayName: "Acme Capital",
-	marketScope: { regions: ["US"], assetClasses: ["equity"] },
+	marketScope: "both",
 	status: "ready",
 	onboardingStep: "ready",
 	revision: 1,
@@ -48,7 +48,8 @@ const ownerMembership: Membership = {
 
 function createAcceptDeps(seedMemberships: Membership[] = [ownerMembership]) {
 	const agencyRepository = createInMemoryAgencyRepository([agency]);
-	const membershipRepository = createInMemoryMembershipRepository(seedMemberships);
+	const membershipRepository =
+		createInMemoryMembershipRepository(seedMemberships);
 	const commandJournal = createInMemoryCommandJournalRepository();
 	const inviteTokenHasher = createTestInviteTokenHasher();
 	const { unitOfWork, published } = createRecordingOrganizationUnitOfWork({
@@ -61,6 +62,7 @@ function createAcceptDeps(seedMemberships: Membership[] = [ownerMembership]) {
 		deps: {
 			unitOfWork,
 			commandJournal,
+			membershipRepository,
 			inviteTokenHasher,
 		},
 		inviteDeps: {
@@ -90,7 +92,9 @@ describe("acceptInviteByToken", () => {
 			sessionEmail: "operator@example.com",
 		});
 		expect(accepted.aggregateId).toBe(invited.result.aggregateId);
-		expect(published.at(-1)?.eventType).toBe(ORGANIZATION_EVENT_TYPES.MEMBERSHIP_ACTIVATED);
+		expect(published.at(-1)?.eventType).toBe(
+			ORGANIZATION_EVENT_TYPES.MEMBERSHIP_ACTIVATED,
+		);
 	});
 
 	test("rejects session email mismatch", async () => {
@@ -170,10 +174,13 @@ describe("acceptInviteByToken", () => {
 		expect(fulfilled).toHaveLength(1);
 		expect(rejected).toHaveLength(2);
 		for (const failure of rejected) {
-			expect((failure as PromiseRejectedResult).reason).toBeInstanceOf(OrganizationCommandError);
+			expect((failure as PromiseRejectedResult).reason).toBeInstanceOf(
+				OrganizationCommandError,
+			);
 		}
 		const activationEvents = published.filter(
-			(event) => event.eventType === ORGANIZATION_EVENT_TYPES.MEMBERSHIP_ACTIVATED,
+			(event) =>
+				event.eventType === ORGANIZATION_EVENT_TYPES.MEMBERSHIP_ACTIVATED,
 		);
 		expect(activationEvents).toHaveLength(1);
 	});

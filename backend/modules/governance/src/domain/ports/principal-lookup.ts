@@ -3,7 +3,10 @@ export interface PrincipalLookup {
 }
 
 export class PrincipalLookupUnavailableError extends Error {
-	constructor(message = "Identity service unavailable", options?: ErrorOptions) {
+	constructor(
+		message = "Identity service unavailable",
+		options?: ErrorOptions,
+	) {
 		super(message, options);
 		this.name = "PrincipalLookupUnavailableError";
 	}

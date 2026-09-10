@@ -1,6 +1,6 @@
 # Status do Goal — Orquestração anxionOS via Dashi Taskboard
 
-**Data da auditoria:** 2026-09-09T17:15Z (ANX-237 — integração karpathy/ECC/ui-ux + TEAM-ACTIVATION)
+**Data da auditoria:** 2026-09-09T16:42Z (ANX-237 **done** G7 PASS — commit `a161f00`; produto BLOCKED)
 **Owner greenlight produto:** [PROJECT-GREENLIGHT.md](./PROJECT-GREENLIGHT.md) — `backend/`/`frontend/` **BLOCKED** até @Owner autorizar explicitamente; framework (ANX-230/237) continua.  
 **Goal Cursor (produto):** *orchestrate anxionOS development via Dashi Taskboard with complete Google-style team* — **BLOCKED** (produto pausado — aguarda greenlight Owner; ver [examples/project-anxionos/OWNER-GREENLIGHT.anxionos.md](./examples/project-anxionos/OWNER-GREENLIGHT.anxionos.md))  
 **Escopo desta auditoria:** `.cursor/orchestration/`, hooks, rules, config, CI — **não** slices P02 produto  
@@ -90,11 +90,11 @@ flowchart LR
 
 ## Sessões ativas
 
-Fonte: `npm run orchestration:session -- list` (2026-09-09T14:45Z)
+Fonte: `npm run orchestration:session -- list` (2026-09-09T16:42Z)
 
 | Persona | Issue | Status |
 | --- | --- | --- |
-| *(nenhuma)* | — | ✅ **0 sessões** — 5 órfãs encerradas com `--force` (backend-executor, backend-critic, security-lead, orchestrator, code-review-lead) |
+| *(nenhuma)* | — | ✅ **0 sessões** — 18 órfãs encerradas com `end --persona SLUG --force` pós-ANX-237 |
 
 ---
 

@@ -5,9 +5,11 @@ import type {
 	CommandJournalRepository,
 	NewCommandJournalRecord,
 } from "../../domain/ports/command-journal";
-import { commandJournal, type CommandJournalRow } from "./schema";
+import { type CommandJournalRow, commandJournal } from "./schema";
 
-export function toCommandJournalRecord(row: CommandJournalRow): CommandJournalRecord {
+export function toCommandJournalRecord(
+	row: CommandJournalRow,
+): CommandJournalRecord {
 	return {
 		commandId: row.commandId,
 		commandName: row.commandName,

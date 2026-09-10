@@ -1,4 +1,61 @@
-export { adapterManifestSchema, adapterCapabilitiesSchema, adapterLimitsSchema, adapterCapabilityKeySchema, adapterGatewayEnvironmentSchema, adapterGatewayExecutionModeSchema, adapterActorTypeSchema, adapterDispatchIdSchema, ADAPTER_GATEWAY_OWNER_DOMAIN, AdapterGatewayContractError, assertAdapterGatewayExecutionModeSupported, assertAdapterManifestSupportsCapabilities, type AdapterManifest, type AdapterCapabilityKey, } from "./types";
-export { adapterCommandV1Schema, adapterOrderParametersSchema, adapterGatewayCommandResultSchema, dispatchAdapterCommandSchema, type AdapterCommandV1, type AdapterGatewayCommandResult, type DispatchAdapterCommand, } from "./commands";
-export { ADAPTER_EVENT_OUTCOMES, adapterEventOutcomeSchema, ADAPTER_GATEWAY_EVENT_TYPES, adapterEventV1Schema, commandDispatchedPayloadSchema, adapterEventIngestedPayloadSchema, adapterGatewayEventPayloadSchema, } from "./events";
-export { ADAPTER_GATEWAY_ERROR_CODES, ADAPTER_GATEWAY_ERROR_STATUS_MAP, adapterGatewayErrorCodeSchema, resolveAdapterGatewayErrorStatus, type AdapterGatewayErrorCode, } from "./errors";
+export {
+	adapterManifestSchema,
+	adapterCapabilitiesSchema,
+	adapterLimitsSchema,
+	adapterCapabilityKeySchema,
+	adapterGatewayEnvironmentSchema,
+	adapterGatewayExecutionModeSchema,
+	adapterActorTypeSchema,
+	adapterDispatchIdSchema,
+	ADAPTER_GATEWAY_OWNER_DOMAIN,
+	AdapterGatewayContractError,
+	assertAdapterGatewayExecutionModeSupported,
+	assertAdapterManifestSupportsCapabilities,
+	type AdapterManifest,
+	type AdapterCapabilityKey,
+} from "./types";
+export {
+	adapterCommandV1Schema,
+	adapterOrderParametersSchema,
+	adapterGatewayCommandResultSchema,
+	dispatchAdapterCommandSchema,
+	type AdapterCommandV1,
+	type AdapterGatewayCommandResult,
+	type DispatchAdapterCommand,
+} from "./commands";
+export {
+	ADAPTER_EVENT_OUTCOMES,
+	adapterEventOutcomeSchema,
+	ADAPTER_GATEWAY_EVENT_TYPES,
+	adapterEventV1Schema,
+	commandDispatchedPayloadSchema,
+	adapterEventIngestedPayloadSchema,
+	adapterGatewayEventPayloadSchema,
+} from "./events";
+export {
+	ADAPTER_GATEWAY_ERROR_CODES,
+	ADAPTER_GATEWAY_ERROR_STATUS_MAP,
+	adapterGatewayErrorCodeSchema,
+	AdapterGatewayError,
+	assertAdapterEventOutcomeKnown,
+	resolveAdapterGatewayErrorStatus,
+	type AdapterGatewayErrorCode,
+} from "./errors";
+export {
+	ADAPTER_CONFORMANCE_SUITE_VERSION,
+	ADAPTER_LIFECYCLE_STATUS,
+	ADAPTER_CONFORMANCE_CHECK_IDS,
+	adapterLifecycleStatusSchema,
+	adapterRegistryEntrySchema,
+	adapterConformanceCheckResultSchema,
+	adapterConformanceCapabilityResultSchema,
+	adapterConformanceReportSchema,
+	assertAdapterPortVersionCompatible,
+	assertAdapterCapabilitiesExplicit,
+	negotiateAdapterCapabilities,
+	type AdapterLifecycleStatus,
+	type AdapterRegistryEntry,
+	type AdapterConformanceCheckResult,
+	type AdapterConformanceCapabilityResult,
+	type AdapterConformanceReport,
+} from "./conformance";

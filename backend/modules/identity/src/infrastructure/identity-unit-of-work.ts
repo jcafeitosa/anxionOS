@@ -7,10 +7,12 @@ import type {
 	IdentityUnitOfWork,
 } from "../domain/ports/identity-unit-of-work";
 import { createDrizzlePrincipalRepository } from "./persistence/principal-repository";
-import { createDrizzleServiceIdentityRepository } from "./persistence/service-identity-repository";
 import * as schema from "./persistence/schema";
+import { createDrizzleServiceIdentityRepository } from "./persistence/service-identity-repository";
 
-function createTransactionContext(client: PoolClient): IdentityTransactionContext {
+function createTransactionContext(
+	client: PoolClient,
+): IdentityTransactionContext {
 	const db = drizzle(client, { schema });
 	return {
 		principalRepository: createDrizzlePrincipalRepository(db),

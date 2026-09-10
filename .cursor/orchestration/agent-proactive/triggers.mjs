@@ -4,6 +4,10 @@
 
 import { readDialogueMessages } from "../agent-dialogue/dialogue-log.mjs";
 import { getPersona, PERSONAS } from "../agent-dialogue/personas.mjs";
+import {
+  pendingEscalationToTrigger,
+  readPendingEscalation,
+} from "../agent-autonomy/pending-escalate.mjs";
 import { fetchBoardState, hoursSince, isUnblocked } from "./taskboard-fetch.mjs";
 
 /**
@@ -32,6 +36,7 @@ export const TRIGGER_DEFINITIONS = [
   { id: "zero-in-progress", label: "Nenhuma issue in_progress", whoActs: "Orquestrador" },
   { id: "g7-aceite-pending", label: "G7 pendente", whoActs: "Orquestrador" },
   { id: "specialist-in-review", label: "Issue entrou em in_review", whoActs: "Equipe especialista" },
+  { id: "pending-escalate", label: "Escalação pendente (hook)", whoActs: "Orquestrador" },
 ];
 
 const DOMAIN_PATTERNS = {
@@ -69,6 +74,11 @@ export async function evaluateTriggers(personaSlug = null) {
   const tasks = board.tasks ?? [];
   /** @type {TriggerResult[]} */
   const results = [];
+
+  const pendingEscalate = pendingEscalationToTrigger(readPendingEscalation());
+  if (pendingEscalate) {
+    results.push(pendingEscalate);
+  }
 
   if (!board.online) {
     results.push({

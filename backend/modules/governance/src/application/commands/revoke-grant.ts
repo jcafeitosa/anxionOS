@@ -1,19 +1,26 @@
+import { randomUUID } from "node:crypto";
 import {
-	governanceCommandResultSchema,
-	revokeGrantCommandSchema,
 	type GovernanceCommandResult,
 	type RevokeGrantCommand,
+	governanceCommandResultSchema,
+	revokeGrantCommandSchema,
 } from "@anxionos/contracts/governance";
 import { isGrantRevoked } from "../../domain/entities/grant";
-import { createAuthorityEpochBumpedEvent, createGrantRevokedEvent } from "../../domain/events/governance-events";
+import {
+	createAuthorityEpochBumpedEvent,
+	createGrantRevokedEvent,
+} from "../../domain/events/governance-events";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { GovernanceUnitOfWork } from "../../domain/ports/governance-unit-of-work";
+import type { GrantRepository } from "../../domain/ports/grant-repository";
 import { loadIdempotentCommandResult, toCommandResultSnapshot } from "../command-support";
 import { parseCommandResultSnapshot, throwGovernanceError } from "../errors";
+import type { TenantContext } from "../../domain/ports/tenant-context";
 
 export interface RevokeGrantDeps {
 	unitOfWork: GovernanceUnitOfWork;
 	commandJournal: CommandJournalRepository;
+	grantRepository: GrantRepository;
 }
 
 export async function revokeGrant(
@@ -21,18 +28,37 @@ export async function revokeGrant(
 	input: RevokeGrantCommand,
 ): Promise<GovernanceCommandResult> {
 	const command = revokeGrantCommandSchema.parse(input);
-	const replay = await loadIdempotentCommandResult(deps.commandJournal, command.commandId);
+	const replay = await loadIdempotentCommandResult(
+		deps.commandJournal,
+		command.commandId,
+	);
 	if (replay) {
 		return replay;
 	}
-	return deps.unitOfWork.runInTransaction(async (context) => {
+	// Fetch grant outside transaction to derive TenantContext (Pattern B híbrido)
+	const grant = await deps.grantRepository.findById(command.grantId);
+	if (!grant) {
+		throwGovernanceError(
+			"GOV_GRANT_NOT_FOUND",
+			`Grant ${command.grantId} not found`,
+		);
+	}
+	const tenantContext: TenantContext = {
+		tenantId: grant.tenantId,
+		agencyId: grant.agencyId,
+		principalId: grant.granteePrincipalId,
+	};
+	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
 		const raced = await context.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
 			return parseCommandResultSnapshot(raced.responseSnapshot);
 		}
 		const grant = await context.grantRepository.findById(command.grantId);
 		if (!grant) {
-			throwGovernanceError("GOV_GRANT_NOT_FOUND", `Grant ${command.grantId} not found`);
+			throwGovernanceError(
+				"GOV_GRANT_NOT_FOUND",
+				`Grant ${command.grantId} not found`,
+			);
 		}
 		if (isGrantRevoked(grant)) {
 			const currentEpoch = await context.authorityEpochStore.get(grant.scopeId);
@@ -51,7 +77,11 @@ export async function revokeGrant(
 			});
 			return unchanged;
 		}
-		const bumpedEpoch = await context.authorityEpochStore.increment(grant.scopeId);
+		const bumpedEpoch = await context.authorityEpochStore.increment(
+			grant.scopeId,
+			grant.tenantId,
+			grant.agencyId,
+		);
 		const now = new Date();
 		const revision = grant.revision + 1;
 		const updated = await context.grantRepository.save({
@@ -66,14 +96,18 @@ export async function revokeGrant(
 			authorityEpoch: bumpedEpoch.epoch,
 		});
 		const events = [
-			createGrantRevokedEvent({
-				grantId: updated.id,
-				scopeId: updated.scopeId,
-				authorityEpoch: bumpedEpoch.epoch,
-				revision: updated.revision,
-			}),
+			createGrantRevokedEvent(
+				{
+					grantId: updated.id,
+					scopeId: updated.scopeId,
+					authorityEpoch: bumpedEpoch.epoch,
+					revision: updated.revision,
+					revokedAt: now.toISOString(),
+				},
+				now,
+			),
 			createAuthorityEpochBumpedEvent({
-				scopeId: updated.scopeId,
+				scopeId: grant.scopeId,
 				epoch: bumpedEpoch.epoch,
 				reason: "RevokeGrant",
 			}),

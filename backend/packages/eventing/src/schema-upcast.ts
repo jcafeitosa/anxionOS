@@ -1,9 +1,9 @@
-import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import {
 	type DomainEventEnvelopeV02,
 	type InstitutionalChannel,
 	upgradeDomainEventEnvelopeToV02,
 } from "@anxionos/contracts/envelope-v02";
+import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 
 export class UnknownSchemaVersionError extends Error {
 	constructor(version: string) {

@@ -6,13 +6,17 @@ import {
 	shutdownOutboxRelayWorker,
 } from "./bootstrap";
 import {
-	loadGraphGovernanceWorkerConfig,
-	loadOutboxRelayWorkerConfig,
 	WORKER_PROFILE_GRAPH_GOVERNANCE,
+	WORKER_PROFILE_GRAPH_PRODUCT,
 	WORKER_PROFILE_OUTBOX_RELAY,
+	loadGraphGovernanceWorkerConfig,
+	loadGraphProductWorkerConfig,
+	loadOutboxRelayWorkerConfig,
 } from "./config";
 import { startAppOutboxRelayWorker } from "./eventing/outbox-relay-worker";
 import { startGovernanceProjectionConsumer } from "./graph/governance-projection-worker";
+import { startOrganizationsProjectionConsumer } from "./graph/organizations-graph-projection-worker";
+import { startProductGraphProjectionConsumers } from "./graph/product-graph-projection-worker";
 
 const logger = createLogger({ service: "workers-root" });
 
@@ -25,7 +29,44 @@ async function main(): Promise<void> {
 	if (profile === WORKER_PROFILE_GRAPH_GOVERNANCE) {
 		const config = loadGraphGovernanceWorkerConfig();
 		const runtime = await bootstrapGraphGovernanceWorker(config);
-		const consumer = await startGovernanceProjectionConsumer({
+		const governanceConsumer = await startGovernanceProjectionConsumer({
+			config,
+			pool: runtime.pool,
+			graphStore: runtime.graphStore,
+			signal: abortController.signal,
+		});
+		const organizationsConsumer = await startOrganizationsProjectionConsumer({
+			config,
+			pool: runtime.pool,
+			graphStore: runtime.graphStore,
+			signal: abortController.signal,
+		});
+
+		const shutdown = async (signal: string) => {
+			if (shuttingDown) {
+				return;
+			}
+			shuttingDown = true;
+			logger.info("Workers shutting down", { signal, profile: config.profile });
+			abortController.abort();
+			await Promise.all([
+				governanceConsumer.stop(),
+				organizationsConsumer.stop(),
+			]);
+			await shutdownGraphGovernanceWorker(runtime);
+			process.exit(0);
+		};
+
+		process.on("SIGINT", () => void shutdown("SIGINT"));
+		process.on("SIGTERM", () => void shutdown("SIGTERM"));
+		logger.info("Workers running", { profile: config.profile });
+		return;
+	}
+
+	if (profile === WORKER_PROFILE_GRAPH_PRODUCT) {
+		const config = loadGraphProductWorkerConfig();
+		const runtime = await bootstrapGraphGovernanceWorker(config);
+		const consumer = await startProductGraphProjectionConsumers({
 			config,
 			pool: runtime.pool,
 			graphStore: runtime.graphStore,
@@ -78,7 +119,7 @@ async function main(): Promise<void> {
 	}
 
 	throw new Error(
-		`Unsupported WORKER_PROFILE "${profile}" — expected ${WORKER_PROFILE_GRAPH_GOVERNANCE} or ${WORKER_PROFILE_OUTBOX_RELAY}`,
+		`Unsupported WORKER_PROFILE "${profile}" — expected ${WORKER_PROFILE_GRAPH_GOVERNANCE}, ${WORKER_PROFILE_GRAPH_PRODUCT}, or ${WORKER_PROFILE_OUTBOX_RELAY}`,
 	);
 }
 

@@ -4,8 +4,8 @@ import type { PrincipalRepository } from "../domain/ports/principal-repository";
 import type { ServiceIdentityRepository } from "../domain/ports/service-identity-repository";
 import { createIdentityUnitOfWork } from "./identity-unit-of-work";
 import { createDrizzlePrincipalRepository } from "./persistence/principal-repository";
-import { createDrizzleServiceIdentityRepository } from "./persistence/service-identity-repository";
 import * as schema from "./persistence/schema";
+import { createDrizzleServiceIdentityRepository } from "./persistence/service-identity-repository";
 
 export function createIdentityDb(pool: Pool): {
 	db: ReturnType<typeof drizzle<typeof schema>>;

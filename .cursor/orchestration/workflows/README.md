@@ -2,7 +2,7 @@
 
 Um arquivo por persona permanente de [PERSONAS.md](../PERSONAS.md). Cada workflow compõe [COLLECTIVE-WORKFLOW.md](../COLLECTIVE-WORKFLOW.md). Roster: [AGENT-ROSTER.md](../AGENT-ROSTER.md).
 
-**CLI:** `npm run orchestration:workflow -- status|next|monitor|sync`
+**CLI:** `npm run orchestration:boot` · `npm run orchestration:workflow -- status|next|monitor|sync`
 
 **Level C:** [LEVEL-C-MONITORING.md](../LEVEL-C-MONITORING.md)
 

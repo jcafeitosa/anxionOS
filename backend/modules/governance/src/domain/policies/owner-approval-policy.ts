@@ -10,6 +10,7 @@ export function requiresOwnerApproval(kind: ChangeProposalKind): boolean {
 
 export function hasOwnerAuthority(grants: Grant[]): boolean {
 	return grants.some(
-		(grant) => grant.status === "active" && OWNER_CAPABILITIES.has(grant.capability),
+		(grant) =>
+			grant.status === "active" && OWNER_CAPABILITIES.has(grant.capability),
 	);
 }

@@ -11,8 +11,37 @@ import { getPersona } from "../agent-dialogue/personas.mjs";
 import { loadWorkflowState, repoRoot, SILENCE_THRESHOLD_MS } from "../agent-workflow/state.mjs";
 import { formatIssueIdHint, getOrchestrationPaths, getScopeDocPath } from "../agent-config/load-config.mjs";
 import { dialogueForIssue } from "../agent-workflow/monitor.mjs";
+import { evaluateDelegationFeedbackWarnings } from "../agent-workflow/delegate-monitor.mjs";
+import {
+  evaluateCrossChatClaimConflicts,
+  evaluateIssueLockHeld,
+} from "../agent-workflow/issue-coordination.mjs";
+import { recordTaskboardEnsure } from "./taskboard-cache.mjs";
+import { evaluateTaskboardViolations, GATE_HANDOFF_TYPES } from "./taskboard-gate.mjs";
+import { resolveTaskboardRouting } from "../agent-config/taskboard-routing.mjs";
+import { detectReservationsInCorpus } from "../agent-proactive/cto-evidence.mjs";
+import {
+  evaluateBrainConsultationWarnings,
+  evaluateReflectionPendingWarnings,
+  hasBrainReference,
+} from "../agent-brain/brain-reflection.mjs";
+import { evaluateCapabilitiesUnderusedWarnings } from "./capabilities-gate.mjs";
+import { evaluateTeamInteractionWarnings } from "../agent-dialogue/google-team-rituals.mjs";
+import {
+  evaluateActivePersonaWarnings,
+  evaluatePersonaIdentityWarnings,
+} from "../agent-dialogue/persona-identity.mjs";
+
+export { evaluateTaskboardViolations, GATE_HANDOFF_TYPES };
+export {
+  evaluateBrainConsultationWarnings,
+  evaluateReflectionPendingWarnings,
+  hasBrainReference,
+} from "../agent-brain/brain-reflection.mjs";
+export { evaluateCapabilitiesUnderusedWarnings } from "./capabilities-gate.mjs";
 
 import { getCursorSubagentType } from "../agent-hire/levels.mjs";
+import { countByStatus, listDispatches } from "../agent-delegation/dispatch-queue.mjs";
 
 const SKILL_HINTS = {
   orchestrator: ["orchestrate-work", "manage-taskboard"],
@@ -23,12 +52,35 @@ const SKILL_HINTS = {
   researcher: ["research-with-sources", "open-knowledge"],
 };
 
+export function evaluateDispatchPendingWarnings(persona) {
+  if (persona !== "orchestrator") return [];
+  const counts = countByStatus();
+  if (counts.pending === 0) return [];
+  const pending = listDispatches({ status: "pending" }).slice(0, 3);
+  const summary = pending.map((p) => `${p.persona}·${p.issueId}`).join(", ");
+  return [
+    {
+      code: "DISPATCH_PENDING",
+      message: `${counts.pending} teammate(s) na fila sem Task spawnado (${summary})`,
+      fix: "npm run orchestration:dispatch -- inject → invocar Task para cada item; ver GROK-BOT-PARITY.md",
+    },
+  ];
+}
+
 export function getComplianceReminders({ persona, mode }) {
   const reminders = [];
   const sub = getCursorSubagentType(persona);
   if (persona === "orchestrator" || mode === "pre-work") {
     reminders.push("Delegate trabalho substancial via Task (Multitask Mode)? Ver CURSOR-AGENTS-INTEGRATION.md");
   }
+  if (COORDINATOR_PERSONAS.has(persona)) {
+    reminders.push(
+      "Chat nativo: responder com blocos persona (---), min 2; colar orchestration:chat --new-only apos subagentes — ver CHAT-PARTICIPATION.md",
+    );
+  }
+  reminders.push(
+    "Voz natural PT-BR por persona — informal, tecnico, humor leve; ver PERSONA-VOICE.md (warning PERSONA_ROBOTIC se parecer Assistant)",
+  );
   if (sub) {
     reminders.push(`Task subagent_type sugerido para ${persona}: ${sub}`);
   }
@@ -37,6 +89,12 @@ export function getComplianceReminders({ persona, mode }) {
     reminders.push(`Skill disponível: ${s} — ler SKILL.md antes de agir`);
   }
   reminders.push("MCP: GetDynamicTools antes de CallDynamicTool; open-knowledge para brain/");
+  reminders.push(
+    "Capacidades completas: internet/RAG (WebSearch/context7), executar comandos (nao describe-only), MCPs — ver AGENT-CAPABILITIES.md",
+  );
+  reminders.push(
+    "Brain loop: consultar brain/ antes de codar; reflect apos CHANGES_REQUIRED — ver OPENKNOWLEDGE-BRAIN.md",
+  );
   return reminders;
 }
 
@@ -52,8 +110,11 @@ const baseUrl = (
 export async function taskboardOnline() {
   try {
     const res = await fetch(`${baseUrl}/health`);
-    return res.ok;
-  } catch {
+    const ok = res.ok;
+    recordTaskboardEnsure(ok, { url: baseUrl, error: ok ? null : `HTTP ${res.status}` });
+    return ok;
+  } catch (err) {
+    recordTaskboardEnsure(false, { url: baseUrl, error: err?.message ?? "fetch failed" });
     return false;
   }
 }
@@ -145,6 +206,144 @@ export function evaluateDialogueDisplayWarnings(options = {}) {
   return warnings;
 }
 
+const COORDINATOR_PERSONAS = new Set(["orchestrator", "cto-critic"]);
+
+/**
+ * Aviso quando coordenador deve usar blocos persona no chat (nao monologo Assistant).
+ * @param {string} persona
+ * @param {{ pendingChat?: boolean }} [options]
+ * @returns {{ code: string, message: string, fix: string }[]}
+ */
+export function evaluateCoordinatorMonologueWarnings(persona, options = {}) {
+  const warnings = [];
+  if (!COORDINATOR_PERSONAS.has(persona)) return warnings;
+
+  const pendingChat =
+    options.pendingChat ?? evaluateDialogueDisplayWarnings().length > 0;
+
+  warnings.push({
+    code: "COORDINATOR_MONOLOGUE",
+    message: pendingChat
+      ? "Dialogue pendente no JSONL — coordenador deve colar orchestration:chat e responder com 2+ blocos persona (---), nao voz Assistant"
+      : "Em threads de orquestracao, coordenador responde com blocos persona (min 2) + orchestration:chat apos subagentes — proibido monologo generico",
+    fix: "Ver CHAT-PARTICIPATION.md § Coordinator anti-patterns; npm run orchestration:chat -- --new-only (colar verbatim) + blocos --- por persona",
+  });
+  return warnings;
+}
+
+
+const HIERARCHY_EVIDENCE_RE =
+  /(?:--evidence\b|(?:^|\s)(?:command|file|issue|path|evidence):|\bevidence:\s*\n)/im;
+const HIERARCHY_ROUTING_MENTION_RE =
+  /@(?:lucas|marina|camila|paulo|fernanda|edu|isa|thiago|ju|andre|marcus|claudia|cláudia|diego|rafael|gustavo|bia|helena|owner)/i;
+const HIERARCHY_ROUTING_VERB_RE =
+  /\b(delego|encaminho|roteio|handoff|passo a|pergunto ao|consulto @|roteio para|@\w+ — @owner)/i;
+const HIERARCHY_TECHNICAL_RE =
+  /\b(test(?:e|es|ado|ar|s)?|coverage|migrate|lint|build|api|endpoint|backend|frontend|diff|m[oó]dulo|implement|cod(?:e|ar|igo)|bug|fix|refactor|typescript|bun test|npm run|middleware|auth header|security|migrate)\b/i;
+const HIERARCHY_NOT_VERIFIED_RE = /n[aã]o verificado/i;
+
+/**
+ * Aviso suave: orchestrator responde pergunta tecnica sem handoff @mention ou evidencia.
+ * @param {string} persona
+ * @param {{ text?: string|null }} [options]
+ * @returns {{ code: string, message: string, fix: string }[]}
+ */
+export function evaluateHierarchyProxyAnswerWarnings(persona, options = {}) {
+  const warnings = [];
+  if (persona !== "orchestrator") return warnings;
+
+  const text = options.text ?? readPendingBroadcastText();
+  if (!text || typeof text !== "string") return warnings;
+  const trimmed = text.trim();
+  if (trimmed.length < 30) return warnings;
+
+  if (!HIERARCHY_TECHNICAL_RE.test(trimmed)) return warnings;
+  if (HIERARCHY_NOT_VERIFIED_RE.test(trimmed)) return warnings;
+  if (HIERARCHY_EVIDENCE_RE.test(trimmed)) return warnings;
+
+  const hasRouting =
+    HIERARCHY_ROUTING_MENTION_RE.test(trimmed) && HIERARCHY_ROUTING_VERB_RE.test(trimmed);
+  if (hasRouting) return warnings;
+
+  warnings.push({
+    code: "HIERARCHY_PROXY_ANSWER",
+    message:
+      "Orquestrador respondeu conteudo tecnico sem handoff @mention ao owner competente nem bloco de evidencia (command:/file:/issue:)",
+    fix: "Ver QUESTION-HIERARCHY.md — rotear @mention ao lead/executor; resposta com --evidence ou declarar nao verificado + comando",
+  });
+  return warnings;
+}
+
+const MENTION_RE = /@(?:owner|[a-z][a-z0-9_-]*)/i;
+const PERSONA_BLOCK_RE = /^---\s*\n\*\*[A-ZÀ-Ú]/m;
+const GENERIC_ASSISTANT_RE =
+  /^(?:I have|I've|Here is|Here are|As an AI|Sure!?|Certainly|Completed|Summary|Status update)/im;
+const ASSISTANT_PHRASE_RE = /\b(as an assistant|I will help you|happy to help)\b/i;
+
+/**
+ * Le texto candidato a resposta no chat (pending-broadcast body).
+ * @param {{ paths?: ReturnType<typeof getOrchestrationPaths>['paths'] }} [options]
+ * @returns {string|null}
+ */
+function readPendingBroadcastPayload(options = {}) {
+  const paths = getOrchestrationPaths(options).paths;
+  const pendingPath = join(paths.autonomy, "pending-broadcast.json");
+  if (!existsSync(pendingPath)) return null;
+  try {
+    return JSON.parse(readFileSync(pendingPath, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+function detectGateHandoff() {
+  const pending = readPendingBroadcastPayload();
+  const type = pending?.type ?? pending?.messageType;
+  return type && GATE_HANDOFF_TYPES.has(type);
+}
+
+export function readPendingBroadcastText(options = {}) {
+  const paths = getOrchestrationPaths(options).paths;
+  const pendingPath = join(paths.autonomy, "pending-broadcast.json");
+  if (!existsSync(pendingPath)) return null;
+  try {
+    const pending = JSON.parse(readFileSync(pendingPath, "utf8"));
+    const body = pending?.body ?? pending?.message ?? pending?.text;
+    return typeof body === "string" && body.trim() ? body.trim() : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Heuristica suave: texto sem @mention e com padroes de assistant generico.
+ * @param {string|null|undefined} text
+ * @returns {{ code: string, message: string, fix: string }[]}
+ */
+export function evaluatePersonaRoboticWarnings(text) {
+  const warnings = [];
+  if (!text || typeof text !== "string") return warnings;
+  const trimmed = text.trim();
+  if (trimmed.length < 40) return warnings;
+  if (MENTION_RE.test(trimmed)) return warnings;
+  if (PERSONA_BLOCK_RE.test(trimmed)) return warnings;
+
+  const lines = trimmed.split("\n");
+  const bulletLines = (trimmed.match(/^[\-*•]\s+/gm) || []).length;
+  const bulletHeavy = bulletLines >= 3 && bulletLines / Math.max(lines.length, 1) > 0.5;
+  const genericOpener = GENERIC_ASSISTANT_RE.test(trimmed);
+  const assistantPhrase = ASSISTANT_PHRASE_RE.test(trimmed);
+
+  if (bulletHeavy || genericOpener || assistantPhrase) {
+    warnings.push({
+      code: "PERSONA_ROBOTIC",
+      message: "Texto parece voz generica de assistant (sem @mention nem bloco persona)",
+      fix: "Reescrever com voz da persona em PERSONA-VOICE.md; incluir @mention e blocos ---",
+    });
+  }
+  return warnings;
+}
+
 /**
  * Violacao quando coordenador encerra turno sem colar dialogue no chat.
  * @param {string} persona
@@ -163,6 +362,18 @@ export function evaluateDialogueDisplayViolations(persona, mode = "full") {
     fix: pending.fix,
   });
   return violations;
+}
+
+/**
+ * Em pre-commit, PENDING_CHAT_DISPLAY ja e violacao (orchestrator) — nao duplicar como warning.
+ * @param {{ code: string }[]} warnings
+ * @param {string} mode
+ * @param {{ code: string }[]} violations
+ */
+function filterDialogueDisplayWarningsForMode(warnings, mode, violations) {
+  if (mode !== "pre-commit") return warnings;
+  const blockedCodes = new Set(violations.map((v) => v.code));
+  return warnings.filter((w) => !(w.code === "PENDING_CHAT_DISPLAY" && blockedCodes.has(w.code)));
 }
 
 function messageFromPersona(message, persona) {
@@ -306,8 +517,24 @@ export function evaluateExecutorCriticPairing(persona, issueId, session, mode = 
   return violations;
 }
 
+
+export function evaluateDoneWithReservationsWarnings(issue, comments = []) {
+  const warnings = [];
+  if (!issue || issue.status !== "done") return warnings;
+  const corpus = comments.map((c) => `${c.title ?? ""}\n${c.body ?? ""}`).join("\n---\n");
+  const hits = detectReservationsInCorpus(corpus);
+  if (hits.length > 0) {
+    warnings.push({
+      code: "DONE_WITH_RESERVATIONS",
+      message: hits.join("; "),
+      fix: "Corrigir escopo ou reabrir issue — ver ZERO-RESERVATIONS-DONE.md",
+    });
+  }
+  return warnings;
+}
+
 export function evaluateCompliance(input) {
-  const { persona, issueId, mode } = input;
+  const { persona, issueId, mode, scope = "auto", changedPaths = null } = input;
   const violations = [];
   const taskboardOk = input.taskboardOk ?? false;
   const issue = input.issue ?? null;
@@ -315,16 +542,24 @@ export function evaluateCompliance(input) {
   const workflow = input.workflow ?? loadWorkflowState(persona, issueId);
   const dialogue = input.dialogue ?? dialogueForIssue(issueId, persona);
   const checklist = workflow.checklist ?? {};
+  const gateHandoff = Boolean(input.gateHandoff);
 
   const fix = (cmd) => cmd;
 
-  if (!taskboardOk) {
-    violations.push({
-      code: "TASKBOARD_OFFLINE",
-      message: "Taskboard offline — abortar trabalho tecnico",
-      fix: fix("npm run taskboard:ensure"),
-    });
-  }
+  const routing = resolveTaskboardRouting({ scope, issueId, issue, changedPaths });
+  violations.push(
+    ...evaluateTaskboardViolations({
+      issueId,
+      issue,
+      persona,
+      mode,
+      taskboardOk,
+      gateHandoff,
+      requireClaim: true,
+      scope,
+      changedPaths,
+    }),
+  );
 
   if (!agentsMdExists() || !checklist.agentsMdRead) {
     violations.push({
@@ -365,36 +600,30 @@ export function evaluateCompliance(input) {
   }
 
   if (mode === "pre-work") {
-    if (issue && issue.status !== "in_progress") {
-      violations.push({
-        code: "ISSUE_NOT_IN_PROGRESS",
-        message: `Issue ${issueId} nao esta in_progress (status: ${issue.status ?? "?"})`,
-        fix: fix(`node scripts/taskboard.mjs move ${issueId} in_progress`),
-      });
-    }
+    violations.push(...evaluateCrossChatClaimConflicts(persona, issueId, session));
+    violations.push(...evaluateIssueLockHeld(issueId, session));
     violations.push(...evaluateExecutorCriticPairing(persona, issueId, session, mode));
     const warnings = [
+    ...evaluateDelegationFeedbackWarnings(persona, issueId, session, issue),
     ...evaluateToolingWarnings(),
     ...evaluateDialogueDisplayWarnings(),
+    ...evaluateCoordinatorMonologueWarnings(persona),
+    ...evaluateHierarchyProxyAnswerWarnings(persona),
+    ...evaluatePersonaRoboticWarnings(readPendingBroadcastText()),
+    ...evaluatePersonaIdentityWarnings(readPendingBroadcastText(), persona),
+    ...evaluateActivePersonaWarnings(session),
+    ...(issueId && issue?.status === "in_progress"
+      ? evaluateTeamInteractionWarnings(issueId)
+      : []),
     ...evaluateCenterBypassWarnings(issueId),
     ...evaluateOrchestratorCriticPairing(persona, issueId),
+    ...evaluateBrainConsultationWarnings({ persona, mode, issue }),
+    ...evaluateReflectionPendingWarnings({ persona, mode, issue, issueId }),
+    ...evaluateCapabilitiesUnderusedWarnings({ persona, mode, issueId, session }),
+    ...evaluateDispatchPendingWarnings(persona),
   ];
     const reminders = getComplianceReminders({ persona, mode });
-    return { compliant: violations.length === 0, violations, warnings, reminders, mode, persona, issueId };
-  }
-
-  if (!issue) {
-    violations.push({
-      code: "ISSUE_NOT_FOUND",
-      message: `Issue ${issueId} nao encontrada no taskboard`,
-      fix: fix("npm run taskboard:list"),
-    });
-  } else if (issue.status !== "in_progress") {
-    violations.push({
-      code: "ISSUE_NOT_IN_PROGRESS",
-      message: `Issue ${issueId} nao esta in_progress (status: ${issue.status})`,
-      fix: fix(`node scripts/taskboard.mjs move ${issueId} in_progress`),
-    });
+    return { compliant: violations.length === 0, violations, warnings, reminders, mode, persona, issueId, routing };
   }
 
   if (!session || session.issueId !== issueId) {
@@ -459,7 +688,25 @@ export function evaluateCompliance(input) {
     violations.push(...evaluateDialogueDisplayViolations(persona, mode));
   }
 
-  const warnings = [...evaluateToolingWarnings(), ...evaluateDialogueDisplayWarnings()];
+  let warnings = [
+    ...evaluateDoneWithReservationsWarnings(issue, input.comments ?? []),
+    ...evaluateDelegationFeedbackWarnings(persona, issueId, session, issue),
+    ...evaluateToolingWarnings(),
+    ...evaluateDialogueDisplayWarnings(),
+    ...evaluateCoordinatorMonologueWarnings(persona),
+    ...evaluateHierarchyProxyAnswerWarnings(persona),
+    ...evaluatePersonaRoboticWarnings(readPendingBroadcastText()),
+    ...evaluatePersonaIdentityWarnings(readPendingBroadcastText(), persona),
+    ...evaluateActivePersonaWarnings(session),
+    ...(issueId && issue?.status === "in_progress"
+      ? evaluateTeamInteractionWarnings(issueId)
+      : []),
+    ...evaluateBrainConsultationWarnings({ persona, mode, issue }),
+    ...evaluateReflectionPendingWarnings({ persona, mode, issue, issueId }),
+    ...evaluateCapabilitiesUnderusedWarnings({ persona, mode, issueId, session }),
+    ...evaluateDispatchPendingWarnings(persona),
+  ];
+  warnings = filterDialogueDisplayWarningsForMode(warnings, mode, violations);
   const reminders = getComplianceReminders({ persona, mode });
 
   return {
@@ -471,6 +718,7 @@ export function evaluateCompliance(input) {
     persona,
     issueId,
     workflow: { step: workflow.step, checklist },
+    routing,
   };
 }
 
@@ -506,6 +754,7 @@ export async function runComplianceCheck({ persona, issueId, mode = "full" }) {
     taskboardOk: online,
     issue,
     session,
+    gateHandoff: detectGateHandoff(),
   });
 }
 

@@ -1,6 +1,9 @@
 import type { Pool, PoolClient } from "pg";
 import { DatabaseMigrationError } from "./errors";
-import { RLS_FIXTURE_DOWN_SQL, RLS_FIXTURE_UP_SQL } from "./migrations/rls-fixture-ddl";
+import {
+	RLS_FIXTURE_DOWN_SQL,
+	RLS_FIXTURE_UP_SQL,
+} from "./migrations/rls-fixture-ddl";
 import { ANXION_APP_ROLE, ANXION_SERVICE_ROLE, createRolesSql } from "./roles";
 
 const FIXTURE_TABLE = "anxionos_tenant_records";

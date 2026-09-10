@@ -4,6 +4,15 @@
  */
 
 import { readDialogueMessages } from "./dialogue-log.mjs";
+import {
+  buildThreadTree,
+  formatReactionsLine,
+  getAllReactions,
+  getPinnedMessages,
+  getUnreadCount,
+  highlightMentions,
+  resolveChannelId,
+} from "./slack-store.mjs";
 
 const TYPE_LABELS = {
   debate: "debate",
@@ -55,28 +64,53 @@ function formatTime(iso) {
   return `${hh}:${mm}`;
 }
 
-function formatMessageBlock(msg) {
-  const mention = msg.to?.mention ? ` → ${msg.to.mention}` : "";
+function formatMessageBlock(msg, opts = {}) {
+  const { reactionsMap = {}, indent = "" } = opts;
+  const mention = msg.to?.mention ? ` → ${highlightMentions(msg.to.mention)}` : "";
   const typeLabel = TYPE_LABELS[msg.type] ?? msg.type;
   const gatePart = msg.gate ? ` · ${msg.gate}` : "";
   const verdictPart = msg.verdict
     ? ` · **${VERDICT_BADGES[msg.verdict] ?? msg.verdict}**`
     : "";
+  const threadPart = msg.replyTo ? " · ↩ thread" : msg.threadId ? ` · 🧵 ${msg.threadId}` : "";
 
-  const meta = `**${typeLabel}**${gatePart}${verdictPart}`;
-  const quotedBody = msg.body
+  const meta = `**${typeLabel}**${gatePart}${verdictPart}${threadPart}`;
+  const quotedBody = highlightMentions(msg.body)
     .split("\n")
-    .map((line) => `> ${line}`)
+    .map((line) => `${indent}> ${line}`)
     .join("\n");
 
   const evidence =
     msg.evidence?.length > 0
-      ? `\n\n_Evidência:_ ${msg.evidence.map((e) => `\`${e.kind}:${e.ref}\``).join(", ")}`
+      ? `\n\n${indent}_Evidência:_ ${msg.evidence.map((e) => `\`${e.kind}:${e.ref}\``).join(", ")}`
       : "";
 
-  return `### ${formatTime(msg.timestamp)} · ${displayName(msg)} (${roleSlug(msg)})${mention}
-${meta}
-${quotedBody}${evidence}`;
+  const reactions = reactionsMap[msg.id] ?? {};
+  const reactionsLine = formatReactionsLine(reactions);
+  const reactionsPart = reactionsLine ? `\n\n${indent}_Reactions:_ ${reactionsLine}` : "";
+
+  return `${indent}### ${formatTime(msg.timestamp)} · ${displayName(msg)} (${roleSlug(msg)})${mention}
+${indent}${meta}
+${quotedBody}${evidence}${reactionsPart}`;
+}
+
+function formatThreadNode(node, reactionsMap, depth = 0) {
+  const indent = depth > 0 ? "  ".repeat(depth) : "";
+  let block = formatMessageBlock(node, { reactionsMap, indent });
+  for (const reply of node.replies ?? []) {
+    block += `\n\n${formatThreadNode(reply, reactionsMap, depth + 1)}`;
+  }
+  return block;
+}
+
+function formatPinnedSection(channelId) {
+  const pins = getPinnedMessages(channelId);
+  if (pins.length === 0) return "";
+  const lines = pins.map((pin) => {
+    const preview = pin.message.body.split("\n")[0].slice(0, 80);
+    return `- 📌 \`${pin.messageId.slice(0, 8)}…\` · ${preview}`;
+  });
+  return `### 📌 Fixados\n${lines.join("\n")}\n\n---\n\n`;
 }
 
 function groupKey(msg) {
@@ -99,16 +133,27 @@ export function formatConversationMarkdown(messages, opts = {}) {
   }
 
   const { issueId, threadId } = opts;
+  const reactionsMap = getAllReactions();
+
+  function buildChannelBody(channelMessages, channelId) {
+    const unread = getUnreadCount(channelId);
+    const unreadPart = unread > 0 ? ` · **${unread} não lidas**` : "";
+    const pinned = formatPinnedSection(channelId);
+    const tree = buildThreadTree(channelMessages);
+    const blocks = tree.map((node) => formatThreadNode(node, reactionsMap)).join("\n\n");
+    return { unreadPart, pinned, blocks };
+  }
 
   if (issueId) {
-    const title = `## 💬 Diálogo dos Agentes — ${issueId}`;
-    const blocks = messages.map((m) => formatMessageBlock(m)).join("\n\n");
-    return `${title}\n\n${blocks}`;
+    const { unreadPart, pinned, blocks } = buildChannelBody(messages, issueId);
+    const title = `## 💬 Diálogo dos Agentes — #${issueId}${unreadPart}`;
+    return `${title}\n\n${pinned}${blocks}`;
   }
 
   if (threadId) {
-    const title = `## 💬 Diálogo dos Agentes — ${threadId}`;
-    const blocks = messages.map((m) => formatMessageBlock(m)).join("\n\n");
+    const title = `## 💬 Diálogo dos Agentes — 🧵 ${threadId}`;
+    const tree = buildThreadTree(messages);
+    const blocks = tree.map((node) => formatThreadNode(node, reactionsMap)).join("\n\n");
     return `${title}\n\n${blocks}`;
   }
 
@@ -121,9 +166,10 @@ export function formatConversationMarkdown(messages, opts = {}) {
 
   const sections = [];
   for (const [key, groupMessages] of groups) {
-    const title = `## 💬 Diálogo dos Agentes — ${groupTitle(key)}`;
-    const blocks = groupMessages.map((m) => formatMessageBlock(m)).join("\n\n");
-    sections.push(`${title}\n\n${blocks}`);
+    const channelId = resolveChannelId(groupMessages[0]);
+    const { unreadPart, pinned, blocks } = buildChannelBody(groupMessages, channelId);
+    const title = `## 💬 Diálogo dos Agentes — #${groupTitle(key)}${unreadPart}`;
+    sections.push(`${title}\n\n${pinned}${blocks}`);
   }
 
   return sections.join("\n\n---\n\n");

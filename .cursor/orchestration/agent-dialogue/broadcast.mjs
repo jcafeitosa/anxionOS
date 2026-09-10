@@ -34,7 +34,11 @@ import {
   parseDialogueMessage,
 } from "./protocol.mjs";
 import { touchSessionFromDialogue } from "./session-tracker.mjs";
+import { fetchIssue } from "../agent-compliance/compliance-lib.mjs";
+import { validateIssueForWrite } from "../agent-compliance/taskboard-gate.mjs";
+import { touchChannelFromMessage } from "./slack-store.mjs";
 import { formatDialogueTerminalOneliner } from "./terminal-format.mjs";
+import { taskboardComment } from "../agent-config/agent-taskboard-write.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const MAC_TASKCTL =
@@ -288,12 +292,9 @@ function parseReadArgs(argv) {
   return opts;
 }
 
-function mirrorToTaskboard(message) {
+async function mirrorToTaskboard(message) {
   if (!message.issueId) {
     throw new Error("--mirror-taskboard requires --issue ANX-N");
-  }
-  if (!taskctl) {
-    throw new Error("taskctl not found; cannot mirror to taskboard");
   }
 
   const gate = message.gate ? ` · ${message.gate}` : "";
@@ -305,15 +306,23 @@ ${message.body}
 
 _ref: \`${message.id}\`_`;
 
-  const threadId =
-    process.env.CURSOR_THREAD_ID ??
-    process.env.CODEX_THREAD_ID ??
-    process.env.CLAUDE_CODE_SESSION_ID;
+  const persona = message.from?.persona?.role ?? message.from?.agentId?.replace(/-local$/, "");
+  if (!persona) {
+    throw new Error("--mirror-taskboard requer --from-persona para assinatura no board");
+  }
 
-  const args = ["comment", "add", message.issueId, "--body", summary];
-  if (threadId) args.push("--thread-id", threadId);
-
-  execFileSync(taskctl, args, { cwd: root, encoding: "utf8" });
+  const result = await taskboardComment({
+    issueId: message.issueId,
+    persona,
+    body: summary,
+    idempotentMarker: `_ref: \`${message.id}\`_`,
+  });
+  if (!result.ok && !result.offline) {
+    throw new Error(result.error ?? "mirror-taskboard failed");
+  }
+  if (result.offline) {
+    console.error("mirror-taskboard: board offline — comentário não espelhado");
+  }
 }
 
 
@@ -336,8 +345,15 @@ function warnComplianceEvidence(message) {
   }
 }
 
-function cmdPost(argv) {
+async function cmdPost(argv) {
   const opts = parsePostArgs(argv);
+  if (opts.issueId) {
+    const ok = await validateIssueForWrite(opts.issueId, fetchIssue, { label: "orchestration:broadcast" });
+    if (!ok) process.exit(1);
+  } else if (opts.type && !["consult", "share"].includes(opts.type)) {
+    console.error("⛔ orchestration:broadcast: --issue ANX-N obrigatorio para trabalho rastreavel");
+    process.exit(1);
+  }
   let message;
 
   if (opts.jsonPath) {
@@ -486,6 +502,7 @@ function cmdPost(argv) {
   warnComplianceEvidence(message);
 
   const saved = appendDialogueMessage(message);
+  touchChannelFromMessage(saved);
   touchSessionFromDialogue(saved);
   writePendingChatDisplay(saved.issueId ?? null, saved.id);
 
@@ -496,8 +513,8 @@ function cmdPost(argv) {
   }
 
   if (opts.mirrorTaskboard) {
-    mirrorToTaskboard(saved);
-    console.error(`(espelhado em ${saved.issueId} via taskctl)`);
+    await mirrorToTaskboard(saved);
+    console.error(`(espelhado em ${saved.issueId} · assinado por ${saved.from?.persona?.role ?? saved.from?.name})`);
   }
 
   return saved;
@@ -532,10 +549,11 @@ if (!cmd || cmd === "--help" || cmd === "-h" || cmd === "help") usage(0);
 const resolvedCmd = cmd.startsWith("--") ? "post" : cmd;
 const resolvedRest = cmd.startsWith("--") ? [cmd, ...rest] : rest;
 
+(async () => {
 try {
   switch (resolvedCmd) {
     case "post":
-      cmdPost(resolvedRest);
+      await cmdPost(resolvedRest);
       break;
     case "read":
       cmdRead(rest);
@@ -556,3 +574,4 @@ try {
   console.error(`dialogue error: ${err.message}`);
   process.exit(1);
 }
+})();

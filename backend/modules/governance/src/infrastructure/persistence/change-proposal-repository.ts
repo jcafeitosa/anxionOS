@@ -2,7 +2,7 @@ import { and, eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { ChangeProposal } from "../../domain/entities/change-proposal";
 import type { ChangeProposalRepository } from "../../domain/ports/change-proposal-repository";
-import { changeProposals, type ChangeProposalRow } from "./schema";
+import { type ChangeProposalRow, changeProposals } from "./schema";
 
 export class ChangeProposalRevisionConflictError extends Error {
 	constructor() {
@@ -14,6 +14,8 @@ export class ChangeProposalRevisionConflictError extends Error {
 export function toChangeProposal(row: ChangeProposalRow): ChangeProposal {
 	return {
 		id: row.id,
+		tenantId: row.tenantId,
+		agencyId: row.agencyId,
 		scopeId: row.scopeId,
 		kind: row.kind,
 		payloadHash: row.payloadHash,
@@ -62,6 +64,8 @@ export function createDrizzleChangeProposalRepository(
 				.insert(changeProposals)
 				.values({
 					id: proposal.id,
+					tenantId: proposal.tenantId,
+					agencyId: proposal.agencyId,
 					scopeId: proposal.scopeId,
 					kind: proposal.kind,
 					payloadHash: proposal.payloadHash,
@@ -90,7 +94,10 @@ export function createDrizzleChangeProposalRepository(
 				.select()
 				.from(changeProposals)
 				.where(
-					and(eq(changeProposals.scopeId, scopeId), eq(changeProposals.status, "pending")),
+					and(
+						eq(changeProposals.scopeId, scopeId),
+						eq(changeProposals.status, "pending"),
+					),
 				);
 			return rows.map(toChangeProposal);
 		},

@@ -4,7 +4,7 @@ Documento mestre: **quando** cada ferramenta habilitada no workspace é obrigat�
 
 > **Nota:** o Owner citou "anchfy" — o nome correto é **Archify** (diagramas de arquitetura). Este documento usa Archify em todo o texto.
 
-**Relacionados:** [CURSOR-AGENTS-INTEGRATION.md](./CURSOR-AGENTS-INTEGRATION.md) · [SKILLS-TOOLS-MCP-REGISTRY.md](./SKILLS-TOOLS-MCP-REGISTRY.md) · [GUIDELINES-INTEGRATION.md](./GUIDELINES-INTEGRATION.md) · [COMPLIANCE.md](./COMPLIANCE.md) · [AGNOSTIC-DESIGN.md](./AGNOSTIC-DESIGN.md) · [MANDATORY-COMPLIANCE.md](./MANDATORY-COMPLIANCE.md) · regra [tooling-mandatory.mdc](../rules/tooling-mandatory.mdc) · template [SUBAGENT-PROMPT-TOOLING.md](./templates/SUBAGENT-PROMPT-TOOLING.md)
+**Relacionados:** [AGENT-CAPABILITIES.md](./AGENT-CAPABILITIES.md) · [CURSOR-AGENTS-INTEGRATION.md](./CURSOR-AGENTS-INTEGRATION.md) · [SKILLS-TOOLS-MCP-REGISTRY.md](./SKILLS-TOOLS-MCP-REGISTRY.md) · [GUIDELINES-INTEGRATION.md](./GUIDELINES-INTEGRATION.md) · [COMPLIANCE.md](./COMPLIANCE.md) · [AGNOSTIC-DESIGN.md](./AGNOSTIC-DESIGN.md) · [MANDATORY-COMPLIANCE.md](./MANDATORY-COMPLIANCE.md) · regra [tooling-mandatory.mdc](../rules/tooling-mandatory.mdc) · template [SUBAGENT-PROMPT-TOOLING.md](./templates/SUBAGENT-PROMPT-TOOLING.md)
 
 ---
 
@@ -16,6 +16,7 @@ Documento mestre: **quando** cada ferramenta habilitada no workspace é obrigat�
 | **serena** (MCP) | Edição em nível de símbolo, rename, find references | Executores, G2 | G0.14, G1–G2 | `find_symbol`, `find_referencing_symbols`, `replace_symbol_body`, `rename_symbol` |
 | **archify** | Comunicação de arquitetura, fase P2, handoffs visuais | Marcus, Renata, André | P2, G0.10 | `npm run archify:validate`, `npm run archify:build` |
 | **open-knowledge** | Qualquer leitura/escrita em `brain/` | Todos; André, Helena, Marcus | G0.6, G0.14 | MCP `search`, `exec`, `write`, `edit` — **nunca** Read/Grep/Write nativos em `brain/` |
+| **orchestration:brain** | Staging reflect + instruções OKF search | Executores, críticos | G0, G1, G7 | `npm run orchestration:brain -- search|reflect|lessons` · [OPENKNOWLEDGE-BRAIN.md](./OPENKNOWLEDGE-BRAIN.md) |
 | **code-review-graph** | Análise de impacto, review G2 | Fernanda, críticos | G2 | `semantic_search_nodes_tool`, `get_impact_radius_tool`, `detect_changes_tool`, `get_review_context_tool` |
 | **orchestration:compliance** | Antes de codar; fim de turno | Todos | G0.12 | `npm run orchestration:compliance -- --pre-work --issue ANX-N --persona SLUG` |
 | **orchestration:who** | Antes de trabalho cross-domain | Todos | G0.11 | `npm run orchestration:who -- --persona SLUG --can-i "ação"` |
@@ -24,6 +25,10 @@ Documento mestre: **quando** cada ferramenta habilitada no workspace é obrigat�
 | **agent-compatibility** (ECC) | Gate opcional de portabilidade do framework; antes de `install-global` ou release | Renata, André, Ju | G0 (opcional), CI | `npx -y agent-compatibility@latest --json <framework-root>` |
 | **karpathy-guidelines** | Escrever/revisar código; diagramas com propósito (não decoração) | Todos executores, críticos, G2 | G0–G1, G2 | skill `karpathy-guidelines` · [GUIDELINES-INTEGRATION.md](./GUIDELINES-INTEGRATION.md) |
 | **ui-ux-pro-max** | UI/UX em `frontend/` (consoles P07) | Camila, Paulo, Edu | G1, G3 | skill `ui-ux-pro-max` · [workflow-frontend-executor.md](./workflows/workflow-frontend-executor.md) |
+| **Internet / RAG** | Fato externo (versão API, vendor, breaking change) não em `brain/` ou código | Todos | G0, G1 | `WebSearch`, `WebFetch`, context7 MCP — citar URL; ver [AGENT-CAPABILITIES.md](./AGENT-CAPABILITIES.md) |
+| **Dashi Taskboard (Cursor)** | Claims, comentários e moves assinados por persona | Todos executores | G0.5, G1 | `npm run taskboard:cursor-start`, `orchestration:taskboard --persona` · [CURSOR-TASKBOARD-INTEGRATION.md](./CURSOR-TASKBOARD-INTEGRATION.md) |
+| **Shell / CLI** | Verificação, testes, taskboard, graphify — **executar**, não describe-only | Todos executores | G0, G1 | `command:` em `--evidence`; warn `CAPABILITIES_UNDERUSED` |
+| **9Router** | Endpoint OpenAI-compatible local para Cursor/CLI (LLM externo ao IDE) | Todos (quando Owner habilita) | G0 | `NINEROUTER_BASE_URL`, `OPENAI_API_KEY` · [9ROUTER-INTEGRATION.md](./9ROUTER-INTEGRATION.md) |
 
 ---
 
@@ -68,6 +73,7 @@ flowchart TD
 | 5 | Subagentes recebem SUBAGENT-PROMPT-TOOLING.md | Prompt Task/delegation |
 | 6 | `orchestration:compliance --pre-work` exit 0 | CLI |
 | 7 | Supermemory em retomada de sessão | `supermemory_search` quando aplicável |
+| 8 | Capacidades completas (internet, shell, MCPs) | [AGENT-CAPABILITIES.md](./AGENT-CAPABILITIES.md); evidência no dialogue |
 
 Detalhes em [COMPLIANCE.md](./COMPLIANCE.md).
 
@@ -141,4 +147,4 @@ npx -y agent-compatibility@latest --json .cursor/orchestration
 
 Ver [AGNOSTIC-DESIGN.md](./AGNOSTIC-DESIGN.md) para instalação global do framework.
 
-**Última atualização:** 2026-09-09 · ANX-237 · ECC opcional + karpathy/ui-ux cross-ref
+**Última atualização:** 2026-09-09 · ANX-249 · capacidades completas (internet, shell, MCPs)

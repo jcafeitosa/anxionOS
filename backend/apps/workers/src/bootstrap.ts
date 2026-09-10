@@ -3,6 +3,7 @@ import {
 	ensureEventingSchema,
 } from "@anxionos/eventing/postgres";
 import { ensureGraphSchema } from "@anxionos/graph";
+import type { GraphStore } from "@anxionos/graph";
 import {
 	createNeo4jDriverFromEnv,
 	createNeo4jGraphStore,
@@ -10,9 +11,9 @@ import {
 } from "@anxionos/graph/neo4j";
 import type { Driver } from "neo4j-driver";
 import type { Pool } from "pg";
-import type { GraphStore } from "@anxionos/graph";
 import type {
 	GraphGovernanceWorkerConfig,
+	GraphProductWorkerConfig,
 	OutboxRelayWorkerConfig,
 } from "./config";
 
@@ -27,7 +28,7 @@ export interface OutboxRelayWorkerRuntime {
 }
 
 export async function bootstrapGraphGovernanceWorker(
-	config: GraphGovernanceWorkerConfig,
+	config: GraphGovernanceWorkerConfig | GraphProductWorkerConfig,
 ): Promise<GraphGovernanceWorkerRuntime> {
 	const pool = createPgPool(config.databaseUrl);
 	await pool.query("SELECT 1");

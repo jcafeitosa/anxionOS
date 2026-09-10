@@ -38,7 +38,8 @@ function createSubmitProposalDeps() {
 
 describe("submitChangeProposal", () => {
 	test("submits pending institutional proposal and emits event", async () => {
-		const { deps, changeProposalRepository, published } = createSubmitProposalDeps();
+		const { deps, changeProposalRepository, published } =
+			createSubmitProposalDeps();
 		const commandId = "30303030-3030-4303-8303-303030303030";
 		const result = await submitChangeProposal(deps, {
 			commandId,
@@ -51,7 +52,9 @@ describe("submitChangeProposal", () => {
 		const stored = await changeProposalRepository.findById(result.aggregateId);
 		expect(stored?.status).toBe("pending");
 		expect(stored?.requiredApprovals).toBe(1);
-		expect(published[0]?.eventType).toBe(GOVERNANCE_EVENT_TYPES.CHANGE_PROPOSAL_SUBMITTED);
+		expect(published[0]?.eventType).toBe(
+			GOVERNANCE_EVENT_TYPES.CHANGE_PROPOSAL_SUBMITTED,
+		);
 	});
 
 	test("unknown proposer fails closed", async () => {

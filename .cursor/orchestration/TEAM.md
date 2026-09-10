@@ -87,7 +87,7 @@ Cada executor implementa **uma issue** por vez, com claim versionado e binding c
 
 **Obrigatório:** AGENTS.md + OKF (spec/ADR em `brain/`) + `graphify query`.
 
-**Crítico pareado:** Marina Ferreira (`critic-reviewer` / `mantis-critic`).
+**Crítico pareado:** Marina Ferreira (`code-reviewer` / `mantis-critic`).
 
 ### 2.2 Executor Frontend (P07 consoles)
 
@@ -153,7 +153,7 @@ Ver pares nomeados em [PERSONAS.md](./PERSONAS.md). Interações: `challenge` �
 | Campo | Detalhe |
 | --- | --- |
 | **Missão** | Revisão adversarial independente; bloquear G1 sem evidência. |
-| **Skills** | `critic-reviewer`, `mantis-critic`, `silent-failure-hunter`. |
+| **Skills** | `code-reviewer`, `mantis-critic`, `silent-failure-hunter`. |
 | **Outputs** | `PASS` \| `CHANGES_REQUIRED` \| `BLOCKED` + severidade. |
 
 **Obrigatório:** AGENTS.md + validar zero-tolerância e pacote G0 `brain/` no handoff.

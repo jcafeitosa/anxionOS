@@ -1,9 +1,9 @@
+import { ANXION_SERVICE_ROLE } from "./roles";
 import {
 	AGENCY_ID_SETTING,
 	BYPASS_RLS_SETTING,
 	TENANT_ID_SETTING,
 } from "./tenant-context";
-import { ANXION_SERVICE_ROLE } from "./roles";
 
 function quoteIdent(value: string): string {
 	return `"${value.replace(/"/g, '""')}"`;
@@ -29,7 +29,11 @@ function serviceBypassExpression(): string {
 	return `(current_setting('${BYPASS_RLS_SETTING}', true) = 'true' AND pg_has_role(current_user, '${ANXION_SERVICE_ROLE}', 'member'))`;
 }
 
-function usingClause(tenantColumn: string, agencyColumn?: string, includeServiceBypass = true): string {
+function usingClause(
+	tenantColumn: string,
+	agencyColumn?: string,
+	includeServiceBypass = true,
+): string {
 	const tenantParts = [tenantMatchExpression(tenantColumn)];
 	if (agencyColumn) {
 		tenantParts.push(agencyMatchExpression(agencyColumn));
@@ -102,7 +106,10 @@ export function disableRls(table: string): string {
 	return `ALTER TABLE ${quoteIdent(table)} DISABLE ROW LEVEL SECURITY;`;
 }
 
-export function tenantScopedPolicies(table: string, tenantColumn = "tenant_id"): string {
+export function tenantScopedPolicies(
+	table: string,
+	tenantColumn = "tenant_id",
+): string {
 	return [
 		enableRls(table),
 		forceRls(table),

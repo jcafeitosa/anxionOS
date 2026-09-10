@@ -195,28 +195,33 @@ export function resolveOrchestrationPaths(options = {}) {
   const config = mergeConfig(projectConfig, globalDefaults);
   const resolvePath = (rel) => (isAbsolute(rel) ? rel : join(projectRoot, rel));
   const scopeDoc = config.scopeDoc ?? "SCOPE.md";
+  const testRuntime = process.env.ORCHESTRATION_TEST_RUNTIME;
+  const runtimeRoot = testRuntime
+    ? (isAbsolute(testRuntime) ? testRuntime : join(projectRoot, testRuntime))
+    : resolvePath(config.paths.runtime ?? config.paths.codewhale ?? DEFAULT_RUNTIME_ROOT);
   return {
     projectRoot,
     frameworkRoot,
     configPath,
     config,
     paths: {
-      runtime: resolvePath(config.paths.runtime ?? config.paths.codewhale ?? DEFAULT_RUNTIME_ROOT),
+      runtime: runtimeRoot,
       /** @deprecated Use `runtime` — kept for backward compatibility. */
-      codewhale: resolvePath(config.paths.runtime ?? config.paths.codewhale ?? DEFAULT_RUNTIME_ROOT),
-      dialogue: resolvePath(config.paths.dialogue),
-      workflows: resolvePath(config.paths.workflows),
-      autonomy: resolvePath(config.paths.autonomy),
-      hire: resolvePath(config.paths.hire),
-      proactive: resolvePath(config.paths.proactive),
-      lifecycle: resolvePath(config.paths.lifecycle ?? `${config.paths.runtime ?? DEFAULT_RUNTIME_ROOT}/lifecycle`),
-      state: resolvePath(config.paths.state ?? `${config.paths.runtime ?? DEFAULT_RUNTIME_ROOT}/state`),
+      codewhale: runtimeRoot,
+      dialogue: testRuntime ? join(runtimeRoot, "dialogue") : resolvePath(config.paths.dialogue),
+      workflows: testRuntime ? join(runtimeRoot, "workflows") : resolvePath(config.paths.workflows),
+      autonomy: testRuntime ? join(runtimeRoot, "autonomy") : resolvePath(config.paths.autonomy),
+      hire: testRuntime ? join(runtimeRoot, "hire") : resolvePath(config.paths.hire),
+      proactive: testRuntime ? join(runtimeRoot, "proactive") : resolvePath(config.paths.proactive),
+      lifecycle: testRuntime
+        ? join(runtimeRoot, "lifecycle")
+        : resolvePath(config.paths.lifecycle ?? `${config.paths.runtime ?? DEFAULT_RUNTIME_ROOT}/lifecycle`),
+      state: testRuntime
+        ? join(runtimeRoot, "state")
+        : resolvePath(config.paths.state ?? `${config.paths.runtime ?? DEFAULT_RUNTIME_ROOT}/state`),
       scope: join(frameworkRoot, scopeDoc),
       agentsMd: join(projectRoot, "AGENTS.md"),
-      personasLocal: join(
-        resolvePath(config.paths.runtime ?? config.paths.codewhale ?? DEFAULT_RUNTIME_ROOT),
-        "personas.local.json",
-      ),
+      personasLocal: join(runtimeRoot, "personas.local.json"),
       hooks: join(projectRoot, ".cursor", "hooks"),
       hooksJson: join(projectRoot, ".cursor", "hooks.json"),
       rules: join(projectRoot, ".cursor", "rules"),

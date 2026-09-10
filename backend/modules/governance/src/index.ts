@@ -12,18 +12,26 @@ export {
 export type { Approval } from "./domain/entities/approval";
 export {
 	createApprovalResolvedEvent,
+	createAutonomyAssignedEvent,
+	createAutonomyTransitionedEvent,
 	createAuthorityEpochBumpedEvent,
 	createChangeProposalSubmittedEvent,
+	createBreakGlassActivatedEvent,
+	createDelegationCreatedEvent,
 	createGrantIssuedEvent,
 	createGrantRevokedEvent,
+	createMandateIssuedEvent,
 } from "./domain/events/governance-events";
 export type {
 	ApprovalRepository,
+	AutonomyAssignmentRepository,
 	AuthorityEpochRecord,
 	AuthorityEpochStore,
 	ChangeProposalRepository,
 	CommandJournalRecord,
 	CommandJournalRepository,
+	DelegationRepository,
+	MandateRepository,
 	GovernanceTransactionContext,
 	GovernanceUnitOfWork,
 	GrantRepository,
@@ -41,7 +49,19 @@ export {
 export {
 	revokeGrant,
 	type RevokeGrantDeps,
-	} from "./application/commands/revoke-grant";
+} from "./application/commands/revoke-grant";
+export {
+	activateBreakGlass,
+	type ActivateBreakGlassDeps,
+} from "./application/commands/activate-break-glass";
+export {
+	createDelegation,
+	type CreateDelegationDeps,
+} from "./application/commands/create-delegation";
+export {
+	issueMandate,
+	type IssueMandateDeps,
+} from "./application/commands/issue-mandate";
 export {
 	submitChangeProposal,
 	type SubmitChangeProposalDeps,
@@ -52,6 +72,42 @@ export {
 	type ResolveApprovalDeps,
 	type ResolveApprovalInput,
 } from "./application/commands/resolve-approval";
+export {
+	getAuthorityEpoch,
+	type GetAuthorityEpochDeps,
+} from "./application/queries/get-authority-epoch";
+export {
+	listEffectiveGrants,
+	type ListEffectiveGrantsDeps,
+	type ListEffectiveGrantsInput,
+} from "./application/queries/list-effective-grants";
+export {
+	assignAutonomyLevel,
+	type AssignAutonomyLevelDeps,
+} from "./application/commands/assign-autonomy-level";
+export {
+	transitionAutonomyLevel,
+	type TransitionAutonomyLevelDeps,
+} from "./application/commands/transition-autonomy-level";
+export {
+	getEffectiveAutonomy,
+	type GetEffectiveAutonomyDeps,
+	type GetEffectiveAutonomyInput,
+	type EffectiveAutonomyResult,
+} from "./application/queries/get-effective-autonomy";
+export {
+	evaluateAutonomyCapability,
+	type EvaluateAutonomyCapabilityInput,
+	type EvaluateAutonomyCapabilityResult,
+} from "./application/queries/evaluate-autonomy-capability";
+export {
+	validateAutonomyTransition,
+	validateInitialAssignment,
+	isAutonomyLevelRuntimeEnabled,
+	isCapabilityEligibleAtLevel,
+	getAutonomyLevelDefinition,
+} from "./domain/policies/autonomy-normative-matrix";
+export type { AutonomyAssignment } from "./domain/entities/autonomy-assignment";
 export { GovernanceCommandError } from "./application/errors";
 export { createGovernanceDb } from "./infrastructure/create-db";
 export {
@@ -63,6 +119,7 @@ export {
 	type GraphKernelT01Evaluator,
 } from "./infrastructure/adapters/graph-t01-traversal-evaluator";
 export { createGovernanceUnitOfWork } from "./infrastructure/governance-unit-of-work";
+export { createGovernanceInboxProcessor } from "./infrastructure/inbox-processor-adapter";
 export { ensureGovernanceSchema } from "./infrastructure/migrate";
 export {
 	authorityEpochs,
@@ -83,3 +140,8 @@ export {
 	processOrganizationsMembershipEvent,
 	type OrganizationsMembershipConsumerDeps,
 } from "./application/consumers/organizations-membership-consumer";
+export type {
+	OrganizationsMembershipReadOptions,
+	OrganizationsMembershipReadPort,
+	OrganizationsMembershipSnapshot,
+} from "./domain/ports/organizations-membership-read-port";

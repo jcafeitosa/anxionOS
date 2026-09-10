@@ -1,0 +1,10 @@
+---
+import "../styles/global.css";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { AccessDeniedPanel } from "../components/auth/AuthPanels";
+---
+<BaseLayout title="Acesso negado | anxionOS" description="Esta identidade não tem console autorizado.">
+	<main class="flex min-h-dvh items-center px-4 py-12">
+		<AccessDeniedPanel client:load />
+	</main>
+</BaseLayout>

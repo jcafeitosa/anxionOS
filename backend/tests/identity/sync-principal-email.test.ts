@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { IDENTITY_EVENT_TYPES } from "@anxionos/contracts/identity";
-import { syncPrincipalEmail, type Principal } from "@anxionos/identity";
+import { type Principal, syncPrincipalEmail } from "@anxionos/identity";
 import {
 	createInMemoryPrincipalRepository,
 	createInMemoryServiceIdentityRepository,
@@ -30,7 +30,9 @@ describe("syncPrincipalEmail", () => {
 		);
 		expect(updated.email).toBe("new-owner@example.com");
 		expect(published).toHaveLength(1);
-		expect(published[0]?.eventType).toBe(IDENTITY_EVENT_TYPES.PRINCIPAL_EMAIL_UPDATED);
+		expect(published[0]?.eventType).toBe(
+			IDENTITY_EVENT_TYPES.PRINCIPAL_EMAIL_UPDATED,
+		);
 		expect(published[0]?.payload).toEqual({
 			principalId: principal.id,
 			email: "new-owner@example.com",

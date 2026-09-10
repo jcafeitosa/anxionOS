@@ -32,10 +32,16 @@ export function createDrizzleOwnerRepository(
 				if (!row) throw new Error("Failed to update owner");
 				return toOwner(row);
 			}
+			const scopeAgencyId = owner.defaultOrganizationId;
+			if (!scopeAgencyId) {
+				throw new Error("Owner insert requires defaultOrganizationId for tenant scope");
+			}
 			const rows = await db
 				.insert(owners)
 				.values({
 					id: owner.id,
+					tenantId: scopeAgencyId,
+					agencyId: scopeAgencyId,
 					principalId: owner.principalId,
 					defaultOrganizationId: owner.defaultOrganizationId ?? null,
 					createdAt: owner.createdAt,

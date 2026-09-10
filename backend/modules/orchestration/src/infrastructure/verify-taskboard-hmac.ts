@@ -1,10 +1,6 @@
-export interface TaskboardHmacConfig {
-    secret: string | null;
-    required: boolean;
-}
-
+export type { TaskboardHmacConfig } from "../domain/policies/taskboard-hmac";
 export {
-    computeTaskboardHmac,
-    resolveTaskboardHmacConfig,
-    verifyTaskboardHmac,
+	computeTaskboardHmac,
+	resolveTaskboardHmacConfig,
+	verifyTaskboardHmac,
 } from "../domain/policies/taskboard-hmac";

@@ -6,5 +6,8 @@ export interface InboxConsumer {
 }
 
 export interface InboxProcessorPort {
-	process(consumer: InboxConsumer, envelope: DomainEventEnvelope): Promise<"processed" | "skipped">;
+	process(
+		consumer: InboxConsumer,
+		envelope: DomainEventEnvelope,
+	): Promise<"processed" | "skipped">;
 }

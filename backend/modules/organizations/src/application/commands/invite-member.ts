@@ -13,6 +13,7 @@ import { loadIdempotentCommandResult, toCommandResultSnapshot } from "../command
 import { parseCommandResultSnapshot, throwOrganizationError } from "../errors";
 import { INVITE_TTL_MS } from "../invite-constants";
 import { assertActorIsOwnerOrAdmin } from "../services/membership-role-guard";
+import { buildAgencyTenantContext } from "../services/tenant-context";
 
 export async function inviteMember(
 	deps: InviteMemberDeps,
@@ -23,7 +24,9 @@ export async function inviteMember(
 	if (replay) {
 		return { result: replay, inviteToken: "" };
 	}
-	return deps.unitOfWork.runInTransaction(async (context) => {
+	return deps.unitOfWork.runInTransaction(
+		buildAgencyTenantContext(command.agencyId, input.actorPrincipalId),
+		async (context) => {
 		const raced = await context.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
 			return {
@@ -89,7 +92,8 @@ export async function inviteMember(
 		});
 		await context.publishEvents([event]);
 		return { result, inviteToken };
-	});
+		},
+	);
 }
 
 export interface InviteMemberInput extends InviteMemberCommand {

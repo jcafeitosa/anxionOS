@@ -31,7 +31,7 @@ Política: [.cursor/orchestration/CURSOR-AGENTS-INTEGRATION.md](../orchestration
 | G3 Edu | e2e-runner / validation-review |
 | G4 Isa | security-review |
 | Executor Lucas | generalPurpose |
-| Crítico | critic-reviewer |
+| Crítico | code-reviewer |
 | Research Helena | explore / docs-researcher |
 
 **Violação** = mesma severidade que [MANDATORY-COMPLIANCE.md](../orchestration/MANDATORY-COMPLIANCE.md) · gate G0.15.

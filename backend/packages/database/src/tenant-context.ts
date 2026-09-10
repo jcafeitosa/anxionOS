@@ -44,9 +44,13 @@ export function validateTenantContext(ctx: TenantContext): void {
 	}
 }
 
-export function requireTenantContext(ctx: TenantContext | undefined): TenantContext {
+export function requireTenantContext(
+	ctx: TenantContext | undefined,
+): TenantContext {
 	if (!ctx) {
-		throw new TenantContextError("tenant context is required for authoritative queries");
+		throw new TenantContextError(
+			"tenant context is required for authoritative queries",
+		);
 	}
 	validateTenantContext(ctx);
 	return ctx;

@@ -1,15 +1,15 @@
 import { describe, expect, test } from "bun:test";
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
-import { tmpdir } from "node:os";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { readdirSync, statSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
 	BACKEND_ROOT,
+	type ForbiddenPattern,
+	type ImportViolation,
 	collectModuleLayerFiles,
 	findForbiddenImports,
 	formatViolations,
-	type ForbiddenPattern,
-	type ImportViolation,
 } from "./scan-imports";
 
 /**
@@ -19,7 +19,8 @@ import {
 export const MODULE_APPLICATION_LAYER_FORBIDDEN: ForbiddenPattern[] = [
 	{
 		id: "application-no-infrastructure-relative",
-		description: "module application must not import sibling infrastructure layer",
+		description:
+			"module application must not import sibling infrastructure layer",
 		filePath: /^modules\/[^/]+\/(src|dist)\/application\//,
 		importPatterns: [
 			/\.\.\/infrastructure/,
@@ -67,7 +68,6 @@ export const MODULE_APPLICATION_LAYER_FORBIDDEN: ForbiddenPattern[] = [
 		],
 	},
 ];
-
 
 function listModuleNamesWithApplication(backendRoot = BACKEND_ROOT): string[] {
 	const modulesDir = join(backendRoot, "modules");
@@ -247,10 +247,7 @@ export {};
 		mkdirSync(applicationDir, { recursive: true });
 
 		const invalidFile = join(applicationDir, "bad-reexport-db.ts");
-		writeFileSync(
-			invalidFile,
-			'export { pool } from "@anxionos/database";\n',
-		);
+		writeFileSync(invalidFile, 'export { pool } from "@anxionos/database";\n');
 
 		const violations = findForbiddenImports(
 			[invalidFile],
@@ -294,7 +291,6 @@ export {};
 
 		rmSync(tempRoot, { recursive: true, force: true });
 	});
-
 
 	test("fixture allows domain port imports in application layer", () => {
 		const tempRoot = mkdtempSync(join(tmpdir(), "boundary-app-layer-"));

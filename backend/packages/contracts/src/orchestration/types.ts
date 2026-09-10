@@ -1,51 +1,52 @@
 import { z } from "zod";
 export const gateIdSchema = z.enum([
-    "G0",
-    "G1",
-    "G2",
-    "G3",
-    "G4",
-    "G5",
-    "G6",
-    "G7",
+	"G0",
+	"G1",
+	"G2",
+	"G3",
+	"G4",
+	"G5",
+	"G6",
+	"G7",
 ]);
 export const gateDispositionSchema = z.enum([
-    "PASS",
-    "CHANGES_REQUIRED",
-    "BLOCKED",
-    "NOT_APPLICABLE",
+	"PASS",
+	"CHANGES_REQUIRED",
+	"BLOCKED",
+	"NOT_APPLICABLE",
 ]);
 export const hierarchyModeSchema = z.enum([
-    "HIERARCHY_TREE",
-    "HIERARCHY_CIRCULAR",
+	"HIERARCHY_TREE",
+	"HIERARCHY_CIRCULAR",
 ]);
 export const checkoutStatusSchema = z.enum([
-    "UNCLAIMED",
-    "LEASED",
-    "COMPLETED",
-    "BLOCKED",
+	"UNCLAIMED",
+	"LEASED",
+	"COMPLETED",
+	"BLOCKED",
 ]);
 export const runStatusSchema = z.enum([
-    "SCHEDULED",
-    "WAKING",
-    "ACTIVE",
-    "PAUSED",
-    "COMPLETED",
-    "ORPHANED",
-    "BUDGET_STOPPED",
-    "TERMINATED",
+	"SCHEDULED",
+	"WAKING",
+	"ACTIVE",
+	"PAUSED",
+	"WAITING_HUMAN_INPUT",
+	"COMPLETED",
+	"ORPHANED",
+	"BUDGET_STOPPED",
+	"TERMINATED",
 ]);
 export const goalStatusSchema = z.enum([
-    "draft",
-    "active",
-    "completed",
-    "archived",
+	"draft",
+	"active",
+	"completed",
+	"archived",
 ]);
 export const heartbeatStatusSchema = z.enum([
-    "pending",
-    "processing",
-    "done",
-    "cancelled",
+	"pending",
+	"processing",
+	"done",
+	"cancelled",
 ]);
 export const taskIdSchema = z.string().uuid();
 export const runIdSchema = z.string().uuid();
@@ -55,10 +56,19 @@ export const artifactDigestSchema = z.string().regex(/^[a-f0-9]{64}$/);
 export const agentIdSchema = z.string().min(1).max(128);
 export const organizationIdSchema = z.string().min(1).max(64);
 
+/** Context persisted on a run while WAITING_HUMAN_INPUT. */
+export const waitingHumanContextSchema = z.object({
+	operationId: z.string().min(1).max(128),
+	idempotencyKey: z.string().min(1).max(256),
+	requestedAt: z.string().datetime(),
+	reason: z.string().min(1).max(2000).optional(),
+});
+
 export type GateId = z.infer<typeof gateIdSchema>;
 export type GateDisposition = z.infer<typeof gateDispositionSchema>;
 export type HierarchyMode = z.infer<typeof hierarchyModeSchema>;
 export type CheckoutStatus = z.infer<typeof checkoutStatusSchema>;
 export type RunStatus = z.infer<typeof runStatusSchema>;
+export type WaitingHumanContext = z.infer<typeof waitingHumanContextSchema>;
 export type GoalStatus = z.infer<typeof goalStatusSchema>;
 export type HeartbeatStatus = z.infer<typeof heartbeatStatusSchema>;

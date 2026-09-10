@@ -2,19 +2,29 @@ import { randomUUID } from "node:crypto";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
 import {
-	approvalResolvedPayloadSchema,
-	authorityEpochBumpedPayloadSchema,
-	changeProposalSubmittedPayloadSchema,
-	GOVERNANCE_EVENT_TYPES,
-	GOVERNANCE_OWNER_DOMAIN,
-	grantIssuedPayloadSchema,
-	grantRevokedPayloadSchema,
 	type ApprovalResolvedPayload,
 	type AuthorityEpochBumpedPayload,
 	type ChangeProposalSubmittedPayload,
+	type BreakGlassActivatedPayload,
+	type DelegationCreatedPayload,
+	GOVERNANCE_EVENT_TYPES,
+	GOVERNANCE_OWNER_DOMAIN,
 	type GovernanceEventType,
 	type GrantIssuedPayload,
 	type GrantRevokedPayload,
+	type MandateIssuedPayload,
+	type AutonomyAssignedPayload,
+	type AutonomyTransitionedPayload,
+	approvalResolvedPayloadSchema,
+	autonomyAssignedPayloadSchema,
+	autonomyTransitionedPayloadSchema,
+	authorityEpochBumpedPayloadSchema,
+	breakGlassActivatedPayloadSchema,
+	changeProposalSubmittedPayloadSchema,
+	delegationCreatedPayloadSchema,
+	grantIssuedPayloadSchema,
+	grantRevokedPayloadSchema,
+	mandateIssuedPayloadSchema,
 } from "@anxionos/contracts/governance";
 
 function createGovernanceEvent(
@@ -65,6 +75,39 @@ export function createAuthorityEpochBumpedEvent(
 	);
 }
 
+export function createMandateIssuedEvent(
+	payload: MandateIssuedPayload,
+	occurredAt?: Date,
+): DomainEventEnvelope {
+	return createGovernanceEvent(
+		GOVERNANCE_EVENT_TYPES.MANDATE_ISSUED,
+		mandateIssuedPayloadSchema.parse(payload),
+		occurredAt,
+	);
+}
+
+export function createBreakGlassActivatedEvent(
+	payload: BreakGlassActivatedPayload,
+	occurredAt?: Date,
+): DomainEventEnvelope {
+	return createGovernanceEvent(
+		GOVERNANCE_EVENT_TYPES.BREAK_GLASS_ACTIVATED,
+		breakGlassActivatedPayloadSchema.parse(payload),
+		occurredAt,
+	);
+}
+
+export function createDelegationCreatedEvent(
+	payload: DelegationCreatedPayload,
+	occurredAt?: Date,
+): DomainEventEnvelope {
+	return createGovernanceEvent(
+		GOVERNANCE_EVENT_TYPES.DELEGATION_CREATED,
+		delegationCreatedPayloadSchema.parse(payload),
+		occurredAt,
+	);
+}
+
 export function createChangeProposalSubmittedEvent(
 	payload: ChangeProposalSubmittedPayload,
 	occurredAt?: Date,
@@ -83,6 +126,28 @@ export function createApprovalResolvedEvent(
 	return createGovernanceEvent(
 		GOVERNANCE_EVENT_TYPES.APPROVAL_RESOLVED,
 		approvalResolvedPayloadSchema.parse(payload),
+		occurredAt,
+	);
+}
+
+export function createAutonomyAssignedEvent(
+	payload: AutonomyAssignedPayload,
+	occurredAt?: Date,
+): DomainEventEnvelope {
+	return createGovernanceEvent(
+		GOVERNANCE_EVENT_TYPES.AUTONOMY_ASSIGNED,
+		autonomyAssignedPayloadSchema.parse(payload),
+		occurredAt,
+	);
+}
+
+export function createAutonomyTransitionedEvent(
+	payload: AutonomyTransitionedPayload,
+	occurredAt?: Date,
+): DomainEventEnvelope {
+	return createGovernanceEvent(
+		GOVERNANCE_EVENT_TYPES.AUTONOMY_TRANSITIONED,
+		autonomyTransitionedPayloadSchema.parse(payload),
 		occurredAt,
 	);
 }

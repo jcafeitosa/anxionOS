@@ -1,12 +1,12 @@
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import type { Pool } from "pg";
 import {
+	type Queryable,
 	fetchPendingOutbox,
 	markOutboxDispatched,
 	markOutboxDispatchedForRelay,
-	type Queryable,
 } from "./postgres";
-import { computeBackoffDelay, shouldRetry, type RetryPolicy } from "./retry";
+import { type RetryPolicy, computeBackoffDelay, shouldRetry } from "./retry";
 
 export interface OutboxPublisher {
 	publish(envelope: DomainEventEnvelope): Promise<void>;

@@ -1,16 +1,20 @@
 import { randomUUID } from "node:crypto";
 import {
-	governanceCommandResultSchema,
-	submitChangeProposalCommandSchema,
 	type GovernanceCommandResult,
 	type SubmitChangeProposalCommand,
+	governanceCommandResultSchema,
+	submitChangeProposalCommandSchema,
 } from "@anxionos/contracts/governance";
 import { defaultRequiredApprovals } from "../../domain/entities/change-proposal";
 import { createChangeProposalSubmittedEvent } from "../../domain/events/governance-events";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { GovernanceUnitOfWork } from "../../domain/ports/governance-unit-of-work";
 import type { PrincipalLookup } from "../../domain/ports/principal-lookup";
-import { loadIdempotentCommandResult, toCommandResultSnapshot } from "../command-support";
+import type { TenantContext } from "../../domain/ports/tenant-context";
+import {
+	loadIdempotentCommandResult,
+	toCommandResultSnapshot,
+} from "../command-support";
 import { parseCommandResultSnapshot, throwGovernanceError } from "../errors";
 
 export interface SubmitChangeProposalInput extends SubmitChangeProposalCommand {
@@ -28,16 +32,28 @@ export async function submitChangeProposal(
 	input: SubmitChangeProposalInput,
 ): Promise<GovernanceCommandResult> {
 	const command = submitChangeProposalCommandSchema.parse(input);
-	const replay = await loadIdempotentCommandResult(deps.commandJournal, command.commandId);
+	const replay = await loadIdempotentCommandResult(
+		deps.commandJournal,
+		command.commandId,
+	);
 	if (replay) {
 		return replay;
 	}
-	return deps.unitOfWork.runInTransaction(async (context) => {
-		const raced = await context.commandJournal.findByCommandId(command.commandId);
+	const tenantContext: TenantContext = {
+		tenantId: command.scopeId,
+		agencyId: command.scopeId,
+		principalId: input.proposerPrincipalId,
+	};
+	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
+		const raced = await context.commandJournal.findByCommandId(
+			command.commandId,
+		);
 		if (raced) {
 			return parseCommandResultSnapshot(raced.responseSnapshot);
 		}
-		const proposerExists = await deps.principalLookup.exists(input.proposerPrincipalId);
+		const proposerExists = await deps.principalLookup.exists(
+			input.proposerPrincipalId,
+		);
 		if (!proposerExists) {
 			throwGovernanceError(
 				"GOV_PRINCIPAL_NOT_FOUND",
@@ -49,6 +65,8 @@ export async function submitChangeProposal(
 		const revision = 1;
 		const saved = await context.changeProposalRepository.save({
 			id: proposalId,
+			tenantId: command.scopeId,
+			agencyId: command.scopeId,
 			scopeId: command.scopeId,
 			kind: command.kind,
 			payloadHash: command.payloadHash,

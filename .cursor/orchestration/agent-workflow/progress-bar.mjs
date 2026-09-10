@@ -14,6 +14,7 @@ import { readDialogueMessages } from "../agent-dialogue/dialogue-log.mjs";
 import { extractLatestGateVerdicts } from "../agent-proactive/cto-evidence.mjs";
 import { getOrchestrationPaths } from "../agent-config/load-config.mjs";
 import { loadAllWorkflowStates } from "./state.mjs";
+import { buildCompanyStageReport } from "../agent-lifecycle/phase-check.mjs";
 
 export const CURSOR_PROGRESS_MARKER =
   "<!-- CURSOR_CHAT_PROGRESS: include at start of coordinator substantive turns -->";
@@ -291,12 +292,18 @@ export function computeOverallProgress(gates) {
  * @param {object} progress
  */
 export function renderProgressMarkdown(progress) {
-  const { issueId, issueStatus, gates, overall, slices } = progress;
+  const { issueId, issueStatus, gates, overall, slices, companyStage } = progress;
   const bar = renderProgressBar(overall.completed, overall.total);
   const lines = [
     `${issueId} ${bar} ${overall.currentGate}/${overall.total - 1} (${overall.percent}%) · ${issueStatus}`,
     renderGateLine(gates),
   ];
+
+  if (companyStage) {
+    lines.push(
+      `Product Company: PC${companyStage.productCompanyStageNumber} · ${companyStage.productCompanyStageName} (${companyStage.productCompanyStage})`,
+    );
+  }
 
   if (slices.total != null) {
     const sliceBar = renderProgressBar(slices.completed, slices.total, 10);
@@ -330,6 +337,11 @@ export async function buildProgressReport(issueId, opts = {}) {
     ? { total: null, completed: 0, label: null }
     : computeSliceProgress({ dialogueMessages, delegationText });
 
+  const companyStage = buildCompanyStageReport(issueId, {
+    gates,
+    issueStatus,
+  });
+
   return {
     issueId,
     issueStatus,
@@ -337,7 +349,15 @@ export async function buildProgressReport(issueId, opts = {}) {
     gates,
     overall,
     slices,
-    markdown: renderProgressMarkdown({ issueId, issueStatus, gates, overall, slices }),
+    companyStage,
+    markdown: renderProgressMarkdown({
+      issueId,
+      issueStatus,
+      gates,
+      overall,
+      slices,
+      companyStage,
+    }),
   };
 }
 

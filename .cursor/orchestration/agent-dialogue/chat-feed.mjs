@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 import { formatConversationMarkdown } from "./conversation.mjs";
 import { getDialogueDir, readDialogueMessages } from "./dialogue-log.mjs";
 import { buildChatProgressBlock } from "../agent-workflow/progress-bar.mjs";
+import { markChannelRead, resolveChannelId } from "./slack-store.mjs";
 
 export const CURSOR_CHAT_MARKER =
   "<!-- CURSOR_CHAT_DIALOGUE: paste this block verbatim in assistant response -->";
@@ -174,6 +175,8 @@ export async function buildChatFeedOutput(opts) {
 
   if (opts.markRead && messages.length > 0) {
     writeLastReadFromMessages(messages);
+    const channelId = issueId ?? resolveChannelId(messages[messages.length - 1]);
+    markChannelRead(channelId);
   }
 
   if (opts.checkPending) {

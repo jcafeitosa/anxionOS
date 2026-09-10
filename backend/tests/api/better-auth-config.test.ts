@@ -29,7 +29,8 @@ describe("better auth config", () => {
 		const previousOrigins = process.env.BETTER_AUTH_TRUSTED_ORIGINS;
 		process.env.BETTER_AUTH_SECRET = "test-secret";
 		process.env.BETTER_AUTH_URL = "http://localhost:3000";
-		process.env.BETTER_AUTH_TRUSTED_ORIGINS = "http://localhost:4321, http://localhost:3000";
+		process.env.BETTER_AUTH_TRUSTED_ORIGINS =
+			"http://localhost:4321, http://localhost:3000";
 		try {
 			expect(resolveBetterAuthConfig()).toEqual({
 				secret: "test-secret",

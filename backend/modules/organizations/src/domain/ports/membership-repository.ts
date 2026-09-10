@@ -8,4 +8,8 @@ export interface MembershipRepository {
     findInvitedByTokenHash(tokenHash: string): Promise<Membership | null>;
     listByAgency(agencyId: string): Promise<Membership[]>;
     listActiveByPrincipal(principalId: string): Promise<Membership[]>;
+    listInvitedForActor(input: {
+        principalId: string;
+        email: string;
+    }): Promise<Membership[]>;
 }

@@ -9,9 +9,15 @@ export interface ProjectionHandlerContext {
 	envelope: DomainEventEnvelope;
 }
 
-export type ProjectionHandler = (context: ProjectionHandlerContext) => Promise<void>;
+export type ProjectionHandler = (
+	context: ProjectionHandlerContext,
+) => Promise<void>;
 
-export type ProcessWithInboxStatus = "processed" | "duplicate" | "quarantined" | "retry";
+export type ProcessWithInboxStatus =
+	| "processed"
+	| "duplicate"
+	| "quarantined"
+	| "retry";
 
 export interface ProcessWithInboxResult {
 	status: ProcessWithInboxStatus;

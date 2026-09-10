@@ -1,15 +1,15 @@
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
-import type { Principal, NewPrincipal } from "@anxionos/identity";
+import type { NewPrincipal, Principal } from "@anxionos/identity";
+import type {
+	NewServiceIdentity,
+	ServiceIdentity,
+} from "../../modules/identity/src/domain/entities/service-identity";
 import type {
 	IdentityTransactionContext,
 	IdentityUnitOfWork,
 } from "../../modules/identity/src/domain/ports/identity-unit-of-work";
 import type { PrincipalRepository } from "../../modules/identity/src/domain/ports/principal-repository";
 import type { ServiceIdentityRepository } from "../../modules/identity/src/domain/ports/service-identity-repository";
-import type {
-	NewServiceIdentity,
-	ServiceIdentity,
-} from "../../modules/identity/src/domain/entities/service-identity";
 
 export function createInMemoryPrincipalRepository(
 	seed: Principal[] = [],
@@ -34,6 +34,11 @@ export function createInMemoryPrincipalRepository(
 				}
 			}
 			return null;
+		},
+		async listSuspended() {
+			return [...principals.values()].filter(
+				(principal) => principal.status === "suspended",
+			);
 		},
 		async create(input: NewPrincipal) {
 			const principal: Principal = {

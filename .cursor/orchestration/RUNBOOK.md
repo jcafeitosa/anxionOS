@@ -48,6 +48,11 @@ npm run orchestration:terminal -- --issue ANX-221 --clear
 npm run orchestration:tail
 npm run orchestration:tail -- --issue ANX-VALIDATION --lines 20
 
+# Monitor de delegações (coordenador multitask)
+npm run orchestration:delegate-monitor -- list
+npm run orchestration:delegate-monitor -- stale --threshold 10m
+npm run orchestration:delegate-monitor -- summary --issue ANX-N
+
 # Detecção de silêncio (cron 5m recomendado)
 npm run orchestration:silence-watch
 npm run orchestration:silence-watch -- --dry-run
@@ -304,3 +309,8 @@ Ver [AUTONOMY.md](./AUTONOMY.md) · [GOALS-PROTOCOL.md](./GOALS-PROTOCOL.md) · 
 | Registry | `.cursor/orchestration-runtime/autonomy/registry.json` |
 | Audit log | `.cursor/orchestration-runtime/autonomy/autonomy.jsonl` |
 | Hooks Cursor | `.cursor/hooks.json` |
+
+
+## Monitoramento de delegações
+
+Ver [DELEGATION-MONITORING.md](./DELEGATION-MONITORING.md).

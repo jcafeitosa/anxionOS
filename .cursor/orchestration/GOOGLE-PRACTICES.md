@@ -2,7 +2,9 @@
 
 Como padrões de engenharia de bigtechs (Google, Meta, etc.) se traduzem na nossa orquestração Cursor. **Não** são regras do runtime do produto.
 
-Referência: [LIFECYCLE.md](./LIFECYCLE.md) · [GOOGLE-PRACTICES.md](./GOOGLE-PRACTICES.md)
+**Playbook completo (rituais, papéis, conversa natural):** [GOOGLE-TEAM-PLAYBOOK.md](./GOOGLE-TEAM-PLAYBOOK.md) · exemplos: [templates/GOOGLE-NATURAL-TEAM-EXAMPLES.md](./templates/GOOGLE-NATURAL-TEAM-EXAMPLES.md)
+
+Referência: [LIFECYCLE.md](./LIFECYCLE.md) · [INTERACTIONS.md](./INTERACTIONS.md) · [CHAT-PARTICIPATION.md](./CHAT-PARTICIPATION.md)
 
 ---
 
@@ -21,6 +23,10 @@ Referência: [LIFECYCLE.md](./LIFECYCLE.md) · [GOOGLE-PRACTICES.md](./GOOGLE-PR
 | No silent work | [NO-SILENT-WORK.md](./NO-SILENT-WORK.md) | Todas | Dialogue obrigatório |
 | Evidence-based decisions | karpathy-guidelines + `--evidence` | Todas | [GUIDELINES-INTEGRATION.md](./GUIDELINES-INTEGRATION.md) |
 | SLOs / observability | Ju + `@anxionos/observability` | P7 | Dashboards pós-deploy |
+| **Conversa natural de time** | Peer `@mention` + 2+ blocos persona | Todas | [GOOGLE-TEAM-PLAYBOOK.md](./GOOGLE-TEAM-PLAYBOOK.md) |
+| **Rituais Google** | standup, design review, LRR, postmortem | P1–P7 | `google-team-rituals.mjs` · `orchestration:standup` |
+| **Psychological safety** | `debate`/`challenge` sem proxy | G1 | Crítico 1:1 independente |
+| **Small CLs / slices** | Uma issue `ANX-*` por unidade | P4 | [taskboard-required.mdc](../rules/taskboard-required.mdc) |
 
 ---
 
@@ -32,6 +38,8 @@ Mapeamento completo standup, LGTM, cross-team consult, design review, incident b
 **[INTERACTIONS.md § Catálogo Google-style](./INTERACTIONS.md#catálogo-google-style--padrões-de-equipe--tipos-de-dialogue)**
 
 CLI standup: `npm run orchestration:standup -- --issue ANX-N`
+
+Verificação peer-to-peer: `node .cursor/orchestration/agent-dialogue/google-team-rituals.mjs check --issue ANX-N`
 
 ## Design doc (P1)
 

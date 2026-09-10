@@ -12,6 +12,9 @@ export interface DlqEntry {
 
 export interface DlqReplayPort {
 	findById(dlqId: string): Promise<DlqEntry | null>;
-	replay(dlqId: string, auditManifestId: string): Promise<"replayed" | "already_replayed">;
+	replay(
+		dlqId: string,
+		auditManifestId: string,
+	): Promise<"replayed" | "already_replayed">;
 	resetInboxForReplay(eventId: string, consumerName: string): Promise<void>;
 }

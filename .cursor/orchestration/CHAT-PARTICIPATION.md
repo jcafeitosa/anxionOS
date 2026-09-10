@@ -8,7 +8,7 @@ status: active
 
 Como agentes **participam do chat do Cursor como o usuário** — mesma superfície conversacional, personas humanas nomeadas, colaboração visível como time chat (Slack/Google Chat), não monólito genérico "Assistant".
 
-**Relacionados:** [CTO-AUTHORITY.md](./CTO-AUTHORITY.md) · [PERSONAS.md](./PERSONAS.md) · [NO-SILENT-WORK.md](./NO-SILENT-WORK.md) · [TEAM-COLLABORATION.md](./TEAM-COLLABORATION.md) · [RUNBOOK.md](./RUNBOOK.md) · regra `.cursor/rules/agents-in-chat.mdc`
+**Relacionados:** [CTO-AUTHORITY.md](./CTO-AUTHORITY.md) · [PERSONAS.md](./PERSONAS.md) · [PERSONALITIES.md](./PERSONALITIES.md) · [PERSONA-VOICE.md](./PERSONA-VOICE.md) · [PERSONA-VOICE.md](./PERSONA-VOICE.md) · [NO-SILENT-WORK.md](./NO-SILENT-WORK.md) · [TEAM-COLLABORATION.md](./TEAM-COLLABORATION.md) · [RUNBOOK.md](./RUNBOOK.md) · regra `.cursor/rules/agents-in-chat.mdc`
 
 ---
 
@@ -56,6 +56,7 @@ Cada falante recebe um bloco isolado:
 | Separadores | `---` antes e depois de cada bloco |
 | Voz única | Proibido fundir várias personas em um parágrafo sem blocos |
 | Idioma | PT-BR na comunicação com @Owner |
+| Voz | Natural, informal, técnica, profissional, humor leve por persona — [PERSONA-VOICE.md](./PERSONA-VOICE.md) |
 
 ---
 
@@ -81,6 +82,21 @@ Cada falante recebe um bloco isolado:
 ## Colaboração estilo equipe Google (obrigatório em threads ativas)
 
 Agentes devem **conversar entre si** como equipe de engenharia — não apenas reportar à orquestradora.
+
+**Playbook canônico:** [GOOGLE-TEAM-PLAYBOOK.md](./GOOGLE-TEAM-PLAYBOOK.md) · **exemplos de diálogo natural:** [templates/GOOGLE-NATURAL-TEAM-EXAMPLES.md](./templates/GOOGLE-NATURAL-TEAM-EXAMPLES.md) · regra Cursor: [google-team-collaboration.mdc](../rules/google-team-collaboration.mdc)
+
+### Conversa natural (como humanos em time)
+
+| Comportamento humano | Equivalente no framework |
+| --- | --- |
+| Perguntar ao colega no corredor | `@mention` + `consult` / `question` |
+| Responder no thread | `response` em bloco persona próprio |
+| Discordar com argumento | `debate` ou `challenge` (máx. 3 ciclos) |
+| Pair no mesmo monitor | `pair` / `collab` |
+| Daily de pé | `orchestration:standup --post` |
+| Manager só desbloqueia | Renata `unblock` / `decision` — não proxy técnico |
+
+Warning compliance: `GOOGLE_TEAM_NO_PEER_CHAT` quando só orchestrator posta em issue `in_progress`.
 
 ### Consultar antes de invadir domínio
 
@@ -189,7 +205,7 @@ O `dialogue.jsonl` **não** alimenta o chat Cursor automaticamente. Cada broadca
 | 1 | **Coordenador não cola `orchestration:chat`** | Após subagente/broadcast: blocos persona **+** saída verbatim de `orchestration:chat --new-only` | Pai resume em voz única "Assistant"; JSONL tem Lucas/Marina/Renata mas o chat não |
 | 2 | **Subagente retorna prosa ao pai** | Subagente faz `speak`/`broadcast` **e** pai reformata em blocos | Subagente codifica e devolve texto; pai não traduz para formato multi-speaker |
 | 3 | **Multitask encerra turno cedo** | Pai aguarda subagentes, depois uma resposta com 2+ personas + chat feed | Turno fecha com resultado do subagente; checklist do coordenador (itens 1–3) não roda |
-| 4 | **Hooks só avisam, não formatam** | `beforeSubmitPrompt` bloquearia ou forçaria `--check-pending` | `PENDING_CHAT_DISPLAY` vai para stderr; agente ignora e `.pending-chat-display` fica preso |
+| 4 | **Hooks só avisam, não formatam** | `beforeSubmitPrompt` bloquearia ou forçaria `--check-pending` | Hook ainda avisa no stderr; **`orchestration:compliance --pre-commit` bloqueia** (`PENDING_CHAT_DISPLAY` → violação, exit 1) |
 | 5 | **Regras `alwaysApply` são soft** | Composer obedece `agents-in-chat.mdc` em todo turno de orquestração | Modelo prioriza resposta direta; protocolo existe mas não é mecanicamente injetado na UI |
 
 **Verificação rápida (3 comandos):**
@@ -231,7 +247,7 @@ flowchart LR
 | 4 | Usuário pergunta sobre equipe, diálogo ou orquestração | `npm run orchestration:chat` (com `--issue` se citou ANX-N) — saída completa |
 | 5 | Turno substantivo com issue `ANX-*` ativa | `npm run orchestration:progress -- --issue ANX-N` no **início** da resposta (ou via `orchestration:chat -- --issue ANX-N`, que inclui progresso por padrão) |
 | 6 | Resposta ao @Owner em thread multi-agente | Mínimo **2 blocos persona** (`---` … `---`) **antes** de qualquer resumo em voz única |
-| 7 | Fim de turno de coordenação | `orchestration:compliance --pre-commit`; se `PENDING_CHAT_DISPLAY` → colar `--check-pending` e só então encerrar |
+| 7 | Fim de turno de coordenação | `orchestration:compliance --pre-commit` (**bloqueante** se `PENDING_CHAT_DISPLAY`); colar `--check-pending` e só então encerrar |
 
 **Proibido:** encerrar turno de coordenação sem colar o thread quando há mensagens novas não exibidas no chat.
 **Proibido:** responder sobre trabalho em curso sem barra G0–G7 quando há issue claimada.
@@ -260,3 +276,85 @@ Regras always-on: `.cursor/rules/dialogue-in-cursor-chat.mdc`, `.cursor/rules/or
 - Omitir `orchestration:chat` após multi-speaker quando há mensagens novas.
 
 Ver [EXAMPLE-CHAT-SESSION.md](./EXAMPLE-CHAT-SESSION.md).
+
+---
+
+## Coordinator anti-patterns (BAD vs GOOD)
+
+O gap mais frequente **não** é ausência de `speak`/`broadcast` — é o **coordenador pai** que resume em voz monolítica em vez de exibir personas no chat Cursor.
+
+### BAD — monólogo do coordenador (proibido)
+
+```markdown
+Implementei o enforcement de chat participation. Alterei SUBAGENT-DELEGATION-PACKAGE.md,
+CHAT-PARTICIPATION.md e compliance-lib.mjs. Os testes passaram. O diálogo está no JSONL.
+```
+
+**Por que falha:** @Owner vê só "Assistant"; Lucas/Marina/Renata falaram no `dialogue.jsonl` mas não no chat; `.pending-chat-display` fica preso; compliance emite `PENDING_CHAT_DISPLAY` / `COORDINATOR_MONOLOGUE`.
+
+### BAD — bullets técnicos sem personas (proibido)
+
+```markdown
+## Resumo
+- 4 arquivos alterados
+- ANX-239 claimada
+- broadcast feito
+
+Consulte `.cursor/orchestration-runtime/dialogue/` para o thread.
+```
+
+**Por que falha:** bullets não substituem blocos `---`; apontar para JSONL sem `orchestration:chat` viola checklist item 7.
+
+### BAD — subagente retorna prosa; parent cola cru (proibido)
+
+```markdown
+O subagente reportou: "Atualizei templates e adicionei COORDINATOR_MONOLOGUE no compliance.
+Exit 0 nos testes."
+```
+
+**Por que falha:** parent deve **re-renderizar** como diálogo multi-speaker, não proxy de relatório.
+
+### GOOD — turno correto após delegação Task
+
+```markdown
+---
+**Renata Oliveira** · orquestrador · [orchestrator] · liderança
+@Owner — recebi o retorno do subagente ANX-239. Colo o thread verbatim abaixo; enforcement aplicado.
+---
+
+---
+**Lucas Mendes** · executor · [backend-executor] · execução
+@marina — templates de delegação atualizados; bloco chat nativo obrigatório em todo Task prompt.
+---
+
+---
+**Marina Ferreira** · crítica · [backend-critic] · qualidade
+@lucas — PASS: COORDINATOR_MONOLOGUE warning adicionado; anti-patterns documentados. Parent deve colar chat feed.
+---
+```
+
+*Em seguida, verbatim (desde `<!-- CURSOR_CHAT_DIALOGUE` até o fim):*
+
+```bash
+npm run orchestration:chat -- --new-only
+```
+
+### GOOD — início de turno com pending display
+
+```bash
+npm run orchestration:chat -- --check-pending
+```
+
+Colar saída **antes** de qualquer outra ação quando `.pending-chat-display` existe.
+
+### Checklist rápido coordenador
+
+| Situação | Comando + ação |
+| --- | --- |
+| Subagente/Task concluiu | `orchestration:chat --new-only` → colar verbatim + 2+ blocos persona |
+| Próprio broadcast | `orchestration:chat --issue ANX-N` na mesma resposta |
+| Turno inicia com pending | `orchestration:chat --check-pending` primeiro |
+| Resposta substantiva | `orchestration:progress --issue ANX-N` no topo |
+| Fim de turno | `compliance --pre-commit`; tratar `PENDING_CHAT_DISPLAY` como bloqueante |
+
+Compliance pode emitir warning **`COORDINATOR_MONOLOGUE`** quando o coordenador ignora este checklist — ver `compliance-lib.mjs`.

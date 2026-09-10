@@ -1,17 +1,27 @@
 import { z } from "zod";
+import { nodeKeySchema } from "../types";
 import { traversalMetaSchema } from "./common";
+
 export const TRAVERSAL_T09_META = traversalMetaSchema.parse({
-    traversalId: "T09",
-    queryVersion: 1,
-    name: "explore.path",
-    class: "domain",
-    cacheable: "never",
+	traversalId: "T09",
+	queryVersion: 1,
+	name: "exposure.byAsset",
+	class: "domain",
+	cacheable: "never",
 });
+
 export const T09_INPUT_SCHEMA = z.object({
-    validAt: z.string().datetime(),
+	scopeNodeKey: nodeKeySchema,
+	assetId: z.string().uuid(),
+	validAt: z.string().datetime(),
 });
+
 export const T09_OUTPUT_SCHEMA = z.object({
-    complete: z.boolean(),
+	complete: z.boolean(),
+	grossExposure: z.number().nullable(),
+	netExposure: z.number().nullable(),
+	unvalued: z.boolean(),
+	incompleteReasons: z.array(z.string()).optional(),
 });
 
 export type T09Input = z.infer<typeof T09_INPUT_SCHEMA>;

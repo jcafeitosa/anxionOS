@@ -149,11 +149,7 @@ export class IdempotentSecretRotation implements SecretRotationPort {
 			.catch(() => null);
 
 		const previousVersion = current?.reference.version ?? 0;
-		const reference = await this.vault.put(
-			secretId,
-			workloadId,
-			nextPlaintext,
-		);
+		const reference = await this.vault.put(secretId, workloadId, nextPlaintext);
 
 		const record: RotationRecord = {
 			secretId,

@@ -71,7 +71,9 @@ export function createPool(config: DatabaseConfig): Pool {
 	return new PgPool(poolConfig);
 }
 
-export async function createConnection(config: DatabaseConfig): Promise<DatabaseConnection> {
+export async function createConnection(
+	config: DatabaseConfig,
+): Promise<DatabaseConnection> {
 	const pool = createPool(config);
 
 	return {

@@ -13,6 +13,14 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { formatIssueIdError, getOrchestrationPaths, isValidIssueId, repoRoot as configRepoRoot } from "../agent-config/load-config.mjs";
+import {
+  PRODUCT_COMPANY_STAGES,
+  STAGE_ORDER,
+  inferProductCompanyStage,
+  resolveStageCode,
+  suggestCompanyStageTransition,
+  stagesForLifecyclePhase,
+} from "./product-company-stages.mjs";
 
 const moduleDir = dirname(fileURLToPath(import.meta.url));
 export const repoRoot = configRepoRoot;
@@ -142,6 +150,8 @@ export function createDefaultLifecycleState(issueId) {
     phase: "P0",
     phaseSlug: "brainstorm",
     gate: "G-B",
+    productCompanyStage: "PC1",
+    productCompanyStageSlug: "strategy",
     updatedAt: new Date().toISOString(),
     evidence: [],
     checklist: {},
@@ -162,12 +172,18 @@ export function loadLifecycleState(issueId) {
     const data = JSON.parse(readFileSync(path, "utf8"));
     const phase = resolvePhaseCode(data.phase) ?? "P0";
     const meta = LIFECYCLE_PHASES[phase];
+    const inferred = inferProductCompanyStage({
+      lifecyclePhase: phase,
+      explicitStage: data.productCompanyStage ?? null,
+    });
     return {
       ...createDefaultLifecycleState(issueId),
       ...data,
       phase,
       phaseSlug: meta.slug,
       gate: meta.gate,
+      productCompanyStage: inferred.stage,
+      productCompanyStageSlug: inferred.stageSlug,
     };
   } catch {
     return createDefaultLifecycleState(issueId);
@@ -186,12 +202,19 @@ export function saveLifecycleState(issueId, patch = {}) {
   const historyEntry = patch.phase && patch.phase !== current.phase
     ? { from: current.phase, to: phase, at: new Date().toISOString() }
     : null;
+  const explicitStage = patch.productCompanyStage ?? current.productCompanyStage;
+  const inferred = inferProductCompanyStage({
+    lifecyclePhase: phase,
+    explicitStage,
+  });
   const next = {
     ...current,
     ...patch,
     phase,
     phaseSlug: meta.slug,
     gate: meta.gate,
+    productCompanyStage: inferred.stage,
+    productCompanyStageSlug: inferred.stageSlug,
     checklist: { ...current.checklist, ...(patch.checklist ?? {}) },
     evidence: patch.evidence ?? current.evidence,
     history: historyEntry ? [...(current.history ?? []), historyEntry] : current.history ?? [],
@@ -307,14 +330,59 @@ export function mapPhaseToGates(phaseInput, issueId) {
   return result;
 }
 
+/**
+ * @param {string} issueId
+ * @param {object} [opts]
+ */
+export function buildCompanyStageReport(issueId, opts = {}) {
+  const state = loadLifecycleState(issueId);
+  const inferred = inferProductCompanyStage({
+    lifecyclePhase: state.phase,
+    explicitStage: state.productCompanyStage,
+    gates: opts.gates ?? null,
+    issueStatus: opts.issueStatus ?? "unknown",
+  });
+  const stageMeta = PRODUCT_COMPANY_STAGES[inferred.stage];
+  const lifecycleStages = stagesForLifecyclePhase(state.phase);
+  return {
+    issueId,
+    lifecyclePhase: state.phase,
+    lifecyclePhaseSlug: state.phaseSlug,
+    productCompanyStage: inferred.stage,
+    productCompanyStageNumber: stageMeta.number,
+    productCompanyStageSlug: inferred.stageSlug,
+    productCompanyStageName: inferred.stageName,
+    inferenceSource: inferred.source,
+    lifecycleGate: stageMeta.gate,
+    lifecycleStagesForPhase: lifecycleStages,
+    updatedAt: state.updatedAt,
+    doc: ".cursor/orchestration/PRODUCT-COMPANY-MODEL.md",
+  };
+}
+
 function parseArgs(argv) {
-  const args = { cmd: argv[0], json: false, issue: null, from: null, phase: null, gate: null };
-  for (let i = 1; i < argv.length; i += 1) {
+  const args = {
+    cmd: argv[0],
+    json: false,
+    issue: null,
+    from: null,
+    phase: null,
+    gate: null,
+    companyStage: null,
+    subcmd: null,
+  };
+  if (argv[0] === "company" || argv[0] === "pc") {
+    args.cmd = "company";
+    args.subcmd = argv[1] ?? null;
+    argv = argv.slice(2);
+  }
+  for (let i = 0; i < argv.length; i += 1) {
     const a = argv[i];
     if (a === "--json") args.json = true;
     else if (a === "--issue") args.issue = argv[++i];
     else if (a === "--from") args.from = argv[++i];
     else if (a === "--phase") args.phase = argv[++i];
+    else if (a === "--company-stage" || a === "--stage") args.companyStage = argv[++i];
     else if (a === "gate" && !args.gate && args.cmd === "gate") args.gate = argv[++i];
     else if (args.cmd === "gate" && !args.gate && /^P\d$/i.test(a)) args.gate = a;
   }
@@ -338,6 +406,28 @@ function printOrJson(data, json) {
     }
     return;
   }
+  if (data.pcTable) {
+    console.log("\n| # | Código | Slug | Nome | Lifecycle | Gates |");
+    console.log("| --- | --- | --- | --- | --- | --- |");
+    for (const code of STAGE_ORDER) {
+      const s = PRODUCT_COMPANY_STAGES[code];
+      const gates = s.pipelineGates ? s.pipelineGates.join(", ") : "—";
+      const lifecycle = s.lifecyclePhases ? s.lifecyclePhases.join(", ") : "—";
+      console.log(`| ${s.number} | ${s.code} | ${s.slug} | ${s.name} | ${lifecycle} | ${gates} |`);
+    }
+    return;
+  }
+  if (data.companyTable) {
+    console.log("\n| # | Código | Etapa Product Company | Gate | Lifecycle |");
+    console.log("| ---: | --- | --- | --- | --- |");
+    for (const code of STAGE_ORDER) {
+      const s = PRODUCT_COMPANY_STAGES[code];
+      console.log(
+        `| ${s.number} | ${s.code} | ${s.name} | ${s.gate} | ${s.lifecyclePhases.join(", ")} |`,
+      );
+    }
+    return;
+  }
   if (data.steps) {
     console.log(`\n## Próximos passos — ${data.phase.name} (${data.phase.code})`);
     for (const s of data.steps) console.log(`- ${s}`);
@@ -356,7 +446,10 @@ async function main() {
   orchestration:phase status --issue ANX-N
   orchestration:phase next --from brainstorm|P0
   orchestration:phase gate P4 --issue ANX-N
-  orchestration:phase set --issue ANX-N --phase P4`);
+  orchestration:phase set --issue ANX-N --phase P4 [--company-stage PC7]
+  orchestration:phase company status --issue ANX-N
+  orchestration:phase company set --issue ANX-N --stage PC7
+  orchestration:phase company table`);
     process.exit(0);
   }
 
@@ -365,6 +458,7 @@ async function main() {
       assertIssueId(args.issue);
       const state = loadLifecycleState(args.issue);
       const meta = LIFECYCLE_PHASES[state.phase];
+      const company = buildCompanyStageReport(args.issue);
       const out = {
         issueId: args.issue,
         phase: state.phase,
@@ -377,9 +471,44 @@ async function main() {
         doc: meta.doc,
         isDevelopment: state.phase === "P4",
         pipelineGates: meta.pipelineGates ?? null,
+        productCompanyStage: company.productCompanyStage,
+        productCompanyStageNumber: company.productCompanyStageNumber,
+        productCompanyStageName: company.productCompanyStageName,
+        productCompanyStageSlug: company.productCompanyStageSlug,
+        productCompanyInferenceSource: company.inferenceSource,
       };
       printOrJson(out, args.json);
       return;
+    }
+
+    if (args.cmd === "company") {
+      if (args.subcmd === "table") {
+        printOrJson({ companyTable: true }, args.json);
+        return;
+      }
+      if (args.subcmd === "status") {
+        assertIssueId(args.issue);
+        const out = buildCompanyStageReport(args.issue);
+        printOrJson(out, args.json);
+        return;
+      }
+      if (args.subcmd === "set") {
+        assertIssueId(args.issue);
+        if (!args.companyStage) throw new Error("--stage PC1–PC12 obrigatório");
+        const code = resolveStageCode(args.companyStage);
+        if (!code) throw new Error(`Etapa inválida: ${args.companyStage}`);
+        const state = saveLifecycleState(args.issue, { productCompanyStage: code });
+        const company = buildCompanyStageReport(args.issue);
+        printOrJson({ ...company, persisted: state.productCompanyStage }, args.json);
+        return;
+      }
+      if (args.subcmd === "next") {
+        const from = args.from ?? args.companyStage ?? "PC1";
+        const { stage, nextStage } = suggestCompanyStageTransition(from);
+        printOrJson({ stage, nextStage }, args.json);
+        return;
+      }
+      throw new Error(`Subcomando company desconhecido: ${args.subcmd ?? "(vazio)"}`);
     }
 
     if (args.cmd === "next") {
@@ -399,10 +528,21 @@ async function main() {
 
     if (args.cmd === "set") {
       assertIssueId(args.issue);
-      if (!args.phase) throw new Error("--phase P0–P7 obrigatório");
-      const code = resolvePhaseCode(args.phase);
-      if (!code) throw new Error(`Fase inválida: ${args.phase}`);
-      const state = saveLifecycleState(args.issue, { phase: code });
+      if (!args.phase && !args.companyStage) {
+        throw new Error("--phase P0–P7 ou --company-stage PC1–PC12 obrigatório");
+      }
+      const patch = {};
+      if (args.phase) {
+        const code = resolvePhaseCode(args.phase);
+        if (!code) throw new Error(`Fase inválida: ${args.phase}`);
+        patch.phase = code;
+      }
+      if (args.companyStage) {
+        const stageCode = resolveStageCode(args.companyStage);
+        if (!stageCode) throw new Error(`Etapa inválida: ${args.companyStage}`);
+        patch.productCompanyStage = stageCode;
+      }
+      const state = saveLifecycleState(args.issue, patch);
       printOrJson(state, args.json);
       return;
     }

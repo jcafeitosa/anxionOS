@@ -53,7 +53,9 @@ export function parseCommandResultSnapshot(
 		aggregateId: snapshot.aggregateId,
 		revision: typeof snapshot.revision === "number" ? snapshot.revision : 0,
 		authorityEpoch:
-			typeof snapshot.authorityEpoch === "number" ? snapshot.authorityEpoch : undefined,
+			typeof snapshot.authorityEpoch === "number"
+				? snapshot.authorityEpoch
+				: undefined,
 		idempotentReplay: true,
 	};
 }

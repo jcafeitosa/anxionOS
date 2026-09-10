@@ -1,32 +1,34 @@
 import {
-  riskCommandResultSchema,
-  type RiskCommandResult,
-  type RiskErrorCode,
+	type RiskCommandResult,
+	type RiskErrorCode,
+	riskCommandResultSchema,
 } from "@anxionos/contracts/risk";
 
 export class RiskCommandError extends Error {
-  readonly code: RiskErrorCode;
+	readonly code: RiskErrorCode;
 
-  constructor(code: RiskErrorCode, message: string) {
-    super(message);
-    this.code = code;
-    this.name = "RiskCommandError";
-  }
+	constructor(code: RiskErrorCode, message: string) {
+		super(message);
+		this.code = code;
+		this.name = "RiskCommandError";
+	}
 }
 
 export function throwRiskError(code: RiskErrorCode, message: string): never {
-  throw new RiskCommandError(code, message);
+	throw new RiskCommandError(code, message);
 }
 
-export function parseCommandResultSnapshot(snapshot: Record<string, unknown>): RiskCommandResult {
-  return riskCommandResultSchema.parse({
-    aggregateId: snapshot.aggregateId,
-    revision: snapshot.revision,
-    idempotentReplay: snapshot.idempotentReplay,
-    policyId: snapshot.policyId,
-    checkId: snapshot.checkId,
-    permitId: snapshot.permitId,
-    checkResult: snapshot.checkResult,
-    denyReasonCode: snapshot.denyReasonCode,
-  });
+export function parseCommandResultSnapshot(
+	snapshot: Record<string, unknown>,
+): RiskCommandResult {
+	return riskCommandResultSchema.parse({
+		aggregateId: snapshot.aggregateId,
+		revision: snapshot.revision,
+		idempotentReplay: snapshot.idempotentReplay,
+		policyId: snapshot.policyId,
+		checkId: snapshot.checkId,
+		permitId: snapshot.permitId,
+		checkResult: snapshot.checkResult,
+		denyReasonCode: snapshot.denyReasonCode,
+	});
 }

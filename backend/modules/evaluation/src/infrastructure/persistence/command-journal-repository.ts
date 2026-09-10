@@ -1,45 +1,54 @@
 import type { Pool, PoolClient } from "pg";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 
-export function createPgCommandJournalRepository(client: Pool | PoolClient): CommandJournalRepository {
-    return {
-        async findByCommandId(commandId) {
-            const result = await client.query(`SELECT command_id, organization_id, command_name, outcome_snapshot_id, response_snapshot
-				 FROM evaluation_command_journal WHERE command_id = $1`, [commandId]);
-            const row = result.rows[0];
-            if (!row)
-                return null;
-            return {
-                commandId: row.command_id,
-                organizationId: row.organization_id,
-                commandName: row.command_name,
-                outcomeSnapshotId: row.outcome_snapshot_id ?? undefined,
-                responseSnapshot: row.response_snapshot,
-            };
-        },
-        async findByOutcomeSnapshotId(outcomeSnapshotId) {
-            const result = await client.query(`SELECT command_id, organization_id, command_name, outcome_snapshot_id, response_snapshot
-				 FROM evaluation_command_journal WHERE outcome_snapshot_id = $1`, [outcomeSnapshotId]);
-            const row = result.rows[0];
-            if (!row)
-                return null;
-            return {
-                commandId: row.command_id,
-                organizationId: row.organization_id,
-                commandName: row.command_name,
-                outcomeSnapshotId: row.outcome_snapshot_id ?? undefined,
-                responseSnapshot: row.response_snapshot,
-            };
-        },
-        async save(entry) {
-            await client.query(`INSERT INTO evaluation_command_journal (command_id, organization_id, command_name, outcome_snapshot_id, response_snapshot)
-				 VALUES ($1,$2,$3,$4,$5)`, [
-                entry.commandId,
-                entry.organizationId,
-                entry.commandName,
-                entry.outcomeSnapshotId ?? null,
-                entry.responseSnapshot,
-            ]);
-        },
-    };
+export function createPgCommandJournalRepository(
+	client: Pool | PoolClient,
+): CommandJournalRepository {
+	return {
+		async findByCommandId(commandId) {
+			const result = await client.query(
+				`SELECT command_id, organization_id, command_name, outcome_snapshot_id, response_snapshot
+				 FROM evaluation_command_journal WHERE command_id = $1`,
+				[commandId],
+			);
+			const row = result.rows[0];
+			if (!row) return null;
+			return {
+				commandId: row.command_id,
+				organizationId: row.organization_id,
+				commandName: row.command_name,
+				outcomeSnapshotId: row.outcome_snapshot_id ?? undefined,
+				responseSnapshot: row.response_snapshot,
+			};
+		},
+		async findByOutcomeSnapshotId(outcomeSnapshotId) {
+			const result = await client.query(
+				`SELECT command_id, organization_id, command_name, outcome_snapshot_id, response_snapshot
+				 FROM evaluation_command_journal WHERE outcome_snapshot_id = $1`,
+				[outcomeSnapshotId],
+			);
+			const row = result.rows[0];
+			if (!row) return null;
+			return {
+				commandId: row.command_id,
+				organizationId: row.organization_id,
+				commandName: row.command_name,
+				outcomeSnapshotId: row.outcome_snapshot_id ?? undefined,
+				responseSnapshot: row.response_snapshot,
+			};
+		},
+		async save(entry) {
+			await client.query(
+				`INSERT INTO evaluation_command_journal (command_id, organization_id, command_name, outcome_snapshot_id, response_snapshot)
+				 VALUES ($1,$2,$3,$4,$5)`,
+				[
+					entry.commandId,
+					entry.organizationId,
+					entry.commandName,
+					entry.outcomeSnapshotId ?? null,
+					entry.responseSnapshot,
+				],
+			);
+		},
+	};
 }

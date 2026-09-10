@@ -1,7 +1,7 @@
-import { BETTER_AUTH_DDL } from "../../apps/api/src/auth/better-auth-schema-ddl";
-import { IDENTITY_DDL } from "../../modules/identity/src/infrastructure/schema-ddl";
 import { createPgPool } from "@anxionos/eventing/postgres";
 import { EVENTING_DDL } from "@anxionos/eventing/schema";
+import { BETTER_AUTH_DDL } from "../../apps/api/src/auth/better-auth-schema-ddl";
+import { IDENTITY_DDL } from "../../modules/identity/src/infrastructure/schema-ddl";
 
 export function getDatabaseUrl(): string | undefined {
 	return process.env.DATABASE_URL?.trim() || undefined;
@@ -12,7 +12,9 @@ export function getNatsUrl(): string | undefined {
 }
 
 export function shouldRunPgIntegrationTests(): boolean {
-	return process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl());
+	return (
+		process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl())
+	);
 }
 
 export function shouldRunNatsIntegrationTests(): boolean {
@@ -37,7 +39,7 @@ export async function withSessionRevocationPgHarness<T>(
 		await pool.query(IDENTITY_DDL);
 		await pool.query(BETTER_AUTH_DDL);
 		await pool.query(
-			"TRUNCATE domain_journal, outbox, inbox, dead_letter_queue, identity_principals, identity_service_identities, session, \"user\" RESTART IDENTITY CASCADE",
+			'TRUNCATE domain_journal, outbox, inbox, dead_letter_queue, identity_principals, identity_service_identities, session, "user" RESTART IDENTITY CASCADE',
 		);
 		return await work({ pool });
 	} finally {

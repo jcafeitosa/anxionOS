@@ -2,7 +2,7 @@ import { and, eq, ne } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { NewPrincipal, Principal } from "../../domain/entities/principal";
 import type { PrincipalRepository } from "../../domain/ports/principal-repository";
-import { principals, type PrincipalRow } from "./schema";
+import { type PrincipalRow, principals } from "./schema";
 
 export function toPrincipal(row: PrincipalRow): Principal {
 	return {
@@ -17,7 +17,10 @@ export function toPrincipal(row: PrincipalRow): Principal {
 }
 
 export function createDrizzlePrincipalRepository(
-	db: NodePgDatabase<{ principals: typeof principals; serviceIdentities: typeof import("./schema").serviceIdentities }>,
+	db: NodePgDatabase<{
+		principals: typeof principals;
+		serviceIdentities: typeof import("./schema").serviceIdentities;
+	}>,
 ): PrincipalRepository {
 	return {
 		async findById(id: string): Promise<Principal | null> {
@@ -43,6 +46,13 @@ export function createDrizzlePrincipalRepository(
 				.where(eq(principals.email, email))
 				.limit(1);
 			return rows[0] ? toPrincipal(rows[0]) : null;
+		},
+		async listSuspended(): Promise<Principal[]> {
+			const rows = await db
+				.select()
+				.from(principals)
+				.where(eq(principals.status, "suspended"));
+			return rows.map(toPrincipal);
 		},
 		async create(input: NewPrincipal): Promise<Principal> {
 			const rows = await db
@@ -86,7 +96,10 @@ export function createDrizzlePrincipalRepository(
 				.returning();
 			return rows[0] ? toPrincipal(rows[0]) : null;
 		},
-		async linkAuthUserId(id: string, authUserId: string): Promise<Principal | null> {
+		async linkAuthUserId(
+			id: string,
+			authUserId: string,
+		): Promise<Principal | null> {
 			const rows = await db
 				.update(principals)
 				.set({ authUserId })

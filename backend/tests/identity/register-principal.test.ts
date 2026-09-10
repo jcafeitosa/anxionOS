@@ -20,7 +20,9 @@ describe("registerPrincipal", () => {
 		);
 		expect(principal.email).toBe("owner@example.com");
 		expect(published).toHaveLength(1);
-		expect(published[0]?.eventType).toBe(IDENTITY_EVENT_TYPES.PRINCIPAL_REGISTERED);
+		expect(published[0]?.eventType).toBe(
+			IDENTITY_EVENT_TYPES.PRINCIPAL_REGISTERED,
+		);
 		expect(published[0]?.payload).not.toHaveProperty("authUserId");
 	});
 

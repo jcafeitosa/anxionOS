@@ -13,6 +13,7 @@ import { loadIdempotentCommandResult, toCommandResultSnapshot } from "../command
 import { parseCommandResultSnapshot, throwOrganizationError } from "../errors";
 import { assertPrincipalExists } from "../services/principal-guard";
 import { assertActorIsOwnerOrAdmin } from "../services/membership-role-guard";
+import { buildAgencyTenantContext } from "../services/tenant-context";
 
 /**
  * Admin/owner assisted activation — bypasses invite email match (D-ORG-036).
@@ -27,7 +28,9 @@ export async function activateMembership(
 		return replay;
 	}
 	await assertPrincipalExists(deps.principalLookup, input.targetPrincipalId);
-	return deps.unitOfWork.runInTransaction(async (context) => {
+	return deps.unitOfWork.runInTransaction(
+		buildAgencyTenantContext(command.agencyId, input.actorPrincipalId),
+		async (context) => {
 		const raced = await context.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
 			return parseCommandResultSnapshot(raced.responseSnapshot);
@@ -85,7 +88,8 @@ export async function activateMembership(
 		});
 		await context.publishEvents([event]);
 		return result;
-	});
+		},
+	);
 }
 
 export interface ActivateMembershipInput extends ActivateMembershipCommand {

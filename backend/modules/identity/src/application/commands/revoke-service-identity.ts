@@ -15,9 +15,14 @@ export async function revokeServiceIdentity(
 	input: { serviceIdentityId: string },
 ): Promise<ServiceIdentity> {
 	const command = revokeServiceIdentityCommandSchema.parse(input);
-	const existing = await deps.serviceIdentityRepository.findById(command.serviceIdentityId);
+	const existing = await deps.serviceIdentityRepository.findById(
+		command.serviceIdentityId,
+	);
 	if (!existing) {
-		throwIdentityError("SERVICE_IDENTITY_NOT_FOUND", "Service identity not found");
+		throwIdentityError(
+			"SERVICE_IDENTITY_NOT_FOUND",
+			"Service identity not found",
+		);
 	}
 	if (existing.status === "revoked") {
 		return existing;
@@ -29,7 +34,10 @@ export async function revokeServiceIdentity(
 			revokedAt,
 		);
 		if (!serviceIdentity) {
-			throwIdentityError("SERVICE_IDENTITY_NOT_FOUND", "Service identity not found");
+			throwIdentityError(
+				"SERVICE_IDENTITY_NOT_FOUND",
+				"Service identity not found",
+			);
 		}
 		await context.publishEvents([
 			createServiceIdentityRevokedEvent({

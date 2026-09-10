@@ -1,7 +1,9 @@
 import { shouldCacheT01Decision } from "@anxionos/contracts/graph";
 import type { GraphCacheLookupInput } from "../ports/graph-read-cache";
 
-export function shouldCacheTraversalResult(input: GraphCacheLookupInput): boolean {
+export function shouldCacheTraversalResult(
+	input: GraphCacheLookupInput,
+): boolean {
 	if (input.intentHash) {
 		return false;
 	}

@@ -1,7 +1,12 @@
-import type { GovernanceScopeKind, GrantStatus } from "@anxionos/contracts/governance";
+import type {
+	GovernanceScopeKind,
+	GrantStatus,
+} from "@anxionos/contracts/governance";
 
 export interface Grant {
 	id: string;
+	tenantId: string;
+	agencyId: string;
 	scopeId: string;
 	scopeKind: GovernanceScopeKind;
 	granteePrincipalId: string;

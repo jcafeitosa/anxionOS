@@ -8,7 +8,15 @@
 
 | Escopo | Paths / issues | Status | Condição para retomar |
 | --- | --- | --- | --- |
-| **Produto** | `backend/`, `frontend/`, docs de produto (`docs/backend/`, `docs/frontend/`, etc.), issues `ANX-*` de módulo/slice (ex. ANX-135, ANX-134 produto) | **BLOCKED** | Owner diz explicitamente **"autorizo anxionOS"** ou equivalente inequívoco |
+| **Produto** | `backend/`, `frontend/`, docs de produto (`docs/backend/`, `docs/frontend/`, etc.), issues `ANX-*` de módulo/slice (ex. ANX-135, ANX-134 produto) | **ACTIVE** | Owner diz explicitamente **"autorizo anxionOS"** ou equivalente inequívoco |
+
+```yaml
+authorized: true
+authorizedAt: 2026-09-09T17:00:00Z
+authorizedBy: @Owner
+authorizationPhrase: "autorizo anxionOS"
+recordedOn: ANX-237
+```
 | **Framework** | `.cursor/orchestration/`, `.cursor/rules/`, `.cursor/hooks/`, `.cursor/commands/`, issues **ANX-230**, **ANX-237** | **ALLOWED** | Claim + compliance normal; não altera `backend/`/`frontend/` |
 
 ---
@@ -41,4 +49,4 @@
 
 ---
 
-**Registrado:** 2026-09-09 · issue framework **ANX-230** · produto **ANX-135** pausado (`blocked`)
+**Registrado:** 2026-09-09 · issue framework **ANX-237** · produto **ANX-135** **ACTIVE** (`in_progress`, greenlight Owner 2026-09-09)

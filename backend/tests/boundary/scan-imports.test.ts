@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
+	type ForbiddenPattern,
 	collectTsFiles,
 	extractImportsFromSource,
 	findForbiddenImports,
-	type ForbiddenPattern,
 } from "./scan-imports";
 
 const FIXTURE_RULES: ForbiddenPattern[] = [
@@ -43,13 +43,7 @@ describe("scan-imports fixtures", () => {
 
 	test("findForbiddenImports detects negative fixture import", () => {
 		tempRoot = mkdtempSync(join(tmpdir(), "boundary-scan-"));
-		const domainDir = join(
-			tempRoot,
-			"modules",
-			"fixture",
-			"src",
-			"domain",
-		);
+		const domainDir = join(tempRoot, "modules", "fixture", "src", "domain");
 		mkdirSync(domainDir, { recursive: true });
 
 		const validFile = join(domainDir, "valid.ts");
@@ -91,13 +85,7 @@ export async function load() {
 
 	test("findForbiddenImports passes positive fixture import", () => {
 		tempRoot = mkdtempSync(join(tmpdir(), "boundary-scan-"));
-		const domainDir = join(
-			tempRoot,
-			"modules",
-			"fixture",
-			"src",
-			"domain",
-		);
+		const domainDir = join(tempRoot, "modules", "fixture", "src", "domain");
 		mkdirSync(domainDir, { recursive: true });
 
 		const validFile = join(domainDir, "ports.ts");

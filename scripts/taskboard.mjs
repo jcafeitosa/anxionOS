@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Thin wrapper around Dashi/Codex Taskboard for anxionOS agents.
+ * Thin wrapper around Dashi Taskboard for anxionOS agents (Cursor + Codex).
  * Prefers `taskctl` when installed; falls back to HTTP for read-only ops.
  *
  * Usage:
@@ -14,12 +14,22 @@
  * Env: TASKBOARD_URL or CODEX_TASKBOARD_URL (default http://127.0.0.1:47823)
  *      TASKBOARD_PROJECT_NAME (default anxionOS)
  *      TASKBOARD_PROJECT_ID (optional pin)
- *      CODEX_THREAD_ID / CLAUDE_CODE_SESSION_ID for write attribution
+ *      CURSOR_THREAD_ID (preferred) / CODEX_THREAD_ID / CLAUDE_CODE_SESSION_ID for writes
  */
 
 import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { recordTaskboardEnsure } from "../.cursor/orchestration/agent-compliance/taskboard-cache.mjs";
+import {
+  detectAgentSyncDrift,
+  warnAgentSyncDrift,
+} from "../.cursor/orchestration/agent-config/agent-taskboard-drift.mjs";
+import {
+  taskboardComment,
+  taskboardMove,
+  warnUnsignedTaskboardWrite,
+} from "../.cursor/orchestration/agent-config/agent-taskboard-write.mjs";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -67,7 +77,8 @@ Commands:
   list [--status STATUS] [--compact]  List issues in anxionOS project
   get <ID>                     Get issue by identifier (e.g. ANX-2)
   create --title T [opts]      Create issue (requires taskctl + thread id)
-  move <ID> <STATUS>           Move issue status (requires taskctl + thread id)
+  comment --issue ID --persona SLUG --body TEXT  Comentário assinado pela persona
+  move <ID> <STATUS> [--persona SLUG]  Move issue (assinado se --persona)
 
 Options for create:
   --status backlog|todo|in_progress|in_review|blocked|done|canceled
@@ -75,7 +86,7 @@ Options for create:
   --labels a,b
   --description TEXT
 
-Env: TASKBOARD_URL, TASKBOARD_PROJECT_NAME, TASKBOARD_PROJECT_ID, CODEX_THREAD_ID`);
+Env: TASKBOARD_URL, TASKBOARD_PROJECT_NAME, TASKBOARD_PROJECT_ID, CURSOR_THREAD_ID, CODEX_THREAD_ID`);
   process.exit(exitCode);
 }
 
@@ -134,6 +145,14 @@ function compactTaskList(data) {
       labels: task.labels,
     })),
   };
+}
+
+function parsePersonaFlag(argv) {
+  const idx = argv.indexOf("--persona");
+  if (idx < 0) return { persona: null, rest: argv };
+  const persona = argv[idx + 1];
+  const rest = argv.filter((_, i) => i !== idx && i !== idx + 1);
+  return { persona, rest };
 }
 
 function requireThreadId() {
@@ -208,7 +227,30 @@ try {
     case "ping":
     case "ensure":
     case "prework": {
-      const health = await httpJson("/health");
+      let health;
+      let online = true;
+      try {
+        health = await httpJson("/health");
+      } catch (err) {
+        online = false;
+        if (cmd === "ensure" || cmd === "prework") {
+          recordTaskboardEnsure(false, { url: baseUrl, error: err?.message ?? "offline" });
+          console.error(`taskboard offline: ${baseUrl}`);
+          process.exit(1);
+        }
+        throw err;
+      }
+      if (cmd === "ensure" || cmd === "prework") {
+        recordTaskboardEnsure(true, { url: baseUrl });
+      }
+      if (cmd === "ensure" || cmd === "prework") {
+        try {
+          const drift = await detectAgentSyncDrift({ baseUrl });
+          warnAgentSyncDrift(drift);
+        } catch {
+          /* best-effort drift check */
+        }
+      }
       const payload = { ok: true, url: baseUrl, ...health };
       if (cmd === "ensure" || cmd === "prework") {
         console.log(`taskboard online: ${baseUrl}`);
@@ -305,14 +347,41 @@ try {
       console.log(JSON.stringify(runTaskctl(args), null, 2));
       break;
     }
+    case "comment": {
+      let issueId = null;
+      let persona = null;
+      let body = null;
+      for (let i = 0; i < rest.length; i += 1) {
+        const a = rest[i];
+        if (a === "--issue") issueId = rest[++i]?.toUpperCase();
+        else if (a === "--persona") persona = rest[++i];
+        else if (a === "--body") body = rest[++i];
+        else throw new Error(`Unknown comment option: ${a}`);
+      }
+      if (!issueId || !persona || !body) {
+        throw new Error("comment requires --issue ANX-N --persona SLUG --body TEXT");
+      }
+      const result = await taskboardComment({ issueId, persona, body });
+      if (!result.ok) throw new Error(result.error ?? "comment failed");
+      console.log(JSON.stringify(result, null, 2));
+      break;
+    }
     case "move": {
-      const [id, status] = rest;
+      const { persona, rest: moveRest } = parsePersonaFlag(rest);
+      const [id, status] = moveRest;
       if (!id || !status) throw new Error("move requires <ID> <STATUS>");
+      await syncHireOnMove(id, status);
+      if (persona) {
+        const result = await taskboardMove({ issueId: id, status, persona });
+        if (!result.ok) throw new Error(result.error ?? "move failed");
+        console.log(JSON.stringify(result, null, 2));
+        break;
+      }
+      warnUnsignedTaskboardWrite("move", `${id} → ${status}`);
       const tid = requireThreadId();
       const current = runTaskctl(["issue", "get", id, "--json"]);
       const version = current.task?.version ?? current.version;
       if (!version) throw new Error(`Could not read version for ${id}`);
-      await syncHireOnMove(id, status);
       console.log(
         JSON.stringify(
           runTaskctl([

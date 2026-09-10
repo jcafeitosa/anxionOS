@@ -39,6 +39,11 @@ const SUBCOMMANDS = {
   tail: "agent-dialogue/tail-formatted.mjs",
   terminal: "agent-dialogue/terminal-panel.mjs",
   "silence-watch": "agent-autonomy/scripts/silence-detector.mjs",
+  "delegate-monitor": "agent-workflow/delegate-monitor.mjs",
+  coordination: "agent-workflow/coordination.mjs",
+  brain: "agent-brain/brain-cli.mjs",
+  taskboard: "agent-config/agent-taskboard-cli.mjs",
+  "self-healing": "agent-workflow/self-healing-cli.mjs",
 };
 
 function usage() {

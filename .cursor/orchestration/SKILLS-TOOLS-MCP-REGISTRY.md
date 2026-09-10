@@ -43,7 +43,7 @@ Instalação via Cursor Marketplace / plugins locais. Nenhum é obrigatório par
 
 | Subagente | Gate | Lead persona |
 | --- | --- | --- |
-| `critic-reviewer`, `silent-failure-hunter` | G1 | Críticos Level C |
+| `code-reviewer`, `silent-failure-hunter` | G1 | Críticos Level C |
 | `code-reviewer`, `typescript-reviewer`, `thermo-nuclear-code-quality-review` | G2 | Fernanda |
 | `e2e-runner`, `validation-review`, `pr-test-analyzer` | G3 | Eduardo |
 | `security-reviewer`, `mantis-threat-model` | G4 | Isa |
@@ -118,7 +118,7 @@ Descoberta: `GetDynamicTools` · invocação: `CallDynamicTool`.
 | Editar símbolo TS | serena MCP | Refactor localizado |
 | Escrever ADR | open-knowledge MCP + `record-a-decision` | P2 |
 | Build quebrado | `build-error-resolver` subagent | tsc/bun fail |
-| Crítico G1 | `critic-reviewer` subagent | Handoff executor |
+| Crítico G1 | `code-reviewer` subagent | Handoff executor |
 | Diagrama institucional | archify skill + CLI | Handoff P2/G0.10 |
 
 ---

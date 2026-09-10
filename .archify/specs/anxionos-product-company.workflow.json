@@ -1,0 +1,164 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "anxionOS — Product Company (12 etapas)",
+    "quality_profile": "showcase",
+    "output": "anxionos-product-company.workflow.html",
+    "views": [
+      {
+        "id": "upstream",
+        "label": "Upstream",
+        "focus": [
+          "g12",
+          "g34",
+          "g56"
+        ],
+        "note": "Etapas 1–6"
+      },
+      {
+        "id": "delivery",
+        "label": "Delivery",
+        "focus": [
+          "g78",
+          "g910",
+          "g1112"
+        ],
+        "note": "Etapas 7–12 + loop"
+      }
+    ]
+  },
+  "lanes": [
+    {
+      "id": "upstream",
+      "label": "Upstream (etapas 1–6)"
+    },
+    {
+      "id": "delivery",
+      "label": "Delivery & ops (7–12)"
+    }
+  ],
+  "phases": [
+    {
+      "id": "precode",
+      "label": "Pré-código",
+      "fromCol": 0,
+      "toCol": 2
+    },
+    {
+      "id": "build",
+      "label": "Build & ship",
+      "fromCol": 3,
+      "toCol": 5,
+      "variant": "emphasis"
+    }
+  ],
+  "mainPath": [
+    "g12",
+    "g34",
+    "g56",
+    "g78",
+    "g910",
+    "g1112"
+  ],
+  "nodes": [
+    {
+      "id": "g12",
+      "lane": "upstream",
+      "col": 0,
+      "type": "security",
+      "label": "1–2",
+      "sublabel": "Strategy+Discovery",
+      "width": 130
+    },
+    {
+      "id": "g34",
+      "lane": "upstream",
+      "col": 1,
+      "type": "frontend",
+      "label": "3–4",
+      "sublabel": "Definition+UX",
+      "width": 130
+    },
+    {
+      "id": "g56",
+      "lane": "upstream",
+      "col": 2,
+      "type": "database",
+      "label": "5–6",
+      "sublabel": "Arch+Planning",
+      "width": 130
+    },
+    {
+      "id": "g78",
+      "lane": "delivery",
+      "col": 3,
+      "type": "backend",
+      "label": "7–8",
+      "sublabel": "Dev+Test",
+      "width": 130,
+      "tag": "G1"
+    },
+    {
+      "id": "g910",
+      "lane": "delivery",
+      "col": 4,
+      "type": "security",
+      "label": "9–10",
+      "sublabel": "Review+Release",
+      "width": 130,
+      "tag": "G2"
+    },
+    {
+      "id": "g1112",
+      "lane": "delivery",
+      "col": 5,
+      "type": "cloud",
+      "label": "11–12",
+      "sublabel": "Ops+Intel",
+      "width": 130
+    }
+  ],
+  "edges": [
+    {
+      "from": "g12",
+      "to": "g34"
+    },
+    {
+      "from": "g34",
+      "to": "g56"
+    },
+    {
+      "from": "g56",
+      "to": "g78",
+      "variant": "emphasis"
+    },
+    {
+      "from": "g78",
+      "to": "g910"
+    },
+    {
+      "from": "g910",
+      "to": "g1112"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "12 etapas detalhadas",
+      "items": [
+        "Ver PRODUCT-COMPANY-MODEL.md",
+        "Product Graph: PRODUCT-GRAPH-SCHEMA.md",
+        "Loop 12→2: Mermaid em PRODUCT-COMPANY-MODEL.md"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "G0–G7",
+      "items": [
+        "Etapas 7–9 = G1/G3/G2–G5",
+        "Issue ANX-250 · P0 doc only"
+      ]
+    }
+  ]
+}

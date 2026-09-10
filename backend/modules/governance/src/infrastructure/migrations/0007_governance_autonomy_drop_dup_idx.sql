@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS governance_autonomy_assignments_active_scope_agent_uidx;

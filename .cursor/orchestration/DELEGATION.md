@@ -171,7 +171,7 @@ Renata **deve** usar a ferramenta `Task` do Cursor para trabalho substancial (Mu
 | Persona | `subagent_type` | Doc |
 | --- | --- | --- |
 | Lucas (executor) | `generalPurpose` | Não usar `explore` para implementação |
-| Marina (crítico) | `critic-reviewer` | G1 adversarial |
+| Marina (crítico) | `code-reviewer` | G1 adversarial |
 | Fernanda (G2) | `code-reviewer` | + specialists G2 |
 | Edu (G3) | `e2e-runner` / `validation-review` | Oráculos da issue |
 | Isa (G4) | `security-review` | Tenancy, secrets |
@@ -193,7 +193,7 @@ Política completa: [CURSOR-AGENTS-INTEGRATION.md](./CURSOR-AGENTS-INTEGRATION.m
 | Backend TS | `test-driven-development` | `typescript-reviewer`, `database-reviewer` |
 | Frontend P07 | `ui-ux-pro-max` | `react-reviewer`, `a11y-architect` |
 | CI/infra | `fix-ci`, `verification-before-completion` | `ci-watcher` |
-| Review | `requesting-code-review` | `code-reviewer`, `critic-reviewer` |
+| Review | `requesting-code-review` | `code-reviewer`, `code-reviewer` |
 | Debug | `systematic-debugging` | `build-error-resolver` |
 | Paralelo | `dispatching-parallel-agents` | um issue por agente |
 | Docs brain | `open-knowledge` | `doc-updater` |

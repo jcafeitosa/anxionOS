@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { handlePrincipalSuspended } from "@anxionos/identity";
+import {
+	SessionRevocationUnavailableError,
+	handlePrincipalSuspended,
+} from "@anxionos/identity";
 import type { Principal } from "@anxionos/identity";
 import { createInMemoryPrincipalRepository } from "./test-support";
 
@@ -25,7 +28,9 @@ describe("handlePrincipalSuspended", () => {
 		const revoked: string[] = [];
 		await handlePrincipalSuspended(
 			{
-				principalRepository: createInMemoryPrincipalRepository([activePrincipal]),
+				principalRepository: createInMemoryPrincipalRepository([
+					activePrincipal,
+				]),
 				sessionRevoker: {
 					async revokeAllForAuthUser(authUserId) {
 						revoked.push(authUserId);
@@ -59,5 +64,45 @@ describe("handlePrincipalSuspended", () => {
 			},
 		);
 		expect(revoked).toEqual(["auth-1"]);
+	});
+
+	test("no-ops when principal is missing", async () => {
+		const revoked: string[] = [];
+		await handlePrincipalSuspended(
+			{
+				principalRepository: createInMemoryPrincipalRepository(),
+				sessionRevoker: {
+					async revokeAllForAuthUser(authUserId) {
+						revoked.push(authUserId);
+					},
+				},
+			},
+			{
+				principalId: principal.id,
+				reasonCode: "ops.manual",
+				suspendedAt: "2026-09-08T12:00:00.000Z",
+			},
+		);
+		expect(revoked).toEqual([]);
+	});
+
+	test("propagates SessionRevocationUnavailableError when revoker fails", async () => {
+		await expect(
+			handlePrincipalSuspended(
+				{
+					principalRepository: createInMemoryPrincipalRepository([principal]),
+					sessionRevoker: {
+						async revokeAllForAuthUser() {
+							throw new Error("better-auth unavailable");
+						},
+					},
+				},
+				{
+					principalId: principal.id,
+					reasonCode: "ops.manual",
+					suspendedAt: "2026-09-08T12:00:00.000Z",
+				},
+			),
+		).rejects.toBeInstanceOf(SessionRevocationUnavailableError);
 	});
 });

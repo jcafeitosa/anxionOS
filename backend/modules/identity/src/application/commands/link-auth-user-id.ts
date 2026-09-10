@@ -27,7 +27,9 @@ export async function linkAuthUserId(
 	if (existing.authUserId === command.authUserId) {
 		return existing;
 	}
-	const authUserTaken = await deps.repository.findByAuthUserId(command.authUserId);
+	const authUserTaken = await deps.repository.findByAuthUserId(
+		command.authUserId,
+	);
 	if (authUserTaken && authUserTaken.id !== command.principalId) {
 		throwIdentityError(
 			"PRINCIPAL_AUTH_USER_TAKEN",

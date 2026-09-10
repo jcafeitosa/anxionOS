@@ -47,7 +47,7 @@ function createRevokeGrantDeps(seed: Grant[] = [activeGrant]) {
 		commandJournal,
 	});
 	return {
-		deps: { unitOfWork, commandJournal },
+		deps: { unitOfWork, commandJournal, grantRepository },
 		grantRepository,
 		published,
 	};
@@ -69,7 +69,11 @@ describe("revokeGrant", () => {
 	});
 
 	test("re-revoke is idempotent without duplicate epoch bump events", async () => {
-		const revokedGrant: Grant = { ...activeGrant, status: "revoked", revision: 2 };
+		const revokedGrant: Grant = {
+			...activeGrant,
+			status: "revoked",
+			revision: 2,
+		};
 		const { deps, published } = createRevokeGrantDeps([revokedGrant]);
 		const commandId = "10101010-1010-4101-8101-101010101010";
 		const result = await revokeGrant(deps, { commandId, grantId });

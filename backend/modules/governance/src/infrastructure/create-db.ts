@@ -1,5 +1,6 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import type { Pool } from "pg";
+import { createDrizzleAutonomyAssignmentRepository } from "./persistence/autonomy-assignment-repository";
 import { createDrizzleApprovalRepository } from "./persistence/approval-repository";
 import { createDrizzleAuthorityEpochStore } from "./persistence/authority-epoch-store";
 import { createDrizzleChangeProposalRepository } from "./persistence/change-proposal-repository";
@@ -17,5 +18,6 @@ export function createGovernanceDb(pool: Pool) {
 		grantRepository: createDrizzleGrantRepository(db),
 		changeProposalRepository: createDrizzleChangeProposalRepository(db),
 		approvalRepository: createDrizzleApprovalRepository(db),
+		autonomyAssignmentRepository: createDrizzleAutonomyAssignmentRepository(db),
 	};
 }

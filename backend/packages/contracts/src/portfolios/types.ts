@@ -10,17 +10,17 @@ export const positionBookSchema = z.enum(["TRADING"]).default("TRADING");
 export const fillSideSchema = z.enum(["BUY", "SELL"]);
 export const decimalAmountSchema = z.string().regex(/^\d+(\.\d+)?$/);
 export class PortfoliosContractError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = "PortfoliosContractError";
-    }
+	constructor(message: string) {
+		super(message);
+		this.name = "PortfoliosContractError";
+	}
 }
 export function assertPortfoliosExecutionModeSupported(mode: string): void {
-    if (mode === "REAL" || mode === "REAL_EXECUTION" || mode === "LIVE") {
-        throw new PortfoliosContractError("PF_REAL_MODE_REJECTED");
-    }
-    const parsed = portfoliosExecutionModeSchema.safeParse(mode);
-    if (!parsed.success) {
-        throw new PortfoliosContractError("PF_REAL_MODE_REJECTED");
-    }
+	if (mode === "REAL" || mode === "REAL_EXECUTION" || mode === "LIVE") {
+		throw new PortfoliosContractError("PF_REAL_MODE_REJECTED");
+	}
+	const parsed = portfoliosExecutionModeSchema.safeParse(mode);
+	if (!parsed.success) {
+		throw new PortfoliosContractError("PF_REAL_MODE_REJECTED");
+	}
 }

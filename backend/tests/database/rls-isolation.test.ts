@@ -16,18 +16,22 @@ import {
 
 describe("tenant context validation", () => {
 	test("rejects missing tenantId", () => {
-		expect(() => validateTenantContext({ tenantId: "" })).toThrow(TenantContextError);
+		expect(() => validateTenantContext({ tenantId: "" })).toThrow(
+			TenantContextError,
+		);
 	});
 
 	test("rejects invalid UUID", () => {
-		expect(() => validateTenantContext({ tenantId: "not-a-uuid" })).toThrow(TenantContextError);
+		expect(() => validateTenantContext({ tenantId: "not-a-uuid" })).toThrow(
+			TenantContextError,
+		);
 	});
 });
 
 describe("rls policy helpers", () => {
 	test("generates tenant-scoped policy bundle", () => {
 		const sql = tenantScopedPolicies("example_rows", "organization_id");
-		expect(sql).toContain('ENABLE ROW LEVEL SECURITY');
+		expect(sql).toContain("ENABLE ROW LEVEL SECURITY");
 		expect(sql).toContain("organization_id");
 		expect(sql).toContain("current_setting('app.tenant_id', true)");
 	});
@@ -63,7 +67,9 @@ describe("postgresql rls integration", () => {
 			await seedTenantRow(pool, tenantA, "hidden-without-context");
 
 			const count = await pool.withPlatformContext(async (client) => {
-				const result = await client.query("SELECT count(*)::int AS count FROM anxionos_tenant_records");
+				const result = await client.query(
+					"SELECT count(*)::int AS count FROM anxionos_tenant_records",
+				);
 				return result.rows[0]?.count ?? 0;
 			});
 
@@ -77,7 +83,10 @@ describe("postgresql rls integration", () => {
 	test("RLS-04 app pool rejects bypassRls flag", async () => {
 		await withPgTestHarness(async ({ pool, tenantA }) => {
 			await expect(
-				pool.withContext({ tenantId: tenantA, bypassRls: true }, async () => "noop"),
+				pool.withContext(
+					{ tenantId: tenantA, bypassRls: true },
+					async () => "noop",
+				),
 			).rejects.toThrow(TenantContextError);
 		});
 		if (!shouldRunPgIntegrationTests()) {

@@ -1,0 +1,160 @@
+import { randomUUID } from "node:crypto";
+import {
+	type CommandResult,
+	type TransferOwnershipCommand,
+	commandResultSchema,
+	transferOwnershipCommandSchema,
+} from "@anxionos/contracts/organizations";
+import { createOwnershipTransferredEvent } from "../../domain/events/organization-events";
+import type { CommandJournalRepository } from "../../domain/ports/command-journal";
+import type { OrganizationUnitOfWork } from "../../domain/ports/organization-unit-of-work";
+import type { PrincipalLookup } from "../../domain/ports/principal-lookup";
+import {
+	loadIdempotentCommandResult,
+	toCommandResultSnapshot,
+} from "../command-support";
+import { parseCommandResultSnapshot, throwOrganizationError } from "../errors";
+import { assertPrincipalExists } from "../services/principal-guard";
+import { buildAgencyTenantContext } from "../services/tenant-context";
+export async function transferOwnership(
+	deps: TransferOwnershipDeps,
+	input: TransferOwnershipInput,
+): Promise<CommandResult> {
+	const command = transferOwnershipCommandSchema.parse(input);
+	const replay = await loadIdempotentCommandResult(
+		deps.commandJournal,
+		command.commandId,
+	);
+	if (replay) {
+		return replay;
+	}
+	await assertPrincipalExists(
+		deps.principalLookup,
+		command.newOwnerPrincipalId,
+	);
+	return deps.unitOfWork.runInTransaction(
+		buildAgencyTenantContext(command.agencyId, input.actorPrincipalId),
+		async (context) => {
+		const raced = await context.commandJournal.findByCommandId(
+			command.commandId,
+		);
+		if (raced) {
+			return parseCommandResultSnapshot(raced.responseSnapshot);
+		}
+		const agency = await context.agencyRepository.findByAgencyId(
+			command.agencyId,
+		);
+		if (!agency) {
+			throwOrganizationError(
+				"ORG_AGENCY_NOT_FOUND",
+				`Agency ${command.agencyId} not found`,
+			);
+		}
+		const actorMembership =
+			await context.membershipRepository.findByAgencyAndPrincipal(
+				command.agencyId,
+				input.actorPrincipalId,
+			);
+		if (
+			!actorMembership ||
+			actorMembership.status !== "active" ||
+			actorMembership.role !== "owner" ||
+			agency.ownerPrincipalId !== input.actorPrincipalId
+		) {
+			throwOrganizationError(
+				"ORG_CROSS_TENANT",
+				`Principal ${input.actorPrincipalId} is not the active owner of agency ${command.agencyId}`,
+			);
+		}
+		if (command.newOwnerPrincipalId === agency.ownerPrincipalId) {
+			const unchanged = commandResultSchema.parse({
+				aggregateId: agency.id,
+				revision: agency.revision,
+			});
+			await context.commandJournal.record({
+				commandId: command.commandId,
+				commandName: "TransferOwnership",
+				aggregateId: agency.id,
+				aggregateType: "Agency",
+				revision: agency.revision,
+				responseSnapshot: toCommandResultSnapshot(unchanged),
+			});
+			return unchanged;
+		}
+		const successorMembership =
+			await context.membershipRepository.findByAgencyAndPrincipal(
+				command.agencyId,
+				command.newOwnerPrincipalId,
+			);
+		if (!successorMembership || successorMembership.status !== "active") {
+			throwOrganizationError(
+				"ORG_OWNER_REQUIRED",
+				"Cannot transfer ownership without an active successor membership",
+			);
+		}
+		const now = new Date();
+		const agencyRevision = agency.revision + 1;
+		const updatedAgency = await context.agencyRepository.save({
+			...agency,
+			ownerPrincipalId: command.newOwnerPrincipalId,
+			revision: agencyRevision,
+			updatedAt: now,
+		});
+		await context.membershipRepository.save({
+			...actorMembership,
+			role: "admin",
+			revision: actorMembership.revision + 1,
+			updatedAt: now,
+		});
+		await context.membershipRepository.save({
+			...successorMembership,
+			role: "owner",
+			revision: successorMembership.revision + 1,
+			updatedAt: now,
+		});
+		const existingOwner = await context.ownerRepository.findByPrincipalId(
+			command.newOwnerPrincipalId,
+		);
+		if (!existingOwner) {
+			await context.ownerRepository.save({
+				id: randomUUID(),
+				principalId: command.newOwnerPrincipalId,
+				defaultOrganizationId: updatedAgency.id,
+				createdAt: now,
+			});
+		}
+		const result = commandResultSchema.parse({
+			aggregateId: updatedAgency.id,
+			revision: updatedAgency.revision,
+		});
+		const event = createOwnershipTransferredEvent({
+			agencyId: updatedAgency.id,
+			previousOwnerPrincipalId: input.actorPrincipalId,
+			previousOwnerMembershipId: actorMembership.id,
+			newOwnerPrincipalId: command.newOwnerPrincipalId,
+			newOwnerMembershipId: successorMembership.id,
+			revision: updatedAgency.revision,
+		});
+		await context.commandJournal.record({
+			commandId: command.commandId,
+			commandName: "TransferOwnership",
+			aggregateId: updatedAgency.id,
+			aggregateType: "Agency",
+			revision: updatedAgency.revision,
+			responseSnapshot: toCommandResultSnapshot(result),
+		});
+		await context.publishEvents([event]);
+		return result;
+		},
+	);
+}
+
+export interface TransferOwnershipInput extends TransferOwnershipCommand {
+	actorPrincipalId: string;
+}
+
+export interface TransferOwnershipDeps {
+	unitOfWork: OrganizationUnitOfWork;
+	commandJournal: CommandJournalRepository;
+	principalLookup: PrincipalLookup;
+}

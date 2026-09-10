@@ -5,8 +5,8 @@ import { ANXION_APP_ROLE, ANXION_SERVICE_ROLE } from "./roles";
 import {
 	AGENCY_ID_SETTING,
 	BYPASS_RLS_SETTING,
-	TENANT_ID_SETTING,
 	type DatabaseRole,
+	TENANT_ID_SETTING,
 	type TenantContext,
 	validateTenantContext,
 } from "./tenant-context";
@@ -75,7 +75,9 @@ export async function applyTenantContext(
 	}
 }
 
-export function createScopedPool(config: ScopedPoolConfig): TenantScopedQueryable {
+export function createScopedPool(
+	config: ScopedPoolConfig,
+): TenantScopedQueryable {
 	const { role, ...poolConfig } = config;
 	const pool = new PgPool(poolConfig);
 
@@ -99,7 +101,9 @@ export function createScopedPool(config: ScopedPoolConfig): TenantScopedQueryabl
 				client.release();
 			}
 		},
-		async withPlatformContext<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {
+		async withPlatformContext<T>(
+			fn: (client: PoolClient) => Promise<T>,
+		): Promise<T> {
 			const client = await pool.connect();
 			try {
 				await client.query("BEGIN");

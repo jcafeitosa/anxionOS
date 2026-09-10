@@ -25,11 +25,15 @@ export async function registerPrincipal(
 		return existing;
 	}
 	return deps.unitOfWork.runInTransaction(async (context) => {
-		const raced = await context.principalRepository.findByAuthUserId(command.authUserId);
+		const raced = await context.principalRepository.findByAuthUserId(
+			command.authUserId,
+		);
 		if (raced) {
 			return raced;
 		}
-		const emailTaken = await context.principalRepository.findByEmail(command.email);
+		const emailTaken = await context.principalRepository.findByEmail(
+			command.email,
+		);
 		if (emailTaken) {
 			throwIdentityError("PRINCIPAL_EMAIL_TAKEN", "Email already registered");
 		}

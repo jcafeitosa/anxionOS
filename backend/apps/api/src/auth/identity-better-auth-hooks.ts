@@ -1,13 +1,27 @@
 import {
+	type RegisterPrincipalDeps,
 	registerPrincipal,
 	syncPrincipalEmail,
-	type RegisterPrincipalDeps,
 } from "@anxionos/identity";
 
 export type IdentityBetterAuthDeps = RegisterPrincipalDeps;
 
-export function createIdentityBetterAuthDatabaseHooks(deps: IdentityBetterAuthDeps) {
+export function createIdentityBetterAuthDatabaseHooks(
+	deps: IdentityBetterAuthDeps,
+) {
 	return {
+		session: {
+			create: {
+				before: async (session: { userId: string }) => {
+					const principal = await deps.repository.findByAuthUserId(
+						session.userId,
+					);
+					if (principal?.status === "suspended") {
+						return false;
+					}
+				},
+			},
+		},
 		user: {
 			create: {
 				after: async (user: { id: string; email: string }) => {

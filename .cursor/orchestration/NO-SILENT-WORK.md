@@ -2,7 +2,7 @@
 
 **Nenhum agente trabalha sozinho ou em silêncio.** Toda ação técnica deve ser visível no diálogo, pareada com crítico quando executor, e rastreável no taskboard.
 
-**Relacionados:** [COMPLIANCE.md](./COMPLIANCE.md) · [TEAM-COLLABORATION.md](./TEAM-COLLABORATION.md) · [PERSONAS.md](./PERSONAS.md) · [RUNBOOK.md](./RUNBOOK.md)
+**Relacionados:** [COMPLIANCE.md](./COMPLIANCE.md) · [MULTI-CHAT-COORDINATION.md](./MULTI-CHAT-COORDINATION.md) · [TEAM-COLLABORATION.md](./TEAM-COLLABORATION.md) · [PERSONAS.md](./PERSONAS.md) · [RUNBOOK.md](./RUNBOOK.md)
 
 ---
 
@@ -40,7 +40,8 @@ Marque cada ponto antes de avançar de fase:
 1. **Executor sem crítico na thread = sessão inválida.** Ver par em [PERSONAS.md](./PERSONAS.md) (`criticSlug`).
 2. **Orquestrador** não substitui crítico nem especialistas — apenas coordena e escala.
 3. **Especialistas (G2–G5)** publicam `verdict` visível; não corrigem código em silêncio.
-4. Ao iniciar sessão: `npm run orchestration:session -- start --persona <slug> --issue ANX-N`.
+4. Ao iniciar sessão (Z21): `claim-check --issue ANX-N --acquire` → comentario CLAIM na issue → `orchestration:session start` → compliance sem `MISSING_ISSUE_LOCK`.
+5. Em conflito cross-chat: broadcast `block` via `coordination claim-check --broadcast` antes de escalar (ver [MULTI-CHAT-COORDINATION.md](./MULTI-CHAT-COORDINATION.md)).
 
 ---
 

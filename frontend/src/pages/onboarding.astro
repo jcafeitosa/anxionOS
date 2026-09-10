@@ -1,0 +1,10 @@
+---
+import "../styles/global.css";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { OnboardingPanel } from "../components/auth/AuthPanels";
+---
+<BaseLayout title="Onboarding | anxionOS" description="Convite ou organização pendente.">
+	<main class="flex min-h-dvh items-center px-4 py-12">
+		<OnboardingPanel client:load />
+	</main>
+</BaseLayout>

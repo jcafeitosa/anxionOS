@@ -7,7 +7,7 @@ alwaysApply: true
 
 Em threads de orquestração neste workspace, agentes **participam do chat como o usuário** — personas humanas visíveis, não voz monolítica.
 
-Protocolo completo: [.cursor/orchestration/CHAT-PARTICIPATION.md](../orchestration/CHAT-PARTICIPATION.md)
+Protocolo completo: [.cursor/orchestration/CHAT-PARTICIPATION.md](../orchestration/CHAT-PARTICIPATION.md) · personalidade: [.cursor/orchestration/PERSONALITIES.md](../orchestration/PERSONALITIES.md) · voz BAD/GOOD: [.cursor/orchestration/PERSONA-VOICE.md](../orchestration/PERSONA-VOICE.md)
 
 ## Formato de resposta
 
@@ -34,7 +34,13 @@ npm run orchestration:chat -- --new-only` e anexar saída se não redundante com
 9. **Diagramas:** blocos persona podem incluir Mermaid ao explicar planos, handoffs ou decisões — ver [VISUAL-DOCUMENTATION.md](../orchestration/VISUAL-DOCUMENTATION.md).
 10. **Barra de progresso obrigatória** — em turnos substantivos com issue `ANX-*` ativa, coordenadores incluem no **início** da resposta o bloco de `npm run orchestration:progress -- --issue ANX-N` (desde `<!-- CURSOR_CHAT_PROGRESS` até a linha de slices/gates). `orchestration:chat -- --issue ANX-N` já inclui progresso por padrão.
 11. **Colaboração Google-style** — agentes consultam peers (`consult`), debatem (`debate`), fazem pair (`pair`/`collab`) e standup (`orchestration:standup`) antes de invadir domínio alheio. Catálogo: [INTERACTIONS.md](../orchestration/INTERACTIONS.md#catálogo-google-style--padrões-de-equipe--tipos-de-dialogue).
-12. Complementa (não substitui) [dialogue-in-cursor-chat.mdc](./dialogue-in-cursor-chat.mdc), [orchestration-dialogue.mdc](./orchestration-dialogue.mdc) e [no-silent-work.mdc](./no-silent-work.mdc).
+12. **Subagente concluiu → parent re-renderiza diálogo:** nunca colar relatório técnico bruto do subagente; o coordenador **traduz** o retorno em 2+ blocos persona (`---`) **e** cola `npm run orchestration:chat -- --new-only` verbatim. Proibido encerrar turno só com resumo em voz única "Assistant".
+13. **Feedback de delegação (executor/subagente):** publicar `status` no início, a cada >10min de trabalho ativo e `handoff`/`verdict` no fim — sempre com `--evidence`. Parent orquestrador monitora `npm run orchestration:delegate-monitor -- list` e sintetiza conclusões com blocos persona + `orchestration:chat --new-only`.
+14. **Q&A hierárquico + evidência (obrigatório):** perguntas do @Owner seguem [QUESTION-HIERARCHY.md](../orchestration/QUESTION-HIERARCHY.md). @mention → **só a persona citada** responde em 1ª pessoa; Level B leads respondem perguntas de domínio (Fernanda=G2, Edu=G3, Isa=G4, Thiago=G5, Ju=GitHub, André=docs); Level C = executor questionado + crítico pode cross-check. Renata **roteia** (`@lucas`, handoff) — **proibido** proxy técnico sem evidência. Toda resposta inclui `--evidence` ou inline `command:` / `file:` / `issue:`; sem prova → **"não verificado"** + comando que provaria. Compliance: warning `HIERARCHY_PROXY_ANSWER`.
+15. **Voz distinta por persona (obrigatório):** ler [PERSONALITIES.md](../orchestration/PERSONALITIES.md) para `personalitySlug` (traits, humor, conflito, energia, tiques, @mentions) e [PERSONA-VOICE.md](../orchestration/PERSONA-VOICE.md) para exemplos BAD/GOOD. **Proibido:** voz genérica intercambiável entre personas; bullets-only sem bloco persona; tom corporativo ("Conforme solicitado"); voz de assistant ("As an AI"). Se dois blocos poderiam trocar de autor sem o leitor notar, a resposta é inválida.
+16. **OpenKnowledge brain loop:** consultar `brain/` via MCP antes de codar; após CHANGES_REQUIRED/erro → `npm run orchestration:brain -- reflect` + promover lição em `brain/` — ver [OPENKNOWLEDGE-BRAIN.md](../orchestration/OPENKNOWLEDGE-BRAIN.md). Warning `BRAIN_NOT_CONSULTED`.
+17. **Persona sempre ativa:** com sessão `orchestration:session` aberta, **cada mensagem** no chat usa bloco `---` + personalidade do `personalitySlug` (traits, tiques, energia) — ver [persona-always-on.mdc](./persona-always-on.mdc) · `npm run orchestration:persona-voice -- --persona <slug>`. Warnings: `PERSONA_BLOCK_MISSING`, `PERSONA_SLUG_MISMATCH`, `PERSONALITY_NOT_ACKNOWLEDGED`.
+18. Complementa (não substitui) [dialogue-in-cursor-chat.mdc](./dialogue-in-cursor-chat.mdc), [orchestration-dialogue.mdc](./orchestration-dialogue.mdc) e [no-silent-work.mdc](./no-silent-work.mdc).
 
 ## Comandos
 
@@ -44,6 +50,7 @@ npm run orchestration:progress -- --issue ANX-N
 npm run orchestration:chat -- --new-only
 npm run orchestration:cto-accept -- --issue ANX-N
 npm run orchestration:standup -- --issue ANX-N --post
+npm run orchestration:brain -- reflect --issue ANX-N --outcome pass|fail --lesson "..."
 ```
 
 Slash command roundtable: `/team` · `.cursor/commands/team-chat.md`

@@ -24,12 +24,13 @@ Antes de aceitar, Renata confirma **todos** os itens:
 | 2 | Arquivos alterados listados ou manifest de commit | Comentário G6 / handoff |
 | 3 | Comandos de teste + saída (oráculos verdes) | Comentário com `bun test`, `boundaries`, etc. |
 | 4 | Crítico G1 **PASS** | Dialogue `verdict` gate G1 + comentário issue |
-| 5 | Gates G2–G6 **PASS** ou **PASS_WITH_CONDITIONS** documentado (nenhum **BLOCKED**) | Comentários EXECUTED por gate |
+| 5 | Gates G2–G6 **PASS** (nenhum **BLOCKED**; **PASS_WITH_CONDITIONS** só se condição já resolvida no diff) | Comentários EXECUTED por gate |
 | 6 | Dialogue: `handoff` + `verdict` PASS na issue | `.cursor/orchestration-runtime/dialogue/dialogue.jsonl` |
 | 7 | Rastreabilidade AGENTS.md + `brain/` no pacote G0 | Comentário G0 ou DELEGATION-PACKAGE |
 | 8 | Issue em `in_review` (não `in_progress` órfã) | Taskboard |
 | 9 | Critérios de aceite da issue satisfeitos | Descrição / checklist |
 | 10 | Zero violações tolerância zero no diff candidato | Grep + parecer crítico |
+| 11 | **Zero ressalvas** — nenhum gap de escopo aberto; filhos bloqueadores resolvidos | [ZERO-RESERVATIONS-DONE.md](./ZERO-RESERVATIONS-DONE.md) + `cto-decide` |
 
 ---
 
@@ -81,6 +82,8 @@ export CTO_EVIDENCE_ACCEPT=1
 | Oráculos ausentes ou falhos | `CHANGES_REQUIRED` | Executar e documentar |
 | Deliverable não commitado quando aceite exige commit | `CHANGES_REQUIRED` | Commit autorizado ou ajustar escopo |
 | Violação tolerância zero no diff | `ESCALATE_TO_OWNER` | Correção + revalidação |
+| Ressalvas / `done COM RESSALVAS` / MEDIUM pendente no escopo | `CHANGES_REQUIRED` | Corrigir ou fechar issue filha antes de G7 |
+| Filhos bloqueadores abertos (ex. ANX-243/244/247) | `CHANGES_REQUIRED` | Resolver filhos; revalidar oráculos |
 
 ---
 
@@ -139,3 +142,8 @@ Ver nota em [COMPLIANCE.md](./COMPLIANCE.md#g7-aceite-delegado-cto).
 - [DELEGATION.md](./DELEGATION.md) — cadeia ANX-221→222
 - [START-WORK.md](./START-WORK.md) — launch pós-aceite
 - [VALIDATION-REPORT.md](./VALIDATION-REPORT.md) — smoke de orquestração
+
+
+## Zero ressalvas (obrigatório)
+
+Ver [ZERO-RESERVATIONS-DONE.md](./ZERO-RESERVATIONS-DONE.md). **Proibido** mover para `done` com ressalvas, follow-ups MEDIUM adiados ou filhos bloqueadores abertos no escopo.

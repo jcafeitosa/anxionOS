@@ -9,9 +9,7 @@
 		"declarationMap": true,
 		"noImplicitAny": false
 	},
-	"include": [
-		"src/**/*.ts"
-	],
+	"include": ["src/**/*.ts"],
 	"references": [
 		{
 			"path": "../../packages/contracts"

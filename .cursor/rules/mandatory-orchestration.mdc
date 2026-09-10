@@ -17,6 +17,7 @@ Prefixo de issues, roots de código e roster vêm de [`.cursor/orchestration.con
 
 ```bash
 npm run taskboard:ensure
+npm run orchestration:coordination -- claim-check --issue ANX-N --persona <slug> --acquire
 npm run orchestration:compliance -- --pre-work --issue ANX-N --persona <slug>
 ```
 
@@ -29,6 +30,7 @@ Exit 1 = **ABORTAR** — corrigir violacoes listadas antes de editar arquivos.
 3. `ack` postado no dialogue antes de codar
 4. `status` a cada 10 min de sessao ativa
 5. Executor + critico pareados na mesma issue
+6. Orquestrador: monitorar Tasks em background com `npm run orchestration:delegate-monitor -- list` a cada ~10min; ao concluir subagente, sintetizar com blocos persona + `orchestration:chat --new-only`
 
 ## Fim de turno
 

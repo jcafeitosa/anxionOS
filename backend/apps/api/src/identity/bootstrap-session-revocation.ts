@@ -2,50 +2,33 @@ import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
 import { IDENTITY_EVENT_TYPES } from "@anxionos/contracts/identity";
 import { createLogger } from "@anxionos/observability";
 import {
+	DEFAULT_NATS_EVENTS_STREAM,
+	ensureEventsJetStream,
+} from "@anxionos/eventing/nats-publisher";
+import {
 	AckPolicy,
-	connect,
 	DeliverPolicy,
 	JSONCodec,
-	StorageType,
-	type JetStreamManager,
 	type NatsConnection,
+	connect,
 } from "nats";
 import type { Pool } from "pg";
+import { reconcileSuspendedPrincipalSessions } from "@anxionos/identity";
 import {
-	createSessionRevocationConsumerDeps,
 	IDENTITY_SESSIONS_CONSUMER_NAME,
+	classifyIdentitySessionRevocationError,
+	createSessionRevocationConsumerDeps,
 	processIdentitySessionEvent,
 } from "./session-revocation-consumer";
 
 const logger = createLogger({
-	
 	service: "identity-session-revocation",
 });
 
 const codec = JSONCodec<unknown>();
 
-export const DEFAULT_NATS_EVENTS_STREAM = "EVENTS";
 const IDENTITY_SESSIONS_DURABLE = "identity-sessions-v1";
 const IDENTITY_SUSPENDED_SUBJECT = `events.${IDENTITY_EVENT_TYPES.PRINCIPAL_SUSPENDED}`;
-
-export async function ensureEventsJetStream(
-	jsm: JetStreamManager,
-	streamName: string,
-): Promise<void> {
-	try {
-		await jsm.streams.info(streamName);
-		return;
-	} catch {
-		await jsm.streams.add({
-			name: streamName,
-			subjects: ["events.>"],
-			storage: StorageType.File,
-		});
-		logger.info("Created JetStream EVENTS stream for identity consumer", {
-			streamName,
-		});
-	}
-}
 
 export interface IdentitySessionRevocationHandle {
 	stop: () => Promise<void>;
@@ -77,6 +60,12 @@ export async function startIdentitySessionRevocationConsumer(
 	const js = nc.jetstream();
 	const deps = createSessionRevocationConsumerDeps(pool);
 
+	const reconciliation = await reconcileSuspendedPrincipalSessions(deps);
+	logger.info("Identity session reconciliation completed for suspended principals", {
+		revokedPrincipalCount: reconciliation.revokedPrincipalCount,
+		deliverPolicy: "New",
+	});
+
 	try {
 		await jsm.consumers.add(streamName, {
 			durable_name: IDENTITY_SESSIONS_DURABLE,
@@ -88,7 +77,10 @@ export async function startIdentitySessionRevocationConsumer(
 		// durable consumer may already exist from a prior process
 	}
 
-	const consumer = await js.consumers.get(streamName, IDENTITY_SESSIONS_DURABLE);
+	const consumer = await js.consumers.get(
+		streamName,
+		IDENTITY_SESSIONS_DURABLE,
+	);
 	let aborted = false;
 
 	logger.info("Identity session revocation consumer started", {
@@ -113,10 +105,24 @@ export async function startIdentitySessionRevocationConsumer(
 						await processIdentitySessionEvent(pool, deps, envelope);
 						msg.ack();
 					} catch (error) {
-						logger.error("Identity session revocation message failed", {
-							error: error instanceof Error ? error.message : String(error),
-						});
-						msg.nak();
+						const failureClass = classifyIdentitySessionRevocationError(error);
+						if (failureClass === "permanent") {
+							logger.warn(
+								"Identity session revocation message skipped (permanent failure)",
+								{
+									error: error instanceof Error ? error.message : String(error),
+								},
+							);
+							msg.ack();
+						} else {
+							logger.error(
+								"Identity session revocation message failed (transient)",
+								{
+									error: error instanceof Error ? error.message : String(error),
+								},
+							);
+							msg.nak();
+						}
 					}
 				}
 			} catch (error) {

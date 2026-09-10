@@ -5,11 +5,13 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = (rel) => fs.readFileSync(path.join(root, rel), "utf8");
 const write = (rel, c) => {
-  fs.mkdirSync(path.dirname(path.join(root, rel)), { recursive: true });
-  fs.writeFileSync(path.join(root, rel), c);
+	fs.mkdirSync(path.dirname(path.join(root, rel)), { recursive: true });
+	fs.writeFileSync(path.join(root, rel), c);
 };
 
-write("src/application/errors.ts", `import {
+write(
+	"src/application/errors.ts",
+	`import {
   decisionsCommandResultSchema,
   type DecisionsCommandResult,
   type DecisionsErrorCode,
@@ -39,9 +41,12 @@ export function parseCommandResultSnapshot(snapshot: Record<string, unknown>): D
     intentId: snapshot.intentId,
   });
 }
-`);
+`,
+);
 
-write("src/application/command-support.ts", `import type { DecisionsCommandResult } from "@anxionos/contracts/decisions";
+write(
+	"src/application/command-support.ts",
+	`import type { DecisionsCommandResult } from "@anxionos/contracts/decisions";
 import type { CommandJournalRepository } from "../domain/ports/command-journal";
 import { parseCommandResultSnapshot } from "./errors";
 
@@ -65,9 +70,12 @@ export function toCommandResultSnapshot(result: DecisionsCommandResult): Record<
     intentId: result.intentId,
   };
 }
-`);
+`,
+);
 
-write("src/domain/events/decisions-events.ts", `import { randomUUID } from "node:crypto";
+write(
+	"src/domain/events/decisions-events.ts",
+	`import { randomUUID } from "node:crypto";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import {
   DECISIONS_EVENT_TYPES,
@@ -129,9 +137,12 @@ export function createIntentSubmittedEvent(input: {
     payload: input,
   };
 }
-`);
+`,
+);
 
-write("src/infrastructure/decisions-unit-of-work.ts", `import type { DomainEventEnvelope } from "@anxionos/contracts/events";
+write(
+	"src/infrastructure/decisions-unit-of-work.ts",
+	`import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import { appendJournal, enqueueOutbox } from "@anxionos/eventing/postgres";
 import type { Pool, PoolClient } from "pg";
 import type {
@@ -179,9 +190,12 @@ export function createDecisionsUnitOfWork(pool: Pool): DecisionsUnitOfWork {
     },
   };
 }
-`);
+`,
+);
 
-write("src/infrastructure/migrate.ts", `import { dirname, join } from "node:path";
+write(
+	"src/infrastructure/migrate.ts",
+	`import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
@@ -211,29 +225,45 @@ if (import.meta.main) {
     process.exit(1);
   });
 }
-`);
+`,
+);
 
 for (const [rel, fn, depsType, cmdType] of [
-  ["src/application/commands/propose-decision.ts", "proposeDecision", "ProposeDecisionDeps", "ProposeDecisionCommand"],
-  ["src/application/commands/check-authority.ts", "checkAuthority", "CheckAuthorityDeps", "CheckAuthorityCommand"],
-  ["src/application/commands/submit-intent.ts", "submitIntent", "SubmitIntentDeps", "SubmitIntentCommand"],
+	[
+		"src/application/commands/propose-decision.ts",
+		"proposeDecision",
+		"ProposeDecisionDeps",
+		"ProposeDecisionCommand",
+	],
+	[
+		"src/application/commands/check-authority.ts",
+		"checkAuthority",
+		"CheckAuthorityDeps",
+		"CheckAuthorityCommand",
+	],
+	[
+		"src/application/commands/submit-intent.ts",
+		"submitIntent",
+		"SubmitIntentDeps",
+		"SubmitIntentCommand",
+	],
 ]) {
-  let c = read(rel);
-  if (!c.includes(`${fn}(deps: ${depsType}`)) {
-    c = c.replace(
-      `export async function ${fn}(deps, input)`,
-      `export async function ${fn}(deps: ${depsType}, input: ${cmdType}): Promise<DecisionsCommandResult>`,
-    );
-  }
-  write(rel, c);
+	let c = read(rel);
+	if (!c.includes(`${fn}(deps: ${depsType}`)) {
+		c = c.replace(
+			`export async function ${fn}(deps, input)`,
+			`export async function ${fn}(deps: ${depsType}, input: ${cmdType}): Promise<DecisionsCommandResult>`,
+		);
+	}
+	write(rel, c);
 }
 
 write(
-  "src/infrastructure/persistence/repositories.ts",
-  read("dist/infrastructure/persistence/repositories.js")
-    .replace(
-      /^import \{ DecisionsCommandError \}/,
-      `import type { PoolClient } from "pg";
+	"src/infrastructure/persistence/repositories.ts",
+	read("dist/infrastructure/persistence/repositories.js")
+		.replace(
+			/^import \{ DecisionsCommandError \}/,
+			`import type { PoolClient } from "pg";
 import { DecisionsCommandError } from "../../application/errors";
 import type {
   DecisionRecord,
@@ -247,49 +277,85 @@ import type {
 function isPgUniqueViolation(error: unknown): boolean {
   return typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "23505";
 }`,
-    )
-    .replace("function mapDecision(row) {", "function mapDecision(row: Record<string, unknown>): DecisionRecord {")
-    .replace("function mapProposal(row) {", "function mapProposal(row: Record<string, unknown>): ProposalRecord {")
-    .replace("function mapTradeIntent(row) {", "function mapTradeIntent(row: Record<string, unknown>): TradeIntentRecord {")
-    .replace(/id: row\.id,/g, "id: String(row.id),")
-    .replace(/organizationId: row\.organization_id,/g, "organizationId: String(row.organization_id),")
-    .replace(/grantId: row\.grant_id,/g, "grantId: String(row.grant_id),")
-    .replace(/expectedAuthorityEpoch: row\.expected_authority_epoch,/g, "expectedAuthorityEpoch: Number(row.expected_authority_epoch),")
-    .replace(/correlationId: row\.correlation_id,/g, "correlationId: String(row.correlation_id),")
-    .replace(/status: row\.status,/g, "status: String(row.status),")
-    .replace(/revision: row\.revision,/g, "revision: Number(row.revision),")
-    .replace(/decisionId: row\.decision_id,/g, "decisionId: String(row.decision_id),")
-    .replace(/proposalKind: row\.proposal_kind,/g, "proposalKind: String(row.proposal_kind),")
-    .replace(/intentHash: row\.intent_hash,/g, "intentHash: String(row.intent_hash),")
-    .replace(/instrumentId: row\.instrument_id,/g, "instrumentId: String(row.instrument_id),")
-    .replace(/side: row\.side,/g, "side: String(row.side),")
-    .replace(/executionMode: row\.execution_mode,/g, "executionMode: String(row.execution_mode),")
-    .replace(
-      "export function createPgDecisionRepository(client) {",
-      "export function createPgDecisionRepository(client: PoolClient): DecisionRepository {",
-    )
-    .replace(
-      "export function createPgProposalRepository(client) {",
-      "export function createPgProposalRepository(client: PoolClient): ProposalRepository {",
-    )
-    .replace(
-      "export function createPgTradeIntentRepository(client) {",
-      "export function createPgTradeIntentRepository(client: PoolClient): TradeIntentRepository {",
-    )
-    .replace(/async save\(record\)/g, "async save(record: DecisionRecord | ProposalRecord | TradeIntentRecord)")
-    .replace(
-      /catch \(error\) \{\s*if \(error\.code === "23505"\)/,
-      "catch (error: unknown) {\n                if (isPgUniqueViolation(error))",
-    ),
+		)
+		.replace(
+			"function mapDecision(row) {",
+			"function mapDecision(row: Record<string, unknown>): DecisionRecord {",
+		)
+		.replace(
+			"function mapProposal(row) {",
+			"function mapProposal(row: Record<string, unknown>): ProposalRecord {",
+		)
+		.replace(
+			"function mapTradeIntent(row) {",
+			"function mapTradeIntent(row: Record<string, unknown>): TradeIntentRecord {",
+		)
+		.replace(/id: row\.id,/g, "id: String(row.id),")
+		.replace(
+			/organizationId: row\.organization_id,/g,
+			"organizationId: String(row.organization_id),",
+		)
+		.replace(/grantId: row\.grant_id,/g, "grantId: String(row.grant_id),")
+		.replace(
+			/expectedAuthorityEpoch: row\.expected_authority_epoch,/g,
+			"expectedAuthorityEpoch: Number(row.expected_authority_epoch),",
+		)
+		.replace(
+			/correlationId: row\.correlation_id,/g,
+			"correlationId: String(row.correlation_id),",
+		)
+		.replace(/status: row\.status,/g, "status: String(row.status),")
+		.replace(/revision: row\.revision,/g, "revision: Number(row.revision),")
+		.replace(
+			/decisionId: row\.decision_id,/g,
+			"decisionId: String(row.decision_id),",
+		)
+		.replace(
+			/proposalKind: row\.proposal_kind,/g,
+			"proposalKind: String(row.proposal_kind),",
+		)
+		.replace(
+			/intentHash: row\.intent_hash,/g,
+			"intentHash: String(row.intent_hash),",
+		)
+		.replace(
+			/instrumentId: row\.instrument_id,/g,
+			"instrumentId: String(row.instrument_id),",
+		)
+		.replace(/side: row\.side,/g, "side: String(row.side),")
+		.replace(
+			/executionMode: row\.execution_mode,/g,
+			"executionMode: String(row.execution_mode),",
+		)
+		.replace(
+			"export function createPgDecisionRepository(client) {",
+			"export function createPgDecisionRepository(client: PoolClient): DecisionRepository {",
+		)
+		.replace(
+			"export function createPgProposalRepository(client) {",
+			"export function createPgProposalRepository(client: PoolClient): ProposalRepository {",
+		)
+		.replace(
+			"export function createPgTradeIntentRepository(client) {",
+			"export function createPgTradeIntentRepository(client: PoolClient): TradeIntentRepository {",
+		)
+		.replace(
+			/async save\(record\)/g,
+			"async save(record: DecisionRecord | ProposalRecord | TradeIntentRecord)",
+		)
+		.replace(
+			/catch \(error\) \{\s*if \(error\.code === "23505"\)/,
+			"catch (error: unknown) {\n                if (isPgUniqueViolation(error))",
+		),
 );
 
 let cj = read("src/infrastructure/persistence/command-journal-repository.ts");
 if (!cj.includes("Pool | PoolClient")) {
-  cj = cj.replace(
-    "export function createPgCommandJournalRepository(client)",
-    "export function createPgCommandJournalRepository(client: import(\"pg\").Pool | import(\"pg\").PoolClient)",
-  );
-  write("src/infrastructure/persistence/command-journal-repository.ts", cj);
+	cj = cj.replace(
+		"export function createPgCommandJournalRepository(client)",
+		'export function createPgCommandJournalRepository(client: import("pg").Pool | import("pg").PoolClient)',
+	);
+	write("src/infrastructure/persistence/command-journal-repository.ts", cj);
 }
 
 console.log("finalized decisions src");

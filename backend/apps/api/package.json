@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "bun run --watch src/index.ts",
 		"start": "bun run src/index.ts",
+		"seed:dev": "bun run src/auth/seed-dev.ts",
 		"build": "tsc --project tsconfig.json",
 		"typecheck": "tsc --project tsconfig.json --noEmit"
 	},
@@ -21,7 +22,10 @@
 		"elysia": "^1.2.25",
 		"pg": "^8.23.0",
 		"zod": "^3.24.1",
+		"@anxionos/agents": "workspace:*",
+		"@anxionos/governance": "workspace:*",
 		"@anxionos/identity": "workspace:*",
+		"@anxionos/organizations": "workspace:*",
 		"drizzle-orm": "^0.38.3"
 	}
 }

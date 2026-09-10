@@ -46,6 +46,8 @@ export function createDrizzleAgencyRepository(
 				.insert(agencies)
 				.values({
 					id: agency.id,
+					tenantId: agency.id,
+					agencyId: agency.id,
 					ownerPrincipalId: agency.ownerPrincipalId,
 					displayName: agency.displayName,
 					marketScope: agency.marketScope,

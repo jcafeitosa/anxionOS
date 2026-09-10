@@ -134,6 +134,21 @@ Após hire aprovado, despachar `Task` com o `subagent_type` correspondente + [SU
 Ver `PERSONA_CURSOR_SUBAGENT` e `ON_DEMAND_CURSOR_SUBAGENT` em `agent-hire/levels.mjs`.
 
 
+
+## Sincronização automática com o Taskboard
+
+Após cada hire bem-sucedido, o framework registra o agente na issue do Dashi:
+
+- Comentário `[hire-sync]` com `hire-id`, persona, level, razão e evidência
+- Label `hired:<slug>` na issue
+
+Detalhes: [HIRE-TASKBOARD-SYNC.md](./HIRE-TASKBOARD-SYNC.md).
+
+```bash
+# Pular sync em emergência
+npm run orchestration:hire -- ... --skip-taskboard-sync
+```
+
 ## Limites
 
 - Máx. **3** on-demand ativos por `ANX-N`

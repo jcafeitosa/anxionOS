@@ -2,6 +2,8 @@ import type { ApprovalDecision } from "@anxionos/contracts/governance";
 
 export interface Approval {
 	id: string;
+	tenantId: string;
+	agencyId: string;
 	changeProposalId: string;
 	actionRef: string | null;
 	resolverPrincipalId: string;

@@ -1,17 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { AckPolicy, DeliverPolicy, JSONCodec, connect } from "nats";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import { IDENTITY_EVENT_TYPES } from "@anxionos/contracts/identity";
-import {
-	createSessionRevocationConsumerDeps,
-	IDENTITY_SESSIONS_CONSUMER_NAME,
-	processIdentitySessionEvent,
-} from "../../apps/api/src/identity/session-revocation-consumer";
+import { resolveEventSubject } from "@anxionos/eventing/nats-publisher";
+import { AckPolicy, DeliverPolicy, JSONCodec, connect } from "nats";
 import {
 	DEFAULT_NATS_EVENTS_STREAM,
 	ensureEventsJetStream,
-} from "../../apps/api/src/identity/bootstrap-session-revocation";
-import { resolveEventSubject } from "@anxionos/eventing/nats-publisher";
+} from "@anxionos/eventing/nats-publisher";
+import { reconcileSuspendedPrincipalSessions } from "@anxionos/identity";
+import {
+	IDENTITY_SESSIONS_CONSUMER_NAME,
+	createSessionRevocationConsumerDeps,
+	processIdentitySessionEvent,
+} from "../../apps/api/src/identity/session-revocation-consumer";
 import {
 	getNatsUrl,
 	shouldRunNatsIntegrationTests,
@@ -37,9 +38,12 @@ function createSuspendedEnvelope(): DomainEventEnvelope {
 	};
 }
 
-async function seedSuspendedPrincipalWithSessions(
-	pool: { query: (sql: string, params?: unknown[]) => Promise<{ rowCount: number | null; rows: { consumer_name?: string }[] }> },
-): Promise<void> {
+async function seedSuspendedPrincipalWithSessions(pool: {
+	query: (
+		sql: string,
+		params?: unknown[],
+	) => Promise<{ rowCount: number | null; rows: { consumer_name?: string }[] }>;
+}): Promise<void> {
 	await pool.query(
 		`INSERT INTO "user" (id, name, email, "emailVerified")
 		 VALUES ($1, $2, $3, TRUE)`,
@@ -84,15 +88,24 @@ describe("session revocation consumer postgres integration", () => {
 			const deps = createSessionRevocationConsumerDeps(pool);
 			const suspendedEnvelope = createSuspendedEnvelope();
 
-			const first = await processIdentitySessionEvent(pool, deps, suspendedEnvelope);
-			const second = await processIdentitySessionEvent(pool, deps, suspendedEnvelope);
+			const first = await processIdentitySessionEvent(
+				pool,
+				deps,
+				suspendedEnvelope,
+			);
+			const second = await processIdentitySessionEvent(
+				pool,
+				deps,
+				suspendedEnvelope,
+			);
 
 			expect(first).toBe("processed");
 			expect(second).toBe("skipped");
 
-			const sessions = await pool.query('SELECT id FROM session WHERE "userId" = $1', [
-				authUserId,
-			]);
+			const sessions = await pool.query(
+				'SELECT id FROM session WHERE "userId" = $1',
+				[authUserId],
+			);
 			expect(sessions.rowCount).toBe(0);
 
 			const inbox = await pool.query(
@@ -100,7 +113,9 @@ describe("session revocation consumer postgres integration", () => {
 				[suspendedEnvelope.eventId],
 			);
 			expect(inbox.rowCount).toBe(1);
-			expect(inbox.rows[0]?.consumer_name).toBe(IDENTITY_SESSIONS_CONSUMER_NAME);
+			expect(inbox.rows[0]?.consumer_name).toBe(
+				IDENTITY_SESSIONS_CONSUMER_NAME,
+			);
 		});
 	});
 
@@ -124,16 +139,49 @@ describe("session revocation consumer postgres integration", () => {
 			await pool.query(
 				`INSERT INTO session (id, "expiresAt", token, "createdAt", "updatedAt", "userId")
 				 VALUES ($1, $2, $3, $4, $4, $5)`,
-				["sess-1", new Date("2027-01-01T00:00:00.000Z"), "token-1", sessionCreatedAt, authUserId],
+				[
+					"sess-1",
+					new Date("2027-01-01T00:00:00.000Z"),
+					"token-1",
+					sessionCreatedAt,
+					authUserId,
+				],
 			);
 
 			const deps = createSessionRevocationConsumerDeps(pool);
 			await processIdentitySessionEvent(pool, deps, createSuspendedEnvelope());
 
-			const sessions = await pool.query('SELECT id FROM session WHERE "userId" = $1', [
-				authUserId,
-			]);
+			const sessions = await pool.query(
+				'SELECT id FROM session WHERE "userId" = $1',
+				[authUserId],
+			);
 			expect(sessions.rowCount).toBe(1);
+		});
+	});
+
+	test("reconcileSuspendedPrincipalSessions revokes sessions for principals suspended before consumer bootstrap", async () => {
+		if (!shouldRunPgIntegrationTests()) {
+			return;
+		}
+
+		await withSessionRevocationPgHarness(async ({ pool }) => {
+			await seedSuspendedPrincipalWithSessions(pool);
+			const deps = createSessionRevocationConsumerDeps(pool);
+
+			const before = await pool.query(
+				'SELECT id FROM session WHERE "userId" = $1',
+				[authUserId],
+			);
+			expect(before.rowCount).toBe(2);
+
+			const result = await reconcileSuspendedPrincipalSessions(deps);
+			expect(result.revokedPrincipalCount).toBe(1);
+
+			const sessions = await pool.query(
+				'SELECT id FROM session WHERE "userId" = $1',
+				[authUserId],
+			);
+			expect(sessions.rowCount).toBe(0);
 		});
 	});
 });
@@ -149,7 +197,8 @@ describe("session revocation consumer nats integration", () => {
 			return;
 		}
 
-		const streamName = process.env.NATS_EVENTS_STREAM?.trim() ?? DEFAULT_NATS_EVENTS_STREAM;
+		const streamName =
+			process.env.NATS_EVENTS_STREAM?.trim() ?? DEFAULT_NATS_EVENTS_STREAM;
 		const durable = `identity_sessions_test_${crypto.randomUUID().replace(/-/g, "")}`;
 		const suspendedEnvelope = createSuspendedEnvelope();
 		const subject = resolveEventSubject(suspendedEnvelope.eventType);
@@ -178,16 +227,20 @@ describe("session revocation consumer nats integration", () => {
 			await js.publish(subject, codec.encode(suspendedEnvelope));
 
 			const deps = createSessionRevocationConsumerDeps(pool);
-			const messages = await consumer.fetch({ max_messages: 1, expires: 5_000 });
+			const messages = await consumer.fetch({
+				max_messages: 1,
+				expires: 5_000,
+			});
 			for await (const msg of messages) {
 				const envelope = codec.decode(msg.data);
 				await processIdentitySessionEvent(pool, deps, envelope);
 				msg.ack();
 			}
 
-			const sessions = await pool.query('SELECT id FROM session WHERE "userId" = $1', [
-				authUserId,
-			]);
+			const sessions = await pool.query(
+				'SELECT id FROM session WHERE "userId" = $1',
+				[authUserId],
+			);
 			expect(sessions.rowCount).toBe(0);
 
 			try {

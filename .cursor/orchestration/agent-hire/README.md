@@ -20,9 +20,12 @@ npm run orchestration:hire -- --worker typescript-reviewer --issue ANX-134 --rea
 npm run orchestration:dismiss -- --persona security-lead --issue ANX-221 --evidence "G4 PASS"
 npm run orchestration:dismiss -- issue-done --issue ANX-221
 
-# Integração taskboard
+# Integração taskboard (board → hire)
 node .cursor/orchestration/agent-hire/taskboard-sync.mjs delegate --issue ANX-N
 node .cursor/orchestration/agent-hire/taskboard-sync.mjs done --issue ANX-N
+
+# Hire → board (automático após orchestration:hire)
+# Ver HIRE-TASKBOARD-SYNC.md — comentário + label hired:<slug>
 ```
 
 ## Arquivos de estado

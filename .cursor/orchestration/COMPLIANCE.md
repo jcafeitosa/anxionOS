@@ -58,7 +58,7 @@ Personas (Renata, Lucas, Marina…) **não** são agentes institucionais do anxi
 | Handoff documental | André (docs) ou executor autorizado | Template da pasta; `summary` ≤80 chars em cada write |
 | Pesquisa durável | `research-with-sources` skill | Fontes ingeridas; citação local, não URL inline no corpo |
 
-**STOP:** nunca usar `Read`/`Grep`/`Write` nativos em `.md` dentro de `brain/` quando o MCP OpenKnowledge estiver disponível — ver skill [open-knowledge](../../.cursor/skills/open-knowledge/SKILL.md).
+**STOP:** nunca usar `Read`/`Grep`/`Write` nativos em `.md` dentro de `brain/` quando o MCP OpenKnowledge estiver disponível — ver skill [open-knowledge](../../.cursor/skills/open-knowledge/SKILL.md) e loop [OPENKNOWLEDGE-BRAIN.md](./OPENKNOWLEDGE-BRAIN.md) (`orchestration:brain`, warnings `BRAIN_NOT_CONSULTED` / `REFLECTION_PENDING`).
 
 ### Docs públicas vs `brain/`
 
