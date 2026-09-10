@@ -11,6 +11,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "test:e2e": "playwright test",
+    "test:unit": "node --experimental-strip-types --test src/lib/console-access.test.ts",
     "typecheck": "astro check"
   },
   "dependencies": {
