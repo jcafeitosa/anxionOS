@@ -19,7 +19,7 @@ type: guide
 | **Events consumed** | Projeções, workflows, audit — inbox idempotente |
 | **Graph projection** | Nós/arestas Neo4j derivados de eventos (nunca escrita direta) |
 | **API surface** | REST prefixo /v1/<domain> ou /v1/graph/* quando kernel |
-| **Gap código** | Snapshot 2026-09-07 vs baseline documentado |
+| **Gap código** | Snapshot **2026-09-10 (ANX-346)**: presença de `backend/modules/<name>/src/index.ts`. «Ausente» de 2026-09-07 está obsoleto. **Parcial** = código/esqueleto presente; **não** implica G7. `adapter-gateway` **fora** desta matriz (ADR0006). |
 
 ---
 

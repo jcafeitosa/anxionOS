@@ -15,21 +15,21 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@astrojs/node": "^11.1.5",
-    "@astrojs/react": "^6.0.5",
-    "@elysiajs/eden": "^1.4.9",
-    "@tailwindcss/vite": "^4.3.3",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.7",
-    "astro": "^7.3.1",
-    "better-auth": "^1.7.3",
-    "lightweight-charts": "^5.2.1",
-    "lucide-react": "^1.42.0",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "react-qr-code": "^2.2.0",
-    "tailwindcss": "^4.3.3",
-    "zod": "^3.25.76"
+    "@astrojs/node": "11.1.5",
+    "@astrojs/react": "6.0.5",
+    "@elysiajs/eden": "1.4.9",
+    "@tailwindcss/vite": "4.3.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "astro": "7.3.2",
+    "better-auth": "1.7.4",
+    "lightweight-charts": "5.2.1",
+    "lucide-react": "1.44.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-qr-code": "2.2.0",
+    "tailwindcss": "4.3.3",
+    "zod": "4.6.2"
   },
   "allowScripts": {
     "esbuild": true
