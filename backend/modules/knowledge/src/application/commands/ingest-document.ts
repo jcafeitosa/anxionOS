@@ -101,6 +101,7 @@ export async function ingestDocument(
 			indexGenerationId: indexId,
 			sequence,
 			contentHash: hashText(text),
+			textContent: text,
 			tokenCount: Math.max(1, Math.ceil(text.length / 4)),
 		}));
 		await ctx.indexGenerations.save({

@@ -76,6 +76,26 @@ export function createPgDocumentRepository(
 	client: PoolClient,
 ): DocumentRepository {
 	return {
+		async listActiveByOrganization(organizationId) {
+			const result = await client.query(
+				`SELECT * FROM knowledge_documents WHERE organization_id = $1 AND status = 'ACTIVE'`,
+				[organizationId],
+			);
+			return result.rows.map((row: Record<string, unknown>) => ({
+				id: String(row.id),
+				organizationId: String(row.organization_id),
+				knowledgeSourceId: String(row.knowledge_source_id),
+				title: String(row.title),
+				classification: String(row.classification),
+				aclId: String(row.acl_id),
+				aclEpoch: Number(row.acl_epoch),
+				activeVersionId: row.active_version_id
+					? String(row.active_version_id)
+					: null,
+				status: String(row.status),
+				revision: Number(row.revision),
+			}));
+		},
 		async findById(documentId, organizationId) {
 			const result = await client.query(
 				"SELECT * FROM knowledge_documents WHERE id = $1 AND organization_id = $2",
@@ -120,7 +140,8 @@ export function createPgDocumentRepository(
 		},
 		async update(record: DocumentRecord) {
 			await client.query(
-				`UPDATE knowledge_documents SET active_version_id = $3, status = $4, revision = $5, updated_at = now()
+				`UPDATE knowledge_documents SET active_version_id = $3, status = $4, revision = $5,
+				 acl_id = $6, acl_epoch = $7, updated_at = now()
 				 WHERE id = $1 AND organization_id = $2`,
 				[
 					record.id,
@@ -128,6 +149,8 @@ export function createPgDocumentRepository(
 					record.activeVersionId,
 					record.status,
 					record.revision,
+					record.aclId,
+					record.aclEpoch,
 				],
 			);
 			return record;
@@ -251,8 +274,8 @@ export function createPgChunkRepository(client: PoolClient): ChunkRepository {
 			for (const record of records) {
 				await client.query(
 					`INSERT INTO knowledge_chunks (id, organization_id, document_version_id, index_generation_id,
-					 sequence, content_hash, token_count)
-					 VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+					 sequence, content_hash, text_content, token_count)
+					 VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
 					[
 						record.id,
 						record.organizationId,
@@ -260,6 +283,7 @@ export function createPgChunkRepository(client: PoolClient): ChunkRepository {
 						record.indexGenerationId,
 						record.sequence,
 						record.contentHash,
+						record.textContent,
 						record.tokenCount,
 					],
 				);
@@ -277,6 +301,23 @@ export function createPgChunkRepository(client: PoolClient): ChunkRepository {
 				indexGenerationId: String(row.index_generation_id),
 				sequence: Number(row.sequence),
 				contentHash: String(row.content_hash),
+				textContent: String(row.text_content ?? ""),
+				tokenCount: Number(row.token_count),
+			}));
+		},
+		async listByDocumentVersion(documentVersionId) {
+			const result = await client.query(
+				"SELECT * FROM knowledge_chunks WHERE document_version_id = $1 ORDER BY sequence",
+				[documentVersionId],
+			);
+			return result.rows.map((row: Record<string, unknown>) => ({
+				id: String(row.id),
+				organizationId: String(row.organization_id),
+				documentVersionId: String(row.document_version_id),
+				indexGenerationId: String(row.index_generation_id),
+				sequence: Number(row.sequence),
+				contentHash: String(row.content_hash),
+				textContent: String(row.text_content ?? ""),
 				tokenCount: Number(row.token_count),
 			}));
 		},
@@ -311,7 +352,35 @@ export function createPgEmbeddingRepository(
 			);
 			return Number(result.rows[0].c);
 		},
+		async listByOrganization(organizationId) {
+			const result = await client.query(
+				`SELECT e.chunk_id, e.organization_id, e.embedding_space_id, e.dimensions, e.embedding
+				 FROM knowledge_embeddings e WHERE e.organization_id = $1`,
+				[organizationId],
+			);
+			return result.rows.map((row: Record<string, unknown>) => ({
+				chunkId: String(row.chunk_id),
+				organizationId: String(row.organization_id),
+				embeddingSpaceId: String(row.embedding_space_id),
+				dimensions: Number(row.dimensions),
+				vector: parsePgVector(String(row.embedding)),
+			}));
+		},
+		async purgeByChunkIds(chunkIds) {
+			if (chunkIds.length === 0) return 0;
+			const result = await client.query(
+				"DELETE FROM knowledge_embeddings WHERE chunk_id = ANY($1::text[])",
+				[chunkIds],
+			);
+			return result.rowCount ?? 0;
+		},
 	};
+}
+
+function parsePgVector(raw: string): number[] {
+	const trimmed = raw.replace(/^\[/, "").replace(/\]$/, "");
+	if (trimmed.length === 0) return [];
+	return trimmed.split(",").map((part) => Number.parseFloat(part));
 }
 
 export function createPgEmbeddingSpaceRepository(

@@ -2,6 +2,10 @@ export {
 	registerKnowledgeSourceCommandSchema,
 	ingestDocumentCommandSchema,
 	publishIndexCommandSchema,
+	revokeDocumentAccessCommandSchema,
+	retrieveKnowledgeQuerySchema,
+	registerCandidateMemoryCommandSchema,
+	promoteCandidateMemoryCommandSchema,
 	knowledgeCommandResultSchema,
 } from "./commands";
 export type {
@@ -9,12 +13,18 @@ export type {
 	KnowledgeCommandResult,
 	PublishIndexCommand,
 	RegisterKnowledgeSourceCommand,
+	RevokeDocumentAccessCommand,
+	RetrieveKnowledgeQuery,
+	RegisterCandidateMemoryCommand,
+	PromoteCandidateMemoryCommand,
 } from "./commands";
 export {
 	KNOWLEDGE_EVENT_TYPES,
 	knowledgeEventPayloadSchema,
 	documentIndexedPayloadSchema,
 	chunkEmbeddedPayloadSchema,
+	documentAccessRevokedPayloadSchema,
+	memoryPromotedPayloadSchema,
 } from "./events";
 export type { KnowledgeEventType } from "./events";
 export {
@@ -31,6 +41,7 @@ export {
 	assertKnowledgeEventPayloadSafe,
 	blobRefSchema,
 	chunkIdSchema,
+	contextManifestSchema,
 	dataClassificationSchema,
 	documentIdSchema,
 	documentStatusSchema,
@@ -39,4 +50,11 @@ export {
 	knowledgeSourceIdSchema,
 	knowledgeSourceKindSchema,
 	knowledgeSourceStatusSchema,
+	memoryEntryIdSchema,
+	memoryTierSchema,
+	retrievalHitSchema,
+} from "./types";
+export type {
+	ContextManifest,
+	RetrievalHit,
 } from "./types";

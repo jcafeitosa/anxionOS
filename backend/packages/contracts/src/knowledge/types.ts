@@ -47,6 +47,33 @@ export const aclRefSchema = z.object({
 	aclId: z.string().uuid(),
 	epoch: z.number().int().nonnegative(),
 });
+export const memoryEntryIdSchema = z
+	.string()
+	.regex(/^kn_mem_[0-9a-f-]{36}$/i);
+export const memoryTierSchema = z.enum(["CANDIDATE", "PROMOTED"]);
+export const retrievalHitSchema = z.object({
+	chunkId: chunkIdSchema,
+	documentId: documentIdSchema,
+	documentVersionId: documentVersionIdSchema,
+	contentHash: z.string().min(32).max(128),
+	textPreview: z.string().max(512),
+	score: z.number().min(0).max(1),
+	provenance: z.object({
+		sourceTitle: z.string().max(512),
+		classification: dataClassificationSchema,
+		aclId: z.string().uuid(),
+		aclEpoch: z.number().int().nonnegative(),
+	}),
+});
+export const contextManifestSchema = z.object({
+	manifestId: z.string().uuid(),
+	organizationId: z.string().uuid(),
+	queryHash: z.string().min(32).max(128),
+	hits: z.array(retrievalHitSchema),
+	generatedAt: z.string().datetime(),
+});
+export type RetrievalHit = z.infer<typeof retrievalHitSchema>;
+export type ContextManifest = z.infer<typeof contextManifestSchema>;
 export class KnowledgeContractError extends Error {
 	constructor(message: string) {
 		super(message);

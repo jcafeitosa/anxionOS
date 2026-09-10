@@ -51,7 +51,15 @@ export interface ChunkRecord {
 	indexGenerationId: string;
 	sequence: number;
 	contentHash: string;
+	textContent: string;
 	tokenCount: number;
+}
+export interface RetrievalEmbeddingRecord {
+	chunkId: string;
+	organizationId: string;
+	embeddingSpaceId: string;
+	dimensions: number;
+	vector: number[];
 }
 export interface EmbeddingSpaceRecord {
 	id: string;
@@ -76,6 +84,7 @@ export interface DocumentRepository {
 		documentId: string,
 		organizationId: string,
 	): Promise<DocumentRecord | null>;
+	listActiveByOrganization(organizationId: string): Promise<DocumentRecord[]>;
 	save(record: DocumentRecord): Promise<DocumentRecord>;
 	update(record: DocumentRecord): Promise<DocumentRecord>;
 }
@@ -98,6 +107,7 @@ export interface IndexGenerationRepository {
 export interface ChunkRepository {
 	saveMany(records: ChunkRecord[]): Promise<void>;
 	listByIndexGeneration(indexGenerationId: string): Promise<ChunkRecord[]>;
+	listByDocumentVersion(documentVersionId: string): Promise<ChunkRecord[]>;
 }
 export interface EmbeddingRepository {
 	save(record: {
@@ -109,6 +119,8 @@ export interface EmbeddingRepository {
 		vector: number[];
 	}): Promise<void>;
 	countByIndexGeneration(indexGenerationId: string): Promise<number>;
+	listByOrganization(organizationId: string): Promise<RetrievalEmbeddingRecord[]>;
+	purgeByChunkIds(chunkIds: string[]): Promise<number>;
 }
 export interface EmbeddingSpaceRepository {
 	findById(

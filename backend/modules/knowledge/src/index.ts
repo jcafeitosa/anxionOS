@@ -11,6 +11,26 @@ export {
 	type PublishIndexDeps,
 } from "./application/commands/publish-index";
 export {
+	revokeDocumentAccess,
+	type RevokeDocumentAccessDeps,
+} from "./application/commands/revoke-document-access";
+export {
+	retrieveKnowledge,
+	type RetrieveKnowledgeDeps,
+} from "./application/commands/retrieve-knowledge";
+export {
+	registerCandidateMemory,
+	type RegisterCandidateMemoryDeps,
+} from "./application/commands/register-candidate-memory";
+export {
+	promoteCandidateMemory,
+	type PromoteCandidateMemoryDeps,
+} from "./application/commands/promote-candidate-memory";
+export { sanitizeRetrievalQuery } from "./application/query-sanitizer";
+export { buildContextManifest, recallAtK } from "./application/context-manifest";
+export { cosineSimilarity } from "./application/retrieval-ranking";
+export { createInMemoryMemoryStore } from "./infrastructure/adapters/in-memory-memory-store";
+export {
 	createIngestDocumentWorker,
 	type IngestDocumentWorkerDeps,
 } from "./application/workers/ingest-document-worker";

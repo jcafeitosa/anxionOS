@@ -38,3 +38,35 @@ export function createChunkEmbeddedEvent(input: {
 		payload: input,
 	};
 }
+
+export function createDocumentAccessRevokedEvent(input: {
+	documentId: string;
+	organizationId: string;
+	revokedAt: string;
+	aclEpoch: number;
+}): DomainEventEnvelope {
+	return {
+		eventId: randomUUID(),
+		eventType: KNOWLEDGE_EVENT_TYPES.DOCUMENT_ACCESS_REVOKED,
+		schemaVersion,
+		ownerDomain: KNOWLEDGE_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload: input,
+	};
+}
+
+export function createMemoryPromotedEvent(input: {
+	memoryEntryId: string;
+	organizationId: string;
+	contentHash: string;
+	promotedAt: string;
+}): DomainEventEnvelope {
+	return {
+		eventId: randomUUID(),
+		eventType: KNOWLEDGE_EVENT_TYPES.MEMORY_PROMOTED,
+		schemaVersion,
+		ownerDomain: KNOWLEDGE_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload: input,
+	};
+}
