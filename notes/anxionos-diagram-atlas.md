@@ -273,7 +273,7 @@ Cita: SDD [001](./../brain/project-docs/specs/001-institutional-contract/spec.md
 
 ## Questões abertas
 
-1. Debate serial começa em governance? **Fechada (PC 01 / ANX-351):** M01 fechado; próximo é PC 02 Organization (ANX-352).
+1. Debate serial 01-30? **Fechada em docs:** [indice](./anxionos-pc-serial-index.md). ANX-342 aberto para auditoria.
 2. Não promover a taxonomia 30 a ADR de layout — **reafirmado** CTO: rejeitado 30 pastas. ADR0002 permanece.
 3. Archify de **cada** módulo ainda não existe; este atlas Mermaid é o preenchimento documental. HTML por módulo é follow-up ANX-343 (atlas contínuo, não bloqueia fechar PC 01).
 
