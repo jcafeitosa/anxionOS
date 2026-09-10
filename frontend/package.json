@@ -12,7 +12,7 @@
     "astro": "astro",
     "test:e2e": "playwright test",
     "test:unit": "node --experimental-strip-types --test src/lib/console-access.test.ts src/lib/owner-dashboard.test.ts src/lib/archify-platform.test.ts src/lib/partner-console.test.ts",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@astrojs/node": "^11.1.5",
@@ -35,11 +35,10 @@
     "esbuild": true
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.10",
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.63.0",
     "@types/node": "^26.5.0",
-    "typescript": "^7.0.2"
+    "typescript": "7.0.2"
   },
   "overrides": {
     "typescript": "7.0.2"
