@@ -3,7 +3,11 @@
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
-	"workspaces": ["apps/*", "packages/*", "modules/*"],
+	"workspaces": [
+		"apps/*",
+		"packages/*",
+		"modules/*"
+	],
 	"scripts": {
 		"dev": "bun run --filter @anxionos/api dev",
 		"build": "bun run --filter '*' build",
@@ -53,6 +57,7 @@
 		"@anxionos/operations": "workspace:*",
 		"@anxionos/simulation": "workspace:*",
 		"@anxionos/partners": "workspace:*",
-		"@anxionos/adapter-gateway": "workspace:*"
+		"@anxionos/adapter-gateway": "workspace:*",
+		"@anxionos/agents": "workspace:*"
 	}
 }

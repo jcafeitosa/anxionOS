@@ -2,31 +2,19 @@
 	"files": [],
 	"references": [
 		{
-			"path": "./apps/workers"
-		},
-		{
 			"path": "./apps/api"
 		},
 		{
-			"path": "./packages/contracts"
-		},
-		{
-			"path": "./packages/eventing"
-		},
-		{
-			"path": "./packages/database"
-		},
-		{
-			"path": "./packages/observability"
-		},
-		{
-			"path": "./packages/secrets"
+			"path": "./apps/workers"
 		},
 		{
 			"path": "./modules/accounting"
 		},
 		{
 			"path": "./modules/adapter-gateway"
+		},
+		{
+			"path": "./modules/agents"
 		},
 		{
 			"path": "./modules/audit"
@@ -90,6 +78,21 @@
 		},
 		{
 			"path": "./modules/strategies"
+		},
+		{
+			"path": "./packages/contracts"
+		},
+		{
+			"path": "./packages/database"
+		},
+		{
+			"path": "./packages/eventing"
+		},
+		{
+			"path": "./packages/observability"
+		},
+		{
+			"path": "./packages/secrets"
 		}
 	],
 	"compilerOptions": {
