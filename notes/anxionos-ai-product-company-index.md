@@ -59,6 +59,13 @@ tags:
 | §25 Self-development | `notes/anxionos-self-development-loop.md` |
 | §12 Intelligence | `notes/anxionos-product-intelligence-loop.md` |
 
+## Atlas visual
+
+| Doc | Conteúdo |
+| --- | --- |
+| [Atlas sistema](./anxionos-diagram-atlas.md) | Plataforma, PC 12 etapas, graph cognitivo, G0–G7, Archify |
+| [Atlas 23 módulos](./anxionos-diagram-atlas-modules.md) | Mermaid por módulo físico ADR0002 |
+
 ## Capacidades compostas
 
 | Doc | Issue |
