@@ -8,6 +8,22 @@ type: debate
 **Issue:** ANX-392  
 **Engines ADR0004:** PostgreSQL autoritativo; Neo4j só via graph projector; **sem** Timescale e **sem** pgvector neste módulo; SQLite **não** é AgentVersion autoritativo.
 
+## In / Out (R5)
+
+**In:** PG `agents_*` + ObjectRef. **Out:** modelo documental. Sem SQLite AgentVersion. Sem migration ST08.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`.
+
+## Ownership (storage)
+
+| Superfície | Dono |
+| --- | --- |
+| agents_* | **agents** |
+| graph:agents:v1 | **graph** |
+| adapter-gateway | **KEEP** |
+
 ## Princípios de autoridade
 
 | Princípio | Decisão |

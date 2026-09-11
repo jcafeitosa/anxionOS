@@ -5,7 +5,23 @@ type: debate
 
 **Rodada:** R8  
 **Data:** 2026-09-11  
-**Issue:** ANX-392
+**Issue:** ANX-392 · pack ANX-389
+
+## In / Out (R8)
+
+**In:** D-AGT-001–007. **Out:** este log. **Não** fecha ANX-389. Sem ST08 live.
+
+## Non-goals
+
+Não spec `accepted`. Não ANX-342/389 `done`.
+
+## Ownership (log)
+
+| Superfície | Dono |
+| --- | --- |
+| Agent / AgentVersion / Skill / Binding / BrainFacade | **agents** |
+| Task / Run | **orchestration** |
+| adapter-gateway | **KEEP** |
 
 ## Tabela consolidada
 

@@ -8,6 +8,24 @@ type: debate
 **Issue:** ANX-392  
 **Pré-requisito:** [R03-domain-sketch.md](./R03-domain-sketch.md) · [structure R04](../../structure-debate/agents/R04-contracts-events.md)
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R4)
+
+**In:** superfície pública Agent/AgentVersion/Skill/Binding/BrainFacade. **Out:** `agents.*` eventos. **Não** Task/Run (`orchestration`). Sem secrets em payload.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`.
+
+## Ownership (contratos)
+
+| Superfície | Dono |
+| --- | --- |
+| Agent / AgentVersion / Skill / Binding / BrainFacade | **agents** |
+| Task / Run | **orchestration** |
+| adapter-gateway | **KEEP** |
+
 ## Participantes
 
 Executor, Code Review, Arquiteto, Crítico, Security, QA, Red Team, Orquestrador.

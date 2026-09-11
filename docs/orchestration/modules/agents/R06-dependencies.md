@@ -5,7 +5,25 @@ type: debate
 
 **Rodada:** R6  
 **Data:** 2026-09-11  
-**Issue:** ANX-392
+**Issue:** ANX-392 · pack ANX-389
+
+## In / Out (R6)
+
+**In:** PrincipalLookup; AgencyScopePort; T01; GraphContextPort read; eventing.
+
+**Out:** ports públicos. Sem neo4j-driver. Sem mutate Goal/Run.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`.
+
+## Ownership (dependências)
+
+| Superfície | Dono |
+| --- | --- |
+| AgentVersion | **agents** |
+| Task/Run | **orchestration** |
+| adapter-gateway | **KEEP** |
 
 ## Decisões-chave
 

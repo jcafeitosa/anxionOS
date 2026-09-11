@@ -5,7 +5,25 @@ type: debate
 
 **Rodada:** R7  
 **Data:** 2026-09-11  
-**Issue:** ANX-392
+**Issue:** ANX-392 · pack ANX-389
+
+## In / Out (R7)
+
+**In:** publish sem T01, PII em version, brain bypass, prompt injection, skill injection.
+
+**Out:** R-AGT-*. Sem ST08 live.
+
+## Non-goals
+
+Não spec `accepted`. Não ANX-342/389 `done`.
+
+## Ownership (riscos)
+
+| Superfície | Dono |
+| --- | --- |
+| AgentVersion / T01 pré-publish | **agents** |
+| Goal/Run | **orchestration** |
+| adapter-gateway | **KEEP** |
 
 ## Registro de riscos
 

@@ -6,7 +6,25 @@ type: debate
 **Rodada:** R9  
 **Data:** 2026-09-11  
 **Issue debate:** ANX-392  
-**Implementação:** issue distinta pós-greenlight Owner — **não** neste pack.
+**Implementação:** issue distinta pós-greenlight Owner — **não** neste pack. Pack ANX-389 — não `done`.
+
+## In / Out (R9)
+
+**In:** plano G1 futuro (não neste pack).
+
+**Out:** pré-requisitos. **Não** ST08. **Não** ANX-389 `done`.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`.
+
+## Ownership (plano)
+
+| Superfície | Dono |
+| --- | --- |
+| schema agents_* | **agents** |
+| graph:agents:v1 | **graph** |
+| adapter-gateway | **KEEP** |
 
 ## Pré-requisitos G1 futuro
 
