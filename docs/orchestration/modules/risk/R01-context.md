@@ -1,68 +1,82 @@
 ---
 type: debate
 ---
-
 # R01 — Contexto: `modules/risk`
 
 **Componente:** modules/risk  
-**Rodada:** R1 — Inventário documental e de código  
+**Rodada:** R1 — Inventário documental  
 **Pacote SDD:** P06  
-**Data:** 2026-09-07  
-**Issue debate estrutura:** ANX-42
+**Data:** 2026-09-11  
+**Issue pack:** ANX-389 · debate estrutura ANX-42 · debate módulo **ANX-99** · impl futura **ANX-100** (não neste pack) · gate ANX-58  
+**Callers:** [R02-boundaries.md](./R02-boundaries.md) · [ROUNDS.md](./ROUNDS.md).
+
+## Objetivo da rodada
+
+Inventariar políticas/limites de risco, checks e kill switch. D-GOV-010 vive **aqui** (P06). Spec 003 **draft**. ST08 **0/23**. SIMULATED|PAPER only v1. Não stamp `accepted`. Não done ANX-342 / ANX-389. Não G1.
 
 ## Propósito
 
-Políticas/limites de risco, checks e kill switch — RiskPolicy como PolicyVersion(kind=RISK).
+Risk **avalia** TradeIntent (hash) e exposição canônica, **emite** RiskPermit ou DENY fail-closed, e **opera** kill switch + `riskEpoch`. **Não** executa ordem. **Não** reserva capital. **Não** é MandateVersion (governance).
 
-## O que possui / não possui
+## In / Out (R1)
 
-### Possui (donos de estado ou composição)
+**In:** `decisions.intent.submitted.v1`; `portfolios.position.updated.v1`; `capital.reservation.created.v1` (consulta); preços asOf de market-data; PolicyReference de governance (não o corpo até P06 LimitPolicy).
 
-- RiskPolicy
-- RiskCheck
-- limites
-- epochs risco
-- kill switch
+**Out:** `risk.check.completed.v1`; `risk.permit.issued.v1`; `risk.epoch.bumped.v1`; `risk.kill_switch.activated.v1`. LimitPolicy / ExposureSnapshot / RiskCheckResult / RiskPermit em PG. Projector `graph:risk:v1`.
 
-### Não possui (fronteiras ADR0002 / brain)
+**Não sai:** `execution.order.*`; mutate de saldo; apply de grant.
 
-- Grants genéricos — governance (mantém contrato PolicyVersion)
-- Execução — execution (revalida)
+## O módulo POSSUI
+
+LimitPolicy (PolicyVersion kind=RISK), RiskCheck / RiskCheckResult, limites, riskEpoch, kill switch, RiskPermit, ExposureSnapshot.
+
+## O módulo NÃO POSSUI (ownership nomeado)
+
+| Item | Dono |
+| --- | --- |
+| Grants genéricos / MandateVersion | **governance** |
+| TradeIntent | **decisions** |
+| Ordens / fills | **execution** (revalida permit) |
+| Reserva / saldo | **capital** |
+| Posição canônica | **portfolios** |
+| Preços | **market-data** |
+
+## Non-goals
+
+- REAL/live v1 (schema reject).
+- SQLite como estado de risco.
+- LLM override de DENY determinístico.
+- Post-trade S4 defer.
+- Migration / ST08 live.
 
 ## Dependências
 
-| Direção | Componentes / artefatos |
+| Direção | Componentes |
 | --- | --- |
-| **Upstream** | governance, portfolios, market-data, decisions |
-| **Downstream** | execution, decisions, graph (explicação), operations (incidentes) |
+| Upstream | governance, portfolios, market-data, decisions, capital (consulta) |
+| Downstream | execution, decisions, graph, operations (incidentes), audit |
 
 ## Armazenamento
 
-PG: políticas, checks, kill switch. Neo4j: restrições, violações. SQLite: não validar risco com estado local antigo.
+PG políticas/checks/permits/kill switch. Neo4j restrições via projector. SQLite **não** validar risco. ST08 0/23.
 
-Fonte: `brain/notes/anxionos-storage-ownership.md`.
+## Estado do código
 
-## Estado do código atual
+**Ausente** como bounded context completo.
 
-**Ausente.**
+## Oráculos (não executados)
 
-## Perguntas abertas para debate
+| ID | Gate | Esperado |
+| --- | --- | --- |
+| G3-RK-S2-01 | G3 | check PASS emite permit |
+| G3-RK-S2-02 | G3 | CONFIG_REQUIRED deny |
+| G5-RK-01 | G5 | cross-tenant RK_CROSS_TENANT |
 
-- Kill switch: escopo global vs tenant vs strategy?
-- RiskCheck síncrono na rota execution vs async worker?
-- PolicyVersion kind=RISK: extensão governance ou tipo próprio?
-- Limites pré-trade vs post-trade: dois agregados?
+```mermaid
+flowchart LR
+  dec[decisions.intent] --> rsk[risk]
+  rsk -->|permit.issued| cap[capital]
+  rsk -->|permit.issued| ex[execution]
+```
 
-## Fontes
-
-| Documento | Caminho |
-| --- | --- |
-| Estrutura modular (aceita) | `brain/notes/anxionos-backend-structure.md` |
-| Mapa de armazenamento | `brain/notes/anxionos-storage-ownership.md` |
-| SDD institucional | `brain/project-docs/specs/001-institutional-contract/spec.md` |
-| ADR0002 layout modular | `brain/project-docs/decisions/0002-adopt-modular-backend-layout.md` |
-| Playbook orquestração | `docs/orchestration/module-development-playbook.md` |
-
-## Próxima rodada
-
-→ **R02 — Fronteiras** (`R02-boundaries.md`) após consenso sobre inventário R1.
+→ **R02** ([R02-boundaries.md](./R02-boundaries.md))

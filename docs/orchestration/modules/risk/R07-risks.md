@@ -1,32 +1,42 @@
 ---
 type: debate
 ---
-
 # R07 — Riscos: `modules/risk`
 
-**Issue:** ANX-99
+**Issue:** ANX-99 · pack ANX-389 · gate ANX-58  
+**Callers:** [R06-dependencies.md](./R06-dependencies.md) · [R08-decision-log.md](./R08-decision-log.md).
+
+## In / Out (R7)
+
+**In scope:** bypass de limites, permit stale, cross-tenant exposure, double consume, SQLite local, REAL bypass, LLM override DENY, kill switch estreito, reserva sem permit.
+
+**Out of scope:** ameaça de venue HTTP (`execution` infra); P&L (`performance`); Twin (`simulation`).
+
+## Non-goals
+
+Não “mitigar” com stub de permit PASS. Não REAL v1.
+
+## Registro
 
 | ID | Risco | Sev | Mitigação |
 | --- | --- | ---: | --- |
-| R-RK-01 | **Bypass limits** — ordem sem check ou métricas omitidas | 20 | RK-R02-INV-09 CONFIG_REQUIRED; RK-R03-INV-02 permit só em PASS; execution gate |
-| R-RK-02 | **Stale riskEpoch** — permit/check após policy revoke ou kill switch | 20 | RK-R03-INV-06; isRiskPermitStale; consumer risk.epoch.bumped |
-| R-RK-03 | **Cross-tenant exposure** — portfolioId de outra org no check | 20 | RK-R02-INV-12; org scope queries; G5-RK-01 |
-| R-RK-04 | Double consume RiskPermit | 18 | singleUse + status CONSUMED |
-| R-RK-05 | Stale ExposureSnapshot | 16 | valuationAsOf freshness; RK_STALE_EXPOSURE |
-| R-RK-06 | SQLite risk local dev | 18 | RK-R05-05 CI |
+| R-RK-01 | Bypass limits — ordem sem check | 20 | CONFIG_REQUIRED; permit só em PASS |
+| R-RK-02 | Stale riskEpoch pós kill switch | 20 | isRiskPermitStale; epoch.bumped |
+| R-RK-03 | Cross-tenant exposure | 20 | org scope; G5-RK-01 |
+| R-RK-04 | Double consume RiskPermit | 18 | singleUse CONSUMED |
+| R-RK-05 | Stale ExposureSnapshot | 16 | valuationAsOf |
+| R-RK-06 | SQLite risk local | 18 | CI fail |
 | R-RK-07 | REAL mode bypass v1 | 10 | schema reject |
-| R-RK-08 | LLM override deterministic DENY | 14 | explanationRef only |
-| R-RK-09 | Kill switch scope too narrow | 12 | hierarchy GLOBAL→ORG→PORTFOLIO |
-| R-RK-10 | Capital reserve sem risk permit | 19 | capital gate on risk.permit.issued |
+| R-RK-08 | LLM override DENY | 14 | explanationRef only |
+| R-RK-09 | Kill switch scope narrow | 12 | GLOBAL→ORG→PORTFOLIO |
+| R-RK-10 | Capital reserve sem permit | 19 | capital gate on permit.issued |
 
-## Adversarial (G5)
+## Oráculos G5
 
 | ID | Cenário | Esperado |
 | --- | --- | --- |
-| G5-RK-01 | Check com portfolioId org-A e intent org-B | RK_CROSS_TENANT reject |
-| G5-RK-02 | PASS emitido; kill switch ativa; submit com permit antigo | RK_PERMIT_STALE |
-| G5-RK-03 | LimitPolicy revogada; riskEpoch bumped; reserve com permit epoch antigo | RK_POLICY_STALE |
+| G5-RK-01 | portfolioId org-A + intent org-B | RK_CROSS_TENANT |
+| G5-RK-02 | PASS depois kill switch | RK_PERMIT_STALE |
+| G5-RK-03 | policy revogada + epoch bump | RK_POLICY_STALE |
 
 Top 5 → R08.
-
-→ **R08** ([R08-decision-log.md](./R08-decision-log.md))
