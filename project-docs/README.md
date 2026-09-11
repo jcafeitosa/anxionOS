@@ -1,3 +1,7 @@
+---
+type: guide
+---
+
 # project-docs (redirect)
 
 **Canonical product documentation lives in `brain/` (OpenKnowledge, local-only).**

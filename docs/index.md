@@ -1,3 +1,7 @@
+---
+type: guide
+---
+
 # Documentação do projeto anxionOS
 
 Índice central da documentação **versionada neste repositório**. Entradas de convenção GitHub permanecem na raiz; detalhes operacionais vivem aqui em `docs/`.

@@ -1,3 +1,7 @@
+---
+type: reference
+---
+
 # ANX-146 Slice A Backfill Core — Implementation Report
 
 ## Scope
