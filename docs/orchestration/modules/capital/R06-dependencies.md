@@ -7,6 +7,18 @@ type: debate
 **Issues:** ANX-91 · ANX-29 · ANX-30 · ANX-58 · ANX-89 · pack ANX-389  
 **Callers:** [R05-storage-pg.md](./R05-storage-pg.md) · [R07-risks.md](./R07-risks.md) · [ROUNDS.md](./ROUNDS.md)
 
+## In / Out (R6)
+
+**In:** AgencyScope; PrincipalLookup; TraversalEvaluator T01 `capital.*`; MarketDataPort FX as-of; eventing.
+
+**Out:** `capital.*` para risk/decisions/portfolios/audit/graph. Sem mutate Grant, ledger ou Position.
+
+## Non-goals
+
+D-GOV-010 = **risk P06**. Sem import `governance/infrastructure/**` nem `accounting/infrastructure/**`. Sem neo4j-driver.
+
+**KEEP adapter-gateway**.
+
 ## Ownership
 
 capital: CapitalAccount, Allocation, CapitalReservation, BalanceView. Grant entidade = **governance**. Ledger = **accounting**. Posição = **portfolios**.

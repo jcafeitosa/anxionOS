@@ -7,6 +7,16 @@ type: debate
 **Issue:** ANX-91 · pack ANX-389  
 **Callers:** [R06-dependencies.md](./R06-dependencies.md) · [R08-decision-log.md](./R08-decision-log.md) · [ROUNDS.md](./ROUNDS.md)
 
+## In / Out (R7)
+
+**In scope:** double allocation FI02, grant revogado mid-flight, cross-tenant, REAL schema-reject, SQLite saldo.
+
+**Out of scope:** D-GOV-010 (`risk` P06); venue fills (`execution`); ledger mutation (`accounting`).
+
+## Non-goals
+
+Não mitigar com stub de reserva. Não aceitar REAL v1.
+
 ## Debate R7
 
 **Arquiteto:** FI02 (double allocation) exige serializable + unique — não retry na API.

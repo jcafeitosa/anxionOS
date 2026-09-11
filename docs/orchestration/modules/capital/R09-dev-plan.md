@@ -5,7 +5,19 @@ status: draft
 
 # R09 — Plano de implementação: `modules/capital`
 
-**Issue:** ANX-91 · impl: **ANX-92** · gate: ANX-58
+**Issue:** ANX-91 · impl: **ANX-92** · gate: ANX-58 · pack ANX-389
+
+## In / Out (R9)
+
+**In scope (G1 futuro):** schema `capital_*`, contracts, reserve/release, HTTP available, projector stub.
+
+**Out of scope:** Grant (`governance`); ledger (`accounting`); Position (`portfolios`); REAL; spec accepted; ST08 migration agora; ANX-342/389 done.
+
+## Non-goals P1
+
+Só G0 documental neste pack. Não G7 ANX-92.
+
+**KEEP adapter-gateway**.
 
 ## Slices P06
 

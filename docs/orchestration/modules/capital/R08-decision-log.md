@@ -5,7 +5,27 @@ status: draft
 
 # R08 — Decision log: `modules/capital`
 
-**Issue:** ANX-91 · gate: ANX-58
+**Issue:** ANX-91 · gate: ANX-58 · pack ANX-389
+
+## In / Out (R8)
+
+**In scope:** ownership CapitalAccount/Allocation/Reservation; PG vs grafo; SIMULATED|PAPER; KEEP adapter-gateway.
+
+**Out of scope:** spec accepted; ANX-342 done; ST08 live; G7 ANX-92; ANX-389 `done`.
+
+## Non-goals
+
+Não stamp `accepted`. Não fake ST08.
+
+## Ownership consolidado
+
+| Superfície | Dono |
+| --- | --- |
+| CapitalAccount / Allocation / Reservation / BalanceView | **capital** |
+| Grant | **governance** |
+| Ledger | **accounting** |
+| Position | **portfolios** |
+| adapter-gateway | **KEEP** |
 
 | ID | Decisão | Status |
 | --- | --- | --- |
