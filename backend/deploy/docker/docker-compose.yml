@@ -479,6 +479,63 @@ services:
           memory: 64M
     restart: unless-stopped
 
+  mt5-sandbox:
+    build:
+      context: ./engines
+      dockerfile: mt5/Dockerfile
+    image: anxionos/mt5-sandbox:0.1.0-anx180-s1
+    profiles:
+      - engines-sandbox
+    environment:
+      ENGINE_MODE: ${ENGINE_MODE:-SIMULATED}
+      ENGINE_SANDBOX_AUTH_TOKEN: ${ENGINE_SANDBOX_AUTH_TOKEN:?ENGINE_SANDBOX_AUTH_TOKEN required for engines-sandbox}
+      MT5_SANDBOX_PORT: ${MT5_SANDBOX_PORT:-9059}
+      MT5_SANDBOX_VERSION: 0.1.0-anx180-s1
+    ports:
+      - "${MT5_SANDBOX_PORT:-9059}:9059"
+    volumes:
+      - mt5-sandbox-data:/data
+    networks:
+      - anxion-engines-sandbox
+    read_only: true
+    tmpfs:
+      - /tmp:size=16M,mode=1777
+    user: "10001:10001"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--spider",
+          "-q",
+          "http://localhost:9059/health",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    labels:
+      anxion.issue: ANX-180
+      anxion.slice: S1
+      anxion.engine: mt5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 64M
+    restart: unless-stopped
+
 volumes:
   pgdata:
   neo4jdata:
@@ -489,3 +546,4 @@ volumes:
   xch-sandbox-data:
   nts-sandbox-data:
   cfs-sandbox-data:
+  mt5-sandbox-data:
