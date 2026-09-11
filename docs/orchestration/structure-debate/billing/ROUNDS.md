@@ -1,3 +1,7 @@
+---
+type: debate
+---
+
 # Rodadas — `modules/billing`
 
 | Rodada | Artefato | Status |
