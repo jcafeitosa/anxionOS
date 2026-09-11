@@ -1,3 +1,6 @@
+---
+type: spec
+---
 
 ## Completude P1 — ownership, eventos, oráculos (ANX-389)
 
