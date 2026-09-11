@@ -1,10 +1,30 @@
 ---
 type: debate
 ---
-
 # R09 — Plano de implementação: `modules/governance`
 
-**Rodada:** R9 · **Data:** 2026-09-08 · **Issue:** ANX-40 · **Impl:** ANX-30
+**Rodada:** R9  
+**Data:** 2026-09-11 · **Issue:** ANX-40 · **Impl:** ANX-30 · pack ANX-389  
+**Callers:** [R08-decision-log.md](./R08-decision-log.md) · [R10-g0-handoff.md](./R10-g0-handoff.md). Plano **draft**.
+
+## In / Out (R9)
+
+**In:** slices S1–S6; matriz G3-GOV-01–05; pré-requisitos identity/eventing/organizations.
+
+**Out:** ordem de slices. **Não** ST08. **Não** ANX-389 `done`. D-GOV-010 defer P06.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`. Não G7 ANX-30 neste pack documental.
+
+## Ownership (plano)
+
+| Superfície | Dono |
+| --- | --- |
+| schema + IssueGrant/RevokeGrant | **governance** (ANX-30) |
+| T01 adapter | **graph** (S5) |
+| PrincipalLookup | **identity** |
+| adapter-gateway | **KEEP** |
 
 ## Pré-requisitos G1
 
@@ -48,4 +68,4 @@ backend/modules/governance/src/
 
 ## Saída R9
 
-✅ Plano G1 para ANX-30.
+Plano G1 para ANX-30. Pack ANX-389 **não** `done`.

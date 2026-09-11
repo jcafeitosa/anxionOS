@@ -1,15 +1,29 @@
 ---
 type: debate
 ---
-
 # R05 — Armazenamento: `modules/governance`
 
 **Rodada:** R5 — PostgreSQL, journal/outbox, projeção Neo4j  
-**Data:** 2026-09-08 · **Issue:** ANX-40
+**Data:** 2026-09-11 · **Issue:** ANX-40 · pack ANX-389  
+**Callers:** [R04-contracts.md](./R04-contracts.md) · [R06-dependencies.md](./R06-dependencies.md). **Sem migration ST08.** ST08 **0/23**.
 
-## Objetivo
+## In / Out (R5)
 
-Modelo de persistência autoritativo: tabelas PG, command journal, outbox via `@anxionos/eventing`, projeção Neo4j (graph), sem SQLite para permissões.
+**In:** tabelas `governance_*` + command_journal + authority_epochs; UoW + outbox.
+
+**Out:** modelo documental. **Não** Neo4j writer. Sem SQLite permissões. Sem FK física cross-module.
+
+## Non-goals
+
+Não RLS P09. Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`.
+
+## Ownership (storage)
+
+| Superfície | Dono |
+| --- | --- |
+| governance_grants / delegations / mandates / proposals / approvals / epochs / journal | **governance** |
+| GRANT/MANDATE edges | **graph** projector |
+| adapter-gateway | **KEEP** |
 
 ## Princípios
 
@@ -49,4 +63,4 @@ Estado agregado + command_journal + appendJournal + enqueueOutbox na mesma trans
 
 ## Saída R5
 
-✅ Modelo v1 fechado para R6.
+Modelo v1 para R6. **Não** autoriza G1 neste pack.

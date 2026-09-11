@@ -1,10 +1,31 @@
 ---
 type: debate
 ---
-
 # R06 — Dependências: `modules/governance`
 
-**Rodada:** R6 · **Data:** 2026-09-08 · **Issue:** ANX-40
+**Rodada:** R6  
+**Data:** 2026-09-11 · **Issue:** ANX-40 · pack ANX-389  
+**Callers:** [R05-storage.md](./R05-storage.md) · [R07-risks.md](./R07-risks.md).
+
+## In / Out (R6)
+
+**In:** PrincipalLookup (identity); membership.* consumers (organizations); eventing; contracts; T01 via adapter (graph).
+
+**Out:** TraversalEvaluator síncrono (orchestration); grant/epoch events → decisions/execution; ChangeProposal → simulation. Sem mutate AgentVersion, Goal/Run, PolicyVersion RISK.
+
+## Non-goals
+
+D-GOV-010 = **risk P06**. Sem import `organizations/infrastructure/**`, `graph/infrastructure/**`, `risk/infrastructure/**`. Sem spec `accepted`. Sem ST08 live. Sem ANX-342/389 `done`.
+
+## Ownership (dependências)
+
+| Superfície | Dono |
+| --- | --- |
+| Grant / AuthorityEpoch | **governance** |
+| T01 kernel | **graph** |
+| Principal | **identity** |
+| PolicyVersion RISK | **risk** |
+| adapter-gateway | **KEEP** |
 
 ## Decisões-chave
 
@@ -44,4 +65,4 @@ type: debate
 
 ## Saída R6
 
-✅ Mapa v1 fechado para R7.
+Mapa v1 para R7.

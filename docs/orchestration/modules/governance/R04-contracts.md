@@ -1,25 +1,12 @@
 ---
 type: debate
 ---
-
 # R04 — Contratos, API e eventos: `modules/governance`
 
 **Rodada:** R4 — Superfície pública, contratos e API sketch  
-**Data:** 2026-09-08  
-**Issue:** ANX-40 (debate) · ANX-30 (implementação)
-
-## Participantes
-
-| Papel | Agente |
-| --- | --- |
-| Executor | code-architect |
-| Code Review | code-reviewer |
-| Arquiteto | architect |
-| Crítico | critic-reviewer |
-
-## Objetivo da rodada
-
-Definir superfície pública antes de armazenamento (R5) e dependências (R6).
+**Data:** 2026-09-11  
+**Issue:** ANX-40 (debate) · ANX-30 (implementação) · pack ANX-389  
+**Callers:** [R03-domain-sketch.md](./R03-domain-sketch.md) · [R05-storage.md](./R05-storage.md).
 
 ## Convenções transversais
 
@@ -29,7 +16,28 @@ Definir superfície pública antes de armazenamento (R5) e dependências (R6).
 | `eventType` | `governance.<aggregate>.<action>.v1` |
 | Idempotência | `Idempotency-Key` → `commandId` |
 
-### Eventos v1
+**KEEP adapter-gateway** se já exportado.
+
+## In / Out (R4)
+
+**In:** POST/DELETE/GET grants; POST change-proposals; POST `/v1/governance/authorization/can` (evaluateT01). Timeout T01 2s → DENY.
+
+**Out:** `governance.grant.*` / `change_proposal.submitted` / `approval.resolved` / `authority_epoch.bumped`. **Não** PolicyVersion RISK (`risk`). **Não** T01 kernel (`graph`). Sem secrets.
+
+## Non-goals
+
+Não D-GOV-010 enforcement cross-risk neste módulo (defer P06). Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`. Não Neo4j driver no módulo.
+
+## Ownership (contratos)
+
+| Superfície | Dono |
+| --- | --- |
+| Grant / Delegation / Mandate / ChangeProposal / Approval / AuthorityEpoch | **governance** |
+| PolicyVersion RISK / kill switch | **risk** |
+| T01 kernel | **graph** |
+| adapter-gateway | **KEEP** |
+
+## Eventos v1
 
 | eventType | Campos principais |
 | --- | --- |
@@ -39,7 +47,7 @@ Definir superfície pública antes de armazenamento (R5) e dependências (R6).
 | `governance.approval.resolved.v1` | `approvalId`, `decision` |
 | `governance.authority_epoch.bumped.v1` | `scopeId`, `epoch` |
 
-### REST sketch
+## REST sketch
 
 | Método | Rota | Ação |
 | --- | --- | --- |
@@ -49,10 +57,10 @@ Definir superfície pública antes de armazenamento (R5) e dependências (R6).
 | POST | `/v1/agencies/:agencyId/change-proposals` | SubmitChangeProposal |
 | POST | `/v1/governance/authorization/can` | evaluateT01 |
 
-### Port público
+## Port público
 
 `TraversalEvaluator.evaluateT01` — adapter → graph kernel; timeout 2s → DENY.
 
 ## Saída R4
 
-✅ Contratos v1 aprovados para R5.
+Contratos v1 para R5 (debate). Spec **não** `accepted`.

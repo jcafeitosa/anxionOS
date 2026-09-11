@@ -11,6 +11,23 @@ type: debate
 
 Consolidar P1 neste diretório. Structure-debate permanece histórico. **Não** reabre ADR0001 (proposto). Spec 001 **draft**. Pack ≠ G7 código. ANX-342 permanece `todo`.
 
+## In / Out (R8)
+
+**In:** D-GR / GK-R02 / P1-GRP (registry T01–T03, Neo4j adapter exclusivo, inbox, poison, projectionPending, ST08 0/23).
+
+**Out:** este log. **Não** promove spec. **Não** fecha ANX-389. Sem ST08 live.
+
+## Non-goals
+
+Não Cypher em apps. Não SQLite institucional. Não 24º gateway. Não spec `accepted`. Não ANX-342/389 `done`.
+
+**KEEP adapter-gateway**.
+
+## Ownership
+
+Graph: catálogo, inbox, rebuild, adapter Neo4j, dispatcher.
+**Não:** grants, capital, orders, Goal/Run, AgentVersion, journal dos donos.
+
 ## Decisões P1 (canônicas neste pack)
 
 | ID | Decisão | Status |

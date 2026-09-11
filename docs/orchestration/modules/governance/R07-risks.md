@@ -1,10 +1,29 @@
 ---
 type: debate
 ---
-
 # R07 — Riscos: `modules/governance`
 
-**Rodada:** R7 · **Data:** 2026-09-08 · **Issue:** ANX-40 · **GK03:** revogação + epoch
+**Rodada:** R7  
+**Data:** 2026-09-11 · **Issue:** ANX-40 · **GK03:** revogação + epoch · pack ANX-389  
+**Callers:** [R06-dependencies.md](./R06-dependencies.md) · [R08-decision-log.md](./R08-decision-log.md).
+
+## In / Out (R7)
+
+**In:** grant escalation, stale ALLOW, membership.revoked leak, T01 timeout ALLOW, HIERARCHY_MODE sem Owner.
+
+**Out:** R-GOV-01–05 + G5. Sem Red Team em grants de produção. Sem ST08 live.
+
+## Non-goals
+
+Não spec `accepted`. Não ANX-342/389 `done`. Não tratar timeout como ALLOW.
+
+## Ownership (riscos)
+
+| Superfície | Dono |
+| --- | --- |
+| Grant / epoch / GOV_* rejects | **governance** |
+| T01 cache | **graph** |
+| adapter-gateway | **KEEP** |
 
 ## Top 5 riscos
 
@@ -24,4 +43,4 @@ type: debate
 
 ## Saída R7
 
-✅ Registro fechado para R8.
+Registro para R8. Debate — não `accepted` spec.
