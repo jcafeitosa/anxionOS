@@ -88,6 +88,8 @@ Resposta esperada:
 }
 ```
 
+Drill de backup/restore (ANX-169, destino isolado): [backup-restore-drill.md](./backup-restore-drill.md).
+
 ### Infra local (Docker)
 
 Subir Postgres, NATS (JetStream) e Neo4j:
