@@ -26,6 +26,25 @@ describe("tenant context validation", () => {
 			TenantContextError,
 		);
 	});
+
+	test("rejects nil UUID and v6+ accepted by Zod .uuid() (ANX-405)", () => {
+		for (const tenantId of [
+			"00000000-0000-0000-0000-000000000000",
+			"6ba7b810-9dad-61d1-80b4-00c04fd430c8",
+		]) {
+			expect(() => validateTenantContext({ tenantId })).toThrow(
+				TenantContextError,
+			);
+		}
+	});
+
+	test("accepts RFC 4122 v4 test identifiers used in integration fixtures", () => {
+		expect(() =>
+			validateTenantContext({
+				tenantId: "00000000-0000-4000-8000-000000000001",
+			}),
+		).not.toThrow();
+	});
 });
 
 describe("rls policy helpers", () => {

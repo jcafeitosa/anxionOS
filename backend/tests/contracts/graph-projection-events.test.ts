@@ -8,8 +8,15 @@ import {
 	PRODUCT_GRAPH_EVENT_TYPES,
 	agentRoleAssignedPayloadSchema,
 	decisionRecordedPayloadSchema,
+	graphQueryEnvelopeSchema,
+	nodeKeySchema,
 	workItemStatusChangedPayloadSchema,
 } from "@anxionos/contracts/graph";
+
+const VALID_UUID = "a1234567-89ab-4def-8123-456789abcdef";
+const NIL_UUID = "00000000-0000-0000-0000-000000000000";
+const V6_UUID = "6ba7b810-9dad-61d1-80b4-00c04fd430c8";
+const INVALID_VARIANT = "ffffffff-ffff-ffff-ffff-ffffffffffff";
 
 describe("graph projection event contracts (ANX-277)", () => {
 	test("PRODUCT_GRAPH_EVENT_TYPES uses versioned event names", () => {
@@ -72,5 +79,66 @@ describe("graph projection event contracts (ANX-277)", () => {
 			revision: 1,
 		});
 		expect(parsed.status).toBe("active");
+	});
+});
+
+describe("graph institutional UUID boundaries (ANX-444 batch 8)", () => {
+	test("nodeKeySchema rejects nil scopeId", () => {
+		expect(
+			nodeKeySchema.safeParse({
+				scopeType: "AGENCY",
+				scopeId: NIL_UUID,
+				type: "WorkItem",
+				id: VALID_UUID,
+			}).success,
+		).toBe(false);
+	});
+
+	test("workItemStatusChangedPayloadSchema rejects v6+ companyId", () => {
+		expect(
+			workItemStatusChangedPayloadSchema.safeParse({
+				workItemId: VALID_UUID,
+				companyId: V6_UUID,
+				status: "in_progress",
+				revision: 1,
+			}).success,
+		).toBe(false);
+	});
+
+	test("decisionRecordedPayloadSchema rejects non-RFC variant scopeId", () => {
+		expect(
+			decisionRecordedPayloadSchema.safeParse({
+				decisionId: VALID_UUID,
+				scopeId: INVALID_VARIANT,
+				status: "accepted",
+				revision: 1,
+			}).success,
+		).toBe(false);
+	});
+
+	test("graphQueryEnvelopeSchema rejects nil clientQueryId when provided", () => {
+		expect(
+			graphQueryEnvelopeSchema.safeParse({
+				clientQueryId: NIL_UUID,
+				scope: {
+					principalId: VALID_UUID,
+					actingScope: { scopeType: "AGENCY", scopeId: VALID_UUID },
+				},
+				temporal: { validAt: "2026-01-01T00:00:00.000Z" },
+				params: {},
+			}).success,
+		).toBe(false);
+	});
+
+	test("agentRoleAssignedPayloadSchema accepts valid institutional UUIDs", () => {
+		expect(
+			agentRoleAssignedPayloadSchema.safeParse({
+				agentRoleId: VALID_UUID,
+				companyId: VALID_UUID,
+				agentId: VALID_UUID,
+				personaSlug: "backend-executor",
+				revision: 1,
+			}).success,
+		).toBe(true);
 	});
 });

@@ -25,43 +25,107 @@ const validLicenses = {
 	xchange: "XCH-LICENSE-550e8400-e29b-41d4-a716-446655440000-1.0.0",
 };
 
+const healthyHmbBody = {
+	status: "ok",
+	engine: "hummingbot",
+	adapterId: "adapter-hummingbot",
+	mode: "SIMULATED",
+	version: "0.1.0-anx162-s5",
+	simulated: true,
+};
+
+const healthyFqtBody = {
+	status: "ok",
+	engine: "freqtrade",
+	adapterId: "adapter-freqtrade",
+	mode: "SIMULATED",
+	version: "0.1.0-anx162-s5",
+	simulated: true,
+};
+
+const healthyXchBody = {
+	status: "ok",
+	engine: "xchange",
+	adapterId: "adapter-xchange",
+	mode: "SIMULATED",
+	version: "0.1.0-anx162-s5",
+	simulated: true,
+};
+
+function mockFetch(
+	handler: (url: string) => Response | Promise<Response>,
+): typeof fetch {
+	return (async (input: RequestInfo | URL) => {
+		const url = typeof input === "string" ? input : input.toString();
+		return handler(url);
+	}) as typeof fetch;
+}
+
 describe("execution sandbox venue adapters (ANX-326)", () => {
 	test("HummingbotAdapter validates license format and demo permits", async () => {
 		const valid = new HummingbotAdapter(
 			validLicenses.hummingbot,
 			"demo-hmb-01",
+			{
+				fetchFn: mockFetch((url) => {
+					expect(url.endsWith("/health")).toBe(true);
+					return Response.json(healthyHmbBody);
+				}),
+			},
 		);
 		expect(await valid.validatePermit(permitInput)).toEqual({
 			valid: true,
 			failure: undefined,
 		});
 
-		const invalid = new HummingbotAdapter("bad-license", "demo-hmb-01");
+		const invalid = new HummingbotAdapter("bad-license", "demo-hmb-01", {
+			fetchFn: mockFetch(() => Response.json(healthyHmbBody)),
+		});
 		expect(await invalid.validatePermit(permitInput)).toEqual({
 			valid: false,
 			failure: "NOT_ISSUED",
 		});
 	});
 
-	test("FreqtradeAdapter validates license format and demo permits", async () => {
-		const valid = new FreqtradeAdapter(validLicenses.freqtrade, "demo-fqt-01");
+	test("FreqtradeAdapter validates license format and demo permits with sandbox health", async () => {
+		const valid = new FreqtradeAdapter(validLicenses.freqtrade, "demo-fqt-01", {
+			fetchFn: mockFetch((url) => {
+				expect(url.endsWith("/health")).toBe(true);
+				return Response.json(healthyFqtBody);
+			}),
+		});
 		expect(await valid.validatePermit(permitInput)).toEqual({
 			valid: true,
 			failure: undefined,
 		});
 
-		const invalid = new FreqtradeAdapter("bad-license", "demo-fqt-01");
+		const invalid = new FreqtradeAdapter("bad-license", "demo-fqt-01", {
+			fetchFn: mockFetch(() => Response.json(healthyFqtBody)),
+		});
 		expect(await invalid.validatePermit(permitInput)).toEqual({
 			valid: false,
 			failure: "NOT_ISSUED",
 		});
 	});
 
-	test("XChangeAdapter matches hummingbot/freqtrade sandbox contract", async () => {
-		const valid = new XChangeAdapter(validLicenses.xchange, "demo-xch-01");
+	test("XChangeAdapter validates license format and demo permits with sandbox health", async () => {
+		const valid = new XChangeAdapter(validLicenses.xchange, "demo-xch-01", {
+			fetchFn: mockFetch((url) => {
+				expect(url.endsWith("/health")).toBe(true);
+				return Response.json(healthyXchBody);
+			}),
+		});
 		expect(await valid.validatePermit(permitInput)).toEqual({
 			valid: true,
 			failure: undefined,
+		});
+
+		const invalid = new XChangeAdapter("bad-license", "demo-xch-01", {
+			fetchFn: mockFetch(() => Response.json(healthyXchBody)),
+		});
+		expect(await invalid.validatePermit(permitInput)).toEqual({
+			valid: false,
+			failure: "NOT_ISSUED",
 		});
 	});
 

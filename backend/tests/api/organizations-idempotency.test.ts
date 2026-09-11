@@ -20,7 +20,16 @@ describe("organizations idempotency middleware", () => {
 	test("rejects non-uuid header", () => {
 		const headers = new Headers({ "Idempotency-Key": "not-a-uuid" });
 		expect(() => parseIdempotencyKey(headers)).toThrow(
-			"Idempotency-Key must be a UUID",
+			"Idempotency-Key must be a valid institutional UUID",
+		);
+	});
+
+	test("rejects nil UUID Idempotency-Key header", () => {
+		const headers = new Headers({
+			"Idempotency-Key": "00000000-0000-0000-0000-000000000000",
+		});
+		expect(() => parseIdempotencyKey(headers)).toThrow(
+			"Idempotency-Key must be a valid institutional UUID",
 		);
 	});
 });

@@ -7,11 +7,16 @@ import {
 } from "@anxionos/governance";
 import { handleAuthorizationCan } from "../../apps/api/src/governance/handlers/authorization-can";
 import {
+	handleListPendingChangeProposals,
+	toChangeProposalDto,
+} from "../../apps/api/src/governance/handlers/change-proposals";
+import {
 	handleIssueGrant,
 	handleListGrants,
 	handleRevokeGrant,
 	toGrantDto,
 } from "../../apps/api/src/governance/handlers/grants";
+import type { ChangeProposal } from "../../modules/governance/src/domain/entities/change-proposal";
 import type { Grant } from "../../modules/governance/src/domain/entities/grant";
 import {
 	createInMemoryApprovalRepository,
@@ -54,18 +59,43 @@ function seedGrant(overrides: Partial<Grant> = {}): Grant {
 	};
 }
 
+const proposalId = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
+
+function seedPendingProposal(overrides: Partial<ChangeProposal> = {}): ChangeProposal {
+	const now = new Date("2026-09-10T12:00:00.000Z");
+	return {
+		id: proposalId,
+		tenantId: scopeId,
+		agencyId: scopeId,
+		scopeId,
+		kind: "INSTITUTIONAL",
+		payloadHash: "sha256:demo-payload",
+		proposerPrincipalId: principalId,
+		status: "pending",
+		requiredApprovals: 1,
+		revision: 1,
+		createdAt: now,
+		updatedAt: now,
+		...overrides,
+	};
+}
+
 function createGrantHandlerDeps() {
 	const grantRepository = createInMemoryGrantRepository([seedGrant()]);
+	const changeProposalRepository = createInMemoryChangeProposalRepository([
+		seedPendingProposal(),
+	]);
 	const commandJournal = createInMemoryCommandJournalRepository();
 	const { unitOfWork } = createRecordingGovernanceUnitOfWork({
 		grantRepository,
-		changeProposalRepository: createInMemoryChangeProposalRepository(),
+		changeProposalRepository,
 		approvalRepository: createInMemoryApprovalRepository(),
 		authorityEpochStore: createInMemoryAuthorityEpochStore(),
 		commandJournal,
 	});
 	return {
 		grantRepository,
+		changeProposalRepository,
 		commandJournal,
 		unitOfWork,
 		principalLookup: createStubPrincipalLookup([granteePrincipalId]),
@@ -184,4 +214,28 @@ describe("governance API handlers (slice 6)", () => {
 			GOVERNANCE_T01_DENY_REASONS.GRAPH_UNAVAILABLE,
 		);
 	});
+	test("handleListPendingChangeProposals returns pending DTOs for agency scope", async () => {
+		const deps = createGrantHandlerDeps();
+		const result = await handleListPendingChangeProposals(deps, {
+			agencyId: scopeId,
+		});
+		expect(result.changeProposals).toHaveLength(1);
+		expect(result.changeProposals[0]?.id).toBe(proposalId);
+		expect(result.changeProposals[0]?.status).toBe("pending");
+	});
+
+	test("handleListPendingChangeProposals returns empty when none pending", async () => {
+		const deps = createGrantHandlerDeps();
+		const result = await handleListPendingChangeProposals(deps, {
+			agencyId: otherAgencyId,
+		});
+		expect(result.changeProposals).toHaveLength(0);
+	});
+
+	test("toChangeProposalDto serializes ISO timestamps", () => {
+		const dto = toChangeProposalDto(seedPendingProposal());
+		expect(dto.createdAt).toMatch(/2026-09-10/);
+		expect(dto.kind).toBe("INSTITUTIONAL");
+	});
+
 });

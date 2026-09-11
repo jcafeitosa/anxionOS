@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import {
+	abortBotRunGenerationCommandSchema,
+	acquireComputerSessionCommandSchema,
+	botRunGenerationRefSchema,
+	computerSessionRefSchema,
+	computerSessionTakeoverPayloadSchema,
 	governedToolCallResultSchema,
 	invokeToolCallCommandSchema,
 	OPENBOT_EVENT_TYPES,
@@ -8,8 +13,12 @@ import {
 	toolCallRequestSchema,
 	toolAuditEntrySchema,
 	toolInvocationDecisionSchema,
-	computerSessionRefSchema,
 } from "@anxionos/contracts/openbot";
+
+const VALID_UUID = "a1234567-89ab-4def-8123-456789abcdef";
+const NIL_UUID = "00000000-0000-0000-0000-000000000000";
+const V6_UUID = "6ba7b810-9dad-61d1-80b4-00c04fd430c8";
+const INVALID_VARIANT = "ffffffff-ffff-ffff-ffff-ffffffffffff";
 
 describe("openbot cross-module contracts (ANX-144 S1)", () => {
 	test("toolCallRequestSchema requires uuid identifiers", () => {
@@ -118,5 +127,115 @@ describe("openbot S5 takeover contracts (ANX-144 S5)", () => {
 			controller: "bot",
 		});
 		expect(parsed.controller).toBe("bot");
+	});
+});
+
+
+describe("openbot S6 generation fencing contracts (ANX-144 S6)", () => {
+	test("botRunGenerationRefSchema requires runRevision fence fields", () => {
+		const parsed = botRunGenerationRefSchema.parse({
+			generationId: "a1000001-0001-4001-8001-000000000001",
+			organizationId: "b2000002-0002-4002-8002-000000000002",
+			agentId: "c3000003-0003-4003-8003-000000000003",
+			runId: "f8000008-0008-4008-8008-000000000008",
+			runRevision: 1,
+			generationSequence: 1,
+			status: "active",
+			abortToken: "d4000004-0004-4004-8004-000000000004",
+		});
+		expect(parsed.runRevision).toBe(1);
+	});
+
+	test("OPENBOT_EVENT_TYPES includes bot run generation events", () => {
+		expect(OPENBOT_EVENT_TYPES.BOT_RUN_GENERATION_ACQUIRED).toBe(
+			"openbot.bot_run_generation.acquired.v1",
+		);
+		expect(OPENBOT_EVENT_TYPES.BOT_RUN_GENERATION_ABORTED).toBe(
+			"openbot.bot_run_generation.aborted.v1",
+		);
+	});
+});
+
+describe("OpenBot institutional UUID boundaries (ANX-444)", () => {
+	test("invokeToolCallCommandSchema rejects nil commandId", () => {
+		expect(
+			invokeToolCallCommandSchema.safeParse({
+				commandId: NIL_UUID,
+				requestId: VALID_UUID,
+				organizationId: VALID_UUID,
+				agentId: VALID_UUID,
+				toolName: "sandbox.echo",
+				inputHash: "sha256:input",
+			}).success,
+		).toBe(false);
+	});
+
+	test("toolCallRequestSchema rejects v6+ organizationId", () => {
+		expect(
+			toolCallRequestSchema.safeParse({
+				requestId: VALID_UUID,
+				organizationId: V6_UUID,
+				agentId: VALID_UUID,
+				toolName: "sandbox.echo",
+				inputHash: "sha256:input",
+			}).success,
+		).toBe(false);
+	});
+
+	test("acquireComputerSessionCommandSchema rejects non-RFC variant agentId", () => {
+		expect(
+			acquireComputerSessionCommandSchema.safeParse({
+				commandId: VALID_UUID,
+				organizationId: VALID_UUID,
+				agentId: INVALID_VARIANT,
+			}).success,
+		).toBe(false);
+	});
+
+	test("abortBotRunGenerationCommandSchema rejects nil abortToken", () => {
+		expect(
+			abortBotRunGenerationCommandSchema.safeParse({
+				commandId: VALID_UUID,
+				generationId: VALID_UUID,
+				organizationId: VALID_UUID,
+				abortToken: NIL_UUID,
+				runRevision: 1,
+			}).success,
+		).toBe(false);
+	});
+
+	test("computerSessionTakeoverPayloadSchema rejects v6+ operatorId", () => {
+		expect(
+			computerSessionTakeoverPayloadSchema.safeParse({
+				commandId: VALID_UUID,
+				session: {
+					sessionId: VALID_UUID,
+					organizationId: VALID_UUID,
+					agentId: VALID_UUID,
+					workspacePath: "/tmp/anxionos-openbot-sandbox",
+					status: "active",
+					authorityToken: VALID_UUID,
+					controller: "human",
+				},
+				operatorId: V6_UUID,
+				revokedAuthorityToken: VALID_UUID,
+				previousController: "bot",
+			}).success,
+		).toBe(false);
+	});
+
+	test("botRunGenerationRefSchema accepts valid institutional UUIDs", () => {
+		expect(
+			botRunGenerationRefSchema.safeParse({
+				generationId: VALID_UUID,
+				organizationId: VALID_UUID,
+				agentId: VALID_UUID,
+				runId: VALID_UUID,
+				runRevision: 1,
+				generationSequence: 1,
+				status: "active",
+				abortToken: VALID_UUID,
+			}).success,
+		).toBe(true);
 	});
 });

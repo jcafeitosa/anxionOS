@@ -78,6 +78,11 @@ const DOCUMENTED_OPERATIONS: Array<{
 		tag: "Governance",
 	},
 	{
+		path: "/v1/agencies/{agencyId}/change-proposals",
+		method: "get",
+		tag: "Governance",
+	},
+	{
 		path: "/v1/governance/authorization/can",
 		method: "post",
 		tag: "Governance",
@@ -163,19 +168,171 @@ const DOCUMENTED_OPERATIONS: Array<{
 	{ path: "/v1/connections", method: "get", tag: "Connections" },
 	{ path: "/v1/knowledge", method: "get", tag: "Knowledge" },
 	{ path: "/v1/market-data", method: "get", tag: "Market data" },
-	{ path: "/v1/strategies", method: "get", tag: "Strategies" },
+	{
+		path: "/v1/strategies/agencies/{agencyId}",
+		method: "post",
+		tag: "Strategies",
+	},
+	{
+		path: "/v1/strategies/agencies/{agencyId}/{strategyId}/versions",
+		method: "post",
+		tag: "Strategies",
+	},
+	{
+		path: "/v1/strategies/agencies/{agencyId}/{strategyId}/versions/{strategyVersionId}/publish",
+		method: "post",
+		tag: "Strategies",
+	},
+	{
+		path: "/v1/strategies/agencies/{agencyId}/{strategyId}/versions/{strategyVersionId}/backtests",
+		method: "post",
+		tag: "Strategies",
+	},
+	{
+		path: "/v1/strategies/agencies/{agencyId}/backtest-runs/{backtestRunId}/complete",
+		method: "post",
+		tag: "Strategies",
+	},
+	{
+		path: "/v1/strategies/agencies/{agencyId}/{strategyId}/deployments",
+		method: "post",
+		tag: "Strategies",
+	},
+	{
+		path: "/v1/strategies/agencies/{agencyId}/{strategyId}/signals",
+		method: "post",
+		tag: "Strategies",
+	},
 	{ path: "/v1/capital", method: "get", tag: "Capital" },
-	{ path: "/v1/portfolios", method: "get", tag: "Portfolios" },
+	{
+		path: "/v1/agencies/{agencyId}/portfolios",
+		method: "get",
+		tag: "Portfolios",
+	},
 	{ path: "/v1/decisions", method: "get", tag: "Decisions" },
-	{ path: "/v1/risk", method: "get", tag: "Risk" },
-	{ path: "/v1/execution", method: "get", tag: "Execution" },
+	{
+		path: "/v1/risk/agencies/{agencyId}/kill-switch",
+		method: "get",
+		tag: "Risk",
+	},
+	{
+		path: "/v1/risk/agencies/{agencyId}/kill-switch/activate",
+		method: "post",
+		tag: "Risk",
+	},
+	{
+		path: "/v1/risk/agencies/{agencyId}/kill-switch/release",
+		method: "post",
+		tag: "Risk",
+	},
+	{
+		path: "/v1/execution/agencies/{agencyId}/orders",
+		method: "get",
+		tag: "Execution",
+	},
+	{
+		path: "/v1/execution/agencies/{agencyId}/reconciliation-cases",
+		method: "get",
+		tag: "Execution",
+	},
 	{ path: "/v1/accounting", method: "get", tag: "Accounting" },
-	{ path: "/v1/performance", method: "get", tag: "Performance" },
-	{ path: "/v1/evaluation", method: "get", tag: "Evaluation" },
-	{ path: "/v1/simulation", method: "get", tag: "Simulation" },
+	{
+		path: "/v1/performance/agencies/{agencyId}/outcome-snapshots",
+		method: "get",
+		tag: "Performance",
+	},
+	{
+		path: "/v1/performance/agencies/{agencyId}/outcome-snapshots/{outcomeSnapshotId}",
+		method: "get",
+		tag: "Performance",
+	},
+	{
+		path: "/v1/performance/agencies/{agencyId}/outcome-snapshots/{outcomeSnapshotId}/metrics",
+		method: "get",
+		tag: "Performance",
+	},
+	{
+		path: "/v1/performance/agencies/{agencyId}/position-exposure-snapshots",
+		method: "get",
+		tag: "Performance",
+	},
+	{
+		path: "/v1/performance/agencies/{agencyId}/position-exposure-snapshots/{positionExposureSnapshotId}",
+		method: "get",
+		tag: "Performance",
+	},
+	{
+		path: "/v1/performance/agencies/{agencyId}/position-exposure-snapshots/{positionExposureSnapshotId}/metrics",
+		method: "get",
+		tag: "Performance",
+	},
+	{
+		path: "/v1/evaluation/agencies/{agencyId}/certifications",
+		method: "get",
+		tag: "Evaluation",
+	},
+	{
+		path: "/v1/evaluation/agencies/{agencyId}/certifications",
+		method: "post",
+		tag: "Evaluation",
+	},
+	{
+		path: "/v1/evaluation/agencies/{agencyId}/evaluation-records/{evaluationRecordId}",
+		method: "get",
+		tag: "Evaluation",
+	},
+	{
+		path: "/v1/evaluation/agencies/{agencyId}/evaluation-records/{evaluationRecordId}/score",
+		method: "get",
+		tag: "Evaluation",
+	},
+	{
+		path: "/v1/simulation/agencies/{agencyId}/runs",
+		method: "get",
+		tag: "Simulation",
+	},
+	{
+		path: "/v1/simulation/agencies/{agencyId}/runs/{simulationRunId}",
+		method: "get",
+		tag: "Simulation",
+	},
+	{
+		path: "/v1/simulation/agencies/{agencyId}/runs/{simulationRunId}/snapshot",
+		method: "get",
+		tag: "Simulation",
+	},
 	{ path: "/v1/audit", method: "get", tag: "Audit" },
 	{ path: "/v1/billing", method: "get", tag: "Billing" },
-	{ path: "/v1/operations", method: "get", tag: "Operations" },
+	{
+		path: "/v1/operations/agencies/{agencyId}/incidents/{incidentId}/recovery-tasks",
+		method: "post",
+		tag: "Operations",
+	},
+	{
+		path: "/v1/operations/agencies/{agencyId}/recovery-tasks/{recoveryTaskId}/approve",
+		method: "post",
+		tag: "Operations",
+	},
+	{
+		path: "/v1/operations/agencies/{agencyId}/recovery-tasks/{recoveryTaskId}/start-execution",
+		method: "post",
+		tag: "Operations",
+	},
+	{
+		path: "/v1/operations/agencies/{agencyId}/recovery-tasks/{recoveryTaskId}/complete",
+		method: "post",
+		tag: "Operations",
+	},
+	{
+		path: "/v1/operations/agencies/{agencyId}/recovery-tasks/{recoveryTaskId}/fail",
+		method: "post",
+		tag: "Operations",
+	},
+	{
+		path: "/v1/operations/agencies/{agencyId}/recovery-tasks/{recoveryTaskId}/cancel",
+		method: "post",
+		tag: "Operations",
+	},
 ];
 
 describe("OpenAPI module catalog", () => {

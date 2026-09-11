@@ -6,6 +6,8 @@ import {
 	decisionIdSchema,
 	proposalIdSchema,
 	decisionRecordSchema,
+	proposeDecisionCommandSchema,
+	tradeIntentSchema,
 } from "@anxionos/contracts/decisions";
 
 const ISO_NOW = "2026-09-10T14:30:00.000Z";
@@ -177,5 +179,71 @@ describe("Decision Record envelope schemas", () => {
 
 	test("decisionRecordSchema rejects empty evidence array", () => {
 		expect(decisionRecordSchema.safeParse(buildValidRecord({ evidence: [] })).success).toBe(false);
+	});
+
+	test("decisionRecordSchema rejects nil institutional UUIDs (ANX-444)", () => {
+		const nilUuid = "00000000-0000-0000-0000-000000000000";
+		expect(
+			decisionRecordSchema.safeParse(
+				buildValidRecord({
+					recordId: nilUuid,
+					evidence: [
+						{
+							id: nilUuid,
+							source: "on_chain",
+							uri: "https://chain.example.com/tx/abc123",
+							checksum: "sha256:abc123def456",
+							claim: "On-chain confirmation received",
+						},
+					],
+				}),
+			).success,
+		).toBe(false);
+	});
+});
+
+describe("Decisions institutional UUID boundaries (ANX-444)", () => {
+	const validCommand = {
+		commandId: "a1234567-89ab-4def-8123-456789abcdef",
+		organizationId: "b1234567-89ab-4def-8123-456789abcdef",
+		grantId: "c1234567-89ab-4def-8123-456789abcdef",
+		expectedAuthorityEpoch: 1,
+		correlationId: "d1234567-89ab-4def-8123-456789abcdef",
+	};
+
+	test("proposeDecisionCommandSchema rejects nil UUID fields", () => {
+		const nilUuid = "00000000-0000-0000-0000-000000000000";
+		expect(
+			proposeDecisionCommandSchema.safeParse({
+				...validCommand,
+				commandId: nilUuid,
+			}).success,
+		).toBe(false);
+	});
+
+	test("tradeIntentSchema rejects non-RFC variant UUIDs", () => {
+		const invalidVariant = "ffffffff-ffff-ffff-ffff-ffffffffffff";
+		expect(
+			tradeIntentSchema.safeParse({
+				intentId: "a1234567-89ab-4def-8123-456789abcdef",
+				actorPrincipalId: "b1234567-89ab-4def-8123-456789abcdef",
+				agencyId: invalidVariant,
+				assetClass: "STOCK",
+				instrumentId: "c1234567-89ab-4def-8123-456789abcdef",
+				venue: "NYSE",
+				accountId: "d1234567-89ab-4def-8123-456789abcdef",
+				executionMode: "SIMULATED",
+				side: "BUY",
+				quantity: "10",
+				orderType: "MARKET",
+				quoteCurrency: "USD",
+				authorityEpoch: 1,
+				riskEpoch: 1,
+				intentHash: "hash-1",
+				idempotencyKey: "e1234567-89ab-4def-8123-456789abcdef",
+				expiresAt: ISO_NOW,
+				createdAt: ISO_NOW,
+			}).success,
+		).toBe(false);
 	});
 });
