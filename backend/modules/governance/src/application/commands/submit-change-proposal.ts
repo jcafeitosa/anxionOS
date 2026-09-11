@@ -40,7 +40,9 @@ export async function submitChangeProposal(
 	};
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
 		// ANX-476/FURO 4 — a key so' repete para a MESMA proposta
-		// (escopo + tipo + payload + proponente); resolvido sob o lock da key.
+		// (escopo + tipo + payload + proponente). Nao ha lock da key: a
+		// serializacao e' o bump de epoch e o perdedor de uma corrida e' derrubado
+		// pelo INSERT atomico do journal (`ON CONFLICT DO NOTHING` → 409).
 		const raced = await loadIdempotentCommandResult(
 			context.commandJournal,
 			command.commandId,

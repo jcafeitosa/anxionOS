@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type { GovernanceCommandResult } from "@anxionos/contracts/governance";
 import {
 	CommandJournalConflictError,
@@ -18,10 +19,23 @@ export interface GovernanceCommandIntent {
 	aggregateId?: string;
 	/** Validacao alternativa (comandos que CRIAM o agregado). */
 	matchesAggregate?: (aggregateId: string) => Promise<boolean>;
+	/**
+	 * ANX-476/A (MEDIUM do G2) — fingerprint canonico do payload, para comandos
+	 * cujo agregado NAO reconstroi a intencao inteira. O `TransitionAutonomyLevel`
+	 * e' o caso: `transitionKind`, `actorPrincipalId` e `reason` vao apenas para o
+	 * evento, entao sem o fingerprint um reuso divergente da key passava como
+	 * replay 200. Compare sempre pelo hash, nunca pela lista de campos a mao — e'
+	 * o que impede a comparacao de ficar fragil a medida que o schema muda.
+	 */
+	requestHash?: string;
 }
 
 async function assertIntentMatches(
-	existing: { commandName: string; aggregateId: string },
+	existing: {
+		commandName: string;
+		aggregateId: string;
+		requestHash: string | null;
+	},
 	intent: GovernanceCommandIntent,
 	commandId: string,
 ): Promise<void> {
@@ -49,6 +63,48 @@ async function assertIntentMatches(
 			);
 		}
 	}
+	if (
+		intent.requestHash !== undefined &&
+		existing.requestHash !== intent.requestHash
+	) {
+		throwGovernanceError(
+			"GOV_DUPLICATE_IDEMPOTENCY",
+			`Idempotency key ${commandId} was already applied with a different payload`,
+		);
+	}
+}
+
+/**
+ * Fingerprint canonico de um payload de comando: SHA-256 de um JSON com chaves
+ * ordenadas, onde uma entrada `undefined` e' OMITIDA (ausente e `undefined` sao
+ * a mesma coisa — `null` continua distinto). Duas coisas que o `JSON.stringify`
+ * cru nao garante: (a) a mesma intencao com chaves em ordem diferente produz o
+ * mesmo hash; (b) a ordem de insercao das chaves nao altera o resultado. Arrays
+ * sao hasheados NA ORDEM dada: se a ordem nao for semantica (ex.: o
+ * `capabilitySubset` da delegacao), o comando precisa normalizar antes de
+ * chamar — a delegacao prefere comparar o conjunto com `capabilitySubsetsEqual`
+ * a hashear.
+ */
+export function hashCommandPayload(payload: Record<string, unknown>): string {
+	return createHash("sha256").update(canonicalJson(payload)).digest("hex");
+}
+
+function canonicalJson(value: unknown): string {
+	if (value === undefined || value === null) {
+		return "null";
+	}
+	if (Array.isArray(value)) {
+		return `[${value.map(canonicalJson).join(",")}]`;
+	}
+	if (typeof value === "object") {
+		const entries = Object.entries(value as Record<string, unknown>)
+			.filter(([, entry]) => entry !== undefined)
+			.sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0));
+		return `{${entries
+			.map(([key, entry]) => `${JSON.stringify(key)}:${canonicalJson(entry)}`)
+			.join(",")}}`;
+	}
+	return JSON.stringify(value);
 }
 
 export async function loadIdempotentCommandResult(

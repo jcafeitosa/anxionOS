@@ -18,6 +18,7 @@ export function toCommandJournalRecord(
 		aggregateType: row.aggregateType,
 		revision: row.revision,
 		responseSnapshot: row.responseSnapshot as Record<string, unknown> | null,
+		requestHash: row.requestHash,
 		createdAt: row.createdAt,
 	};
 }
@@ -49,6 +50,7 @@ export function createDrizzleCommandJournalRepository(
 					aggregateType: entry.aggregateType,
 					revision: entry.revision,
 					responseSnapshot: entry.responseSnapshot,
+					requestHash: entry.requestHash ?? null,
 				})
 				.onConflictDoNothing({ target: commandJournal.commandId })
 				.returning();

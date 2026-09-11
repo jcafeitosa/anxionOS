@@ -30,17 +30,16 @@ export async function issueMandate(
 ): Promise<GovernanceCommandResult> {
 	const command = issueMandateCommandSchema.parse(input);
 
+	// ANX-476/B (MEDIUM do G2) — a leitura pre-transacao serve so' para derivar o
+	// escopo da transacao (tenant/agency/principal). Ela NAO julga estado mutavel:
+	// um grant revogado continua existindo, entao o retry legitimo de um comando
+	// ja' commitado chega ao replay em vez de falhar com `GOV_GRANT_REVOKED`. A
+	// checagem de estado roda DEPOIS do replay, dentro da transacao.
 	const backingGrant = await deps.grantRepository.findById(command.grantId);
 	if (!backingGrant) {
 		throwGovernanceError(
 			"GOV_GRANT_NOT_FOUND",
 			`Backing grant ${command.grantId} not found`,
-		);
-	}
-	if (!isGrantActive(backingGrant)) {
-		throwGovernanceError(
-			"GOV_GRANT_REVOKED",
-			`Backing grant ${command.grantId} is not active`,
 		);
 	}
 
@@ -77,7 +76,13 @@ export async function issueMandate(
 		}
 
 		const grant = await context.grantRepository.findById(command.grantId);
-		if (!grant || !isGrantActive(grant)) {
+		if (!grant) {
+			throwGovernanceError(
+				"GOV_GRANT_NOT_FOUND",
+				`Backing grant ${command.grantId} not found`,
+			);
+		}
+		if (!isGrantActive(grant)) {
 			throwGovernanceError(
 				"GOV_GRANT_REVOKED",
 				`Backing grant ${command.grantId} is not active`,

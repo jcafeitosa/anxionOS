@@ -14,6 +14,7 @@ import type { CommandJournalRepository } from "../../domain/ports/command-journa
 import type { GovernanceUnitOfWork } from "../../domain/ports/governance-unit-of-work";
 import type { TenantContext } from "../../domain/ports/tenant-context";
 import {
+	hashCommandPayload,
 	loadIdempotentCommandResult,
 	recordGovernanceCommand,
 	toCommandResultSnapshot,
@@ -37,14 +38,34 @@ export async function transitionAutonomyLevel(
 		principalId: command.actorPrincipalId,
 	};
 
+	// ANX-476/A (MEDIUM do G2) — o agregado `AutonomyAssignment` persiste o nivel
+	// alvo, `evidenceHash` e `approvalId`, mas NAO `transitionKind`,
+	// `actorPrincipalId` nem `reason` (vão apenas para o evento). Sem um
+	// fingerprint do payload, reusar a key com esses campos divergentes devolvia
+	// 200 `idempotentReplay` e ignorava o payload novo. O hash cobre o payload
+	// inteiro de uma vez, em vez de manter uma lista de campos a mao (que fica
+	// fragil quando o schema muda).
+	const requestHash = hashCommandPayload({
+		scopeId: command.scopeId,
+		subjectAgentId: command.subjectAgentId,
+		targetLevel: command.targetLevel,
+		transitionKind: command.transitionKind,
+		evidenceHash: command.evidenceHash ?? null,
+		approvalId: command.approvalId ?? null,
+		actorPrincipalId: command.actorPrincipalId,
+		reason: command.reason ?? null,
+	});
+
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
 		// ANX-476/FURO 4 — a transicao cria um novo assignment; mesma key so'
-		// repete para o MESMO agente/escopo/nivel-alvo.
+		// repete para o MESMO agente/escopo/nivel-alvo (e mesmo payload, pelo
+		// `requestHash`).
 		const raced = await loadIdempotentCommandResult(
 			context.commandJournal,
 			command.commandId,
 			{
 				commandName: "TransitionAutonomyLevel",
+				requestHash,
 				matchesAggregate: async (aggregateId) => {
 					const assignment =
 						await context.autonomyAssignmentRepository.findById(aggregateId);
@@ -54,7 +75,9 @@ export async function transitionAutonomyLevel(
 					return (
 						assignment.scopeId === command.scopeId &&
 						assignment.subjectAgentId === command.subjectAgentId &&
-						assignment.level === command.targetLevel
+						assignment.level === command.targetLevel &&
+						assignment.evidenceHash === (command.evidenceHash ?? null) &&
+						assignment.approvalId === (command.approvalId ?? null)
 					);
 				},
 			},
@@ -157,6 +180,7 @@ export async function transitionAutonomyLevel(
 			aggregateType: "AutonomyAssignment",
 			revision,
 			responseSnapshot: toCommandResultSnapshot(result),
+			requestHash,
 		});
 		return result;
 	});

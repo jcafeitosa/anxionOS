@@ -44,6 +44,7 @@ export async function ensureGovernanceSchema(pool: Pool): Promise<void> {
 		pool,
 		"0010_governance_remove_organization_scope.sql",
 	);
+	await applyMigrationFile(pool, "0011_governance_command_request_hash.sql");
 }
 
 const databaseUrl =

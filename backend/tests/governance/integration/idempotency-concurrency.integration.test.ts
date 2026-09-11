@@ -57,10 +57,13 @@ import {
  *      `governance_authority_epochs` do escopo com `FOR UPDATE`. Todas as N
  *      chamadas atravessam a leitura do journal (que acontece ANTES do bump do
  *      epoch) e ficam bloqueadas no bump; o teste espera N backends em
- *      `wait_event = Lock` e so' entao libera. Isso reproduz a janela exata em
- *      que o G5 provou o double-apply, de forma reproduzivel e sem sleep/retry.
+ *      `wait_event = Lock` e so' entao libera. Nao ha corrida por `sleep` nem
+ *      retry cego: a liberacao e' dirigida pelo estado observado. A UNICA espera
+ *      temporal e' o poll limitado de `waitForLockWaiters` (deadline de 15s,
+ *      intervalo de 5ms) sobre `pg_stat_activity`, que apenas OBSERVA os
+ *      bloqueados — nao repete a operacao nem mascara falha.
  *
- * Rodado ANTES da correcao, as corridas por barreira falham exatamente nos
+ * Rodado ANTES da correcao, as corridas por barreira falhavam exatamente nos
  * invariantes (a)/(b)/(c): 10 respostas 200, 10 grants ativos, 10 linhas de
  * journal.
  */
@@ -268,6 +271,13 @@ async function lockScopeEpoch(pool: Pool): Promise<PoolClient> {
 }
 
 async function waitForLockWaiters(pool: Pool, expected: number): Promise<void> {
+	// Poll LIMITADO e observavel sobre `pg_stat_activity`: nao ha primitiva de
+	// bloqueio em PostgreSQL que avise "N backends chegaram ao lock" (LISTEN/
+	// NOTIFY nao cobre espera por lock), entao a alternativa e' observar o
+	// estado. Nao e' retry cego: o deadline de 15s produz falha explicita com a
+	// contagem real, e o intervalo de 5ms nao mascara lentidao — apenas evita
+	// busy-loop. O caminho testado segue deterministico: quem libera a barreira e'
+	// o COMMIT do blocker, nao um `sleep`.
 	const deadline = Date.now() + 15_000;
 	for (;;) {
 		const result = await pool.query<{ waiting: number }>(
@@ -418,12 +428,6 @@ function assertRevokeRaceSafe(
 	return { ok, conflicts };
 }
 
-function distribution(outcome: ParsedResponse[]): string {
-	const ok = outcome.filter((item) => item.status === 200).length;
-	const conflicts = outcome.filter((item) => item.status === 409).length;
-	return `${outcome.length} chamadas -> ${ok}x200 + ${conflicts}x409`;
-}
-
 async function withHarness(
 	work: (ctx: Harness & Fixture) => Promise<void>,
 ): Promise<void> {
@@ -466,7 +470,6 @@ describe("ANX-457 — idempotencia concorrente do governance (PostgreSQL real + 
 		"10 POST simultaneos x 5 rodadas: nenhum double-apply",
 		async () => {
 			await withHarness(async ({ app, pool, targetPrincipalId }) => {
-				const rounds: string[] = [];
 				for (let round = 0; round < RACE_ROUNDS; round += 1) {
 					const key = randomUUID();
 					const before = await countActiveGrants(
@@ -492,11 +495,7 @@ describe("ANX-457 — idempotencia concorrente do governance (PostgreSQL real + 
 
 					expect(after - before).toBe(1);
 					expect(await countJournalEntries(pool, key)).toBe(1);
-					rounds.push(
-						`rodada ${round + 1}: ${distribution(outcome)} (ativos ${before}->${after})`,
-					);
 				}
-				console.log(`[ANX-457/FURO1 natural] ${rounds.join(" | ")}`);
 			});
 		},
 	);
@@ -506,15 +505,14 @@ describe("ANX-457 — idempotencia concorrente do governance (PostgreSQL real + 
 	 * chave nova por rodada, cada rodada contra um grant recem-emitido. Prova o
 	 * invariante de seguranca: UMA revogacao efetiva por rodada (um unico evento
 	 * `GRANT_REVOKED` commitado) e nenhum double-apply. O contrato de status do
-	 * perdedor e' verificado no teste dedicado "perdedores da revogacao..."
-	 * (hoje violado — ver o comentario daquele teste).
+	 * perdedor (409 `GOV_DUPLICATE_IDEMPOTENCY`, nunca 500) e' verificado aqui
+	 * por `assertRevokeRaceSafe` e no teste dedicado logo abaixo.
 	 */
 	test.skipIf(Boolean(skipReason))(
 		"10 DELETE simultaneos x 5 rodadas: 1 revogacao efetiva (sem double-apply)",
 		async () => {
 			await withHarness(
 				async ({ app, pool, govRuntime, targetPrincipalId }) => {
-					const rounds: string[] = [];
 					for (let round = 0; round < RACE_ROUNDS; round += 1) {
 						const issued = await issueGrant(
 							{
@@ -548,19 +546,9 @@ describe("ANX-457 — idempotencia concorrente do governance (PostgreSQL real + 
 						expect(row?.revision).toBe(2);
 						expect(revokedEvents).toBe(1);
 						expect(await countJournalEntries(pool, key)).toBe(1);
-						expect(
-							outcome.filter((item) => item.status === 200).length,
-						).toBeGreaterThanOrEqual(1);
-						const aggregateIds = new Set(
-							outcome
-								.filter((item) => item.status === 200)
-								.map((item) => item.body.aggregateId),
-						);
-						rounds.push(
-							`rodada ${round + 1}: ${distribution(outcome)} (status=${row?.status}, eventos=${revokedEvents}, agregados=${[...aggregateIds].length})`,
-						);
+						// Nenhum status fora de {200, 409}; todo 200 carrega o alvo.
+						assertRevokeRaceSafe(outcome, issued.aggregateId);
 					}
-					console.log(`[ANX-457/FURO2 natural-revoke] ${rounds.join(" | ")}`);
 				},
 			);
 		},
@@ -571,15 +559,14 @@ describe("ANX-457 — idempotencia concorrente do governance (PostgreSQL real + 
 	 * de uma corrida com a MESMA `Idempotency-Key` tem de ser 409
 	 * `GOV_DUPLICATE_IDEMPOTENCY` — nunca 500.
 	 *
-	 * Este teste esta' VERMELHO no digest atual por um gap ANTERIOR ao journal:
-	 * os perdedores leem o grant (revision 1) antes de serializar no bump de
-	 * epoch e o `save` otimista de `grant-repository.ts:41-65` falha com
-	 * `GrantRevisionConflictError` (sem mapeamento → 500 INTERNAL_ERROR
-	 * "Grant revision conflict") ANTES de chegar ao `recordGovernanceCommand`.
-	 * Reproduzido tambem sem barreira: 8/8 rodadas naturais de 10 DELETE deram
-	 * 1 revogacao efetiva e 8-9 respostas 500. O `ON CONFLICT DO NOTHING` do
-	 * ANX-476 nao alcanca esses perdedores; falta tratar a colisao de revisao do
-	 * grant como duplicata (ou re-resolver o journal nesse ponto).
+	 * Este teste e' a regressao da classe: os perdedores liam o grant (revision 1)
+	 * antes de serializar no bump de epoch e o `save` otimista de
+	 * `grant-repository.ts` falhava com `GrantRevisionConflictError` (sem
+	 * mapeamento → 500 "Grant revision conflict") ANTES de chegar ao
+	 * `recordGovernanceCommand`. Fechado no mesmo passe: `revokeGrant` passou a
+	 * RE-LER o grant depois do bump de epoch, entao o perdedor cai no no-op e o
+	 * `recordGovernanceCommand` devolve o conflito institucional (409). Verde no
+	 * digest atual.
 	 */
 	test.skipIf(Boolean(skipReason))(
 		"perdedores da revogacao sao 409 GOV_DUPLICATE_IDEMPOTENCY (nunca 500)",
@@ -613,9 +600,6 @@ describe("ANX-457 — idempotencia concorrente do governance (PostgreSQL real + 
 						issued.aggregateId,
 					);
 					expect(conflicts.length).toBe(RACE_CONCURRENCY - 1);
-					console.log(
-						`[ANX-457/FURO2 contrato-perdedor] ${distribution(outcome)}`,
-					);
 				},
 			);
 		},
@@ -655,7 +639,6 @@ describe("ANX-457 — idempotencia concorrente do governance (PostgreSQL real + 
 				expect(after - before).toBe(1);
 				expect(await countJournalEntries(pool, key)).toBe(1);
 				expect(conflicts.length).toBe(1);
-				console.log(`[ANX-457/FURO1 barreira-2] ${distribution(outcome)}`);
 			});
 		},
 	);
@@ -695,7 +678,6 @@ describe("ANX-457 — idempotencia concorrente do governance (PostgreSQL real + 
 				expect(after - before).toBe(1);
 				expect(await countJournalEntries(pool, key)).toBe(1);
 				expect(conflicts.length).toBe(RACE_CONCURRENCY - 1);
-				console.log(`[ANX-457/FURO1 barreira-10] ${distribution(outcome)}`);
 			});
 		},
 	);
@@ -806,9 +788,6 @@ describe("ANX-457 — idempotencia concorrente do governance (PostgreSQL real + 
 					)) {
 						expect(response.body.aggregateId).toBe(issued.aggregateId);
 					}
-					console.log(
-						`[ANX-457/FURO2 barreira-10-revoke] ${distribution(outcome)}`,
-					);
 				},
 			);
 		},

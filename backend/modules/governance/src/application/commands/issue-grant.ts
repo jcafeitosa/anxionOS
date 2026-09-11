@@ -111,13 +111,15 @@ export async function issueGrant(
 		principalId: command.granteePrincipalId,
 	};
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
-		// Replay resolvido NA TRANSACAO sob o lock da key e com validacao de
-		// intencao: o comando CRIA o agregado, entao a intencao e' checada pelo
-		// grant que o journal aponta. `matchesAggregate` compara TAMBEM
-		// `resourceRef`/`validUntil`/emissor (ANX-476/FURO 3: antes um payload
-		// divergente nesses campos devolvia 200 sem aplicar). O lock serializa
-		// duas requisicoes concorrentes com a MESMA key (ANX-476/FURO 1: antes
-		// ambas gravavam e o 409 era contornado).
+		// Replay resolvido NA TRANSACAO, com validacao de intencao: o comando CRIA
+		// o agregado, entao a intencao e' checada pelo grant que o journal aponta.
+		// `matchesAggregate` compara TAMBEM `resourceRef`/`validUntil`/emissor
+		// (ANX-476/FURO 3: antes um payload divergente nesses campos devolvia 200
+		// sem aplicar). NAO existe lock da key: duas requisicoes concorrentes com a
+		// MESMA key serializam no bump de epoch e o perdedor e' derrubado pelo
+		// INSERT atomico do journal (`ON CONFLICT DO NOTHING` →
+		// `CommandJournalConflictError` → 409 `GOV_DUPLICATE_IDEMPOTENCY`), sem
+		// double-apply (ANX-476/FURO 1).
 		const journaled = await loadIdempotentCommandResult(
 			context.commandJournal,
 			command.commandId,

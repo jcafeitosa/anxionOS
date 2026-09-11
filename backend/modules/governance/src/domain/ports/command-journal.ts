@@ -5,6 +5,14 @@ export interface CommandJournalRecord {
 	aggregateType: string;
 	revision: number;
 	responseSnapshot: Record<string, unknown> | null;
+	/**
+	 * Fingerprint canonico do payload do comando (ANX-476/A do G2). Existe para
+	 * os comandos cujo agregado NAO reconstroi o payload inteiro — a transicao de
+	 * autonomia grava `transitionKind`/`actorPrincipalId`/`reason` apenas nos
+	 * eventos, entao sem este campo um reuso divergente da key passava como
+	 * replay 200. `null` quando o comando nao o fornece.
+	 */
+	requestHash: string | null;
 	createdAt: Date;
 }
 
@@ -15,6 +23,8 @@ export interface NewCommandJournalRecord {
 	aggregateType: string;
 	revision: number;
 	responseSnapshot: Record<string, unknown> | null;
+	/** Ver `CommandJournalRecord.requestHash`. Opcional: nem todo comando precisa. */
+	requestHash?: string | null;
 }
 
 export interface CommandJournalRepository {

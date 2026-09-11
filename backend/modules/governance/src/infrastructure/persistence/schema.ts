@@ -248,6 +248,8 @@ export const commandJournal = pgTable("governance_command_journal", {
 	aggregateType: text("aggregate_type").notNull(),
 	revision: integer("revision").notNull(),
 	responseSnapshot: jsonb("response_snapshot"),
+	// ANX-476/A — fingerprint do payload (ver `domain/ports/command-journal.ts`).
+	requestHash: text("request_hash"),
 	createdAt: timestamp("created_at", { withTimezone: true })
 		.notNull()
 		.defaultNow(),

@@ -12,7 +12,10 @@ import {
 	createDelegationCreatedEvent,
 	createGrantIssuedEvent,
 } from "../../domain/events/governance-events";
-import { validateCapabilitySubset } from "../../domain/policies/delegation-capability";
+import {
+	capabilitySubsetsEqual,
+	validateCapabilitySubset,
+} from "../../domain/policies/delegation-capability";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { GovernanceUnitOfWork } from "../../domain/ports/governance-unit-of-work";
 import type { GrantRepository } from "../../domain/ports/grant-repository";
@@ -49,6 +52,14 @@ export async function createDelegation(
 			);
 		}
 	}
+	// ANX-476/B (MEDIUM do G2) — a UNICA leitura pre-transacao e' a que
+	// identifica o ESCOPO da transacao (tenant/agency/principal). Ela nao julga
+	// estado mutavel: um grant revogado/vencido continua existindo, entao o
+	// retry legitimo de um comando ja' commitado atravessa daqui ate' o replay.
+	// As validacoes de estado (ativo, subset, janela) rodam DEPOIS do replay,
+	// dentro da transacao — antes elas rodavam aqui e um retry apos a revogacao
+	// do parent falhava com `GOV_GRANT_REVOKED` em vez de reproduzir o
+	// resultado. Validacao de estado continua valendo para execucao NOVA.
 	const parentGrant = await deps.grantRepository.findById(
 		command.parentGrantId,
 	);
@@ -58,28 +69,8 @@ export async function createDelegation(
 			`Parent grant ${command.parentGrantId} not found`,
 		);
 	}
-	if (!isGrantActive(parentGrant)) {
-		throwGovernanceError(
-			"GOV_GRANT_REVOKED",
-			`Parent grant ${command.parentGrantId} is not active`,
-		);
-	}
-	if (
-		!validateCapabilitySubset(parentGrant.capability, command.capabilitySubset)
-	) {
-		throwGovernanceError(
-			"GOV_DELEGATION_EXCEEDS_PARENT",
-			"Delegation capability subset exceeds parent grant authority",
-		);
-	}
 
 	const validUntil = new Date(command.validUntil);
-	if (parentGrant.validUntil && validUntil > parentGrant.validUntil) {
-		throwGovernanceError(
-			"GOV_DELEGATION_EXCEEDS_PARENT",
-			"Delegation validUntil exceeds parent grant validity",
-		);
-	}
 
 	const tenantContext: TenantContext = {
 		tenantId: parentGrant.tenantId,
@@ -89,7 +80,9 @@ export async function createDelegation(
 
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
 		// ANX-476/FURO 4 — mesma key so' repete para a MESMA delegacao
-		// (grant pai + delegado + subset + janela).
+		// (grant pai + delegado + subset + janela + intentHash). O subset e'
+		// comparado SEM ordem (ANX-476/D: `JSON.stringify` cru devolvia 409 falso
+		// para o mesmo conjunto em ordem diferente).
 		const raced = await loadIdempotentCommandResult(
 			context.commandJournal,
 			command.commandId,
@@ -104,10 +97,12 @@ export async function createDelegation(
 					return (
 						existing.parentGrantId === command.parentGrantId &&
 						existing.delegatePrincipalId === command.delegatePrincipalId &&
-						JSON.stringify(existing.capabilitySubset) ===
-							JSON.stringify(command.capabilitySubset) &&
-						existing.validUntil.toISOString() ===
-							new Date(command.validUntil).toISOString()
+						capabilitySubsetsEqual(
+							existing.capabilitySubset,
+							command.capabilitySubset,
+						) &&
+						existing.validUntil.toISOString() === validUntil.toISOString() &&
+						existing.intentHash === (command.intentHash ?? null)
 					);
 				},
 			},
@@ -119,7 +114,13 @@ export async function createDelegation(
 		const parent = await context.grantRepository.findById(
 			command.parentGrantId,
 		);
-		if (!parent || !isGrantActive(parent)) {
+		if (!parent) {
+			throwGovernanceError(
+				"GOV_GRANT_NOT_FOUND",
+				`Parent grant ${command.parentGrantId} not found`,
+			);
+		}
+		if (!isGrantActive(parent)) {
 			throwGovernanceError(
 				"GOV_GRANT_REVOKED",
 				`Parent grant ${command.parentGrantId} is not active`,
@@ -131,6 +132,12 @@ export async function createDelegation(
 			throwGovernanceError(
 				"GOV_DELEGATION_EXCEEDS_PARENT",
 				"Delegation capability subset exceeds parent grant authority",
+			);
+		}
+		if (parent.validUntil && validUntil > parent.validUntil) {
+			throwGovernanceError(
+				"GOV_DELEGATION_EXCEEDS_PARENT",
+				"Delegation validUntil exceeds parent grant validity",
 			);
 		}
 

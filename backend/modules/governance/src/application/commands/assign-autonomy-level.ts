@@ -52,7 +52,11 @@ export async function assignAutonomyLevel(
 	};
 
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
-		// ANX-476/FURO 4 — mesma key so' repete para o MESMO agente/escopo/nivel.
+		// ANX-476/FURO 4 + A (MEDIUM do G2) — mesma key so' repete para o MESMO
+		// agente/escopo/nivel E para os mesmos `evidenceHash`/`approvalId`, que o
+		// assignment persiste. Sem eles, reusar a key com uma evidencia/aprovacao
+		// divergente devolvia 200 `idempotentReplay` e o payload novo era
+		// ignorado.
 		const raced = await loadIdempotentCommandResult(
 			context.commandJournal,
 			command.commandId,
@@ -67,7 +71,9 @@ export async function assignAutonomyLevel(
 					return (
 						assignment.scopeId === command.scopeId &&
 						assignment.subjectAgentId === command.subjectAgentId &&
-						assignment.level === command.level
+						assignment.level === command.level &&
+						assignment.evidenceHash === (command.evidenceHash ?? null) &&
+						assignment.approvalId === (command.approvalId ?? null)
 					);
 				},
 			},

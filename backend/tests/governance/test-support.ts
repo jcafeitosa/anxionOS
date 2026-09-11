@@ -256,6 +256,7 @@ export function createInMemoryCommandJournalRepository(
 			}
 			const stored: CommandJournalRecord = {
 				...entry,
+				requestHash: entry.requestHash ?? null,
 				createdAt: new Date(),
 			};
 			records.set(entry.commandId, stored);
@@ -283,6 +284,17 @@ export function createRecordingGovernanceUnitOfWork(deps: {
 		deps.autonomyAssignmentRepository ??
 		createInMemoryAutonomyAssignmentRepository();
 	let transactionChain: Promise<unknown> = Promise.resolve();
+	/**
+	 * Disposicao ANX-476/E (LOW do G2): este UoW in-memory NAO faz rollback — o
+	 * estado parcial de um `work` que lanca sobrevive. E' aceitavel de proposito:
+	 * ele cobre o caminho feliz e as validacoes puras (os testes que o usam
+	 * afirmam zero escrita APENAS quando o comando falha ANTES de gravar). Os
+	 * caminhos de rollback de verdade — colisao de `command_id` derrubando o
+	 * agregado do perdedor, re-leitura pos-bump de epoch — sao provados com
+	 * PostgreSQL real nos testes de integracao (`integration/`), onde a
+	 * transacao e' de fato atomica. Reimplementar transacao aqui seria uma
+	 * segunda semantica para manter em sincronia, sem aumentar a confianca.
+	 */
 	const unitOfWork: GovernanceUnitOfWork = {
 		async runInTransaction(
 			ctx: TenantContext,

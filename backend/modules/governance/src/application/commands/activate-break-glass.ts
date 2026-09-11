@@ -45,30 +45,13 @@ export async function activateBreakGlass(
 			`Capability ${command.capability} is not in the grant capability catalog`,
 		);
 	}
-	const expiresAt = new Date(command.expiresAt);
-	const now = new Date();
-	if (expiresAt <= now) {
-		throwGovernanceError(
-			"GOV_INSUFFICIENT_AUTHORITY",
-			"Break-glass expiresAt must be in the future",
-		);
-	}
-	if (expiresAt.getTime() - now.getTime() > MAX_BREAK_GLASS_TTL_MS) {
-		throwGovernanceError(
-			"GOV_INSUFFICIENT_AUTHORITY",
-			"Break-glass TTL exceeds maximum allowed window (24h)",
-		);
-	}
-
-	const granteeExists = await deps.principalLookup.exists(
-		command.granteePrincipalId,
-	);
-	if (!granteeExists) {
-		throwGovernanceError(
-			"GOV_PRINCIPAL_NOT_FOUND",
-			`Principal ${command.granteePrincipalId} not found`,
-		);
-	}
+	// ANX-476/B (MEDIUM do G2) — a janela de validade e a existencia do principal
+	// sao estado MUTAVEL e a checagem migrou para DEPOIS do replay, dentro da
+	// transacao. Antes elas rodavam aqui: o retry legitimo de um break-glass ja'
+	// commitado, depois do `expiresAt` vencer, falhava com
+	// `GOV_INSUFFICIENT_AUTHORITY` em vez de reproduzir o resultado. A chave
+	// existe exatamente para o retry ser seguro depois que o mundo mudou; a
+	// validacao continua valendo para execucao NOVA.
 
 	const tenantContext: TenantContext = {
 		tenantId: command.scopeId,
@@ -96,13 +79,37 @@ export async function activateBreakGlass(
 						existing.scopeId === command.scopeId &&
 						existing.resourceRef === `break-glass:${incidentRef}` &&
 						(existing.validUntil?.toISOString() ?? null) ===
-							expiresAt.toISOString()
+							new Date(command.expiresAt).toISOString()
 					);
 				},
 			},
 		);
 		if (raced) {
 			return raced;
+		}
+
+		const expiresAt = new Date(command.expiresAt);
+		const now = new Date();
+		if (expiresAt <= now) {
+			throwGovernanceError(
+				"GOV_INSUFFICIENT_AUTHORITY",
+				"Break-glass expiresAt must be in the future",
+			);
+		}
+		if (expiresAt.getTime() - now.getTime() > MAX_BREAK_GLASS_TTL_MS) {
+			throwGovernanceError(
+				"GOV_INSUFFICIENT_AUTHORITY",
+				"Break-glass TTL exceeds maximum allowed window (24h)",
+			);
+		}
+		const granteeExists = await deps.principalLookup.exists(
+			command.granteePrincipalId,
+		);
+		if (!granteeExists) {
+			throwGovernanceError(
+				"GOV_PRINCIPAL_NOT_FOUND",
+				`Principal ${command.granteePrincipalId} not found`,
+			);
 		}
 
 		const bumpedEpoch = await context.authorityEpochStore.increment(
