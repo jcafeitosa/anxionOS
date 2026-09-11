@@ -52,6 +52,7 @@
     "anx162:s3-engines-homologation": "bun backend/scripts/anx162-s3-engines-homologation.mjs",
     "anx162:s4-egress-auth-audit-homologation": "bun backend/scripts/anx162-s4-egress-auth-audit-homologation.mjs",
     "anx162:s5-limits-logs-rollback-homologation": "bun backend/scripts/anx162-s5-limits-logs-rollback-homologation.mjs",
+    "anx154:convergence-oracle": "bun backend/scripts/anx154-convergence-oracle.mjs",
     "anx174:nautilus-sandbox-homologation": "bun backend/scripts/anx174-nautilus-sandbox-homologation.mjs",
     "anx179:cryptofeed-sandbox-homologation": "bun backend/scripts/anx179-cryptofeed-sandbox-homologation.mjs",
     "anx180:mt5-sandbox-homologation": "bun backend/scripts/anx180-mt5-sandbox-homologation.mjs",
