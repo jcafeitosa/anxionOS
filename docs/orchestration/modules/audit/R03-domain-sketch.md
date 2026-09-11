@@ -4,7 +4,29 @@ type: debate
 # R03 — Esboço de domínio: `modules/audit`
 
 **Issue:** ANX-107 · pack ANX-389  
-**Callers:** [R02-boundaries.md](./R02-boundaries.md) · [R04-contracts-events.md](./R04-contracts-events.md). Arquivo já existe. Sem dados de produção. Instrução: «3. **audit**».
+**Callers:** [R02-boundaries.md](./R02-boundaries.md) · [R04-contracts-events.md](./R04-contracts-events.md). Sem dados de produção.
+
+## Debate R3 (síntese atribuída)
+
+**Arquiteto:** Agregados DeltaRef, AuditManifest, FlightRecorderChunk, ReplaySession, AuditIndex.
+
+**Executor:** AuditUnitOfWork + DomainEventTapPort + ObjectChunkPort.
+
+**Crítico:** Replay não chama commands de capital/execution. Chunk imutável.
+
+**Security:** redact antes do chunk; grant `audit.replay`.
+
+## In / Out (R3)
+
+**In:** tap redacted; requestReplay (grant); AgencyScopePort; TraversalEvaluator.
+
+**Out:** Manifest hash chain; chunk SHA-256; ReplaySession cursor read-only; eventos replay requested/completed. Sem Order, Grant apply, JournalEntry.
+
+## Non-goals
+
+- Não segundo ledger.
+- Não BYTEA de payload no PG.
+- Não D-GOV-010.
 
 ## Agregados
 
@@ -18,7 +40,14 @@ type: debate
 
 ## Ports
 
-AuditUnitOfWork, DomainEventTapPort, ObjectChunkPort, TraversalEvaluator, AgencyScopePort.
+| Port | Responsabilidade |
+| --- | --- |
+| AuditUnitOfWork | estado + journal + outbox |
+| DomainEventTapPort | ingest |
+| ObjectChunkPort | append chunk |
+| TraversalEvaluator | T01 |
+| AgencyScopePort | tenancy |
+| ReplaySessionRepository | cursor |
 
 ## Comandos / eventos
 
@@ -34,6 +63,13 @@ stateDiagram-v2
   REPLAYING --> COMPLETED
   REPLAYING --> FAILED
 ```
+
+## Oráculos
+
+| ID | Gate | Esperado |
+| --- | --- | --- |
+| G3-AUD-01 | G3 | replay read-only |
+| G5-AUD-02 | G5 | UPDATE chunk rejeitado |
 
 ## Saída R3
 

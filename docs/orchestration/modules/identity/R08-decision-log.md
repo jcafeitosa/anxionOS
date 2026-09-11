@@ -7,7 +7,17 @@ status: draft
 
 **Rodada:** R8 — Síntese do debate e registro de decisões  
 **Data:** 2026-09-08  
-**Issue:** ANX-77 · implementação P0: ANX-28 (`done`, G7 2026-09-07) · structure-debate R01–R05: ANX-42
+**Issue:** ANX-77 · implementação P0: ANX-28 (`done`, G7 2026-09-07) · structure-debate R01–R05: ANX-42 · pack ANX-389
+
+## In / Out (R8)
+
+**In scope:** decisões de ownership Principal/SessionRef, engines PG vs grafo, proibição de token em evento.
+
+**Out of scope:** aceite spec 001; fechar ANX-342; stamp `accepted`.
+
+## Non-goals
+
+Não reabrir G7 de ANX-28 neste log. Não fake ST08 live.
 
 ## Participantes
 

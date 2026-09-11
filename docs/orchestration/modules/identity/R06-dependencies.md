@@ -7,7 +7,19 @@ status: draft
 
 **Rodada:** R6 — Upstream, packages, downstream e contratos cross-module  
 **Data:** 2026-09-08  
-**Issue:** ANX-77 (debate R06–R10) · implementação P0: ANX-28 (`done`, G7 2026-09-07) · debate estrutura R01–R05: ANX-42
+**Issue:** ANX-77 (debate R06–R10) · implementação P0: ANX-28 (`done`, G7 2026-09-07) · debate estrutura R01–R05: ANX-42 · pack ANX-389
+
+## In / Out (R6)
+
+**In:** PrincipalLookup consumers; Better Auth só em `apps/api`; AgencyScopePort (sem FK); eventing.
+
+**Out:** eventos `identity.*` sem token; projector `graph:identity:v1`. Sem membership, grant, secrets de connections.
+
+## Non-goals
+
+- Não D-GOV-010 neste módulo (risk P06).
+- Não import de better-auth em `domain/`.
+- Não pasta organization única (PC 02).
 
 ## Participantes
 

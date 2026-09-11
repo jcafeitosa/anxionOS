@@ -1,69 +1,84 @@
 ---
 type: debate
 ---
-
 # R01 — Contexto: `modules/audit`
 
 **Componente:** modules/audit  
-**Rodada:** R1 — Inventário documental e de código  
+**Rodada:** R1 — Inventário documental  
 **Pacote SDD:** P06  
-**Data:** 2026-09-07  
-**Issue debate estrutura:** ANX-42
+**Data:** 2026-09-11  
+**Issue pack:** ANX-389 · debate estrutura ANX-42 · debate módulo **ANX-107** · impl futura **ANX-108** (não neste pack)  
+**Callers:** [R02-boundaries.md](./R02-boundaries.md) · [ROUNDS.md](./ROUNDS.md).  
+**Fontes:** `brain/notes/anxionos-backend-structure.md` · `brain/notes/anxionos-storage-ownership.md` · spec 001 **draft** · ADR0002.
+
+## Objetivo da rodada
+
+Inventariar Flight Recorder, linhagem e replay **governado**. Manifests e índices — **não** segundo ledger. Specs **draft**. ST08 **0/23**. Não stamp `accepted`. Não G1. Não done ANX-342 / ANX-389.
 
 ## Propósito
 
-Flight Recorder, linhagem e replay governado — manifests e índices, não segundo ledger.
+Audit **ingere** eventos de domínio (tap redacted), **indexa** hash chain, **guarda** chunks imutáveis e **reproduz** sessões read-only com grant `audit.replay`. Operations exporta via `deltaRefId` — não reescreve o trail.
 
-## O que possui / não possui
+## In / Out (R1)
 
-### Possui (donos de estado ou composição)
+**In:** tap de eventing (`*.v1` redacted); POST replay (grant `audit.replay` + T01); GET manifests scoped; AgencyScope.
 
-- Manifests auditoria
-- índices
-- retenção
-- replay governado
-- Flight Recorder
+**Out:** AuditManifest + ReplaySession em PG; chunks object store; `audit.manifest.recorded.v1`; `audit.replay.requested.v1` / completed; projector `graph:audit:v1` (ids). **Não** ledger, **não** kill-switch, **não** logs de app.
 
-### Não possui (fronteiras ADR0002 / brain)
+## O módulo POSSUI
 
-- Journal domínio — cada módulo/eventing
-- Ledger — accounting
-- Logs app — observability
+AuditManifest, IndexCursor/AuditIndex, RetentionPolicy (ponteiro), ReplaySession (read-only), DeltaRef `ownerDomain=audit`, FlightRecorderChunk.
+
+## O módulo NÃO POSSUI (ownership nomeado)
+
+| Item | Dono |
+| --- | --- |
+| Journal de domínio | cada módulo + **eventing** |
+| Ledger | **accounting** |
+| Logs app | **packages/observability** |
+| Grant/Approval | **governance** |
+| Kill switch / D-GOV-010 | **risk** P06 |
+| Export job operacional | **operations** (consome deltaRefId) |
+| Pasta approvals/policies | **não criar** |
+
+## Non-goals
+
+- SQLite como audit trail único.
+- Replay que reexecuta ordens/capital.
+- Segundo ledger.
+- Cypher/driver Neo4j neste módulo.
+- Migration / ST08 live.
 
 ## Dependências
 
-| Direção | Componentes / artefatos |
+| Direção | Componentes |
 | --- | --- |
-| **Upstream** | packages/eventing, todos os módulos (eventos), graph (linhagem) |
-| **Downstream** | operations, governance (investigação), compliance export |
+| Upstream | packages/eventing, identity, organizations, governance T01 |
+| Downstream | operations, graph, Platform console |
 
 ## Armazenamento
 
-PG: manifests, índices, retenção. Neo4j: causalidade linhagem. SQLite: logs auxiliares, nunca audit trail único.
+PG manifests/índices/replay/journal. Object store chunks. Neo4j linhagem **só ids**. SQLite logs auxiliares **nunca** trail único. ST08 0/23.
 
-Fonte: `brain/notes/anxionos-storage-ownership.md`.
+## Estado do código
 
-## Estado do código atual
+**Ausente** como bounded context completo.
 
-**Ausente.**
+## Oráculos (não executados)
 
-## Perguntas abertas para debate
+| ID | Gate | Esperado |
+| --- | --- | --- |
+| G3-AUD-01 | G3 | replay read-only — zero writes accounting |
+| G3-AUD-02 | G3 | tap dedupe por eventId |
+| G5-AUD-01 | G5 | export/GET cross-tenant 403 |
+| G5-AUD-02 | G5 | UPDATE chunk rejeitado |
 
-- Replay governado: quem autoriza e escopo de mutação?
-- Retenção vs GDPR/export — operations overlap?
-- Flight Recorder volume — object storage vs PG?
-- Deduplicação replay Neo4j alinhada audit index?
+```mermaid
+flowchart LR
+  tap[eventing tap] --> aud[audit]
+  aud --> obj[object store chunks]
+  aud -->|manifest.recorded| ops[operations]
+  aud --> grp[graph:audit:v1]
+```
 
-## Fontes
-
-| Documento | Caminho |
-| --- | --- |
-| Estrutura modular (aceita) | `brain/notes/anxionos-backend-structure.md` |
-| Mapa de armazenamento | `brain/notes/anxionos-storage-ownership.md` |
-| SDD institucional | `brain/project-docs/specs/001-institutional-contract/spec.md` |
-| ADR0002 layout modular | `brain/project-docs/decisions/0002-adopt-modular-backend-layout.md` |
-| Playbook orquestração | `docs/orchestration/module-development-playbook.md` |
-
-## Próxima rodada
-
-→ **R02 — Fronteiras** (`R02-boundaries.md`) após consenso sobre inventário R1.
+→ **R02** ([R02-boundaries.md](./R02-boundaries.md))

@@ -7,7 +7,17 @@ status: draft
 
 **Rodada:** R7 — Registro de riscos, ameaças e controles propostos  
 **Data:** 2026-09-08  
-**Issue:** ANX-77 · implementação P0: ANX-28 (`done`, G7 2026-09-07)
+**Issue:** ANX-77 · implementação P0: ANX-28 (`done`, G7 2026-09-07) · pack ANX-389
+
+## In / Out (R7)
+
+**In scope:** ameaças de token em evento, sessão SQLite, cross-tenant Principal, identity importando Better Auth no domain.
+
+**Out of scope:** ameaça de venue (`execution`); PolicyVersion RISK (`risk` P06); membership leak (`organizations`).
+
+## Non-goals
+
+Não mitigar com stub de Principal. Não aceitar token no grafo.
 
 ## Participantes
 
