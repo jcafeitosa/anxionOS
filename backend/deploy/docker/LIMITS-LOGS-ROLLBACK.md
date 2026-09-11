@@ -1,3 +1,7 @@
+---
+type: spec
+---
+
 # ANX-162 S5 — resource limits, structured logging, rollback
 
 Slice **S5** closes operational controls for the `engines-sandbox` profile:

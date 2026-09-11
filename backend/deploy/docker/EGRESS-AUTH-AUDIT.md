@@ -1,3 +1,7 @@
+---
+type: spec
+---
+
 # ANX-162 S4 — egress deny, service auth, audit manifest
 
 Slice **S4** closes three gateway spec controls for the `engines-sandbox` profile:
