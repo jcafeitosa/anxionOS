@@ -154,6 +154,50 @@ describe("hasCapability", () => {
 			),
 		).resolves.toBe(false);
 	});
+
+	/**
+	 * Bypass corrigido no G2: `undefined` significava "qualquer escopo", entao um
+	 * grant de agencia autorizava operacao global quando o header era omitido.
+	 */
+	test("null scope rejects an agency-scoped grant", async () => {
+		const grantRepository = createInMemoryGrantRepository([
+			seedGrant({ capability: "identity.admin", scopeId }),
+		]);
+		await expect(
+			hasCapability(
+				{ grantRepository },
+				{ principalId, capability: "identity.admin", asOf, scopeId: null },
+			),
+		).resolves.toBe(false);
+	});
+
+	test("null scope accepts an unscoped grant", async () => {
+		const grantRepository = createInMemoryGrantRepository([
+			// Fixture: adapters podem nao materializar `scopeId` (grant sem escopo).
+			seedGrant({
+				capability: "identity.admin",
+				scopeId: undefined as unknown as string,
+			}),
+		]);
+		await expect(
+			hasCapability(
+				{ grantRepository },
+				{ principalId, capability: "identity.admin", asOf, scopeId: null },
+			),
+		).resolves.toBe(true);
+	});
+
+	test("omitted scope keeps any-scope behaviour for scope-agnostic tokens", async () => {
+		const grantRepository = createInMemoryGrantRepository([
+			seedGrant({ capability: PLATFORM_CONSOLE_CAPABILITY, scopeId }),
+		]);
+		await expect(
+			hasCapability(
+				{ grantRepository },
+				{ principalId, capability: PLATFORM_CONSOLE_CAPABILITY, asOf },
+			),
+		).resolves.toBe(true);
+	});
 });
 
 describe("getAuthorityEpoch", () => {

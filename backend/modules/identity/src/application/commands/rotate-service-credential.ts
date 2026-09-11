@@ -136,7 +136,11 @@ export async function rotateServiceCredential(
 		}
 		await context.publishEvents(events);
 		if (command.commandId) {
-			const result = await recordIdempotentCommand(context, {
+			// `created.id` e novo NESTA transacao, entao "already-recorded" e
+			// inalcancavel: uma key concorrente aponta para OUTRO credencial e
+			// `recordIdempotentCommand` lanca IDN_DUPLICATE_IDEMPOTENCY (mesma
+			// semantica de suspend/revoke). Nao ha ramo morto a manter.
+			await recordIdempotentCommand(context, {
 				commandId: command.commandId,
 				commandName: "RotateServiceCredential",
 				aggregateId: created.id,
@@ -148,14 +152,6 @@ export async function rotateServiceCredential(
 					status: created.status,
 				},
 			});
-			if (result === "already-recorded") {
-				const applied = await context.serviceCredentialRepository.findById(
-					created.id,
-				);
-				if (applied) {
-					return { created: applied, replaced: [] as string[] };
-				}
-			}
 		}
 		return { created, replaced };
 	});

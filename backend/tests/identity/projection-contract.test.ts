@@ -122,4 +122,26 @@ describe("identity :User projection contract (D-IDN-020)", () => {
 		expect(serialized).not.toContain("auth-1");
 		expect(serialized).not.toContain("authUserId");
 	});
+
+	/**
+	 * LOW do G2: um atributo OPCIONAL corrompido no envelope derrubava o nó
+	 * inteiro (o `.strict()` do contrato reprovava o candidato e o projector
+	 * recebia `null`) — perda silenciosa de projeção. O campo inválido é
+	 * omitido; o nó segue projetado.
+	 */
+	test("a malformed optional attribute does not drop the whole node", () => {
+		const node = toIdentityUserProjectionNode(
+			envelope(IDENTITY_EVENT_TYPES.PRINCIPAL_SUSPENDED, {
+				principalId,
+				kind: "not-a-kind",
+				revision: -5,
+				email: "not-an-email",
+			}),
+		);
+		expect(node).not.toBeNull();
+		expect(node?.status).toBe("suspended");
+		expect(node?.kind).toBeUndefined();
+		expect(node?.revision).toBeUndefined();
+		expect(node?.email).toBeUndefined();
+	});
 });

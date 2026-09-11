@@ -70,12 +70,24 @@ export function parseCommandResultSnapshot(
 	return identityCommandResultSchema.parse(snapshot);
 }
 
-/** PostgreSQL unique violation (`23505`) — used to classify index races. */
+/**
+ * PostgreSQL unique violation (`23505`) — used to classify index races.
+ *
+ * O driver nao expoe o codigo no topo: drizzle-orm 0.45 envolve o erro do `pg`
+ * em `DrizzleQueryError` com `cause = DatabaseError { code: "23505" }`. Ler so
+ * `error.code` nao detectava NADA em producao (os mapeamentos 23505 ficavam
+ * mortos), por isso a cadeia de `cause` e percorrida.
+ */
 export function isUniqueViolation(error: unknown): boolean {
-	return (
-		typeof error === "object" &&
-		error !== null &&
-		"code" in error &&
-		(error as { code?: unknown }).code === "23505"
-	);
+	let current: unknown = error;
+	for (let depth = 0; depth < 5; depth += 1) {
+		if (typeof current !== "object" || current === null) {
+			return false;
+		}
+		if ((current as { code?: unknown }).code === "23505") {
+			return true;
+		}
+		current = (current as { cause?: unknown }).cause;
+	}
+	return false;
 }

@@ -31,6 +31,24 @@ export function createInMemoryPrincipalRepository(
 ): PrincipalRepository {
 	const principals = new Map(seed.map((p) => [p.id, { ...p }]));
 
+	function createPrincipal(input: NewPrincipal): Principal {
+		const principal: Principal = {
+			id: crypto.randomUUID(),
+			authUserId: input.authUserId ?? null,
+			email: input.email,
+			kind: input.kind ?? "human",
+			status: "active",
+			revision: 1,
+			createdAt: new Date(),
+			suspendedAt: null,
+			suspensionReason: null,
+			revokedAt: null,
+			revocationReason: null,
+		};
+		principals.set(principal.id, principal);
+		return principal;
+	}
+
 	function bump(principal: Principal): Principal {
 		return { ...principal, revision: principal.revision + 1 };
 	}
@@ -70,21 +88,21 @@ export function createInMemoryPrincipalRepository(
 			return [...principals.values()];
 		},
 		async create(input: NewPrincipal) {
-			const principal: Principal = {
-				id: crypto.randomUUID(),
-				authUserId: input.authUserId ?? null,
-				email: input.email,
-				kind: input.kind ?? "human",
-				status: "active",
-				revision: 1,
-				createdAt: new Date(),
-				suspendedAt: null,
-				suspensionReason: null,
-				revokedAt: null,
-				revocationReason: null,
-			};
-			principals.set(principal.id, principal);
-			return principal;
+			return createPrincipal(input);
+		},
+		async createIfAbsent(input: NewPrincipal) {
+			for (const existing of principals.values()) {
+				if (
+					(input.authUserId ?? null) !== null &&
+					existing.authUserId === input.authUserId
+				) {
+					return null;
+				}
+				if (existing.email === input.email) {
+					return null;
+				}
+			}
+			return createPrincipal(input);
 		},
 		async markSuspended(id, reasonCode, suspendedAt, expectedRevision) {
 			const principal = principals.get(id);

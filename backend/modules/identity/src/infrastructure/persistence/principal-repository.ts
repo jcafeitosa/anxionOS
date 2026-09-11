@@ -84,6 +84,20 @@ export function createDrizzlePrincipalRepository(
 			}
 			return toPrincipal(row);
 		},
+		async createIfAbsent(input: NewPrincipal): Promise<Principal | null> {
+			// Sem alvo: qualquer indice unico em conflito (auth_user_id ou email)
+			// resolve como "nenhuma linha" em vez de 23505, preservando a transacao.
+			const rows = await db
+				.insert(principals)
+				.values({
+					authUserId: input.authUserId ?? null,
+					email: input.email,
+					kind: input.kind ?? "human",
+				})
+				.onConflictDoNothing()
+				.returning();
+			return rows[0] ? toPrincipal(rows[0]) : null;
+		},
 		async markSuspended(
 			id: string,
 			reasonCode: string,

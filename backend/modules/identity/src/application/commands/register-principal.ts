@@ -64,16 +64,51 @@ export async function registerPrincipal(
 			command.email,
 		);
 		if (emailTaken) {
+			// A corrida pode commitar o vencedor ENTRE as duas leituras: se a linha
+			// que ocupa o e-mail e a MESMA intencao (mesmo authUserId), isso e o
+			// replay do nosso proprio registro, nao e-mail de terceiro.
+			if (emailTaken.authUserId === command.authUserId) {
+				return emailTaken;
+			}
 			throwIdentityError(
 				"IDN_PRINCIPAL_EMAIL_TAKEN",
 				"Email already registered",
 			);
 		}
-		const principal = await context.principalRepository.create({
+		// Insert tolerante a conflito: NAO aborta a transacao com 23505. Se o
+		// vencedor da corrida ja commitou, `null` volta e resolvemos por releitura
+		// (o INSERT ON CONFLICT espera o desfecho do concorrente antes de decidir).
+		const created = await context.principalRepository.createIfAbsent({
 			authUserId: command.authUserId,
 			email: command.email,
 			kind: command.kind ?? "human",
 		});
+		if (!created) {
+			const racedAuthUser = await context.principalRepository.findByAuthUserId(
+				command.authUserId,
+			);
+			if (racedAuthUser) {
+				// Mesma intencao (mesmo authUserId): replay idempotente.
+				return racedAuthUser;
+			}
+			const racedEmail = await context.principalRepository.findByEmail(
+				command.email,
+			);
+			if (racedEmail) {
+				if (racedEmail.authUserId === command.authUserId) {
+					return racedEmail;
+				}
+				throwIdentityError(
+					"IDN_PRINCIPAL_EMAIL_TAKEN",
+					"Email already registered",
+				);
+			}
+			throwIdentityError(
+				"IDN_DUPLICATE_IDEMPOTENCY",
+				"Concurrent registration with the same idempotency key",
+			);
+		}
+		const principal = created;
 		await context.publishEvents([
 			createPrincipalRegisteredEvent({
 				principalId: principal.id,

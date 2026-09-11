@@ -51,19 +51,10 @@ export async function recordSessionRevoked(
 		throwIdentityError("IDN_PRINCIPAL_NOT_FOUND", "Principal not found");
 	}
 
-	const existing = await deps.sessionRefRepository.findById(
-		command.sessionRefId,
-	);
-	if (existing?.status === "revoked") {
-		return { sessionRef: toSessionRefDto(existing), transitioned: false };
-	}
-	if (!existing && !command.externalRefHash) {
-		throwIdentityError(
-			"IDN_SESSION_NOT_FOUND",
-			"Unknown session reference requires externalRefHash",
-		);
-	}
-
+	// Os dois atalhos de sucesso ("ja revogada" e replay do journal) vivem DENTRO
+	// da transacao e DEPOIS da checagem de intencao: um early-return antes dela
+	// respondia 200 a reuso de key em OUTRO sessionRef ja revogado, mascarando o
+	// conflito IDN_DUPLICATE_IDEMPOTENCY (achado MEDIUM do G2).
 	return deps.unitOfWork.runInTransaction(async (context) => {
 		if (command.commandId) {
 			// The aggregate IS the session reference: reusing the key for another
@@ -84,6 +75,18 @@ export async function recordSessionRevoked(
 					};
 				}
 			}
+		}
+		const existing = await context.sessionRefRepository.findById(
+			command.sessionRefId,
+		);
+		if (existing?.status === "revoked") {
+			return { sessionRef: toSessionRefDto(existing), transitioned: false };
+		}
+		if (!existing && !command.externalRefHash) {
+			throwIdentityError(
+				"IDN_SESSION_NOT_FOUND",
+				"Unknown session reference requires externalRefHash",
+			);
 		}
 		const recorded = existing
 			? await context.sessionRefRepository.revoke(

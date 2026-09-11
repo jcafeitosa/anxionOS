@@ -243,7 +243,7 @@ export const identityPrincipalsOpenApi = {
 		operationId: "identityGetPrincipal",
 		summary: "Get one principal",
 		description:
-			"Module: identity. Returns the public principal DTO (no `authUserId`, no credential material). Self-access is allowed; otherwise the caller needs the `identity.admin`/`identity.read` grant. Suspended and revoked principals fail closed with 404. Optional `x-agency-id` requires membership in that agency (otherwise `IDN_CROSS_TENANT`).",
+			"Module: identity. Returns the public principal DTO (no `authUserId`, no credential material). Self-access is allowed; otherwise the caller needs the `identity.read` grant (`identity.admin` does not imply it, D-IDN-034). Suspended and revoked principals fail closed with 404. Optional `x-agency-id` requires membership in that agency (otherwise `IDN_CROSS_TENANT`).",
 		security: [{ cookieAuth: [] }],
 		parameters: identityPrincipalParams,
 		responses: {
@@ -267,7 +267,11 @@ export const identityPrincipalsOpenApi = {
 		parameters: identityPrincipalParams,
 		responses: {
 			"200": { description: "`{ sessions }` newest first." },
+			"401": { description: "No session." },
 			"403": { description: "`IDN_FORBIDDEN` / `IDN_CROSS_TENANT`." },
+			"404": {
+				description: "`IDN_PRINCIPAL_NOT_FOUND` (includes suspended/revoked).",
+			},
 		},
 	}),
 	registerPrincipal: op({
@@ -296,7 +300,12 @@ export const identityPrincipalsOpenApi = {
 		},
 		responses: {
 			"200": { description: "`{ principal }`." },
-			"403": { description: "`IDN_FORBIDDEN`." },
+			"400": {
+				description:
+					"Missing/invalid `Idempotency-Key` or body (`VALIDATION_ERROR`).",
+			},
+			"401": { description: "No session." },
+			"403": { description: "`IDN_FORBIDDEN` / `IDN_CROSS_TENANT`." },
 			"409": {
 				description:
 					"`IDN_PRINCIPAL_EMAIL_TAKEN` / `IDN_DUPLICATE_IDEMPOTENCY`.",
@@ -335,6 +344,13 @@ export const identityPrincipalsOpenApi = {
 		},
 		responses: {
 			"200": { description: "`{ principal }` suspended." },
+			"400": {
+				description:
+					"Missing/invalid `Idempotency-Key` or body (`VALIDATION_ERROR`).",
+			},
+			"401": { description: "No session." },
+			"403": { description: "`IDN_FORBIDDEN` / `IDN_CROSS_TENANT`." },
+			"404": { description: "`IDN_PRINCIPAL_NOT_FOUND`." },
 			"409": {
 				description: "`IDN_REVISION_CONFLICT` / `IDN_PRINCIPAL_REVOKED`.",
 			},
@@ -377,7 +393,18 @@ export const identityPrincipalsOpenApi = {
 		},
 		responses: {
 			"200": { description: "`{ principal }` revoked." },
+			"400": {
+				description:
+					"Missing/invalid `Idempotency-Key` or body (`VALIDATION_ERROR`).",
+			},
+			"401": { description: "No session." },
+			"403": { description: "`IDN_FORBIDDEN` / `IDN_CROSS_TENANT`." },
+			"404": { description: "`IDN_PRINCIPAL_NOT_FOUND`." },
 			"409": { description: "`IDN_REVISION_CONFLICT`." },
+			"503": {
+				description:
+					"`IDN_IDENTITY_UNAVAILABLE` when session revocation fails.",
+			},
 		},
 	}),
 	revokeSession: op({
@@ -408,10 +435,16 @@ export const identityPrincipalsOpenApi = {
 		},
 		responses: {
 			"200": { description: "`{ sessionRef, transitioned }`." },
-			"403": { description: "`IDN_FORBIDDEN`." },
+			"400": {
+				description:
+					"Missing/invalid `Idempotency-Key` or body (`VALIDATION_ERROR`).",
+			},
+			"401": { description: "No session." },
+			"403": { description: "`IDN_FORBIDDEN` / `IDN_CROSS_TENANT`." },
 			"404": {
 				description: "`IDN_PRINCIPAL_NOT_FOUND` / `IDN_SESSION_NOT_FOUND`.",
 			},
+			"409": { description: "`IDN_DUPLICATE_IDEMPOTENCY`." },
 		},
 	}),
 	listRevokedSessions: op({
@@ -433,7 +466,8 @@ export const identityPrincipalsOpenApi = {
 		],
 		responses: {
 			"200": { description: "`{ sessions }` newest first." },
-			"403": { description: "`IDN_FORBIDDEN`." },
+			"401": { description: "No session." },
+			"403": { description: "`IDN_FORBIDDEN` / `IDN_CROSS_TENANT`." },
 		},
 	}),
 } as const;

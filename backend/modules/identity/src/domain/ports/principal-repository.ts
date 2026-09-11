@@ -13,6 +13,13 @@ export interface PrincipalRepository {
 	listSuspended(): Promise<Principal[]>;
 	listAll(): Promise<Principal[]>;
 	create(input: NewPrincipal): Promise<Principal>;
+	/**
+	 * Insert that tolerates a concurrent winner for the same unique key:
+	 * `ON CONFLICT DO NOTHING`, so the transaction is NOT aborted by 23505 and
+	 * the caller can resolve the race by re-reading. `null` = a conflicting row
+	 * exists (it has committed by the time this returns).
+	 */
+	createIfAbsent(input: NewPrincipal): Promise<Principal | null>;
 	markSuspended(
 		id: string,
 		reasonCode: string,

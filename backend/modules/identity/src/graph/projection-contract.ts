@@ -86,17 +86,21 @@ export function toIdentityUserProjectionNode(
 			: envelope.eventType === IDENTITY_EVENT_TYPES.PRINCIPAL_REVOKED
 				? "revoked"
 				: "active";
+	// Cada atributo OPCIONAL e validado isoladamente: um campo corrompido no
+	// envelope nao pode descartar o no inteiro (perda silenciosa de projecao).
+	// O que nao valida e omitido; o que valida e projetado.
+	const email = emailAddressSchema.safeParse(payload.email);
+	const kind = principalKindSchema.safeParse(payload.kind);
+	const revision = principalRevisionSchema.safeParse(payload.revision);
 	const candidate = {
 		nodeKey: `user:${payload.principalId}`,
 		principalId: payload.principalId,
 		// O evento `registered` é o único que carrega e-mail; atualizações de
 		// e-mail não reprojetam (decisão registrada em R11).
-		email: typeof payload.email === "string" ? payload.email : undefined,
-		...(typeof payload.kind === "string" ? { kind: payload.kind } : {}),
+		...(email.success ? { email: email.data } : {}),
+		...(kind.success ? { kind: kind.data } : {}),
 		status,
-		...(typeof payload.revision === "number"
-			? { revision: payload.revision }
-			: {}),
+		...(revision.success ? { revision: revision.data } : {}),
 		ownerDomain: envelope.ownerDomain,
 		eventId: envelope.eventId,
 		checkpoint: envelope.occurredAt,

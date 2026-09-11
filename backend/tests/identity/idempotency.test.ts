@@ -84,13 +84,17 @@ describe("identity command idempotency (R04)", () => {
 	test("maps a concurrent journal primary-key collision to IDN_DUPLICATE_IDEMPOTENCY", async () => {
 		const repository = createInMemoryPrincipalRepository([activePrincipal]);
 		const baseJournal = createInMemoryCommandJournal();
-		// Simulate the losing side of the concurrent race: the journal insert
-		// fails with PostgreSQL 23505 (PostgresError carries `code`).
+		// Forma REAL do erro no drizzle 0.45: o codigo vem em `cause`, nao no
+		// topo. Um fake com `code` no topo passaria mesmo com o unwrap quebrado.
 		const collidingJournal: CommandJournalRepository = {
 			findByCommandId: (id) => baseJournal.findByCommandId(id),
 			async record() {
-				throw Object.assign(new Error("duplicate key value"), {
+				const databaseError = Object.assign(new Error("duplicate key value"), {
 					code: "23505",
+				});
+				throw Object.assign(new Error("Failed query"), {
+					name: "DrizzleQueryError",
+					cause: databaseError,
 				});
 			},
 		};

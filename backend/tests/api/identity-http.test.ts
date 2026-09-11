@@ -221,6 +221,36 @@ describe("identity HTTP boundary (/v1/identity)", () => {
 		expect((await response.json()).error.details.code).toBe("IDN_CROSS_TENANT");
 	});
 
+	/**
+	 * G2 revalidacao: `scopeId: undefined` em `hasCapability` significava
+	 * "qualquer escopo", entao um grant de agencia autorizava rota PLATFORM-global
+	 * (aqui, o ledger global de sessoes revogadas) so por omitir o header.
+	 */
+	test("grant de agência não autoriza rota global sem x-agency-id", async () => {
+		const { app } = harness({
+			capabilities: ["identity.admin"],
+			grantScopeId: agencyId,
+			memberships: [agencyId],
+		});
+		const response = await app.handle(request("/v1/identity/sessions/revoked"));
+		expect(response.status).toBe(403);
+		expect((await response.json()).error.details.code).toBe("IDN_FORBIDDEN");
+	});
+
+	test("grant de agência autoriza a mesma agência quando declarada", async () => {
+		const { app } = harness({
+			capabilities: ["identity.admin"],
+			grantScopeId: agencyId,
+			memberships: [agencyId],
+		});
+		const response = await app.handle(
+			request("/v1/identity/sessions/revoked", {
+				headers: { "x-agency-id": agencyId },
+			}),
+		);
+		expect(response.status).toBe(200);
+	});
+
 	test("suspend exige Idempotency-Key (400) e aplica com a key (200)", async () => {
 		const { app } = harness({ capabilities: ["identity.admin"] });
 		const withoutKey = await app.handle(

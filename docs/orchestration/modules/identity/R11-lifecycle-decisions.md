@@ -99,6 +99,34 @@ R04:64-66 pede `identity.admin + T01` para as rotas de comando. A implementaçã
 
 `identityUserProjectionNodeSchema` é `.strict()`: atributo proibido (token, `secretHash`, `externalRefHash`, cookie) **falha**. A factory `toIdentityUserProjectionNode` monta o nó por whitelist, então não consegue emitir atributo proibido — a proteção vale para um projector que construa o nó à mão. O teste de vazamento exercita a factory; o de rejeição exercita o schema direto. A projeção só terá consumidor de produção no P03 (`graph`).
 
+## D-IDN-035 — `scopeId: null` significa "só autoridade de plataforma" (corrige o bypass de escopo)
+
+`hasCapability` (governance) tinha três estados implícitos em dois: `scopeId` ausente valia como "qualquer escopo" e o boundary de identity passava `input.agencyId` — **`undefined` quando o header `x-agency-id` era omitido**. Resultado: um grant emitido para a agência A autorizava as rotas globais (`GET /v1/identity/sessions/revoked`, registro, suspend, revoke) bastando **não** enviar o header. Achado HIGH da revalidação G2.
+
+**Decisão.** `scopeId` passa a ter três significados explícitos: `string` = exatamente aquele escopo; `null` = **apenas** grant sem escopo (autoridade de plataforma); `undefined` = sem filtro de escopo, reservado a capabilities scope-agnósticas por contrato (`console.platform`). O boundary de identity passa `scopeId: input.agencyId ?? null`.
+
+**Consequência aceita e lacuna registrada.** `governance_grants.scope_id` é `NOT NULL` e `scope_kind` só admite `agency|organization` — **não existe escopo de plataforma modelado**. Hoje nenhum seed concede `identity.read`/`identity.admin`, então nenhum fluxo real depende de operação global; quando existir operador de plataforma com identity admin, o grant dele precisa de um escopo de plataforma de primeira classe no `governance` (não de um UUID sentinela como o `console.platform` do dev seed). Lacuna rastreada em **ANX-462**.
+
+## D-IDN-036 — Registro concorrente resolve por `ON CONFLICT DO NOTHING` + releitura
+
+`registerPrincipal` usava `INSERT` puro: 10 chamadas concorrentes com a **mesma** `Idempotency-Key` devolviam `[200,500,500,...]` (23505 cru abortando a transação). Achado HIGH da revalidação G2.
+
+**Decisão.** A porta `PrincipalRepository` ganhou `createIfAbsent` (`INSERT ... ON CONFLICT DO NOTHING RETURNING`), que espera o desfecho do concorrente em vez de abortar. Sem linha devolvida, o comando resolve por releitura: mesmo `authUserId` → replay idempotente do mesmo principal; `authUserId` diferente ocupando o e-mail → `IDN_PRINCIPAL_EMAIL_TAKEN`; nada encontrado → `IDN_DUPLICATE_IDEMPOTENCY`.
+
+**Corrida de ordenação coberta.** Entre `findByAuthUserId` e `findByEmail` o vencedor pode commitar; se a linha que ocupa o e-mail tem o **mesmo** `authUserId`, ela é o nosso próprio registro (replay), não e-mail de terceiro. Sem essa checagem o perdedor recebia `IDN_PRINCIPAL_EMAIL_TAKEN` falso — a corrida foi reproduzida 5× contra PostgreSQL real antes e depois da correção (teste de integração com 10 chamadas).
+
+## D-IDN-037 — O atalho "já revogada" não precede a checagem de intenção da key
+
+`recordSessionRevoked` lia a `SessionRef` **fora** da transação e retornava `transitioned: false` antes de consultar o journal: reusar a `Idempotency-Key` em **outro** sessionRef já revogado devolvia 200 (replay do agregado errado) em vez de `IDN_DUPLICATE_IDEMPOTENCY`. Achado MEDIUM da revalidação G2.
+
+**Decisão.** As duas saídas de sucesso (replay do journal e "já revogada") vivem dentro da transação, **depois** da validação de intenção. A leitura de estado passou a acontecer dentro da TX — também elimina a leitura obsoleta.
+
+## D-IDN-038 — Atributo opcional inválido é omitido, não derruba o nó de projeção
+
+Na projeção `:User`, um `kind`/`email`/`revision` opcional corrompido no envelope reprovava o candidato no `.strict()` e o projector recebia `null` — perda silenciosa do nó inteiro. Achado LOW da revalidação G2.
+
+**Decisão.** Cada atributo opcional é validado isoladamente (`safeParse`): o que valida é projetado, o que não valida é omitido. O `.strict()` continua rejeitando atributo **proibido** (segredo) para quem constrói o nó à mão (D-IDN-033) — esse caso segue falhando, e é o que o teste de rejeição exercita. A factory monta o nó por whitelist, então `secretHash` nunca chega a ser candidato.
+
 ## Conflito aberto — R04 vs D-IDN-023 (`organizationId` em Principal)
 
 R04 descreve o payload de `identity.principal.registered.v1` com `organizationId` e uma idempotência `(organizationId, subjectKey)`. D-IDN-023 (aceito) define Principal **global**, com tenancy via Membership em `organizations`, e D-IDN-006 fixa idempotência por `authUserId`.

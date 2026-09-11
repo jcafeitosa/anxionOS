@@ -38,9 +38,12 @@ async function assertCapability(
 		{
 			principalId: input.principalId,
 			capability: input.capability,
-			// Quando o chamador declara uma agencia, o grant precisa cobrir ESSA
+			// Sem agencia declarada a requisicao e PLATFORM-global: `null` exige
+			// autoridade sem escopo. Um grant de agencia nunca autoriza operacao
+			// global (era o bypass: omitir o header degradava para "qualquer
+			// escopo"). Com agencia declarada, o grant precisa cobrir ESSA
 			// agencia: um grant emitido para A nao autoriza operar sob B.
-			scopeId: input.agencyId,
+			scopeId: input.agencyId ?? null,
 		},
 	);
 	if (!allowed) {
