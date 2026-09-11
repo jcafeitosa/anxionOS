@@ -247,19 +247,19 @@ function PlatformRuntimesSection() {
 	}, []);
 
 	return (
-		<section aria-labelledby="platform-runtimes-heading" id="runtimes">
+		<section aria-labelledby="platform-runtime-heading" id="runtimes">
 			<h2
-				id="platform-runtimes-heading"
+				id="platform-runtime-heading"
 				className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground"
 			>
-				Runtimes de plataforma
+				Runtimes e quotas
 			</h2>
 			{view.kind === "loading" ? (
 				<HonestState
 					kind="loading"
 					titleAs="h3"
 					title="Consultando runtimes PLATFORM"
-					description="GET /v1/operations/platform/runtimes. Não copia métricas de Agency."
+					description="GET /v1/operations/platform/runtimes. Nenhuma métrica de Agency é copiada."
 				/>
 			) : null}
 			{view.kind === "denied" ? (
@@ -267,7 +267,7 @@ function PlatformRuntimesSection() {
 					kind="denied"
 					titleAs="h3"
 					title="Runtimes de plataforma negados"
-					description={`HTTP ${String(view.status)}. O console não inventa listagem de runtimes.`}
+					description={`HTTP ${String(view.status)}. O console não inventa quotas.`}
 				/>
 			) : null}
 			{view.kind === "stale" ? (
@@ -318,19 +318,19 @@ function PlatformRecoverySection() {
 	}, []);
 
 	return (
-		<section aria-labelledby="platform-recovery-heading" id="recovery">
+		<section aria-labelledby="platform-rollout-heading" id="rollout">
 			<h2
-				id="platform-recovery-heading"
+				id="platform-rollout-heading"
 				className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground"
 			>
-				Recovery de plataforma
+				Rollout e export/recovery
 			</h2>
 			{view.kind === "loading" ? (
 				<HonestState
 					kind="loading"
 					titleAs="h3"
 					title="Consultando recovery PLATFORM"
-					description="GET /v1/operations/platform/recovery. Não chama recovery-tasks de Agency nem executa break-glass."
+					description="GET /v1/operations/platform/recovery. Não lista recovery-tasks de Agency nem executa break-glass."
 				/>
 			) : null}
 			{view.kind === "denied" ? (

@@ -5,6 +5,7 @@ export const DEV_SEED_PASSWORD = "anxionos-dev-pass";
 export const DEV_SEED_ACCOUNTS = {
 	owner: "owner@anxionos.local",
 	operator: "operator@anxionos.local",
+	platform: "platform@anxionos.local",
 	none: "none@anxionos.local",
 	multi: "multi@anxionos.local",
 } as const;

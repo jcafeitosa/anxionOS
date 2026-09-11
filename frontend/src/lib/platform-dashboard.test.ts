@@ -26,6 +26,10 @@ test("PlatformDashboard shows denied state when platformAccess is false", () => 
 test("PlatformDashboard fetches platform-scoped operations APIs", () => {
 	assert.match(source, /fetchPlatformHealth/);
 	assert.match(source, /fetchPlatformIncidents/);
+	assert.match(source, /fetchPlatformRuntimes/);
+	assert.match(source, /fetchPlatformRecovery/);
 	assert.match(source, /\/v1\/operations\/platform\/health/);
 	assert.match(source, /\/v1\/operations\/platform\/incidents/);
+	assert.match(source, /\/v1\/operations\/platform\/runtimes/);
+	assert.match(source, /\/v1\/operations\/platform\/recovery/);
 });
