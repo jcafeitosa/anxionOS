@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { PLATFORM_SCOPE_ID } from "@anxionos/contracts/governance";
 import {
 	type Principal,
 	SessionRevocationUnavailableError,
@@ -38,12 +39,28 @@ const activePrincipal: Principal = {
 	revocationReason: null,
 };
 
+	const targetPrincipal: Principal = {
+		id: otherPrincipalId,
+		authUserId: "auth-2",
+		email: "member@example.com",
+		kind: "human",
+		status: "active",
+		revision: 1,
+		createdAt: new Date("2026-09-08T12:00:00.000Z"),
+		suspendedAt: null,
+		suspensionReason: null,
+		revokedAt: null,
+		revocationReason: null,
+	};
+
 interface HarnessOptions {
 	principals?: Principal[];
 	capabilities?: string[];
 	authUserId?: string | null;
 	grantScopeId?: string;
 	memberships?: string[];
+	/** Agencias de OUTRO principal (alvo), para os testes de escopo do alvo. */
+	targetAgencyIds?: string[];
 	sessionRevokerFails?: boolean;
 }
 
@@ -59,6 +76,7 @@ function harness(options: HarnessOptions = {}) {
 		options.authUserId === undefined ? "auth-1" : options.authUserId;
 	const grants = options.capabilities ?? [];
 	const memberships = options.memberships ?? [];
+	const targetAgencies = options.targetAgencyIds ?? [];
 
 	const app = new Elysia().use(
 		createIdentityPlugin({
@@ -78,7 +96,8 @@ function harness(options: HarnessOptions = {}) {
 					return grants.map((capability) => ({
 						id: "66666666-6666-4666-8666-666666666666",
 						capability,
-						scopeId: options.grantScopeId,
+						// Sem `grantScopeId` o grant e' de PLATAFORMA (autoridade global).
+						scopeId: options.grantScopeId ?? PLATFORM_SCOPE_ID,
 						status: "active",
 						validFrom: new Date("2026-01-01T00:00:00.000Z"),
 						validUntil: null,
@@ -86,11 +105,13 @@ function harness(options: HarnessOptions = {}) {
 				},
 			} as never,
 			agencyScope: {
-				async isMember(id: string) {
-					return memberships.includes(id);
+				async isMember(id: string, principal: string) {
+					return principal === principalId
+						? memberships.includes(id)
+						: targetAgencies.includes(id);
 				},
-				async listAgencyIdsForPrincipal() {
-					return memberships;
+				async listAgencyIdsForPrincipal(principal: string) {
+					return principal === principalId ? memberships : targetAgencies;
 				},
 			},
 			...(options.sessionRevokerFails
@@ -237,18 +258,109 @@ describe("identity HTTP boundary (/v1/identity)", () => {
 		expect((await response.json()).error.details.code).toBe("IDN_FORBIDDEN");
 	});
 
-	test("grant de agência autoriza a mesma agência quando declarada", async () => {
-		const { app } = harness({
+	/**
+	 * F2 da revalidacao G4: o ledger de sessoes revogadas e' GLOBAL (sessionRefs
+	 * nao tem dimensao de agencia), entao exige autoridade de PLATAFORMA — um
+	 * grant de agencia, mesmo declarando a propria agencia, nao le metadados de
+	 * sessao de outros tenants.
+	 */
+	test("ledger global de sessões exige autoridade de plataforma", async () => {
+		const agencyScoped = harness({
 			capabilities: ["identity.admin"],
 			grantScopeId: agencyId,
 			memberships: [agencyId],
 		});
-		const response = await app.handle(
+		const denied = await agencyScoped.app.handle(
 			request("/v1/identity/sessions/revoked", {
 				headers: { "x-agency-id": agencyId },
 			}),
 		);
+		expect(denied.status).toBe(403);
+		expect((await denied.json()).error.details.code).toBe("IDN_FORBIDDEN");
+
+		const platform = harness({
+			capabilities: ["identity.admin"],
+		});
+		const allowed = await platform.app.handle(
+			request("/v1/identity/sessions/revoked"),
+		);
+		expect(allowed.status).toBe(200);
+	});
+
+	/**
+	 * F1 da revalidacao G4 (HIGH, tambem achado por mim): o escopo declarado
+	 * limita o ALVO. Sem isto, um grant de agencia A lia (e-mail incluso) e
+	 * suspendia principal de qualquer outra agencia.
+	 */
+	test("grant de agência não opera sobre principal de outra agência", async () => {
+		const foreign = harness({
+			principals: [activePrincipal, targetPrincipal],
+			capabilities: ["identity.admin"],
+			grantScopeId: agencyId,
+			memberships: [agencyId],
+			targetAgencyIds: ["99999999-9999-4999-8999-999999999999"],
+		});
+		const read = await foreign.app.handle(
+			request(`/v1/identity/principals/${otherPrincipalId}`, {
+				headers: { "x-agency-id": agencyId },
+			}),
+		);
+		expect(read.status).toBe(403);
+		expect((await read.json()).error.details.code).toBe("IDN_CROSS_TENANT");
+
+		const suspend = await foreign.app.handle(
+			request(`/v1/identity/principals/${otherPrincipalId}/suspend`, {
+				method: "POST",
+				headers: {
+					"x-agency-id": agencyId,
+					"idempotency-key": commandId,
+				},
+				body: { reasonCode: "ops.manual" },
+			}),
+		);
+		expect(suspend.status).toBe(403);
+		expect((await suspend.json()).error.details.code).toBe("IDN_CROSS_TENANT");
+	});
+
+	test("grant de agência opera sobre principal membro da mesma agência", async () => {
+		const { app } = harness({
+			principals: [activePrincipal, targetPrincipal],
+			// `identity.read`: D-IDN-034 — admin NAO implica read.
+			capabilities: ["identity.read"],
+			grantScopeId: agencyId,
+			memberships: [agencyId],
+			targetAgencyIds: [agencyId],
+		});
+		const response = await app.handle(
+			request(`/v1/identity/principals/${otherPrincipalId}`, {
+				headers: { "x-agency-id": agencyId },
+			}),
+		);
 		expect(response.status).toBe(200);
+	});
+
+	/**
+	 * F5 da revalidacao G4: replay de register falha FECHADO quando o principal
+	 * encontrado nao esta ativo — antes devolvia 200 com o DTO (e-mail incluso)
+	 * enquanto `GET /principals/:id` devolvia 404.
+	 */
+	test("register de authUserId suspenso falha fechado (404, não 200)", async () => {
+		const { app } = harness({
+			principals: [
+				activePrincipal,
+				{ ...activePrincipal, id: otherPrincipalId, authUserId: "auth-susp", status: "suspended", revision: 2 },
+			],
+			capabilities: ["identity.admin"],
+		});
+		const response = await app.handle(
+			request("/v1/identity/principals", {
+				method: "POST",
+				headers: { "idempotency-key": commandId },
+				body: { authUserId: "auth-susp", email: "susp@example.com" },
+			}),
+		);
+		expect(response.status).toBe(404);
+		expect((await response.json()).error.details.code).toBe("IDN_PRINCIPAL_NOT_FOUND");
 	});
 
 	test("suspend exige Idempotency-Key (400) e aplica com a key (200)", async () => {

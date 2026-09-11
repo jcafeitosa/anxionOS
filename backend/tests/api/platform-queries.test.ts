@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { PLATFORM_CONSOLE_CAPABILITY } from "@anxionos/contracts/governance";
+import {
+	PLATFORM_CONSOLE_CAPABILITY,
+	PLATFORM_SCOPE_ID,
+} from "@anxionos/contracts/governance";
 import type { Grant } from "@anxionos/governance";
 import {
 	handleGetPlatformHealth,
@@ -18,8 +21,8 @@ function platformGrant(): Grant {
 		id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
 		tenantId: principalId,
 		agencyId: principalId,
-		scopeId: principalId,
-		scopeKind: "agency",
+		scopeId: PLATFORM_SCOPE_ID,
+		scopeKind: "platform",
 		granteePrincipalId: principalId,
 		granteeAgentId: null,
 		capability: PLATFORM_CONSOLE_CAPABILITY,

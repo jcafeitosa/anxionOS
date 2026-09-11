@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { PLATFORM_CONSOLE_CAPABILITY } from "@anxionos/contracts/governance";
+import {
+	PLATFORM_CONSOLE_CAPABILITY,
+	PLATFORM_SCOPE_ID,
+} from "@anxionos/contracts/governance";
 import {
 	type Grant,
 	getAuthorityEpoch,
@@ -75,13 +78,31 @@ describe("hasPlatformConsoleGrant", () => {
 		).resolves.toBe(false);
 	});
 
-	test("is true with an active console.platform grant", async () => {
+	test("is true with a PLATFORM-scoped console.platform grant", async () => {
+		const grantRepository = createInMemoryGrantRepository([
+			seedGrant({
+				capability: PLATFORM_CONSOLE_CAPABILITY,
+				scopeId: PLATFORM_SCOPE_ID,
+				scopeKind: "platform",
+			}),
+		]);
+		await expect(
+			hasPlatformConsoleGrant({ grantRepository }, principalId),
+		).resolves.toBe(true);
+	});
+
+	/**
+	 * ANX-462: era exatamente o fixture anterior (grant agency-scoped de
+	 * `console.platform`) — a suite AFIRMAVA a escalacao. Um operador de agencia
+	 * emitia a capability no proprio escopo e abria o console de plataforma.
+	 */
+	test("is false with an AGENCY-scoped console.platform grant", async () => {
 		const grantRepository = createInMemoryGrantRepository([
 			seedGrant({ capability: PLATFORM_CONSOLE_CAPABILITY }),
 		]);
 		await expect(
 			hasPlatformConsoleGrant({ grantRepository }, principalId),
-		).resolves.toBe(true);
+		).resolves.toBe(false);
 	});
 });
 
@@ -158,31 +179,42 @@ describe("hasCapability", () => {
 	/**
 	 * Bypass corrigido no G2: `undefined` significava "qualquer escopo", entao um
 	 * grant de agencia autorizava operacao global quando o header era omitido.
+	 * A autoridade global agora e' o escopo PLATAFORMA (ANX-462), nao escopo nulo.
 	 */
-	test("null scope rejects an agency-scoped grant", async () => {
+	test("platform scope id rejects an agency-scoped grant", async () => {
 		const grantRepository = createInMemoryGrantRepository([
 			seedGrant({ capability: "identity.admin", scopeId }),
 		]);
 		await expect(
 			hasCapability(
 				{ grantRepository },
-				{ principalId, capability: "identity.admin", asOf, scopeId: null },
+				{
+					principalId,
+					capability: "identity.admin",
+					asOf,
+					scopeId: PLATFORM_SCOPE_ID,
+				},
 			),
 		).resolves.toBe(false);
 	});
 
-	test("null scope accepts an unscoped grant", async () => {
+	test("platform scope id accepts a platform-scoped grant", async () => {
 		const grantRepository = createInMemoryGrantRepository([
-			// Fixture: adapters podem nao materializar `scopeId` (grant sem escopo).
 			seedGrant({
 				capability: "identity.admin",
-				scopeId: undefined as unknown as string,
+				scopeId: PLATFORM_SCOPE_ID,
+				scopeKind: "platform",
 			}),
 		]);
 		await expect(
 			hasCapability(
 				{ grantRepository },
-				{ principalId, capability: "identity.admin", asOf, scopeId: null },
+				{
+					principalId,
+					capability: "identity.admin",
+					asOf,
+					scopeId: PLATFORM_SCOPE_ID,
+				},
 			),
 		).resolves.toBe(true);
 	});

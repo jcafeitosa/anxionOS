@@ -69,21 +69,6 @@ export function createDrizzlePrincipalRepository(
 				.orderBy(principals.createdAt);
 			return rows.map(toPrincipal);
 		},
-		async create(input: NewPrincipal): Promise<Principal> {
-			const rows = await db
-				.insert(principals)
-				.values({
-					authUserId: input.authUserId ?? null,
-					email: input.email,
-					kind: input.kind ?? "human",
-				})
-				.returning();
-			const row = rows[0];
-			if (!row) {
-				throw new Error("Failed to create principal");
-			}
-			return toPrincipal(row);
-		},
 		async createIfAbsent(input: NewPrincipal): Promise<Principal | null> {
 			// Sem alvo: qualquer indice unico em conflito (auth_user_id ou email)
 			// resolve como "nenhuma linha" em vez de 23505, preservando a transacao.

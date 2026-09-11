@@ -87,9 +87,6 @@ export function createInMemoryPrincipalRepository(
 		async listAll() {
 			return [...principals.values()];
 		},
-		async create(input: NewPrincipal) {
-			return createPrincipal(input);
-		},
 		async createIfAbsent(input: NewPrincipal) {
 			for (const existing of principals.values()) {
 				if (

@@ -1,4 +1,7 @@
-import { PLATFORM_CONSOLE_CAPABILITY } from "@anxionos/contracts/governance";
+import {
+	PLATFORM_CONSOLE_CAPABILITY,
+	PLATFORM_SCOPE_ID,
+} from "@anxionos/contracts/governance";
 import { createPgPool } from "@anxionos/eventing/postgres";
 import { ensureGovernanceSchema, issueGrant } from "@anxionos/governance";
 import { createIdentityDb } from "@anxionos/identity";
@@ -64,7 +67,6 @@ const COMMAND_IDS = {
 	inviteOperator: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
 	acceptOperator: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
 	personalOwnerAgency: "f1f1f1f1-f1f1-41f1-81f1-f1f1f1f1f1f1",
-	platformScope: "abababab-abab-4aba-8aba-abababababab",
 	issuePlatformGrant: "acacacac-acac-4aca-8aca-acacacacacac",
 } as const;
 
@@ -337,7 +339,8 @@ export async function seedDevAccounts(): Promise<{
 			},
 			{
 				commandId: COMMAND_IDS.issuePlatformGrant,
-				scopeId: COMMAND_IDS.platformScope,
+				scopeId: PLATFORM_SCOPE_ID,
+				scopeKind: "platform",
 				granteePrincipalId: platformPrincipal.id,
 				capability: PLATFORM_CONSOLE_CAPABILITY,
 			},

@@ -1,9 +1,12 @@
 import { randomUUID } from "node:crypto";
 import {
 	type GovernanceCommandResult,
+	type GovernanceScopeKind,
 	governanceCommandResultSchema,
 	type IssueGrantCommand,
 	issueGrantCommandSchema,
+	isPlatformOnlyCapability,
+	PLATFORM_SCOPE_ID,
 } from "@anxionos/contracts/governance";
 import {
 	createAuthorityEpochBumpedEvent,
@@ -20,7 +23,7 @@ import {
 import { parseCommandResultSnapshot, throwGovernanceError } from "../errors";
 
 export interface IssueGrantInput extends IssueGrantCommand {
-	scopeKind?: "agency" | "organization";
+	scopeKind?: GovernanceScopeKind;
 }
 
 export interface IssueGrantDeps {
@@ -29,12 +32,49 @@ export interface IssueGrantDeps {
 	principalLookup: PrincipalLookup;
 }
 
+/**
+ * ANX-462 — coerencia entre capability e escopo.
+ *
+ * Sem esta checagem, `POST /v1/agencies/:agencyId/grants` (autorizado para
+ * `owner|admin|operator` daquela agencia) aceitava qualquer string em
+ * `capability`, incluindo `console.platform`. Como `hasPlatformConsoleGrant`
+ * nao filtrava escopo, o operador de agencia abria o console de PLATAFORMA.
+ *
+ * Regras: escopo PLATFORM exige o identificador canonico; capability
+ * platform-only exige escopo PLATFORM.
+ */
+function assertCapabilityScopeCoherence(
+	scopeId: string,
+	scopeKind: GovernanceScopeKind,
+	capability: string,
+): void {
+	if (scopeKind === "platform" && scopeId !== PLATFORM_SCOPE_ID) {
+		throwGovernanceError(
+			"GOV_CAPABILITY_SCOPE_MISMATCH",
+			`Platform scope kind requires scopeId ${PLATFORM_SCOPE_ID}`,
+		);
+	}
+	if (scopeKind !== "platform" && scopeId === PLATFORM_SCOPE_ID) {
+		throwGovernanceError(
+			"GOV_CAPABILITY_SCOPE_MISMATCH",
+			"Platform scope id requires scopeKind 'platform'",
+		);
+	}
+	if (scopeKind !== "platform" && isPlatformOnlyCapability(capability)) {
+		throwGovernanceError(
+			"GOV_CAPABILITY_SCOPE_MISMATCH",
+			`Capability ${capability} requires PLATFORM scope`,
+		);
+	}
+}
+
 export async function issueGrant(
 	deps: IssueGrantDeps,
 	input: IssueGrantInput,
 ): Promise<GovernanceCommandResult> {
 	const command = issueGrantCommandSchema.parse(input);
-	const scopeKind = input.scopeKind ?? "agency";
+	const scopeKind: GovernanceScopeKind = input.scopeKind ?? "agency";
+	assertCapabilityScopeCoherence(command.scopeId, scopeKind, command.capability);
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
 		command.commandId,

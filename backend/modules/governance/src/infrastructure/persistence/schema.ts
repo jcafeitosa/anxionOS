@@ -11,6 +11,8 @@ import {
 export const governanceScopeKindEnum = pgEnum("governance_scope_kind", [
 	"agency",
 	"organization",
+	// ANX-462: escopo de plataforma de primeira classe (migration 0008).
+	"platform",
 ]);
 export const grantStatusEnum = pgEnum("governance_grant_status", [
 	"active",

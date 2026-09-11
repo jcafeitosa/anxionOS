@@ -19,6 +19,20 @@ export interface RegisterPrincipalDeps {
 }
 
 /**
+ * Replay de um principal que nao esta mais ativo falha FECHADO com o mesmo
+ * codigo da leitura publica (`getPrincipalById`, D-IDN-008/INV-IDN-01). Antes,
+ * re-registrar um `authUserId` suspenso/revogado devolvia 200 com o DTO
+ * (inclusive e-mail) enquanto `GET /principals/:id` devolvia 404 — assimetria
+ * apontada como F5 pela revalidacao G4.
+ */
+function assertReplayable(principal: Principal): Principal {
+	if (principal.status !== "active") {
+		throwIdentityError("IDN_PRINCIPAL_NOT_FOUND", "Principal not found");
+	}
+	return principal;
+}
+
+/**
  * D-IDN-006: idempotent by `authUserId` — a repeated registration returns the
  * existing principal and emits no second event. R04 additionally materializes
  * an `Idempotency-Key` as `commandId` in the journal when the caller provides one.
@@ -30,7 +44,7 @@ export async function registerPrincipal(
 	const command = registerPrincipalCommandSchema.parse(input);
 	const existing = await deps.repository.findByAuthUserId(command.authUserId);
 	if (existing) {
-		return existing;
+		return assertReplayable(existing);
 	}
 	return deps.unitOfWork.runInTransaction(async (context) => {
 		if (command.commandId) {
@@ -58,7 +72,7 @@ export async function registerPrincipal(
 			command.authUserId,
 		);
 		if (raced) {
-			return raced;
+			return assertReplayable(raced);
 		}
 		const emailTaken = await context.principalRepository.findByEmail(
 			command.email,
@@ -68,7 +82,7 @@ export async function registerPrincipal(
 			// que ocupa o e-mail e a MESMA intencao (mesmo authUserId), isso e o
 			// replay do nosso proprio registro, nao e-mail de terceiro.
 			if (emailTaken.authUserId === command.authUserId) {
-				return emailTaken;
+				return assertReplayable(emailTaken);
 			}
 			throwIdentityError(
 				"IDN_PRINCIPAL_EMAIL_TAKEN",
@@ -89,14 +103,14 @@ export async function registerPrincipal(
 			);
 			if (racedAuthUser) {
 				// Mesma intencao (mesmo authUserId): replay idempotente.
-				return racedAuthUser;
+				return assertReplayable(racedAuthUser);
 			}
 			const racedEmail = await context.principalRepository.findByEmail(
 				command.email,
 			);
 			if (racedEmail) {
 				if (racedEmail.authUserId === command.authUserId) {
-					return racedEmail;
+					return assertReplayable(racedEmail);
 				}
 				throwIdentityError(
 					"IDN_PRINCIPAL_EMAIL_TAKEN",

@@ -1,0 +1,13 @@
+-- ANX-462 — escopo PLATAFORMA de primeira classe.
+--
+-- `governance_grants.scope_id` e NOT NULL, entao autoridade de plataforma nao
+-- pode ser "escopo nulo": ela precisa de um valor de escopo proprio. O
+-- identificador canonico vive em @anxionos/contracts/governance
+-- (PLATFORM_SCOPE_ID) — este migration apenas habilita o tipo de escopo.
+--
+-- Aditivo e idempotente: nenhuma linha existente muda de valor ou de
+-- significado. Um grant antigo de console.platform emitido com escopo de
+-- agencia continua no banco, mas deixa de autorizar o console de plataforma
+-- (hasPlatformConsoleGrant passou a exigir o escopo PLATFORM) — o que e' o
+-- efeito pretendido da correcao.
+ALTER TYPE governance_scope_kind ADD VALUE IF NOT EXISTS 'platform';

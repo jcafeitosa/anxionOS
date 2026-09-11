@@ -12,7 +12,6 @@ export interface PrincipalRepository {
 	findByEmail(email: string): Promise<Principal | null>;
 	listSuspended(): Promise<Principal[]>;
 	listAll(): Promise<Principal[]>;
-	create(input: NewPrincipal): Promise<Principal>;
 	/**
 	 * Insert that tolerates a concurrent winner for the same unique key:
 	 * `ON CONFLICT DO NOTHING`, so the transaction is NOT aborted by 23505 and

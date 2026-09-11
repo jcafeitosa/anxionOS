@@ -250,6 +250,9 @@ export const identityPrincipalsOpenApi = {
 			"200": {
 				description: "`{ principal }` with id, email, kind, status, revision.",
 			},
+			"400": {
+				description: "Invalid path/query (`VALIDATION_ERROR`).",
+			},
 			"401": { description: "No session." },
 			"403": { description: "`IDN_FORBIDDEN` / `IDN_CROSS_TENANT`." },
 			"404": {
@@ -267,6 +270,7 @@ export const identityPrincipalsOpenApi = {
 		parameters: identityPrincipalParams,
 		responses: {
 			"200": { description: "`{ sessions }` newest first." },
+			"400": { description: "Invalid path (`VALIDATION_ERROR`)." },
 			"401": { description: "No session." },
 			"403": { description: "`IDN_FORBIDDEN` / `IDN_CROSS_TENANT`." },
 			"404": {
@@ -466,6 +470,9 @@ export const identityPrincipalsOpenApi = {
 		],
 		responses: {
 			"200": { description: "`{ sessions }` newest first." },
+			"400": {
+				description: "Invalid `since` or `x-agency-id` (`VALIDATION_ERROR`).",
+			},
 			"401": { description: "No session." },
 			"403": { description: "`IDN_FORBIDDEN` / `IDN_CROSS_TENANT`." },
 		},

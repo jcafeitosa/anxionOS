@@ -1,7 +1,10 @@
 import type { SessionRefDto } from "@anxionos/contracts/identity";
 import { recordSessionRevokedCommandSchema } from "@anxionos/contracts/identity";
 import { createSessionRevokedEvent } from "../../domain/events/identity-events";
-import type { IdentityUnitOfWork } from "../../domain/ports/identity-unit-of-work";
+import type {
+	IdentityTransactionContext,
+	IdentityUnitOfWork,
+} from "../../domain/ports/identity-unit-of-work";
 import type { PrincipalRepository } from "../../domain/ports/principal-repository";
 import type { SessionRefRepository } from "../../domain/ports/session-ref-repository";
 import { throwIdentityError } from "../errors";
@@ -55,6 +58,29 @@ export async function recordSessionRevoked(
 	// da transacao e DEPOIS da checagem de intencao: um early-return antes dela
 	// respondia 200 a reuso de key em OUTRO sessionRef ja revogado, mascarando o
 	// conflito IDN_DUPLICATE_IDEMPOTENCY (achado MEDIUM do G2).
+	//
+	// O no-op TAMBEM grava o journal (achado bloqueante da revalidacao G2): sem
+	// isso, se a PRIMEIRA usagem da key cai no atalho de "ja revogada", a key
+	// nunca existe no journal e o reuso posterior escapa da checagem de intencao
+	// — a mesma key produzia efeito em dois agregados (refX no-op, refZ novo).
+	const journalNoOp = async (
+		context: IdentityTransactionContext,
+		aggregateId: string,
+		status: string,
+	): Promise<void> => {
+		if (!command.commandId) {
+			return;
+		}
+		await recordIdempotentCommand(context, {
+			commandId: command.commandId,
+			commandName: "RecordSessionRevoked",
+			aggregateId,
+			aggregateType: "SessionRef",
+			revision: 1,
+			responseSnapshot: { aggregateId, revision: 1, status },
+		});
+	};
+
 	return deps.unitOfWork.runInTransaction(async (context) => {
 		if (command.commandId) {
 			// The aggregate IS the session reference: reusing the key for another
@@ -80,6 +106,7 @@ export async function recordSessionRevoked(
 			command.sessionRefId,
 		);
 		if (existing?.status === "revoked") {
+			await journalNoOp(context, existing.id, existing.status);
 			return { sessionRef: toSessionRefDto(existing), transitioned: false };
 		}
 		if (!existing && !command.externalRefHash) {
@@ -107,6 +134,7 @@ export async function recordSessionRevoked(
 				command.sessionRefId,
 			);
 			if (current) {
+				await journalNoOp(context, current.id, current.status);
 				return { sessionRef: toSessionRefDto(current), transitioned: false };
 			}
 			throwIdentityError(

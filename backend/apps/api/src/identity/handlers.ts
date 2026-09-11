@@ -145,6 +145,7 @@ export async function handleSuspendPrincipal(
 		principalId: input.actorPrincipalId,
 		capability: "identity.admin",
 		agencyId: input.agencyId,
+		targetPrincipalId: principalId,
 	});
 	const body = suspendBodySchema.parse(input.body ?? {});
 	const principal = await suspendPrincipal(
@@ -179,6 +180,7 @@ export async function handleRevokePrincipal(
 		principalId: input.actorPrincipalId,
 		capability: "identity.admin",
 		agencyId: input.agencyId,
+		targetPrincipalId: principalId,
 	});
 	const body = revokeBodySchema.parse(input.body ?? {});
 	const principal = await revokePrincipal(
@@ -222,7 +224,14 @@ export async function handleRevokeSession(
 	return { sessionRef: result.sessionRef, transitioned: result.transitioned };
 }
 
-/** GET /v1/identity/sessions/revoked — capability `identity.session.list-revoked`. */
+/**
+ * GET /v1/identity/sessions/revoked — capability `identity.session.list-revoked`.
+ *
+ * O ledger e' GLOBAL (sessionRefs nao tem dimensao de agencia em identity), entao
+ * exige autoridade de PLATAFORMA: sem `agencyId` declarado a checagem resolve
+ * para o escopo PLATAFORMA. Antes, um `identity.admin` escopado a propria
+ * agencia lia metadados de sessao de todos os tenants (F2 da revalidacao G4).
+ */
 export async function handleListRevokedSessions(
 	deps: IdentityPluginDeps,
 	input: IdentityRequestContext & { query: unknown },
@@ -230,7 +239,6 @@ export async function handleListRevokedSessions(
 	await requireIdentityGrant(deps, {
 		principalId: input.actorPrincipalId,
 		capability: "identity.admin",
-		agencyId: input.agencyId,
 	});
 	const query = revokedQuerySchema.parse(input.query ?? {});
 	const sessions = await listRevokedSessions(

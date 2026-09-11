@@ -1,3 +1,4 @@
+import { PLATFORM_SCOPE_ID } from "@anxionos/contracts/governance";
 import { hasCapability } from "@anxionos/governance";
 import { throwIdentityError } from "@anxionos/identity";
 import type { IdentityPluginDeps } from "./deps";
@@ -25,6 +26,32 @@ async function assertAgencyMembership(
 	}
 }
 
+/**
+ * ANX-457 (achado HIGH proprio) — o escopo declarado limita o ALVO, nao so o
+ * ator. Principal e' global (D-IDN-023) e identity nao guarda FK de agencia, o
+ * unico sinal de tenancy do alvo sao as memberships em `organizations`. Sem
+ * esta checagem, um grant de agencia A autorizava ler (inclusive e-mail/PII) e
+ * suspender/revogar principal de QUALQUER agencia — basta declarar a propria.
+ */
+async function assertTargetInDeclaredAgency(
+	deps: Pick<IdentityPluginDeps, "agencyScope">,
+	agencyId: string | undefined,
+	targetPrincipalId: string,
+): Promise<void> {
+	if (!agencyId) {
+		// Autoridade de plataforma: opera sobre qualquer principal.
+		return;
+	}
+	const agencies =
+		await deps.agencyScope.listAgencyIdsForPrincipal(targetPrincipalId);
+	if (!agencies.includes(agencyId)) {
+		throwIdentityError(
+			"IDN_CROSS_TENANT",
+			"Target principal does not belong to the declared agency",
+		);
+	}
+}
+
 async function assertCapability(
 	deps: Pick<IdentityPluginDeps, "grantRepository">,
 	input: {
@@ -38,12 +65,12 @@ async function assertCapability(
 		{
 			principalId: input.principalId,
 			capability: input.capability,
-			// Sem agencia declarada a requisicao e PLATFORM-global: `null` exige
-			// autoridade sem escopo. Um grant de agencia nunca autoriza operacao
-			// global (era o bypass: omitir o header degradava para "qualquer
-			// escopo"). Com agencia declarada, o grant precisa cobrir ESSA
-			// agencia: um grant emitido para A nao autoriza operar sob B.
-			scopeId: input.agencyId ?? null,
+			// Sem agencia declarada a requisicao e PLATFORM-global e exige o
+			// escopo PLATAFORMA (ANX-462). Um grant de agencia nunca autoriza
+			// operacao global — era o bypass: omitir o header degradava para
+			// "qualquer escopo". Com agencia declarada, o grant precisa cobrir
+			// ESSA agencia: um grant emitido para A nao autoriza operar sob B.
+			scopeId: input.agencyId ?? PLATFORM_SCOPE_ID,
 		},
 	);
 	if (!allowed) {
@@ -65,9 +92,18 @@ export async function requireIdentityGrant(
 		principalId: string;
 		capability: "identity.read" | "identity.admin";
 		agencyId?: string;
+		/** Alvo da operacao, quando existe: o escopo declarado precisa cobri-lo. */
+		targetPrincipalId?: string;
 	},
 ): Promise<void> {
 	await assertAgencyMembership(deps, input.agencyId, input.principalId);
+	if (input.targetPrincipalId) {
+		await assertTargetInDeclaredAgency(
+			deps,
+			input.agencyId,
+			input.targetPrincipalId,
+		);
+	}
 	await assertCapability(deps, input);
 }
 
@@ -85,6 +121,11 @@ export async function requireSelfOrGrant(
 	if (input.actorPrincipalId === input.targetPrincipalId) {
 		return;
 	}
+	await assertTargetInDeclaredAgency(
+		deps,
+		input.agencyId,
+		input.targetPrincipalId,
+	);
 	await assertCapability(deps, {
 		principalId: input.actorPrincipalId,
 		capability: input.capability,

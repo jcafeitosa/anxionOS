@@ -38,6 +38,7 @@ export async function ensureGovernanceSchema(pool: Pool): Promise<void> {
 	await applyMigrationFile(pool, "0005_governance_autonomy.sql");
 	await applyMigrationFile(pool, "0006_governance_autonomy_unique_active.sql");
 	await applyMigrationFile(pool, "0007_governance_autonomy_drop_dup_idx.sql");
+	await applyMigrationFile(pool, "0008_governance_platform_scope.sql");
 }
 
 const databaseUrl =

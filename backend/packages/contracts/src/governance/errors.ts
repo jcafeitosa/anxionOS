@@ -13,6 +13,8 @@ export const GOVERNANCE_ERROR_CODES = [
 	"GOV_AUTONOMY_CAPABILITY_DENIED",
 	"GOV_AUTONOMY_ASSIGNMENT_EXISTS",
 	"GOV_AUTONOMY_ASSIGNMENT_NOT_FOUND",
+	// ANX-462: capability de plataforma emitida em escopo de agencia (ou o inverso).
+	"GOV_CAPABILITY_SCOPE_MISMATCH",
 ] as const;
 export const governanceErrorCodeSchema = z.enum(GOVERNANCE_ERROR_CODES);
 export const GOVERNANCE_ERROR_STATUS_MAP = {
@@ -29,6 +31,7 @@ export const GOVERNANCE_ERROR_STATUS_MAP = {
 	GOV_AUTONOMY_CAPABILITY_DENIED: 403,
 	GOV_AUTONOMY_ASSIGNMENT_EXISTS: 409,
 	GOV_AUTONOMY_ASSIGNMENT_NOT_FOUND: 404,
+	GOV_CAPABILITY_SCOPE_MISMATCH: 409,
 };
 export const governanceErrorDetailsSchema = z.object({
 	code: governanceErrorCodeSchema,

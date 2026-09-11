@@ -11,17 +11,17 @@ export interface HasCapabilityInput {
 	capability: string;
 	asOf?: Date;
 	/**
-	 * Scope requirement, with three distinct meanings:
+	 * Scope requirement:
 	 *
-	 * - a `string`: only a grant bound to exactly that scope counts.
-	 * - `null`: only an **unscoped** grant counts (platform authority). An
-	 *   agency-scoped grant must never satisfy a request that declares no scope
-	 *   — that is the privilege escalation this parameter exists to prevent.
-	 * - `undefined`: no scope filtering (any grant with the capability). Only
-	 *   legitimate for capabilities that are scope-agnostic by contract, such
-	 *   as the PLATFORM console token.
+	 * - a `string`: only a grant bound to exactly that scope counts. Autoridade
+	 *   de PLATAFORMA se pede com `PLATFORM_SCOPE_ID` (ANX-462) — nao com escopo
+	 *   nulo, que nao existe no modelo (`governance_grants.scope_id` e NOT NULL).
+	 * - `undefined`: sem filtro de escopo (qualquer grant com a capability).
+	 *   Reservado a capabilities scope-agnosticas *por contrato*; foi o valor
+	 *   que, por engano, autorizou um grant de agencia a operar globalmente
+	 *   quando o header `x-agency-id` era omitido (achado HIGH do G2).
 	 */
-	scopeId?: string | null;
+	scopeId?: string;
 }
 
 /**
@@ -46,19 +46,14 @@ export async function hasCapability(
 }
 
 /**
- * `scopeId === undefined` preserves the historical "any scope" behaviour;
- * `null` demands platform (unscoped) authority; a string demands that exact
- * scope. Fail-closed: an unknown/absent grant scope never matches `null`.
+ * Escopo do grant: exato quando pedido, sem filtro quando o chamador nao
+ * declara escopo. Nao existe ramo "escopo nulo" — a coluna e NOT NULL e um
+ * grant sem escopo nao e representavel (por isso a plataforma tem
+ * `PLATFORM_SCOPE_ID`).
  */
-function matchesScope(
-	grant: Grant,
-	scopeId: string | null | undefined,
-): boolean {
+function matchesScope(grant: Grant, scopeId: string | undefined): boolean {
 	if (scopeId === undefined) {
 		return true;
-	}
-	if (scopeId === null) {
-		return grant.scopeId === null || grant.scopeId === undefined;
 	}
 	return grant.scopeId === scopeId;
 }

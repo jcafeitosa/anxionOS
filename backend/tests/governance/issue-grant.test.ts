@@ -1,5 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { GOVERNANCE_EVENT_TYPES } from "@anxionos/contracts/governance";
+import {
+	GOVERNANCE_EVENT_TYPES,
+	PLATFORM_CONSOLE_CAPABILITY,
+	PLATFORM_SCOPE_ID,
+} from "@anxionos/contracts/governance";
 import { issueGrant } from "@anxionos/governance";
 import { GovernanceCommandError } from "../../modules/governance/src/application/errors";
 import {
@@ -100,5 +104,69 @@ describe("issueGrant", () => {
 				},
 			),
 		).rejects.toBeInstanceOf(GovernanceCommandError);
+	});
+});
+
+/**
+ * ANX-462 — o exploit: `POST /v1/agencies/:agencyId/grants` aceitava qualquer
+ * `capability`, inclusive `console.platform`, e `hasPlatformConsoleGrant` nao
+ * filtrava escopo. Um `operator` de agencia abria o console de PLATAFORMA.
+ */
+describe("issueGrant — coerencia capability x escopo (ANX-462)", () => {
+	test("rejects console.platform in an agency scope and writes nothing", async () => {
+		const { deps, grantRepository } = createIssueGrantDeps();
+		await expect(
+			issueGrant(deps, {
+				commandId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+				scopeId,
+				granteePrincipalId,
+				capability: PLATFORM_CONSOLE_CAPABILITY,
+			}),
+		).rejects.toMatchObject({ governanceCode: "GOV_CAPABILITY_SCOPE_MISMATCH" });
+		expect(
+			await grantRepository.listActiveByPrincipal(granteePrincipalId),
+		).toHaveLength(0);
+	});
+
+	test("rejects console.platform in an organization scope", async () => {
+		const { deps } = createIssueGrantDeps();
+		await expect(
+			issueGrant(deps, {
+				commandId: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+				scopeId,
+				scopeKind: "organization",
+				granteePrincipalId,
+				capability: PLATFORM_CONSOLE_CAPABILITY,
+			}),
+		).rejects.toMatchObject({ governanceCode: "GOV_CAPABILITY_SCOPE_MISMATCH" });
+	});
+
+	test("issues console.platform with the canonical PLATFORM scope", async () => {
+		const { deps, grantRepository } = createIssueGrantDeps();
+		await issueGrant(deps, {
+			commandId: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+			scopeId: PLATFORM_SCOPE_ID,
+			scopeKind: "platform",
+			granteePrincipalId,
+			capability: PLATFORM_CONSOLE_CAPABILITY,
+		});
+		const grants =
+			await grantRepository.listActiveByPrincipal(granteePrincipalId);
+		expect(grants).toHaveLength(1);
+		expect(grants[0]?.scopeId).toBe(PLATFORM_SCOPE_ID);
+		expect(grants[0]?.scopeKind).toBe("platform");
+	});
+
+	test("rejects the platform scope id carrying an agency scope kind", async () => {
+		const { deps } = createIssueGrantDeps();
+		await expect(
+			issueGrant(deps, {
+				commandId: "ffffffff-ffff-4fff-8fff-ffffffffffff",
+				scopeId: PLATFORM_SCOPE_ID,
+				scopeKind: "agency",
+				granteePrincipalId,
+				capability: "identity.admin",
+			}),
+		).rejects.toMatchObject({ governanceCode: "GOV_CAPABILITY_SCOPE_MISMATCH" });
 	});
 });

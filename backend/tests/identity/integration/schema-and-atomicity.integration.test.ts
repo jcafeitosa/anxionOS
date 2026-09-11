@@ -379,4 +379,70 @@ describe("identity schema — migrator real contra PostgreSQL", () => {
 			});
 		},
 	);
+
+	/**
+	 * Achado BLOQUEANTE da revalidacao G2: o atalho "ja revogada" nao gravava o
+	 * journal. Se a PRIMEIRA usagem da key caisse nele, a key nunca existia no
+	 * journal e o reuso posterior escapava da checagem de intencao — a MESMA key
+	 * produzia efeito em dois agregados (refX no-op, refZ novo).
+	 */
+	test.skipIf(Boolean(skipReason))(
+		"key usada primeiro em no-op não pode depois aplicar em outro sessionRef",
+		async () => {
+			await withIdentityPgHarness(async ({ pool }) => {
+				const db = createIdentityDb(pool);
+				const principal = await registerPrincipal(
+					{ repository: db.repository, unitOfWork: db.unitOfWork },
+					{ authUserId: `auth-${randomUUID()}`, email: "noop@example.com" },
+				);
+				const deps = {
+					principalRepository: db.repository,
+					sessionRefRepository: db.sessionRefRepository,
+					unitOfWork: db.unitOfWork,
+				};
+				const revokedRef = randomUUID();
+				const freshRef = randomUUID();
+
+				// ref ja revogada SEM commandId: nada no journal para ela
+				await recordSessionRevoked(deps, {
+					principalId: principal.id,
+					sessionRefId: revokedRef,
+					externalRefHash: `hash-${revokedRef}`,
+				});
+
+				const reusableKey = randomUUID();
+				// PRIMEIRA usagem da key: cai no atalho de "ja revogada"
+				const noop = await recordSessionRevoked(deps, {
+					principalId: principal.id,
+					sessionRefId: revokedRef,
+					commandId: reusableKey,
+				});
+				expect(noop.transitioned).toBe(false);
+
+				const journal = await pool.query<{ count: string }>(
+					"SELECT COUNT(*)::text AS count FROM identity_command_journal WHERE command_id = $1",
+					[reusableKey],
+				);
+				expect(journal.rows[0]?.count).toBe("1");
+
+				// reuso da MESMA key em agregado NOVO tem de ser conflito
+				await expect(
+					recordSessionRevoked(deps, {
+						principalId: principal.id,
+						sessionRefId: freshRef,
+						externalRefHash: `hash-${freshRef}`,
+						commandId: reusableKey,
+					}),
+				).rejects.toMatchObject({
+					identityCode: "IDN_DUPLICATE_IDEMPOTENCY",
+				});
+
+				const untouched = await pool.query<{ status: string }>(
+					"SELECT status FROM identity_sessions WHERE id = $1",
+					[freshRef],
+				);
+				expect(untouched.rows[0]).toBeUndefined();
+			});
+		},
+	);
 });
