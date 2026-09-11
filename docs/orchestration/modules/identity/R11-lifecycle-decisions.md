@@ -166,3 +166,22 @@ R04 descreve o payload de `identity.principal.registered.v1` com `organizationId
 ## Fora de escopo (com dono)
 
 RLS PostgreSQL (`D-IDN-018` → P09) · projeção Neo4j `:User` (`D-IDN-020` → `graph`) · `/v1/auth/*` (Better Auth em `apps/api`) · capital real e autonomia L3/L4 (ANX-172/173, `backlog`).
+
+## Rastreabilidade dos oráculos de R09 (G3/G4/G5)
+
+O plano em `R09-dev-plan.md` nomeia oráculos (`G3-IDN-*`, `G4-IDN-*`) que não eram citados pelos testes — a cobertura existia, mas o mapa não. Fechado aqui, com o arquivo exato; `G4-IDN-02` era o único sem teste e ganhou um.
+
+| Oráculo (R09) | Esperado | Teste que prova |
+| --- | --- | --- |
+| `G3-IDN-01` | Registro emite `identity.principal.registered.v1` uma única vez, sem `authUserId` no payload | `tests/identity/register-principal.test.ts` — "creates principal and emits registered event once"; integração em `tests/identity/integration/schema-and-atomicity.integration.test.ts` confere a linha de `outbox` |
+| `G3-IDN-02` | Replay por `authUserId` devolve o mesmo Principal e **não** emite segundo evento | `tests/identity/register-principal.test.ts` — "replay by authUserId is idempotent without second event" |
+| `G3-IDN-03` | `suspendPrincipal` active→suspended, evento emitido, queries fail-closed | `tests/identity/suspend-principal.test.ts` — "suspends active principal and hides it from queries"; `tests/api/identity-http.test.ts` — "principal suspenso ou revogado não resolve sessão na borda" |
+| `G3-IDN-04` | Re-suspend é idempotente, sem evento duplicado | `tests/identity/suspend-principal.test.ts` — "re-suspend is idempotent without duplicate event" |
+| `G3-IDN-05` | Falha na outbox faz rollback: zero linha em PG | `tests/identity/integration/schema-and-atomicity.integration.test.ts` — "comando que falha não deixa journal nem outbox (rollback atômico)" |
+| `G3-IDN-06` | Consumer de sessão revoga sessões do Better Auth após suspend | `tests/identity/suspend-principal.test.ts` — "revokes Better Auth sessions synchronously on suspend (ANX-235)" e "idempotent re-suspend does not call session revoker" |
+| `G4-IDN-01` | Sem `authUserId`/segredo/token em outbox, journal, DTO e projeção | `tests/identity/projection-contract.test.ts` — "no projected node ever carries a credential or token value" e "the node shape rejects forbidden attributes instead of leaking them"; inspeção direta de `outbox`/`identity_service_credentials`/`identity_sessions` no parecer G4 |
+| `G4-IDN-02` | Logs sem e-mail em claro | `tests/identity/logging-policy.test.ts` — varredura estrutural de `modules/identity/src` **e** `apps/api/src/identity`: extrai cada chamada de `logger.*` inteira (payload multilinha incluído) e recusa `email`, `authUserId`, `secret`, `token`, `password`, `hash`, `cookie`; a segunda asserção recusa `console.*`/`debugger`. Provado que morde (com um `email` injetado o teste falha; revertido, volta verde) e ancorado por um terceiro teste que exige que a varredura encontre arquivos e chamadas reais |
+
+Os oráculos `G5-IDN-01`/`G5-IDN-02` (credencial revogada não verifica; duplo revoke idempotente) são provados por `tests/identity/service-credentials.test.ts` — "a credential of a revoked service identity does not verify (G4 A2)" e "revoking invalidates the key and is idempotent".
+
+Ressalva de método que vale para o módulo inteiro: os testes de integração usam `test.skipIf`, então aparecem como `skip` sem PostgreSQL — ao contrário de módulos que usam early-`return` e mascaram a não-execução (achado do G0 de organizations).
