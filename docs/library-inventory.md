@@ -1,3 +1,7 @@
+---
+type: reference
+---
+
 # Inventário de bibliotecas — anxionOS
 
 Versões resolvidas nos lockfiles em **2026-09-10** (ANX-383 + TypeScript 7.0.2 — ANX-341). Política: latest estável no momento da instalação, pin exact no `package.json` + lockfile.
