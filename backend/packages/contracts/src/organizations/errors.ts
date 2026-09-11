@@ -10,6 +10,7 @@ export const ORGANIZATION_ERROR_CODES = [
 	"ORG_IDENTITY_UNAVAILABLE",
 	"ORG_INVITE_EXPIRED",
 	"ORG_INVITE_EMAIL_MISMATCH",
+	"ORG_DUPLICATE_IDEMPOTENCY",
 ] as const;
 export const organizationErrorCodeSchema = z.enum(ORGANIZATION_ERROR_CODES);
 export const ORGANIZATION_ERROR_STATUS_MAP = {
@@ -23,6 +24,7 @@ export const ORGANIZATION_ERROR_STATUS_MAP = {
 	ORG_IDENTITY_UNAVAILABLE: 503,
 	ORG_INVITE_EXPIRED: 410,
 	ORG_INVITE_EMAIL_MISMATCH: 403,
+	ORG_DUPLICATE_IDEMPOTENCY: 409,
 };
 export const organizationErrorDetailsSchema = z.object({
 	code: organizationErrorCodeSchema,

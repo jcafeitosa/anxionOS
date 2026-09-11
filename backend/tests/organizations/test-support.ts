@@ -9,10 +9,11 @@ import type { Membership } from "../../modules/organizations/src/domain/entities
 import type { Owner } from "../../modules/organizations/src/domain/entities/owner";
 import { MembershipRevisionConflictError } from "../../modules/organizations/src/domain/errors/membership-errors";
 import type { AgencyRepository } from "../../modules/organizations/src/domain/ports/agency-repository";
-import type {
-	CommandJournalRecord,
-	CommandJournalRepository,
-	NewCommandJournalRecord,
+import {
+	CommandJournalConflictError,
+	type CommandJournalRecord,
+	type CommandJournalRepository,
+	type NewCommandJournalRecord,
 } from "../../modules/organizations/src/domain/ports/command-journal";
 import type { MembershipRepository } from "../../modules/organizations/src/domain/ports/membership-repository";
 import type {
@@ -160,12 +161,16 @@ export function createInMemoryCommandJournalRepository(
 			return records.get(commandId) ?? null;
 		},
 		async record(entry: NewCommandJournalRecord) {
+			// Espelha o repositorio Drizzle: insercao atomica, colisao de
+			// `command_id` vira `CommandJournalConflictError` (nunca devolve a linha
+			// alheia — isso seria double-apply).
 			const existing = records.get(entry.commandId);
 			if (existing) {
-				return existing;
+				throw new CommandJournalConflictError(entry.commandId);
 			}
 			const stored: CommandJournalRecord = {
 				...entry,
+				requestHash: entry.requestHash ?? null,
 				createdAt: new Date(),
 			};
 			records.set(entry.commandId, stored);

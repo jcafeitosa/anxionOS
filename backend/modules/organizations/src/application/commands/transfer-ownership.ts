@@ -10,10 +10,12 @@ import type { CommandJournalRepository } from "../../domain/ports/command-journa
 import type { OrganizationUnitOfWork } from "../../domain/ports/organization-unit-of-work";
 import type { PrincipalLookup } from "../../domain/ports/principal-lookup";
 import {
+	hashCommandPayload,
 	loadIdempotentCommandResult,
+	recordOrganizationCommand,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwOrganizationError } from "../errors";
+import { throwOrganizationError } from "../errors";
 import { assertPrincipalExists } from "../services/principal-guard";
 import { buildAgencyTenantContext } from "../services/tenant-context";
 export async function transferOwnership(
@@ -21,9 +23,19 @@ export async function transferOwnership(
 	input: TransferOwnershipInput,
 ): Promise<CommandResult> {
 	const command = transferOwnershipCommandSchema.parse(input);
+	const intent = {
+		commandName: "TransferOwnership",
+		aggregateId: command.agencyId,
+		requestHash: hashCommandPayload({
+			agencyId: command.agencyId,
+			newOwnerPrincipalId: command.newOwnerPrincipalId,
+			actorPrincipalId: input.actorPrincipalId,
+		}),
+	};
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
 		command.commandId,
+		intent,
 	);
 	if (replay) {
 		return replay;
@@ -35,11 +47,13 @@ export async function transferOwnership(
 	return deps.unitOfWork.runInTransaction(
 		buildAgencyTenantContext(command.agencyId, input.actorPrincipalId),
 		async (context) => {
-			const raced = await context.commandJournal.findByCommandId(
+			const raced = await loadIdempotentCommandResult(
+				context.commandJournal,
 				command.commandId,
+				intent,
 			);
 			if (raced) {
-				return parseCommandResultSnapshot(raced.responseSnapshot);
+				return raced;
 			}
 			const agency = await context.agencyRepository.findByAgencyId(
 				command.agencyId,
@@ -71,13 +85,14 @@ export async function transferOwnership(
 					aggregateId: agency.id,
 					revision: agency.revision,
 				});
-				await context.commandJournal.record({
+				await recordOrganizationCommand(context, {
 					commandId: command.commandId,
 					commandName: "TransferOwnership",
 					aggregateId: agency.id,
 					aggregateType: "Agency",
 					revision: agency.revision,
 					responseSnapshot: toCommandResultSnapshot(unchanged),
+					requestHash: intent.requestHash,
 				});
 				return unchanged;
 			}
@@ -135,13 +150,14 @@ export async function transferOwnership(
 				newOwnerMembershipId: successorMembership.id,
 				revision: updatedAgency.revision,
 			});
-			await context.commandJournal.record({
+			await recordOrganizationCommand(context, {
 				commandId: command.commandId,
 				commandName: "TransferOwnership",
 				aggregateId: updatedAgency.id,
 				aggregateType: "Agency",
 				revision: updatedAgency.revision,
 				responseSnapshot: toCommandResultSnapshot(result),
+				requestHash: intent.requestHash,
 			});
 			await context.publishEvents([event]);
 			return result;

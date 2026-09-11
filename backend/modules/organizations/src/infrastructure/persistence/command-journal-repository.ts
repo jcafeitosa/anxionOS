@@ -1,9 +1,10 @@
 import { eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import type {
-	CommandJournalRecord,
-	CommandJournalRepository,
-	NewCommandJournalRecord,
+import {
+	CommandJournalConflictError,
+	type CommandJournalRecord,
+	type CommandJournalRepository,
+	type NewCommandJournalRecord,
 } from "../../domain/ports/command-journal";
 import { type CommandJournalRow, commandJournal } from "./schema";
 
@@ -17,6 +18,7 @@ export function toCommandJournalRecord(
 		aggregateType: row.aggregateType,
 		revision: row.revision,
 		responseSnapshot: row.responseSnapshot as Record<string, unknown> | null,
+		requestHash: row.requestHash,
 		createdAt: row.createdAt,
 	};
 }
@@ -34,10 +36,11 @@ export function createDrizzleCommandJournalRepository(
 			return rows[0] ? toCommandJournalRecord(rows[0]) : null;
 		},
 		async record(entry: NewCommandJournalRecord) {
-			const existing = await this.findByCommandId(entry.commandId);
-			if (existing) {
-				return existing;
-			}
+			// Insercao atomica: nao ha find-then-insert. Se o `command_id` ja' existe,
+			// `ON CONFLICT DO NOTHING` nao devolve linha e o conflito e' sinalizado —
+			// a transacao do perdedor faz ROLLBACK em vez de commitar o agregado
+			// duplicado. Devolver a linha alheia aqui era o double-apply (S2/ANX-460,
+			// mesmo desenho do governance em `command-support.ts`).
 			const rows = await db
 				.insert(commandJournal)
 				.values({
@@ -47,10 +50,14 @@ export function createDrizzleCommandJournalRepository(
 					aggregateType: entry.aggregateType,
 					revision: entry.revision,
 					responseSnapshot: entry.responseSnapshot,
+					requestHash: entry.requestHash ?? null,
 				})
+				.onConflictDoNothing({ target: commandJournal.commandId })
 				.returning();
 			const row = rows[0];
-			if (!row) throw new Error("Failed to record command journal entry");
+			if (!row) {
+				throw new CommandJournalConflictError(entry.commandId);
+			}
 			return toCommandJournalRecord(row);
 		},
 	};

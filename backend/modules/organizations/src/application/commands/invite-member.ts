@@ -10,10 +10,12 @@ import type { CommandJournalRepository } from "../../domain/ports/command-journa
 import type { InviteTokenHasher } from "../../domain/ports/invite-token-hasher";
 import type { OrganizationUnitOfWork } from "../../domain/ports/organization-unit-of-work";
 import {
+	hashCommandPayload,
 	loadIdempotentCommandResult,
+	recordOrganizationCommand,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwOrganizationError } from "../errors";
+import { throwOrganizationError } from "../errors";
 import { INVITE_TTL_MS } from "../invite-constants";
 import { assertActorIsOwnerOrAdmin } from "../services/membership-role-guard";
 import { buildAgencyTenantContext } from "../services/tenant-context";
@@ -23,9 +25,19 @@ export async function inviteMember(
 	input: InviteMemberInput,
 ): Promise<InviteMemberResult> {
 	const command = inviteMemberCommandSchema.parse(input);
+	// O comando CRIA o agregado (a membership). O `requestHash` fixa a intencao
+	// (agencia + e-mail + papel + ator) para que reusar a key com outro payload
+	// seja 409, e nao um 200 sem aplicar.
+	const requestHash = hashCommandPayload({
+		agencyId: command.agencyId,
+		email: command.email,
+		role: command.role,
+		actorPrincipalId: input.actorPrincipalId,
+	});
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
 		command.commandId,
+		{ commandName: "InviteMember", requestHash },
 	);
 	if (replay) {
 		return { result: replay, inviteToken: "" };
@@ -33,14 +45,32 @@ export async function inviteMember(
 	return deps.unitOfWork.runInTransaction(
 		buildAgencyTenantContext(command.agencyId, input.actorPrincipalId),
 		async (context) => {
-			const raced = await context.commandJournal.findByCommandId(
+			const raced = await loadIdempotentCommandResult(
+				context.commandJournal,
 				command.commandId,
+				{
+					commandName: "InviteMember",
+					requestHash,
+					// O agregado e' criado aqui; confirma que o journal aponta para uma
+					// membership que carrega o mesmo payload/agencia.
+					matchesAggregate: async (aggregateId) => {
+						const membership = await context.membershipRepository.findById(
+							command.agencyId,
+							aggregateId,
+						);
+						if (!membership) {
+							return false;
+						}
+						return (
+							membership.agencyId === command.agencyId &&
+							membership.inviteEmail === command.email &&
+							membership.role === command.role
+						);
+					},
+				},
 			);
 			if (raced) {
-				return {
-					result: parseCommandResultSnapshot(raced.responseSnapshot),
-					inviteToken: "",
-				};
+				return { result: raced, inviteToken: "" };
 			}
 			await assertActorIsOwnerOrAdmin(
 				context.membershipRepository,
@@ -100,13 +130,14 @@ export async function inviteMember(
 				role: command.role,
 				revision,
 			});
-			await context.commandJournal.record({
+			await recordOrganizationCommand(context, {
 				commandId: command.commandId,
 				commandName: "InviteMember",
 				aggregateId: membershipId,
 				aggregateType: "Membership",
 				revision,
 				responseSnapshot: toCommandResultSnapshot(result),
+				requestHash,
 			});
 			await context.publishEvents([event]);
 			return { result, inviteToken };

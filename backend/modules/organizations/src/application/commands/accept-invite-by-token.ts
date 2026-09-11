@@ -12,10 +12,12 @@ import type { InviteTokenHasher } from "../../domain/ports/invite-token-hasher";
 import type { MembershipRepository } from "../../domain/ports/membership-repository";
 import type { OrganizationUnitOfWork } from "../../domain/ports/organization-unit-of-work";
 import {
+	hashCommandPayload,
 	loadIdempotentCommandResult,
+	recordOrganizationCommand,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwOrganizationError } from "../errors";
+import { throwOrganizationError } from "../errors";
 import { buildAgencyTenantContext } from "../services/tenant-context";
 
 /**
@@ -27,14 +29,27 @@ export async function acceptInviteByToken(
 	input: AcceptInviteByTokenInput,
 ): Promise<CommandResult> {
 	const command = acceptInviteByTokenCommandSchema.parse(input);
+	const tokenHash = deps.inviteTokenHasher.hash(command.token);
+	// O agregado so' e' conhecido depois de resolver o token (que fornece o
+	// tenant), entao a intencao e' fixada pelo `requestHash` do token + sessao.
+	// O replay precisa vir ANTES da busca por token: um retry legitimo apos o
+	// convite ja' ter sido consumido nao pode estourar "token invalido".
+	const intent = {
+		commandName: "AcceptInviteByToken",
+		requestHash: hashCommandPayload({
+			tokenHash,
+			sessionPrincipalId: input.sessionPrincipalId,
+			sessionEmail: input.sessionEmail.toLowerCase(),
+		}),
+	};
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
 		command.commandId,
+		intent,
 	);
 	if (replay) {
 		return replay;
 	}
-	const tokenHash = deps.inviteTokenHasher.hash(command.token);
 	const invitedMembership =
 		await deps.membershipRepository.findInvitedByTokenHash(tokenHash);
 	if (!invitedMembership) {
@@ -49,11 +64,15 @@ export async function acceptInviteByToken(
 			input.sessionPrincipalId,
 		),
 		async (context) => {
-			const raced = await context.commandJournal.findByCommandId(
+			// Replay como PRIMEIRA operacao da transacao, antes das validacoes de
+			// estado (token consumido/revogado) que quebrariam o retry legitimo.
+			const raced = await loadIdempotentCommandResult(
+				context.commandJournal,
 				command.commandId,
+				intent,
 			);
 			if (raced) {
-				return parseCommandResultSnapshot(raced.responseSnapshot);
+				return raced;
 			}
 			const membership =
 				await context.membershipRepository.findInvitedByTokenHash(tokenHash);
@@ -140,13 +159,14 @@ export async function acceptInviteByToken(
 				role: updated.role,
 				revision: updated.revision,
 			});
-			await context.commandJournal.record({
+			await recordOrganizationCommand(context, {
 				commandId: command.commandId,
 				commandName: "AcceptInviteByToken",
 				aggregateId: updated.id,
 				aggregateType: "Membership",
 				revision: updated.revision,
 				responseSnapshot: toCommandResultSnapshot(result),
+				requestHash: intent.requestHash,
 			});
 			await context.publishEvents([event]);
 			return result;

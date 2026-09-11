@@ -6,7 +6,6 @@ import {
 	pgTable,
 	text,
 	timestamp,
-	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
 export const agencyStatusEnum = pgEnum("organizations_agency_status", [
@@ -82,9 +81,9 @@ export const owners = pgTable(
 			.defaultNow(),
 	},
 	(table) => [
-		uniqueIndex("organizations_owners_principal_id_unique").on(
-			table.principalId,
-		),
+		// D-ORG-035: nao e' UNIQUE — um Owner pode ter N Agencies. A unicidade
+		// correta e' "1 owner ativo por AGENCY", nos membros ativos.
+		index("organizations_owners_principal_id_idx").on(table.principalId),
 		index("organizations_owners_tenant_id_idx").on(table.tenantId),
 		index("organizations_owners_agency_id_idx").on(table.agencyId),
 	],
@@ -125,6 +124,7 @@ export const commandJournal = pgTable("organizations_command_journal", {
 	aggregateType: text("aggregate_type").notNull(),
 	revision: integer("revision").notNull(),
 	responseSnapshot: jsonb("response_snapshot"),
+	requestHash: text("request_hash"),
 	createdAt: timestamp("created_at", { withTimezone: true })
 		.notNull()
 		.defaultNow(),

@@ -10,10 +10,11 @@ import type { CommandJournalRepository } from "../../domain/ports/command-journa
 import type { OrganizationUnitOfWork } from "../../domain/ports/organization-unit-of-work";
 import type { PrincipalLookup } from "../../domain/ports/principal-lookup";
 import {
+	hashCommandPayload,
 	loadIdempotentCommandResult,
+	recordOrganizationCommand,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot } from "../errors";
 import { assertPrincipalExists } from "../services/principal-guard";
 import { buildAgencyTenantContext } from "../services/tenant-context";
 
@@ -22,9 +23,21 @@ export async function createAgency(
 	input: CreateAgencyInput,
 ): Promise<CommandResult> {
 	const command = createAgencyCommandSchema.parse(input);
+	// O comando CRIA o agregado, entao a intencao e' o payload inteiro: o
+	// `requestHash` distingue dois Creates com o mesmo Owner/payload de um reuso
+	// divergente da key (409), sem depender de estado que ainda nao existe.
+	const intent = {
+		commandName: "CreateAgency",
+		requestHash: hashCommandPayload({
+			ownerPrincipalId: input.ownerPrincipalId,
+			displayName: command.displayName,
+			marketScope: command.marketScope,
+		}),
+	};
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
 		command.commandId,
+		intent,
 	);
 	if (replay) {
 		return replay;
@@ -51,11 +64,17 @@ export async function createAgency(
 	return deps.unitOfWork.runInTransaction(
 		buildAgencyTenantContext(agencyId, input.ownerPrincipalId),
 		async (context) => {
-			const raced = await context.commandJournal.findByCommandId(
+			// Replay como PRIMEIRA operacao da transacao, com validacao de intencao.
+			// As validacoes dependentes de estado vem depois: resolver o retry
+			// legitimo antes delas e' o que impede a regressao do G2 (retry apos o
+			// agregado mudar de estado precisa continuar sendo replay).
+			const raced = await loadIdempotentCommandResult(
+				context.commandJournal,
 				command.commandId,
+				intent,
 			);
 			if (raced) {
-				return parseCommandResultSnapshot(raced.responseSnapshot);
+				return raced;
 			}
 			await context.agencyRepository.save({
 				id: agencyId,
@@ -95,13 +114,14 @@ export async function createAgency(
 				createdAt: now,
 				updatedAt: now,
 			});
-			await context.commandJournal.record({
+			await recordOrganizationCommand(context, {
 				commandId: command.commandId,
 				commandName: "CreateAgency",
 				aggregateId: agencyId,
 				aggregateType: "Agency",
 				revision,
 				responseSnapshot: toCommandResultSnapshot(result),
+				requestHash: intent.requestHash,
 			});
 			await context.publishEvents([event]);
 			return result;

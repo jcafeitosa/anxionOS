@@ -9,10 +9,12 @@ import { createAgencyStatusChangedEvent } from "../../domain/events/organization
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { OrganizationUnitOfWork } from "../../domain/ports/organization-unit-of-work";
 import {
+	hashCommandPayload,
 	loadIdempotentCommandResult,
+	recordOrganizationCommand,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwOrganizationError } from "../errors";
+import { throwOrganizationError } from "../errors";
 import { assertActorIsOwnerOrAdmin } from "../services/membership-role-guard";
 import { buildAgencyTenantContext } from "../services/tenant-context";
 
@@ -21,9 +23,19 @@ export async function advanceOnboarding(
 	input: AdvanceOnboardingInput,
 ): Promise<CommandResult> {
 	const command = advanceOnboardingCommandSchema.parse(input);
+	const intent = {
+		commandName: "AdvanceOnboarding",
+		aggregateId: command.agencyId,
+		requestHash: hashCommandPayload({
+			agencyId: command.agencyId,
+			step: command.step,
+			actorPrincipalId: input.actorPrincipalId,
+		}),
+	};
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
 		command.commandId,
+		intent,
 	);
 	if (replay) {
 		return replay;
@@ -31,11 +43,13 @@ export async function advanceOnboarding(
 	return deps.unitOfWork.runInTransaction(
 		buildAgencyTenantContext(command.agencyId, input.actorPrincipalId),
 		async (context) => {
-			const raced = await context.commandJournal.findByCommandId(
+			const raced = await loadIdempotentCommandResult(
+				context.commandJournal,
 				command.commandId,
+				intent,
 			);
 			if (raced) {
-				return parseCommandResultSnapshot(raced.responseSnapshot);
+				return raced;
 			}
 			await assertActorIsOwnerOrAdmin(
 				context.membershipRepository,
@@ -62,13 +76,14 @@ export async function advanceOnboarding(
 					aggregateId: agency.id,
 					revision: agency.revision,
 				});
-				await context.commandJournal.record({
+				await recordOrganizationCommand(context, {
 					commandId: command.commandId,
 					commandName: "AdvanceOnboarding",
 					aggregateId: agency.id,
 					aggregateType: "Agency",
 					revision: agency.revision,
 					responseSnapshot: toCommandResultSnapshot(unchanged),
+					requestHash: intent.requestHash,
 				});
 				return unchanged;
 			}
@@ -92,13 +107,14 @@ export async function advanceOnboarding(
 				previousStatus,
 				revision: updated.revision,
 			});
-			await context.commandJournal.record({
+			await recordOrganizationCommand(context, {
 				commandId: command.commandId,
 				commandName: "AdvanceOnboarding",
 				aggregateId: updated.id,
 				aggregateType: "Agency",
 				revision: updated.revision,
 				responseSnapshot: toCommandResultSnapshot(result),
+				requestHash: intent.requestHash,
 			});
 			await context.publishEvents([event]);
 			return result;

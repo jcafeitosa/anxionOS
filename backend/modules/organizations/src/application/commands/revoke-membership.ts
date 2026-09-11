@@ -12,10 +12,12 @@ import { createMembershipRevokedEvent } from "../../domain/events/organization-e
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { OrganizationUnitOfWork } from "../../domain/ports/organization-unit-of-work";
 import {
+	hashCommandPayload,
 	loadIdempotentCommandResult,
+	recordOrganizationCommand,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwOrganizationError } from "../errors";
+import { throwOrganizationError } from "../errors";
 import { assertActorIsOwnerOrAdmin } from "../services/membership-role-guard";
 import { buildAgencyTenantContext } from "../services/tenant-context";
 
@@ -24,9 +26,19 @@ export async function revokeMembership(
 	input: RevokeMembershipInput,
 ): Promise<CommandResult> {
 	const command = revokeMembershipCommandSchema.parse(input);
+	const intent = {
+		commandName: "RevokeMembership",
+		aggregateId: command.membershipId,
+		requestHash: hashCommandPayload({
+			agencyId: command.agencyId,
+			membershipId: command.membershipId,
+			actorPrincipalId: input.actorPrincipalId,
+		}),
+	};
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
 		command.commandId,
+		intent,
 	);
 	if (replay) {
 		return replay;
@@ -34,11 +46,13 @@ export async function revokeMembership(
 	return deps.unitOfWork.runInTransaction(
 		buildAgencyTenantContext(command.agencyId, input.actorPrincipalId),
 		async (context) => {
-			const raced = await context.commandJournal.findByCommandId(
+			const raced = await loadIdempotentCommandResult(
+				context.commandJournal,
 				command.commandId,
+				intent,
 			);
 			if (raced) {
-				return parseCommandResultSnapshot(raced.responseSnapshot);
+				return raced;
 			}
 			await assertActorIsOwnerOrAdmin(
 				context.membershipRepository,
@@ -60,13 +74,14 @@ export async function revokeMembership(
 					aggregateId: membership.id,
 					revision: membership.revision,
 				});
-				await context.commandJournal.record({
+				await recordOrganizationCommand(context, {
 					commandId: command.commandId,
 					commandName: "RevokeMembership",
 					aggregateId: membership.id,
 					aggregateType: "Membership",
 					revision: membership.revision,
 					responseSnapshot: toCommandResultSnapshot(unchanged),
+					requestHash: intent.requestHash,
 				});
 				return unchanged;
 			}
@@ -106,13 +121,14 @@ export async function revokeMembership(
 				principalId: updated.principalId ?? input.actorPrincipalId,
 				revision: updated.revision,
 			});
-			await context.commandJournal.record({
+			await recordOrganizationCommand(context, {
 				commandId: command.commandId,
 				commandName: "RevokeMembership",
 				aggregateId: updated.id,
 				aggregateType: "Membership",
 				revision: updated.revision,
 				responseSnapshot: toCommandResultSnapshot(result),
+				requestHash: intent.requestHash,
 			});
 			await context.publishEvents([event]);
 			return result;

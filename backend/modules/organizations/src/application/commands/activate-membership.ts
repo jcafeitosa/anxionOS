@@ -10,10 +10,12 @@ import type { CommandJournalRepository } from "../../domain/ports/command-journa
 import type { OrganizationUnitOfWork } from "../../domain/ports/organization-unit-of-work";
 import type { PrincipalLookup } from "../../domain/ports/principal-lookup";
 import {
+	hashCommandPayload,
 	loadIdempotentCommandResult,
+	recordOrganizationCommand,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwOrganizationError } from "../errors";
+import { throwOrganizationError } from "../errors";
 import { assertActorIsOwnerOrAdmin } from "../services/membership-role-guard";
 import { assertPrincipalExists } from "../services/principal-guard";
 import { buildAgencyTenantContext } from "../services/tenant-context";
@@ -26,9 +28,20 @@ export async function activateMembership(
 	input: ActivateMembershipInput,
 ): Promise<CommandResult> {
 	const command = activateMembershipCommandSchema.parse(input);
+	const intent = {
+		commandName: "ActivateMembership",
+		aggregateId: command.membershipId,
+		requestHash: hashCommandPayload({
+			agencyId: command.agencyId,
+			membershipId: command.membershipId,
+			actorPrincipalId: input.actorPrincipalId,
+			targetPrincipalId: input.targetPrincipalId,
+		}),
+	};
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
 		command.commandId,
+		intent,
 	);
 	if (replay) {
 		return replay;
@@ -37,11 +50,13 @@ export async function activateMembership(
 	return deps.unitOfWork.runInTransaction(
 		buildAgencyTenantContext(command.agencyId, input.actorPrincipalId),
 		async (context) => {
-			const raced = await context.commandJournal.findByCommandId(
+			const raced = await loadIdempotentCommandResult(
+				context.commandJournal,
 				command.commandId,
+				intent,
 			);
 			if (raced) {
-				return parseCommandResultSnapshot(raced.responseSnapshot);
+				return raced;
 			}
 			await assertActorIsOwnerOrAdmin(
 				context.membershipRepository,
@@ -102,13 +117,14 @@ export async function activateMembership(
 				role: updated.role,
 				revision: updated.revision,
 			});
-			await context.commandJournal.record({
+			await recordOrganizationCommand(context, {
 				commandId: command.commandId,
 				commandName: "ActivateMembership",
 				aggregateId: updated.id,
 				aggregateType: "Membership",
 				revision: updated.revision,
 				responseSnapshot: toCommandResultSnapshot(result),
+				requestHash: intent.requestHash,
 			});
 			await context.publishEvents([event]);
 			return result;
