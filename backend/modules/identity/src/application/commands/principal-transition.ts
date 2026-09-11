@@ -33,6 +33,12 @@ export interface PrincipalTransitionParams {
 	at: Date;
 	expectedRevision?: number;
 	/**
+	 * Idempotency key of the calling command. Passed in so a concurrent
+	 * execution of the SAME command is classified as a replay instead of a
+	 * lost-update conflict.
+	 */
+	commandId?: string;
+	/**
 	 * ANX-235: when provided, sessions are revoked inline so a disabled NATS
 	 * consumer cannot leave an authenticated window open. A failure aborts the
 	 * transaction (fail-closed): the principal keeps its previous status and the
@@ -89,7 +95,23 @@ export async function transitionPrincipalState(
 					params.expectedRevision,
 				);
 	if (!transitioned) {
-		// Lost the optimistic race between read and write.
+		// The UPDATE matched no row. Two very different causes:
+		//   (a) a concurrent execution of the SAME commandId already applied —
+		//       in that case the winner has committed (otherwise this UPDATE
+		//       would still block on its row lock), so the journal entry is
+		//       visible and the correct outcome is a replay, not a conflict;
+		//   (b) a different command changed the principal — a real conflict.
+		if (params.commandId) {
+			const journaled = await context.commandJournal.findByCommandId(
+				params.commandId,
+			);
+			if (journaled) {
+				const applied = await context.principalRepository.findById(current.id);
+				if (applied) {
+					return applied;
+				}
+			}
+		}
 		throwIdentityError(
 			"IDN_REVISION_CONFLICT",
 			"Principal changed concurrently during transition",
@@ -255,6 +277,13 @@ export async function recordTransitionJournal(
 	},
 ): Promise<void> {
 	if (!input.commandId) {
+		return;
+	}
+	const existing = await context.commandJournal.findByCommandId(
+		input.commandId,
+	);
+	if (existing) {
+		// Replay: the winner of a concurrent execution already recorded it.
 		return;
 	}
 	const result = identityCommandResultSchema.parse({

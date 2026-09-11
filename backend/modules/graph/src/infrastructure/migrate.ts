@@ -10,7 +10,14 @@ const migrationsFolder = join(
 );
 export async function ensureGraphSchema(pool) {
 	const db = drizzle(pool);
-	await migrate(db, { migrationsFolder });
+	// Journal isolado no schema `graph`: sem isso, módulos que usam o schema
+	// `drizzle` compartilham `__drizzle_migrations` e um pode considerar a
+	// migração do outro já aplicada (mesmo padrão adotado em identity).
+	await migrate(db, {
+		migrationsFolder,
+		migrationsSchema: "graph",
+		migrationsTable: "__drizzle_migrations",
+	});
 }
 const databaseUrl =
 	process.env.DATABASE_URL ??

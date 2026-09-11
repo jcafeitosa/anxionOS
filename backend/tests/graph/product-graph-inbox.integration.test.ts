@@ -21,6 +21,25 @@ import {
 	projectProductGraphEvent,
 } from "@anxionos/graph";
 
+/**
+ * Remove apenas as linhas dos consumers deste arquivo. O teste usa `eventId`
+ * fixo, entao sem limpeza a segunda execucao contra o mesmo banco encontraria a
+ * linha do inbox e trataria a PRIMEIRA chamada como duplicata (vazamento de
+ * estado entre execucoes, invisivel enquanto o teste pulava).
+ */
+async function resetInboxFixtures(
+	pool: { query: (sql: string, params?: unknown[]) => Promise<unknown> },
+	consumerNames: string[],
+): Promise<void> {
+	await pool.query(
+		"DELETE FROM graph_projection_inbox WHERE consumer_name = ANY($1)",
+		[consumerNames],
+	);
+	await pool.query("DELETE FROM graph_projection_dlq WHERE consumer_name = ANY($1)", [
+		consumerNames,
+	]);
+}
+
 function shouldRun(): boolean {
 	return (
 		process.env.RUN_PG_INTEGRATION_TESTS === "true" &&
@@ -51,6 +70,9 @@ describe("product graph inbox integration (ANX-277)", () => {
 		const pool = createPgPool(process.env.DATABASE_URL!);
 		try {
 			await ensureGraphSchema(pool);
+			await resetInboxFixtures(pool, [
+				productProjectionConsumer.consumerName,
+			]);
 			const graphStore = createInMemoryGraphStore();
 
 			const first = await processWithInbox({
@@ -100,6 +122,7 @@ describe("product graph inbox integration (ANX-277)", () => {
 		const pool = createPgPool(process.env.DATABASE_URL!);
 		try {
 			await ensureGraphSchema(pool);
+			await resetInboxFixtures(pool, [agentProjectionConsumer.consumerName]);
 			const graphStore = createInMemoryGraphStore();
 
 			const first = await processWithInbox({

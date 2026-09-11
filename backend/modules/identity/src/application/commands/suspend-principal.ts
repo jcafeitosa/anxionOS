@@ -45,6 +45,7 @@ export async function suspendPrincipal(
 			reasonCode: command.reasonCode,
 			at: suspendedAt,
 			expectedRevision: command.expectedRevision,
+			commandId: command.commandId,
 			sessionRevocation: deps.sessionRevoker,
 		});
 		await recordTransitionJournal(context, {

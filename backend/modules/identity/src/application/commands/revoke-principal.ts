@@ -50,6 +50,7 @@ export async function revokePrincipal(
 			reasonCode: command.reasonCode,
 			at: revokedAt,
 			expectedRevision: command.expectedRevision,
+			commandId: command.commandId,
 			sessionRevocation: deps.sessionRevoker,
 		});
 		await recordTransitionJournal(context, {
