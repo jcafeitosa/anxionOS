@@ -4,19 +4,20 @@ Slice **S4** closes three gateway spec controls for the `engines-sandbox` profil
 
 | Controle | Implementação local | Oracle |
 | --- | --- | --- |
-| Egress deny | Rede `anxion-data` com `internal: true` — engines não alcançam internet | `npm run anx162:s4-egress-auth-audit-homologation` |
+| Egress deny | Rede `anxion-engines-sandbox` com `internal: true` — quartet isolado sem internet | `npm run anx162:s4-egress-auth-audit-homologation` |
 | Service auth | `ENGINE_SANDBOX_AUTH_TOKEN` — Bearer em rotas API; `/health` público | mesmo oracle |
 | Audit manifest | `audit/engine-sandbox-manifest.json` com tags + digests | mesmo oracle |
 
 ## Redes
 
 ```text
-anxion-control     → API, NATS (control-plane)
-anxion-data        → Postgres, engines (internal: true — sem egress)
-anxion-observability → NATS metrics
+anxion-control         → API, NATS (control-plane)
+anxion-data            → Postgres, Neo4j
+anxion-engines-sandbox → quartet engines (internal: true — sem egress)
+anxion-observability   → NATS metrics
 ```
 
-Engines ficam **somente** em `anxion-data`. Postgres também usa `anxion-control` para acesso do host/API, mas engines não são anexados ao control-plane.
+Engines ficam **somente** em `anxion-engines-sandbox` (rede interna). Oráculos S3/S4 provam `/health` via `docker exec` dentro do container — portas não são publicadas no host quando a rede é exclusivamente interna.
 
 ## Service auth
 

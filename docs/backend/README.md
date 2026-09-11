@@ -110,10 +110,10 @@ Containers de engine externo em modo **SIMULATED** — sem credenciais live:
 cp backend/deploy/docker/.env.example backend/deploy/docker/.env
 docker-compose -f backend/deploy/docker/docker-compose.yml --profile engines-sandbox build
 docker-compose -f backend/deploy/docker/docker-compose.yml --profile engines-sandbox up -d
-curl -s http://127.0.0.1:9053/health | jq .
-curl -s http://127.0.0.1:9054/health | jq .
-curl -s http://127.0.0.1:9055/health | jq .
-curl -s http://127.0.0.1:9056/health | jq .
+docker exec docker-gocryptotrader-sandbox-1 wget -qO- http://localhost:9053/health | jq .
+docker exec docker-hummingbot-sandbox-1 wget -qO- http://localhost:9054/health | jq .
+docker exec docker-freqtrade-sandbox-1 wget -qO- http://localhost:9055/health | jq .
+docker exec docker-xchange-sandbox-1 wget -qO- http://localhost:9056/health | jq .
 npm run anx162:s3-engines-homologation
 npm run anx162:s4-egress-auth-audit-homologation
 ```
@@ -122,7 +122,7 @@ Isolamento aplicado a todos os serviços do quartet (`gocryptotrader-sandbox`, `
 
 | Controle | Valor |
 | --- | --- |
-| Rede | `anxion-data` (`internal: true` — egress deny; sem `anxion-control`) |
+| Rede | `anxion-engines-sandbox` (`internal: true` — egress deny; sem `anxion-control`/`anxion-data`) |
 | Service auth | `ENGINE_SANDBOX_AUTH_TOKEN` — Bearer em rotas API; `/health` público |
 | Usuário | `10001` (non-root) |
 | Root FS | `read_only: true` + `tmpfs` em `/tmp` |

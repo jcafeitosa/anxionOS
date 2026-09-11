@@ -8,6 +8,8 @@ networks:
     driver: bridge
   anxion-data:
     driver: bridge
+  anxion-engines-sandbox:
+    driver: bridge
     internal: true
   anxion-observability:
     driver: bridge
@@ -152,7 +154,7 @@ services:
     volumes:
       - gct-sandbox-data:/data
     networks:
-      - anxion-data
+      - anxion-engines-sandbox
     read_only: true
     tmpfs:
       - /tmp:size=16M,mode=1777
@@ -200,7 +202,7 @@ services:
     volumes:
       - hmb-sandbox-data:/data
     networks:
-      - anxion-data
+      - anxion-engines-sandbox
     read_only: true
     tmpfs:
       - /tmp:size=16M,mode=1777
@@ -248,7 +250,7 @@ services:
     volumes:
       - fqt-sandbox-data:/data
     networks:
-      - anxion-data
+      - anxion-engines-sandbox
     read_only: true
     tmpfs:
       - /tmp:size=16M,mode=1777
@@ -296,7 +298,7 @@ services:
     volumes:
       - xch-sandbox-data:/data
     networks:
-      - anxion-data
+      - anxion-engines-sandbox
     read_only: true
     tmpfs:
       - /tmp:size=16M,mode=1777
