@@ -27,8 +27,13 @@ G3-SIM-01 backtest requested → started+completed · G3-SIM-02 hash mismatch FA
 
 ## In / Out (R4)
 
-**In:** POST /v1/simulation/runs; consumer strategies.backtest.requested.v1.
-**Out:** simulation.run.started.v1, simulation.run.completed.v1, simulation.snapshot.created.v1, simulation.run.failed.v1. Códigos SIM_*. SIM-R04-01: não emite execution.order nem evaluation.certification.
+**In:** POST `/v1/simulation/runs`; GET `/v1/simulation/runs/:id`; POST `/v1/simulation/snapshots`; consumer `strategies.backtest.requested.v1`.
+
+**Out:** `simulation.run.started.v1`, `simulation.run.completed.v1`, `simulation.snapshot.created.v1`, `simulation.run.failed.v1`. Códigos SIM_*. **SIM-R04-01:** não emite `execution.order.*` nem `evaluation.certification.*`.
+
+## Non-goals
+
+Não OpenAPI público neste pack. Não schema produção. Não emitir journal de accounting. Specs permanecem draft.
 
 ## Saída R4
 
