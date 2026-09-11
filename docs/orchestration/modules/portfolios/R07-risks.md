@@ -1,24 +1,43 @@
 ---
 type: debate
 ---
-
 # R07 — Riscos: `modules/portfolios`
 
-**Issue:** ANX-95
+**Rodada:** R7  
+**Data:** 2026-09-11  
+**Issues:** ANX-389 · ANX-95  
+**Callers:** [R06-dependencies.md](./R06-dependencies.md) · [R08-decision-log.md](./R08-decision-log.md).
 
-| ID | Risco | Sev | Mitigação |
-| --- | --- | ---: | --- |
-| R-PF-01 | Cross-tenant leak em positions | 15 | org scope + test G5 |
-| R-PF-02 | Double apply mesmo fill | 20 | idempotency_key + unique constraint |
-| R-PF-03 | Position drift vs execution fills | 18 | PositionReconciliationCase + projector tests |
-| R-PF-04 | Position cash drift vs accounting ledger | 16 | accounting consumer + reconcile case |
-| R-PF-05 | SQLite position em dev | 18 | PF-R05-05 CI boundary |
-| R-PF-06 | Stale ValuationSnapshot usado por risk | 14 | qualityFlags + CONFIRMED policy |
-| R-PF-07 | REAL venue position bypass v1 | 10 | schema reject executionMode |
-| R-PF-08 | Cross-portfolio double exposure (FI02 overlap) | 17 | shared capitalAccountId explicit in exposure API |
-| R-PF-09 | RebalancePlan executa ordem direto | 16 | PF-R02-INV-11 + decisions gate |
-| R-PF-10 | NAV calculado com price errado | 13 | observationId validation + PROVISIONAL flag |
+## Registro
 
-Top 5 → R08. G5-PF-01 cross-tenant · G5-PF-02 double fill · G5-PF-03 position drift. Ownership: Position ≠ ledger ≠ reserva. D-GOV-010 = risk P06.
+| ID | Risco | L | I | Sev | Mitigação | Gate |
+| --- | --- | ---: | ---: | ---: | --- | --- |
+| R-PF-01 | Cross-tenant leak em positions | 3 | 5 | 15 | org scope + G5-PF-01 | G4 G5 |
+| R-PF-02 | Double apply mesmo fill | 4 | 5 | 20 | idempotency_key + unique | G3 |
+| R-PF-03 | Position drift vs execution fills | 4 | 5 | 20 | PositionReconciliationCase | G3 G5 |
+| R-PF-04 | Position cash drift vs accounting ledger | 3 | 5 | 15 | accounting consumer | G3 |
+| R-PF-05 | SQLite position em dev | 3 | 5 | 15 | PF-R05-05 CI | G2 G4 |
+| R-PF-06 | Stale ValuationSnapshot usado por risk | 3 | 4 | 12 | CONFIRMED + qualityFlags | G3 |
+| R-PF-07 | REAL venue position bypass v1 | 2 | 5 | 10 | schema reject executionMode | G3 |
+| R-PF-08 | Cross-portfolio double exposure (FI02) | 3 | 5 | 15 | capitalAccountId explícito | G3 |
+| R-PF-09 | RebalancePlan executa ordem direto | 3 | 5 | 15 | PF-R02-INV-11 + decisions | G2 |
+| R-PF-10 | NAV com price errado | 3 | 4 | 12 | observationId + PROVISIONAL | G3 |
+| R-PF-11 | D-GOV-010 neste módulo | 1 | 3 | 3 | risk P06 | P06 |
 
-→ **R08** ([R08-decision-log.md](./R08-decision-log.md))
+### Top 5
+
+R-PF-02 · R-PF-03 · R-PF-01 · R-PF-05 · R-PF-09
+
+Ownership: Position ≠ ledger ≠ reserva. D-GOV-010 = risk P06.
+
+## Oráculos G5
+
+| ID | Esperado |
+| --- | --- |
+| G5-PF-01 | GET positions outra org → 403 |
+| G5-PF-02 | double fill → mesma revision |
+| G5-PF-03 | position drift vs fills → ReconciliationCase OPEN |
+
+## Saída R7
+
+Riscos fechados para R8. Sem pasta `approvals/` / `policies/`.

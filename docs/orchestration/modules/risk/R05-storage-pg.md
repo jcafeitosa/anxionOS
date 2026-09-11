@@ -5,22 +5,58 @@ type: debate
 
 **Rodada:** R5  
 **Data:** 2026-09-11  
-**Issue:** ANX-99 · P1 ANX-389
+**Issues:** ANX-389 · ANX-99  
+**Callers:** [R04-contracts-events.md](./R04-contracts-events.md) · [R06-dependencies.md](./R06-dependencies.md).  
+ADR0004: PG autoritativo; Neo4j projector; **sem** Timescale para check/permit; SQLite **não**. ST08 **0/23**. **Sem migration.** Nomes de tabela documentais (alvo G1). D-GOV-010 (corpo PolicyVersion RISK) **deferido P06** — este pack só nomeia `risk_limit_policies` + PolicyReference em governance.
 
-## ADR0004
+## Princípios
 
-| Engine | Uso neste módulo |
+PG `risk_*` verdade; journal/outbox mesma UoW; sem FK capital/portfolios; grafo `graph:risk:v1` só ids. Kill switch e epoch são estado deste módulo, não do board.
+
+```mermaid
+sequenceDiagram
+  participant DC as decisions
+  participant RK as risk
+  participant PG as PostgreSQL
+  participant EX as execution
+  DC->>RK: check.requested.v1
+  RK->>PG: check + permit + outbox COMMIT
+  RK->>EX: risk.permit.issued.v1
+  Note over RK,PG: epoch bump / kill switch invalida permit
+```
+
+## Tabelas (alvo G1)
+
+| Tabela | Propósito |
 | --- | --- |
-| PostgreSQL | LimitPolicy, ExposureSnapshot, RiskCheckResult, RiskPermit, KillSwitchState, risk_epoch_registry, command_journal |
-| Neo4j | projeção async via graph — restrições/violações |
-| Timescale | **não** — séries de exposição derivadas podem viver em performance/portfolios |
-| pgvector | **não** |
-| SQLite | **proibido** para check/permit/kill switch autoritativo |
+| `risk_limit_policies` | LimitPolicy publicada; UNIQUE (org_id, policy_id, revision) |
+| `risk_exposure_snapshots` | ExposureSnapshot asOf; rebuildável |
+| `risk_check_results` | RiskCheckResult append-only |
+| `risk_permits` | RiskPermit single-use; UNIQUE (org_id, permit_id) |
+| `risk_kill_switch_state` | hierarquia GLOBAL→ORG→PORTFOLIO |
+| `risk_epoch_registry` | riskEpoch monotônico por org |
+| `risk_command_journal` | command_id PK; owner_domain=risk |
 
-D-GOV-010 (corpo PolicyVersion RISK) **deferido P06** — este pack só referencia PolicyReference em governance.
+## Invariantes storage (`RK-R05-*`)
 
-UoW: estado + journal + outbox na mesma transação. Sem FK para capital/portfolios.
+| ID | Regra |
+| --- | --- |
+| RK-R05-01 | Nenhum check/permit/kill switch autoritativo fora PostgreSQL |
+| RK-R05-02 | Mutação + outbox na mesma transação |
+| RK-R05-03 | Permit single-use; CONSUMED não reemite |
+| RK-R05-04 | Sem FK para `capital_*` / `portfolios_*` |
+| RK-R05-05 | SQLite / WAL local → rejeitado em CI |
+| RK-R05-06 | RLS defer P09 — application-only tenancy |
+| RK-R05-07 | D-GOV-010 corpo PolicyVersion RISK **não** migrado neste pack |
+
+## Neo4j
+
+check.completed → RESTRICTS / VIOLATED (ids). Sem segundo writer de permit.
+
+## Alternativas rejeitadas
+
+Check em SQLite; permit só no grafo; FK para portfolios_positions; pasta `policies/` no repo.
 
 ## Saída R5
 
-Para R06.
+Modelo v1 nomeado. Nenhuma migration. D-GOV-010 = P06.
