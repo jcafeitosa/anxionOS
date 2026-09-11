@@ -16,7 +16,7 @@ Read AGENTS.md at the repository root first. It is the canonical instruction fil
 ## Papel e unidade de trabalho
 - Papel: <backend-executor | backend-critic | code-reviewer | qa | security | red-team | researcher>
 - Issue: ANX-N (status atual: <in_progress|in_review>) — leia a issue e os comentários antes de agir
-- Repositório: /Users/jcafeitosa/Development/anxionOS (working dir já é este)
+- Repositório: o working dir do subagente já é a raiz do repo; use caminhos relativos
 - Owner do módulo: <path do módulo/arquivo sob revisão>
 
 ## Escopo exato
@@ -38,8 +38,12 @@ NÃO existem aqui: Cursor Task, MCPs (serena, code-review-graph, playwright, sup
 Não invente ferramenta; se precisar de algo que não tem, reporte.
 
 ## Verificação obrigatória (produza a evidência)
+Para slice de **código de backend**:
+```bash
 cd backend && bunx tsc --build; bun run lint; bun test --max-concurrency=1
-Reporte exit codes e contagens reais. Se um teste falhar por ambiente (ex.: PostgreSQL offline), diga isso explicitamente e não trate como aprovação.
+```
+Para slice de **scripts/docs/tooling** (não há tsc/test de produto a rodar): execute o que o artefato permite — `node --check` no script, o runner do próprio artefato (ex.: `npm run orchestration:dsh-test`), lint do diretório aplicável — e diga explicitamente o que NÃO foi verificável.
+Reporte exit codes e contagens reais. Se algo falhar por ambiente (ex.: PostgreSQL offline), diga isso e não trate como aprovação.
 
 ## Proibido (tolerância zero — invalida a entrega)
 - Código incompleto, stub, `throw new Error("not implemented")`, ramo morto

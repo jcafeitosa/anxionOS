@@ -96,7 +96,7 @@ Docs: `.cursor/orchestration/TASKBOARD-ROUTING.md` · `.cursor/orchestration/man
 | Sintoma | Causa provável | Ação |
 | --- | --- | --- |
 | `Write operations need CODEX_THREAD_ID, CLAUDE_CODE_SESSION_ID, or CURSOR_THREAD_ID` | thread id não exportado | `export CURSOR_THREAD_ID="dsh-$DSH_SESSION_ID"` |
-| `Binding identity requires project id, kind, host id, and workspace path` | binding incompleto | mover via wrapper com `--persona`, ou passar todos os campos de binding |
+| `Binding identity requires project id, kind, host id, and workspace path` (observado nesta sessão em `taskctl issue move --binding-thread-id` sem os demais campos) | binding incompleto | mover via wrapper com `--persona`, ou passar todos os campos de binding |
 | `CROSS_CHAT_CLAIM_CONFLICT` | outra conversa na mesma issue | `orchestration:coordination status` → handoff/release |
 | `MISSING_ISSUE_LOCK` | lock de outra thread | adquirir lock (`claim-check --acquire`) antes de editar |
 | Comentário aceito mas não aparece na issue | postou em outro projeto | conferir `taskboard:context` (project resolvido por `workspacePath`) |

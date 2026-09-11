@@ -12,6 +12,9 @@
  *   node scripts/orchestration/dsh-dispatch.mjs --input /tmp/spawn-plan.json --persona backend-critic
  *   node scripts/orchestration/dsh-dispatch.mjs --issue ANX-457 --model backend-critic=anthropic/claude-sonnet-4.5@high
  *   node scripts/orchestration/dsh-dispatch.mjs --issue ANX-457 --check-lock
+ *
+ * Exit codes: 0 ok · 1 erro de uso/execução · 3 lock em conflito de outra thread
+ *             · 4 lock-check indisponível (não foi possível verificar).
  */
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
@@ -40,76 +43,29 @@ const DROPPED_SECTIONS = [
 	/^#{1,3}\s+Template\s+—\s+bloco tooling/i,
 ];
 
-/** Menções que só existem no runtime Cursor — removidas do prompt final. */
-const CURSOR_ONLY_MARKERS = [
-	"serena",
-	"code-review-graph",
-	"supermemory",
-	"context7",
-	"GetDynamicTools",
-	"CallDynamicTool",
-	"Chrome DevTools",
-	"playwright",
-	"orchestration:speak",
-	"Chat Cursor",
-	"Task filhos",
-];
+/**
+ * Marcadores de linha que só existem no runtime Cursor. A checagem exige
+ * contexto de ferramenta (MCP, API do Cursor, convenção de chat) para não
+ * apagar conteúdo legítimo — `npx playwright test` é dependência real do repo.
+ */
+const CURSOR_TOOLING_LINE =
+	/(\bMCPs?\b|GetDynamicTools|CallDynamicTool|orchestration:speak|Chat Cursor|\bTask filhos\b|supermemory|context7)/i;
+const KEEP_LINE = /NÃO existem aqui/i;
 
-/** Reescreve o intro Cursor ("acesso total ao Cursor: shell, MCPs, ..."). */
-const CURSOR_INTRO_PATTERN = /^(.*teammate autônomo com acesso total ao Cursor.*)$/i;
+/** Placeholder de evidência do framework: inválido para o dialogue (`cmd:` idem). */
+const EVIDENCE_PLACEHOLDER = /--evidence\s+"\.\.\."/g;
+const EVIDENCE_CMD_KIND = /--evidence\s+"cmd:/g;
+const FALLBACK_EVIDENCE = '--evidence "command:<preencher>"';
+
+const CURSOR_INTRO = /^.*teammate autônomo com acesso total ao Cursor.*$/im;
 const DSH_INTRO =
 	"Autônomo, com acesso a shell, arquivos e subagentes do DeepSeek Harness:";
 
-function isCursorOnlyLine(line) {
-	const trimmed = line.trim();
-	if (!trimmed) return false;
-	if (trimmed.startsWith("NÃO existem aqui")) return false;
-	return CURSOR_ONLY_MARKERS.some((marker) =>
-		trimmed.toLowerCase().includes(marker.toLowerCase()),
-	);
-}
-
-/** Reescreve o prompt Cursor removendo acoplamentos e anexando o tooling DSH. */
-function adaptPrompt(prompt) {
-	const out = [];
-	let dropping = false;
-	let inFence = false;
-	for (const line of prompt.split("\n")) {
-		const isFence = /^\s*```/.test(line);
-		// Headers dentro de fence pertencem a template embutido: não reativam seções.
-		if (!inFence && !isFence && /^#{1,3}\s+/.test(line)) {
-			dropping = DROPPED_SECTIONS.some((pattern) => pattern.test(line));
-		}
-		if (isFence) {
-			inFence = !inFence;
-		}
-		if (dropping) continue;
-		if (/subagent_type/i.test(line)) {
-			const cleaned = line
-				.replace(/\s*[·|,-]?\s*subagent_type:.*$/i, "")
-				.trim();
-			if (cleaned) out.push(cleaned);
-			continue;
-		}
-		out.push(line);
-	}
-
-	const scrubbed = out
-		.filter((line) => !isCursorOnlyLine(line))
-		.map((line) =>
-			CURSOR_INTRO_PATTERN.test(line)
-				? line.replace(CURSOR_INTRO_PATTERN, `$1`).replace(/.*/, DSH_INTRO)
-				: line,
-		)
-		.join("\n")
-		.replace(/\n{3,}/g, "\n\n")
-		.trimEnd();
-
-	return `${scrubbed}\n\n${DSH_TOOLING_BLOCK}\n`;
-}
+/** `spawn-plan` corta em 5 por padrão; pedimos um teto alto e avisamos se bater. */
+const PLAN_LIMIT = 200;
 
 function usage(exitCode = 0) {
-	const out = `dsh-dispatch — spawn-plan (framework) → despachos DSH
+	console.log(`dsh-dispatch — spawn-plan (framework) → despachos DSH
 
 Opções:
   --issue ANX-N[,ANX-M]     filtra por issue (recomendado; evita despachar trabalho de outra sessão)
@@ -117,14 +73,14 @@ Opções:
   --input PATH              lê o spawn-plan de arquivo em vez de executar o framework
   --format markdown|json    saída (default: markdown)
   --model SLUG=provider/model[@effort]   fixa a rota do subagente para um papel (repetível)
-  --check-lock              consulta o lock de cada issue e avisa em conflito de outra thread
+  --check-lock              verifica o lock de cada issue; exit 3 em conflito, 4 se não verificável
   --json                    atalho para --format json
   --help
 
-Sem --issue, o script emite TODOS os despachos pendentes da fila — inclusive de
-outras conversas. Rodar assim em workspace com sessões paralelas é risco real.
-`;
-	console.log(out);
+Sem --issue, o script consulta a fila global (cap de ${PLAN_LIMIT} por consulta) e emite
+TODOS os pendentes — inclusive de outras conversas. Em workspace com sessões
+paralelas isso é risco real: prefira sempre --issue.
+`);
 	process.exit(exitCode);
 }
 
@@ -163,16 +119,24 @@ function parseArgs(argv) {
 				break;
 			case "--model": {
 				const value = argv[++index] ?? "";
-				const [slug, route] = value.split("=");
-				if (!slug || !route) {
+				const separator = value.indexOf("=");
+				if (separator <= 0) {
 					throw new Error("--model requires SLUG=provider/model[@effort]");
 				}
+				const slug = value.slice(0, separator);
+				const route = value.slice(separator + 1);
 				const [target, effort] = route.split("@");
-				const [provider, model] = target.split("/");
-				if (!provider || !model) {
+				// Model ids may contain `/` (e.g. openrouter/meta/llama): split the
+				// provider on the FIRST slash only.
+				const slash = (target ?? "").indexOf("/");
+				if (slash <= 0 || slash === (target ?? "").length - 1) {
 					throw new Error("--model requires provider/model");
 				}
-				options.models.set(slug, { provider, model, effort });
+				options.models.set(slug, {
+					provider: target.slice(0, slash),
+					model: target.slice(slash + 1),
+					effort: effort || undefined,
+				});
 				break;
 			}
 			case "--check-lock":
@@ -210,14 +174,16 @@ function loadSpawnPlan(inputPath, issues) {
 				"--",
 				"spawn-plan",
 				...extraArgs,
+				"--limit",
+				String(PLAN_LIMIT),
 				"--json",
 			],
 			{ encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
 		);
 		return JSON.parse(raw.slice(raw.indexOf("{")));
 	};
-	// O plano global é limitado: consultar por issue evita que o item pedido
-	// fique fora da janela (foi um bug real do adaptador).
+	// O plano é limitado: consultar por issue evita que o item pedido fique fora
+	// da janela (foi um bug real do adaptador).
 	if (issues.length === 0) {
 		return call([]);
 	}
@@ -233,6 +199,93 @@ function loadSpawnPlan(inputPath, issues) {
 	return { tasks };
 }
 
+/** Delimitador de fence markdown: ``` ou ~~~, com o comprimento da abertura. */
+function fenceDelimiter(line) {
+	const match = line.match(/^\s*(`{3,}|~{3,})/);
+	return match ? { char: match[1][0], length: match[1].length } : null;
+}
+
+/**
+ * Remove a fence externa quando o prompt chega embrulhado nela pelo
+ * `dispatch inject` (`<details>` + ```markdown). Sem isso, todo header fica
+ * "dentro de fence" e o corte por seção nunca acontece.
+ */
+function unwrapOuterFence(prompt) {
+	const lines = prompt.split("\n");
+	let start = 0;
+	while (start < lines.length && lines[start].trim() === "") start += 1;
+	let end = lines.length - 1;
+	while (end > start && lines[end].trim() === "") end -= 1;
+	const opening = start < lines.length ? fenceDelimiter(lines[start]) : null;
+	const closing = end > start ? fenceDelimiter(lines[end]) : null;
+	if (
+		!opening ||
+		!closing ||
+		opening.char !== closing.char ||
+		closing.length < opening.length
+	) {
+		return prompt;
+	}
+	return lines.slice(start + 1, end).join("\n");
+}
+
+function normalizeEvidence(value) {
+	if (typeof value !== "string") return value;
+	return value
+		.replace(EVIDENCE_CMD_KIND, '--evidence "command:')
+		.replace(EVIDENCE_PLACEHOLDER, FALLBACK_EVIDENCE);
+}
+
+/**
+ * Reescreve o prompt Cursor removendo acoplamentos e anexando o tooling DSH.
+ * Fences são rastreadas por delimitador (abertura/fechamento do mesmo tipo,
+ * fechamento com comprimento >= abertura) e headers só contam fora de fence.
+ */
+function adaptPrompt(prompt) {
+	const out = [];
+	let dropping = false;
+	let fence = null;
+	for (const line of unwrapOuterFence(prompt).split("\n")) {
+		const delimiter = fenceDelimiter(line);
+		if (delimiter) {
+			if (fence === null) {
+				fence = delimiter;
+			} else if (
+				delimiter.char === fence.char &&
+				delimiter.length >= fence.length
+			) {
+				fence = null;
+			}
+			if (dropping) continue;
+			out.push(line);
+			continue;
+		}
+		if (fence === null && /^#{1,3}\s+/.test(line)) {
+			dropping = DROPPED_SECTIONS.some((pattern) => pattern.test(line));
+		}
+		if (dropping) continue;
+		if (/subagent_type/i.test(line)) {
+			const cleaned = line
+				.replace(/\s*[·|,-]?\s*subagent_type:.*$/i, "")
+				.trim();
+			if (cleaned) out.push(cleaned);
+			continue;
+		}
+		if (CURSOR_TOOLING_LINE.test(line) && !KEEP_LINE.test(line)) continue;
+		out.push(line);
+	}
+
+	const scrubbed = out
+		.join("\n")
+		.replace(CURSOR_INTRO, DSH_INTRO)
+		.replace(/\n{3,}/g, "\n\n")
+		.trimEnd();
+
+	// O framework emite `--evidence "cmd:..."` no próprio prompt, mas o dialogue
+	// só aceita file|command|issue|pr: sem normalizar, o ack de todo dispatch falha.
+	return `${normalizeEvidence(scrubbed)}\n\n${DSH_TOOLING_BLOCK}\n`;
+}
+
 function checkLock(issueId) {
 	try {
 		const raw = execFileSync(
@@ -246,13 +299,15 @@ function checkLock(issueId) {
 				"--issue",
 				issueId,
 			],
-			{ encoding: "utf8" },
+			{ encoding: "utf8", stderr: "ignore" },
 		);
 		const line = raw
 			.split("\n")
 			.map((item) => item.trim())
 			.find((item) => item.startsWith(issueId));
-		if (!line) return { issueId, status: "unknown", detail: "sem resposta" };
+		if (!line) {
+			return { issueId, status: "unknown", detail: "sem linha de status" };
+		}
 		if (line.includes("CONFLICT")) {
 			return { issueId, status: "conflict", detail: line };
 		}
@@ -278,35 +333,41 @@ function toDispatch(task, options) {
 		legacySubagentType: task.subagent_type ?? null,
 		route: route ?? null,
 		prompt: adaptPrompt(task.prompt ?? ""),
-		afterSpawn: task.afterSpawn,
-		onComplete: task.onComplete,
+		afterSpawn: task.afterSpawn ?? null,
+		onComplete: task.onComplete
+			? normalizeEvidence(task.onComplete)
+			: null,
+		missingBookkeeping: !task.afterSpawn || !task.onComplete,
 	};
 }
 
 function renderMarkdown(dispatches, locks) {
 	const blocks = dispatches.map((dispatch) => {
+		const lock = locks?.get(dispatch.issueId);
 		const lockWarning =
-			locks?.get(dispatch.issueId)?.status === "conflict"
-				? `\n> ⚠️ LOCK CONFLITANTE: ${locks.get(dispatch.issueId).detail}\n`
+			lock && lock.status !== "ok"
+				? `\n> ⚠️ LOCK ${lock.status.toUpperCase()}: ${lock.detail}\n`
 				: "";
 		const route = dispatch.route
 			? `${dispatch.route.provider}/${dispatch.route.model}${
 					dispatch.route.effort ? `@${dispatch.route.effort}` : ""
 				}`
 			: "herdar do agente pai";
+		const bookkeeping = dispatch.missingBookkeeping
+			? "\n> ⚠️ bookkeeping ausente no plano (afterSpawn/onComplete): registre manualmente.\n"
+			: `\n\`\`\`bash
+# após despachar
+${dispatch.afterSpawn}
+# ao receber o parecer
+${dispatch.onComplete}
+\`\`\``;
 		return `## ${dispatch.persona} · ${dispatch.issueId}
 ${lockWarning}
 - dispatchId: \`${dispatch.dispatchId}\`
 - descrição: ${dispatch.description}
 - background: ${dispatch.run_in_background}
 - rota: ${route}${dispatch.legacySubagentType ? ` (Cursor: ${dispatch.legacySubagentType})` : ""}
-
-\`\`\`bash
-# após despachar
-${dispatch.afterSpawn}
-# ao receber o parecer
-${dispatch.onComplete.replace(/--evidence "\.\.\."/, '--evidence "command:..."')}
-\`\`\`
+${bookkeeping}
 
 ### prompt
 
@@ -317,6 +378,15 @@ ${dispatch.prompt}
 	return blocks.join("\n\n---\n\n");
 }
 
+/** Exit code do lock-check: 0 ok, 3 conflito, 4 indeterminado. */
+function lockExitCode(locks) {
+	if (!locks) return 0;
+	const statuses = [...locks.values()].map((entry) => entry.status);
+	if (statuses.includes("conflict")) return 3;
+	if (statuses.some((status) => status !== "ok")) return 4;
+	return 0;
+}
+
 function main() {
 	const options = parseArgs(process.argv.slice(2));
 	const plan = loadSpawnPlan(options.input, options.issues);
@@ -324,6 +394,11 @@ function main() {
 	if (tasks.length === 0) {
 		console.error("spawn-plan vazio — nada a despachar.");
 		process.exit(0);
+	}
+	if (tasks.length >= PLAN_LIMIT) {
+		console.error(
+			`AVISO: o plano bateu o cap de ${PLAN_LIMIT} tarefas; pode haver pendentes não listados.`,
+		);
 	}
 	if (options.issues.length === 0 && !options.persona) {
 		console.error(
@@ -356,20 +431,31 @@ function main() {
 				checkLock(issueId),
 			]),
 		);
+		for (const entry of locks.values()) {
+			if (entry.status === "ok") continue;
+			console.error(
+				`AVISO LOCK [${entry.status}] ${entry.issueId}: ${entry.detail}`,
+			);
+		}
 	}
 
 	const dispatches = filtered.map((task) => toDispatch(task, options));
 	if (options.format === "json") {
 		console.log(
 			JSON.stringify(
-				{ generatedAt: new Date().toISOString(), dispatches },
+				{
+					generatedAt: new Date().toISOString(),
+					locks: locks ? [...locks.values()] : null,
+					dispatches,
+				},
 				null,
 				2,
 			),
 		);
-		return;
+		process.exit(lockExitCode(locks));
 	}
 	console.log(renderMarkdown(dispatches, locks));
+	process.exit(lockExitCode(locks));
 }
 
 try {

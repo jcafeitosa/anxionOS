@@ -56,7 +56,8 @@ npm run orchestration:broadcast -- --from-persona backend-executor --type ack --
 
 # despacho de gates (adapta o spawn-plan do framework)
 npm run orchestration:dsh-dispatch -- --issue ANX-N --check-lock
-npm run orchestration:dsh-dispatch -- --issue ANX-N --format json --model backend-critic=... 
+npm run orchestration:dsh-dispatch -- --issue ANX-N --format json \
+  --model backend-critic=anthropic/claude-sonnet-4.5@high
 
 # fim de turno
 npm run orchestration:compliance -- --pre-commit --issue ANX-N --persona backend-executor

@@ -39,7 +39,7 @@ Todo executor Level C tem um crítico nominal na **mesma issue**: `backend-execu
 
 ```bash
 npm run orchestration:session -- start --persona backend-critic --issue ANX-N
-npm run orchestration:broadcast -- --from-persona backend-critic --type ack --issue ANX-N --body "ack pareamento" --evidence "cmd:orchestration:compliance"
+npm run orchestration:broadcast -- --from-persona backend-critic --type ack --issue ANX-N --body "ack pareamento" --evidence "command:orchestration:compliance"
 ```
 
 **Independência não vem do slug.** O ack de pareamento é handshake de orquestração, **não** parecer. O parecer G1 substantivo deve vir de um subagente com contexto próprio sobre o diff exato, e ser registrado como comentário/verdict separado com evidência.
