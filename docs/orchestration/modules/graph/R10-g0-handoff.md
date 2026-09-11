@@ -23,6 +23,15 @@ type: debate
 
 Kernel, catálogo T01–T20, inbox, DLQ, rebuild full-swap, dispatcher, consumers `graph:{domain}:v1`, cache epoch-aware, R01–R10 neste diretório, APIs draft [node.get](./node-get-neighbors-api-v1.md) / [T01–T05](./t01-t05-fixtures-v1.md).
 
+**Persistência nomeada:** PostgreSQL `graph_traversal_catalog`, `graph_inbox`, `graph_dlq`, `graph_rebuild_jobs`, `graph_cache_epochs`, `graph_command_journal`. Neo4j = projeção (não ledger).
+
+## Non-goals
+
+- Nenhuma migration ST08 neste pack.
+- neo4j-driver fora do adapter graph.
+- SQLite para T01/grants/grafo institucional.
+- Specs 001–005 **draft**; ANX-342 `todo`; D-GOV-010 = risk P06.
+
 ## Out of scope
 
 | Item | Destino |

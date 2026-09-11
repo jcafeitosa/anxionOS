@@ -15,11 +15,18 @@ type: debate
 | Domínio | Grant, Delegation, Mandate, ChangeProposal, Approval, AuthorityEpoch |
 | Comandos | IssueGrant, RevokeGrant, CreateDelegation, SubmitChangeProposal, ResolveApproval |
 | Queries | ListEffectiveGrants, GetGrantById, GetAuthorityEpoch |
-| Persistência | PG governance_* + command journal + outbox |
+| Persistência nomeada | PostgreSQL `governance_grants`, `governance_delegations`, `governance_mandates`, `governance_change_proposals`, `governance_approvals`, `governance_authority_epochs`, `governance_command_journal` |
 | Consumer | membership.activated/revoked → grants derivados |
 | Port | TraversalEvaluator → graph T01 |
 | API | `/v1/agencies/:agencyId/grants` + change-proposals |
 | Testes | G3-GOV-01..05, GK03, AR01 |
+
+## Non-goals
+
+- Nenhuma migration ST08 neste pack documental extra.
+- Pasta `approvals/` / `policies/` **não criar** — tabelas `governance_approvals` no PG, não pasta de módulo.
+- PolicyVersion RISK body = D-GOV-010 **risk P06**.
+- Specs 001–005 permanecem **draft**; ANX-342 permanece `todo`.
 
 ### Out of scope v1
 

@@ -9,7 +9,9 @@ status: draft
 
 ## In scope
 
-Incident, ExportJob, ServiceHealthSnapshot, Runbook, RetentionPolicy; PG `operations_*`; object store resultRef; projector IMPACTS; HTTP health/incidents; oraculos abaixo.
+Incident, ExportJob, ServiceHealthSnapshot, Runbook, RetentionPolicy; object store resultRef; projector IMPACTS; HTTP health/incidents; oraculos abaixo.
+
+**Persistência nomeada:** PostgreSQL `operations_incidents`, `operations_runbooks`, `operations_retention_policies`, `operations_export_jobs`, `operations_health_snapshots`, `operations_command_journal`.
 
 ## Out of scope
 

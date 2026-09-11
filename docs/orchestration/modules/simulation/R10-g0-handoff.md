@@ -9,7 +9,9 @@ status: draft
 
 ## In scope
 
-SimulationRun, ScenarioSnapshot, TwinManifest, SandboxCheckpoint; PG run state; SQLite sandbox **non-auth**; `graph:simulation:v1` isolado; HTTP `/v1/simulation`; oraculos abaixo.
+SimulationRun, ScenarioSnapshot, TwinManifest, SandboxCheckpoint; SQLite sandbox **non-auth**; `graph:simulation:v1` isolado; HTTP `/v1/simulation`; oraculos abaixo.
+
+**Persistência nomeada:** PostgreSQL `simulation_manifests`, `simulation_runs`, `simulation_snapshots`, `simulation_command_journal`. resultRef em object store.
 
 ## Out of scope
 

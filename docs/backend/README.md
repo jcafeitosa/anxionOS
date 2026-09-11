@@ -12,7 +12,7 @@ Workspace Bun/TypeScript do backend anxionOS — composition root separado confo
 - `tests/contracts` — smoke tests
 - `deploy/docker` — Postgres, NATS JetStream e Neo4j para dev local
 
-- `modules/` — **22 de 23** módulos do baseline com slice S1–S2 (journal/outbox/migrations); `agents` pendente; `adapter-gateway` (ANX-117) como transport SIMULATED. Detalhes: `brain/notes/anxionos-backend-conformance-2026-09-08.md` (local).
+- `modules/` — **23 módulos do baseline (ADR0002)** com código presente em `src/` (journal/outbox/migrations), incluindo `agents`. O diretório `adapter-gateway/` existe no tree como resquício pré-migração: o **baseline permanece 23 módulos** e o gateway externo é **distribuído nos donos executores/de dados** (execution + market-data) conforme [ADR0006](../../brain/project-docs/decisions/0006-distribute-external-gateways-within-baseline.md) e [ANX-345]. Detalhes: `brain/notes/anxionos-backend-conformance-2026-09-08.md` (local).
 
 ## Pré-requisitos
 

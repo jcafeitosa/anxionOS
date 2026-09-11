@@ -9,7 +9,9 @@ status: draft
 
 ## In scope
 
-EvaluationRecord, Certification, ReputationScore, PromotionRecommendation, ScoringPolicy; PG `evaluation_*`; projector `graph:evaluation:v1`; HTTP `/v1/evaluation`; oraculos abaixo.
+EvaluationRecord, Certification, ReputationScore, PromotionRecommendation, ScoringPolicy; projector `graph:evaluation:v1`; HTTP `/v1/evaluation`; oraculos abaixo.
+
+**Persistência nomeada:** PostgreSQL `evaluation_policies`, `evaluation_records`, `evaluation_certifications`, `evaluation_reputation`, `evaluation_recommendations`, `evaluation_command_journal`.
 
 ## Out of scope
 
