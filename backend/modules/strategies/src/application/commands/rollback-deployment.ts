@@ -51,10 +51,11 @@ export async function rollbackDeployment(
 				`Deployment ${command.deploymentId} not found`,
 			);
 		}
-		if (deployment.status !== "ACTIVE") {
+		const rollbackableStatuses = new Set(["ACTIVE", "CANARY"]);
+		if (!rollbackableStatuses.has(deployment.status)) {
 			throwStrategiesError(
 				"ST_INVALID_DEPLOYMENT_STATUS",
-				`Rollback requires ACTIVE deployment, got ${deployment.status}`,
+				`Rollback requires ACTIVE or CANARY deployment, got ${deployment.status}`,
 			);
 		}
 		await ctx.deployments.updateStatus({

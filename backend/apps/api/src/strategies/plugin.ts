@@ -18,8 +18,10 @@ import {
 	handlePublishStrategyVersion,
 	handleRegisterStrategy,
 	handleRequestBacktest,
+	handleRollbackDeployment,
 	strategyIdParamSchema,
 	strategyVersionIdParamSchema,
+	deploymentIdParamSchema,
 } from "./handlers/commands";
 
 export interface StrategiesPluginDeps extends StrategiesApiRuntime {
@@ -166,6 +168,24 @@ export function createStrategiesPlugin(deps: StrategiesPluginDeps) {
 						});
 					},
 					strategiesOpenApi.activateDeployment,
+				)
+				.post(
+					"/:strategyId/deployments/:deploymentId/rollback",
+					async ({ request, agencyId, params, principal }) => {
+						const { strategyId } = strategyIdParamSchema.parse(params);
+						const { deploymentId } = deploymentIdParamSchema.parse(params);
+						const commandId = parseIdempotencyKey(request.headers);
+						const body = await request.json();
+						return handleRollbackDeployment(deps, {
+							commandId,
+							agencyId,
+							strategyId,
+							deploymentId,
+							principalId: principal.id,
+							body,
+						});
+					},
+					strategiesOpenApi.rollbackDeployment,
 				)
 				.post(
 					"/:strategyId/signals",

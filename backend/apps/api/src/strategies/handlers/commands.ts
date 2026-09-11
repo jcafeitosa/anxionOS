@@ -1,5 +1,6 @@
 import {
 	activateDeploymentCommandSchema,
+	rollbackDeploymentCommandSchema,
 	completeBacktestCommandSchema,
 	createStrategyVersionCommandSchema,
 	emitSignalCommandSchema,
@@ -9,6 +10,7 @@ import {
 } from "@anxionos/contracts/strategies";
 import {
 	activateDeployment,
+	rollbackDeployment,
 	completeBacktest,
 	createStrategyVersion,
 	emitSignal,
@@ -71,6 +73,10 @@ export const strategyVersionIdParamSchema = z.object({
 
 export const backtestRunIdParamSchema = z.object({
 	backtestRunId: z.string().regex(/^st_btr_[0-9a-f-]{36}$/i),
+});
+
+export const deploymentIdParamSchema = z.object({
+	deploymentId: z.string().regex(/^st_dep_[0-9a-f-]{36}$/i),
 });
 
 export async function handleRegisterStrategy(
@@ -224,6 +230,7 @@ export async function handleActivateDeployment(
 			executionMode: body.executionMode,
 			portfolioId: body.portfolioId,
 			bindingSnapshot: body.bindingSnapshot,
+			canary: body.canary,
 		},
 	);
 }
@@ -254,3 +261,40 @@ export async function handleEmitSignal(
 		},
 	);
 }
+
+const rollbackDeploymentBodySchema = rollbackDeploymentCommandSchema
+	.omit({
+		commandId: true,
+		organizationId: true,
+		deploymentId: true,
+		rolledBackBy: true,
+	})
+	.strict();
+
+export async function handleRollbackDeployment(
+	deps: StrategiesPluginDeps,
+	input: {
+		commandId: string;
+		agencyId: string;
+		strategyId: string;
+		deploymentId: string;
+		principalId: string;
+		body: unknown;
+	},
+) {
+	const body = rollbackDeploymentBodySchema.parse(input.body);
+	return rollbackDeployment(
+		{
+			unitOfWork: deps.unitOfWork,
+			commandJournal: deps.commandJournal,
+		},
+		{
+			commandId: input.commandId,
+			organizationId: input.agencyId,
+			deploymentId: input.deploymentId,
+			reason: body.reason,
+			rolledBackBy: input.principalId,
+		},
+	);
+}
+

@@ -78,6 +78,8 @@ export const activateDeploymentCommandSchema = z.object({
 	executionMode: activateDeploymentExecutionModeSchema,
 	portfolioId: z.string().min(1).max(256).optional(),
 	bindingSnapshot: bindingSnapshotSchema,
+	/** ANX-171 — when true, deployment starts in CANARY before full promotion. */
+	canary: z.boolean().optional(),
 });
 export const emitSignalCommandSchema = z.object({
 	commandId: institutionalUuidSchema,

@@ -6,6 +6,7 @@ import { registerStrategyCommandSchema } from "@anxionos/contracts/strategies";
 import { mapStrategiesError } from "../../apps/api/src/strategies/error-handler";
 import {
 	backtestRunIdParamSchema,
+	deploymentIdParamSchema,
 	strategyIdParamSchema,
 	strategyVersionIdParamSchema,
 } from "../../apps/api/src/strategies/handlers/commands";
@@ -78,6 +79,12 @@ describe("strategies POST RBAC (ANX-442)", () => {
 });
 
 describe("strategies API boundary", () => {
+	test("deploymentIdParamSchema accepts st_dep_ ids", () => {
+		const parsed = deploymentIdParamSchema.parse({
+			deploymentId: "st_dep_aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+		});
+		expect(parsed.deploymentId).toMatch(/^st_dep_/);
+	});
 	test("registerStrategy body schema strips organizationId tampering", () => {
 		const parsed = registerStrategyCommandSchema
 			.omit({ commandId: true, organizationId: true })

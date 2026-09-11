@@ -13,6 +13,7 @@ export const deploymentIdSchema = z
 export const signalIdSchema = z.string().regex(/^st_sig_[0-9a-f-]{36}$/i);
 export const strategiesExecutionModeSchema = z.enum(["SIMULATED", "PAPER"]);
 export const deploymentStatusSchema = z.enum([
+	"CANARY",
 	"ACTIVE",
 	"PAUSED",
 	"ROLLED_BACK",

@@ -95,6 +95,7 @@ export async function activateDeployment(
 		}
 		const deploymentId = `st_dep_${randomUUID()}`;
 		const bindingHash = hashBindingSnapshot(command.bindingSnapshot);
+		const initialStatus = command.canary === true ? "CANARY" : "ACTIVE";
 		await ctx.deployments.save({
 			id: deploymentId,
 			organizationId: command.organizationId,
@@ -103,7 +104,7 @@ export async function activateDeployment(
 			executionMode: command.executionMode,
 			portfolioId: command.portfolioId ?? null,
 			bindingSnapshot: command.bindingSnapshot,
-			status: "ACTIVE",
+			status: initialStatus,
 			revision: 1,
 		});
 		await ctx.publishEvents([

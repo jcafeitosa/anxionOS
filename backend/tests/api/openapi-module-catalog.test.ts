@@ -199,6 +199,12 @@ const DOCUMENTED_OPERATIONS: Array<{
 		tag: "Strategies",
 	},
 	{
+		path: "/v1/strategies/agencies/{agencyId}/{strategyId}/deployments/{deploymentId}/rollback",
+		method: "post",
+		tag: "Strategies",
+	},
+
+	{
 		path: "/v1/strategies/agencies/{agencyId}/{strategyId}/signals",
 		method: "post",
 		tag: "Strategies",

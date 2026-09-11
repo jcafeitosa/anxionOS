@@ -17,7 +17,12 @@ export type BacktestRunStatus =
 	| "COMPLETED"
 	| "FAILED"
 	| "CANCELLED";
-export type DeploymentStatus = "ACTIVE" | "PAUSED" | "ROLLED_BACK" | "RETIRED";
+export type DeploymentStatus =
+	| "CANARY"
+	| "ACTIVE"
+	| "PAUSED"
+	| "ROLLED_BACK"
+	| "RETIRED";
 
 export interface BindingSnapshot {
 	instrumentRefs: string[];

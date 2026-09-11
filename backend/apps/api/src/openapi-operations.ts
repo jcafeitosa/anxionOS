@@ -211,7 +211,7 @@ export const postLoginContextOpenApiDetail = op({
 	operationId: "getPostLoginContext",
 	summary: "Resolve post-login console routing",
 	description:
-		"Module: identity + organizations. Cookie optional. Returns authentication flags, principal, active/pending memberships, MFA/email-verification gates and whether SMTP verification is configured. `platformAccess` and `partnerAccess` are fail-closed (`false`) until those consoles are authorized.",
+		"Module: identity + organizations. Cookie optional. Returns authentication flags, principal, active/pending memberships, MFA/email-verification gates and whether SMTP verification is configured. `platformAccess` is true only with an active `console.platform` grant (fail-closed otherwise). `partnerAccess` remains fail-closed until the partner console is authorized.",
 	security: COOKIE_SECURITY,
 	parameters: [REQUEST_ID],
 	responses: {
@@ -1236,6 +1236,7 @@ export const strategiesOpenApi = {
 					strategyVersionId: UUID,
 					executionMode: { type: "string", enum: ["SIMULATED", "PAPER"] },
 					portfolioId: { type: "string", minLength: 1, maxLength: 256 },
+					canary: { type: "boolean" },
 					bindingSnapshot: {
 						type: "object",
 						required: ["instrumentRefs", "parametersHash"],
@@ -1255,6 +1256,40 @@ export const strategiesOpenApi = {
 		),
 		responses: {
 			"200": { description: "Command result with deploymentId." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	rollbackDeployment: op({
+		tag: "Strategies",
+		operationId: "rollbackStrategyDeployment",
+		summary: "Rollback strategy deployment",
+		description:
+			"Module: strategies (ANX-171). Rolls back an ACTIVE or CANARY deployment to ROLLED_BACK with audited journal and domain event.",
+		security: COOKIE_SECURITY,
+		parameters: [
+			...commandParams,
+			pathUuid("strategyId", "Strategy aggregate id."),
+			{
+				name: "deploymentId",
+				in: "path",
+				required: true,
+				schema: { type: "string", pattern: "^st_dep_[0-9a-f-]{36}$" },
+				description: "Deployment aggregate id.",
+			},
+		],
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["reason"],
+				properties: {
+					reason: { type: "string", minLength: 1, maxLength: 512 },
+				},
+			},
+			"Rollback reason for audit trail.",
+		),
+		responses: {
+			"200": { description: "Command result after deployment rollback." },
 			...ERROR_RESPONSES,
 		},
 	}),
