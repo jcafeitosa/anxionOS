@@ -335,6 +335,9 @@ export async function seedDevAccounts(): Promise<{
 				scopeId: PLATFORM_SCOPE_ID,
 				scopeKind: "platform",
 				granteePrincipalId: platformPrincipal.id,
+				// Grant de provisionamento dev, sem ator humano: sem emissor
+				// registrado (ANX-469).
+				issuedByPrincipalId: null,
 				capability: PLATFORM_CONSOLE_CAPABILITY,
 			},
 		);

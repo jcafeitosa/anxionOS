@@ -179,9 +179,24 @@ Achado **LOW N2** da revalidação G2: o replay pelo journal devolvia o principa
 
 Achado **LOW** do G5: o comando aceitava `commandId` e o ignorava, sem journal — reusar a key de outro comando passava em silêncio. Passa a usar o mesmo guard dos demais (validação de intenção + journal na transação), com o mesmo contrato de conflito (`IDN_DUPLICATE_IDEMPOTENCY`).
 
+## D-IDN-047 — Posse da `SessionRef` é invariante do agregado em todo caminho de resolução
+
+Achado **MEDIUM** da revalidação G4 do ANX-457 (digest `ae99f9b2`) somado a um **LOW residual** do mesmo parecer, ambos com o mesmo defeito de fundo: o `D-IDN-043` fechou o IDOR **apenas** no ramo `findById`, e os outros dois caminhos que encontram uma referência existente cediam a posse.
+
+- **por hash** (`recordRevoked`, `session-ref-repository.ts`): self-access com `sessionRefId` arbitrário + `externalRefHash` da vítima revogava a linha alheia (`active→revoked`) e devolvia **200** com o `principalId` de terceiro;
+- **por journal** (`findIdempotentCommand`): o replay devolvia o DTO da referência de terceiro **antes** de qualquer checagem de posse (não altera estado, mas expõe `principalId`/`status`/`revokedAt`).
+
+**Decisão.** `recordSessionRevoked` valida a posse (`existing.principalId === command.principalId`) em **todos** os caminhos que resolvem uma referência existente — por id, por hash (antes de delegar a `recordRevoked`) e no replay do journal — com a mesma resposta opaca `IDN_SESSION_NOT_FOUND` (404) do `D-IDN-043`. Devolver `IDN_CROSS_TENANT` confirmaria a existência e o vínculo com terceiro; o controle de objeto não depende do sigilo do UUID nem do sigilo do hash. Fluxos legítimos preservados: própria referência por id e por hash seguem 200, e admin de plataforma com o `principalId` **correto** do alvo segue 200. Prova executada no boundary Elysia real com os repositórios PostgreSQL reais em `tests/identity/integration/session-ref-ownership.integration.test.ts`, complementada por `tests/api/identity-http.test.ts` e `tests/identity/session-refs.test.ts`.
+
+## D-IDN-048 — `externalRefHash` só aceita derivação sha256 hex
+
+Achado **LOW** do G5, com a disposição original rastreada em **ANX-464**. O contrato publicava um invariante ("hash one-way") que nada impunha: `z.string().min(16).max(128)` aceitava qualquer string e o valor era persistido **verbatim**, então um token cru entraria em `identity_sessions.external_ref_hash` — coluna que guarda **somente** derivação irreversível.
+
+**Decisão.** `recordSessionRevokedCommandSchema.externalRefHash` passa a usar `sessionRefHashSchema` (`^[0-9a-f]{64}$`), exatamente o sha256 hex que o próprio módulo produz (`hashSessionRef`). A validação existe no schema do boundary **e** no comando (defense in depth: chamadores in-process — Better Auth, workers — não passam pelo boundary). As fixtures derivam o hash com `createHash("sha256")` do id, nunca com literal decorado; token cru, string curta ou hex de tamanho errado respondem **400 `VALIDATION_ERROR`**. O OpenAPI publica o `pattern` e o tamanho exatos.
+
 ## Disposições de achados LOW (com rationale)
 
-- **`externalRefHash` aceita string não-hash** (G5 LOW): o campo é fornecido pelo chamador e persiste verbatim; um valor que não seja hash (ex.: token cru) entraria no banco. **Rastreado em ANX-464** — apertar o schema para hash sha256 exige atualizar fixtures de integração e é mudança de contrato publicada, então não entra como correção silenciosa.
+- **`externalRefHash` aceita string não-hash** (G5 LOW): **corrigido em ANX-464 / D-IDN-048** — o schema passou a exigir sha256 hex, o comando revalida e o OpenAPI publica o formato; fixtures atualizadas.
 - **Oráculo de membership pela ordem das checagens** (G5 LOW): um ator sem grants distingue `IDN_FORBIDDEN` (alvo de outra agência na própria agência) de `IDN_CROSS_TENANT` (agência declarada da qual não é membro). **Disposição: aceito e documentado** — a distinção é intencional (R04 usa os dois códigos para causas diferentes), o sinal é intra-tenant (o ator precisa declarar uma agência da qual já é membro) e uniformizar os códigos degradaria o diagnóstico sem ganho de isolamento.
 - **Validação do body de grants devolvia 500** (G5 LOW): **corrigido** — `ZodError` no boundary de governance agora é 400 `VALIDATION_ERROR`.
 

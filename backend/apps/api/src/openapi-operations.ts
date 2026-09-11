@@ -1,6 +1,8 @@
+import { GRANT_CAPABILITY_CATALOG } from "@anxionos/contracts/governance";
+
 type JsonSchema = Record<string, unknown>;
 
-type OpenApiParameter = {
+export type OpenApiParameter = {
 	name: string;
 	in: "query" | "header" | "path" | "cookie";
 	required?: boolean;
@@ -89,6 +91,33 @@ const ERROR_RESPONSES = {
 	"429": { description: "Rate limit or realtime connection quota exceeded." },
 };
 
+/**
+ * Parametros declarados por `operationId` (ANX-468).
+ *
+ * `@elysia/openapi` reconstroi `operation.parameters` a partir do schema da
+ * rota e **descarta** `detail.parameters` sempre que o path tem ao menos um
+ * template variable (`:principalId` etc.). A correcao vive na raiz — o gerador
+ * (`openapi-plugin.ts`) restaura os parametros declarados a partir deste
+ * registro — entao nenhuma rota precisa remendar a saida individualmente e
+ * rotas novas herdam o comportamento.
+ */
+const DECLARED_OPERATION_PARAMETERS = new Map<
+	string,
+	readonly OpenApiParameter[]
+>();
+
+/**
+ * Somente leitura para o gerador e para o teste de regressao do catalogo.
+ * A chave e' o `operationId` — identificador estavel ja assertado no documento
+ * servido.
+ */
+export function declaredOperationParameters(): ReadonlyMap<
+	string,
+	readonly OpenApiParameter[]
+> {
+	return DECLARED_OPERATION_PARAMETERS;
+}
+
 function op(input: {
 	tag: string;
 	operationId: string;
@@ -99,6 +128,9 @@ function op(input: {
 	requestBody?: OpenApiRequestBody;
 	responses?: Record<string, OpenApiResponse>;
 }) {
+	if (input.parameters && input.parameters.length > 0) {
+		DECLARED_OPERATION_PARAMETERS.set(input.operationId, input.parameters);
+	}
 	return {
 		detail: {
 			tags: [input.tag],
@@ -488,8 +520,11 @@ export const identityPrincipalsOpenApi = {
 							sessionRefId: { type: "string", format: "uuid" },
 							externalRefHash: {
 								type: "string",
-								minLength: 16,
-								maxLength: 128,
+								description:
+									"One-way sha256 hex digest of the session owner's opaque reference; raw tokens/cookies are rejected (`VALIDATION_ERROR`).",
+								pattern: "^[0-9a-f]{64}$",
+								minLength: 64,
+								maxLength: 64,
 							},
 							revokedAt: { type: "string", format: "date-time" },
 							reasonCode: {
@@ -531,6 +566,15 @@ export const identityPrincipalsOpenApi = {
 				schema: { type: "string", format: "date-time" },
 				description: "Only revocations at or after this instant.",
 			},
+			// ANX-468 (F3 do G3): a rota LE e APLICA o header — agencia
+			// estrangeira responde `IDN_CROSS_TENANT` — mas ele nao era
+			// declarado. Descricao propria porque o ledger e' global: declarar
+			// agencia nao satisfaz o escopo exigido (sempre PLATAFORMA).
+			header(
+				"X-Agency-Id",
+				"Optional agency scope. The revocation ledger is global, so this route always requires a platform-scoped `identity.admin` grant; declaring an agency the caller is not an active member of is still rejected as `IDN_CROSS_TENANT`. Invalid UUID → `VALIDATION_ERROR`.",
+				{ schema: UUID },
+			),
 			REQUEST_ID,
 		],
 		responses: {
@@ -768,7 +812,7 @@ export const governanceOpenApi = {
 		operationId: "issueGrant",
 		summary: "Issue a capability grant",
 		description:
-			"Module: governance. Issues a grant to a principal. `scopeId` in the domain command is the agency. `capability` is a capability id string. Optional `resourceRef` and `validUntil` (ISO datetime).",
+			"Module: governance. Issues a grant to a principal. `scopeId` in the domain command is the agency. `capability` is **validated against the grant capability catalog** (`GRANT_CAPABILITY_CATALOG`, the single source of the tokens the system consumes); a value outside the catalog is rejected with `GOV_CAPABILITY_UNKNOWN` (400) and zero writes, by the HTTP route and by the command (seed/worker included). Issuing is authorized by **role and possession**, not by role alone: `operator` only issues operational capabilities, `owner`/`admin` also issue administrative ones (`identity.*`, `governance.*`, `console.*`, `owner.*`), and the issuer must already hold the capability in the declared agency scope or in PLATFORM scope — otherwise `GOV_INSUFFICIENT_AUTHORITY` (403). `console.platform` stays platform-only: requesting it in agency scope is `GOV_CAPABILITY_SCOPE_MISMATCH` (409). Optional `resourceRef` and `validUntil` (ISO datetime).",
 		security: COOKIE_SECURITY,
 		parameters: commandParams,
 		requestBody: jsonBody(
@@ -779,7 +823,12 @@ export const governanceOpenApi = {
 				properties: {
 					scopeId: UUID,
 					granteePrincipalId: UUID,
-					capability: { type: "string", minLength: 1 },
+					capability: {
+						type: "string",
+						enum: [...GRANT_CAPABILITY_CATALOG],
+						description:
+							"Grant capability token. Must belong to `GRANT_CAPABILITY_CATALOG`; any other value is refused with `GOV_CAPABILITY_UNKNOWN` (400).",
+					},
 					resourceRef: { type: "string", minLength: 1 },
 					validUntil: { type: "string", format: "date-time" },
 				},
@@ -789,6 +838,22 @@ export const governanceOpenApi = {
 		responses: {
 			"200": { description: "Command result with grant aggregateId." },
 			...ERROR_RESPONSES,
+			"400": {
+				description:
+					"`GOV_CAPABILITY_UNKNOWN` when `capability` is not in the grant capability catalog (no write). Malformed body, unknown body property or missing/invalid `Idempotency-Key` → `VALIDATION_ERROR`.",
+			},
+			"403": {
+				description:
+					"`GOV_INSUFFICIENT_AUTHORITY` when the caller's membership role may not issue that capability class, or when the issuer does not already hold it in the declared agency scope or in PLATFORM scope. Also `ORG_CROSS_TENANT` when the caller lacks an active mutating membership in `agencyId`.",
+			},
+			"404": {
+				description:
+					"`GOV_PRINCIPAL_NOT_FOUND` for an unknown `granteePrincipalId` (also `ORG_PRINCIPAL_NOT_FOUND` / `ORG_AGENCY_NOT_FOUND` on the agency scope).",
+			},
+			"409": {
+				description:
+					"`GOV_CAPABILITY_SCOPE_MISMATCH` when a platform-only capability (e.g. `console.platform`) is requested in agency scope, or when scope id and scope kind disagree. Also revision/duplicate-command conflicts.",
+			},
 		},
 	}),
 	revokeGrant: op({

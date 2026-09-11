@@ -1,5 +1,6 @@
 import type { SessionRefDto } from "@anxionos/contracts/identity";
 import { recordSessionRevokedCommandSchema } from "@anxionos/contracts/identity";
+import type { SessionRef } from "../../domain/entities/session-ref";
 import { createSessionRevokedEvent } from "../../domain/events/identity-events";
 import type {
 	IdentityTransactionContext,
@@ -31,6 +32,22 @@ export interface RecordSessionRevokedResult {
 	sessionRef: SessionRefDto;
 	/** False when the reference was already revoked (idempotent no-op). */
 	transitioned: boolean;
+}
+
+/**
+ * ANX-467: a posse da `SessionRef` e' invariante do AGREGADO, nao do caminho de
+ * resolucao. Por id, por hash (`recordRevoked`) ou pelo replay do journal, uma
+ * referencia que pertence a outro `principalId` responde o MESMO 404 opaco de
+ * D-IDN-043. Devolver `IDN_CROSS_TENANT` confirmaria a existencia da referencia
+ * e o vinculo com terceiro; o controle de objeto nao pode depender de sigilo.
+ */
+function assertSessionOwnership(
+	session: SessionRef,
+	principalId: string,
+): void {
+	if (session.principalId !== principalId) {
+		throwIdentityError("IDN_SESSION_NOT_FOUND", "Session reference not found");
+	}
 }
 
 /**
@@ -95,6 +112,10 @@ export async function recordSessionRevoked(
 					journaled.aggregateId,
 				);
 				if (replayed) {
+					// ANX-467 (3o caminho): o replay do journal resolve a referencia
+					// por id. Sem validar a posse aqui, conhecer a `Idempotency-Key`
+					// de terceiro devolvia o DTO da sessao alheia.
+					assertSessionOwnership(replayed, command.principalId);
 					return {
 						sessionRef: toSessionRefDto(replayed),
 						transitioned: false,
@@ -111,11 +132,8 @@ export async function recordSessionRevoked(
 		// OUTRO principal apenas conhecendo o UUID da referencia — o controle de
 		// objeto nao pode depender de sigilo de UUID. Resposta opaca de proposito:
 		// nao revela que a referencia existe e pertence a terceiro.
-		if (existing && existing.principalId !== command.principalId) {
-			throwIdentityError(
-				"IDN_SESSION_NOT_FOUND",
-				"Session reference not found",
-			);
+		if (existing) {
+			assertSessionOwnership(existing, command.principalId);
 		}
 		if (existing?.status === "revoked") {
 			await journalNoOp(context, existing.id, existing.status);
@@ -126,6 +144,19 @@ export async function recordSessionRevoked(
 				"IDN_SESSION_NOT_FOUND",
 				"Unknown session reference requires externalRefHash",
 			);
+		}
+		// ANX-467 (2o caminho): a referencia desconhecida por id e' resolvida por
+		// hash DENTRO de `recordRevoked`, que revogaria a linha de OUTRO principal
+		// (self-access com id arbitrario + hash da vitima -> 200 e vítima
+		// `active->revoked`). A posse e' validada ANTES da transicao, com o mesmo
+		// 404 opaco: o segredo do hash nao substitui a checagem de objeto.
+		if (!existing && command.externalRefHash) {
+			const byHash = await context.sessionRefRepository.findByExternalRefHash(
+				command.externalRefHash,
+			);
+			if (byHash) {
+				assertSessionOwnership(byHash, command.principalId);
+			}
 		}
 		const recorded = existing
 			? await context.sessionRefRepository.revoke(

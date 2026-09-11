@@ -5,6 +5,7 @@ import {
 	isKnownGrantCapability,
 	OWNER_AUTHORITY_CAPABILITIES,
 	roleMayIssueGrantCapability,
+	roleMayRevokeGrant,
 } from "@anxionos/contracts/governance";
 
 /**
@@ -78,5 +79,61 @@ describe("grant capability policy (ANX-466)", () => {
 			expect(roleMayIssueGrantCapability(role, "identity.admin")).toBe(true);
 			expect(roleMayIssueGrantCapability(role, "owner.manage")).toBe(true);
 		}
+	});
+});
+
+/**
+ * ANX-469 — `governance.grant.revoke` = "owner ou issuer". A revogacao nao
+ * limita o alvo apenas por papel: owner/admin revogam qualquer grant da
+ * agencia, e os demais papeis so' o proprio grant, nunca acima da classe que
+ * podem emitir.
+ */
+describe("grant revocation policy (ANX-469)", () => {
+	test("owner/admin revogam qualquer grant da agencia", () => {
+		for (const role of ["owner", "admin"] as const) {
+			for (const capability of ["agents.publish", "identity.admin"]) {
+				expect(
+					roleMayRevokeGrant({
+						role,
+						capability,
+						actorIsIssuer: false,
+					}),
+				).toBe(true);
+			}
+		}
+	});
+
+	test("nao-emissor fora de owner/admin nao revoga", () => {
+		expect(
+			roleMayRevokeGrant({
+				role: "operator",
+				capability: "agents.publish",
+				actorIsIssuer: false,
+			}),
+		).toBe(false);
+	});
+
+	test("issuer operator revoga apenas a classe que pode emitir", () => {
+		expect(
+			roleMayRevokeGrant({
+				role: "operator",
+				capability: "agents.publish",
+				actorIsIssuer: true,
+			}),
+		).toBe(true);
+		expect(
+			roleMayRevokeGrant({
+				role: "operator",
+				capability: "identity.admin",
+				actorIsIssuer: true,
+			}),
+		).toBe(false);
+		expect(
+			roleMayRevokeGrant({
+				role: "operator",
+				capability: "owner.manage",
+				actorIsIssuer: true,
+			}),
+		).toBe(false);
 	});
 });

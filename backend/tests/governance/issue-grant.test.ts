@@ -47,6 +47,7 @@ describe("issueGrant", () => {
 		const result = await issueGrant(deps, {
 			commandId,
 			scopeId,
+			issuedByPrincipalId: null,
 			granteePrincipalId,
 			capability: "owner.manage",
 		});
@@ -67,12 +68,14 @@ describe("issueGrant", () => {
 		const first = await issueGrant(deps, {
 			commandId,
 			scopeId,
+			issuedByPrincipalId: null,
 			granteePrincipalId,
 			capability: "owner.read",
 		});
 		const second = await issueGrant(deps, {
 			commandId,
 			scopeId,
+			issuedByPrincipalId: null,
 			granteePrincipalId,
 			capability: "owner.read",
 		});
@@ -99,6 +102,7 @@ describe("issueGrant", () => {
 				{
 					commandId: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
 					scopeId,
+					issuedByPrincipalId: null,
 					granteePrincipalId,
 					capability: "owner.manage",
 				},
@@ -119,6 +123,7 @@ describe("issueGrant — coerencia capability x escopo (ANX-462)", () => {
 			issueGrant(deps, {
 				commandId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
 				scopeId,
+				issuedByPrincipalId: null,
 				granteePrincipalId,
 				capability: PLATFORM_CONSOLE_CAPABILITY,
 			}),
@@ -130,26 +135,12 @@ describe("issueGrant — coerencia capability x escopo (ANX-462)", () => {
 		).toHaveLength(0);
 	});
 
-	test("rejects console.platform in an organization scope", async () => {
-		const { deps } = createIssueGrantDeps();
-		await expect(
-			issueGrant(deps, {
-				commandId: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
-				scopeId,
-				scopeKind: "organization",
-				granteePrincipalId,
-				capability: PLATFORM_CONSOLE_CAPABILITY,
-			}),
-		).rejects.toMatchObject({
-			governanceCode: "GOV_CAPABILITY_SCOPE_MISMATCH",
-		});
-	});
-
 	test("issues console.platform with the canonical PLATFORM scope", async () => {
 		const { deps, grantRepository } = createIssueGrantDeps();
 		await issueGrant(deps, {
 			commandId: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
 			scopeId: PLATFORM_SCOPE_ID,
+			issuedByPrincipalId: null,
 			scopeKind: "platform",
 			granteePrincipalId,
 			capability: PLATFORM_CONSOLE_CAPABILITY,
@@ -167,6 +158,7 @@ describe("issueGrant — coerencia capability x escopo (ANX-462)", () => {
 			issueGrant(deps, {
 				commandId: "ffffffff-ffff-4fff-8fff-ffffffffffff",
 				scopeId: PLATFORM_SCOPE_ID,
+				issuedByPrincipalId: null,
 				scopeKind: "agency",
 				granteePrincipalId,
 				capability: "identity.admin",
@@ -189,6 +181,7 @@ describe("issueGrant — catalogo de capability (ANX-466)", () => {
 			issueGrant(deps, {
 				commandId: "abababab-abab-4bab-8bab-abababababab",
 				scopeId,
+				issuedByPrincipalId: null,
 				granteePrincipalId,
 				capability: "totally.unknown.capability",
 			}),
@@ -206,6 +199,7 @@ describe("issueGrant — catalogo de capability (ANX-466)", () => {
 		await issueGrant(deps, {
 			commandId: "acacacac-acac-4cac-8cac-acacacacacac",
 			scopeId,
+			issuedByPrincipalId: null,
 			granteePrincipalId,
 			capability: "agents.publish",
 		});

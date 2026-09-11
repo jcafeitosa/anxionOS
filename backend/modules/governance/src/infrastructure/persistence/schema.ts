@@ -10,8 +10,10 @@ import {
 } from "drizzle-orm/pg-core";
 export const governanceScopeKindEnum = pgEnum("governance_scope_kind", [
 	"agency",
-	"organization",
 	// ANX-462: escopo de plataforma de primeira classe (migration 0008).
+	// ANX-469: `organization` removido — nenhum modulo possui entidade
+	// Organization, o valor nao tinha produtor nem consumidor de autorizacao e
+	// era um tipo morto (migration 0010). O unico par valido e' agency|platform.
 	"platform",
 ]);
 export const grantStatusEnum = pgEnum("governance_grant_status", [
@@ -62,6 +64,8 @@ export const grants = pgTable(
 		scopeKind: governanceScopeKindEnum("scope_kind").notNull(),
 		granteePrincipalId: uuid("grantee_principal_id").notNull(),
 		granteeAgentId: uuid("grantee_agent_id"),
+		// ANX-469: emissor do grant; NULL quando derivado pelo sistema.
+		issuedByPrincipalId: uuid("issued_by_principal_id"),
 		capability: text("capability").notNull(),
 		resourceRef: text("resource_ref"),
 		status: grantStatusEnum("status").notNull().default("active"),

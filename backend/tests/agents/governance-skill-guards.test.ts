@@ -118,6 +118,7 @@ describe("createGovernanceSkillEvaluationGuard (G4-M1)", () => {
 			authorityEpochAtIssue: 1,
 			revision: 1,
 			derivedFromMembershipId: null,
+			issuedByPrincipalId: null,
 			validFrom: now,
 			validUntil: null,
 			createdAt: now,

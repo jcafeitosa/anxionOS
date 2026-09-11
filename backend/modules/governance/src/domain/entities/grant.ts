@@ -11,6 +11,13 @@ export interface Grant {
 	scopeKind: GovernanceScopeKind;
 	granteePrincipalId: string;
 	granteeAgentId: string | null;
+	/**
+	 * ANX-469 — principal que emitiu o grant quando a emissao tem ator
+	 * identificado. `null` em grants derivados pelo sistema (baseline de
+	 * membership, break-glass e filhos de delegation), que nao tem principal
+	 * emissor e por isso so' sao revogaveis por `owner`/`admin` da agencia.
+	 */
+	issuedByPrincipalId: string | null;
 	capability: string;
 	resourceRef: string | null;
 	status: GrantStatus;

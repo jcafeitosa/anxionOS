@@ -18,6 +18,16 @@ export const principalRevisionSchema = z.number().int().nonnegative();
 /** Idempotency key materialized as the command id in `identity_command_journal`. */
 export const commandIdSchema = institutionalUuidSchema;
 export const sessionRefIdSchema = institutionalUuidSchema;
+/**
+ * ANX-464: the session owner supplies a **one-way** hash of its opaque
+ * reference; `identity_sessions.external_ref_hash` holds derivation, never raw
+ * material (token/cookie/session id). The module only ever produces the sha256
+ * hex digest of `hashSessionRef`, so the contract accepts exactly that shape
+ * and refuses anything else (short strings, raw tokens, other lengths).
+ */
+export const sessionRefHashSchema = z
+	.string()
+	.regex(/^[0-9a-f]{64}$/, "externalRefHash must be a sha256 hex digest");
 export const serviceCredentialIdSchema = institutionalUuidSchema;
 /**
  * Public, non-secret handle for a service credential (prefix of the API key).

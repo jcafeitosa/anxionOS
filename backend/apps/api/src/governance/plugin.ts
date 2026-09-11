@@ -152,7 +152,7 @@ export function createGovernancePlugin(deps: GovernancePluginDeps) {
 				)
 				.delete(
 					"/grants/:grantId",
-					async ({ request, params, agencyId }) => {
+					async ({ request, params, agencyId, principal, actorRole }) => {
 						const { grantId } = grantIdParamSchema.parse(params);
 						const commandId = parseIdempotencyKey(request.headers);
 						const body =
@@ -163,6 +163,7 @@ export function createGovernancePlugin(deps: GovernancePluginDeps) {
 							commandId,
 							agencyId,
 							grantId,
+							actor: { principalId: principal.id, role: actorRole },
 							body,
 						});
 					},

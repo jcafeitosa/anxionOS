@@ -95,6 +95,9 @@ export async function activateBreakGlass(
 			scopeKind: "agency",
 			granteePrincipalId: command.granteePrincipalId,
 			granteeAgentId: null,
+			// Break-glass e' derivado de incidente, nao de um emissor principal:
+			// revogavel por owner/admin da agencia (ANX-469).
+			issuedByPrincipalId: null,
 			capability: command.capability,
 			resourceRef: `break-glass:${incidentRef}`,
 			status: "active",

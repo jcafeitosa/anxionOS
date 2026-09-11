@@ -556,6 +556,191 @@ describe("identity HTTP boundary (/v1/identity)", () => {
 	});
 
 	/**
+	 * ANX-467 (MEDIUM do G4): a posse e' invariante do AGREGADO, nao do caminho
+	 * de resolucao. O ramo por id foi fechado em D-IDN-043; quando o id era
+	 * desconhecido, `recordRevoked` resolvia a linha pelo hash e revogava a
+	 * sessao de OUTRO principal.
+	 */
+	test("self-access com id arbitrário + hash de terceiro não revoga sessão alheia (ANX-467)", async () => {
+		const victimSessionId = "77777777-7777-4777-8777-777777777777";
+		const attackerRefId = "88888888-8888-4888-8888-888888888888";
+		const victimHash = "a".repeat(64);
+		const h = harness({ principals: [activePrincipal, targetPrincipal] });
+		await h.sessionRefRepository.create({
+			id: victimSessionId,
+			principalId: otherPrincipalId,
+			externalRefHash: victimHash,
+		});
+
+		const response = await h.app.handle(
+			request("/v1/identity/sessions/revoke", {
+				method: "POST",
+				headers: { "idempotency-key": commandId },
+				body: {
+					principalId,
+					// id sem posse: a linha e' resolvida pelo hash da vitima
+					sessionRefId: attackerRefId,
+					externalRefHash: victimHash,
+				},
+			}),
+		);
+		expect(response.status).toBe(404);
+		expect((await response.json()).error.details.code).toBe(
+			"IDN_SESSION_NOT_FOUND",
+		);
+
+		// a sessão da vítima continua ativa e o id arbitrario nao foi criado
+		expect(
+			(await h.sessionRefRepository.findById(victimSessionId))?.status,
+		).toBe("active");
+		expect(await h.sessionRefRepository.findById(attackerRefId)).toBeNull();
+	});
+
+	/**
+	 * ANX-467 (3o caminho): o replay pelo journal devolvia o DTO da referencia
+	 * ANTES de qualquer checagem de posse.
+	 */
+	test("replay do journal não devolve DTO de sessão de terceiro (ANX-467)", async () => {
+		const victimSessionId = "77777777-7777-4777-8777-777777777777";
+		const victimKey = "55555555-5555-4555-8555-555555555555";
+		const h = harness({
+			principals: [activePrincipal, targetPrincipal],
+			capabilities: ["identity.admin"],
+		});
+		const victim = await h.app.handle(
+			request("/v1/identity/sessions/revoke", {
+				method: "POST",
+				headers: { "idempotency-key": victimKey },
+				body: {
+					principalId: otherPrincipalId,
+					sessionRefId: victimSessionId,
+					externalRefHash: "b".repeat(64),
+				},
+			}),
+		);
+		expect(victim.status).toBe(200);
+		expect((await victim.json()).sessionRef.principalId).toBe(otherPrincipalId);
+
+		// self-access reusa a key de terceiro no MESMO agregado
+		const attack = await h.app.handle(
+			request("/v1/identity/sessions/revoke", {
+				method: "POST",
+				headers: { "idempotency-key": victimKey },
+				body: { principalId, sessionRefId: victimSessionId },
+			}),
+		);
+		expect(attack.status).toBe(404);
+		expect((await attack.json()).error.details.code).toBe(
+			"IDN_SESSION_NOT_FOUND",
+		);
+	});
+
+	/**
+	 * ANX-467, aceite 4: os caminhos legitimos continuam 200 — criar/revogar a
+	 * PROPRIA referencia (por id e por hash) e admin de plataforma revogando
+	 * sessao de terceiro com o `principalId` correto.
+	 */
+	test("própria referência (por id e por hash) e admin legítimo continuam 200 (ANX-467)", async () => {
+		const ownById = "77777777-7777-4777-8777-777777777777";
+		const ownByHash = "99999999-9999-4999-8999-999999999999";
+		const ownHash = "c".repeat(64);
+		const h = harness();
+		await h.sessionRefRepository.create({
+			id: ownById,
+			principalId,
+			externalRefHash: "d".repeat(64),
+		});
+		await h.sessionRefRepository.create({
+			id: ownByHash,
+			principalId,
+			externalRefHash: ownHash,
+		});
+
+		const byId = await h.app.handle(
+			request("/v1/identity/sessions/revoke", {
+				method: "POST",
+				headers: { "idempotency-key": commandId },
+				body: { principalId, sessionRefId: ownById },
+			}),
+		);
+		expect(byId.status).toBe(200);
+		expect((await byId.json()).transitioned).toBe(true);
+
+		// id logico desconhecido + hash da PROPRIA referencia
+		const byHash = await h.app.handle(
+			request("/v1/identity/sessions/revoke", {
+				method: "POST",
+				headers: { "idempotency-key": "66666666-6666-4666-8666-666666666666" },
+				body: {
+					principalId,
+					sessionRefId: "12121212-1212-4212-8212-121212121212",
+					externalRefHash: ownHash,
+				},
+			}),
+		);
+		expect(byHash.status).toBe(200);
+		expect((await byHash.json()).sessionRef.sessionRefId).toBe(ownByHash);
+	});
+
+	test("admin de plataforma revoga sessão de terceiro com o principalId correto (ANX-467)", async () => {
+		const victimSessionId = "77777777-7777-4777-8777-777777777777";
+		const h = harness({
+			principals: [activePrincipal, targetPrincipal],
+			capabilities: ["identity.admin"],
+		});
+		await h.sessionRefRepository.create({
+			id: victimSessionId,
+			principalId: otherPrincipalId,
+			externalRefHash: "e".repeat(64),
+		});
+		const response = await h.app.handle(
+			request("/v1/identity/sessions/revoke", {
+				method: "POST",
+				headers: { "idempotency-key": commandId },
+				body: { principalId: otherPrincipalId, sessionRefId: victimSessionId },
+			}),
+		);
+		expect(response.status).toBe(200);
+		expect((await response.json()).transitioned).toBe(true);
+		expect(
+			(await h.sessionRefRepository.findById(victimSessionId))?.status,
+		).toBe("revoked");
+	});
+
+	/**
+	 * ANX-464: a coluna guarda SO derivacao. Um token cru, uma string curta ou
+	 * um hex de tamanho errado sao recusados com 400 no boundary (o comando
+	 * revalida com o mesmo schema — defense in depth).
+	 */
+	test("externalRefHash fora do formato sha256 é 400 VALIDATION_ERROR (ANX-464)", async () => {
+		const h = harness();
+		const invalid = [
+			"raw-session-token", // token cru
+			"abc", // string curta
+			"a".repeat(63), // hex de tamanho errado
+			"a".repeat(128),
+			`g${"a".repeat(63)}`, // 64 chars, nao-hex
+		];
+		for (const externalRefHash of invalid) {
+			const response = await h.app.handle(
+				request("/v1/identity/sessions/revoke", {
+					method: "POST",
+					headers: {
+						"idempotency-key": "12121212-1212-4212-8212-121212121212",
+					},
+					body: {
+						principalId,
+						sessionRefId: "77777777-7777-4777-8777-777777777777",
+						externalRefHash,
+					},
+				}),
+			);
+			expect(response.status).toBe(400);
+			expect((await response.json()).error.code).toBe("VALIDATION_ERROR");
+		}
+	});
+
+	/**
 	 * N1 do G2 / F-G5-2 do G5: o principal criado e' GLOBAL e o replay devolve o
 	 * DTO (com e-mail) de um principal existente. Sem exigir plataforma, um admin
 	 * de agencia lia e-mail de outro tenant pelo `authUserId`, criava principals

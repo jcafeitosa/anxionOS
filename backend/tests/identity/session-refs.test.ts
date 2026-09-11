@@ -146,6 +146,77 @@ describe("recordSessionRevoked", () => {
 		).rejects.toMatchObject({ identityCode: "IDN_SESSION_NOT_FOUND" });
 	});
 
+	/**
+	 * ANX-467: a posse e' invariante do agregado tambem quando a referencia e'
+	 * resolvida por hash. O comando valida antes de delegar a transicao.
+	 */
+	test("a hash that belongs to another principal fails closed", async () => {
+		const victim: Principal = {
+			...activePrincipal,
+			id: "22222222-2222-4222-8222-222222222222",
+			authUserId: "auth-2",
+			email: "victim@example.com",
+		};
+		const principalRepository = createInMemoryPrincipalRepository([
+			activePrincipal,
+			victim,
+		]);
+		const recording = createRecordingUnitOfWork(
+			principalRepository,
+			createInMemoryServiceIdentityRepository(),
+		);
+		const victimSessionId = "44444444-4444-4444-8444-444444444444";
+		const victimHash = "ab".repeat(32);
+		await recording.sessionRefRepository.create({
+			id: victimSessionId,
+			principalId: victim.id,
+			externalRefHash: victimHash,
+		});
+
+		await expect(
+			recordSessionRevoked(
+				{
+					principalRepository,
+					sessionRefRepository: recording.sessionRefRepository,
+					unitOfWork: recording.unitOfWork,
+				},
+				{
+					principalId: activePrincipal.id,
+					sessionRefId: "55555555-5555-4555-8555-555555555555",
+					externalRefHash: victimHash,
+				},
+			),
+		).rejects.toMatchObject({ identityCode: "IDN_SESSION_NOT_FOUND" });
+
+		expect(
+			(await recording.sessionRefRepository.findById(victimSessionId))?.status,
+		).toBe("active");
+	});
+
+	/**
+	 * ANX-464, defense in depth: o comando revalida com o mesmo schema do
+	 * boundary, entao chamadores in-process (Better Auth/workers) tambem nao
+	 * conseguem gravar um valor que nao seja derivacao sha256.
+	 */
+	test("a non-sha256 externalRefHash fails closed in the command", async () => {
+		const h = harness();
+		await expect(
+			recordSessionRevoked(
+				{
+					principalRepository: h.principalRepository,
+					sessionRefRepository: h.sessionRefRepository,
+					unitOfWork: h.unitOfWork,
+				},
+				{
+					principalId: activePrincipal.id,
+					sessionRefId,
+					externalRefHash: "raw-session-token",
+				},
+			),
+		).rejects.toThrow();
+		expect(await h.sessionRefRepository.findById(sessionRefId)).toBeNull();
+	});
+
 	test("recording a revoked principal's session is allowed (reconciliation path)", async () => {
 		// Fail-closed applies to resolution/authentication, not to recording the
 		// revocation of sessions that belong to a suspended/revoked principal.

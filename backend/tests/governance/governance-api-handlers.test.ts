@@ -51,6 +51,7 @@ function seedGrant(overrides: Partial<Grant> = {}): Grant {
 		validFrom: now,
 		validUntil: new Date("2027-09-10T12:00:00.000Z"),
 		derivedFromMembershipId: null,
+		issuedByPrincipalId: null,
 		authorityEpochAtIssue: 1,
 		revision: 1,
 		createdAt: now,
@@ -288,6 +289,7 @@ describe("governance API handlers (slice 6)", () => {
 			commandId: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
 			agencyId: scopeId,
 			grantId,
+			actor: { principalId, role: "owner" },
 			body: { reason: "test revoke" },
 		});
 		expect(result.revision).toBeGreaterThan(0);
@@ -300,9 +302,103 @@ describe("governance API handlers (slice 6)", () => {
 				commandId: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
 				agencyId: otherAgencyId,
 				grantId,
+				actor: { principalId, role: "owner" },
 				body: {},
 			}),
 		).rejects.toBeInstanceOf(GovernanceCommandError);
+	});
+
+	/**
+	 * ANX-469 — o achado: a rota reusava a guarda de papel da emissao
+	 * (`owner|admin|operator`) e nao limitava o alvo, entao um `operator`
+	 * revogava grants do `owner` da propria agencia. O catalogo
+	 * (`governance.grant.revoke`) exige owner/issuer.
+	 */
+	test("handleRevokeGrant nega operator revogando grant do owner", async () => {
+		const deps = createGrantHandlerDeps();
+		await expect(
+			handleRevokeGrant(deps, {
+				commandId: "1a1a1a1a-1a1a-4a1a-8a1a-1a1a1a1a1a1a",
+				agencyId: scopeId,
+				grantId,
+				actor: { principalId: otherPrincipalId, role: "operator" },
+				body: {},
+			}),
+		).rejects.toMatchObject({ governanceCode: "GOV_INSUFFICIENT_AUTHORITY" });
+		const stored = await deps.grantRepository.findById(grantId);
+		expect(stored?.status).toBe("active");
+	});
+
+	test("handleRevokeGrant permite ao emissor revogar o proprio grant operacional", async () => {
+		const deps = createGrantHandlerDeps();
+		const issuedGrant = seedGrant({
+			id: "1b1b1b1b-1b1b-4b1b-8b1b-1b1b1b1b1b1b",
+			granteePrincipalId: otherPrincipalId,
+			capability: "agents.publish",
+			issuedByPrincipalId: principalId,
+		});
+		await deps.grantRepository.save(issuedGrant);
+		const result = await handleRevokeGrant(deps, {
+			commandId: "1c1c1c1c-1c1c-4c1c-8c1c-1c1c1c1c1c1c",
+			agencyId: scopeId,
+			grantId: issuedGrant.id,
+			actor: { principalId, role: "operator" },
+			body: {},
+		});
+		expect(result.aggregateId).toBe(issuedGrant.id);
+		expect((await deps.grantRepository.findById(issuedGrant.id))?.status).toBe(
+			"revoked",
+		);
+	});
+
+	/**
+	 * ANX-469 — o caminho de emissor nao amplia a classe: `operator` nao revoga
+	 * grant administrativo mesmo tendo sido o emissor registrado (estado legado
+	 * possivel antes do ANX-466).
+	 */
+	test("handleRevokeGrant nega operator emissor de grant administrativo", async () => {
+		const deps = createGrantHandlerDeps();
+		const adminGrant = seedGrant({
+			id: "1d1d1d1d-1d1d-4d1d-8d1d-1d1d1d1d1d1d",
+			granteePrincipalId: otherPrincipalId,
+			capability: "identity.admin",
+			issuedByPrincipalId: principalId,
+		});
+		await deps.grantRepository.save(adminGrant);
+		await expect(
+			handleRevokeGrant(deps, {
+				commandId: "1e1e1e1e-1e1e-4e1e-8e1e-1e1e1e1e1e1e",
+				agencyId: scopeId,
+				grantId: adminGrant.id,
+				actor: { principalId, role: "operator" },
+				body: {},
+			}),
+		).rejects.toMatchObject({ governanceCode: "GOV_INSUFFICIENT_AUTHORITY" });
+		expect((await deps.grantRepository.findById(adminGrant.id))?.status).toBe(
+			"active",
+		);
+	});
+
+	test("handleRevokeGrant permite owner revogar grant de terceiro", async () => {
+		const deps = createGrantHandlerDeps();
+		const thirdPartyGrant = seedGrant({
+			id: "1f1f1f1f-1f1f-4f1f-8f1f-1f1f1f1f1f1f",
+			granteePrincipalId: otherPrincipalId,
+			capability: "agents.publish",
+			issuedByPrincipalId: otherPrincipalId,
+		});
+		await deps.grantRepository.save(thirdPartyGrant);
+		const result = await handleRevokeGrant(deps, {
+			commandId: "2a2a2a2a-2a2a-4a2a-8a2a-2a2a2a2a2a2a",
+			agencyId: scopeId,
+			grantId: thirdPartyGrant.id,
+			actor: { principalId, role: "owner" },
+			body: {},
+		});
+		expect(result.aggregateId).toBe(thirdPartyGrant.id);
+		expect(
+			(await deps.grantRepository.findById(thirdPartyGrant.id))?.status,
+		).toBe("revoked");
 	});
 
 	test("handleAuthorizationCan rejects actorId mismatch", async () => {

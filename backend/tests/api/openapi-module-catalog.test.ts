@@ -1,6 +1,53 @@
 import { describe, expect, test } from "bun:test";
+import { GRANT_CAPABILITY_CATALOG } from "@anxionos/contracts/governance";
 import { OPENAPI_MODULE_TAG_GROUPS } from "../../apps/api/src/openapi-baseline";
 import { createOpenApiCatalogApp } from "../../apps/api/src/openapi-catalog-harness";
+import { declaredOperationParameters } from "../../apps/api/src/openapi-operations";
+
+type ParameterExpectation = {
+	name: string;
+	in: "path" | "query" | "header" | "cookie";
+	required: boolean;
+};
+
+type ServedParameter = {
+	name: string;
+	in: string;
+	required?: boolean;
+	description?: string;
+	schema?: { format?: string };
+};
+
+const PRINCIPAL_ID: ParameterExpectation = {
+	name: "principalId",
+	in: "path",
+	required: true,
+};
+const AGENCY_ID: ParameterExpectation = {
+	name: "agencyId",
+	in: "path",
+	required: true,
+};
+const GRANT_ID: ParameterExpectation = {
+	name: "grantId",
+	in: "path",
+	required: true,
+};
+const REQUEST_ID_HEADER: ParameterExpectation = {
+	name: "X-Request-Id",
+	in: "header",
+	required: false,
+};
+const AGENCY_SCOPE_HEADER: ParameterExpectation = {
+	name: "X-Agency-Id",
+	in: "header",
+	required: false,
+};
+const IDEMPOTENCY_HEADER: ParameterExpectation = {
+	name: "Idempotency-Key",
+	in: "header",
+	required: true,
+};
 
 const DOCUMENTED_OPERATIONS: Array<{
 	path: string;
@@ -9,19 +56,31 @@ const DOCUMENTED_OPERATIONS: Array<{
 	/** Asserted when declared: `operationId` fixo e status declarados. */
 	operationId?: string;
 	statuses?: string[];
+	/**
+	 * ANX-468: parametros declarados que **precisam** sobreviver a geracao.
+	 * Antes desta assercao o defeito do gerador (headers descartados em toda
+	 * rota com path param) passou por duas rodadas de auditoria de contrato.
+	 */
+	parameters?: ParameterExpectation[];
 }> = [
 	{ path: "/health", method: "get", tag: "Health" },
 	{ path: "/api/auth/sign-in/email", method: "post", tag: "Identity" },
 	{ path: "/api/auth/sign-up/email", method: "post", tag: "Identity" },
 	{ path: "/api/auth/get-session", method: "get", tag: "Identity" },
 	{ path: "/api/auth/sign-out", method: "post", tag: "Identity" },
-	{ path: "/v1/auth/post-login-context", method: "get", tag: "Identity" },
+	{
+		path: "/v1/auth/post-login-context",
+		method: "get",
+		tag: "Identity",
+		parameters: [REQUEST_ID_HEADER],
+	},
 	{
 		path: "/v1/identity/principals/{principalId}",
 		method: "get",
 		tag: "Identity",
 		operationId: "identityGetPrincipal",
 		statuses: ["200", "400", "401", "403", "404"],
+		parameters: [PRINCIPAL_ID, AGENCY_SCOPE_HEADER, REQUEST_ID_HEADER],
 	},
 	{
 		path: "/v1/identity/principals/{principalId}/sessions",
@@ -29,6 +88,7 @@ const DOCUMENTED_OPERATIONS: Array<{
 		tag: "Identity",
 		operationId: "identityListSessions",
 		statuses: ["200", "400", "401", "403", "404"],
+		parameters: [PRINCIPAL_ID, AGENCY_SCOPE_HEADER, REQUEST_ID_HEADER],
 	},
 	{
 		path: "/v1/identity/principals",
@@ -36,6 +96,7 @@ const DOCUMENTED_OPERATIONS: Array<{
 		tag: "Identity",
 		operationId: "identityRegisterPrincipal",
 		statuses: ["200", "400", "401", "403", "404", "409"],
+		parameters: [IDEMPOTENCY_HEADER, AGENCY_SCOPE_HEADER, REQUEST_ID_HEADER],
 	},
 	{
 		path: "/v1/identity/principals/{principalId}/suspend",
@@ -43,6 +104,12 @@ const DOCUMENTED_OPERATIONS: Array<{
 		tag: "Identity",
 		operationId: "identitySuspendPrincipal",
 		statuses: ["200", "400", "401", "403", "404", "409", "503"],
+		parameters: [
+			PRINCIPAL_ID,
+			AGENCY_SCOPE_HEADER,
+			REQUEST_ID_HEADER,
+			IDEMPOTENCY_HEADER,
+		],
 	},
 	{
 		path: "/v1/identity/principals/{principalId}/revoke",
@@ -50,6 +117,12 @@ const DOCUMENTED_OPERATIONS: Array<{
 		tag: "Identity",
 		operationId: "identityRevokePrincipal",
 		statuses: ["200", "400", "401", "403", "404", "409", "503"],
+		parameters: [
+			PRINCIPAL_ID,
+			AGENCY_SCOPE_HEADER,
+			REQUEST_ID_HEADER,
+			IDEMPOTENCY_HEADER,
+		],
 	},
 	{
 		path: "/v1/identity/sessions/revoke",
@@ -57,6 +130,7 @@ const DOCUMENTED_OPERATIONS: Array<{
 		tag: "Identity",
 		operationId: "identityRevokeSession",
 		statuses: ["200", "400", "401", "403", "404", "409"],
+		parameters: [IDEMPOTENCY_HEADER, AGENCY_SCOPE_HEADER, REQUEST_ID_HEADER],
 	},
 	{
 		path: "/v1/identity/sessions/revoked",
@@ -64,13 +138,25 @@ const DOCUMENTED_OPERATIONS: Array<{
 		tag: "Identity",
 		operationId: "identityListRevokedSessions",
 		statuses: ["200", "400", "401", "403"],
+		// ANX-468 (F3): a rota le e aplica o header — precisa declara-lo.
+		parameters: [
+			{ name: "since", in: "query", required: false },
+			AGENCY_SCOPE_HEADER,
+			REQUEST_ID_HEADER,
+		],
 	},
-	{ path: "/v1/organizations/agencies", method: "post", tag: "Organizations" },
+	{
+		path: "/v1/organizations/agencies",
+		method: "post",
+		tag: "Organizations",
+		parameters: [IDEMPOTENCY_HEADER, REQUEST_ID_HEADER],
+	},
 	{ path: "/v1/organizations/agencies", method: "get", tag: "Organizations" },
 	{
 		path: "/v1/organizations/agencies/{agencyId}",
 		method: "get",
 		tag: "Organizations",
+		parameters: [AGENCY_ID, REQUEST_ID_HEADER],
 	},
 	{
 		path: "/v1/organizations/agencies/{agencyId}/markets",
@@ -107,12 +193,25 @@ const DOCUMENTED_OPERATIONS: Array<{
 		method: "post",
 		tag: "Organizations",
 	},
-	{ path: "/v1/agencies/{agencyId}/grants", method: "get", tag: "Governance" },
-	{ path: "/v1/agencies/{agencyId}/grants", method: "post", tag: "Governance" },
+	{
+		path: "/v1/agencies/{agencyId}/grants",
+		method: "get",
+		tag: "Governance",
+		parameters: [AGENCY_ID, REQUEST_ID_HEADER],
+	},
+	{
+		path: "/v1/agencies/{agencyId}/grants",
+		method: "post",
+		tag: "Governance",
+		operationId: "issueGrant",
+		statuses: ["200", "400", "401", "403", "404", "409", "429"],
+		parameters: [AGENCY_ID, REQUEST_ID_HEADER, IDEMPOTENCY_HEADER],
+	},
 	{
 		path: "/v1/agencies/{agencyId}/grants/{grantId}",
 		method: "delete",
 		tag: "Governance",
+		parameters: [AGENCY_ID, REQUEST_ID_HEADER, IDEMPOTENCY_HEADER, GRANT_ID],
 	},
 	{
 		path: "/v1/agencies/{agencyId}/agents/{agentId}/autonomy",
@@ -442,6 +541,12 @@ describe("OpenAPI module catalog", () => {
 						description?: string;
 						operationId?: string;
 						responses?: Record<string, unknown>;
+						parameters?: Array<{
+							name: string;
+							in: string;
+							required?: boolean;
+						}>;
+						requestBody?: { required?: boolean; content?: unknown };
 					}
 				>
 			>;
@@ -498,6 +603,30 @@ describe("OpenAPI module catalog", () => {
 					);
 				}
 			}
+			if (expected.parameters) {
+				const declared = Array.isArray(operation.parameters)
+					? operation.parameters
+					: [];
+				for (const wanted of expected.parameters) {
+					const found = declared.find(
+						(candidate) =>
+							candidate.name === wanted.name && candidate.in === wanted.in,
+					);
+					if (!found) {
+						missing.push(
+							`${expected.method.toUpperCase()} ${expected.path} missing parameter ${wanted.in}:${wanted.name} declared=${declared
+								.map((candidate) => `${candidate.in}:${candidate.name}`)
+								.join(",")}`,
+						);
+						continue;
+					}
+					if (Boolean(found.required) !== wanted.required) {
+						missing.push(
+							`${expected.method.toUpperCase()} ${expected.path} parameter ${wanted.in}:${wanted.name} required=${String(found.required)} expected=${String(wanted.required)}`,
+						);
+					}
+				}
+			}
 		}
 
 		// `operationId` é a chave estável consumida por agentes e tools; duplicata
@@ -520,5 +649,226 @@ describe("OpenAPI module catalog", () => {
 			}
 		}
 		expect(missing).toEqual([]);
+	});
+
+	// ANX-468. O defeito nao estava no source: `detail.parameters` era
+	// declarado corretamente e o gerador (`@elysia/openapi`) o descartava em
+	// TODA rota com path param. A assercao abaixo e' sistemica de proposito —
+	// deriva do registro de `op()` (fonte do contrato), nao de uma lista de
+	// rotas, entao cobre os 23 modulos e qualquer rota nova.
+	test("every declared operation parameter survives generation (ANX-468)", async () => {
+		const app = createOpenApiCatalogApp();
+		const response = await app.handle(
+			new Request("http://127.0.0.1/openapi/json"),
+		);
+		expect(response.status).toBe(200);
+		const spec = (await response.json()) as {
+			paths: Record<
+				string,
+				Record<
+					string,
+					{
+						operationId?: string;
+						parameters?: Array<{
+							name: string;
+							in: string;
+							required?: boolean;
+							description?: string;
+							schema?: { format?: string };
+						}>;
+					}
+				>
+			>;
+		};
+
+		const servedByOperationId = new Map<
+			string,
+			{ where: string; parameters: ServedParameter[] }
+		>();
+		for (const [path, methods] of Object.entries(spec.paths)) {
+			for (const [method, operation] of Object.entries(methods)) {
+				if (!operation.operationId) {
+					continue;
+				}
+				servedByOperationId.set(operation.operationId, {
+					where: `${method.toUpperCase()} ${path}`,
+					parameters: operation.parameters ?? [],
+				});
+			}
+		}
+
+		const problems: string[] = [];
+		let examinedPathParameterOperations = 0;
+		let examinedHeaderRestorations = 0;
+		const declared = declaredOperationParameters();
+		expect(declared.size).toBeGreaterThan(0);
+
+		for (const [operationId, declaredParameters] of declared) {
+			const served = servedByOperationId.get(operationId);
+			if (!served) {
+				problems.push(`operationId ${operationId} is not served`);
+				continue;
+			}
+			const hasPathParameter = declaredParameters.some(
+				(parameter) => parameter.in === "path",
+			);
+			const hasHeaderParameter = declaredParameters.some(
+				(parameter) => parameter.in === "header",
+			);
+			if (hasPathParameter && hasHeaderParameter) {
+				examinedPathParameterOperations += 1;
+			}
+			for (const parameter of declaredParameters) {
+				const match = served.parameters.find(
+					(candidate) =>
+						candidate.name === parameter.name && candidate.in === parameter.in,
+				);
+				if (!match) {
+					problems.push(
+						`${served.where} operationId=${operationId} lost parameter ${parameter.in}:${parameter.name}`,
+					);
+					continue;
+				}
+				if (Boolean(match.required) !== Boolean(parameter.required)) {
+					problems.push(
+						`${served.where} parameter ${parameter.in}:${parameter.name} required=${String(match.required)} expected=${String(parameter.required)}`,
+					);
+				}
+				if (parameter.description && !match.description) {
+					problems.push(
+						`${served.where} parameter ${parameter.in}:${parameter.name} lost its declared description`,
+					);
+				}
+				const declaredFormat = parameter.schema?.format;
+				if (declaredFormat && match.schema?.format !== declaredFormat) {
+					problems.push(
+						`${served.where} parameter ${parameter.in}:${parameter.name} format=${String(match.schema?.format)} expected=${declaredFormat}`,
+					);
+				}
+				if (parameter.in === "header") {
+					examinedHeaderRestorations += 1;
+				}
+			}
+		}
+
+		expect(problems).toEqual([]);
+		// Guardas de vacuidade: o teste precisa exercitar a classe defeituosa
+		// (path param + headers declarados), nao apenas rotas triviais. O ANX-468
+		// mediu 73 operacoes nessa classe no documento servido; uma queda grande
+		// significa que rotas pararam de declarar seus headers — regressao de
+		// contrato por si so'.
+		expect(examinedPathParameterOperations).toBeGreaterThanOrEqual(70);
+		expect(examinedHeaderRestorations).toBeGreaterThan(0);
+	});
+
+	test("every path template variable is served as a path parameter (ANX-468)", async () => {
+		const app = createOpenApiCatalogApp();
+		const response = await app.handle(
+			new Request("http://127.0.0.1/openapi/json"),
+		);
+		expect(response.status).toBe(200);
+		const spec = (await response.json()) as {
+			paths: Record<
+				string,
+				Record<
+					string,
+					{
+						parameters?: Array<{
+							name: string;
+							in: string;
+							required?: boolean;
+						}>;
+					}
+				>
+			>;
+		};
+
+		const problems: string[] = [];
+		for (const [path, methods] of Object.entries(spec.paths)) {
+			const templates = [...path.matchAll(/\{([^}]+)\}/g)].map(
+				(match) => match[1],
+			);
+			if (templates.length === 0) {
+				continue;
+			}
+			for (const [method, operation] of Object.entries(methods)) {
+				const parameters = operation.parameters ?? [];
+				for (const template of templates) {
+					const found = parameters.find(
+						(parameter) =>
+							parameter.in === "path" && parameter.name === template,
+					);
+					if (!found) {
+						problems.push(
+							`${method.toUpperCase()} ${path} missing path:${template}`,
+						);
+					} else if (found.required !== true) {
+						problems.push(
+							`${method.toUpperCase()} ${path} path:${template} required=${String(found.required)} expected=true`,
+						);
+					}
+				}
+			}
+		}
+		expect(problems).toEqual([]);
+	});
+
+	test("path-param operations keep requestBody and response schemas (ANX-468 item 3)", async () => {
+		const app = createOpenApiCatalogApp();
+		const response = await app.handle(
+			new Request("http://127.0.0.1/openapi/json"),
+		);
+		expect(response.status).toBe(200);
+		const spec = (await response.json()) as {
+			paths: Record<
+				string,
+				Record<
+					string,
+					{
+						requestBody?: {
+							required?: boolean;
+							content?: Record<string, { schema?: Record<string, unknown> }>;
+						};
+						responses?: Record<string, { description?: string }>;
+						parameters?: Array<{
+							name: string;
+							in: string;
+							description?: string;
+							schema?: { format?: string };
+						}>;
+					}
+				>
+			>;
+		};
+
+		const suspend =
+			spec.paths["/v1/identity/principals/{principalId}/suspend"].post;
+		expect(suspend.requestBody?.required).toBe(false);
+		expect(
+			suspend.requestBody?.content?.["application/json"]?.schema,
+		).toBeDefined();
+		expect(Object.keys(suspend.responses ?? {})).toEqual(
+			expect.arrayContaining(["200", "404", "409"]),
+		);
+
+		const issueGrant = spec.paths["/v1/agencies/{agencyId}/grants"].post;
+		expect(issueGrant.requestBody?.required).toBe(true);
+		const capabilitySchema = (
+			issueGrant.requestBody?.content?.["application/json"]?.schema as {
+				properties?: { capability?: { enum?: string[] } };
+			}
+		).properties?.capability;
+		expect(capabilitySchema?.enum).toEqual([...GRANT_CAPABILITY_CATALOG]);
+
+		// O objeto declarado vence o derivado pelo plugin: a descricao e o
+		// schema tipado (UUID) sobrevivem junto com o parametro.
+		const agencyScope = (
+			spec.paths["/v1/identity/principals/{principalId}"].get.parameters ?? []
+		).find(
+			(parameter) =>
+				parameter.in === "header" && parameter.name === "X-Agency-Id",
+		);
+		expect(agencyScope?.description?.length ?? 0).toBeGreaterThan(40);
+		expect(agencyScope?.schema?.format).toBe("uuid");
 	});
 });

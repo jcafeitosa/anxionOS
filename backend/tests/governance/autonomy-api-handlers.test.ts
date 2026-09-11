@@ -63,6 +63,7 @@ function seedAgentGrant(): Grant {
 		validFrom: now,
 		validUntil: null,
 		derivedFromMembershipId: null,
+		issuedByPrincipalId: null,
 		authorityEpochAtIssue: 1,
 		revision: 1,
 		createdAt: now,

@@ -300,26 +300,6 @@ export function createInMemorySessionRefRepository(
 			sessions.set(id, updated);
 			return updated;
 		},
-		async revokeActiveByPrincipalId(principalId, revokedAt, reasonCode) {
-			const revoked: SessionRef[] = [];
-			for (const session of sessions.values()) {
-				if (
-					session.principalId !== principalId ||
-					session.status !== "active"
-				) {
-					continue;
-				}
-				const updated = {
-					...session,
-					status: "revoked" as const,
-					revokedAt,
-					revocationReason: reasonCode ?? null,
-				};
-				sessions.set(updated.id, updated);
-				revoked.push(updated);
-			}
-			return revoked;
-		},
 	};
 }
 

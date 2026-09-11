@@ -9,6 +9,7 @@ import {
 	principalRevisionSchema,
 	revocationReasonCodeSchema,
 	serviceCredentialIdSchema,
+	sessionRefHashSchema,
 	sessionRefIdSchema,
 	suspensionReasonCodeSchema,
 } from "./types";
@@ -82,10 +83,12 @@ export const recordSessionRevokedCommandSchema = z.object({
 	principalId: principalIdSchema,
 	sessionRefId: sessionRefIdSchema,
 	/**
-	 * One-way hash of the session owner's opaque reference. Required only when
-	 * the reference is not yet recorded in `identity_sessions`.
+	 * One-way sha256 hex digest of the session owner's opaque reference.
+	 * Required only when the reference is not yet recorded in `identity_sessions`.
+	 * Validated both by the boundary schema and by the command itself
+	 * (defense in depth, ANX-464).
 	 */
-	externalRefHash: z.string().min(16).max(128).optional(),
+	externalRefHash: sessionRefHashSchema.optional(),
 	revokedAt: z.string().datetime().optional(),
 	reasonCode: z.string().min(1).max(64).optional(),
 });

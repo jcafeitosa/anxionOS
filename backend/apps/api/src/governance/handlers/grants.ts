@@ -6,6 +6,7 @@ import {
 	PLATFORM_SCOPE_ID,
 	revokeGrantCommandSchema,
 	roleMayIssueGrantCapability,
+	roleMayRevokeGrant,
 } from "@anxionos/contracts/governance";
 import type { MembershipRole } from "@anxionos/contracts/organizations";
 import {
@@ -163,6 +164,7 @@ export async function handleIssueGrant(
 			{
 				commandId: input.commandId,
 				scopeId: input.agencyId,
+				issuedByPrincipalId: input.actor.principalId,
 				...body,
 			},
 		);
@@ -181,9 +183,49 @@ export async function handleIssueGrant(
 		{
 			commandId: input.commandId,
 			scopeId: input.agencyId,
+			issuedByPrincipalId: input.actor.principalId,
 			...body,
 		},
 	);
+}
+
+export interface RevokeGrantActor {
+	principalId: string;
+	role: MembershipRole;
+}
+
+/**
+ * ANX-469 — a revogacao nao limita o alvo apenas por papel.
+ *
+ * A rota usava a mesma guarda da emissao (`owner|admin|operator`) e nao olhava
+ * o grant: um `operator` revogava grants do `owner` da propria agencia. O
+ * catalogo declara `governance.grant.revoke` como "owner ou issuer", entao a
+ * decisao vive no contrato (`roleMayRevokeGrant`, mesma fonte da matriz de
+ * emissao) e o alvo passa a ser considerado: `owner`/`admin` revogam qualquer
+ * grant da agencia; qualquer outro papel de mutacao so' o grant que ele mesmo
+ * emitiu, e nunca um de classe superior a que pode emitir.
+ *
+ * Recusa antes de qualquer escrita: o grant permanece `active`.
+ */
+function assertActorMayRevokeGrant(
+	actor: RevokeGrantActor,
+	grant: Grant,
+): void {
+	const actorIsIssuer =
+		grant.issuedByPrincipalId !== null &&
+		grant.issuedByPrincipalId === actor.principalId;
+	if (
+		!roleMayRevokeGrant({
+			role: actor.role,
+			capability: grant.capability,
+			actorIsIssuer,
+		})
+	) {
+		throw new GovernanceCommandError(
+			"GOV_INSUFFICIENT_AUTHORITY",
+			`Actor ${actor.principalId} (${actor.role}) may not revoke grant ${grant.id}`,
+		);
+	}
 }
 
 export async function handleRevokeGrant(
@@ -192,6 +234,7 @@ export async function handleRevokeGrant(
 		commandId: string;
 		agencyId: string;
 		grantId: string;
+		actor: RevokeGrantActor;
 		body: unknown;
 	},
 ) {
@@ -202,6 +245,7 @@ export async function handleRevokeGrant(
 			`Grant ${input.grantId} not found in agency ${input.agencyId}`,
 		);
 	}
+	assertActorMayRevokeGrant(input.actor, grant);
 	const body = revokeGrantBodySchema.parse(input.body ?? {});
 	return revokeGrant(
 		{

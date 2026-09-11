@@ -138,26 +138,5 @@ export function createDrizzleSessionRefRepository(
 			return toSessionRef(row);
 		},
 		revoke,
-		async revokeActiveByPrincipalId(
-			principalId: string,
-			revokedAt: Date,
-			reasonCode?: string | null,
-		): Promise<SessionRef[]> {
-			const rows = await db
-				.update(sessionRefs)
-				.set({
-					status: "revoked",
-					revokedAt,
-					revocationReason: reasonCode ?? null,
-				})
-				.where(
-					and(
-						eq(sessionRefs.principalId, principalId),
-						eq(sessionRefs.status, "active"),
-					),
-				)
-				.returning();
-			return rows.map(toSessionRef);
-		},
 	};
 }

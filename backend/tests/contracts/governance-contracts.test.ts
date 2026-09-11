@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
 	assignAutonomyLevelCommandSchema,
 	GOVERNANCE_EVENT_TYPES,
+	governanceScopeKindSchema,
 	grantIssuedPayloadSchema,
 	issueGrantCommandSchema,
 	mandateIssuedPayloadSchema,
@@ -143,5 +144,17 @@ describe("Governance institutional UUID boundaries (ANX-444)", () => {
 				approvalId: NIL_UUID,
 			}).success,
 		).toBe(false);
+	});
+
+	/**
+	 * ANX-469 — `organization` era valor morto do enum (sem produtor, sem dono e
+	 * sem consumidor de autorizacao). O contrato so' admite `agency|platform`.
+	 */
+	test("governanceScopeKindSchema so' admite agency e platform", () => {
+		expect(governanceScopeKindSchema.safeParse("agency").success).toBe(true);
+		expect(governanceScopeKindSchema.safeParse("platform").success).toBe(true);
+		expect(governanceScopeKindSchema.safeParse("organization").success).toBe(
+			false,
+		);
 	});
 });

@@ -1,9 +1,5 @@
 import { z } from "zod";
-export const governanceScopeKindSchema = z.enum([
-	"agency",
-	"organization",
-	"platform",
-]);
+export const governanceScopeKindSchema = z.enum(["agency", "platform"]);
 export const grantStatusSchema = z.enum(["active", "revoked", "expired"]);
 
 /** Explicit PLATFORM console grant. Never inferred from agency membership (ANX-166). */
@@ -23,9 +19,9 @@ export const PLATFORM_SCOPE_ID = "abababab-abab-4aba-8aba-abababababab";
 
 /**
  * ANX-462 — capabilities que so fazem sentido com escopo PLATFORM. `issueGrant`
- * rejeita emiti-las em escopo de agencia/organizacao; antes desta regra um
- * operador de agencia emitia `console.platform` no proprio escopo e abria o
- * console de plataforma (testes afirmavam esse comportamento).
+ * rejeita emiti-las em escopo de agencia; antes desta regra um operador de
+ * agencia emitia `console.platform` no proprio escopo e abria o console de
+ * plataforma (testes afirmavam esse comportamento).
  */
 export const PLATFORM_ONLY_CAPABILITIES: readonly string[] = [
 	PLATFORM_CONSOLE_CAPABILITY,

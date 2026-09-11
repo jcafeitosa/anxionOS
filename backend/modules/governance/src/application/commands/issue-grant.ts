@@ -25,6 +25,12 @@ import { parseCommandResultSnapshot, throwGovernanceError } from "../errors";
 
 export interface IssueGrantInput extends IssueGrantCommand {
 	scopeKind?: GovernanceScopeKind;
+	/**
+	 * ANX-469 — principal que emitiu o grant. Obrigatorio (explicito como `null`
+	 * quando derivado pelo sistema) para que a revogacao possa honrar a metade
+	 * "ou issuer" do catalogo sem depender de dado que nao existe.
+	 */
+	issuedByPrincipalId: string | null;
 }
 
 export interface IssueGrantDeps {
@@ -143,6 +149,7 @@ export async function issueGrant(
 			scopeKind,
 			granteePrincipalId: command.granteePrincipalId,
 			granteeAgentId: null,
+			issuedByPrincipalId: input.issuedByPrincipalId,
 			capability: command.capability,
 			resourceRef: command.resourceRef ?? null,
 			status: "active",

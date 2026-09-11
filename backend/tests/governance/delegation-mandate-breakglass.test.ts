@@ -39,6 +39,7 @@ function seedParentGrant(capability = "owner.*"): Grant {
 		validFrom: now,
 		validUntil: new Date("2027-09-10T12:00:00.000Z"),
 		derivedFromMembershipId: null,
+		issuedByPrincipalId: null,
 		authorityEpochAtIssue: 1,
 		revision: 1,
 		createdAt: now,

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import {
 	createPgPool,
 	ensureEventingSchema,
@@ -23,6 +23,15 @@ const skipReason = shouldRunPgIntegrationTests()
 const TRUNCATE_SQL = `TRUNCATE domain_journal, outbox, inbox, dead_letter_queue,
 	identity_sessions, identity_service_credentials, identity_service_identities,
 	identity_principals, identity_command_journal RESTART IDENTITY CASCADE`;
+
+/**
+ * ANX-464: `externalRefHash` only accepts a real sha256 hex digest — the shape
+ * the module itself produces (`hashSessionRef`). Fixtures derive it from the
+ * raw reference instead of decorating a literal.
+ */
+function sessionRefHash(rawRef: string): string {
+	return createHash("sha256").update(rawRef, "utf8").digest("hex");
+}
 
 /**
  * Harness de integração do identity: aplica o **migrator Drizzle real**
@@ -355,14 +364,14 @@ describe("identity schema — migrator real contra PostgreSQL", () => {
 				await recordSessionRevoked(deps, {
 					principalId: principal.id,
 					sessionRefId: firstRef,
-					externalRefHash: `hash-${firstRef}`,
+					externalRefHash: sessionRefHash(firstRef),
 					commandId: firstKey,
 				});
 				// segundo agregado já revogado antes do reuso da key
 				await recordSessionRevoked(deps, {
 					principalId: principal.id,
 					sessionRefId: secondRef,
-					externalRefHash: `hash-${secondRef}`,
+					externalRefHash: sessionRefHash(secondRef),
 					commandId: randomUUID(),
 				});
 
@@ -370,7 +379,7 @@ describe("identity schema — migrator real contra PostgreSQL", () => {
 					recordSessionRevoked(deps, {
 						principalId: principal.id,
 						sessionRefId: secondRef,
-						externalRefHash: `hash-${secondRef}`,
+						externalRefHash: sessionRefHash(secondRef),
 						commandId: firstKey,
 					}),
 				).rejects.toMatchObject({
@@ -407,7 +416,7 @@ describe("identity schema — migrator real contra PostgreSQL", () => {
 				await recordSessionRevoked(deps, {
 					principalId: principal.id,
 					sessionRefId: revokedRef,
-					externalRefHash: `hash-${revokedRef}`,
+					externalRefHash: sessionRefHash(revokedRef),
 				});
 
 				const reusableKey = randomUUID();
@@ -430,7 +439,7 @@ describe("identity schema — migrator real contra PostgreSQL", () => {
 					recordSessionRevoked(deps, {
 						principalId: principal.id,
 						sessionRefId: freshRef,
-						externalRefHash: `hash-${freshRef}`,
+						externalRefHash: sessionRefHash(freshRef),
 						commandId: reusableKey,
 					}),
 				).rejects.toMatchObject({

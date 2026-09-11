@@ -102,6 +102,7 @@ describe("executeGovernedToolCall with governance grants (ANX-144 S2)", () => {
 			authorityEpochAtIssue: 1,
 			revision: 1,
 			derivedFromMembershipId: null,
+			issuedByPrincipalId: null,
 			validFrom: now,
 			validUntil: null,
 			createdAt: now,

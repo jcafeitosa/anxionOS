@@ -1,4 +1,4 @@
-import { type Grant, isGrantEffectiveAt } from "../../domain/entities/grant";
+import { isGrantEffectiveAt } from "../../domain/entities/grant";
 import type { GrantRepository } from "../../domain/ports/grant-repository";
 
 export interface HasCapabilityDeps {
@@ -11,17 +11,17 @@ export interface HasCapabilityInput {
 	capability: string;
 	asOf?: Date;
 	/**
-	 * Scope requirement:
+	 * Escopo exigido, sempre explicito. So' conta grant vinculado exatamente a
+	 * este escopo; autoridade de PLATAFORMA se pede com `PLATFORM_SCOPE_ID`
+	 * (ANX-462).
 	 *
-	 * - a `string`: only a grant bound to exactly that scope counts. Autoridade
-	 *   de PLATAFORMA se pede com `PLATFORM_SCOPE_ID` (ANX-462) — nao com escopo
-	 *   nulo, que nao existe no modelo (`governance_grants.scope_id` e NOT NULL).
-	 * - `undefined`: sem filtro de escopo (qualquer grant com a capability).
-	 *   Reservado a capabilities scope-agnosticas *por contrato*; foi o valor
-	 *   que, por engano, autorizou um grant de agencia a operar globalmente
-	 *   quando o header `x-agency-id` era omitido (achado HIGH do G2).
+	 * ANX-469: o parametro era opcional e `undefined` significava "qualquer
+	 * escopo" — o footgun que autorizou um grant de agencia a operar
+	 * globalmente quando o header `x-agency-id` era omitido (achado HIGH do
+	 * G2). Obrigatorio no tipo: um chamador que nao declare escopo nao compila,
+	 * entao o bypass nao pode voltar por omissao.
 	 */
-	scopeId?: string;
+	scopeId: string;
 }
 
 /**
@@ -40,20 +40,7 @@ export async function hasCapability(
 	return grants.some(
 		(grant) =>
 			grant.capability === input.capability &&
-			matchesScope(grant, input.scopeId) &&
+			grant.scopeId === input.scopeId &&
 			isGrantEffectiveAt(grant, asOf),
 	);
-}
-
-/**
- * Escopo do grant: exato quando pedido, sem filtro quando o chamador nao
- * declara escopo. Nao existe ramo "escopo nulo" — a coluna e NOT NULL e um
- * grant sem escopo nao e representavel (por isso a plataforma tem
- * `PLATFORM_SCOPE_ID`).
- */
-function matchesScope(grant: Grant, scopeId: string | undefined): boolean {
-	if (scopeId === undefined) {
-		return true;
-	}
-	return grant.scopeId === scopeId;
 }

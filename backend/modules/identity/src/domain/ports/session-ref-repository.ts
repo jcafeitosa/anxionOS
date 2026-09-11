@@ -23,13 +23,4 @@ export interface SessionRefRepository {
 		revokedAt: Date,
 		reasonCode?: string | null,
 	): Promise<SessionRef | null>;
-	/**
-	 * Revokes every still-active reference of a principal and returns the rows
-	 * that actually transitioned (idempotent: a second call returns `[]`).
-	 */
-	revokeActiveByPrincipalId(
-		principalId: string,
-		revokedAt: Date,
-		reasonCode?: string | null,
-	): Promise<SessionRef[]>;
 }

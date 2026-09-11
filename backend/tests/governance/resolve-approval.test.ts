@@ -42,6 +42,7 @@ const ownerGrant: Grant = {
 	validFrom: new Date("2026-09-08T12:00:00.000Z"),
 	validUntil: null,
 	derivedFromMembershipId: null,
+	issuedByPrincipalId: null,
 	authorityEpochAtIssue: 1,
 	revision: 1,
 	createdAt: new Date("2026-09-08T12:00:00.000Z"),

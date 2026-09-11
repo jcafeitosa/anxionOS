@@ -76,10 +76,12 @@ export {
 	ADMINISTRATIVE_CAPABILITY_PREFIXES,
 	GRANT_CAPABILITY_CATALOG,
 	GRANT_ISSUANCE_ROLES,
+	GRANT_REVOCATION_OWNER_ROLES,
 	isAdministrativeGrantCapability,
 	isKnownGrantCapability,
 	OWNER_AUTHORITY_CAPABILITIES,
 	roleMayIssueGrantCapability,
+	roleMayRevokeGrant,
 } from "./grant-capability-policy";
 export type {
 	ApprovalDecision,

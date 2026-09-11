@@ -400,6 +400,7 @@ describe("evaluateAutonomyCapability", () => {
 			authorityEpochAtIssue: 1,
 			revision: 1,
 			derivedFromMembershipId: null,
+			issuedByPrincipalId: null,
 			validFrom: now,
 			validUntil: null,
 			createdAt: now,

@@ -34,6 +34,7 @@ function seedGrant(overrides: Partial<Grant> = {}): Grant {
 		validFrom: now,
 		validUntil: new Date("2027-09-10T12:00:00.000Z"),
 		derivedFromMembershipId: null,
+		issuedByPrincipalId: null,
 		authorityEpochAtIssue: 1,
 		revision: 1,
 		createdAt: now,
@@ -116,13 +117,13 @@ describe("hasCapability", () => {
 		await expect(
 			hasCapability(
 				{ grantRepository },
-				{ principalId, capability: "identity.admin", asOf },
+				{ principalId, capability: "identity.admin", asOf, scopeId },
 			),
 		).resolves.toBe(true);
 		await expect(
 			hasCapability(
 				{ grantRepository },
-				{ principalId, capability: "identity.read", asOf },
+				{ principalId, capability: "identity.read", asOf, scopeId },
 			),
 		).resolves.toBe(false);
 	});
@@ -138,12 +139,12 @@ describe("hasCapability", () => {
 		await expect(
 			hasCapability(
 				{ grantRepository },
-				{ principalId, capability: "identity.admin", asOf },
+				{ principalId, capability: "identity.admin", asOf, scopeId },
 			),
 		).resolves.toBe(false);
 	});
 
-	test("honours the optional scope filter", async () => {
+	test("honours the explicit scope filter", async () => {
 		const grantRepository = createInMemoryGrantRepository([
 			seedGrant({ capability: "identity.read", scopeId }),
 		]);
@@ -171,7 +172,7 @@ describe("hasCapability", () => {
 		await expect(
 			hasCapability(
 				{ grantRepository },
-				{ principalId, capability: "identity.read", asOf },
+				{ principalId, capability: "identity.read", asOf, scopeId },
 			),
 		).resolves.toBe(false);
 	});
@@ -219,16 +220,28 @@ describe("hasCapability", () => {
 		).resolves.toBe(true);
 	});
 
-	test("omitted scope keeps any-scope behaviour for scope-agnostic tokens", async () => {
+	/**
+	 * ANX-469 — o parametro `scopeId` era opcional e `undefined` significava
+	 * "qualquer escopo": era o footgun do bypass HIGH do G2, e este teste o
+	 * afirmava como comportamento esperado. Trocado por escopo explicito: um
+	 * grant de `console.platform` preso a uma agencia NAO autoriza o escopo
+	 * PLATAFORMA.
+	 */
+	test("exige escopo explicito: grant agency-scoped nao autoriza o escopo PLATAFORMA", async () => {
 		const grantRepository = createInMemoryGrantRepository([
 			seedGrant({ capability: PLATFORM_CONSOLE_CAPABILITY, scopeId }),
 		]);
 		await expect(
 			hasCapability(
 				{ grantRepository },
-				{ principalId, capability: PLATFORM_CONSOLE_CAPABILITY, asOf },
+				{
+					principalId,
+					capability: PLATFORM_CONSOLE_CAPABILITY,
+					asOf,
+					scopeId: PLATFORM_SCOPE_ID,
+				},
 			),
-		).resolves.toBe(true);
+		).resolves.toBe(false);
 	});
 });
 

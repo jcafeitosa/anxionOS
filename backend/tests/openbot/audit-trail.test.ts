@@ -169,6 +169,7 @@ describe("executeGovernedToolCall audit events (ANX-144 S4)", () => {
 			authorityEpochAtIssue: 1,
 			revision: 1,
 			derivedFromMembershipId: null,
+			issuedByPrincipalId: null,
 			validFrom: now,
 			validUntil: null,
 			createdAt: now,

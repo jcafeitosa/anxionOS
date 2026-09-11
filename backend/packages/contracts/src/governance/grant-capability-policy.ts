@@ -114,6 +114,18 @@ export const GRANT_ISSUANCE_ROLES: readonly MembershipRole[] = [
 ];
 
 /**
+ * ANX-469 — roles que revogam **qualquer** grant da agencia. O catalogo declara
+ * `governance.grant.revoke` com `requiredGrants: ["governance.owner",
+ * "governance.issuer"]`: `owner`/`admin` sao a autoridade institucional sobre a
+ * agencia; os demais papeis de mutacao (`operator`) so' alcancam o caminho de
+ * emissor.
+ */
+export const GRANT_REVOCATION_OWNER_ROLES: readonly MembershipRole[] = [
+	"owner",
+	"admin",
+];
+
+/**
  * Matriz declarada papel x classe de capability. `operator` so' emite
  * capability operacional; owner/admin emitem operacional e administrativa.
  *
@@ -133,4 +145,37 @@ export function roleMayIssueGrantCapability(
 		return !isAdministrativeGrantCapability(capability);
 	}
 	return true;
+}
+
+/**
+ * ANX-469 — autorizacao de REVOGACAO alinhada ao catalogo
+ * (`governance.grant.revoke` = owner ou issuer).
+ *
+ * Antes desta regra a rota `DELETE /v1/agencies/:agencyId/grants/:grantId`
+ * reusava a guarda de papel da emissao (`owner|admin|operator`) e **nao limitava
+ * o alvo**: um `operator` revogava grants do `owner` da propria agencia. Aqui o
+ * papel deixou de ser suficiente — a autoridade e' de `owner`/`admin` da agencia
+ * (qualquer grant) ou do **emissor registrado no grant**.
+ *
+ * O caminho de emissor nao amplia a classe do papel: um `operator` so' revoga o
+ * proprio grant quando a capability pertence a classe que ele pode emitir
+ * (`roleMayIssueGrantCapability`, a MESMA matriz da emissao — nao uma segunda
+ * lista). Assim um emissor `operator` de um grant administrativo legado
+ * (emitido antes do ANX-466) nao o revoga.
+ */
+export function roleMayRevokeGrant(input: {
+	role: MembershipRole;
+	capability: string;
+	actorIsIssuer: boolean;
+}): boolean {
+	if (!GRANT_ISSUANCE_ROLES.includes(input.role)) {
+		return false;
+	}
+	if (GRANT_REVOCATION_OWNER_ROLES.includes(input.role)) {
+		return true;
+	}
+	if (!input.actorIsIssuer) {
+		return false;
+	}
+	return roleMayIssueGrantCapability(input.role, input.capability);
 }

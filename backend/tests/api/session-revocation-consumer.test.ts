@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { createHash } from "node:crypto";
 import {
 	IDENTITY_EVENT_TYPES,
 	identityPrincipalSuspendedV1PayloadSchema,
@@ -19,6 +20,11 @@ import {
 	createInMemoryServiceIdentityRepository,
 	createRecordingUnitOfWork,
 } from "../identity/test-support";
+
+/** ANX-464: `externalRefHash` carries a real sha256 hex digest, never material. */
+function sessionRefHash(rawRef: string): string {
+	return createHash("sha256").update(rawRef, "utf8").digest("hex");
+}
 
 const suspendedPrincipal: Principal = {
 	id: "11111111-1111-4111-8111-111111111111",
@@ -138,7 +144,10 @@ describe("session revocation consumer", () => {
 				async revokeAllForAuthUser(authUserId) {
 					revoked.push(authUserId);
 					return [
-						{ externalRefHash: `hash-${authUserId}`, revokedAt: new Date() },
+						{
+							externalRefHash: sessionRefHash(authUserId),
+							revokedAt: new Date(),
+						},
 					];
 				},
 			},
@@ -172,7 +181,12 @@ describe("session revocation consumer", () => {
 			principalRepository: repository,
 			sessionRevoker: {
 				async revokeAllForAuthUser() {
-					return [{ externalRefHash: "hash-auth-1", revokedAt: new Date() }];
+					return [
+						{
+							externalRefHash: sessionRefHash("auth-1"),
+							revokedAt: new Date(),
+						},
+					];
 				},
 			},
 			unitOfWork,

@@ -89,6 +89,8 @@ async function seedOwnerBaseline(
 				commandId: randomUUID(),
 				scopeId: AGENCY_ID,
 				granteePrincipalId: ownerPrincipalId,
+				// Baseline CAP-B01 derivada pelo sistema (ANX-469): sem emissor.
+				issuedByPrincipalId: null,
 				capability,
 			},
 		);

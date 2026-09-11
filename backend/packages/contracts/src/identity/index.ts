@@ -96,6 +96,7 @@ export {
 	revocationReasonCodeSchema,
 	serviceCredentialIdSchema,
 	serviceCredentialPrefixSchema,
+	sessionRefHashSchema,
 	sessionRefIdSchema,
 	suspensionReasonCodeSchema,
 } from "./types";
