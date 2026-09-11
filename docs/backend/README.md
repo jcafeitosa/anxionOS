@@ -95,7 +95,7 @@ docker-compose -f backend/deploy/docker/docker-compose.yml --profile graph-sandb
 npm run anx162:engine-isolation-homologation
 ```
 
-#### Profile `engines-sandbox` (ANX-162 S3)
+#### Profile `engines-sandbox` (ANX-162 S3 + S4)
 
 Containers de engine externo em modo **SIMULATED** — sem credenciais live:
 
@@ -104,6 +104,7 @@ Containers de engine externo em modo **SIMULATED** — sem credenciais live:
 | `gocryptotrader-sandbox` | `9053` | ANX-175 (GoCryptoTrader REAL) |
 | `hummingbot-sandbox` | `9054` | ANX-176 (Hummingbot REAL) |
 | `freqtrade-sandbox` | `9055` | ANX-177 (Freqtrade REAL) |
+| `xchange-sandbox` | `9056` | ANX-178 (XChange REAL) |
 
 ```bash
 cp backend/deploy/docker/.env.example backend/deploy/docker/.env
@@ -112,23 +113,26 @@ docker-compose -f backend/deploy/docker/docker-compose.yml --profile engines-san
 curl -s http://127.0.0.1:9053/health | jq .
 curl -s http://127.0.0.1:9054/health | jq .
 curl -s http://127.0.0.1:9055/health | jq .
+curl -s http://127.0.0.1:9056/health | jq .
 npm run anx162:s3-engines-homologation
+npm run anx162:s4-egress-auth-audit-homologation
 ```
 
-Isolamento aplicado a todos os serviços (`gocryptotrader-sandbox`, `hummingbot-sandbox`, `freqtrade-sandbox`):
+Isolamento aplicado a todos os serviços do quartet (`gocryptotrader-sandbox`, `hummingbot-sandbox`, `freqtrade-sandbox`, `xchange-sandbox`):
 
 | Controle | Valor |
 | --- | --- |
-| Rede | `anxion-data` (data-plane; sem `anxion-control`) |
+| Rede | `anxion-data` (`internal: true` — egress deny; sem `anxion-control`) |
+| Service auth | `ENGINE_SANDBOX_AUTH_TOKEN` — Bearer em rotas API; `/health` público |
 | Usuário | `10001` (non-root) |
 | Root FS | `read_only: true` + `tmpfs` em `/tmp` |
 | Capabilities | `cap_drop: [ALL]`, `no-new-privileges` |
-| Docker socket | proibido (verificado pelo oracle S3) |
-| Health GCT | `GET /health` na porta `9053` |
-| Health Hummingbot | `GET /health` na porta `9054` |
-| Health Freqtrade | `GET /health` na porta `9055` |
+| Docker socket | proibido (verificado pelos oracles S3/S4) |
+| Audit manifest | `backend/deploy/docker/audit/engine-sandbox-manifest.json` |
 
-> Os containers S3 são **stubs sandbox** com superfície compatível (`/health`, `/v1/getinfo`, `/v1/status` ou `/api/v1/ping`). ANX-175/176/177 substituem pelos terminais reais mantendo o mesmo profile e oráculos.
+Detalhes S4: [backend/deploy/docker/EGRESS-AUTH-AUDIT.md](../../backend/deploy/docker/EGRESS-AUTH-AUDIT.md).
+
+> Os containers são **stubs sandbox** com superfície compatível (`/health`, `/v1/getinfo`, `/v1/status`, `/api/v1/ping`, `/api/v1/health`). ANX-175/176/177/178 substituem pelos terminais reais mantendo o mesmo profile e oráculos.
 
 > **Migração Timescale (ADR0004):** se o volume `pgdata` foi criado com imagem Postgres plain (pré-ANX-162), remova o volume antes de subir `timescale/timescaledb` — extensões `timescaledb` e `vector` são aplicadas via `initdb/001-adr0004-extensions.sql` apenas em cluster novo:
 >
@@ -142,9 +146,10 @@ Isolamento aplicado a todos os serviços (`gocryptotrader-sandbox`, `hummingbot-
 | Postgres  | 5432         | `timescale/timescaledb:2.30.0-pg16` | OLTP + TimescaleDB + pgvector (ADR0004)  |
 | NATS      | 4222, 8222   | `nats:2.10.12-alpine`               | Eventos / JetStream                      |
 | Neo4j     | 7474, 7687   | `neo4j:5.26.2-community`            | Grafo institucional (`--profile graph-sandbox`) |
-| GoCryptoTrader (sandbox) | 9053 | `anxionos/gocryptotrader-sandbox:0.1.0-anx162-s3` | Engine SIMULATED (`--profile engines-sandbox`) |
-| Hummingbot (sandbox) | 9054 | `anxionos/hummingbot-sandbox:0.1.0-anx162-s3` | Engine SIMULATED (`--profile engines-sandbox`) |
-| Freqtrade (sandbox) | 9055 | `anxionos/freqtrade-sandbox:0.1.0-anx162-s3` | Engine SIMULATED (`--profile engines-sandbox`) |
+| GoCryptoTrader (sandbox) | 9053 | `anxionos/gocryptotrader-sandbox:0.1.0-anx162-s4` | Engine SIMULATED (`--profile engines-sandbox`) |
+| Hummingbot (sandbox) | 9054 | `anxionos/hummingbot-sandbox:0.1.0-anx162-s4` | Engine SIMULATED (`--profile engines-sandbox`) |
+| Freqtrade (sandbox) | 9055 | `anxionos/freqtrade-sandbox:0.1.0-anx162-s4` | Engine SIMULATED (`--profile engines-sandbox`) |
+| XChange (sandbox) | 9056 | `anxionos/xchange-sandbox:0.1.0-anx162-s4` | Engine SIMULATED (`--profile engines-sandbox`) |
 | Taskboard | 47823        | (host, não compose)       | Dashi/Codex Taskboard        |
 
 Copie `.env.example` para `.env` e ajuste se necessário:
