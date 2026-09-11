@@ -8,6 +8,24 @@ type: debate
 **Issue pack:** ANX-389 · histórico ANX-103  
 **Callers:** [R06-dependencies.md](./R06-dependencies.md) · [R08-decision-log.md](./R08-decision-log.md) · [ROUNDS.md](./ROUNDS.md).
 
+## In / Out (R7)
+
+**In:** cross-tenant invoice, webhook replay, double invoice, refund, secrets PSP, billing escreve ledger.
+
+**Out:** R-BIL-*. Sem ST08 live.
+
+## Non-goals
+
+Não spec `accepted`. Não ANX-342/389 `done`. Billing **não** escreve ledger.
+
+## Ownership (riscos)
+
+| Superfície | Dono |
+| --- | --- |
+| Invoice / webhook uniqueness | **billing** |
+| ledger | **accounting** |
+| adapter-gateway | **KEEP** |
+
 ## Registro
 
 | ID | Risco | L | I | Sev | Mitigação | Gate |

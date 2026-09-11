@@ -7,7 +7,25 @@ status: draft
 **Rodada:** R9  
 **Data:** 2026-09-11  
 **Issue debate:** ANX-389 / ANX-103 · impl futura **ANX-104** (não neste pack)  
-**Callers:** [R08-decision-log.md](./R08-decision-log.md) · [R10-g0-handoff.md](./R10-g0-handoff.md). Sem migration.
+**Callers:** [R08-decision-log.md](./R08-decision-log.md) · [R10-g0-handoff.md](./R10-g0-handoff.md). Sem migration. Plano **draft**.
+
+## In / Out (R9)
+
+**In:** plano G1 futuro ANX-104 (não neste pack).
+
+**Out:** ordem de pré-requisitos. **Não** ST08. **Não** ANX-389 `done`.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`. Não G7 ANX-104 aqui.
+
+## Ownership (plano)
+
+| Superfície | Dono |
+| --- | --- |
+| schema billing_* | **billing** (ANX-104 futuro) |
+| usage.recorded | **connections** |
+| adapter-gateway | **KEEP** |
 
 ## Pré-requisitos G1 futuro
 

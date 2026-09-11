@@ -8,6 +8,25 @@ type: debate
 **Issue pack:** ANX-389 · histórico ANX-103  
 **Callers:** [R05-storage-pg.md](./R05-storage-pg.md) · [R07-risks.md](./R07-risks.md) · [ROUNDS.md](./ROUNDS.md). Sem API runtime neste artefato.
 
+## In / Out (R6)
+
+**In:** usage via evento connections; AgencyScopePort; T01; graph SDK read; eventing.
+
+**Out:** `billing.*` para accounting/partners/audit. Sem mutate ledger. Sem neo4j-driver.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`.
+
+## Ownership (dependências)
+
+| Superfície | Dono |
+| --- | --- |
+| Invoice | **billing** |
+| Usage record | **connections** |
+| JournalEntry | **accounting** |
+| adapter-gateway | **KEEP** |
+
 ## Decisões-chave
 
 | ID | Decisão |

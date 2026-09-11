@@ -7,7 +7,25 @@ status: draft
 **Rodada:** R8  
 **Data:** 2026-09-11  
 **Issue pack:** ANX-389 · histórico ANX-103  
-**Callers:** [R07-risks.md](./R07-risks.md) · [R09-dev-plan.md](./R09-dev-plan.md) · [ROUNDS.md](./ROUNDS.md).
+**Callers:** [R07-risks.md](./R07-risks.md) · [R09-dev-plan.md](./R09-dev-plan.md) · [ROUNDS.md](./ROUNDS.md). Status **draft** — não `accepted`.
+
+## In / Out (R8)
+
+**In:** D-BIL-001–007 (dono Invoice, usage async, PG, graph projector).
+
+**Out:** este log. **Não** fecha ANX-389. Sem ST08 live.
+
+## Non-goals
+
+Não stamp `accepted`. Não fake ST08. Não ANX-342/389 `done`.
+
+## Ownership (log)
+
+| Superfície | Dono |
+| --- | --- |
+| Subscription / Invoice / Refund / WebhookReceipt | **billing** |
+| ledger | **accounting** |
+| adapter-gateway | **KEEP** |
 
 | ID | Decisão | Rodada | Status |
 | --- | --- | --- | --- |

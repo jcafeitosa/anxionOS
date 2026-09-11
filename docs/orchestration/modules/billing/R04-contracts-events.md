@@ -19,6 +19,26 @@ type: debate
 | Idempotência | `Idempotency-Key` → `commandId` |
 | Segredos | **proibido** em DTO/evento (token PSP, PAN) |
 
+**KEEP adapter-gateway** se já exportado.
+
+## In / Out (R4)
+
+**In:** esboço `/v1/billing` (issue/refund/webhook). Idempotency-Key. T01 pré-issue/refund.
+
+**Out:** `billing.*` eventos. **Não** ledger. Sem token PSP/PAN em DTO.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`.
+
+## Ownership (contratos)
+
+| Superfície | Dono |
+| --- | --- |
+| Invoice / Subscription / Refund / WebhookReceipt | **billing** |
+| JournalEntry | **accounting** |
+| adapter-gateway | **KEEP** |
+
 ### Códigos (`details.code`)
 
 | Código | HTTP | Quando |

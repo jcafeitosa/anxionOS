@@ -12,6 +12,24 @@ type: debate
 **Callers:** [R02-boundaries.md](./R02-boundaries.md) · [ROUNDS.md](./ROUNDS.md).  
 **Fonte debate thin:** `brain/notes/anxionos-thin-billing-debate.md` (OpenKnowledge).
 
+## In / Out (R1)
+
+**In:** inventário de cobrança comercial (assinatura, invoice, refund, webhook).
+
+**Out:** este contexto. **Não** ledger de trading (`accounting`). Sem código de produto.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`. Não pastas `approvals/`/`policies/`/`marketplace/`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Subscription / Invoice / Refund / WebhookReceipt | **billing** |
+| JournalEntry | **accounting** |
+| adapter-gateway | **KEEP** |
+
 ## Propósito
 
 Cobrança **comercial da plataforma** (assinatura, invoice, refund, webhook). **Não** é ledger de trading. Código de produto **ausente**; este pack é G0 documental. Spec 003 ciclo de investimento permanece **draft** (ST08 0/23). Não criar pastas `approvals/` nem `policies/`. D-GOV-010 fica em **risk P06**.

@@ -10,6 +10,22 @@ type: debate
 **Engines ADR0004:** PostgreSQL autoritativo; Neo4j só projector; **sem** Timescale neste módulo; **sem** pgvector; SQLite **não** autoritativo.  
 **Fonte:** `brain/notes/anxionos-storage-ownership.md` (**draft**; ST08 **0/23**). Tabelas alvo G1 — **nenhuma migration** neste pack.
 
+## In / Out (R5)
+
+**In:** PG `billing_*` + journal/outbox. **Out:** modelo documental. Sem Timescale. Sem SQLite autoritativo. Sem migration ST08.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`.
+
+## Ownership (storage)
+
+| Superfície | Dono |
+| --- | --- |
+| billing_* | **billing** |
+| graph:billing:v1 | **graph** projector |
+| adapter-gateway | **KEEP** |
+
 ## Princípios
 
 | Princípio | Decisão |
