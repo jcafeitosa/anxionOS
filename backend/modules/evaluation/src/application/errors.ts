@@ -30,5 +30,6 @@ export function parseCommandResultSnapshot(
 		idempotentReplay: snapshot.idempotentReplay,
 		evaluationRecordId: snapshot.evaluationRecordId,
 		evaluationScoreId: snapshot.evaluationScoreId,
+		certificationId: snapshot.certificationId,
 	});
 }

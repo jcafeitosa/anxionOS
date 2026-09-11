@@ -7,8 +7,12 @@ import type {
 } from "../domain/ports/operations-unit-of-work";
 import { createPgCommandJournalRepository } from "./persistence/command-journal-repository";
 import {
+	createPgDeletionRequestRepository,
+	createPgExportJobRepository,
 	createPgHealthCheckRepository,
 	createPgIncidentRepository,
+	createPgRecoveryTaskRepository,
+	createPgRetentionPolicyRepository,
 } from "./persistence/repositories";
 
 function createTransactionContext(
@@ -18,6 +22,10 @@ function createTransactionContext(
 		commandJournal: createPgCommandJournalRepository(client),
 		healthChecks: createPgHealthCheckRepository(client),
 		incidents: createPgIncidentRepository(client),
+		recoveryTasks: createPgRecoveryTaskRepository(client),
+		retentionPolicies: createPgRetentionPolicyRepository(client),
+		exportJobs: createPgExportJobRepository(client),
+		deletionRequests: createPgDeletionRequestRepository(client),
 		async publishEvents(envelopes: DomainEventEnvelope[]) {
 			for (const envelope of envelopes) {
 				await appendJournal(client, envelope);

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	auditFlightRecorderEntryIdSchema,
 	auditManifestIdSchema,
@@ -12,9 +13,9 @@ export const auditCommandResultSchema = z.object({
 	flightRecordId: auditFlightRecorderEntryIdSchema.optional(),
 });
 export const ingestDomainEventTapCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
-	sourceEventId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
+	sourceEventId: institutionalUuidSchema,
 	ownerDomain: z.string().min(1),
 	eventType: z.string().min(1),
 	occurredAt: z.string().datetime(),
@@ -28,8 +29,8 @@ export type IngestDomainEventTapCommand = z.infer<
 >;
 
 export const verifyManifestIntegrityCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	manifestId: auditManifestIdSchema,
 	payloadHash: payloadHashSchema,
 });

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	capitalAccountIdSchema,
 	capitalExecutionModeSchema,
@@ -14,29 +15,29 @@ export const capitalCommandResultSchema = z.object({
 	reservationId: z.string().optional(),
 });
 export const registerCapitalAccountCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
-	ownerUserId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
+	ownerUserId: institutionalUuidSchema,
 	baseCurrency: z.string().min(3).max(8),
 	initialSettledAmount: decimalAmountSchema,
 	executionMode: capitalExecutionModeSchema,
 });
 export const proposeAllocationCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	accountId: capitalAccountIdSchema,
-	portfolioId: z.string().uuid(),
-	grantId: z.string().uuid(),
+	portfolioId: institutionalUuidSchema,
+	grantId: institutionalUuidSchema,
 	limitAmount: decimalAmountSchema,
 	limitCurrency: z.string().min(3).max(8),
 	executionMode: capitalExecutionModeSchema,
 });
 export const reserveForIntentCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	accountId: capitalAccountIdSchema,
-	portfolioId: z.string().uuid(),
-	grantId: z.string().uuid(),
+	portfolioId: institutionalUuidSchema,
+	grantId: institutionalUuidSchema,
 	intentHash: z.string().min(32).max(128),
 	asset: z.string().min(1).max(16),
 	amount: decimalAmountSchema,
@@ -60,8 +61,8 @@ export type ReserveForIntentCommand = z.infer<
 >;
 
 export const releaseReservationCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	reservationId: z.string().min(1).max(64),
 	releaseAmount: decimalAmountSchema,
 	reason: z.enum(["cancel", "partial_fill", "expired"]),

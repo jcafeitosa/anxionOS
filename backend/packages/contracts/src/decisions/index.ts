@@ -1,11 +1,19 @@
 export {
 	proposeDecisionCommandSchema,
 	checkAuthorityCommandSchema,
+	requestHumanApprovalCommandSchema,
+	recordApprovalCommandSchema,
+	recordDispositionCommandSchema,
+	recordEvidenceManifestCommandSchema,
 	submitIntentCommandSchema,
 	decisionsCommandResultSchema,
 	type DecisionsCommandResult,
 	type ProposeDecisionCommand,
 	type CheckAuthorityCommand,
+	type RequestHumanApprovalCommand,
+	type RecordApprovalCommand,
+	type RecordDispositionCommand,
+	type RecordEvidenceManifestCommand,
 	type SubmitIntentCommand,
 } from "./commands";
 export {
@@ -13,7 +21,11 @@ export {
 	decisionsEventPayloadSchema,
 	proposalCreatedPayloadSchema,
 	authorityCheckedPayloadSchema,
+	approvalRequestedPayloadSchema,
+	approvalRecordedPayloadSchema,
+	dispositionRecordedPayloadSchema,
 	intentSubmittedPayloadSchema,
+	evidenceManifestRecordedPayloadSchema,
 } from "./events";
 export {
 	DECISIONS_ERROR_CODES,
@@ -45,6 +57,14 @@ export {
 	proposalIdSchema,
 	proposalKindSchema,
 	proposalStatusSchema,
+	dispositionKindSchema,
+	dispositionOutcomeSchema,
+	approvalIdSchema,
+	dispositionIdSchema,
+	evidenceManifestIdSchema,
+	knowledgeEvidenceIdSchema,
+	evidenceProvenanceKindSchema,
+	evidenceManifestEntrySchema,
 	decisionScopeSchema,
 	decisionEngineStatusSchema,
 } from "./types";

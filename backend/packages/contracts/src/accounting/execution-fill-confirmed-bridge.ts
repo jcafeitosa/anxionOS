@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	accountingExecutionModeSchema,
 	decimalAmountSchema,
@@ -6,13 +7,13 @@ import {
 } from "./types";
 /** Bridge schema for accounting consumer input shaped as execution.fill.confirmed.v1 (SIMULATED fixture). */
 export const executionFillConfirmedV1Schema = z.object({
-	eventId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	eventId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	fillId: z.string().min(1).max(128),
-	orderId: z.string().uuid(),
-	executionSessionId: z.string().uuid().optional(),
+	orderId: institutionalUuidSchema,
+	executionSessionId: institutionalUuidSchema.optional(),
 	side: orderSideSchema,
-	instrumentId: z.string().uuid(),
+	instrumentId: institutionalUuidSchema,
 	quantity: decimalAmountSchema,
 	price: decimalAmountSchema,
 	notionalAmount: decimalAmountSchema,
@@ -20,7 +21,7 @@ export const executionFillConfirmedV1Schema = z.object({
 	filledAt: z.string().datetime(),
 	executionMode: accountingExecutionModeSchema,
 	capitalAccountId: z.string().optional(),
-	portfolioId: z.string().uuid().optional(),
+	portfolioId: institutionalUuidSchema.optional(),
 	feeAmount: decimalAmountSchema.optional(),
 	feeCurrency: z.string().optional(),
 });

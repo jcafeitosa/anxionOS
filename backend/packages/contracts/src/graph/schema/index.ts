@@ -22,3 +22,7 @@ export {
 	PRODUCT_GRAPH_EDGE_TYPES,
 	PRODUCT_GRAPH_NODE_TYPES,
 } from "./product-graph-schema";
+export {
+	PERFORMANCE_GRAPH_EDGE_TYPES,
+	PERFORMANCE_GRAPH_NODE_TYPES,
+} from "./performance-graph-schema";

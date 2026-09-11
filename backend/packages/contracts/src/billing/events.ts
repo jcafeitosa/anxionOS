@@ -1,4 +1,6 @@
 import { z } from "zod";
+
+/** ANX-444 NOT_APPLICABLE (ANX-223): billing UUID fields remain z.string().uuid() until Owner greenlight. */
 import {
 	billingInvoiceIdSchema,
 	billingPeriodSchema,

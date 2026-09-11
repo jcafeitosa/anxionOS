@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 
 export const toolInvocationDecisionSchema = z.enum(["ALLOW", "DENY", "DEFER"]);
 
@@ -15,43 +16,43 @@ export const computerSessionStatusSchema = z.enum([
 export const computerSessionControllerSchema = z.enum(["bot", "human"]);
 
 export const toolCallRequestSchema = z.object({
-	requestId: z.string().uuid(),
-	organizationId: z.string().uuid(),
-	agentId: z.string().uuid(),
+	requestId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
 	toolName: z.string().min(1).max(128),
 	inputHash: z.string().min(1).max(128),
 });
 
 export const toolCallDecisionSchema = z.object({
-	requestId: z.string().uuid(),
+	requestId: institutionalUuidSchema,
 	decision: toolInvocationDecisionSchema,
 	ruleId: z.string().min(1).max(128).optional(),
 	reason: z.string().max(512).optional(),
 });
 
 export const toolCallEffectSchema = z.object({
-	effectId: z.string().uuid(),
-	requestId: z.string().uuid(),
+	effectId: institutionalUuidSchema,
+	requestId: institutionalUuidSchema,
 	outcomeHash: z.string().min(1).max(128),
 });
 
 export const computerSessionRefSchema = z.object({
-	sessionId: z.string().uuid(),
-	organizationId: z.string().uuid(),
-	agentId: z.string().uuid(),
+	sessionId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
 	workspacePath: z.string().min(1).max(512),
 	status: computerSessionStatusSchema,
 	/** Rotates on acquire, takeover and resume; prior values are revoked (R144-05). */
-	authorityToken: z.string().uuid(),
+	authorityToken: institutionalUuidSchema,
 	controller: computerSessionControllerSchema,
 });
 
 export const toolAuditEntrySchema = z.object({
-	auditId: z.string().uuid(),
-	requestId: z.string().uuid(),
+	auditId: institutionalUuidSchema,
+	requestId: institutionalUuidSchema,
 	phase: toolAuditPhaseSchema,
-	organizationId: z.string().uuid(),
-	agentId: z.string().uuid(),
+	organizationId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
 	toolName: z.string().min(1).max(128),
 	decision: toolInvocationDecisionSchema.optional(),
 	ruleId: z.string().min(1).max(128).optional(),
@@ -86,3 +87,27 @@ export type SandboxToolCatalogEntry = z.infer<
 	typeof sandboxToolCatalogEntrySchema
 >;
 export type SandboxToolCatalog = z.infer<typeof sandboxToolCatalogSchema>;
+
+/** Bot execution generation lifecycle (R144-08). Run revision is sourced from orchestration. */
+export const botRunGenerationStatusSchema = z.enum([
+	"active",
+	"aborted",
+	"released",
+]);
+
+export const botRunGenerationRefSchema = z.object({
+	generationId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
+	runId: institutionalUuidSchema,
+	/** Orchestration Run.revision at acquire time — fencing token (D-AGT-003). */
+	runRevision: z.number().int().positive(),
+	/** Monotonic sequence per run; stale generations carry lower values. */
+	generationSequence: z.number().int().positive(),
+	status: botRunGenerationStatusSchema,
+	/** Scoped abort credential; aborting A must not cancel B. */
+	abortToken: institutionalUuidSchema,
+});
+
+export type BotRunGenerationStatus = z.infer<typeof botRunGenerationStatusSchema>;
+export type BotRunGenerationRef = z.infer<typeof botRunGenerationRefSchema>;

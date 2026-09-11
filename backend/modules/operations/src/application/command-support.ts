@@ -21,5 +21,6 @@ export function toCommandResultSnapshot(
 		idempotentReplay: result.idempotentReplay ?? false,
 		healthCheckId: result.healthCheckId,
 		incidentId: result.incidentId,
+		recoveryTaskId: result.recoveryTaskId,
 	};
 }

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { executionModeSchema } from "../decisions/types";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import type { ExecutionMode } from "../decisions/types";
 import {
 	ENV_BOUNDARY_VIOLATION,
@@ -14,12 +15,12 @@ export type ConfigLeakFinding = {
 	message: string;
 };
 export const secretRefSchema = z.object({
-	secretRefId: z.string().uuid(),
+	secretRefId: institutionalUuidSchema,
 	scope: secretScopeSchema,
 	label: z.string().min(1),
 });
 export const environmentAccountSchema = z.object({
-	accountId: z.string().uuid(),
+	accountId: institutionalUuidSchema,
 	executionMode: executionModeSchema,
 	venue: z.string().min(1),
 	isProduction: z.boolean(),
@@ -30,9 +31,9 @@ export const executionEnvironmentConfigSchema = z.object({
 	accounts: z.array(environmentAccountSchema),
 });
 export const dispatchBundleSchema = z.object({
-	adapterId: z.string().uuid(),
-	secretRefId: z.string().uuid().optional(),
-	accountId: z.string().uuid(),
+	adapterId: institutionalUuidSchema,
+	secretRefId: institutionalUuidSchema.optional(),
+	accountId: institutionalUuidSchema,
 });
 const SECRET_SCOPE_BY_MODE: Record<
 	ExecutionMode,

@@ -8,6 +8,20 @@
 			"when": 1789069000000,
 			"tag": "0000_operations_core",
 			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1789155400000,
+			"tag": "0001_recovery_tasks",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1789241800000,
+			"tag": "0002_retention_export_deletion",
+			"breakpoints": true
 		}
 	]
 }

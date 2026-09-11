@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	auditFlightRecorderEntryIdSchema,
 	auditManifestIdSchema,
@@ -10,8 +11,8 @@ export const AUDIT_EVENT_TYPES = {
 export const manifestRecordedPayloadSchema = z.object({
 	manifestId: auditManifestIdSchema,
 	flightRecordId: auditFlightRecorderEntryIdSchema,
-	organizationId: z.string().uuid(),
-	sourceEventId: z.string().uuid(),
+	organizationId: institutionalUuidSchema,
+	sourceEventId: institutionalUuidSchema,
 	ownerDomain: z.string().min(1),
 	eventType: z.string().min(1),
 	occurredAt: z.string().datetime(),

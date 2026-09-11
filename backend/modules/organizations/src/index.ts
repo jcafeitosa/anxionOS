@@ -18,6 +18,10 @@ export { listMembershipsByAgency, } from "./application/queries/list-memberships
 export { INVITE_TTL_MS } from "./application/invite-constants";
 export { OrganizationCommandError } from "./application/errors";
 export { assertAgencyScope } from "./application/services/assert-agency-scope";
+export {
+	AGENCY_MUTATION_ROLES,
+	assertActorCanMutate,
+} from "./application/services/membership-role-guard";
 export { buildAgencyTenantContext } from "./application/services/tenant-context";
 export { createHmacInviteTokenHasher, createHmacInviteTokenHasherFromEnv, } from "./infrastructure/adapters/hmac-invite-token-hasher";
 export { createIdentityPrincipalLookup } from "./infrastructure/adapters/identity-principal-lookup";

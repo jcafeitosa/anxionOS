@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "./institutional-uuid";
 /** Institutional envelope schema version (P02 Wave 2). */
 export const INSTITUTIONAL_SCHEMA_VERSION_V02 = "0.2.0";
 export const institutionalChannelSchema = z.enum([
@@ -8,29 +9,29 @@ export const institutionalChannelSchema = z.enum([
 	"system",
 ]);
 const institutionalEnvelopeCoreV02Schema = z.object({
-	messageId: z.string().uuid(),
+	messageId: institutionalUuidSchema,
 	messageType: z.string().min(1),
 	schemaVersion: z.literal(INSTITUTIONAL_SCHEMA_VERSION_V02),
 	occurredAt: z.string().datetime(),
-	correlationId: z.string().uuid(),
-	causationId: z.string().uuid().optional(),
-	actorPrincipalId: z.string().uuid(),
-	agencyId: z.string().uuid().optional(),
-	tenantId: z.string().uuid().optional(),
+	correlationId: institutionalUuidSchema,
+	causationId: institutionalUuidSchema.optional(),
+	actorPrincipalId: institutionalUuidSchema,
+	agencyId: institutionalUuidSchema.optional(),
+	tenantId: institutionalUuidSchema.optional(),
 	channel: institutionalChannelSchema,
-	aggregateId: z.string().uuid().optional(),
+	aggregateId: institutionalUuidSchema.optional(),
 	aggregateRevision: z.number().int().nonnegative().optional(),
 	payload: z.unknown(),
 });
 export const domainEventEnvelopeV02Schema =
 	institutionalEnvelopeCoreV02Schema.extend({
 		ownerDomain: z.string().min(1),
-		idempotencyKey: z.string().uuid().optional(),
+		idempotencyKey: institutionalUuidSchema.optional(),
 	});
 export const domainCommandEnvelopeV02Schema =
 	institutionalEnvelopeCoreV02Schema.extend({
 		ownerDomain: z.string().min(1),
-		idempotencyKey: z.string().uuid(),
+		idempotencyKey: institutionalUuidSchema,
 	});
 export function parseDomainEventEnvelopeV02(
 	input: unknown,

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../../institutional-uuid";
 import { nodeKeySchema } from "../types";
 import { traversalMetaSchema } from "./common";
 
@@ -18,7 +19,7 @@ export const T18_INPUT_SCHEMA = z.object({
 
 export const T18_OUTPUT_SCHEMA = z.object({
 	complete: z.boolean(),
-	caseIds: z.array(z.string().uuid()),
+	caseIds: z.array(institutionalUuidSchema),
 	differenceUsd: z.number().nullable(),
 	incompleteReasons: z.array(z.string()).optional(),
 });

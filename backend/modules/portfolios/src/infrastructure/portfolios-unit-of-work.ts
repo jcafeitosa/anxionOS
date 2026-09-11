@@ -8,8 +8,12 @@ import type {
 import { createPgCommandJournalRepository } from "./persistence/command-journal-repository";
 import {
 	createPgHoldingRepository,
+	createPgLedgerApplicationRepository,
 	createPgPortfolioRepository,
+	createPgPositionReconciliationCaseRepository,
 	createPgPositionRepository,
+	createPgProvisionalCashRepository,
+	createPgValuationSnapshotRepository,
 } from "./persistence/repositories";
 
 function createTransactionContext(
@@ -20,6 +24,10 @@ function createTransactionContext(
 		portfolios: createPgPortfolioRepository(client),
 		positions: createPgPositionRepository(client),
 		holdings: createPgHoldingRepository(client),
+		valuationSnapshots: createPgValuationSnapshotRepository(client),
+		provisionalCash: createPgProvisionalCashRepository(client),
+		ledgerApplications: createPgLedgerApplicationRepository(client),
+		reconciliationCases: createPgPositionReconciliationCaseRepository(client),
 		async publishEvents(envelopes: DomainEventEnvelope[]) {
 			for (const envelope of envelopes) {
 				await appendJournal(client, envelope);

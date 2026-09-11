@@ -4,7 +4,28 @@ export const strategyIdSchema = z.string().regex(/^st_str_[0-9a-f-]{36}$/i);
 export const strategyVersionIdSchema = z
 	.string()
 	.regex(/^st_ver_[0-9a-f-]{36}$/i);
+export const backtestRunIdSchema = z
+	.string()
+	.regex(/^st_btr_[0-9a-f-]{36}$/i);
+export const deploymentIdSchema = z
+	.string()
+	.regex(/^st_dep_[0-9a-f-]{36}$/i);
+export const signalIdSchema = z.string().regex(/^st_sig_[0-9a-f-]{36}$/i);
 export const strategiesExecutionModeSchema = z.enum(["SIMULATED", "PAPER"]);
+export const deploymentStatusSchema = z.enum([
+	"ACTIVE",
+	"PAUSED",
+	"ROLLED_BACK",
+	"RETIRED",
+]);
+export const bindingSnapshotSchema = z.object({
+	instrumentRefs: z.array(z.string().min(1)).min(1),
+	parametersHash: z.string().regex(/^[a-f0-9]{64}$/i),
+	rulesHash: z
+		.string()
+		.regex(/^[a-f0-9]{64}$/i)
+		.optional(),
+});
 export const strategyStatusSchema = z.enum(["ACTIVE", "ARCHIVED"]);
 export const strategyVersionLifecycleSchema = z.enum([
 	"DRAFT",

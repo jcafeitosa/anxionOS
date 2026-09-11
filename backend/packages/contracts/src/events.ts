@@ -1,13 +1,14 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "./institutional-uuid";
 /** Institutional domain event envelope (P02 baseline). */
 export const domainEventEnvelopeSchema = z.object({
-	eventId: z.string().uuid(),
+	eventId: institutionalUuidSchema,
 	schemaVersion: z.literal("0.1.0"),
 	ownerDomain: z.string().min(1),
 	eventType: z.string().min(1),
 	occurredAt: z.string().datetime(),
 	/** Present for agency-scoped domains; used by NATS subject isolation. */
-	agencyId: z.string().uuid().optional(),
+	agencyId: institutionalUuidSchema.optional(),
 	payload: z.unknown(),
 });
 export function parseDomainEventEnvelope(input: unknown): DomainEventEnvelope {

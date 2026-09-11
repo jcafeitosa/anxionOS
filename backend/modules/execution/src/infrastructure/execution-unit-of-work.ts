@@ -8,7 +8,9 @@ import type {
 import { createPgCommandJournalRepository } from "./persistence/command-journal-repository";
 import {
 	createPgExecutionFillRepository,
+	createPgExecutionOrderAttemptRepository,
 	createPgExecutionOrderRepository,
+	createPgExecutionReconciliationCaseRepository,
 	createPgExecutionSessionRepository,
 	createPgVenueAdapterRefRepository,
 } from "./persistence/repositories";
@@ -22,6 +24,8 @@ function createTransactionContext(
 		sessions: createPgExecutionSessionRepository(client),
 		orders: createPgExecutionOrderRepository(client),
 		fills: createPgExecutionFillRepository(client),
+		orderAttempts: createPgExecutionOrderAttemptRepository(client),
+		reconciliationCases: createPgExecutionReconciliationCaseRepository(client),
 		async publishEvents(envelopes: DomainEventEnvelope[]) {
 			for (const envelope of envelopes) {
 				await appendJournal(client, envelope);

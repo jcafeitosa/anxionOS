@@ -32,5 +32,6 @@ export function toCommandResultSnapshot(
 		idempotentReplay: result.idempotentReplay ?? false,
 		evaluationRecordId: result.evaluationRecordId,
 		evaluationScoreId: result.evaluationScoreId,
+		certificationId: result.certificationId,
 	};
 }

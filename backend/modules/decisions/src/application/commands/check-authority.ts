@@ -10,10 +10,12 @@ import { createAuthorityCheckedEvent } from "../../domain/events/decisions-event
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { DecisionsUnitOfWork } from "../../domain/ports/decisions-unit-of-work";
 import {
-	loadIdempotentCommandResult,
+	loadIdempotentCommandResultWithGuard,
+	replayIdempotentCommandJournalEntry,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwDecisionsError } from "../errors";
+import { throwDecisionsError } from "../errors";
+import { armSubmitPreconditions } from "../submit-preconditions-support";
 
 export interface CheckAuthorityDeps {
 	unitOfWork: DecisionsUnitOfWork;
@@ -25,31 +27,19 @@ export async function checkAuthority(
 	input: CheckAuthorityCommand,
 ): Promise<DecisionsCommandResult> {
 	const command = checkAuthorityCommandSchema.parse(input);
-	const existingCommand = await deps.commandJournal.findByCommandId(
-		command.commandId,
-	);
-	if (
-		existingCommand &&
-		existingCommand.organizationId !== command.organizationId
-	) {
-		throwDecisionsError(
-			"DC_CROSS_TENANT",
-			"command journal organization mismatch",
-		);
-	}
-	const replay = await loadIdempotentCommandResult(
+	const replay = await loadIdempotentCommandResultWithGuard(
 		deps.commandJournal,
 		command.commandId,
+		command.organizationId,
 	);
 	if (replay) return replay;
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return decisionsCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
+			return replayIdempotentCommandJournalEntry(
+				raced,
+				command.organizationId,
+			);
 		}
 		const decision = await ctx.decisions.findById(command.decisionId);
 		if (!decision || decision.organizationId !== command.organizationId) {
@@ -64,11 +54,19 @@ export async function checkAuthority(
 		if (decision.status === "SUBMITTED") {
 			throwDecisionsError("DC_INTENT_IMMUTABLE", "decision already submitted");
 		}
+		const nextStatus = command.intentHash ? "RISK_PENDING" : "AUTHORITY_CHECKED";
 		const updated = await ctx.decisions.updateStatus(
 			decision.id,
-			"AUTHORITY_CHECKED",
+			nextStatus,
 			decision.revision + 1,
 		);
+		if (command.intentHash) {
+			await armSubmitPreconditions(
+				ctx.submitPreconditions,
+				updated,
+				command.intentHash,
+			);
+		}
 		await ctx.publishEvents([
 			createAuthorityCheckedEvent({
 				decisionId: updated.id,

@@ -1,6 +1,10 @@
 import type { RiskCommandResult } from "@anxionos/contracts/risk";
-import type { CommandJournalRepository } from "../domain/ports/command-journal";
-import { parseCommandResultSnapshot } from "./errors";
+import { riskCommandResultSchema } from "@anxionos/contracts/risk";
+import type {
+	CommandJournalEntry,
+	CommandJournalRepository,
+} from "../domain/ports/command-journal";
+import { parseCommandResultSnapshot, throwRiskError } from "./errors";
 
 export async function loadIdempotentCommandResult(
 	commandJournal: CommandJournalRepository,
@@ -10,6 +14,34 @@ export async function loadIdempotentCommandResult(
 	if (!existing) return null;
 	const parsed = parseCommandResultSnapshot(existing.responseSnapshot);
 	return { ...parsed, idempotentReplay: true };
+}
+
+export async function loadIdempotentCommandResultWithGuard(
+	commandJournal: CommandJournalRepository,
+	commandId: string,
+	organizationId: string,
+): Promise<RiskCommandResult | null> {
+	const existing = await commandJournal.findByCommandId(commandId);
+	if (!existing) return null;
+	if (existing.organizationId !== organizationId) {
+		throwRiskError("RK_CROSS_TENANT", "command journal organization mismatch");
+	}
+	const parsed = parseCommandResultSnapshot(existing.responseSnapshot);
+	return { ...parsed, idempotentReplay: true };
+}
+
+export function replayIdempotentCommandJournalEntry(
+	existing: CommandJournalEntry,
+	organizationId: string,
+): RiskCommandResult {
+	if (existing.organizationId !== organizationId) {
+		throwRiskError("RK_CROSS_TENANT", "command journal organization mismatch");
+	}
+	const parsed = parseCommandResultSnapshot(existing.responseSnapshot);
+	return riskCommandResultSchema.parse({
+		...parsed,
+		idempotentReplay: true,
+	});
 }
 
 export async function loadIdempotentByIntentHash(
@@ -38,6 +70,9 @@ export function toCommandResultSnapshot(
 		permitId: result.permitId,
 		checkResult: result.checkResult,
 		denyReasonCode: result.denyReasonCode,
+		killSwitchId: result.killSwitchId,
+		riskEpoch: result.riskEpoch,
+		killSwitchActive: result.killSwitchActive,
 	};
 }
 

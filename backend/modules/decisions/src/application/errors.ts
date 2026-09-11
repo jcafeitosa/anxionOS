@@ -31,5 +31,9 @@ export function parseCommandResultSnapshot(
 		decisionId: snapshot.decisionId,
 		proposalId: snapshot.proposalId,
 		intentId: snapshot.intentId,
+		approvalId: snapshot.approvalId,
+		dispositionId: snapshot.dispositionId,
+		evidenceManifestId: snapshot.evidenceManifestId,
+		waitingHuman: snapshot.waitingHuman,
 	});
 }

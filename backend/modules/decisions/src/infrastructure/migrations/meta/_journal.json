@@ -1,0 +1,48 @@
+{
+	"version": "7",
+	"dialect": "postgresql",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "7",
+			"when": 1795468800000,
+			"tag": "0000_decisions_core",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1795555200000,
+			"tag": "0001_submit_immutability_trigger",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1795641600000,
+			"tag": "0002_disposition_approval",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "7",
+			"when": 1795728000000,
+			"tag": "0003_risk_capital_preconditions",
+			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "7",
+			"when": 1795814400000,
+			"tag": "0004_evidence_manifest",
+			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "7",
+			"when": 1796160000000,
+			"tag": "0005_epoch_bump_consumer",
+			"breakpoints": true
+		}
+	]
+}

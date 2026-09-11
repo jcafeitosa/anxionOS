@@ -1,11 +1,15 @@
 export {
 	recordEvaluationScoreCommandSchema,
+	issueCertificationCommandSchema,
 	evaluationCommandResultSchema,
 	type EvaluationCommandResult,
+	type IssueCertificationCommand,
 	type RecordEvaluationScoreCommand,
 } from "./commands";
 export {
 	EVALUATION_EVENT_TYPES,
+	certificationIssuedPayloadSchema,
+	certificationSubjectTypeSchema,
 	evaluationEventPayloadSchema,
 	scoreComputedPayloadSchema,
 } from "./events";
@@ -23,8 +27,15 @@ export {
 	type PerformanceOutcomeRecordedBridge,
 } from "./outcome-recorded-bridge";
 export {
+	evaluationCertificationIssuedBridgeSchema,
+	mapCertificationIssuedToPromotionInput,
+	type EvaluationCertificationIssuedBridge,
+	type PromoteStrategyVersionCertifiedInput,
+} from "./certification-issued-bridge";
+export {
 	EVALUATION_OWNER_DOMAIN,
 	decimalScoreSchema,
+	evaluationCertificationIdSchema,
 	evaluationRecordIdSchema,
 	evaluationScoreIdSchema,
 } from "./types";

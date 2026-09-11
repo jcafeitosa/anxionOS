@@ -40,17 +40,45 @@ export {
 export {
 	openExecutionSessionCommandSchema,
 	submitOrderCommandSchema,
+	cancelOrderCommandSchema,
+	recordFillCommandSchema,
 	executionCommandResultSchema,
 	type ExecutionCommandResult,
 	type OpenExecutionSessionCommand,
 	type SubmitOrderCommand,
+	type CancelOrderCommand,
+	type RecordFillCommand,
 } from "./module-commands";
+export {
+	openVenueReconciliationCaseCommandSchema,
+	resolveVenueReconciliationCaseCommandSchema,
+	reconcileUnknownDispatchCommandSchema,
+	type OpenVenueReconciliationCaseCommand,
+	type ResolveVenueReconciliationCaseCommand,
+	type ReconcileUnknownDispatchCommand,
+} from "./reconciliation-commands";
+export {
+	executionReconciliationCaseIdSchema,
+	executionReconciliationCaseKindSchema,
+	executionReconciliationCaseStatusSchema,
+	executionVenueDispatchStatusSchema,
+	executionOrderAttemptStatusSchema,
+	executionReconciliationDispositionSchema,
+	type ExecutionReconciliationCaseKind,
+	type ExecutionReconciliationCaseStatus,
+	type ExecutionVenueDispatchStatus,
+	type ExecutionOrderAttemptStatus,
+	type ExecutionReconciliationDisposition,
+} from "./reconciliation-types";
 export {
 	EXECUTION_MODULE_EVENT_TYPES,
 	executionModuleEventPayloadSchema,
 	sessionOpenedPayloadSchema,
 	orderSubmittedPayloadSchema,
+	orderCancelledPayloadSchema,
 	fillConfirmedPayloadSchema,
+	reconciliationOpenedPayloadSchema,
+	reconciliationResolvedPayloadSchema,
 } from "./module-events";
 export {
 	EXECUTION_MODULE_ERROR_CODES,
@@ -59,6 +87,16 @@ export {
 	resolveExecutionModuleErrorStatus,
 	type ExecutionModuleErrorCode,
 } from "./module-errors";
+export {
+	executionOrderSnapshotSchema,
+	executionReconciliationCaseSnapshotSchema,
+	listOrdersResponseSchema,
+	listReconciliationCasesResponseSchema,
+	type ExecutionOrderSnapshot,
+	type ExecutionReconciliationCaseSnapshot,
+	type ListOrdersResponse,
+	type ListReconciliationCasesResponse,
+} from "./queries";
 export {
 	EXECUTION_OWNER_DOMAIN,
 	ExecutionModuleContractError,

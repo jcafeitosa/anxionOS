@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	checkoutStatusSchema,
 	waitingHumanContextSchema,
@@ -19,7 +20,7 @@ export const taskDtoSchema = z.object({
 	revision: z.number().int().nonnegative(),
 });
 export const runDtoSchema = z.object({
-	id: z.string().uuid(),
+	id: institutionalUuidSchema,
 	taskId: taskIdSchema,
 	agentId: z.string(),
 	issueIdentifier: issueIdentifierSchema,
@@ -32,7 +33,7 @@ export const runDtoSchema = z.object({
 export const checkoutTaskResultSchema = z.object({
 	task: taskDtoSchema,
 	run: runDtoSchema,
-	leaseToken: z.string().uuid(),
+	leaseToken: institutionalUuidSchema,
 	idempotentReplay: z.boolean(),
 });
 
@@ -50,7 +51,7 @@ export const resumeFromWaitingHumanInputResultSchema = z.object({
 });
 export const restartRunFromCheckpointResultSchema = z.object({
 	run: runDtoSchema,
-	leaseToken: z.string().uuid(),
+	leaseToken: institutionalUuidSchema,
 	idempotentReplay: z.boolean(),
 });
 export type RequestWaitingHumanInputResult = z.infer<

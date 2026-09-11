@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	agentKindSchema,
 	agentLifecycleStatusSchema,
@@ -39,9 +40,9 @@ export const AGENTS_EVENT_TYPES = {
 } as const;
 
 export const agentRegisteredPayloadSchema = z.object({
-	agentId: z.string().uuid(),
-	organizationId: z.string().uuid(),
-	agencyId: z.string().uuid().optional(),
+	agentId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
+	agencyId: institutionalUuidSchema.optional(),
 	kind: agentKindSchema,
 	displayName: z.string().min(1).max(256),
 	status: agentLifecycleStatusSchema,
@@ -49,44 +50,44 @@ export const agentRegisteredPayloadSchema = z.object({
 });
 
 export const agentStatusChangedPayloadSchema = z.object({
-	agentId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	agentId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	fromStatus: agentLifecycleStatusSchema,
 	toStatus: agentLifecycleStatusSchema,
 	revision: z.number().int().nonnegative(),
 });
 
 export const agentVersionRolledBackPayloadSchema = z.object({
-	agentId: z.string().uuid(),
-	organizationId: z.string().uuid(),
-	fromVersionId: z.string().uuid().optional(),
-	toVersionId: z.string().uuid(),
+	agentId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
+	fromVersionId: institutionalUuidSchema.optional(),
+	toVersionId: institutionalUuidSchema,
 	toVersionNumber: z.number().int().positive(),
 	revision: z.number().int().nonnegative(),
 });
 
 export const brainInvocationRequestedPayloadSchema = z.object({
-	invocationId: z.string().uuid(),
-	agentId: z.string().uuid(),
-	agentVersionId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	invocationId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
+	agentVersionId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	capabilityId: z.string().min(1).max(128),
 	correlationId: z.string().min(1).max(128),
 });
 
 export const skillRegisteredPayloadSchema = z.object({
-	skillId: z.string().uuid(),
-	organizationId: z.string().uuid(),
-	agencyId: z.string().uuid().optional(),
+	skillId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
+	agencyId: institutionalUuidSchema.optional(),
 	slug: z.string().min(1).max(64),
 	displayName: z.string().min(1).max(256),
 	revision: z.number().int().nonnegative(),
 });
 
 export const skillVersionCreatedPayloadSchema = z.object({
-	skillId: z.string().uuid(),
-	skillVersionId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	skillId: institutionalUuidSchema,
+	skillVersionId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	versionNumber: z.number().int().positive(),
 	schemaVersion: z.string().min(1).max(32),
 	contentRef: objectRefSchema,
@@ -98,9 +99,9 @@ export const skillVersionCreatedPayloadSchema = z.object({
 });
 
 export const skillVersionSubmittedPayloadSchema = z.object({
-	skillId: z.string().uuid(),
-	skillVersionId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	skillId: institutionalUuidSchema,
+	skillVersionId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	versionNumber: z.number().int().positive(),
 	fromStatus: z.literal("draft"),
 	toStatus: z.literal("candidate"),
@@ -108,9 +109,9 @@ export const skillVersionSubmittedPayloadSchema = z.object({
 });
 
 export const skillVersionEvaluatedPayloadSchema = z.object({
-	skillId: z.string().uuid(),
-	skillVersionId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	skillId: institutionalUuidSchema,
+	skillVersionId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	versionNumber: z.number().int().positive(),
 	fromStatus: z.literal("candidate"),
 	toStatus: z.enum(["verified", "rejected"]),
@@ -119,18 +120,18 @@ export const skillVersionEvaluatedPayloadSchema = z.object({
 });
 
 export const agentSkillBoundPayloadSchema = z.object({
-	agentId: z.string().uuid(),
-	agentVersionId: z.string().uuid(),
-	skillVersionId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	agentId: institutionalUuidSchema,
+	agentVersionId: institutionalUuidSchema,
+	skillVersionId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	bindingConfig: skillBindingConfigSchema,
 	revision: z.number().int().nonnegative(),
 });
 
 export const agentVersionPublishedPayloadSchema = z.object({
-	agentVersionId: z.string().uuid(),
-	agentId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	agentVersionId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	versionNumber: z.number().int().positive(),
 	capabilityManifestHash: z.string().min(1).max(128),
 	autonomyLevel: autonomyLevelSchema,
@@ -142,9 +143,9 @@ export const agentVersionPublishedPayloadSchema = z.object({
 
 
 export const agentRoutineRegisteredPayloadSchema = z.object({
-	routineId: z.string().uuid(),
-	agentId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	routineId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	slug: z.string().min(1).max(64),
 	displayName: z.string().min(1).max(256),
 	triggerKind: routineTriggerKindSchema,
@@ -154,44 +155,44 @@ export const agentRoutineRegisteredPayloadSchema = z.object({
 });
 
 export const agentRoutinePausedPayloadSchema = z.object({
-	routineId: z.string().uuid(),
-	agentId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	routineId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	fromStatus: z.literal("active"),
 	toStatus: z.literal("paused"),
 	revision: z.number().int().nonnegative(),
 });
 
 export const agentRoutineResumedPayloadSchema = z.object({
-	routineId: z.string().uuid(),
-	agentId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	routineId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	fromStatus: z.literal("paused"),
 	toStatus: z.literal("active"),
 	revision: z.number().int().nonnegative(),
 });
 
 export const agentRoutineTriggeredPayloadSchema = z.object({
-	routineId: z.string().uuid(),
-	agentId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	routineId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	dedupeKey: z.string().min(1).max(256),
-	runId: z.string().uuid().optional(),
+	runId: institutionalUuidSchema.optional(),
 	idempotentReplay: z.boolean().optional(),
 	revision: z.number().int().nonnegative(),
 });
 
 export const agentBudgetPolicySetPayloadSchema = z.object({
-	agentId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	agentId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	caps: agentBudgetCapsSchema,
 	status: agentBudgetStatusSchema,
 	revision: z.number().int().nonnegative(),
 });
 
 export const agentBudgetExhaustedPayloadSchema = z.object({
-	agentId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	agentId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	fromStatus: z.literal("active"),
 	toStatus: z.enum(["paused", "exhausted"]),
 	revision: z.number().int().nonnegative(),

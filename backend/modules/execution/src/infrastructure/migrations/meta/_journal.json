@@ -1,0 +1,27 @@
+{
+	"version": "7",
+	"dialect": "postgresql",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "7",
+			"when": 1796246400000,
+			"tag": "0000_execution_core",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1796332800000,
+			"tag": "0001_partial_fills_cancel",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1796419200000,
+			"tag": "0002_reconciliation_venue",
+			"breakpoints": true
+		}
+	]
+}

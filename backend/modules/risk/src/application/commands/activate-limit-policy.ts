@@ -10,10 +10,10 @@ import {
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { RiskUnitOfWork } from "../../domain/ports/risk-unit-of-work";
 import {
-	loadIdempotentCommandResult,
+	loadIdempotentCommandResultWithGuard,
+	replayIdempotentCommandJournalEntry,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwRiskError } from "../errors";
 
 export interface ActivateLimitPolicyDeps {
 	unitOfWork: RiskUnitOfWork;
@@ -25,28 +25,19 @@ export async function activateLimitPolicy(
 	input: ActivateLimitPolicyCommand,
 ): Promise<RiskCommandResult> {
 	const command = activateLimitPolicyCommandSchema.parse(input);
-	const existingCommand = await deps.commandJournal.findByCommandId(
-		command.commandId,
-	);
-	if (
-		existingCommand &&
-		existingCommand.organizationId !== command.organizationId
-	) {
-		throwRiskError("RK_CROSS_TENANT", "command journal organization mismatch");
-	}
-	const replay = await loadIdempotentCommandResult(
+	const replay = await loadIdempotentCommandResultWithGuard(
 		deps.commandJournal,
 		command.commandId,
+		command.organizationId,
 	);
 	if (replay) return replay;
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return riskCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
+			return replayIdempotentCommandJournalEntry(
+				raced,
+				command.organizationId,
+			);
 		}
 		await ctx.limitPolicies.supersedeActive(command.organizationId);
 		const policyId = `rk_pol_${randomUUID()}`;

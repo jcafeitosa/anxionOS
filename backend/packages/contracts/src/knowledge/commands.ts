@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	aclRefSchema,
 	blobRefSchema,
@@ -19,16 +20,16 @@ export const knowledgeCommandResultSchema = z.object({
 	indexGenerationId: indexGenerationIdSchema.optional(),
 });
 export const registerKnowledgeSourceCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	displayName: z.string().min(1).max(256),
 	sourceKind: knowledgeSourceKindSchema,
 	defaultClassification: dataClassificationSchema,
 	defaultAclRef: aclRefSchema,
 });
 export const ingestDocumentCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	knowledgeSourceId: knowledgeSourceIdSchema,
 	title: z.string().min(1).max(512),
 	classification: dataClassificationSchema,
@@ -40,36 +41,36 @@ export const ingestDocumentCommandSchema = z.object({
 	embeddingSpaceId: embeddingSpaceIdSchema,
 });
 export const publishIndexCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	documentId: documentIdSchema,
 	indexGenerationId: indexGenerationIdSchema,
 	expectedRevision: z.number().int().nonnegative(),
 });
 export const revokeDocumentAccessCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	documentId: documentIdSchema,
 	revokedAt: z.string().datetime(),
 	reason: z.string().min(1).max(256).optional(),
 });
 export const retrieveKnowledgeQuerySchema = z.object({
-	organizationId: z.string().uuid(),
+	organizationId: institutionalUuidSchema,
 	queryText: z.string().min(1).max(8_000),
 	aclRef: aclRefSchema,
 	embeddingSpaceId: embeddingSpaceIdSchema,
 	limit: z.number().int().min(1).max(50).default(5),
 });
 export const registerCandidateMemoryCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	summary: z.string().min(1).max(4_000),
 	contentHash: z.string().min(32).max(128),
 	sourceDocumentId: documentIdSchema.optional(),
 });
 export const promoteCandidateMemoryCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	memoryEntryId: memoryEntryIdSchema,
 	promotedAt: z.string().datetime(),
 });

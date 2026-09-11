@@ -5,6 +5,7 @@
  * User instruction: implement AI Product Company Engine projection worker sandbox (ANX-277).
  */
 import { z } from "zod";
+import { institutionalUuidSchema } from "../../institutional-uuid";
 
 export const AGENT_GRAPH_OWNER_DOMAIN = "agents";
 
@@ -14,23 +15,23 @@ export const AGENT_GRAPH_EVENT_TYPES = {
 } as const;
 
 export const decisionRecordedPayloadSchema = z.object({
-	decisionId: z.string().uuid(),
-	scopeId: z.string().uuid(),
+	decisionId: institutionalUuidSchema,
+	scopeId: institutionalUuidSchema,
 	status: z.string().min(1),
 	revision: z.number().int().nonnegative(),
-	approverAgentId: z.string().uuid().optional(),
-	approvedEntityId: z.string().uuid().optional(),
+	approverAgentId: institutionalUuidSchema.optional(),
+	approvedEntityId: institutionalUuidSchema.optional(),
 	approvedEntityKind: z.string().min(1).optional(),
 	summary: z.string().min(1).optional(),
 });
 
 export const agentRoleAssignedPayloadSchema = z.object({
-	agentRoleId: z.string().uuid(),
-	companyId: z.string().uuid(),
-	agentId: z.string().uuid(),
+	agentRoleId: institutionalUuidSchema,
+	companyId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
 	personaSlug: z.string().min(1),
 	revision: z.number().int().nonnegative(),
-	workItemId: z.string().uuid().optional(),
+	workItemId: institutionalUuidSchema.optional(),
 	status: z.string().min(1).default("active"),
 });
 

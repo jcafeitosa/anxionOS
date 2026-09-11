@@ -3,6 +3,7 @@ import {
 	gateBindingV1ObjectSchema,
 	refineGateBindingDigestRules,
 } from "./gate-binding/1.0.0/schema";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	runStatusSchema,
 	agentIdSchema,
@@ -21,12 +22,12 @@ export const checkoutTaskCommandSchema = z.object({
 export const renewTaskLeaseCommandSchema = z.object({
 	taskId: taskIdSchema,
 	agentId: agentIdSchema,
-	leaseToken: z.string().uuid(),
+	leaseToken: institutionalUuidSchema,
 });
 export const releaseTaskLeaseCommandSchema = z.object({
 	taskId: taskIdSchema,
 	agentId: agentIdSchema,
-	leaseToken: z.string().uuid(),
+	leaseToken: institutionalUuidSchema,
 	reason: z.enum(["board_in_review", "manual", "gate_blocked", "cancelled", "budget_exceeded"]).optional(),
 });
 export const recordGateDispositionCommandSchema = gateBindingV1ObjectSchema
@@ -56,7 +57,7 @@ export const dequeueRunHeartbeatsCommandSchema = z.object({
 	limit: z.number().int().min(1).max(500).default(50),
 });
 export const acknowledgeRunHeartbeatCommandSchema = z.object({
-	heartbeatId: z.string().uuid(),
+	heartbeatId: institutionalUuidSchema,
 });
 export const requestWaitingHumanInputCommandSchema = z.object({
 	runId: runIdSchema,
@@ -77,7 +78,7 @@ export const restartRunFromCheckpointCommandSchema = z.object({
 	runId: runIdSchema,
 	agentId: agentIdSchema,
 	runRevision: z.number().int().positive(),
-	leaseToken: z.string().uuid(),
+	leaseToken: institutionalUuidSchema,
 	idempotencyKey: z.string().min(1).max(256),
 });
 export const cancelTaskRunCommandSchema = z.object({
@@ -87,7 +88,7 @@ export const cancelTaskRunCommandSchema = z.object({
 	agentId: agentIdSchema,
 	runRevision: z.number().int().positive(),
 	idempotencyKey: z.string().min(1).max(256),
-	leaseToken: z.string().uuid().optional(),
+	leaseToken: institutionalUuidSchema.optional(),
 	reason: z.string().min(1).max(256).optional(),
 });
 export const stopRunForBudgetCommandSchema = z.object({

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import { grantStatusSchema } from "../governance/types";
 import type {
 	AuthorityReference,
@@ -10,7 +11,7 @@ import type {
  * Decisions validates against this shape but does not persist grant state.
  */
 export const governanceGrantSnapshotSchema = z.object({
-	grantId: z.string().uuid(),
+	grantId: institutionalUuidSchema,
 	status: grantStatusSchema,
 	authorityEpochAtIssue: z.number().int().nonnegative(),
 	capability: z.string().min(1),
@@ -18,7 +19,7 @@ export const governanceGrantSnapshotSchema = z.object({
 
 /** Minimal grant pointer derived from a governance AuthorityReference. */
 export const authorityGrantRefSchema = z.object({
-	grantId: z.string().uuid(),
+	grantId: institutionalUuidSchema,
 	minimumEpochs: z.number().int().nonnegative(),
 });
 

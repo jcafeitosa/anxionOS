@@ -11,10 +11,10 @@ import { createProposalCreatedEvent } from "../../domain/events/decisions-events
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { DecisionsUnitOfWork } from "../../domain/ports/decisions-unit-of-work";
 import {
-	loadIdempotentCommandResult,
+	loadIdempotentCommandResultWithGuard,
+	replayIdempotentCommandJournalEntry,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwDecisionsError } from "../errors";
 
 export interface ProposeDecisionDeps {
 	unitOfWork: DecisionsUnitOfWork;
@@ -26,31 +26,19 @@ export async function proposeDecision(
 	input: ProposeDecisionCommand,
 ): Promise<DecisionsCommandResult> {
 	const command = proposeDecisionCommandSchema.parse(input);
-	const existingCommand = await deps.commandJournal.findByCommandId(
-		command.commandId,
-	);
-	if (
-		existingCommand &&
-		existingCommand.organizationId !== command.organizationId
-	) {
-		throwDecisionsError(
-			"DC_CROSS_TENANT",
-			"command journal organization mismatch",
-		);
-	}
-	const replay = await loadIdempotentCommandResult(
+	const replay = await loadIdempotentCommandResultWithGuard(
 		deps.commandJournal,
 		command.commandId,
+		command.organizationId,
 	);
 	if (replay) return replay;
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return decisionsCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
+			return replayIdempotentCommandJournalEntry(
+				raced,
+				command.organizationId,
+			);
 		}
 		const decisionId = `dc_dec_${randomUUID()}`;
 		const proposalId = `dc_prp_${randomUUID()}`;
@@ -62,6 +50,8 @@ export async function proposeDecision(
 			correlationId: command.correlationId,
 			status: "PROPOSED",
 			revision: 1,
+			proposerId: command.proposerId,
+			approvalPath: false,
 		});
 		await ctx.proposals.save({
 			id: proposalId,

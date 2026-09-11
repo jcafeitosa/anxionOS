@@ -13,7 +13,11 @@ export async function ensureExecutionSchema(
 	poolOrClient: Pool | PoolClient,
 ): Promise<void> {
 	const db = drizzle(poolOrClient);
-	await migrate(db, { migrationsFolder });
+	await migrate(db, {
+		migrationsFolder,
+		migrationsSchema: "execution",
+		migrationsTable: "__drizzle_migrations",
+	});
 }
 
 const databaseUrl =

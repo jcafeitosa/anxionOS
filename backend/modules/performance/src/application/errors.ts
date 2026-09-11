@@ -29,5 +29,6 @@ export function parseCommandResultSnapshot(
 		revision: snapshot.revision,
 		idempotentReplay: snapshot.idempotentReplay,
 		outcomeSnapshotId: snapshot.outcomeSnapshotId,
+		positionExposureSnapshotId: snapshot.positionExposureSnapshotId,
 	});
 }

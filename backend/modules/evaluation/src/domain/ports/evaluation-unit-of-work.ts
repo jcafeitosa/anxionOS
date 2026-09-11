@@ -1,4 +1,5 @@
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
+import type { CertificationRepository } from "./certification";
 import type { CommandJournalRepository } from "./command-journal";
 export interface EvaluationRecordRow {
 	id: string;
@@ -32,6 +33,7 @@ export interface EvaluationTransactionContext {
 	commandJournal: CommandJournalRepository;
 	evaluationRecords: EvaluationRecordRepository;
 	evaluationScores: EvaluationScoreRepository;
+	certifications: CertificationRepository;
 	publishEvents(envelopes: DomainEventEnvelope[]): Promise<void>;
 }
 export interface EvaluationUnitOfWork {

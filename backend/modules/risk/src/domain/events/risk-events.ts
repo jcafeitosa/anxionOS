@@ -41,3 +41,76 @@ export function createPermitIssuedEvent(input: {
 		payload: input,
 	};
 }
+
+export function createRiskEpochBumpedEvent(input: {
+	organizationId: string;
+	previousRiskEpoch: number;
+	currentRiskEpoch: number;
+	reason: string;
+}): DomainEventEnvelope {
+	return {
+		eventId: randomUUID(),
+		eventType: RISK_EVENT_TYPES.EPOCH_BUMPED,
+		schemaVersion: "0.1.0",
+		ownerDomain: RISK_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload: input,
+	};
+}
+
+export function createKillSwitchActivatedEvent(input: {
+	killSwitchId: string;
+	organizationId: string;
+	scope: string;
+	portfolioId?: string;
+	reason: string;
+	activatedBy: string;
+	riskEpoch: number;
+}): DomainEventEnvelope {
+	return {
+		eventId: randomUUID(),
+		eventType: RISK_EVENT_TYPES.KILL_SWITCH_ACTIVATED,
+		schemaVersion: "0.1.0",
+		ownerDomain: RISK_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload: input,
+	};
+}
+
+export function createKillSwitchReleasedEvent(input: {
+	killSwitchId: string;
+	organizationId: string;
+	scope: string;
+	portfolioId?: string;
+	releasedBy: string;
+	riskEpoch: number;
+}): DomainEventEnvelope {
+	return {
+		eventId: randomUUID(),
+		eventType: RISK_EVENT_TYPES.KILL_SWITCH_RELEASED,
+		schemaVersion: "0.1.0",
+		ownerDomain: RISK_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload: input,
+	};
+}
+
+export function createPermitRevokedEvent(input: {
+	permitId: string;
+	checkId: string;
+	organizationId: string;
+	intentHash: string;
+	authorityEpoch: number;
+	riskEpoch: number;
+	currentRiskEpoch: number;
+	revokedReason: string;
+}): DomainEventEnvelope {
+	return {
+		eventId: randomUUID(),
+		eventType: RISK_EVENT_TYPES.PERMIT_REVOKED,
+		schemaVersion: "0.1.0",
+		ownerDomain: RISK_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload: input,
+	};
+}

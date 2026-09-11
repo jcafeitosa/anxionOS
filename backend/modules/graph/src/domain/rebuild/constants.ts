@@ -5,6 +5,7 @@ export const GRAPH_REBUILD_OWNER_DOMAIN_ORDER = [
 	"governance",
 	"product",
 	"agents",
+	"performance",
 	"risk",
 	"connections",
 ];
@@ -17,6 +18,7 @@ export const GRAPH_REBUILD_CONSUMER_BY_DOMAIN = {
 	governance: "graph:governance:v1",
 	product: "graph:product:v1",
 	agents: "graph:agents:v1",
+	performance: "graph:performance:v1",
 	risk: "graph:risk:v1",
 	connections: "graph:connections:v1",
 };

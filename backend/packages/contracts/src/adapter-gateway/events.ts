@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	adapterGatewayEnvironmentSchema,
 	adapterGatewayExecutionModeSchema,
@@ -19,14 +20,14 @@ export const ADAPTER_GATEWAY_EVENT_TYPES = {
 	ADAPTER_EVENT_INGESTED: "adapter-gateway.adapter-event.ingested.v1",
 };
 export const adapterEventV1Schema = z.object({
-	eventId: z.string().uuid(),
+	eventId: institutionalUuidSchema,
 	eventType: z.string().min(1),
 	eventVersion: z.literal("v1"),
 	sequence: z.number().int().nonnegative(),
 	checkpoint: z.string().min(1),
-	commandId: z.string().uuid(),
-	correlationId: z.string().uuid(),
-	causationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	correlationId: institutionalUuidSchema,
+	causationId: institutionalUuidSchema,
 	adapterId: z.string().min(1).max(64),
 	adapterVersion: z.string().min(1).max(64),
 	imageDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/i),
@@ -41,19 +42,19 @@ export const adapterEventV1Schema = z.object({
 });
 export const commandDispatchedPayloadSchema = z.object({
 	dispatchId: z.string().regex(/^agw_dsp_[0-9a-f-]{36}$/i),
-	tenantId: z.string().uuid(),
-	commandId: z.string().uuid(),
+	tenantId: institutionalUuidSchema,
+	commandId: institutionalUuidSchema,
 	idempotencyKey: z.string().min(1),
 	adapterId: z.string().min(1),
 	adapterVersion: z.string().min(1),
 	executionMode: adapterGatewayExecutionModeSchema,
-	executionPermitId: z.string().uuid(),
-	correlationId: z.string().uuid(),
+	executionPermitId: institutionalUuidSchema,
+	correlationId: institutionalUuidSchema,
 	dispatchedAt: z.string().datetime(),
 });
 export const adapterEventIngestedPayloadSchema = z.object({
 	dispatchId: z.string().regex(/^agw_dsp_[0-9a-f-]{36}$/i),
-	tenantId: z.string().uuid(),
+	tenantId: institutionalUuidSchema,
 	adapterEvent: adapterEventV1Schema,
 });
 export const adapterGatewayEventPayloadSchema = z.discriminatedUnion(

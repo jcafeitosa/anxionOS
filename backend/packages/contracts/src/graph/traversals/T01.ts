@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../../institutional-uuid";
 import { nodeKeySchema } from "../types";
 import { traversalMetaSchema } from "./common";
 export const TRAVERSAL_T01_META = traversalMetaSchema.parse({
@@ -9,7 +10,7 @@ export const TRAVERSAL_T01_META = traversalMetaSchema.parse({
 	cacheable: "conditional",
 });
 export const T01_INPUT_SCHEMA = z.object({
-	actorId: z.string().uuid(),
+	actorId: institutionalUuidSchema,
 	action: z.string().min(1),
 	resourceNodeKey: nodeKeySchema,
 	intentHash: z.string().min(1).optional(),
@@ -23,10 +24,10 @@ export const T01_OUTPUT_SCHEMA = z.object({
 	riskEpoch: z.number().int().nonnegative().optional(),
 	proof: z
 		.object({
-			grantIds: z.array(z.string().uuid()),
-			mandateId: z.string().uuid().optional(),
-			policyId: z.string().uuid().optional(),
-			approvalId: z.string().uuid().optional(),
+			grantIds: z.array(institutionalUuidSchema),
+			mandateId: institutionalUuidSchema.optional(),
+			policyId: institutionalUuidSchema.optional(),
+			approvalId: institutionalUuidSchema.optional(),
 		})
 		.optional(),
 	denyReasons: z.array(z.string()).optional(),

@@ -22,6 +22,20 @@ export async function loadIdempotentByJournalEntryId(
 	return { ...parsed, idempotentReplay: true };
 }
 
+export async function loadIdempotentByPositionRevision(
+	commandJournal: CommandJournalRepository,
+	positionId: string,
+	revision: number,
+): Promise<PerformanceCommandResult | null> {
+	const existing = await commandJournal.findByPositionRevision(
+		positionId,
+		revision,
+	);
+	if (!existing) return null;
+	const parsed = parseCommandResultSnapshot(existing.responseSnapshot);
+	return { ...parsed, idempotentReplay: true };
+}
+
 export function toCommandResultSnapshot(
 	result: PerformanceCommandResult,
 ): Record<string, unknown> {
@@ -30,5 +44,6 @@ export function toCommandResultSnapshot(
 		revision: result.revision,
 		idempotentReplay: result.idempotentReplay ?? false,
 		outcomeSnapshotId: result.outcomeSnapshotId,
+		positionExposureSnapshotId: result.positionExposureSnapshotId,
 	};
 }

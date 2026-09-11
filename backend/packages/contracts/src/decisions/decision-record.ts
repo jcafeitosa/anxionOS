@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	decisionIdSchema,
 	proposalIdSchema,
@@ -37,7 +38,7 @@ const optionalSecretFreeEvidenceString = () =>
 		.optional();
 
 export const evidenceReferenceSchema = z.object({
-	id: z.string().uuid(),
+	id: institutionalUuidSchema,
 	source: z.enum(["on_chain", "off_chain", "audit", "log"]),
 	uri: z.string().url().optional(),
 	checksum: z.string().optional(),
@@ -59,7 +60,7 @@ export const alternativeProposalSchema = z.object({
 });
 
 export const authorityReferenceSchema = z.object({
-	id: z.string().uuid(),
+	id: institutionalUuidSchema,
 	kind: z.enum(["governance", "agent", "system"]),
 	minimumEpochs: z.number().int().nonnegative(),
 	grantedBy: z.string(),
@@ -67,7 +68,7 @@ export const authorityReferenceSchema = z.object({
 });
 
 export const approvalSchema = z.object({
-	id: z.string().uuid(),
+	id: institutionalUuidSchema,
 	approverId: z.string(),
 	approvalKind: z.enum(["executive", "manager", "system"]),
 	decisionId: decisionIdSchema,
@@ -76,7 +77,7 @@ export const approvalSchema = z.object({
 });
 
 export const dispositionSchema = z.object({
-	id: z.string().uuid(),
+	id: institutionalUuidSchema,
 	decisionId: decisionIdSchema,
 	outcome: z.enum(["UPHELD", "OVERTURNED", "MODIFIED", "EXPIRED"]),
 	reason: z.string(),
@@ -92,9 +93,9 @@ export const decisionAuthorityRequirementSchema = z.object({
 export const decisionAggregateReferencesSchema = z.object({
 	decisionId: decisionIdSchema,
 	proposalId: proposalIdSchema,
-	changeProposalId: z.string().uuid().optional(),
-	approvalId: z.string().uuid().optional(),
-	grantId: z.string().uuid().optional(),
+	changeProposalId: institutionalUuidSchema.optional(),
+	approvalId: institutionalUuidSchema.optional(),
+	grantId: institutionalUuidSchema.optional(),
 });
 
 export const decisionEvidenceSchema = evidenceReferenceSchema.extend({
@@ -110,7 +111,7 @@ export const decisionEvidenceSchema = evidenceReferenceSchema.extend({
 });
 
 export const decisionRecordSchema = z.object({
-	recordId: z.string().uuid(),
+	recordId: institutionalUuidSchema,
 	schemaVersion: z.literal("decision-record.v1"),
 	scope: decisionScopeSchema,
 	status: decisionEngineStatusSchema,

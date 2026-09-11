@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import { instrumentIdSchema, observationKindSchema } from "./types";
 export const MARKET_DATA_EVENT_TYPES = {
 	INSTRUMENT_REGISTERED: "market_data.instrument.registered.v1",
@@ -6,7 +7,7 @@ export const MARKET_DATA_EVENT_TYPES = {
 };
 export const instrumentRegisteredPayloadSchema = z.object({
 	instrumentId: instrumentIdSchema,
-	organizationId: z.string().uuid(),
+	organizationId: institutionalUuidSchema,
 	canonicalSymbol: z.string().min(1),
 	instrumentKind: z.string().min(1),
 });
@@ -14,7 +15,7 @@ export const observationRecordedPayloadSchema = z.object({
 	observationHeaderId: z.string().min(1),
 	instrumentId: instrumentIdSchema,
 	observationKind: observationKindSchema,
-	sourceEventId: z.string().uuid(),
+	sourceEventId: institutionalUuidSchema,
 	eventTime: z.string().datetime(),
 	price: z.string().min(1),
 });

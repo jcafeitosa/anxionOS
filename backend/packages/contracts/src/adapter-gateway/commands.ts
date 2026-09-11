@@ -4,6 +4,7 @@ import {
 	orderSideSchema,
 	orderTypeSchema,
 } from "../decisions/types";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	adapterActorTypeSchema,
 	adapterCapabilityKeySchema,
@@ -20,11 +21,11 @@ export const adapterOrderParametersSchema = z.object({
 		.optional(),
 });
 export const adapterCommandV1Schema = z.object({
-	commandId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
 	idempotencyKey: z.string().min(1).max(128),
-	tenantId: z.string().uuid(),
-	agencyId: z.string().uuid(),
-	actorId: z.string().uuid(),
+	tenantId: institutionalUuidSchema,
+	agencyId: institutionalUuidSchema,
+	actorId: institutionalUuidSchema,
 	actorType: adapterActorTypeSchema,
 	executionMode: adapterGatewayExecutionModeSchema,
 	adapterId: z.string().min(1).max(64),
@@ -34,18 +35,18 @@ export const adapterCommandV1Schema = z.object({
 	venueRef: z.string().min(1).max(128),
 	accountRef: z.string().min(1).max(128),
 	instrumentRef: z.string().min(1).max(128),
-	tradeIntentId: z.string().uuid(),
-	executionPermitId: z.string().uuid(),
+	tradeIntentId: institutionalUuidSchema,
+	executionPermitId: institutionalUuidSchema,
 	permitHash: z.string().min(1).max(256),
 	order: adapterOrderParametersSchema,
-	correlationId: z.string().uuid(),
-	causationId: z.string().uuid(),
+	correlationId: institutionalUuidSchema,
+	causationId: institutionalUuidSchema,
 	createdAt: z.string().datetime(),
 	expiresAt: z.string().datetime(),
 	policyVersion: z.string().min(1).max(64),
 	grantEpoch: z.number().int().nonnegative(),
 	riskSnapshotId: z.string().min(1).max(128),
-	budgetReservationId: z.string().uuid().optional(),
+	budgetReservationId: institutionalUuidSchema.optional(),
 	requestedCapabilities: z.array(adapterCapabilityKeySchema).min(1),
 });
 export const adapterGatewayCommandResultSchema = z.object({
@@ -53,7 +54,7 @@ export const adapterGatewayCommandResultSchema = z.object({
 	revision: z.number().int().nonnegative(),
 	idempotentReplay: z.boolean().optional(),
 	dispatchId: adapterDispatchIdSchema.optional(),
-	adapterEventId: z.string().uuid().optional(),
+	adapterEventId: institutionalUuidSchema.optional(),
 	outcome: z.enum(["ACCEPTED", "REJECTED"]).optional(),
 });
 /** Module command alias for dispatchAdapterCommand handler. */

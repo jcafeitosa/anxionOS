@@ -30,5 +30,9 @@ export function parseCommandResultSnapshot(
 		portfolioId: snapshot.portfolioId,
 		positionId: snapshot.positionId,
 		holdingId: snapshot.holdingId,
+		valuationSnapshotId: snapshot.valuationSnapshotId,
+		reconciliationCaseId: snapshot.reconciliationCaseId,
+		cashPositionId: snapshot.cashPositionId,
+		provisionalCash: snapshot.provisionalCash,
 	});
 }

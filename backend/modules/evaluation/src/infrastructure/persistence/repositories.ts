@@ -1,4 +1,6 @@
-import type { PoolClient } from "pg";
+import type { Pool, PoolClient } from "pg";
+
+type PgQueryable = Pool | PoolClient;
 import type {
 	EvaluationRecordRepository,
 	EvaluationRecordRow,
@@ -28,7 +30,7 @@ function mapEvaluationScore(row: Record<string, unknown>): EvaluationScoreRow {
 	};
 }
 export function createPgEvaluationRecordRepository(
-	client: PoolClient,
+	client: PgQueryable,
 ): EvaluationRecordRepository {
 	return {
 		async findById(id) {
@@ -65,7 +67,7 @@ export function createPgEvaluationRecordRepository(
 	};
 }
 export function createPgEvaluationScoreRepository(
-	client: PoolClient,
+	client: PgQueryable,
 ): EvaluationScoreRepository {
 	return {
 		async findByEvaluationRecordId(evaluationRecordId) {

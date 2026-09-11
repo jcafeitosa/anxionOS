@@ -1,3 +1,4 @@
+import { INSTITUTIONAL_UUID_PATTERN } from "@anxionos/contracts";
 import { TenantContextError } from "./errors";
 
 /** PostgreSQL session variable for the active tenant (SET LOCAL only). */
@@ -9,8 +10,8 @@ export const AGENCY_ID_SETTING = "app.agency_id";
 /** Administrative bypass flag — honored only on service-role connections. */
 export const BYPASS_RLS_SETTING = "app.bypass_rls";
 
-const UUID_PATTERN =
-	/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+/** @deprecated Use `INSTITUTIONAL_UUID_PATTERN` from `@anxionos/contracts`. */
+export const UUID_PATTERN = INSTITUTIONAL_UUID_PATTERN;
 
 export interface TenantContext {
 	readonly tenantId: string;
@@ -26,7 +27,7 @@ export interface TenantContext {
 export type DatabaseRole = "app" | "service" | "migrator";
 
 export function assertUuid(value: string, field: string): void {
-	if (!UUID_PATTERN.test(value)) {
+	if (!INSTITUTIONAL_UUID_PATTERN.test(value)) {
 		throw new TenantContextError(`${field} must be a UUID`);
 	}
 }

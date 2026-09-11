@@ -71,6 +71,7 @@ export {
 	GRAPH_IDENTITY_CONSUMER_NAME,
 	GRAPH_ORGANIZATIONS_CONSUMER_NAME,
 	GRAPH_PRODUCT_CONSUMER_NAME,
+	GRAPH_PERFORMANCE_CONSUMER_NAME,
 	GRAPH_PROJECTION_DEFAULT_CHECKPOINT,
 	GRAPH_PROJECTION_MAX_ATTEMPTS,
 } from "./domain/projections/constants";
@@ -99,6 +100,10 @@ export {
 	productProjectionConsumer,
 	projectProductGraphEvent,
 } from "./application/projections/product/product-graph-projector";
+export {
+	performanceProjectionConsumer,
+	projectPerformanceGraphEvent,
+} from "./application/projections/performance/performance-graph-projector";
 export {
 	agentProjectionConsumer,
 	projectAgentGraphEvent,

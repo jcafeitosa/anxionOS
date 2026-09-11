@@ -17,10 +17,11 @@ import type { RiskUnitOfWork } from "../../domain/ports/risk-unit-of-work";
 import {
 	compareDecimalAmounts,
 	loadIdempotentByIntentHash,
-	loadIdempotentCommandResult,
+	loadIdempotentCommandResultWithGuard,
+	replayIdempotentCommandJournalEntry,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwRiskError } from "../errors";
+import { throwRiskError } from "../errors";
 
 export interface RunPreTradeCheckDeps {
 	unitOfWork: RiskUnitOfWork;
@@ -33,18 +34,10 @@ export async function runPreTradeCheck(
 ): Promise<RiskCommandResult> {
 	const command = runPreTradeCheckCommandSchema.parse(input);
 	assertRiskExecutionModeSupported(command.executionMode);
-	const existingCommand = await deps.commandJournal.findByCommandId(
-		command.commandId,
-	);
-	if (
-		existingCommand &&
-		existingCommand.organizationId !== command.organizationId
-	) {
-		throwRiskError("RK_CROSS_TENANT", "command journal organization mismatch");
-	}
-	const replayByCommand = await loadIdempotentCommandResult(
+	const replayByCommand = await loadIdempotentCommandResultWithGuard(
 		deps.commandJournal,
 		command.commandId,
+		command.organizationId,
 	);
 	if (replayByCommand) return replayByCommand;
 	const replayByIntent = await loadIdempotentByIntentHash(
@@ -58,24 +51,20 @@ export async function runPreTradeCheck(
 			command.commandId,
 		);
 		if (racedByCommand) {
-			const parsed = parseCommandResultSnapshot(
-				racedByCommand.responseSnapshot,
+			return replayIdempotentCommandJournalEntry(
+				racedByCommand,
+				command.organizationId,
 			);
-			return riskCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
 		}
 		const racedByIntent = await ctx.commandJournal.findByIntentHash(
 			command.organizationId,
 			command.intentHash,
 		);
 		if (racedByIntent) {
-			const parsed = parseCommandResultSnapshot(racedByIntent.responseSnapshot);
-			return riskCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
+			return replayIdempotentCommandJournalEntry(
+				racedByIntent,
+				command.organizationId,
+			);
 		}
 		const epoch = await ctx.epochRegistry.findByOrganization(
 			command.organizationId,
@@ -83,12 +72,19 @@ export async function runPreTradeCheck(
 		if (!epoch || epoch.currentRiskEpoch !== command.riskEpoch) {
 			throwRiskError("RK_PERMIT_STALE", "risk epoch mismatch");
 		}
+		const activeKillSwitch = await ctx.killSwitch.findActiveForCheck(
+			command.organizationId,
+			command.portfolioId,
+		);
 		const policy = await ctx.limitPolicies.findActiveByOrganization(
 			command.organizationId,
 		);
 		let checkResult = "PASS";
 		let denyReasonCode: string | undefined;
-		if (!policy) {
+		if (activeKillSwitch) {
+			checkResult = "DENY";
+			denyReasonCode = "RK_KILL_SWITCH_ACTIVE";
+		} else if (!policy) {
 			checkResult = "DENY";
 			denyReasonCode = "RK_CONFIG_REQUIRED";
 		} else if (

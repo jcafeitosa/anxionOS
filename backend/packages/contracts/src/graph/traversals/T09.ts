@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../../institutional-uuid";
 import { nodeKeySchema } from "../types";
 import { traversalMetaSchema } from "./common";
 
@@ -12,7 +13,7 @@ export const TRAVERSAL_T09_META = traversalMetaSchema.parse({
 
 export const T09_INPUT_SCHEMA = z.object({
 	scopeNodeKey: nodeKeySchema,
-	assetId: z.string().uuid(),
+	assetId: institutionalUuidSchema,
 	validAt: z.string().datetime(),
 });
 

@@ -6,6 +6,7 @@ export {
 	AGENCY_ID_SETTING,
 	BYPASS_RLS_SETTING,
 	TENANT_ID_SETTING,
+	UUID_PATTERN,
 	assertUuid,
 	requireTenantContext,
 	validateTenantContext,

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	executionPermitSchema,
 	isPermitStale,
@@ -40,8 +41,8 @@ export const effectGateContextSchema = z.object({
 	now: z.string().datetime(),
 });
 export const reconcileUnknownCommandSchema = z.object({
-	orderId: z.string().uuid(),
-	idempotencyKey: z.string().uuid(),
+	orderId: institutionalUuidSchema,
+	idempotencyKey: institutionalUuidSchema,
 	venueStatusQueryId: z.string().min(1),
 	decision: z.enum(["CONFIRM_EXISTING", "MARK_FAILED", "KEEP_RECONCILING"]),
 	rationale: z.string().min(1).max(2000),

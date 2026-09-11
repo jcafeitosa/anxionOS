@@ -12,10 +12,10 @@ import { createPortfolioCreatedEvent } from "../../domain/events/portfolios-even
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { PortfoliosUnitOfWork } from "../../domain/ports/portfolios-unit-of-work";
 import {
-	loadIdempotentCommandResult,
+	loadIdempotentCommandResultWithGuard,
+	replayIdempotentCommandJournalEntry,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwPortfoliosError } from "../errors";
 
 export interface CreatePortfolioDeps {
 	unitOfWork: PortfoliosUnitOfWork;
@@ -28,31 +28,19 @@ export async function createPortfolio(
 ): Promise<PortfoliosCommandResult> {
 	const command = createPortfolioCommandSchema.parse(input);
 	assertPortfoliosExecutionModeSupported(command.executionMode);
-	const existingCommand = await deps.commandJournal.findByCommandId(
-		command.commandId,
-	);
-	if (
-		existingCommand &&
-		existingCommand.organizationId !== command.organizationId
-	) {
-		throwPortfoliosError(
-			"PF_CROSS_TENANT",
-			"command journal organization mismatch",
-		);
-	}
-	const replay = await loadIdempotentCommandResult(
+	const replay = await loadIdempotentCommandResultWithGuard(
 		deps.commandJournal,
 		command.commandId,
+		command.organizationId,
 	);
 	if (replay) return replay;
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return portfoliosCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
+			return replayIdempotentCommandJournalEntry(
+				raced,
+				command.organizationId,
+			);
 		}
 		const portfolioId = `pf_prt_${randomUUID()}`;
 		const saved = await ctx.portfolios.save({

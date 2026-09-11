@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	freshnessSchema,
 	nodeKeySchema,
@@ -6,14 +7,14 @@ import {
 	temporalContextSchema,
 } from "./types";
 export const graphQueryEnvelopeSchema = z.object({
-	clientQueryId: z.string().uuid().optional(),
+	clientQueryId: institutionalUuidSchema.optional(),
 	scope: scopeContextSchema,
 	temporal: temporalContextSchema,
 	freshness: freshnessSchema.optional(),
 	params: z.record(z.string(), z.unknown()),
 });
 export const graphQueryMetaSchema = z.object({
-	queryId: z.string().uuid(),
+	queryId: institutionalUuidSchema,
 	traversalId: z.string(),
 	queryVersion: z.number().int().positive(),
 	requestId: z.string().optional(),
@@ -33,7 +34,7 @@ export const graphQueryResultSchema = z.object({
 	data: z.unknown(),
 });
 export const commandAcceptedSchema = z.object({
-	commandId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
 	ownerDomain: z.string(),
 	projectionPending: z.literal(true),
 	acceptedAt: z.string().datetime(),

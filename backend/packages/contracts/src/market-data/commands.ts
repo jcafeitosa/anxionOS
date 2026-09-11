@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	executionModeSchema,
 	instrumentIdSchema,
@@ -13,8 +14,8 @@ export const marketDataCommandResultSchema = z.object({
 	observationHeaderId: z.string().optional(),
 });
 export const registerInstrumentCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	canonicalSymbol: z.string().min(1).max(64),
 	instrumentKind: instrumentKindSchema,
 	assetId: z.string().min(1).max(64),
@@ -22,11 +23,11 @@ export const registerInstrumentCommandSchema = z.object({
 	executionMode: executionModeSchema,
 });
 export const recordObservationCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	instrumentId: instrumentIdSchema,
 	observationKind: observationKindSchema,
-	sourceEventId: z.string().uuid(),
+	sourceEventId: institutionalUuidSchema,
 	eventTime: z.string().datetime(),
 	price: z.string().regex(/^\d+(\.\d+)?$/),
 	volume: z
@@ -38,8 +39,8 @@ export const recordObservationCommandSchema = z.object({
 });
 export const startBackfillCommandSchema = z
 	.object({
-		commandId: z.string().uuid(),
-		organizationId: z.string().uuid(),
+		commandId: institutionalUuidSchema,
+		organizationId: institutionalUuidSchema,
 		instrumentId: instrumentIdSchema,
 		requestedFrom: z.string().datetime(),
 		requestedTo: z.string().datetime(),
@@ -50,17 +51,17 @@ export const startBackfillCommandSchema = z
 		path: ["requestedTo"],
 	});
 export const advanceBackfillCursorCommandSchema = z.object({
-	commandId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
 	jobId: z.string().regex(/^md_bf_[0-9a-f-]{36}$/i),
-	organizationId: z.string().uuid(),
+	organizationId: institutionalUuidSchema,
 	cursorPosition: z.string().optional(),
 	rowsIngested: z.number().int().nonnegative(),
 	status: z.enum(["RUNNING", "COMPLETED"]),
 	lastError: z.string().optional(),
 });
 export const recordFxRateCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	baseCurrency: z.string().regex(/^[A-Z]{3}$/),
 	quoteCurrency: z.string().regex(/^[A-Z]{3}$/),
 	rate: z.string().regex(/^\d+(\.\d+)?$/),
@@ -68,8 +69,8 @@ export const recordFxRateCommandSchema = z.object({
 	source: z.string().min(1),
 });
 export const recordCorporateActionCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	instrumentId: z.string().regex(/^md_ins_[0-9a-f-]{36}$/i),
 	actionKind: z.enum(["SPLIT", "DIVIDEND", "MERGER", "SPINOFF"]),
 	effectiveDate: z.string().datetime().refine(
@@ -81,8 +82,8 @@ export const recordCorporateActionCommandSchema = z.object({
 	source: z.string().min(1),
 });
 export const registerVenueCalendarCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	venueId: z.string().min(1).max(64),
 	ianaTimezone: z.string().regex(/^[\w]+[\w./-]*$/),
 	scope: z.enum(["stocks", "crypto", "both"]),

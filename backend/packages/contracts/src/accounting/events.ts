@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import { journalEntryIdSchema } from "./types";
 export const ACCOUNTING_EVENT_TYPES = {
 	LEDGER_POSTED: "accounting.ledger.posted.v1",
@@ -13,18 +14,18 @@ export const ledgerLineSummarySchema = z.object({
 });
 export const ledgerPostedPayloadSchema = z.object({
 	entryId: journalEntryIdSchema,
-	organizationId: z.string().uuid(),
+	organizationId: institutionalUuidSchema,
 	idempotencyKey: z.string().min(1).max(128),
 	entryKind: z.string().min(1),
 	linesSummary: z.array(ledgerLineSummarySchema).min(2),
 	valueDate: z.string(),
 	capitalAccountId: z.string().optional(),
-	portfolioId: z.string().uuid().optional(),
+	portfolioId: institutionalUuidSchema.optional(),
 });
 export const ledgerReversalPostedPayloadSchema = z.object({
 	reversalEntryId: journalEntryIdSchema,
 	reversesEntryId: journalEntryIdSchema,
-	organizationId: z.string().uuid(),
+	organizationId: institutionalUuidSchema,
 	idempotencyKey: z.string().min(1).max(128),
 	reason: z.string().optional(),
 });

@@ -7,10 +7,14 @@ import type {
 } from "../domain/ports/decisions-unit-of-work";
 import { createPgCommandJournalRepository } from "./persistence/command-journal-repository";
 import {
+	createPgApprovalRepository,
 	createPgDecisionRepository,
+	createPgDispositionRepository,
 	createPgProposalRepository,
 	createPgTradeIntentRepository,
 } from "./persistence/repositories";
+import { createPgEvidenceManifestRepository } from "./persistence/evidence-manifest-repository";
+import { createPgSubmitPreconditionsRepository } from "./persistence/submit-preconditions-repository";
 
 function createTransactionContext(
 	client: PoolClient,
@@ -20,6 +24,10 @@ function createTransactionContext(
 		decisions: createPgDecisionRepository(client),
 		proposals: createPgProposalRepository(client),
 		tradeIntents: createPgTradeIntentRepository(client),
+		approvals: createPgApprovalRepository(client),
+		dispositions: createPgDispositionRepository(client),
+		submitPreconditions: createPgSubmitPreconditionsRepository(client),
+		evidenceManifests: createPgEvidenceManifestRepository(client),
 		async publishEvents(envelopes: DomainEventEnvelope[]) {
 			for (const envelope of envelopes) {
 				await appendJournal(client, envelope);

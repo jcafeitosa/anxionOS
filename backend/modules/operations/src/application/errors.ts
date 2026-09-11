@@ -30,5 +30,6 @@ export function parseCommandResultSnapshot(
 		idempotentReplay: snapshot.idempotentReplay,
 		healthCheckId: snapshot.healthCheckId,
 		incidentId: snapshot.incidentId,
+		recoveryTaskId: snapshot.recoveryTaskId,
 	});
 }

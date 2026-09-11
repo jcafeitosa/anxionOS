@@ -9,11 +9,16 @@ const migrationsFolder = join(
 	"migrations",
 );
 
+// Per-module migration journal (ADR0002). Isolated from shared drizzle.__drizzle_migrations.
 export async function ensureEvaluationSchema(
 	poolOrClient: Pool | PoolClient,
 ): Promise<void> {
 	const db = drizzle(poolOrClient);
-	await migrate(db, { migrationsFolder });
+	await migrate(db, {
+		migrationsFolder,
+		migrationsSchema: "evaluation",
+		migrationsTable: "__drizzle_migrations",
+	});
 }
 
 const databaseUrl =

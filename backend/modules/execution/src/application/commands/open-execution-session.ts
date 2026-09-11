@@ -17,10 +17,11 @@ import type {
 	RiskPermitValidationPort,
 } from "../../domain/ports/risk-permit-validation";
 import {
-	loadIdempotentCommandResult,
+	loadIdempotentCommandResultWithGuard,
+	replayIdempotentCommandJournalEntry,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwExecutionError } from "../errors";
+import { throwExecutionError } from "../errors";
 
 export interface OpenExecutionSessionDeps {
 	unitOfWork: ExecutionUnitOfWork;
@@ -64,21 +65,10 @@ export async function openExecutionSession(
 ): Promise<ExecutionCommandResult> {
 	const command = openExecutionSessionCommandSchema.parse(input);
 	assertExecutionModuleModeSupported(command.executionMode);
-	const existingCommand = await deps.commandJournal.findByCommandId(
-		command.commandId,
-	);
-	if (
-		existingCommand &&
-		existingCommand.organizationId !== command.organizationId
-	) {
-		throwExecutionError(
-			"EX_CROSS_TENANT",
-			"command journal organization mismatch",
-		);
-	}
-	const replay = await loadIdempotentCommandResult(
+	const replay = await loadIdempotentCommandResultWithGuard(
 		deps.commandJournal,
 		command.commandId,
+		command.organizationId,
 	);
 	if (replay) return replay;
 	const permitCheck = await deps.riskPermitValidation.validatePermit({
@@ -94,11 +84,10 @@ export async function openExecutionSession(
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return executionCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
+			return replayIdempotentCommandJournalEntry(
+				raced,
+				command.organizationId,
+			);
 		}
 		const venueAdapterRefId = await ensureSimulatedVenueAdapter(
 			ctx,

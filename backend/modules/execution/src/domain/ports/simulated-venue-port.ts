@@ -2,6 +2,7 @@ export interface SimulatedFillRequest {
 	orderId: string;
 	clientOrderId: string;
 	quantity: string;
+	fillQuantity: string;
 	price: string;
 	asset: string;
 }

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { billingInvoiceIdSchema } from "../billing/types";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	commissionRateSchema,
 	decimalAmountSchema,
@@ -19,39 +20,39 @@ export const partnersCommandResultSchema = z.object({
 	payoutId: partnersPayoutIdSchema.optional(),
 });
 export const registerPartnerCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	referralCode: partnersReferralIdSchema,
 	displayName: z.string().min(1).max(256),
 	commissionRate: commissionRateSchema,
-	referredOrganizationId: z.string().uuid(),
+	referredOrganizationId: institutionalUuidSchema,
 });
 export const accrueCommissionFromInvoiceCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	partnerOrganizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	partnerOrganizationId: institutionalUuidSchema,
 	invoiceId: billingInvoiceIdSchema,
-	referredOrganizationId: z.string().uuid(),
+	referredOrganizationId: institutionalUuidSchema,
 	subscriptionId: z.string().min(1),
 	billingPeriod: z.string().regex(/^\d{4}-\d{2}$/),
 	totalAmount: decimalAmountSchema,
 	issuedAt: z.string().datetime(),
 });
 export const reverseCommissionFromInvoiceCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	partnerOrganizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	partnerOrganizationId: institutionalUuidSchema,
 	invoiceId: billingInvoiceIdSchema,
 	reversedAt: z.string().datetime(),
 	reason: z.string().min(1).max(256).optional(),
 });
 export const requestPayoutCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	partnerOrganizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	partnerOrganizationId: institutionalUuidSchema,
 	partnerId: partnersPartnerIdSchema,
 	requestedAt: z.string().datetime(),
 });
 export const approvePayoutCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	partnerOrganizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	partnerOrganizationId: institutionalUuidSchema,
 	payoutId: partnersPayoutIdSchema,
 	approvedAt: z.string().datetime(),
 	approvalReference: z.string().min(1).max(128),

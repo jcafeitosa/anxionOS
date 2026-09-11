@@ -3,6 +3,19 @@ export const PORTFOLIOS_OWNER_DOMAIN = "portfolios";
 export const portfolioIdSchema = z.string().regex(/^pf_prt_[0-9a-f-]{36}$/i);
 export const positionIdSchema = z.string().regex(/^pf_pos_[0-9a-f-]{36}$/i);
 export const holdingIdSchema = z.string().regex(/^pf_hld_[0-9a-f-]{36}$/i);
+export const valuationSnapshotIdSchema = z
+	.string()
+	.regex(/^pf_val_[0-9a-f-]{36}$/i);
+export const valuationSnapshotStatusSchema = z.enum([
+	"DRAFT",
+	"CONFIRMED",
+	"SUPERSEDED",
+]);
+export const valuationQualityFlagSchema = z.enum([
+	"STALE_PRICE",
+	"MISSING_FX",
+	"PROVISIONAL",
+]);
 export const portfoliosExecutionModeSchema = z.enum(["SIMULATED", "PAPER"]);
 export const portfolioStatusSchema = z.enum(["ACTIVE", "CLOSED"]);
 export const positionSideSchema = z.enum(["LONG", "SHORT", "CASH"]);

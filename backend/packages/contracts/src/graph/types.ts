@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 export const GRAPH_OWNER_DOMAIN = "graph";
 export const scopeTypeSchema = z.enum([
 	"PLATFORM",
@@ -15,15 +16,15 @@ export const actingScopeTypeSchema = z.enum([
 ]);
 export const nodeKeySchema = z.object({
 	scopeType: scopeTypeSchema,
-	scopeId: z.string().uuid(),
+	scopeId: institutionalUuidSchema,
 	type: z.string().min(1).max(64),
-	id: z.string().uuid(),
+	id: institutionalUuidSchema,
 });
 export const scopeContextSchema = z.object({
-	principalId: z.string().uuid(),
+	principalId: institutionalUuidSchema,
 	actingScope: z.object({
 		scopeType: actingScopeTypeSchema,
-		scopeId: z.string().uuid(),
+		scopeId: institutionalUuidSchema,
 	}),
 });
 export const temporalContextSchema = z.object({

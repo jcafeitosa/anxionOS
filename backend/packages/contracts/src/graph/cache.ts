@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 export const CACHEABLE_TRAVERSAL_IDS = ["T01", "T03", "T15"] as const;
 export const cacheableTraversalIdSchema = z.enum(CACHEABLE_TRAVERSAL_IDS);
 export const cachePolicySchema = z.enum(["never", "conditional", "always"]);
@@ -15,7 +16,7 @@ export const graphCacheKeyPartsSchema = z.object({
 export const graphCacheInvalidateSchema = z.object({
 	v: z.literal(1),
 	scopeType: z.enum(["PLATFORM", "ORGANIZATION", "AGENCY", "USER"]),
-	scopeId: z.string().uuid(),
+	scopeId: institutionalUuidSchema,
 	reason: z.string(),
 	authorityEpoch: z.number().int().nonnegative(),
 	riskEpoch: z.number().int().nonnegative(),

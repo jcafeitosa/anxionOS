@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	sandboxIsolationFlagsSchema,
 	simulationBacktestRequestIdSchema,
@@ -12,8 +13,8 @@ export const simulationCommandResultSchema = z.object({
 	simulationRunId: simulationRunIdSchema.optional(),
 });
 export const createSimulationRunCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	strategyId: z.string().min(1).max(128).optional(),
 	strategyVersionId: z.string().min(1).max(128).optional(),
 	backtestRequestId: simulationBacktestRequestIdSchema.optional(),
@@ -34,4 +35,14 @@ export type SimulationCommandResult = z.infer<
 
 export type CreateSimulationRunCommand = z.infer<
 	typeof createSimulationRunCommandSchema
+>;
+
+export const executeSimulationRunCommandSchema = z.object({
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
+	simulationRunId: simulationRunIdSchema,
+});
+
+export type ExecuteSimulationRunCommand = z.infer<
+	typeof executeSimulationRunCommandSchema
 >;

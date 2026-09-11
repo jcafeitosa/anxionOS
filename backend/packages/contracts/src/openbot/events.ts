@@ -1,5 +1,7 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
+	botRunGenerationRefSchema,
 	computerSessionRefSchema,
 	toolAuditEntrySchema,
 	toolCallDecisionSchema,
@@ -17,50 +19,53 @@ export const OPENBOT_EVENT_TYPES = {
 	COMPUTER_SESSION_BOT_RESUMED: "openbot.computer_session.bot_resumed.v1",
 	AUDIT_BEFORE_RECORDED: "openbot.audit.before_recorded.v1",
 	AUDIT_AFTER_RECORDED: "openbot.audit.after_recorded.v1",
+	BOT_RUN_GENERATION_ACQUIRED: "openbot.bot_run_generation.acquired.v1",
+	BOT_RUN_GENERATION_ABORTED: "openbot.bot_run_generation.aborted.v1",
+	BOT_RUN_GENERATION_RELEASED: "openbot.bot_run_generation.released.v1",
 } as const;
 
 export type OpenBotEventType =
 	(typeof OPENBOT_EVENT_TYPES)[keyof typeof OPENBOT_EVENT_TYPES];
 
 export const toolCallDeniedPayloadSchema = z.object({
-	requestId: z.string().uuid(),
-	organizationId: z.string().uuid(),
-	agentId: z.string().uuid(),
+	requestId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
 	toolName: z.string().min(1).max(128),
 	decision: toolCallDecisionSchema,
 });
 
 export const toolCallForwardedPayloadSchema = z.object({
-	requestId: z.string().uuid(),
-	organizationId: z.string().uuid(),
-	agentId: z.string().uuid(),
+	requestId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
 	toolName: z.string().min(1).max(128),
 	decision: toolCallDecisionSchema,
 	effect: toolCallEffectSchema,
 });
 
 export const computerSessionAcquiredPayloadSchema = z.object({
-	commandId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
 	session: computerSessionRefSchema,
 });
 
 export const computerSessionReleasedPayloadSchema = z.object({
-	commandId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
 	session: computerSessionRefSchema,
 });
 
 export const computerSessionTakeoverPayloadSchema = z.object({
-	commandId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
 	session: computerSessionRefSchema,
-	operatorId: z.string().uuid(),
-	revokedAuthorityToken: z.string().uuid(),
+	operatorId: institutionalUuidSchema,
+	revokedAuthorityToken: institutionalUuidSchema,
 	previousController: z.enum(["bot", "human"]),
 });
 
 export const computerSessionBotResumedPayloadSchema = z.object({
-	commandId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
 	session: computerSessionRefSchema,
-	revokedAuthorityToken: z.string().uuid(),
+	revokedAuthorityToken: institutionalUuidSchema,
 });
 
 export const toolAuditBeforeRecordedPayloadSchema = z.object({
@@ -92,4 +97,31 @@ export type ToolAuditBeforeRecordedPayload = z.infer<
 >;
 export type ToolAuditAfterRecordedPayload = z.infer<
 	typeof toolAuditAfterRecordedPayloadSchema
+>;
+
+export const botRunGenerationAcquiredPayloadSchema = z.object({
+	commandId: institutionalUuidSchema,
+	generation: botRunGenerationRefSchema,
+});
+
+export const botRunGenerationAbortedPayloadSchema = z.object({
+	commandId: institutionalUuidSchema,
+	generation: botRunGenerationRefSchema,
+	idempotentReplay: z.boolean().optional(),
+});
+
+export const botRunGenerationReleasedPayloadSchema = z.object({
+	commandId: institutionalUuidSchema,
+	generation: botRunGenerationRefSchema,
+	idempotentReplay: z.boolean().optional(),
+});
+
+export type BotRunGenerationAcquiredPayload = z.infer<
+	typeof botRunGenerationAcquiredPayloadSchema
+>;
+export type BotRunGenerationAbortedPayload = z.infer<
+	typeof botRunGenerationAbortedPayloadSchema
+>;
+export type BotRunGenerationReleasedPayload = z.infer<
+	typeof botRunGenerationReleasedPayloadSchema
 >;

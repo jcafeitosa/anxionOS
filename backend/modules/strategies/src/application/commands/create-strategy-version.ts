@@ -10,10 +10,11 @@ import {
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { StrategiesUnitOfWork } from "../../domain/ports/strategies-unit-of-work";
 import {
-	loadIdempotentCommandResult,
+	loadIdempotentCommandResultWithGuard,
+	replayIdempotentCommandJournalEntry,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwStrategiesError } from "../errors";
+import { throwStrategiesError } from "../errors";
 
 export interface CreateStrategyVersionDeps {
 	unitOfWork: StrategiesUnitOfWork;
@@ -25,19 +26,19 @@ export async function createStrategyVersion(
 	input: CreateStrategyVersionCommand,
 ): Promise<StrategiesCommandResult> {
 	const command = createStrategyVersionCommandSchema.parse(input);
-	const replay = await loadIdempotentCommandResult(
+	const replay = await loadIdempotentCommandResultWithGuard(
 		deps.commandJournal,
 		command.commandId,
+		command.organizationId,
 	);
 	if (replay) return replay;
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return strategiesCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
+			return replayIdempotentCommandJournalEntry(
+				raced,
+				command.organizationId,
+			);
 		}
 		const strategy = await ctx.strategies.findById(
 			command.strategyId,

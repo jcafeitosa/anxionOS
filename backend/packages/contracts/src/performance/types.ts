@@ -6,6 +6,9 @@ export const performanceOutcomeSnapshotIdSchema = z
 export const performanceMetricSeriesIdSchema = z
 	.string()
 	.regex(/^perf_mtr_[0-9a-f-]{36}$/i);
+export const performancePositionExposureSnapshotIdSchema = z
+	.string()
+	.regex(/^perf_pes_[0-9a-f-]{36}$/i);
 export const decimalAmountSchema = z.string().regex(/^\d+(\.\d+)?$/);
 
 export type PerformanceOutcomeSnapshotId = z.infer<
@@ -13,4 +16,7 @@ export type PerformanceOutcomeSnapshotId = z.infer<
 >;
 export type PerformanceMetricSeriesId = z.infer<
 	typeof performanceMetricSeriesIdSchema
+>;
+export type PerformancePositionExposureSnapshotId = z.infer<
+	typeof performancePositionExposureSnapshotIdSchema
 >;

@@ -9,6 +9,10 @@ export {
 	releaseComputerSessionCommandSchema,
 	takeoverComputerSessionCommandSchema,
 	resumeBotControlCommandSchema,
+	acquireBotRunGenerationCommandSchema,
+	abortBotRunGenerationCommandSchema,
+	releaseBotRunGenerationCommandSchema,
+	botRunGenerationCommandResultSchema,
 	computerSessionCommandResultSchema,
 	computerSessionTakeoverResultSchema,
 } from "./commands";
@@ -21,6 +25,10 @@ export type {
 	ResumeBotControlCommand,
 	TakeoverComputerSessionCommand,
 	ComputerSessionTakeoverResult,
+	AcquireBotRunGenerationCommand,
+	AbortBotRunGenerationCommand,
+	ReleaseBotRunGenerationCommand,
+	BotRunGenerationCommandResult,
 } from "./commands";
 export {
 	OPENBOT_EVENT_TYPES,
@@ -29,6 +37,9 @@ export {
 	computerSessionReleasedPayloadSchema,
 	computerSessionTakeoverPayloadSchema,
 	computerSessionBotResumedPayloadSchema,
+	botRunGenerationAcquiredPayloadSchema,
+	botRunGenerationAbortedPayloadSchema,
+	botRunGenerationReleasedPayloadSchema,
 	toolAuditAfterRecordedPayloadSchema,
 	toolAuditBeforeRecordedPayloadSchema,
 	toolCallDeniedPayloadSchema,
@@ -39,6 +50,9 @@ export type {
 	ComputerSessionReleasedPayload,
 	ComputerSessionTakeoverPayload,
 	ComputerSessionBotResumedPayload,
+	BotRunGenerationAcquiredPayload,
+	BotRunGenerationAbortedPayload,
+	BotRunGenerationReleasedPayload,
 	OpenBotEventType,
 	ToolAuditAfterRecordedPayload,
 	ToolAuditBeforeRecordedPayload,
@@ -56,6 +70,8 @@ export type { OpenBotHomologationPolicy } from "./env-policy";
 export {
 	computerSessionRefSchema,
 	computerSessionControllerSchema,
+	botRunGenerationRefSchema,
+	botRunGenerationStatusSchema,
 	computerSessionStatusSchema,
 	sandboxToolCatalogEntrySchema,
 	sandboxToolCatalogSchema,
@@ -68,6 +84,8 @@ export {
 } from "./types";
 export type {
 	ComputerSessionController,
+	BotRunGenerationRef,
+	BotRunGenerationStatus,
 	ComputerSessionRef,
 	ComputerSessionStatus,
 	SandboxToolCatalog,

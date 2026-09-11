@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	agencyStatusSchema,
 	marketScopeSchema,
@@ -8,8 +9,8 @@ import {
 } from "./types";
 
 export const agencyDtoSchema = z.object({
-	id: z.string().uuid(),
-	ownerPrincipalId: z.string().uuid(),
+	id: institutionalUuidSchema,
+	ownerPrincipalId: institutionalUuidSchema,
 	displayName: z.string().min(1).max(200),
 	marketScope: marketScopeSchema,
 	status: agencyStatusSchema,
@@ -20,9 +21,9 @@ export const agencyDtoSchema = z.object({
 });
 
 export const membershipDtoSchema = z.object({
-	id: z.string().uuid(),
-	agencyId: z.string().uuid(),
-	principalId: z.string().uuid().nullable(),
+	id: institutionalUuidSchema,
+	agencyId: institutionalUuidSchema,
+	principalId: institutionalUuidSchema.nullable(),
 	role: membershipRoleSchema,
 	status: membershipStatusSchema,
 	invitedAt: z.string().datetime().optional(),
@@ -32,8 +33,8 @@ export const membershipDtoSchema = z.object({
 });
 
 export const ownerDtoSchema = z.object({
-	id: z.string().uuid(),
-	principalId: z.string().uuid(),
+	id: institutionalUuidSchema,
+	principalId: institutionalUuidSchema,
 	createdAt: z.string().datetime(),
 });
 

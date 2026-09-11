@@ -1,4 +1,11 @@
 import { z } from "zod";
+
+export {
+	INSTITUTIONAL_UUID_PATTERN,
+	institutionalUuidSchema,
+	isInstitutionalUuid,
+} from "./institutional-uuid";
+
 /** Public contract schema version for API and event envelopes (P01). */
 export const schemaVersion = "0.1.0";
 

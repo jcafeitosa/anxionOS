@@ -1,0 +1,27 @@
+{
+	"version": "7",
+	"dialect": "postgresql",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "7",
+			"when": 1789127000000,
+			"tag": "0000_simulation_core",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1789213400000,
+			"tag": "0001_simulation_manifests_snapshots",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1789299800000,
+			"tag": "0002_simulation_runs_repair",
+			"breakpoints": true
+		}
+	]
+}

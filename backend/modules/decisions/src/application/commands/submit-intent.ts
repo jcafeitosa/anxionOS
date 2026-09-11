@@ -12,14 +12,18 @@ import { createIntentSubmittedEvent } from "../../domain/events/decisions-events
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { DecisionsUnitOfWork } from "../../domain/ports/decisions-unit-of-work";
 import {
-	loadIdempotentCommandResult,
+	loadIdempotentCommandResultWithGuard,
+	replayIdempotentCommandJournalEntry,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwDecisionsError } from "../errors";
+import { throwDecisionsError } from "../errors";
+import { assertSubmitPreconditionsMet } from "../submit-preconditions-support";
+import type { CapitalReservationQueryPort } from "../../domain/ports/capital-reservation-query-port";
 
 export interface SubmitIntentDeps {
 	unitOfWork: DecisionsUnitOfWork;
 	commandJournal: CommandJournalRepository;
+	capitalReservationQuery?: CapitalReservationQueryPort;
 }
 
 export async function submitIntent(
@@ -28,45 +32,72 @@ export async function submitIntent(
 ): Promise<DecisionsCommandResult> {
 	const command = submitIntentCommandSchema.parse(input);
 	assertDecisionsExecutionModeSupported(command.executionMode);
-	const existingCommand = await deps.commandJournal.findByCommandId(
-		command.commandId,
-	);
-	if (
-		existingCommand &&
-		existingCommand.organizationId !== command.organizationId
-	) {
-		throwDecisionsError(
-			"DC_CROSS_TENANT",
-			"command journal organization mismatch",
-		);
-	}
-	const replay = await loadIdempotentCommandResult(
+	const replay = await loadIdempotentCommandResultWithGuard(
 		deps.commandJournal,
 		command.commandId,
+		command.organizationId,
 	);
 	if (replay) return replay;
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return decisionsCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
+			return replayIdempotentCommandJournalEntry(
+				raced,
+				command.organizationId,
+			);
 		}
 		const decision = await ctx.decisions.findById(command.decisionId);
 		if (!decision || decision.organizationId !== command.organizationId) {
 			throwDecisionsError("DC_DECISION_NOT_FOUND", "decision not found");
 		}
-		if (decision.status !== "AUTHORITY_CHECKED") {
-			if (decision.status === "SUBMITTED") {
+		if (decision.status === "SUBMITTED") {
+			throwDecisionsError(
+				"DC_INTENT_IMMUTABLE",
+				"decision already submitted",
+			);
+		}
+		if (decision.approvalPath) {
+			if (
+				decision.status !== "APPROVED" &&
+				decision.status !== "CAPITAL_PENDING"
+			) {
 				throwDecisionsError(
-					"DC_INTENT_IMMUTABLE",
-					"decision already submitted",
+					"DC_APPROVAL_REQUIRED",
+					"human approval and disposition required",
 				);
 			}
+			const disposition = await ctx.dispositions.findByDecisionId(decision.id);
+			if (!disposition || disposition.dispositionKind !== "APPROVED") {
+				throwDecisionsError(
+					"DC_DISPOSITION_REQUIRED",
+					"approved disposition required before submit",
+				);
+			}
+			if (
+				command.intentHash &&
+				disposition.intentHash &&
+				disposition.intentHash !== command.intentHash
+			) {
+				throwDecisionsError(
+					"DC_DISPOSITION_INVALID",
+					"intent hash does not match approved disposition",
+				);
+			}
+		} else if (
+			decision.status !== "AUTHORITY_CHECKED" &&
+			decision.status !== "CAPITAL_PENDING" &&
+			decision.status !== "RISK_PENDING" &&
+			decision.status !== "DENIED"
+		) {
 			throwDecisionsError("DC_AUTHORITY_STALE", "authority not checked");
 		}
+		await assertSubmitPreconditionsMet(
+			ctx.submitPreconditions,
+			command.decisionId,
+			command.organizationId,
+			command.intentHash,
+			deps.capitalReservationQuery,
+		);
 		const existingIntent = await ctx.tradeIntents.findByDecisionId(
 			command.decisionId,
 		);

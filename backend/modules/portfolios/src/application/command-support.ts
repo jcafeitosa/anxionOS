@@ -1,6 +1,10 @@
 import type { PortfoliosCommandResult } from "@anxionos/contracts/portfolios";
-import type { CommandJournalRepository } from "../domain/ports/command-journal";
-import { parseCommandResultSnapshot } from "./errors";
+import { portfoliosCommandResultSchema } from "@anxionos/contracts/portfolios";
+import type {
+	CommandJournalEntry,
+	CommandJournalRepository,
+} from "../domain/ports/command-journal";
+import { parseCommandResultSnapshot, throwPortfoliosError } from "./errors";
 
 export async function loadIdempotentCommandResult(
 	commandJournal: CommandJournalRepository,
@@ -10,6 +14,40 @@ export async function loadIdempotentCommandResult(
 	if (!existing) return null;
 	const parsed = parseCommandResultSnapshot(existing.responseSnapshot);
 	return { ...parsed, idempotentReplay: true };
+}
+
+export async function loadIdempotentCommandResultWithGuard(
+	commandJournal: CommandJournalRepository,
+	commandId: string,
+	organizationId: string,
+): Promise<PortfoliosCommandResult | null> {
+	const existing = await commandJournal.findByCommandId(commandId);
+	if (!existing) return null;
+	if (existing.organizationId !== organizationId) {
+		throwPortfoliosError(
+			"PF_CROSS_TENANT",
+			"command journal organization mismatch",
+		);
+	}
+	const parsed = parseCommandResultSnapshot(existing.responseSnapshot);
+	return { ...parsed, idempotentReplay: true };
+}
+
+export function replayIdempotentCommandJournalEntry(
+	existing: CommandJournalEntry,
+	organizationId: string,
+): PortfoliosCommandResult {
+	if (existing.organizationId !== organizationId) {
+		throwPortfoliosError(
+			"PF_CROSS_TENANT",
+			"command journal organization mismatch",
+		);
+	}
+	const parsed = parseCommandResultSnapshot(existing.responseSnapshot);
+	return portfoliosCommandResultSchema.parse({
+		...parsed,
+		idempotentReplay: true,
+	});
 }
 
 export function toCommandResultSnapshot(
@@ -22,5 +60,9 @@ export function toCommandResultSnapshot(
 		portfolioId: result.portfolioId,
 		positionId: result.positionId,
 		holdingId: result.holdingId,
+		valuationSnapshotId: result.valuationSnapshotId,
+		reconciliationCaseId: result.reconciliationCaseId,
+		cashPositionId: result.cashPositionId,
+		provisionalCash: result.provisionalCash,
 	};
 }

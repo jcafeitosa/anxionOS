@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { operationsHealthStatusSchema } from "./types";
+import { institutionalUuidSchema } from "../institutional-uuid";
 
 export const DEFAULT_HEALTH_PROBE_TIMEOUT_MS = 3_000;
 export const DEFAULT_HEALTH_STALE_THRESHOLD_MS = 60_000;
@@ -15,15 +16,15 @@ export const serviceHealthProbeDetailsSchema = z.object({
 });
 
 export const executeServiceHealthProbeCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	serviceId: z.string().min(1).max(128),
 	checkedAt: z.string().datetime().optional(),
 });
 
 export const serviceHealthSnapshotSchema = z.object({
 	healthCheckId: z.string().min(1),
-	organizationId: z.string().uuid(),
+	organizationId: institutionalUuidSchema,
 	serviceId: z.string().min(1).max(128),
 	status: operationsHealthStatusSchema,
 	checkedAt: z.string().datetime(),

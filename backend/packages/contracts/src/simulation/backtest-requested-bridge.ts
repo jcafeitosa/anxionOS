@@ -1,40 +1,45 @@
-import { z } from "zod";
-import { simulationBacktestRequestIdSchema } from "./types";
+import type { z } from "zod";
+import { backtestRequestedPayloadSchema } from "../strategies/events";
+import type { CreateSimulationRunCommand } from "./commands";
+import {
+	assertSimulationExecutionModeSupported,
+	simulationExecutionModeSchema,
+} from "./types";
+
 /** Bridge schema for simulation consumer input shaped as strategies.backtest.requested.v1. */
-export const strategiesBacktestRequestedBridgeSchema = z.object({
-	backtestRequestId: simulationBacktestRequestIdSchema,
-	organizationId: z.string().uuid(),
-	strategyId: z.string().min(1).max(128),
-	strategyVersionId: z.string().min(1).max(128),
-	executionMode: z.enum(["SIMULATED"]),
-	scenarioLabel: z.string().min(1).max(256).optional(),
-	requestedAt: z.string().datetime(),
-});
+export const strategiesBacktestRequestedBridgeSchema =
+	backtestRequestedPayloadSchema;
+
 export function mapBacktestRequestedToSimulationInput(
 	backtest: StrategiesBacktestRequestedBridge,
 	commandId: string,
-): CreateSimulationRunFromBacktestInput {
+): CreateSimulationRunCommand {
 	const parsed = strategiesBacktestRequestedBridgeSchema.parse(backtest);
+	assertSimulationExecutionModeSupported(parsed.executionMode);
+	const executionMode = simulationExecutionModeSchema.parse(parsed.executionMode);
 	return {
 		commandId,
 		organizationId: parsed.organizationId,
 		strategyId: parsed.strategyId,
 		strategyVersionId: parsed.strategyVersionId,
 		backtestRequestId: parsed.backtestRequestId,
-		executionMode: parsed.executionMode,
-		scenarioLabel: parsed.scenarioLabel,
+		executionMode,
+		isolationFlags: {
+			sandboxIsolated: true,
+			promotionBlocked: true,
+			syntheticCredentialsOnly: true,
+			isolatedSubgraph: true,
+		},
+		manifest: {
+			datasetId: parsed.datasetId,
+			datasetRevision: parsed.datasetRevision,
+			seed: parsed.seed,
+			requestedAt: parsed.requestedAt,
+		},
 	};
 }
 
 export type StrategiesBacktestRequestedBridge = z.infer<
 	typeof strategiesBacktestRequestedBridgeSchema
 >;
-export interface CreateSimulationRunFromBacktestInput {
-	commandId: string;
-	organizationId: string;
-	strategyId: string;
-	strategyVersionId: string;
-	backtestRequestId: string;
-	executionMode: "SIMULATED";
-	scenarioLabel?: string;
-}
+export type CreateSimulationRunFromBacktestInput = CreateSimulationRunCommand;

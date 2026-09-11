@@ -1,12 +1,15 @@
 export {
 	createSimulationRunCommandSchema,
+	executeSimulationRunCommandSchema,
 	simulationCommandResultSchema,
 	type SimulationCommandResult,
 	type CreateSimulationRunCommand,
+	type ExecuteSimulationRunCommand,
 } from "./commands";
 export {
 	SIMULATION_EVENT_TYPES,
 	runCompletedPayloadSchema,
+	runFailedPayloadSchema,
 	runStartedPayloadSchema,
 	simulationEventPayloadSchema,
 	snapshotCreatedPayloadSchema,
@@ -24,8 +27,18 @@ export {
 	type StrategiesBacktestRequestedBridge,
 } from "./backtest-requested-bridge";
 export {
+	listSimulationRunsQuerySchema,
+	listSimulationRunsResponseSchema,
+	simulationRunSchema,
+	simulationRunSnapshotSchema,
+	type SimulationRun,
+	type ListSimulationRunsResponse,
+	type SimulationRunSnapshot,
+} from "./queries";
+export {
 	SIMULATION_OWNER_DOMAIN,
 	DEFAULT_SANDBOX_ISOLATION_FLAGS,
+	SimulationContractError,
 	assertSimulationExecutionModeSupported,
 	sandboxIsolationFlagsSchema,
 	simulationBacktestRequestIdSchema,

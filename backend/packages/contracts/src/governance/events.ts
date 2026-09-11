@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import { autonomyLevelSchema } from "./autonomy-policy";
 import {
 	approvalDecisionSchema,
@@ -20,9 +21,9 @@ export const GOVERNANCE_EVENT_TYPES = {
 	AUTONOMY_TRANSITIONED: "governance.autonomy.transitioned.v1",
 };
 export const grantIssuedPayloadSchema = z.object({
-	grantId: z.string().uuid(),
-	scopeId: z.string().uuid(),
-	granteePrincipalId: z.string().uuid(),
+	grantId: institutionalUuidSchema,
+	scopeId: institutionalUuidSchema,
+	granteePrincipalId: institutionalUuidSchema,
 	capability: z.string().min(1),
 	status: grantStatusSchema,
 	authorityEpoch: z.number().int().nonnegative(),
@@ -33,43 +34,43 @@ export const grantIssuedPayloadSchema = z.object({
 	recordedUntil: z.string().datetime().nullable().optional(),
 });
 export const grantRevokedPayloadSchema = z.object({
-	grantId: z.string().uuid(),
-	scopeId: z.string().uuid(),
+	grantId: institutionalUuidSchema,
+	scopeId: institutionalUuidSchema,
 	authorityEpoch: z.number().int().nonnegative(),
 	revision: z.number().int().nonnegative(),
 	revokedAt: z.string().datetime().optional(),
 });
 export const changeProposalSubmittedPayloadSchema = z.object({
-	proposalId: z.string().uuid(),
-	scopeId: z.string().uuid(),
+	proposalId: institutionalUuidSchema,
+	scopeId: institutionalUuidSchema,
 	kind: changeProposalKindSchema,
 	payloadHash: z.string().min(1),
 	revision: z.number().int().nonnegative(),
 });
 export const approvalResolvedPayloadSchema = z.object({
-	approvalId: z.string().uuid(),
-	changeProposalId: z.string().uuid(),
+	approvalId: institutionalUuidSchema,
+	changeProposalId: institutionalUuidSchema,
 	decision: approvalDecisionSchema,
-	resolverPrincipalId: z.string().uuid(),
+	resolverPrincipalId: institutionalUuidSchema,
 	revision: z.number().int().nonnegative(),
 });
 export const authorityEpochBumpedPayloadSchema = z.object({
-	scopeId: z.string().uuid(),
+	scopeId: institutionalUuidSchema,
 	epoch: z.number().int().nonnegative(),
 	reason: z.string().min(1),
 });
 export const delegationCreatedPayloadSchema = z.object({
-	delegationId: z.string().uuid(),
-	parentGrantId: z.string().uuid(),
-	delegatePrincipalId: z.string().uuid(),
+	delegationId: institutionalUuidSchema,
+	parentGrantId: institutionalUuidSchema,
+	delegatePrincipalId: institutionalUuidSchema,
 	capabilitySubset: z.array(z.string().min(1)),
-	childGrantIds: z.array(z.string().uuid()),
+	childGrantIds: z.array(institutionalUuidSchema),
 	revision: z.number().int().nonnegative(),
 });
 export const breakGlassActivatedPayloadSchema = z.object({
-	grantId: z.string().uuid(),
-	scopeId: z.string().uuid(),
-	granteePrincipalId: z.string().uuid(),
+	grantId: institutionalUuidSchema,
+	scopeId: institutionalUuidSchema,
+	granteePrincipalId: institutionalUuidSchema,
 	capability: z.string().min(1),
 	reason: z.string().min(1),
 	expiresAt: z.string().datetime(),
@@ -77,29 +78,29 @@ export const breakGlassActivatedPayloadSchema = z.object({
 	revision: z.number().int().nonnegative(),
 });
 export const mandateIssuedPayloadSchema = z.object({
-	mandateId: z.string().uuid(),
-	agencyId: z.string().uuid(),
-	agentId: z.string().uuid(),
+	mandateId: institutionalUuidSchema,
+	agencyId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
 	mandateKind: mandateKindSchema,
-	grantId: z.string().uuid(),
+	grantId: institutionalUuidSchema,
 	revision: z.number().int().nonnegative(),
 });
 export const autonomyAssignedPayloadSchema = z.object({
-	assignmentId: z.string().uuid(),
-	scopeId: z.string().uuid(),
-	subjectAgentId: z.string().uuid(),
+	assignmentId: institutionalUuidSchema,
+	scopeId: institutionalUuidSchema,
+	subjectAgentId: institutionalUuidSchema,
 	level: autonomyLevelSchema,
 	authorityEpoch: z.number().int().nonnegative(),
 	revision: z.number().int().nonnegative(),
 });
 export const autonomyTransitionedPayloadSchema = z.object({
-	assignmentId: z.string().uuid(),
-	scopeId: z.string().uuid(),
-	subjectAgentId: z.string().uuid(),
+	assignmentId: institutionalUuidSchema,
+	scopeId: institutionalUuidSchema,
+	subjectAgentId: institutionalUuidSchema,
 	fromLevel: autonomyLevelSchema.nullable(),
 	toLevel: autonomyLevelSchema,
 	transitionKind: z.enum(["promote", "demote", "takeover"]),
-	actorPrincipalId: z.string().uuid(),
+	actorPrincipalId: institutionalUuidSchema,
 	reason: z.string().max(500).optional(),
 	authorityEpoch: z.number().int().nonnegative(),
 	revision: z.number().int().nonnegative(),

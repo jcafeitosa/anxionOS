@@ -30,5 +30,8 @@ export function parseCommandResultSnapshot(
 		idempotentReplay: snapshot.idempotentReplay,
 		strategyId: snapshot.strategyId,
 		strategyVersionId: snapshot.strategyVersionId,
+		backtestRunId: snapshot.backtestRunId,
+		deploymentId: snapshot.deploymentId,
+		signalId: snapshot.signalId,
 	});
 }

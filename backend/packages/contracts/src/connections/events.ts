@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	aiAccountIdSchema,
 	connectionBindingIdSchema,
@@ -29,9 +30,9 @@ export const CONNECTIONS_EVENT_TYPES = {
 };
 export const aiAccountRegisteredPayloadSchema = z.object({
 	aiAccountId: aiAccountIdSchema,
-	ownerPrincipalId: z.string().uuid(),
+	ownerPrincipalId: institutionalUuidSchema,
 	providerId: z.string().min(1),
-	organizationId: z.string().uuid(),
+	organizationId: institutionalUuidSchema,
 });
 export const bindingActivatedPayloadSchema = z.object({
 	bindingId: connectionBindingIdSchema,
@@ -58,7 +59,7 @@ export const usageRecordedPayloadSchema = z.object({
 	quantity: z.number().nonnegative(),
 	unit: z.string().min(1),
 	consumerKind: consumerKindSchema,
-	taskId: z.string().uuid().optional(),
+	taskId: institutionalUuidSchema.optional(),
 });
 export const aiAccountAuthorizedPayloadSchema = z.object({
 	aiAccountId: aiAccountIdSchema,

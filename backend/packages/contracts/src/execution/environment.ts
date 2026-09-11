@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { executionModeSchema } from "../decisions/types";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import type { ExecutionMode } from "../decisions/types";
 /** Secret/credential scope — REAL scopes never resolve for SIMULATED/PAPER dispatch. */
 export const secretScopeSchema = z.enum([
@@ -8,7 +9,7 @@ export const secretScopeSchema = z.enum([
 	"REAL_VENUE",
 ]);
 export const executionAdapterDescriptorSchema = z.object({
-	adapterId: z.string().uuid(),
+	adapterId: institutionalUuidSchema,
 	name: z.string().min(1),
 	supportedModes: z
 		.array(executionModeSchema)

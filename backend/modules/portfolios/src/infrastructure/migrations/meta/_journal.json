@@ -1,0 +1,27 @@
+{
+	"version": "7",
+	"dialect": "postgresql",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "7",
+			"when": 1796505600000,
+			"tag": "0000_portfolios_core",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1796592000000,
+			"tag": "0001_valuation_snapshots",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1796678400000,
+			"tag": "0002_position_reconciliation",
+			"breakpoints": true
+		}
+	]
+}

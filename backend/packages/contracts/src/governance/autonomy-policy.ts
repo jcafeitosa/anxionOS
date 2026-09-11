@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 
 export const autonomyLevelSchema = z.enum(["L0", "L1", "L2", "L3", "L4"]);
 
@@ -94,23 +95,23 @@ export const AUTONOMY_NORMATIVE_MATRIX: readonly AutonomyLevelDefinition[] = [
 ];
 
 export const assignAutonomyLevelCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	scopeId: z.string().uuid(),
-	subjectAgentId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	scopeId: institutionalUuidSchema,
+	subjectAgentId: institutionalUuidSchema,
 	level: autonomyLevelSchema,
 	evidenceHash: z.string().min(1).optional(),
-	approvalId: z.string().uuid().optional(),
+	approvalId: institutionalUuidSchema.optional(),
 });
 
 export const transitionAutonomyLevelCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	scopeId: z.string().uuid(),
-	subjectAgentId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	scopeId: institutionalUuidSchema,
+	subjectAgentId: institutionalUuidSchema,
 	targetLevel: autonomyLevelSchema,
 	transitionKind: autonomyTransitionKindSchema,
 	evidenceHash: z.string().min(1).optional(),
-	approvalId: z.string().uuid().optional(),
-	actorPrincipalId: z.string().uuid(),
+	approvalId: institutionalUuidSchema.optional(),
+	actorPrincipalId: institutionalUuidSchema,
 	reason: z.string().max(500).optional(),
 });
 

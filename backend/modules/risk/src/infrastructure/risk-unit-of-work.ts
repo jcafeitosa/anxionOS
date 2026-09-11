@@ -10,7 +10,9 @@ import {
 	createPgCheckResultRepository,
 	createPgEpochRegistryRepository,
 	createPgLimitPolicyRepository,
+	createPgKillSwitchRepository,
 	createPgPermitRepository,
+	createPgConsumerDedupRepository,
 } from "./persistence/repositories";
 
 function createTransactionContext(client: PoolClient): RiskTransactionContext {
@@ -20,6 +22,8 @@ function createTransactionContext(client: PoolClient): RiskTransactionContext {
 		epochRegistry: createPgEpochRegistryRepository(client),
 		checkResults: createPgCheckResultRepository(client),
 		permits: createPgPermitRepository(client),
+		killSwitch: createPgKillSwitchRepository(client),
+		consumerDedup: createPgConsumerDedupRepository(client),
 		async publishEvents(envelopes: DomainEventEnvelope[]) {
 			for (const envelope of envelopes) {
 				await appendJournal(client, envelope);

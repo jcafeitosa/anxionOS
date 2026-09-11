@@ -1,14 +1,26 @@
-import type { PoolClient } from "pg";
+import type { Pool, PoolClient } from "pg";
 import type {
+	DeletionRequestRecord,
+	DeletionRequestRepository,
+	ExportJobRecord,
+	ExportJobRepository,
 	HealthCheckRecord,
 	HealthCheckRepository,
 	HealthCheckUpdateInput,
 	IncidentRecord,
 	IncidentRepository,
 	IncidentUpdateInput,
+	RecoveryTaskRecord,
+	RecoveryTaskRepository,
+	RecoveryTaskUpdateInput,
+	RetentionPolicyRecord,
+	RetentionPolicyRepository,
 } from "../../domain/ports/operations-unit-of-work";
 import { HealthCheckRevisionConflictError } from "../../domain/errors/health-check-errors";
 import { IncidentRevisionConflictError } from "../../domain/errors/incident-errors";
+import { RecoveryTaskRevisionConflictError } from "../../domain/errors/recovery-errors";
+
+type PgQueryable = Pool | PoolClient;
 
 function mapHealthCheck(row: Record<string, unknown>): HealthCheckRecord {
 	return {
@@ -47,7 +59,7 @@ function mapIncident(row: Record<string, unknown>): IncidentRecord {
 	};
 }
 export function createPgHealthCheckRepository(
-	client: PoolClient,
+	client: PgQueryable,
 ): HealthCheckRepository {
 	return {
 		async findByOrganizationAndServiceId(organizationId, serviceId) {
@@ -98,8 +110,97 @@ export function createPgHealthCheckRepository(
 		},
 	};
 }
+function mapRecoveryTask(row: Record<string, unknown>): RecoveryTaskRecord {
+	return {
+		id: String(row.id),
+		organizationId: String(row.organization_id),
+		incidentId: String(row.incident_id),
+		stepKind: String(row.step_kind),
+		status: String(row.status),
+		stepRequiresApproval: Boolean(row.step_requires_approval),
+		hasRequiredApproval: Boolean(row.has_required_approval),
+		startedAt: (row.started_at as Date).toISOString(),
+		revision: Number(row.revision ?? 1),
+		initiatedByPrincipalId: row.initiated_by_principal_id
+			? String(row.initiated_by_principal_id)
+			: null,
+	};
+}
+export function createPgRecoveryTaskRepository(
+	client: PgQueryable,
+): RecoveryTaskRepository {
+	return {
+		async findById(id) {
+			const result = await client.query(
+				"SELECT * FROM operations_recovery_tasks WHERE id = $1",
+				[id],
+			);
+			const row = result.rows[0];
+			return row ? mapRecoveryTask(row) : null;
+		},
+		async findByOrganizationAndId(organizationId, id) {
+			const result = await client.query(
+				"SELECT * FROM operations_recovery_tasks WHERE organization_id = $1 AND id = $2",
+				[organizationId, id],
+			);
+			const row = result.rows[0];
+			return row ? mapRecoveryTask(row) : null;
+		},
+		async listByOrganizationAndIncidentId(organizationId, incidentId) {
+			const result = await client.query(
+				`SELECT * FROM operations_recovery_tasks
+				 WHERE organization_id = $1 AND incident_id = $2
+				 ORDER BY started_at ASC`,
+				[organizationId, incidentId],
+			);
+			return result.rows.map((row) => mapRecoveryTask(row));
+		},
+		async save(record: RecoveryTaskRecord) {
+			await client.query(
+				`INSERT INTO operations_recovery_tasks (
+			   id, organization_id, incident_id, step_kind, status,
+			   step_requires_approval, has_required_approval, started_at, revision,
+			   initiated_by_principal_id
+			 ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+				[
+					record.id,
+					record.organizationId,
+					record.incidentId,
+					record.stepKind,
+					record.status,
+					record.stepRequiresApproval,
+					record.hasRequiredApproval,
+					record.startedAt,
+					record.revision,
+					record.initiatedByPrincipalId,
+				],
+			);
+			return record;
+		},
+		async update(record: RecoveryTaskUpdateInput) {
+			const result = await client.query(
+				`UPDATE operations_recovery_tasks
+			 SET status = $2, has_required_approval = $3, revision = $4, updated_at = now()
+			 WHERE id = $1 AND revision = $5
+			 RETURNING *`,
+				[
+					record.id,
+					record.status,
+					record.hasRequiredApproval,
+					record.revision,
+					record.expectedRevision,
+				],
+			);
+			const row = result.rows[0];
+			if (!row) {
+				throw new RecoveryTaskRevisionConflictError();
+			}
+			return mapRecoveryTask(row);
+		},
+	};
+}
 export function createPgIncidentRepository(
-	client: PoolClient,
+	client: PgQueryable,
 ): IncidentRepository {
 	return {
 		async findById(id) {
@@ -109,6 +210,23 @@ export function createPgIncidentRepository(
 			);
 			const row = result.rows[0];
 			return row ? mapIncident(row) : null;
+		},
+		async findByOrganizationAndId(organizationId, id) {
+			const result = await client.query(
+				"SELECT * FROM operations_incidents WHERE organization_id = $1 AND id = $2",
+				[organizationId, id],
+			);
+			const row = result.rows[0];
+			return row ? mapIncident(row) : null;
+		},
+		async listByOrganizationId(organizationId) {
+			const result = await client.query(
+				`SELECT * FROM operations_incidents
+				 WHERE organization_id = $1
+				 ORDER BY opened_at DESC`,
+				[organizationId],
+			);
+			return result.rows.map((row) => mapIncident(row));
 		},
 		async save(record: IncidentRecord) {
 			await client.query(
@@ -163,6 +281,217 @@ export function createPgIncidentRepository(
 				throw new IncidentRevisionConflictError();
 			}
 			return mapIncident(row);
+		},
+	};
+}
+
+// ANX-313 S3 — retention policy repository
+export function createPgRetentionPolicyRepository(
+	client: PgQueryable,
+): RetentionPolicyRepository {
+	return {
+		async findById(id) {
+			const result = await client.query(
+				"SELECT * FROM operations_retention_policies WHERE id = $1",
+				[id],
+			);
+			const row = result.rows[0];
+			return row
+				? {
+					id: row.id,
+					organizationId: row.organization_id,
+					scope: row.scope,
+					action: row.action,
+					retentionDays: row.retention_days,
+					legalHold: row.legal_hold,
+					exportManifestRequired: row.export_manifest_required,
+					createdBy: row.created_by,
+					status: row.status,
+					createdAt: row.created_at,
+					updatedAt: row.updated_at,
+				}
+				: null;
+		},
+		async findByOrganizationAndScope(organizationId, scope) {
+			const result = await client.query(
+				"SELECT * FROM operations_retention_policies WHERE organization_id = $1 AND scope = $2 AND status = $3 LIMIT 1",
+				[organizationId, scope, "ACTIVE"],
+			);
+			const row = result.rows[0];
+			return row
+				? {
+					id: row.id,
+					organizationId: row.organization_id,
+					scope: row.scope,
+					action: row.action,
+					retentionDays: row.retention_days,
+					legalHold: row.legal_hold,
+					exportManifestRequired: row.export_manifest_required,
+					createdBy: row.created_by,
+					status: row.status,
+					createdAt: row.created_at,
+					updatedAt: row.updated_at,
+				}
+				: null;
+		},
+		async save(record) {
+			await client.query(
+				`INSERT INTO operations_retention_policies (
+				   id, organization_id, scope, action, retention_days,
+				   legal_hold, export_manifest_required, created_by, status
+				 ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+				[
+					record.id,
+					record.organizationId,
+					record.scope,
+					record.action,
+					record.retentionDays,
+					record.legalHold,
+					record.exportManifestRequired,
+					record.createdBy,
+					record.status,
+				],
+			);
+			return record;
+		},
+		async updateStatus(id, status, _revision) {
+			await client.query(
+				"UPDATE operations_retention_policies SET status = $2, updated_at = NOW() WHERE id = $1",
+				[id, status],
+			);
+		},
+	};
+}
+
+// ANX-313 S3 — export job repository
+export function createPgExportJobRepository(
+	client: PgQueryable,
+): ExportJobRepository {
+	return {
+		async findById(id) {
+			const result = await client.query(
+				"SELECT * FROM operations_export_jobs WHERE id = $1",
+				[id],
+			);
+			const row = result.rows[0];
+			return row
+				? {
+					id: row.id,
+					organizationId: row.organization_id,
+					scope: row.scope,
+					subjectId: row.subject_id,
+					status: row.status,
+					manifestJson: row.manifest_json,
+					requestedBy: row.requested_by,
+					completedAt: row.completed_at,
+					createdAt: row.created_at,
+					updatedAt: row.updated_at,
+				}
+				: null;
+		},
+		async save(record) {
+			await client.query(
+				`INSERT INTO operations_export_jobs (
+				   id, organization_id, scope, subject_id, status,
+				   manifest_json, requested_by
+				 ) VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+				[
+					record.id,
+					record.organizationId,
+					record.scope,
+					record.subjectId,
+					record.status,
+					record.manifestJson ? JSON.stringify(record.manifestJson) : null,
+					record.requestedBy,
+				],
+			);
+			return record;
+		},
+		async updateStatus(id, status, manifestJson, completedAt) {
+			await client.query(
+				"UPDATE operations_export_jobs SET status = $2, manifest_json = $3, completed_at = $4, updated_at = NOW() WHERE id = $1",
+				[id, status, manifestJson ? JSON.stringify(manifestJson) : null, completedAt],
+			);
+		},
+	};
+}
+
+// ANX-313 S3 — deletion request repository
+export function createPgDeletionRequestRepository(
+	client: PgQueryable,
+): DeletionRequestRepository {
+	return {
+		async findById(id) {
+			const result = await client.query(
+				"SELECT * FROM operations_deletion_requests WHERE id = $1",
+				[id],
+			);
+			const row = result.rows[0];
+			return row
+				? {
+					id: row.id,
+					organizationId: row.organization_id,
+					scope: row.scope,
+					subjectId: row.subject_id,
+					policyId: row.policy_id,
+					status: row.status,
+					requestedBy: row.requested_by,
+					approvedBy: row.approved_by,
+					approvedAt: row.approved_at,
+					executedAt: row.executed_at,
+					createdAt: row.created_at,
+					updatedAt: row.updated_at,
+				}
+				: null;
+		},
+		async findByOrganizationAndSubject(organizationId, subjectId) {
+			const result = await client.query(
+				"SELECT * FROM operations_deletion_requests WHERE organization_id = $1 AND subject_id = $2 ORDER BY created_at DESC LIMIT 1",
+				[organizationId, subjectId],
+			);
+			const row = result.rows[0];
+			return row
+				? {
+					id: row.id,
+					organizationId: row.organization_id,
+					scope: row.scope,
+					subjectId: row.subject_id,
+					policyId: row.policy_id,
+					status: row.status,
+					requestedBy: row.requested_by,
+					approvedBy: row.approved_by,
+					approvedAt: row.approved_at,
+					executedAt: row.executed_at,
+					createdAt: row.created_at,
+					updatedAt: row.updated_at,
+				}
+				: null;
+		},
+		async save(record) {
+			await client.query(
+				`INSERT INTO operations_deletion_requests (
+				   id, organization_id, scope, subject_id, policy_id,
+				   status, requested_by, approved_by, executed_at
+				 ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+				[
+					record.id,
+					record.organizationId,
+					record.scope,
+					record.subjectId,
+					record.policyId,
+					record.status,
+					record.requestedBy,
+					record.approvedBy,
+					record.executedAt,
+				],
+			);
+			return record;
+		},
+		async updateStatus(id, status, approvedBy, executedAt) {
+			await client.query(
+				"UPDATE operations_deletion_requests SET status = $2, approved_by = $3, executed_at = $4, updated_at = NOW() WHERE id = $1",
+				[id, status, approvedBy, executedAt],
+			);
 		},
 	};
 }

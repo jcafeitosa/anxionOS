@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 export const gateIdSchema = z.enum([
 	"G0",
 	"G1",
@@ -48,9 +49,9 @@ export const heartbeatStatusSchema = z.enum([
 	"done",
 	"cancelled",
 ]);
-export const taskIdSchema = z.string().uuid();
-export const runIdSchema = z.string().uuid();
-export const goalIdSchema = z.string().uuid();
+export const taskIdSchema = institutionalUuidSchema;
+export const runIdSchema = institutionalUuidSchema;
+export const goalIdSchema = institutionalUuidSchema;
 export const issueIdentifierSchema = z.string().regex(/^ANX-[0-9]+$/);
 export const artifactDigestSchema = z.string().regex(/^[a-f0-9]{64}$/);
 export const agentIdSchema = z.string().min(1).max(128);

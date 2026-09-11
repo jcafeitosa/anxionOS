@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { billingInvoiceIdSchema } from "../billing/types";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	commissionRateSchema,
 	decimalAmountSchema,
@@ -17,9 +18,9 @@ export const PARTNERS_EVENT_TYPES = {
 export const commissionAccruedPayloadSchema = z.object({
 	commissionAccrualId: partnersCommissionAccrualIdSchema,
 	partnerId: partnersPartnerIdSchema,
-	organizationId: z.string().uuid(),
+	organizationId: institutionalUuidSchema,
 	referralId: partnersReferralIdSchema,
-	referredOrganizationId: z.string().uuid(),
+	referredOrganizationId: institutionalUuidSchema,
 	invoiceId: billingInvoiceIdSchema,
 	invoiceTotalAmount: decimalAmountSchema,
 	commissionRate: commissionRateSchema,
@@ -29,7 +30,7 @@ export const commissionAccruedPayloadSchema = z.object({
 export const commissionReversedPayloadSchema = z.object({
 	commissionAccrualId: partnersCommissionAccrualIdSchema,
 	partnerId: partnersPartnerIdSchema,
-	organizationId: z.string().uuid(),
+	organizationId: institutionalUuidSchema,
 	invoiceId: billingInvoiceIdSchema,
 	reversedAmount: decimalAmountSchema,
 	reversedAt: z.string().datetime(),
@@ -37,14 +38,14 @@ export const commissionReversedPayloadSchema = z.object({
 export const payoutRequestedPayloadSchema = z.object({
 	payoutId: partnersPayoutIdSchema,
 	partnerId: partnersPartnerIdSchema,
-	organizationId: z.string().uuid(),
+	organizationId: institutionalUuidSchema,
 	requestedAmount: decimalAmountSchema,
 	requestedAt: z.string().datetime(),
 });
 export const payoutApprovedPayloadSchema = z.object({
 	payoutId: partnersPayoutIdSchema,
 	partnerId: partnersPartnerIdSchema,
-	organizationId: z.string().uuid(),
+	organizationId: institutionalUuidSchema,
 	approvedAmount: decimalAmountSchema,
 	approvalReference: z.string().min(1).max(128),
 	approvedAt: z.string().datetime(),

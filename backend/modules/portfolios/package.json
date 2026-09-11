@@ -15,6 +15,7 @@
 	"dependencies": {
 		"@anxionos/contracts": "workspace:*",
 		"@anxionos/eventing": "workspace:*",
+		"@anxionos/market-data": "workspace:*",
 		"drizzle-orm": "0.45.2",
 		"pg": "8.23.0"
 	},

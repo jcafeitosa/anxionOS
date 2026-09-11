@@ -5,6 +5,7 @@
  * User instruction: implement AI Product Company Engine projection worker sandbox (ANX-277).
  */
 import { z } from "zod";
+import { institutionalUuidSchema } from "../../institutional-uuid";
 
 export const PRODUCT_GRAPH_OWNER_DOMAIN = "product";
 
@@ -14,11 +15,11 @@ export const PRODUCT_GRAPH_EVENT_TYPES = {
 } as const;
 
 export const workItemStatusChangedPayloadSchema = z.object({
-	workItemId: z.string().uuid(),
-	companyId: z.string().uuid(),
+	workItemId: institutionalUuidSchema,
+	companyId: institutionalUuidSchema,
 	status: z.string().min(1),
 	revision: z.number().int().nonnegative(),
-	featureId: z.string().uuid().optional(),
+	featureId: institutionalUuidSchema.optional(),
 	title: z.string().min(1).optional(),
 });
 
@@ -27,9 +28,9 @@ export type WorkItemStatusChangedPayload = z.infer<
 >;
 
 export const intelligenceFeedsBackPayloadSchema = z.object({
-	companyId: z.string().uuid(),
-	monitorId: z.string().uuid(),
-	problemId: z.string().uuid(),
+	companyId: institutionalUuidSchema,
+	monitorId: institutionalUuidSchema,
+	problemId: institutionalUuidSchema,
 	revision: z.number().int().nonnegative(),
 	metricName: z.string().min(1),
 	metricValue: z.number(),

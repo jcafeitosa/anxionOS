@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 
 export const agentKindSchema = z.enum(["AGENCY", "PLATFORM"]);
 export const agentLifecycleStatusSchema = z.enum([
@@ -43,7 +44,7 @@ export const skillSandboxPolicySchema = z.object({
 });
 
 export const evaluationRefSchema = z.object({
-	evaluationId: z.string().uuid(),
+	evaluationId: institutionalUuidSchema,
 	rubricVersion: z.string().min(1).max(64),
 	outcome: z.enum(["pass", "fail"]),
 	evidenceHash: z.string().min(1).max(128),
@@ -55,12 +56,12 @@ export const skillBindingConfigSchema = z.record(
 );
 
 export const skillRefSchema = z.object({
-	skillId: z.string().uuid(),
+	skillId: institutionalUuidSchema,
 	schemaVersion: z.string().min(1).max(32),
 });
 
 export const skillVersionRefSchema = z.object({
-	skillVersionId: z.string().uuid(),
+	skillVersionId: institutionalUuidSchema,
 	schemaVersion: z.string().min(1).max(32),
 });
 

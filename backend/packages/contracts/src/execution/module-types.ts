@@ -16,6 +16,7 @@ export const executionModuleModeSchema = z.enum(["SIMULATED", "PAPER"]);
 export const executionSessionStatusSchema = z.enum(["OPEN", "CLOSED"]);
 export const executionOrderStatusSchema = z.enum([
 	"SUBMITTED",
+	"PARTIALLY_FILLED",
 	"FILLED",
 	"CANCELLED",
 ]);

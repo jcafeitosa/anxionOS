@@ -25,6 +25,7 @@ export const AGENTS_ERROR_CODES = [
 	"AGT_ROUTINE_PAUSED",
 	"AGT_BUDGET_NOT_FOUND",
 	"AGT_BUDGET_EXHAUSTED",
+	"AGT_GENERATION_FENCING_MISMATCH",
 ] as const;
 
 export const agentsErrorCodeSchema = z.enum(AGENTS_ERROR_CODES);
@@ -54,6 +55,7 @@ export const AGENTS_ERROR_STATUS_MAP = {
 	AGT_ROUTINE_PAUSED: 409,
 	AGT_BUDGET_NOT_FOUND: 404,
 	AGT_BUDGET_EXHAUSTED: 409,
+	AGT_GENERATION_FENCING_MISMATCH: 409,
 } as const;
 
 export const agentsErrorDetailsSchema = z.object({

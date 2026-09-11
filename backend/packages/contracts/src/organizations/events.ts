@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	agencyStatusSchema,
 	marketScopeSchema,
@@ -16,8 +17,8 @@ export const ORGANIZATION_EVENT_TYPES = {
 	OWNERSHIP_TRANSFERRED: "organizations.agency.ownership_transferred.v1",
 };
 export const agencyCreatedPayloadSchema = z.object({
-	agencyId: z.string().uuid(),
-	ownerPrincipalId: z.string().uuid(),
+	agencyId: institutionalUuidSchema,
+	ownerPrincipalId: institutionalUuidSchema,
 	displayName: z.string().min(1).max(200),
 	marketScope: marketScopeSchema,
 	status: agencyStatusSchema,
@@ -25,44 +26,44 @@ export const agencyCreatedPayloadSchema = z.object({
 	revision: z.number().int().nonnegative(),
 });
 export const agencyMarketsUpdatedPayloadSchema = z.object({
-	agencyId: z.string().uuid(),
+	agencyId: institutionalUuidSchema,
 	marketScope: marketScopeSchema,
 	previousMarketScope: marketScopeSchema,
 	revision: z.number().int().nonnegative(),
 });
 export const agencyStatusChangedPayloadSchema = z.object({
-	agencyId: z.string().uuid(),
+	agencyId: institutionalUuidSchema,
 	status: agencyStatusSchema,
 	onboardingStep: onboardingStepSchema,
 	previousStatus: agencyStatusSchema,
 	revision: z.number().int().nonnegative(),
 });
 export const membershipInvitedPayloadSchema = z.object({
-	membershipId: z.string().uuid(),
-	agencyId: z.string().uuid(),
+	membershipId: institutionalUuidSchema,
+	agencyId: institutionalUuidSchema,
 	email: z.string().email(),
 	role: membershipRoleSchema,
 	revision: z.number().int().nonnegative(),
 });
 export const membershipActivatedPayloadSchema = z.object({
-	membershipId: z.string().uuid(),
-	agencyId: z.string().uuid(),
-	principalId: z.string().uuid(),
+	membershipId: institutionalUuidSchema,
+	agencyId: institutionalUuidSchema,
+	principalId: institutionalUuidSchema,
 	role: membershipRoleSchema,
 	revision: z.number().int().nonnegative(),
 });
 export const membershipRevokedPayloadSchema = z.object({
-	membershipId: z.string().uuid(),
-	agencyId: z.string().uuid(),
-	principalId: z.string().uuid(),
+	membershipId: institutionalUuidSchema,
+	agencyId: institutionalUuidSchema,
+	principalId: institutionalUuidSchema,
 	revision: z.number().int().nonnegative(),
 });
 export const ownershipTransferredPayloadSchema = z.object({
-	agencyId: z.string().uuid(),
-	previousOwnerPrincipalId: z.string().uuid(),
-	previousOwnerMembershipId: z.string().uuid(),
-	newOwnerPrincipalId: z.string().uuid(),
-	newOwnerMembershipId: z.string().uuid(),
+	agencyId: institutionalUuidSchema,
+	previousOwnerPrincipalId: institutionalUuidSchema,
+	previousOwnerMembershipId: institutionalUuidSchema,
+	newOwnerPrincipalId: institutionalUuidSchema,
+	newOwnerMembershipId: institutionalUuidSchema,
 	revision: z.number().int().nonnegative(),
 });
 export const organizationEventPayloadSchema = z.discriminatedUnion(

@@ -3,7 +3,6 @@ import type {
 	StrategiesCommandResult,
 } from "@anxionos/contracts/strategies";
 import {
-	assertValidStrategyVersionLifecycleTransition,
 	publishStrategyVersionCommandSchema,
 	strategiesCommandResultSchema,
 } from "@anxionos/contracts/strategies";
@@ -11,10 +10,11 @@ import { createStrategyVersionPublishedEvent } from "../../domain/events/strateg
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { StrategiesUnitOfWork } from "../../domain/ports/strategies-unit-of-work";
 import {
-	loadIdempotentCommandResult,
+	loadIdempotentCommandResultWithGuard,
+	replayIdempotentCommandJournalEntry,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwStrategiesError } from "../errors";
+import { throwStrategiesError } from "../errors";
 
 export interface PublishStrategyVersionDeps {
 	unitOfWork: StrategiesUnitOfWork;
@@ -26,19 +26,19 @@ export async function publishStrategyVersion(
 	input: PublishStrategyVersionCommand,
 ): Promise<StrategiesCommandResult> {
 	const command = publishStrategyVersionCommandSchema.parse(input);
-	const replay = await loadIdempotentCommandResult(
+	const replay = await loadIdempotentCommandResultWithGuard(
 		deps.commandJournal,
 		command.commandId,
+		command.organizationId,
 	);
 	if (replay) return replay;
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return strategiesCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
+			return replayIdempotentCommandJournalEntry(
+				raced,
+				command.organizationId,
+			);
 		}
 		const strategy = await ctx.strategies.findById(
 			command.strategyId,
@@ -60,20 +60,22 @@ export async function publishStrategyVersion(
 				`Strategy version ${command.strategyVersionId} not found`,
 			);
 		}
-		const fromState = version.lifecycleState;
-		const toState = "BACKTESTED" as const;
-		try {
-			assertValidStrategyVersionLifecycleTransition(fromState, toState);
-		} catch {
+		if (version.lifecycleState !== "DRAFT") {
 			throwStrategiesError(
 				"ST_INVALID_LIFECYCLE_TRANSITION",
-				`Cannot publish version in state ${version.lifecycleState}`,
+				`Cannot publish version in lifecycle state ${version.lifecycleState}`,
+			);
+		}
+		if (version.publishedAt) {
+			throwStrategiesError(
+				"ST_VERSION_IMMUTABLE",
+				`Strategy version ${command.strategyVersionId} is already published`,
 			);
 		}
 		const publishedAt = new Date().toISOString();
 		const updatedVersion = await ctx.versions.update({
 			...version,
-			lifecycleState: toState,
+			lifecycleState: "DRAFT",
 			revision: version.revision + 1,
 			publishedAt,
 		});

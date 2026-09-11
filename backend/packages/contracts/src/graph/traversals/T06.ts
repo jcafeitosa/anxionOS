@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../../institutional-uuid";
 import { nodeKeySchema } from "../types";
 import { traversalMetaSchema } from "./common";
 
@@ -18,8 +19,8 @@ export const T06_INPUT_SCHEMA = z.object({
 
 export const T06_OUTPUT_SCHEMA = z.object({
 	complete: z.boolean(),
-	dependencyTaskIds: z.array(z.string().uuid()),
-	blockedTaskIds: z.array(z.string().uuid()),
+	dependencyTaskIds: z.array(institutionalUuidSchema),
+	blockedTaskIds: z.array(institutionalUuidSchema),
 	hasCycle: z.boolean(),
 	incompleteReasons: z.array(z.string()).optional(),
 });

@@ -39,8 +39,42 @@ export const proposalStatusSchema = z.enum([
 export const decisionStatusSchema = z.enum([
 	"PROPOSED",
 	"AUTHORITY_CHECKED",
+	"WAITING_APPROVAL",
+	"APPROVED",
+	"DENIED",
 	"SUBMITTED",
 ]);
+export const dispositionKindSchema = z.enum([
+	"APPROVED",
+	"DENIED",
+	"REVOKED",
+	"EXPIRED",
+]);
+export const dispositionOutcomeSchema = z.enum([
+	"UPHELD",
+	"OVERTURNED",
+	"MODIFIED",
+	"EXPIRED",
+]);
+export const approvalIdSchema = z.string().regex(/^dc_apr_[0-9a-f-]{36}$/i);
+export const dispositionIdSchema = z.string().regex(/^dc_dsp_[0-9a-f-]{36}$/i);
+export const evidenceManifestIdSchema = z
+	.string()
+	.regex(/^dc_emf_[0-9a-f-]{36}$/i);
+export const knowledgeEvidenceIdSchema = z
+	.string()
+	.regex(/^kn_evd_[0-9a-f-]{36}$/i);
+export const evidenceProvenanceKindSchema = z.enum([
+	"DOCUMENT",
+	"RETRIEVAL",
+	"MANUAL",
+	"RUN_ARTIFACT",
+]);
+export const evidenceManifestEntrySchema = z.object({
+	evidenceId: knowledgeEvidenceIdSchema,
+	claimTextHash: z.string().min(32).max(128),
+	provenanceKind: evidenceProvenanceKindSchema,
+});
 
 /**
  * Decision Engine scope — product vs engineering decisions.
@@ -90,5 +124,7 @@ export type DecisionsExecutionMode = z.infer<
 export type ProposalKind = z.infer<typeof proposalKindSchema>;
 export type ProposalStatus = z.infer<typeof proposalStatusSchema>;
 export type DecisionStatus = z.infer<typeof decisionStatusSchema>;
+export type DispositionKind = z.infer<typeof dispositionKindSchema>;
+export type DispositionOutcome = z.infer<typeof dispositionOutcomeSchema>;
 export type DecisionScope = z.infer<typeof decisionScopeSchema>;
 export type DecisionEngineStatus = z.infer<typeof decisionEngineStatusSchema>;

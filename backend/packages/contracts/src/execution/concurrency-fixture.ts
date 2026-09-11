@@ -1,10 +1,11 @@
 import { z } from "zod";
 import { isPermitStale } from "../decisions/execution-permit";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import type { ExecutionPermit } from "../decisions/execution-permit";
 import { EFFECT_GATE_VIOLATION, EffectGateError } from "./effect-gate";
 export const taskLeaseSchema = z.object({
-	leaseToken: z.string().uuid(),
-	holderId: z.string().uuid(),
+	leaseToken: institutionalUuidSchema,
+	holderId: institutionalUuidSchema,
 	expiresAt: z.string().datetime(),
 });
 export const CONCURRENCY_VIOLATION = {

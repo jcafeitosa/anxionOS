@@ -25,7 +25,17 @@ export {
 	chunkEmbeddedPayloadSchema,
 	documentAccessRevokedPayloadSchema,
 	memoryPromotedPayloadSchema,
+	evidenceSourceRefSchema,
+	evidenceProvenanceKindSchema,
+	evidenceRecordedPayloadSchema,
 } from "./events";
+export {
+	knowledgeEvidenceRecordedBridgeSchema,
+	extractDecisionIdFromEvidenceSourceRefs,
+	mapEvidenceRecordedToAttachInput,
+	type KnowledgeEvidenceRecordedBridge,
+	type AttachEvidenceFromKnowledgeInput,
+} from "./evidence-recorded-bridge";
 export type { KnowledgeEventType } from "./events";
 export {
 	KNOWLEDGE_ERROR_CODES,

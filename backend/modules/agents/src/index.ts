@@ -24,6 +24,8 @@ export type {
 	ToolAuditAfterInput,
 	ToolAuditBeforeInput,
 	ToolAuditTrailQuery,
+	BotRunGenerationPort,
+	OrchestrationRunFencePort,
 } from "./domain/ports";
 export { createAgentRegistryAdapter } from "./infrastructure/adapters/agent-registry-adapter";
 export type { AgentRegistryAdapter } from "./infrastructure/adapters/agent-registry-adapter";
@@ -50,6 +52,8 @@ export { buildOrganizationTenantContext } from "./application/services/tenant-co
 export { createEvaluationRefPromotionGate } from "./application/services/create-evaluation-ref-promotion-gate";
 export { createAppendOnlyToolAuditAdapter } from "./infrastructure/adapters/append-only-tool-audit-adapter";
 export { createSandboxComputerSessionAdapter } from "./infrastructure/adapters/sandbox-computer-session-adapter";
+export { createSandboxBotRunGenerationAdapter } from "./infrastructure/adapters/sandbox-bot-run-generation-adapter";
+export { createInMemoryOrchestrationRunFenceAdapter } from "./infrastructure/adapters/in-memory-orchestration-run-fence-adapter";
 export {
 	buildWorkspacePath,
 	assertWorkspacePathReadable,
@@ -65,6 +69,9 @@ export { acquireComputerSession } from "./application/commands/acquire-computer-
 export { releaseComputerSession } from "./application/commands/release-computer-session";
 export { takeoverComputerSession } from "./application/commands/takeover-computer-session";
 export { resumeBotControl } from "./application/commands/resume-bot-control";
+export { acquireBotRunGeneration } from "./application/commands/acquire-bot-run-generation";
+export { abortBotRunGeneration } from "./application/commands/abort-bot-run-generation";
+export { releaseBotRunGeneration } from "./application/commands/release-bot-run-generation";
 export { executeGovernedToolCall } from "./application/commands/execute-governed-tool-call";
 export { createAgentsDb } from "./infrastructure/create-db";
 export { ensureAgentsSchema } from "./infrastructure/migrate";

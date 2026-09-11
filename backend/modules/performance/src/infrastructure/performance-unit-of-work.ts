@@ -6,9 +6,11 @@ import type {
 	PerformanceUnitOfWork,
 } from "../domain/ports/performance-unit-of-work";
 import { createPgCommandJournalRepository } from "./persistence/command-journal-repository";
+import { createPgMetricTimeseriesRepository } from "./persistence/metric-timeseries-repository";
 import {
 	createPgMetricSeriesRepository,
 	createPgOutcomeSnapshotRepository,
+	createPgPositionExposureSnapshotRepository,
 } from "./persistence/repositories";
 
 function createTransactionContext(
@@ -17,7 +19,10 @@ function createTransactionContext(
 	return {
 		commandJournal: createPgCommandJournalRepository(client),
 		outcomeSnapshots: createPgOutcomeSnapshotRepository(client),
+		positionExposureSnapshots:
+			createPgPositionExposureSnapshotRepository(client),
 		metricSeries: createPgMetricSeriesRepository(client),
+		metricTimeseries: createPgMetricTimeseriesRepository(client),
 		async publishEvents(envelopes: DomainEventEnvelope[]) {
 			for (const envelope of envelopes) {
 				await appendJournal(client, envelope);

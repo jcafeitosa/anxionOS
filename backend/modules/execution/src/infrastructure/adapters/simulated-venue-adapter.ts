@@ -16,7 +16,8 @@ export class SimulatedVenueAdapter implements SimulatedVenuePort {
 	constructor(options: SimulatedVenueAdapterOptions = {}) {
 		this.venueFillIdGenerator =
 			options.venueFillIdGenerator ??
-			((request: SimulatedFillRequest) => `sim_vfill_${request.orderId}`);
+			((request: SimulatedFillRequest) =>
+				`sim_vfill_${request.orderId}_${request.fillQuantity}`);
 	}
 
 	fill(
@@ -26,7 +27,7 @@ export class SimulatedVenueAdapter implements SimulatedVenuePort {
 		const venueFillId = this.venueFillIdGenerator(request);
 		return {
 			venueFillId,
-			quantity: request.quantity,
+			quantity: request.fillQuantity,
 			price: request.price,
 			notionalAmount,
 			asset: request.asset,

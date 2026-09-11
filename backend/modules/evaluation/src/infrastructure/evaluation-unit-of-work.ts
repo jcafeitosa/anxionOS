@@ -5,6 +5,7 @@ import type {
 	EvaluationTransactionContext,
 	EvaluationUnitOfWork,
 } from "../domain/ports/evaluation-unit-of-work";
+import { createPgCertificationRepository } from "./persistence/certification-repository";
 import { createPgCommandJournalRepository } from "./persistence/command-journal-repository";
 import {
 	createPgEvaluationRecordRepository,
@@ -18,6 +19,7 @@ function createTransactionContext(
 		commandJournal: createPgCommandJournalRepository(client),
 		evaluationRecords: createPgEvaluationRecordRepository(client),
 		evaluationScores: createPgEvaluationScoreRepository(client),
+		certifications: createPgCertificationRepository(client),
 		async publishEvents(envelopes: DomainEventEnvelope[]) {
 			for (const envelope of envelopes) {
 				await appendJournal(client, envelope);

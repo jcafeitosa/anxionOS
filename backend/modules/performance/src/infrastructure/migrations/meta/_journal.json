@@ -1,0 +1,27 @@
+{
+	"version": "7",
+	"dialect": "postgresql",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "7",
+			"when": 1796764800000,
+			"tag": "0000_performance_core",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1796851200000,
+			"tag": "0001_position_exposure_snapshots",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1796937600000,
+			"tag": "0002_timescale_metric_series",
+			"breakpoints": true
+		}
+	]
+}

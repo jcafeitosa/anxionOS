@@ -17,6 +17,10 @@ export const riskPermitStatusSchema = z.enum([
 	"REVOKED",
 	"EXPIRED",
 ]);
+export const riskKillSwitchScopeSchema = z.enum(["ORGANIZATION", "PORTFOLIO"]);
+export const riskKillSwitchIdSchema = z
+	.string()
+	.regex(/^rk_ksw_[0-9a-f-]{36}$/i);
 export const decimalAmountSchema = z.string().regex(/^\d+(\.\d+)?$/);
 export class RiskContractError extends Error {
 	constructor(message: string) {
@@ -38,3 +42,4 @@ export type RiskExecutionMode = z.infer<typeof riskExecutionModeSchema>;
 export type CheckResult = z.infer<typeof checkResultSchema>;
 export type RiskPolicyStatus = z.infer<typeof riskPolicyStatusSchema>;
 export type RiskPermitStatus = z.infer<typeof riskPermitStatusSchema>;
+export type RiskKillSwitchScope = z.infer<typeof riskKillSwitchScopeSchema>;

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	capitalAccountIdSchema,
 	capitalAllocationIdSchema,
@@ -12,16 +13,16 @@ export const CAPITAL_EVENT_TYPES = {
 };
 export const accountRegisteredPayloadSchema = z.object({
 	accountId: capitalAccountIdSchema,
-	ownerUserId: z.string().uuid(),
+	ownerUserId: institutionalUuidSchema,
 	baseCurrency: z.string().min(3).max(8),
-	organizationId: z.string().uuid(),
+	organizationId: institutionalUuidSchema,
 });
 export const allocationProposedPayloadSchema = z.object({
 	allocationId: capitalAllocationIdSchema,
 	accountId: capitalAccountIdSchema,
-	grantId: z.string().uuid(),
-	portfolioId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	grantId: institutionalUuidSchema,
+	portfolioId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	limitAmount: z.string(),
 	limitCurrency: z.string(),
 });
@@ -31,12 +32,12 @@ export const reservationCreatedPayloadSchema = z.object({
 	intentHash: z.string(),
 	amount: z.string(),
 	asset: z.string(),
-	organizationId: z.string().uuid(),
+	organizationId: institutionalUuidSchema,
 });
 export const reservationReleasedPayloadSchema = z.object({
 	reservationId: capitalReservationIdSchema,
 	accountId: capitalAccountIdSchema,
-	organizationId: z.string().uuid(),
+	organizationId: institutionalUuidSchema,
 	releasedAmount: z.string(),
 	remainingAmount: z.string(),
 	asset: z.string(),

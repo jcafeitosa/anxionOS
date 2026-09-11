@@ -11,7 +11,11 @@ const migrationsFolder = join(
 
 export async function ensureRiskSchema(pool: Pool): Promise<void> {
 	const db = drizzle(pool);
-	await migrate(db, { migrationsFolder });
+	await migrate(db, {
+		migrationsFolder,
+		migrationsSchema: "risk",
+		migrationsTable: "__drizzle_migrations",
+	});
 }
 
 const databaseUrl =

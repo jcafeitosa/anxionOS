@@ -7,6 +7,9 @@ import type {
 } from "../domain/ports/strategies-unit-of-work";
 import { createPgCommandJournalRepository } from "./persistence/command-journal-repository";
 import {
+	createPgBacktestRunRepository,
+	createPgDeploymentRepository,
+	createPgSignalRepository,
 	createPgStrategyRepository,
 	createPgStrategyVersionRepository,
 } from "./persistence/repositories";
@@ -18,6 +21,9 @@ function createTransactionContext(
 		commandJournal: createPgCommandJournalRepository(client),
 		strategies: createPgStrategyRepository(client),
 		versions: createPgStrategyVersionRepository(client),
+		backtestRuns: createPgBacktestRunRepository(client),
+		deployments: createPgDeploymentRepository(client),
+		signals: createPgSignalRepository(client),
 		async publishEvents(envelopes: DomainEventEnvelope[]) {
 			for (const envelope of envelopes) {
 				await appendJournal(client, envelope);

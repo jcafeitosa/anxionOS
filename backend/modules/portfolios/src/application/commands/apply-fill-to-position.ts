@@ -12,10 +12,12 @@ import { createPositionUpdatedEvent } from "../../domain/events/portfolios-event
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { PortfoliosUnitOfWork } from "../../domain/ports/portfolios-unit-of-work";
 import {
-	loadIdempotentCommandResult,
+	loadIdempotentCommandResultWithGuard,
+	replayIdempotentCommandJournalEntry,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwPortfoliosError } from "../errors";
+import { throwPortfoliosError } from "../errors";
+import { applyProvisionalCashForFill } from "../provisional-cash-support";
 
 export interface ApplyFillToPositionDeps {
 	unitOfWork: PortfoliosUnitOfWork;
@@ -31,6 +33,11 @@ function positionResultFromRecord(
 	record: { id: string; revision: number; portfolioId: string },
 	holdingId: string,
 	idempotentReplay = false,
+	extra?: {
+		reconciliationCaseId?: string;
+		cashPositionId?: string;
+		provisionalCash?: boolean;
+	},
 ) {
 	return portfoliosCommandResultSchema.parse({
 		aggregateId: record.id,
@@ -39,6 +46,9 @@ function positionResultFromRecord(
 		positionId: record.id,
 		holdingId,
 		idempotentReplay,
+		reconciliationCaseId: extra?.reconciliationCaseId,
+		cashPositionId: extra?.cashPositionId,
+		provisionalCash: extra?.provisionalCash,
 	});
 }
 export async function applyFillToPosition(
@@ -47,31 +57,19 @@ export async function applyFillToPosition(
 ): Promise<PortfoliosCommandResult> {
 	const command = applyFillToPositionCommandSchema.parse(input);
 	assertPortfoliosExecutionModeSupported(command.executionMode);
-	const existingCommand = await deps.commandJournal.findByCommandId(
-		command.commandId,
-	);
-	if (
-		existingCommand &&
-		existingCommand.organizationId !== command.organizationId
-	) {
-		throwPortfoliosError(
-			"PF_CROSS_TENANT",
-			"command journal organization mismatch",
-		);
-	}
-	const replay = await loadIdempotentCommandResult(
+	const replay = await loadIdempotentCommandResultWithGuard(
 		deps.commandJournal,
 		command.commandId,
+		command.organizationId,
 	);
 	if (replay) return replay;
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return portfoliosCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
+			return replayIdempotentCommandJournalEntry(
+				raced,
+				command.organizationId,
+			);
 		}
 		const portfolio = await ctx.portfolios.findById(command.portfolioId);
 		if (!portfolio) {
@@ -180,7 +178,18 @@ export async function applyFillToPosition(
 				side: command.side,
 			}),
 		]);
-		const result = positionResultFromRecord(updatedPosition, holding.id);
+		const provisional = await applyProvisionalCashForFill(ctx, {
+			portfolio,
+			fillId: command.fillId,
+			side: command.side,
+			quantity: command.quantity,
+			price: command.price,
+		});
+		const result = positionResultFromRecord(updatedPosition, holding.id, false, {
+			reconciliationCaseId: provisional.reconciliationCaseId,
+			cashPositionId: provisional.cashPosition.id,
+			provisionalCash: true,
+		});
 		await ctx.commandJournal.save({
 			commandId: command.commandId,
 			organizationId: command.organizationId,

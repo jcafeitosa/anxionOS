@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 export const KNOWLEDGE_OWNER_DOMAIN = "knowledge";
 export const knowledgeSourceIdSchema = z
 	.string()
@@ -44,7 +45,7 @@ export const blobRefSchema = z.object({
 	contentHash: z.string().min(32).max(128),
 });
 export const aclRefSchema = z.object({
-	aclId: z.string().uuid(),
+	aclId: institutionalUuidSchema,
 	epoch: z.number().int().nonnegative(),
 });
 export const memoryEntryIdSchema = z
@@ -61,13 +62,13 @@ export const retrievalHitSchema = z.object({
 	provenance: z.object({
 		sourceTitle: z.string().max(512),
 		classification: dataClassificationSchema,
-		aclId: z.string().uuid(),
+		aclId: institutionalUuidSchema,
 		aclEpoch: z.number().int().nonnegative(),
 	}),
 });
 export const contextManifestSchema = z.object({
-	manifestId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	manifestId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	queryHash: z.string().min(32).max(128),
 	hits: z.array(retrievalHitSchema),
 	generatedAt: z.string().datetime(),

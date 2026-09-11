@@ -1,16 +1,17 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	executionModeSchema,
 	instrumentIdSchema,
 	observationKindSchema,
 } from "./types";
 export const connectionsMarketDataObservedSchema = z.object({
-	eventId: z.string().uuid(),
-	organizationId: z.string().uuid(),
+	eventId: institutionalUuidSchema,
+	organizationId: institutionalUuidSchema,
 	instrumentId: instrumentIdSchema.optional(),
 	canonicalSymbol: z.string().min(1).max(64).optional(),
 	observationKind: observationKindSchema,
-	sourceEventId: z.string().uuid(),
+	sourceEventId: institutionalUuidSchema,
 	eventTime: z.string().datetime(),
 	price: z.string().regex(/^\d+(\.\d+)?$/),
 	volume: z

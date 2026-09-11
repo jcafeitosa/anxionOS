@@ -30,5 +30,8 @@ export function parseCommandResultSnapshot(
 		permitId: snapshot.permitId,
 		checkResult: snapshot.checkResult,
 		denyReasonCode: snapshot.denyReasonCode,
+		killSwitchId: snapshot.killSwitchId,
+		riskEpoch: snapshot.riskEpoch,
+		killSwitchActive: snapshot.killSwitchActive,
 	});
 }

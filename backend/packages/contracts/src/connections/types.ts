@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 /** CX-R02-INV-01: REAL_EXECUTION absent by design */
 export const connectionKindSchema = z.enum([
 	"MARKET_DATA",
@@ -32,14 +33,14 @@ export const connectionsSecretRefSchema = z
 	})
 	.strict();
 export const grantRefSchema = z.object({
-	grantId: z.string().uuid(),
+	grantId: institutionalUuidSchema,
 	epoch: z.number().int().nonnegative(),
 });
 export const aiAccountIdSchema = z.string().min(1).max(64);
 export const connectionBindingIdSchema = z.string().min(1).max(64);
 export const connectionIdSchema = z.string().min(1).max(64);
 export const usageRecordIdSchema = z.string().min(1).max(64);
-export const inferenceRequestIdSchema = z.string().uuid();
+export const inferenceRequestIdSchema = institutionalUuidSchema;
 const FORBIDDEN_CONNECTION_KINDS = ["REAL_EXECUTION"];
 export class ConnectionsContractError extends Error {
 	code;

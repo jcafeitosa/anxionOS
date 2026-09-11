@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { gateBindingV1Schema } from "./gate-binding/1.0.0/schema";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	agentIdSchema,
 	checkoutStatusSchema,
@@ -57,7 +58,7 @@ export const orchestrationRunOrphanedV1PayloadSchema = z.object({
 	previousStatus: z.string(),
 });
 export const orchestrationGateDispositionRecordedV1PayloadSchema = z.object({
-	bindingId: z.string().uuid(),
+	bindingId: institutionalUuidSchema,
 	organizationId: organizationIdSchema,
 	issueIdentifier: issueIdentifierSchema,
 	gateBinding: gateBindingV1Schema,
@@ -117,7 +118,7 @@ export const orchestrationRunBudgetStoppedV1PayloadSchema = z.object({
 	idempotentReplay: z.boolean(),
 });
 export const orchestrationPlanRevisionProposedV1PayloadSchema = z.object({
-	planRevisionId: z.string().uuid(),
+	planRevisionId: institutionalUuidSchema,
 	goalId: goalIdSchema,
 	proposedByAgentId: agentIdSchema,
 	requiresG0Rebind: z.boolean(),

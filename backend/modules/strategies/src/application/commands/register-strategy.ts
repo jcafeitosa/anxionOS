@@ -7,13 +7,14 @@ import {
 	registerStrategyCommandSchema,
 	strategiesCommandResultSchema,
 } from "@anxionos/contracts/strategies";
+import { createStrategyRegisteredEvent } from "../../domain/events/strategies-events";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { StrategiesUnitOfWork } from "../../domain/ports/strategies-unit-of-work";
 import {
-	loadIdempotentCommandResult,
+	loadIdempotentCommandResultWithGuard,
+	replayIdempotentCommandJournalEntry,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot } from "../errors";
 
 export interface RegisterStrategyDeps {
 	unitOfWork: StrategiesUnitOfWork;
@@ -25,19 +26,19 @@ export async function registerStrategy(
 	input: RegisterStrategyCommand,
 ): Promise<StrategiesCommandResult> {
 	const command = registerStrategyCommandSchema.parse(input);
-	const replay = await loadIdempotentCommandResult(
+	const replay = await loadIdempotentCommandResultWithGuard(
 		deps.commandJournal,
 		command.commandId,
+		command.organizationId,
 	);
 	if (replay) return replay;
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return strategiesCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
+			return replayIdempotentCommandJournalEntry(
+				raced,
+				command.organizationId,
+			);
 		}
 		const existing = await ctx.strategies.findActiveByNaturalKey(
 			command.organizationId,
@@ -67,6 +68,13 @@ export async function registerStrategy(
 			status: "ACTIVE",
 			revision: 1,
 		});
+		await ctx.publishEvents([
+			createStrategyRegisteredEvent({
+				strategyId: saved.id,
+				organizationId: saved.organizationId,
+				revision: saved.revision,
+			}),
+		]);
 		const result = strategiesCommandResultSchema.parse({
 			aggregateId: saved.id,
 			revision: saved.revision,

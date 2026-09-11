@@ -1,6 +1,8 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
+
 export const principalStatusSchema = z.enum(["active", "suspended"]);
-export const principalIdSchema = z.string().uuid();
+export const principalIdSchema = institutionalUuidSchema;
 export const authUserIdSchema = z.string().min(1).max(128);
 export const emailAddressSchema = z
 	.string()

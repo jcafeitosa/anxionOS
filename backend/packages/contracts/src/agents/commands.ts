@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	agentKindSchema,
 	agentLifecycleStatusSchema,
@@ -16,42 +17,42 @@ import {
 } from "./types";
 
 export const commandResultSchema = z.object({
-	aggregateId: z.string().uuid(),
+	aggregateId: institutionalUuidSchema,
 	revision: z.number().int().nonnegative(),
 	idempotentReplay: z.boolean().optional(),
 });
 
 export const registerAgentCommandSchema = z.object({
-	commandId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
 	displayName: z.string().min(1).max(256),
 	kind: agentKindSchema,
-	agencyId: z.string().uuid().optional(),
+	agencyId: institutionalUuidSchema.optional(),
 });
 
 export const transitionAgentStatusCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	agentId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
 	expectedRevision: z.number().int().nonnegative(),
 	targetStatus: agentLifecycleStatusSchema,
 });
 
 export const rollbackAgentVersionCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	agentId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
 	expectedRevision: z.number().int().nonnegative(),
 	targetVersionNumber: z.number().int().positive(),
 });
 
 export const invokeBrainCapabilityCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	agentId: z.string().uuid(),
-	agentVersionId: z.string().uuid().optional(),
+	commandId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
+	agentVersionId: institutionalUuidSchema.optional(),
 	capabilityId: z.string().min(1).max(128),
 	correlationId: z.string().min(1).max(128),
 });
 
 export const registerSkillCommandSchema = z.object({
-	commandId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
 	slug: z
 		.string()
 		.min(1)
@@ -59,12 +60,12 @@ export const registerSkillCommandSchema = z.object({
 		.regex(/^[a-z][a-z0-9-]*$/),
 	displayName: z.string().min(1).max(256),
 	description: z.string().max(2048).optional(),
-	agencyId: z.string().uuid().optional(),
+	agencyId: institutionalUuidSchema.optional(),
 });
 
 export const createSkillVersionCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	skillId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	skillId: institutionalUuidSchema,
 	schemaVersion: z.string().min(1).max(32),
 	contentRef: objectRefSchema,
 	contentHash: z.string().min(1).max(128),
@@ -79,33 +80,33 @@ export const createSkillVersionCommandSchema = z.object({
 });
 
 export const submitSkillVersionCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	skillId: z.string().uuid(),
-	skillVersionId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	skillId: institutionalUuidSchema,
+	skillVersionId: institutionalUuidSchema,
 	expectedRevision: z.number().int().nonnegative(),
 });
 
 export const recordSkillVersionEvaluationCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	skillId: z.string().uuid(),
-	skillVersionId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	skillId: institutionalUuidSchema,
+	skillVersionId: institutionalUuidSchema,
 	expectedRevision: z.number().int().nonnegative(),
 	outcome: z.enum(["verified", "rejected"]),
 	evaluationRef: evaluationRefSchema,
 });
 
 export const bindAgentSkillCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	agentId: z.string().uuid(),
-	agentVersionId: z.string().uuid(),
-	skillVersionId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
+	agentVersionId: institutionalUuidSchema,
+	skillVersionId: institutionalUuidSchema,
 	expectedAgentRevision: z.number().int().nonnegative(),
 	bindingConfig: skillBindingConfigSchema.default(() => ({})),
 });
 
 export const publishAgentVersionCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	agentId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
 	versionNumber: z.number().int().positive(),
 	expectedRevision: z.number().int().nonnegative(),
 	instructionRef: objectRefSchema,
@@ -142,8 +143,8 @@ export type RecordSkillVersionEvaluationCommand = z.infer<
 
 
 export const registerAgentRoutineCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	agentId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
 	slug: z
 		.string()
 		.min(1)
@@ -156,41 +157,41 @@ export const registerAgentRoutineCommandSchema = z.object({
 });
 
 export const pauseAgentRoutineCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	routineId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	routineId: institutionalUuidSchema,
 	expectedRevision: z.number().int().nonnegative(),
 });
 
 export const resumeAgentRoutineCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	routineId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	routineId: institutionalUuidSchema,
 	expectedRevision: z.number().int().nonnegative(),
 });
 
 export const triggerAgentRoutineCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	routineId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	routineId: institutionalUuidSchema,
 	dedupeKey: z.string().min(1).max(256),
 	expectedRevision: z.number().int().nonnegative(),
 });
 
 export const triggerAgentRoutineResultSchema = z.object({
-	routineId: z.string().uuid(),
+	routineId: institutionalUuidSchema,
 	revision: z.number().int().nonnegative(),
 	dedupeKey: z.string().min(1).max(256),
-	runId: z.string().uuid().optional(),
+	runId: institutionalUuidSchema.optional(),
 	idempotentReplay: z.boolean().optional(),
 });
 
 export const setAgentBudgetPolicyCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	agentId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
 	caps: agentBudgetCapsSchema,
 });
 
 export const consumeAgentBudgetCommandSchema = z.object({
-	commandId: z.string().uuid(),
-	agentId: z.string().uuid(),
+	commandId: institutionalUuidSchema,
+	agentId: institutionalUuidSchema,
 	expectedRevision: z.number().int().nonnegative(),
 	wakeupUnits: z.number().int().nonnegative().default(0),
 	tokenUnits: z.number().int().nonnegative().default(0),
@@ -198,7 +199,7 @@ export const consumeAgentBudgetCommandSchema = z.object({
 });
 
 export const consumeAgentBudgetResultSchema = z.object({
-	agentId: z.string().uuid(),
+	agentId: institutionalUuidSchema,
 	revision: z.number().int().nonnegative(),
 	status: z.enum(["active", "paused", "exhausted"]),
 	idempotentReplay: z.boolean().optional(),

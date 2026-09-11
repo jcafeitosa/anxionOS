@@ -23,6 +23,8 @@ export type { AgentBudgetRepository } from "./agent-budget-repository";
 export type { RoutineRunDispatchPort } from "./routine-run-dispatch";
 export type { ToolGatewayPort } from "./tool-gateway-port";
 export type { ComputerSessionPort } from "./computer-session-port";
+export type { BotRunGenerationPort } from "./bot-run-generation-port";
+export type { OrchestrationRunFencePort } from "./orchestration-run-fence-port";
 export type {
 	ToolAuditPort,
 	ToolAuditAfterInput,

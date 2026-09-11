@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	assetClassSchema,
 	executionModeSchema,
@@ -6,12 +7,12 @@ import {
 } from "./types";
 /** Single-use execution permit bound to TradeIntent hash (P02-03 / ANX-48). */
 export const executionPermitSchema = z.object({
-	permitId: z.string().uuid(),
+	permitId: institutionalUuidSchema,
 	intentHash: z.string().min(1),
-	intentId: z.string().uuid(),
-	agencyId: z.string().uuid(),
-	accountId: z.string().uuid(),
-	instrumentId: z.string().uuid(),
+	intentId: institutionalUuidSchema,
+	agencyId: institutionalUuidSchema,
+	accountId: institutionalUuidSchema,
+	instrumentId: institutionalUuidSchema,
 	venue: z.string().min(1),
 	assetClass: assetClassSchema,
 	executionMode: executionModeSchema,

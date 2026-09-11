@@ -1,5 +1,9 @@
-import type { PoolClient } from "pg";
+import type { Pool, PoolClient } from "pg";
+
+type PgQueryable = Pool | PoolClient;
 import type {
+	KillSwitchRecord,
+	KillSwitchRepository,
 	CheckResultRecord,
 	CheckResultRepository,
 	EpochRegistryRecord,
@@ -8,6 +12,8 @@ import type {
 	LimitPolicyRepository,
 	PermitRecord,
 	PermitRepository,
+	ConsumerDedupRecord,
+	ConsumerDedupRepository,
 } from "../../domain/ports/risk-unit-of-work";
 
 function mapPolicy(row: Record<string, unknown>): LimitPolicyRecord {
@@ -154,6 +160,39 @@ export function createPgCheckResultRepository(
 }
 export function createPgPermitRepository(client: PoolClient): PermitRepository {
 	return {
+		async findById(organizationId, permitId) {
+			const result = await client.query(
+				`SELECT * FROM risk_permits
+				 WHERE organization_id = $1 AND id = $2`,
+				[organizationId, permitId],
+			);
+			const row = result.rows[0];
+			return row ? mapPermit(row) : null;
+		},
+		async findIssuedBelowEpoch(organizationId, currentRiskEpoch) {
+			const result = await client.query(
+				`SELECT * FROM risk_permits
+				 WHERE organization_id = $1
+				   AND status = 'ISSUED'
+				   AND risk_epoch < $2
+				 ORDER BY created_at`,
+				[organizationId, currentRiskEpoch],
+			);
+			return result.rows.map((row) => mapPermit(row));
+		},
+		async revokeIssued({ organizationId, permitId }) {
+			const result = await client.query(
+				`UPDATE risk_permits
+				 SET status = 'REVOKED'
+				 WHERE organization_id = $1
+				   AND id = $2
+				   AND status = 'ISSUED'
+				 RETURNING *`,
+				[organizationId, permitId],
+			);
+			const row = result.rows[0];
+			return row ? mapPermit(row) : null;
+		},
 		async save(record: PermitRecord) {
 			await client.query(
 				`INSERT INTO risk_permits (
@@ -170,6 +209,156 @@ export function createPgPermitRepository(client: PoolClient): PermitRepository {
 				],
 			);
 			return record;
+		},
+	};
+}
+
+export function createPgConsumerDedupRepository(
+	client: PoolClient,
+): ConsumerDedupRepository {
+	return {
+		async findByEventId(eventId) {
+			const result = await client.query(
+				"SELECT * FROM risk_consumer_dedup WHERE event_id = $1",
+				[eventId],
+			);
+			const row = result.rows[0];
+			if (!row) return null;
+			return {
+				eventId: String(row.event_id),
+				consumerName: String(row.consumer_name),
+				organizationId: String(row.organization_id),
+			};
+		},
+		async save(record: ConsumerDedupRecord) {
+			await client.query(
+				`INSERT INTO risk_consumer_dedup (event_id, consumer_name, organization_id)
+				 VALUES ($1, $2, $3)`,
+				[record.eventId, record.consumerName, record.organizationId],
+			);
+			return record;
+		},
+	};
+}
+
+
+function mapKillSwitch(row: Record<string, unknown>): KillSwitchRecord {
+	return {
+		id: String(row.id),
+		organizationId: String(row.organization_id),
+		scope: String(row.scope),
+		portfolioId: row.portfolio_id != null ? String(row.portfolio_id) : null,
+		reason: String(row.reason),
+		activatedBy: String(row.activated_by),
+		riskEpochAtActivation: Number(row.risk_epoch_at_activation),
+		active: Boolean(row.active),
+	};
+}
+
+export function createPgKillSwitchRepository(
+	client: PgQueryable,
+): KillSwitchRepository {
+	return {
+		async findActiveForCheck(organizationId, portfolioId) {
+			const result = await client.query(
+				`SELECT * FROM risk_kill_switch_state
+				 WHERE organization_id = $1
+				   AND active = TRUE
+				   AND (
+				     scope = 'ORGANIZATION'
+				     OR (scope = 'PORTFOLIO' AND portfolio_id = $2)
+				   )
+				 ORDER BY CASE scope WHEN 'ORGANIZATION' THEN 0 ELSE 1 END
+				 LIMIT 1`,
+				[organizationId, portfolioId],
+			);
+			const row = result.rows[0];
+			return row ? mapKillSwitch(row) : null;
+		},
+		async findOrganizationStatus(organizationId) {
+			const activeResult = await client.query(
+				`SELECT k.*, e.current_risk_epoch
+				 FROM risk_kill_switch_state k
+				 LEFT JOIN risk_epoch_registry e ON e.organization_id = k.organization_id
+				 WHERE k.organization_id = $1
+				   AND k.scope = 'ORGANIZATION'
+				   AND k.active = TRUE
+				 ORDER BY k.updated_at DESC
+				 LIMIT 1`,
+				[organizationId],
+			);
+			const activeRow = activeResult.rows[0];
+			if (activeRow) {
+				return {
+					id: String(activeRow.id),
+					organizationId: String(activeRow.organization_id),
+					scope: String(activeRow.scope),
+					portfolioId:
+						activeRow.portfolio_id != null
+							? String(activeRow.portfolio_id)
+							: null,
+					killSwitchActive: true,
+					reason: String(activeRow.reason),
+					activatedBy: String(activeRow.activated_by),
+					activatedAt: new Date(String(activeRow.created_at)).toISOString(),
+					releasedAt: null,
+					riskEpochAtActivation:
+						activeRow.current_risk_epoch != null
+							? Number(activeRow.current_risk_epoch)
+							: Number(activeRow.risk_epoch_at_activation),
+				};
+			}
+			const epochResult = await client.query(
+				"SELECT current_risk_epoch FROM risk_epoch_registry WHERE organization_id = $1",
+				[organizationId],
+			);
+			return {
+				organizationId,
+				scope: "ORGANIZATION",
+				portfolioId: null,
+				killSwitchActive: false,
+				reason: null,
+				activatedBy: null,
+				activatedAt: null,
+				releasedAt: null,
+				riskEpochAtActivation:
+					epochResult.rows[0]?.current_risk_epoch != null
+						? Number(epochResult.rows[0].current_risk_epoch)
+						: 0,
+			};
+		},
+		async save(record: KillSwitchRecord) {
+			await client.query(
+				`INSERT INTO risk_kill_switch_state (
+				   id, organization_id, scope, portfolio_id, reason, activated_by,
+				   risk_epoch_at_activation, active, updated_at
+				 ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8, now())`,
+				[
+					record.id,
+					record.organizationId,
+					record.scope,
+					record.portfolioId,
+					record.reason,
+					record.activatedBy,
+					record.riskEpochAtActivation,
+					record.active,
+				],
+			);
+			return record;
+		},
+		async deactivate({ organizationId, scope, portfolioId }) {
+			const result = await client.query(
+				`UPDATE risk_kill_switch_state
+				 SET active = FALSE, released_at = now(), updated_at = now()
+				 WHERE organization_id = $1
+				   AND scope = $2
+				   AND COALESCE(portfolio_id, '') = COALESCE($3, '')
+				   AND active = TRUE
+				 RETURNING *`,
+				[organizationId, scope, portfolioId],
+			);
+			const row = result.rows[0];
+			return row ? mapKillSwitch(row) : null;
 		},
 	};
 }

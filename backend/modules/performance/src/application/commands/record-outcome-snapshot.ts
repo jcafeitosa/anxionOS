@@ -7,7 +7,10 @@ import {
 	performanceCommandResultSchema,
 	recordOutcomeSnapshotCommandSchema,
 } from "@anxionos/contracts/performance";
-import { createOutcomeRecordedEvent } from "../../domain/events/performance-events";
+import {
+	createMetricSnapshotEvent,
+	createOutcomeRecordedEvent,
+} from "../../domain/events/performance-events";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { PerformanceUnitOfWork } from "../../domain/ports/performance-unit-of-work";
 import {
@@ -16,6 +19,55 @@ import {
 	toCommandResultSnapshot,
 } from "../command-support";
 import { parseCommandResultSnapshot, throwPerformanceError } from "../errors";
+import { deriveLedgerPnlMetrics } from "../pnl-from-ledger-lines";
+
+async function persistDerivedMetrics(
+	ctx: Parameters<
+		Parameters<PerformanceUnitOfWork["runInTransaction"]>[0]
+	>[0],
+	input: {
+		organizationId: string;
+		outcomeSnapshotId: string;
+		journalEntryId: string;
+		linesSummary: RecordOutcomeSnapshotCommand["linesSummary"];
+		observedAt: string;
+	},
+): Promise<void> {
+	const derived = deriveLedgerPnlMetrics(input.linesSummary);
+	const events = [];
+	for (const metric of derived) {
+		const existing = await ctx.metricSeries.findByOutcomeAndMetric(
+			input.outcomeSnapshotId,
+			metric.metricName,
+		);
+		if (existing) continue;
+		const metricSeriesId = `perf_mtr_${randomUUID()}`;
+		const savedMetric = await ctx.metricSeries.save({
+			id: metricSeriesId,
+			organizationId: input.organizationId,
+			outcomeSnapshotId: input.outcomeSnapshotId,
+			metricName: metric.metricName,
+			metricValue: metric.metricValue,
+			observedAt: input.observedAt,
+		});
+		await ctx.metricTimeseries.mirrorMetricSeries(savedMetric, {
+			journalEntryId: input.journalEntryId,
+		});
+		events.push(
+			createMetricSnapshotEvent({
+				metricSeriesId,
+				organizationId: input.organizationId,
+				outcomeSnapshotId: input.outcomeSnapshotId,
+				metricName: metric.metricName,
+				metricValue: metric.metricValue,
+				observedAt: input.observedAt,
+			}),
+		);
+	}
+	if (events.length > 0) {
+		await ctx.publishEvents(events);
+	}
+}
 
 export interface RecordOutcomeSnapshotDeps {
 	unitOfWork: PerformanceUnitOfWork;
@@ -106,6 +158,14 @@ export async function recordOutcomeSnapshot(
 					"outcome snapshot organization mismatch",
 				);
 			}
+			const recordedAt = existingSnapshot.recordedAt;
+			await persistDerivedMetrics(ctx, {
+				organizationId: command.organizationId,
+				outcomeSnapshotId: existingSnapshot.id,
+				journalEntryId: command.journalEntryId,
+				linesSummary: command.linesSummary,
+				observedAt: recordedAt,
+			});
 			const result = performanceCommandResultSchema.parse({
 				aggregateId: existingSnapshot.id,
 				revision: 1,
@@ -141,6 +201,13 @@ export async function recordOutcomeSnapshot(
 				recordedAt,
 			}),
 		]);
+		await persistDerivedMetrics(ctx, {
+			organizationId: saved.organizationId,
+			outcomeSnapshotId: saved.id,
+			journalEntryId: saved.journalEntryId,
+			linesSummary: saved.linesSummary,
+			observedAt: recordedAt,
+		});
 		const result = performanceCommandResultSchema.parse({
 			aggregateId: saved.id,
 			revision: 1,

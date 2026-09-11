@@ -56,6 +56,65 @@ export interface CheckResultRepository {
 }
 export interface PermitRepository {
 	save(record: PermitRecord): Promise<PermitRecord>;
+	findById(
+		organizationId: string,
+		permitId: string,
+	): Promise<PermitRecord | null>;
+	findIssuedBelowEpoch(
+		organizationId: string,
+		currentRiskEpoch: number,
+	): Promise<PermitRecord[]>;
+	revokeIssued(input: {
+		organizationId: string;
+		permitId: string;
+	}): Promise<PermitRecord | null>;
+}
+export interface ConsumerDedupRecord {
+	eventId: string;
+	consumerName: string;
+	organizationId: string;
+}
+export interface KillSwitchRecord {
+	id: string;
+	organizationId: string;
+	scope: string;
+	portfolioId: string | null;
+	reason: string;
+	activatedBy: string;
+	riskEpochAtActivation: number;
+	active: boolean;
+}
+export interface ConsumerDedupRepository {
+	findByEventId(eventId: string): Promise<ConsumerDedupRecord | null>;
+	save(record: ConsumerDedupRecord): Promise<ConsumerDedupRecord>;
+}
+export interface KillSwitchStatusRow {
+	id?: string;
+	organizationId: string;
+	scope: string;
+	portfolioId: string | null;
+	killSwitchActive: boolean;
+	reason?: string | null;
+	activatedBy?: string | null;
+	activatedAt?: string | null;
+	releasedAt?: string | null;
+	riskEpochAtActivation?: number | null;
+}
+
+export interface KillSwitchRepository {
+	findActiveForCheck(
+		organizationId: string,
+		portfolioId: string,
+	): Promise<KillSwitchRecord | null>;
+	findOrganizationStatus(
+		organizationId: string,
+	): Promise<KillSwitchStatusRow>;
+	save(record: KillSwitchRecord): Promise<KillSwitchRecord>;
+	deactivate(input: {
+		organizationId: string;
+		scope: string;
+		portfolioId: string | null;
+	}): Promise<KillSwitchRecord | null>;
 }
 export interface RiskTransactionContext {
 	commandJournal: CommandJournalRepository;
@@ -63,6 +122,8 @@ export interface RiskTransactionContext {
 	epochRegistry: EpochRegistryRepository;
 	checkResults: CheckResultRepository;
 	permits: PermitRepository;
+	killSwitch: KillSwitchRepository;
+	consumerDedup: ConsumerDedupRepository;
 	publishEvents(envelopes: DomainEventEnvelope[]): Promise<void>;
 }
 export interface RiskUnitOfWork {

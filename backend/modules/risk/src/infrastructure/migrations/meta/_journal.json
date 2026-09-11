@@ -1,0 +1,27 @@
+{
+	"version": "7",
+	"dialect": "postgresql",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "7",
+			"when": 1795900800000,
+			"tag": "0000_risk_core",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1795987200000,
+			"tag": "0001_kill_switch",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1796073600000,
+			"tag": "0002_epoch_permit_revocation",
+			"breakpoints": true
+		}
+	]
+}

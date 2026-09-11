@@ -7,6 +7,7 @@ import {
 	type AdapterManifest,
 } from "./types";
 import { AdapterGatewayError } from "./errors";
+import { institutionalUuidSchema } from "../institutional-uuid";
 
 export const ADAPTER_CONFORMANCE_SUITE_VERSION = 1;
 
@@ -27,7 +28,7 @@ export const adapterRegistryEntrySchema = z.object({
 	portVersion: z.string().regex(/^\d+\.\d+\.\d+$/),
 	lifecycleStatus: adapterLifecycleStatusSchema,
 	registeredAt: z.string().datetime(),
-	lastConformanceReportId: z.string().uuid().optional(),
+	lastConformanceReportId: institutionalUuidSchema.optional(),
 });
 
 export const adapterConformanceCheckResultSchema = z.object({
@@ -44,7 +45,7 @@ export const adapterConformanceCapabilityResultSchema = z.object({
 });
 
 export const adapterConformanceReportSchema = z.object({
-	reportId: z.string().uuid(),
+	reportId: institutionalUuidSchema,
 	suiteVersion: z.literal(ADAPTER_CONFORMANCE_SUITE_VERSION),
 	adapterId: z.string().min(1).max(64),
 	adapterVersion: z.string().min(1).max(64),

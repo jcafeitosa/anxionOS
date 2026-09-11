@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	assetClassSchema,
 	executionModeSchema,
@@ -7,14 +8,14 @@ import {
 } from "./types";
 /** Immutable trade intent (P02-03 / ANX-48). Owner: decisions module. */
 export const tradeIntentSchema = z.object({
-	intentId: z.string().uuid(),
-	actorPrincipalId: z.string().uuid(),
-	agencyId: z.string().uuid(),
-	tenantId: z.string().uuid().optional(),
+	intentId: institutionalUuidSchema,
+	actorPrincipalId: institutionalUuidSchema,
+	agencyId: institutionalUuidSchema,
+	tenantId: institutionalUuidSchema.optional(),
 	assetClass: assetClassSchema,
-	instrumentId: z.string().uuid(),
+	instrumentId: institutionalUuidSchema,
 	venue: z.string().min(1),
-	accountId: z.string().uuid(),
+	accountId: institutionalUuidSchema,
 	executionMode: executionModeSchema,
 	side: orderSideSchema,
 	quantity: z.string().regex(/^\d+(\.\d+)?$/),
@@ -25,11 +26,11 @@ export const tradeIntentSchema = z.object({
 		.optional(),
 	maxSlippageBps: z.number().int().nonnegative().optional(),
 	quoteCurrency: z.string().length(3),
-	strategyVersionId: z.string().uuid().optional(),
+	strategyVersionId: institutionalUuidSchema.optional(),
 	authorityEpoch: z.number().int().nonnegative(),
 	riskEpoch: z.number().int().nonnegative(),
 	intentHash: z.string().min(1),
-	idempotencyKey: z.string().uuid(),
+	idempotencyKey: institutionalUuidSchema,
 	expiresAt: z.string().datetime(),
 	createdAt: z.string().datetime(),
 });
