@@ -1,21 +1,22 @@
 ---
 type: debate
 ---
-
 # R05 — Armazenamento: `modules/operations`
 
-**Issue:** ANX-111
+**Rodada:** R5 · 2026-09-11 · ANX-389 · ANX-111  
+**Callers:** [R04-contracts-events.md](./R04-contracts-events.md) · [R06-dependencies.md](./R06-dependencies.md).  
+PG autoritativo; Neo4j impact projector; SQLite **não**; ST08 0/23; **sem migration**. Tabelas documentais.
 
-## Decisão
+## Tabelas alvo G1
 
-PG incidents/export/health; Neo4j impact graph
+`operations_incidents` · `operations_runbooks` · `operations_retention_policies` · `operations_export_jobs` (idempotency_key) · `operations_health_snapshots` · `operations_command_journal`
 
-## Invariantes
+**OPS-R05-01** PG. **OPS-R05-02** UoW+outbox. **OPS-R05-03** RLS defer P09. **OPS-R05-04** blob export em object store (`resultRef`), não BYTEA.
 
-| ID | Regra |
-| --- | --- |
-| OPS-R05-01 | PG autoritativo |
-| OPS-R05-02 | Mutação+outbox mesma transação |
-| OPS-R05-03 | RLS defer P09 |
+## Neo4j
 
-→ **R06** ([R06-dependencies.md](./R06-dependencies.md))
+incident.opened → IMPACTS (ids de serviço). Sem PII.
+
+## Saída R5
+
+Modelo v1. Sem migration.

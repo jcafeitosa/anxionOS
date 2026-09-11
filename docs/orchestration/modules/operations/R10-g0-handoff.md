@@ -2,20 +2,17 @@
 type: debate
 status: draft
 ---
+# R10 — Pacote G0 (handoff): `modules/operations`
 
-# R10 — Pacote G0: `modules/operations`
+**Rodada:** R10 · 2026-09-11 · ANX-389 · ANX-111 · **ANX-112** não executada  
+**Callers:** [R09-dev-plan.md](./R09-dev-plan.md) · [ROUNDS.md](./ROUNDS.md). Sem código de produto.
 
-**Issues:** ANX-111 · **ANX-112**
+## In scope
 
-## PC-G0 — 10/10 ✅
+Incident, ExportJob, Health, Runbook, Retention; contratos; PG; oráculos.
 
-| Gate | PASS |
-| --- | --- |
-| G2–G6 | R04–R09 |
-| G7 | pendente ANX-111 |
+## Out of scope
 
-## Handoff
+Audit journal; kill switch; pasta infrastructure/; D-GOV-010; spec accepted; ANX-342; G1 ANX-112.
 
-Fila: **g0_ready**. **ANX-112** blocked_by ANX-111 G7.
-
-| G7-ready? | **Sim** |
+**Veredito P1:** G0 documental. **Não** G1. Próximo: [evaluation](../evaluation/ROUNDS.md). ANX-342 `todo`.

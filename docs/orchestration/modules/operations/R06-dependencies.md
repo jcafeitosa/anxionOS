@@ -1,26 +1,31 @@
 ---
 type: debate
 ---
-
 # R06 — Dependências: `modules/operations`
 
-**Issues:** ANX-111 · **ANX-112**
+**Rodada:** R6 · 2026-09-11 · ANX-389 · ANX-111  
+**Callers:** [R05-storage-pg.md](./R05-storage-pg.md) · [R07-risks.md](./R07-risks.md). Sem API runtime.
+
+## Decisões
+
+OPS-R06-01 health via eventos/probes — sem import infra alheia  
+OPS-R06-02 graph SDK leitura  
+OPS-R06-03 T01 export/incident  
+OPS-R06-04 D-GOV-010 = risk P06  
+OPS-R06-05 PC 17/18/20 sem pastas novas
 
 ## Upstream
 
-| **audit** | contrato |
-| **observability** | contrato |
-| **graph** | contrato |
-| **all modules** | contrato |
+audit, observability, graph, identity, organizations, governance, eventing.
 
 ## Downstream
 
-| **apps/api health** | consome operations.* |
-| **Platform console** | consome operations.* |
-| **deploy** | consome operations.* |
+apps/api health, Platform console, deploy pipelines (procedimento), audit subscriber.
 
-## Gate
+## Imports proibidos
 
-ANX-107
+`audit/infrastructure/**`, `neo4j-driver`, secret plaintext em domain.
 
-→ **R07** ([R07-risks.md](./R07-risks.md))
+## Saída R6
+
+Mapa v1.

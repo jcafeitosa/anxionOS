@@ -4,24 +4,45 @@ type: debate
 
 # R02 — Fronteiras: `modules/operations`
 
-**Pacote SDD:** P07 · **Issue:** **ANX-111**
+**Rodada:** R2 · P07 · 2026-09-11 · ANX-111 · ANX-389  
+**Callers:** [R01-context.md](./R01-context.md) · [R03-domain-sketch.md](./R03-domain-sketch.md). Sem API runtime. Instrução: fatten operations.
 
-## Objetivo
+## Debate
 
-Fechar fronteiras possui/não possui; ratificar ownership; invariantes para R03/R04.
+**Arquiteto:** operations dono de incidente, export, health, runbook, retenção.
 
-## Síntese R2
+**Crítico:** Export **lê** audit via `deltaRefId` — não reescreve journal. Health não substitui observability metrics store.
 
-operations dono incidentes/export/health; não audit replay nem kill switch
+**Security:** T01 em export/incident mutate; export grant + RetentionPolicy; PII no object store, não no grafo.
 
-## Invariantes (`OPS-R02-INV-*`)
+## POSSUI
 
-| ID | Regra |
+Incident, Runbook, RetentionPolicy, ExportJob, ServiceHealthSnapshot.
+
+## NÃO POSSUI
+
+| Item | Dono |
 | --- | --- |
-| OPS-R02-INV-01 | Dono único agregados R03 |
-| OPS-R02-INV-02 | Cross-module só contrato/evento |
-| OPS-R02-INV-03 | SQLite proibido estado autoritativo |
-| OPS-R02-INV-04 | ownerDomain=operations em comandos/eventos |
-| OPS-R02-INV-05 | REAL/live rejeitado v1 |
+| Manifest/replay | audit |
+| Alert timeseries | observability package |
+| Kill switch | risk |
+| Secrets | packages/secrets |
+| D-GOV-010 | risk P06 |
+
+## Non-goals
+
+Não criar `infrastructure/`, `deployments/`, `incidents/` como 24º. Não SQLite de incidente. Não emitir `audit.manifest.*`.
+
+```mermaid
+flowchart TB
+  obs[observability.alert] --> ops[operations]
+  aud[audit.manifest] --> ops
+  ops -->|incident.opened| aud2[audit]
+  ops -->|health.degraded| orch[orchestration]
+```
+
+## Invariantes OPS-R02-INV-*
+
+01 dono único · 02 só contrato/evento · 03 SQLite não autoritativo · 04 ownerDomain=operations · 05 export referencia deltaRefId audit · 06 D-GOV-010 não aqui.
 
 → **R03** ([R03-domain-sketch.md](./R03-domain-sketch.md))

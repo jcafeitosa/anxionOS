@@ -1,48 +1,37 @@
 ---
 type: debate
 ---
+# R04 — Contratos, API e eventos: `modules/operations`
 
-# R04 — Contratos e eventos: `modules/operations`
-
-**Issues:** ANX-111 · **ANX-112**
+**Rodada:** R4 · 2026-09-11 · ANX-389 · ANX-111 · ANX-112 não impl  
+**Callers:** [R05-storage-pg.md](./R05-storage-pg.md). API esboço `/v1/operations`. Sem schema de produção.
 
 ## Convenções
 
-`ownerDomain: operations` · `operations.<aggregate>.<action>.v1`
+ownerDomain `operations` · `operations.<aggregate>.<action>.v1` · sem secrets.
 
-## HTTP `/v1/operations/*`
+### Códigos
 
-| Método | Rota | Comando |
-| --- | --- | --- |
-| GET | `/health` | platform health agregado |
-| GET | `/health/:serviceId` | getServiceHealth |
-| POST | `/incidents` | openIncident |
-| POST | `/export-jobs` | createExportJob (grant + retention policy) |
-| GET | `/export-jobs/:id` | getExportJobStatus |
-
-## ExportJob state machine
-
-`PENDING` → `RUNNING` → `COMPLETED` | `FAILED` | `CANCELLED` — idempotency por `Idempotency-Key`; retry com backoff; `deltaRefId` de audit.
+OPS_DUPLICATE_IDEMPOTENCY 409 · OPS_CROSS_TENANT 403 · OPS_GRANT_INVALID 403 · OPS_RETENTION_DENIED 403 · OPS_EXPORT_AUDIT_MISSING 422.
 
 ## Eventos emitidos
 
-| eventType | Consumidores |
-| --- | --- |
-| `operations.incident.opened.v1` | audit, graph |
-| `operations.export.completed.v1` | audit |
-| `operations.export.failed.v1` | audit |
-| `operations.health.degraded.v1` | audit, orchestration |
+`operations.incident.opened.v1` · `operations.incident.closed.v1` · `operations.export.completed.v1` · `operations.export.failed.v1` · `operations.health.degraded.v1`
 
-## Eventos consumidos
+## Consumidos
 
-| eventType | Ação |
-| --- | --- |
-| `audit.manifest.recorded.v1` | index export sources |
-| `observability.alert.fired.v1` | open incident (correlation) |
-| `*.heartbeat.v1` (module probes) | ServiceHealthSnapshot |
+`audit.manifest.recorded.v1` · `observability.alert.fired.v1` · `*.heartbeat.v1`
 
-## Erros
+**OPS-R04-01:** não emite `audit.manifest.*` nem kill-switch.
 
-`OPS_DUPLICATE_IDEMPOTENCY` · `OPS_CROSS_TENANT` · `OPS_GRANT_INVALID` · `OPS_RETENTION_DENIED`
+## REST
 
-→ **R05** ([R05-storage-pg.md](./R05-storage-pg.md))
+GET `/v1/operations/health` · GET `/health/:serviceId` · POST `/incidents` · POST `/export-jobs` · GET `/export-jobs/:id`
+
+## Oráculos
+
+G3-OPS-01 export idempotente · G3-OPS-02 retention deny · G3-OPS-03 health snapshot · G5-OPS-01 cross-tenant 403 · G5-OPS-02 T01 DENY export.
+
+## Saída R4
+
+Contratos v1.

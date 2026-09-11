@@ -1,24 +1,28 @@
 ---
 type: debate
 ---
-
 # R03 — Esboço de domínio: `modules/operations`
 
-**Issue:** ANX-111
+**Rodada:** R3 · 2026-09-11 · ANX-389 · ANX-111  
+**Callers:** [R02-boundaries.md](./R02-boundaries.md) · [R04-contracts-events.md](./R04-contracts-events.md).
 
 ## Agregados
 
-Incident, Runbook, RetentionPolicy, ExportJob, ServiceHealthSnapshot
+| Agregado | Notas |
+| --- | --- |
+| Incident | correlationId; status open/mitigated/closed |
+| Runbook | versão imutável; passos sem secret |
+| RetentionPolicy | org-scoped; export deve honrar |
+| ExportJob | PENDING→RUNNING→COMPLETED\|FAILED\|CANCELLED; Idempotency-Key |
+| ServiceHealthSnapshot | probes; não é série Timescale |
 
-## Nota
-
-ServiceHealthSnapshot de probes; export referencia audit deltaRefId
+**OPS-R03-01:** ExportJob carrega `deltaRefId` de audit — não copia journal.  
+**OPS-R03-02:** Alert → OpenIncident correlacionado (não storm 1:1 obrigatório).
 
 ## Ports
 
-| Port | Uso |
-| --- | --- |
-| EventConsumerPort | observability alerts + module heartbeats |
-| EventEmitterPort | operations.incident.opened.v1, operations.export.completed.v1, operations.health.degraded.v1 |
+IncidentRepository, ExportJobRepository, HealthSnapshotRepository, OperationsUnitOfWork, AgencyScopePort, TraversalEvaluator, EventConsumer (alerts, heartbeats, audit.manifest), ObjectStorePort (export blob).
 
-→ **R04** ([R04-contracts-events.md](./R04-contracts-events.md))
+## Saída R3
+
+Modelo v1 para R4.

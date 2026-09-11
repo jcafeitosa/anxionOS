@@ -1,46 +1,72 @@
 ---
 type: debate
 ---
+# R04 — Contratos, API e eventos: `modules/partners`
 
-# R04 — Contratos e eventos: `modules/partners`
-
-**Issues:** ANX-113 · **ANX-114**
+**Rodada:** R4  
+**Data:** 2026-09-11  
+**Issues:** ANX-389 · ANX-113 · ANX-114 (não impl)  
+**Callers:** [R05-storage-pg.md](./R05-storage-pg.md) · [ROUNDS.md](./ROUNDS.md). API esboço `/v1/partners` apenas. Sem schema de produção.
 
 ## Convenções
 
-`ownerDomain: partners` · `partners.<aggregate>.<action>.v1`
+`schemaVersion` 0.1.0 · `ownerDomain: partners` · `partners.<aggregate>.<action>.v1` · Idempotency-Key → commandId · **sem secrets** em DTO.
 
-## Payout state machine
+### Códigos
 
-`SCHEDULED` → `PROCESSING` → `SETTLED` | `FAILED` | `REVERSED` — refund emite reversal de comissão.
-
-## HTTP `/v1/partners/*`
-
-| Método | Rota | Comando |
+| Código | HTTP | Quando |
 | --- | --- | --- |
-| GET | `/` | list (scoped) |
-| GET | `/:id` | getById |
-| POST | `/` | create (Idempotency-Key) |
+| PTR_NOT_FOUND | 404 | |
+| PTR_DUPLICATE_IDEMPOTENCY | 409 | |
+| PTR_CROSS_TENANT | 403 | |
+| PTR_GRANT_INVALID | 403 | T01 DENY |
+| PTR_REFUND_ALREADY_REVERSED | 409 | |
+| PTR_ACCRUAL_UNPAID | 409 | accrue sem paid |
+| PTR_IDEMPOTENT_REPLAY | 200 | |
+
+## Layout `@anxionos/contracts/partners/`
+
+types/commands/queries/events/errors/index.
 
 ## Eventos emitidos
 
 | eventType | Consumidores |
 | --- | --- |
-| `partners.commission.accrued.v1` | audit, accounting |
-| `partners.payout.scheduled.v1` | audit, accounting |
-| `partners.payout.settled.v1` | audit, accounting |
-| `partners.payout.failed.v1` | audit, operations |
-| `partners.commission.reversed.v1` | audit, accounting |
+| `partners.referral.registered.v1` | graph, audit |
+| `partners.rule.published.v1` | graph, audit |
+| `partners.commission.accrued.v1` | accounting, audit |
+| `partners.commission.reversed.v1` | accounting, audit |
+| `partners.payout.scheduled.v1` | accounting, operations |
+| `partners.payout.settled.v1` | accounting, audit |
+| `partners.payout.failed.v1` | operations, audit |
 
-## Eventos consumidos
+**Consumers:** `billing.invoice.paid.v1` accrue; `billing.refund.processed.v1` reverse.  
+**PTR-R04-01:** não emite `billing.*` nem `accounting.journal.*`.
 
-| eventType | Ação |
+## REST `/v1/partners/*`
+
+| Método | Path | Grant |
+| --- | --- | --- |
+| GET | `/v1/partners/referrals` | partners.read |
+| POST | `/v1/partners/referrals` | partners.admin + T01 |
+| GET | `/v1/partners/accruals/:id` | partners.read |
+| POST | `/v1/partners/payouts` | partners.payout + T01 |
+
+## Oráculos
+
+| ID | Esperado |
 | --- | --- |
-| `billing.invoice.paid.v1` | accrue commission |
-| `billing.refund.processed.v1` | reverse commission (idempotent por refundId) |
+| G3-PTR-01 | paid → um accrual |
+| G3-PTR-02 | paid replay → mesmo accrual |
+| G3-PTR-03 | refund → reverse idempotente |
+| G3-PTR-04 | payout FAILED retry não duplica SETTLED |
+| G5-PTR-01 | GET outra org 403 |
+| G5-PTR-02 | T01 DENY 403 |
 
-## Erros
+## Alternativas rejeitadas
 
-`PTR_DUPLICATE_IDEMPOTENCY` · `PTR_CROSS_TENANT` · `PTR_GRANT_INVALID` · `PTR_REFUND_ALREADY_REVERSED`
+Comissão em billing; ledger em partners; pasta marketplace; SQLite payout.
 
-→ **R05** ([R05-storage-pg.md](./R05-storage-pg.md))
+## Saída R4
+
+Contratos v1 para R5.

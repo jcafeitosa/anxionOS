@@ -5,66 +5,35 @@ type: debate
 # R01 — Contexto: `modules/operations`
 
 **Componente:** modules/operations  
-**Rodada:** R1 — Inventário documental e de código  
+**Rodada:** R1  
 **Pacote SDD:** P07  
-**Data:** 2026-09-07  
-**Issue debate estrutura:** ANX-42
+**Data:** 2026-09-11  
+**Issues:** ANX-389 · ANX-42 · **ANX-111**  
+**Callers:** [R02-boundaries.md](./R02-boundaries.md) · [ROUNDS.md](./ROUNDS.md). Fatten in-place.  
+**Fontes:** `brain/notes/anxionos-pc17-deployments-debate.md`, `anxionos-pc18-infrastructure-debate.md`, `anxionos-pc20-incidents-debate.md`.
 
 ## Propósito
 
-Incidentes, retenção, exportação e recuperação — procedimentos e adapters repo/CI/deploy.
+Operação da plataforma: incidentes, runbooks, retenção, export jobs, health de serviços, adapters OP01–OP08 (repo/CI/deploy **como procedimento**, não 24º módulo). **Não** é Flight Recorder (audit) nem kill switch (risk). Specs **draft**. Sem `approvals/`/`policies/`. D-GOV-010 em **risk P06**.
 
-## O que possui / não possui
+## POSSUI
 
-### Possui (donos de estado ou composição)
+Incident, Runbook, RetentionPolicy, ExportJob, ServiceHealthSnapshot.
 
-- Incidentes
-- procedimentos
-- retenção
-- export jobs
-- recuperação
-- adapters engenharia OP01–OP08
+## NÃO POSSUI
 
-### Não possui (fronteiras ADR0002 / brain)
-
-- Audit replay — audit
-- Kill switch — risk
-- Secrets — packages/secrets
-
-## Dependências
-
-| Direção | Componentes / artefatos |
+| Item | Dono |
 | --- | --- |
-| **Upstream** | audit, observability, graph, todos os módulos (health) |
-| **Downstream** | apps/api (health), frontend Platform console, deploy pipelines |
+| Audit replay / manifest autoritativo | audit |
+| Kill switch / D-GOV-010 | risk P06 |
+| Secrets store | packages/secrets |
+| Neo4j driver | graph |
+| Deploy como pasta infrastructure/ | PC 18 — **operations** |
 
 ## Armazenamento
 
-PG: incidentes, export jobs, retenção. Neo4j: impacto serviço→dependência. SQLite: checkpoints diagnóstico local não crítico.
-
-Fonte: `brain/notes/anxionos-storage-ownership.md`.
-
-## Estado do código atual
-
-**Ausente.**
-
-## Perguntas abertas para debate
-
-- Agentes engenharia: ferramentas limitadas vs shell admin?
-- Recuperação P09: coordenação operations vs por-módulo?
-- Export GDPR: operations vs audit ownership?
-- Incident vs kill switch risk — escalonamento?
-
-## Fontes
-
-| Documento | Caminho |
-| --- | --- |
-| Estrutura modular (aceita) | `brain/notes/anxionos-backend-structure.md` |
-| Mapa de armazenamento | `brain/notes/anxionos-storage-ownership.md` |
-| SDD institucional | `brain/project-docs/specs/001-institutional-contract/spec.md` |
-| ADR0002 layout modular | `brain/project-docs/decisions/0002-adopt-modular-backend-layout.md` |
-| Playbook orquestração | `docs/orchestration/module-development-playbook.md` |
+PG incidents/export/health. Neo4j impact **projeção**. SQLite não autoritativo. ST08 0/23.
 
 ## Próxima rodada
 
-→ **R02 — Fronteiras** (`R02-boundaries.md`) após consenso sobre inventário R1.
+→ **R02** ([R02-boundaries.md](./R02-boundaries.md))

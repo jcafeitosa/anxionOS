@@ -2,24 +2,46 @@
 type: debate
 status: draft
 ---
+# R09 — Plano de implementação: `modules/partners`
 
-# R09 — Plano: `modules/partners`
+**Rodada:** R9  
+**Data:** 2026-09-11  
+**Issue debate:** ANX-389 / ANX-113 · impl **ANX-114** (não neste pack)  
+**Callers:** [R08-decision-log.md](./R08-decision-log.md) · [R10-g0-handoff.md](./R10-g0-handoff.md). Sem migration.
 
-**ANX-113** · impl **ANX-114**
+## Pré-requisitos G1
 
-| Slice | Entrega | Gates |
-| --- | --- | --- |
-| S1 | schema partner+commission+payout | G2, G4 |
-| S2 | invoice.paid projector | G3 |
-| S3 | refund reversal + payout lifecycle | G3, G5 |
-| S4 | HTTP v1 + graph stub | G6 parcial |
+R10 documental; eventing; graph:partners:v1; billing paid/refund contratos; AgencyScopePort.
 
-## Matriz G3
+## Árvore alvo G1
 
-G3-PTR-S2-01 commission on paid · G3-PTR-S3-01 refund reversal idempotent · G3-PTR-S3-02 payout FAILED retry · G3-PTR-S3-03 cross-tenant
+```text
+backend/modules/partners/src/
+  domain/  application/commands/  application/consumers/
+  infrastructure/persistence/  api/  index.ts
+```
 
-**Evidência impl:** `backend/tests/partners/` (ANX-114 `in_review`)
+Não scaffoldar 23 módulos. Não criar `marketplace/`.
 
-**ANX-114** — impl `in_review`; debate G7 pendente **ANX-113**
+## Fatias P07 (pós-Owner)
 
-→ **R10** ([R10-g0-handoff.md](./R10-g0-handoff.md))
+| Slice | Entrega |
+| --- | --- |
+| P07-S1 | schema partners_* + contracts |
+| P07-S2 | projector invoice.paid |
+| P07-S3 | refund reverse + payout lifecycle |
+| P07-S4 | HTTP v1 |
+
+## Matriz
+
+G3-PTR-S2-01 commission on paid · G3-PTR-S3-01 refund reversal · G3-PTR-S3-02 payout FAILED retry · G5-PTR-01..05.
+
+## Defer
+
+D-GOV-010; RLS P09; ST08 migrations; rails PSP payout live.
+
+P1 só G0 documental.
+
+## Saída R9
+
+Plano para R10.
