@@ -3,4 +3,19 @@ type: debate
 ---
 # R09 — Plano: `modules/orchestration`
 
-**Issue:** ANX-393. Slices no [structure R09](../../structure-debate/orchestration/R09-dev-plan.md). P1 não implementa workers. G1 futuro: Zod GateBinding → PG → CheckoutTask UoW → mirror taskboard → testes INV-ORC. Greenlight Owner obrigatório.
+**Rodada:** R9  
+**Data:** 2026-09-11  
+**Issue:** ANX-393  
+G1 só após greenlight + issue impl distinta.
+
+## Fatias futuras
+
+S1 schema PG · S2 contracts · S3 checkout UoW · S4 heartbeat worker · S5 GateBinding · S6 HTTP · S7 TaskboardMirror.
+
+Pré-req: AgentRegistryPort (agents), T01 (graph/governance), eventing.
+
+Não scaffoldar 23 módulos. P1 só pack documental.
+
+## Saída R9
+
+Para R10.

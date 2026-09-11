@@ -3,12 +3,24 @@ type: debate
 ---
 # R08 — Decision log: `modules/orchestration`
 
-**Issue:** ANX-393.
+**Rodada:** R8  
+**Data:** 2026-09-11  
+**Issue:** ANX-393
 
-| ID | Decisão |
-| --- | --- |
-| P1-ORC-01 | Pack canônico em `modules/orchestration/` após agents |
-| P1-ORC-02 | Structure-debate permanece detalhe normativo |
-| P1-ORC-03 | Graph modules/ R-pack só depois deste |
-| P1-ORC-04 | Spec 002 draft |
-| P1-ORC-05 | Pack documental ≠ G7 código |
+| ID | Decisão | Status |
+| --- | --- | --- |
+| D-ORC-001 | Dono Goal/Task/Run/lease/heartbeat/GateBinding — não grants/Agent/Neo4j | fechada |
+| D-ORC-005 | Checkout = TaskLease PG; idempotente (agentId, taskId) | fechada |
+| D-ORC-007 | goalAncestry denormalizado; Goal DAG aqui | fechada |
+| D-ORC-015 | PlanRevision separado de Goal | fechada |
+| D-ORC-021 | Eventos v1 R04 | fechada |
+| D-ORC-028 | TaskLease tabela filha 1:1 | fechada |
+| D-ORC-031 | command_journal HTTP | fechada |
+| P1-ORC-01 | Pack canônico em modules/orchestration | fechada |
+| P1-ORC-02 | Sem pastas projects/tasks/agent-teams | fechada |
+| P1-ORC-03 | Spec 002 draft até checklist | fechada |
+| P1-ORC-04 | Pack ≠ G7 código | fechada |
+
+## Saída R8
+
+Para R9.
