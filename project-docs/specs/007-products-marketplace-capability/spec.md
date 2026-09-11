@@ -2,8 +2,10 @@
 type: spec
 title: Products e Marketplace — capacidade composta (sem módulo físico)
 description: Especifica como Products e Marketplace da taxonomia de 30 módulos mapeiam ao baseline de 23 módulos sem criar pastas novas.
-status: draft
-decision_status: proposed
+status: superseded
+decision_status: superseded
+superseded_by: docs/document-precedence.md
+taskboard_issue: ANX-455
 owner: Product
 created: 2026-09-10
 version: "0.1"
@@ -14,6 +16,8 @@ tags:
   - ANX-284
 ---
 # Products e Marketplace — capacidade composta
+
+> **Legado isolado (ANX-455).** Não há spec 007 em `brain/`. Este arquivo **não prevalece** sobre o baseline ADR0002 nem sobre specs canônicas numeradas. Registro: [docs/document-precedence.md](../../../docs/document-precedence.md).
 
 **Issue:** ANX-284 · **Auditoria:** `brain/notes/anxionos-ai-product-company-documentation-audit.md` §lacunas
 

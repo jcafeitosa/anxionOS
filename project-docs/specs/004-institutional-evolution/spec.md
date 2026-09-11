@@ -1,10 +1,15 @@
 ---
 type: spec
+status: superseded
+superseded_by: brain/project-docs/specs/004-institutional-evolution/spec.md
+taskboard_issue: ANX-455
 ---
+
+> **Legado / superseded (ANX-455).** A spec 004 canônica está em `brain/project-docs/specs/004-institutional-evolution/spec.md` com **status accepted**. Esta cópia versionada **não prevalece** e **não** declara draft. Homologação de engines reais (ST08) permanece backlog. Registro: [docs/document-precedence.md](../../../docs/document-precedence.md).
 
 ## Completude P1 — ownership, eventos, oráculos (ANX-389)
 
-`status:` permanece **draft**. ST08 = 0/23. **Não** `accepted` sem G7 Owner + ST01–ST08.
+Notas históricas desta cópia (não alteram o status **accepted** em `brain/`): ST08 = 0/23. Não reler este arquivo como “spec ainda draft”.
 
 ### Ownership (módulos desta spec vs 23 ADR0002)
 
