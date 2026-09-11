@@ -16,6 +16,8 @@ tags:
 ---
 # Product Graph e Agent Graph — sistema operacional cognitivo
 
+> **Legado / superseded (ANX-455).** A spec 006 canônica em `brain/` é *Hierarquia e orquestração de agentes — TREE e CIRCULAR* (draft). Este arquivo é **outro assunto** (Product/Agent Graph) e **não prevalece**. Registro: [docs/document-precedence.md](../../../docs/document-precedence.md).
+
 ## Status e escopo
 
 Esta spec é **proposta**. Descreve o modelo cognitivo da AI Product Company Engine sem afirmar implementação runtime completa. Persistência autoritativa em P0 = OKF (`brain/`) + issues `ANX-*`; projeção Neo4j = P3 (proposed). Não substitui o grafo institucional de runtime (`backend/modules/graph/`).
