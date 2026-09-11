@@ -1,6 +1,6 @@
 import { PLATFORM_CONSOLE_CAPABILITY } from "@anxionos/contracts/governance";
-import { isGrantEffectiveAt } from "../../domain/entities/grant";
 import type { GrantRepository } from "../../domain/ports/grant-repository";
+import { hasCapability } from "./has-capability";
 
 export interface HasPlatformConsoleGrantDeps {
 	grantRepository: GrantRepository;
@@ -15,10 +15,9 @@ export async function hasPlatformConsoleGrant(
 	principalId: string,
 	asOf: Date = new Date(),
 ): Promise<boolean> {
-	const grants = await deps.grantRepository.listActiveByPrincipal(principalId);
-	return grants.some(
-		(grant) =>
-			grant.capability === PLATFORM_CONSOLE_CAPABILITY &&
-			isGrantEffectiveAt(grant, asOf),
-	);
+	return hasCapability(deps, {
+		principalId,
+		capability: PLATFORM_CONSOLE_CAPABILITY,
+		asOf,
+	});
 }

@@ -1,4 +1,5 @@
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
+import { identityCommandResultSchema } from "@anxionos/contracts/identity";
 import type { Principal } from "../../domain/entities/principal";
 import {
 	createPrincipalRevokedEvent,
@@ -13,10 +14,15 @@ import {
 } from "../../domain/policies/principal-lifecycle";
 import type { IdentityTransactionContext } from "../../domain/ports/identity-unit-of-work";
 import {
+	type RevokedSessionRef,
 	type SessionRevocationPort,
 	SessionRevocationUnavailableError,
 } from "../../domain/ports/session-revoker";
-import { throwIdentityError } from "../errors";
+import {
+	isUniqueViolation,
+	parseCommandResultSnapshot,
+	throwIdentityError,
+} from "../errors";
 
 export type PrincipalTransitionTarget = "suspended" | "revoked";
 
@@ -110,24 +116,32 @@ export async function transitionPrincipalState(
 		await context.serviceIdentityRepository.findActiveByPrincipalId(
 			transitioned.id,
 		);
+
+	// SUSPENDED is reversible (R03); REVOKED is terminal. The cascade differs:
+	//   suspend → every active credential is revoked (a secret must not outlive
+	//             the suspension) but the service identity survives, so the
+	//             principal can issue new credentials after reactivation.
+	//   revoke  → the service identity is revoked too, and with it the credentials.
 	for (const serviceIdentity of activeServiceIdentities) {
-		const revokedIdentity = await context.serviceIdentityRepository.revoke(
-			serviceIdentity.id,
-			params.at,
-		);
-		if (!revokedIdentity) {
-			continue;
+		if (params.target === "revoked") {
+			const revokedIdentity = await context.serviceIdentityRepository.revoke(
+				serviceIdentity.id,
+				params.at,
+			);
+			if (!revokedIdentity) {
+				continue;
+			}
+			events.push(
+				createServiceIdentityRevokedEvent({
+					serviceIdentityId: revokedIdentity.id,
+					principalId: revokedIdentity.principalId,
+					revokedAt: params.at.toISOString(),
+				}),
+			);
 		}
-		events.push(
-			createServiceIdentityRevokedEvent({
-				serviceIdentityId: revokedIdentity.id,
-				principalId: revokedIdentity.principalId,
-				revokedAt: params.at.toISOString(),
-			}),
-		);
 		const revokedCredentials =
 			await context.serviceCredentialRepository.revokeActiveByServiceIdentityId(
-				revokedIdentity.id,
+				serviceIdentity.id,
 				params.at,
 			);
 		for (const credential of revokedCredentials) {
@@ -146,6 +160,13 @@ export async function transitionPrincipalState(
 			ReturnType<SessionRevocationPort["revokeAllForAuthUser"]>
 		>;
 		try {
+			// NOTE: this deletes sessions in the authentication layer, on a
+			// different connection, inside this transaction. That is deliberate
+			// (ANX-235 fail-closed: a disabled consumer must not leave an open
+			// session) and has a known consequence: if this transaction rolls
+			// back afterwards, the sessions are already gone and no SessionRef or
+			// event records it. Documented in
+			// docs/orchestration/modules/identity/R11-lifecycle-decisions.md.
 			revokedRefs = await params.sessionRevocation.revokeAllForAuthUser(
 				transitioned.authUserId,
 			);
@@ -155,22 +176,13 @@ export async function transitionPrincipalState(
 				{ cause: error },
 			);
 		}
-		for (const ref of revokedRefs) {
-			const recorded = await context.sessionRefRepository.recordRevoked({
+		events.push(
+			...(await recordRevokedSessionRefs(context, {
 				principalId: transitioned.id,
-				externalRefHash: ref.externalRefHash,
-				revokedAt: ref.revokedAt,
+				revokedRefs,
 				reasonCode: params.reasonCode,
-			});
-			events.push(
-				createSessionRevokedEvent({
-					sessionRefId: recorded.id,
-					principalId: transitioned.id,
-					revokedAt: (recorded.revokedAt ?? ref.revokedAt).toISOString(),
-					reasonCode: params.reasonCode,
-				}),
-			);
-		}
+			})),
+		);
 	}
 
 	await context.publishEvents(events);
@@ -178,9 +190,45 @@ export async function transitionPrincipalState(
 }
 
 /**
+ * Records revoked session references and builds their events. Shared by the
+ * inline transition path and the bootstrap reconciliation so both leave the
+ * same audit trail.
+ */
+export async function recordRevokedSessionRefs(
+	context: IdentityTransactionContext,
+	input: {
+		principalId: string;
+		revokedRefs: RevokedSessionRef[];
+		reasonCode?: string;
+	},
+): Promise<DomainEventEnvelope[]> {
+	const events: DomainEventEnvelope[] = [];
+	for (const ref of input.revokedRefs) {
+		const recorded = await context.sessionRefRepository.recordRevoked({
+			principalId: input.principalId,
+			externalRefHash: ref.externalRefHash,
+			revokedAt: ref.revokedAt,
+			reasonCode: input.reasonCode ?? null,
+		});
+		events.push(
+			createSessionRevokedEvent({
+				sessionRefId: recorded.id,
+				principalId: input.principalId,
+				revokedAt: (recorded.revokedAt ?? ref.revokedAt).toISOString(),
+				reasonCode: input.reasonCode,
+			}),
+		);
+	}
+	return events;
+}
+
+/**
  * Idempotency pre-check: a repeated `commandId` returns the current principal
  * (the applied state) instead of running the transition again, which also keeps
  * the journal insert from colliding on its primary key.
+ *
+ * The stored snapshot is parsed to assert it still satisfies
+ * `identityCommandResultSchema` — a replay must never return unvalidated state.
  */
 export async function loadTransitionReplay(
 	context: IdentityTransactionContext,
@@ -194,6 +242,7 @@ export async function loadTransitionReplay(
 	if (!journaled) {
 		return null;
 	}
+	parseCommandResultSnapshot(journaled.responseSnapshot);
 	return context.principalRepository.findById(principalId);
 }
 
@@ -208,16 +257,30 @@ export async function recordTransitionJournal(
 	if (!input.commandId) {
 		return;
 	}
-	await context.commandJournal.record({
-		commandId: input.commandId,
-		commandName: input.commandName,
+	const result = identityCommandResultSchema.parse({
 		aggregateId: input.principal.id,
-		aggregateType: "Principal",
 		revision: input.principal.revision,
-		responseSnapshot: {
-			aggregateId: input.principal.id,
-			revision: input.principal.revision,
-			status: input.principal.status,
-		},
+		status: input.principal.status,
 	});
+	try {
+		await context.commandJournal.record({
+			commandId: input.commandId,
+			commandName: input.commandName,
+			aggregateId: result.aggregateId,
+			aggregateType: "Principal",
+			revision: result.revision,
+			responseSnapshot: { ...result },
+		});
+	} catch (error) {
+		// A concurrent execution of the same commandId won the primary-key race.
+		// R04 models this explicitly: the loser gets IDN_DUPLICATE_IDEMPOTENCY and
+		// retries, which then finds the journal entry and replays.
+		if (isUniqueViolation(error)) {
+			throwIdentityError(
+				"IDN_DUPLICATE_IDEMPOTENCY",
+				`Command ${input.commandId} is already being processed`,
+			);
+		}
+		throw error;
+	}
 }

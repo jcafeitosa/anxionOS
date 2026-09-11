@@ -173,11 +173,13 @@ describe("identity tenant/concurrency", () => {
 			(event) => event.eventType === IDENTITY_EVENT_TYPES.PRINCIPAL_SUSPENDED,
 		);
 		expect(suspendedEvents).toHaveLength(1);
-		const revokedEvents = published.filter(
+		// Suspend does not revoke the service identity (R03: reversible); only
+		// active credentials would be revoked, and this fixture has none.
+		const revokedIdentityEvents = published.filter(
 			(event) =>
 				event.eventType === IDENTITY_EVENT_TYPES.SERVICE_IDENTITY_REVOKED,
 		);
-		expect(revokedEvents).toHaveLength(1);
+		expect(revokedIdentityEvents).toHaveLength(0);
 	});
 
 	test("concurrent reactivate on suspended principal yields one reactivated event", async () => {

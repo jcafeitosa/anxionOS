@@ -14,16 +14,24 @@ import {
 	consumeIdentitySuspendedEvent,
 	IDENTITY_SESSIONS_CONSUMER_NAME,
 } from "../../apps/api/src/identity/session-revocation-consumer";
-import { createInMemoryPrincipalRepository } from "../identity/test-support";
+import {
+	createInMemoryPrincipalRepository,
+	createInMemoryServiceIdentityRepository,
+	createRecordingUnitOfWork,
+} from "../identity/test-support";
 
 const suspendedPrincipal: Principal = {
 	id: "11111111-1111-4111-8111-111111111111",
 	authUserId: "auth-1",
 	email: "owner@example.com",
+	kind: "human",
 	status: "suspended",
+	revision: 2,
 	createdAt: new Date("2026-09-08T12:00:00.000Z"),
 	suspendedAt: new Date("2026-09-08T12:00:00.000Z"),
 	suspensionReason: "ops.manual",
+	revokedAt: null,
+	revocationReason: null,
 };
 
 describe("session revocation consumer", () => {
@@ -129,10 +137,54 @@ describe("session revocation consumer", () => {
 			sessionRevoker: {
 				async revokeAllForAuthUser(authUserId) {
 					revoked.push(authUserId);
+					return [
+						{ externalRefHash: `hash-${authUserId}`, revokedAt: new Date() },
+					];
 				},
 			},
 		});
 		expect(result.revokedPrincipalCount).toBe(2);
 		expect(revoked.sort()).toEqual(["auth-1", "auth-2"]);
+	});
+
+	test("reconcile does not count a principal that had no live session", async () => {
+		const result = await reconcileSuspendedPrincipalSessions({
+			principalRepository: createInMemoryPrincipalRepository([
+				suspendedPrincipal,
+			]),
+			sessionRevoker: {
+				async revokeAllForAuthUser() {
+					return [];
+				},
+			},
+		});
+		expect(result.revokedPrincipalCount).toBe(0);
+	});
+
+	test("reconcile records session refs and emits the revoked event when wired", async () => {
+		const repository = createInMemoryPrincipalRepository([suspendedPrincipal]);
+		const { unitOfWork, published, sessionRefRepository } =
+			createRecordingUnitOfWork(
+				repository,
+				createInMemoryServiceIdentityRepository(),
+			);
+		const result = await reconcileSuspendedPrincipalSessions({
+			principalRepository: repository,
+			sessionRevoker: {
+				async revokeAllForAuthUser() {
+					return [{ externalRefHash: "hash-auth-1", revokedAt: new Date() }];
+				},
+			},
+			unitOfWork,
+		});
+		expect(result.revokedPrincipalCount).toBe(1);
+		const refs = await sessionRefRepository.listRevoked();
+		expect(refs).toHaveLength(1);
+		expect(refs[0]?.principalId).toBe(suspendedPrincipal.id);
+		expect(
+			published.filter(
+				(event) => event.eventType === IDENTITY_EVENT_TYPES.SESSION_REVOKED,
+			),
+		).toHaveLength(1);
 	});
 });

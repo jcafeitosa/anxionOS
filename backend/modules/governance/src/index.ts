@@ -66,6 +66,11 @@ export {
 	getEffectiveAutonomy,
 } from "./application/queries/get-effective-autonomy";
 export {
+	type HasCapabilityDeps,
+	type HasCapabilityInput,
+	hasCapability,
+} from "./application/queries/has-capability";
+export {
 	type HasPlatformConsoleGrantDeps,
 	hasPlatformConsoleGrant,
 } from "./application/queries/has-platform-console-grant";

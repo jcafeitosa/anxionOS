@@ -3,6 +3,7 @@ import { PLATFORM_CONSOLE_CAPABILITY } from "@anxionos/contracts/governance";
 import {
 	type Grant,
 	getAuthorityEpoch,
+	hasCapability,
 	hasPlatformConsoleGrant,
 	listEffectiveGrants,
 } from "@anxionos/governance";
@@ -81,6 +82,77 @@ describe("hasPlatformConsoleGrant", () => {
 		await expect(
 			hasPlatformConsoleGrant({ grantRepository }, principalId),
 		).resolves.toBe(true);
+	});
+});
+
+describe("hasCapability", () => {
+	const asOf = new Date("2026-09-10T12:00:00.000Z");
+
+	test("matches the requested capability only", async () => {
+		const grantRepository = createInMemoryGrantRepository([
+			seedGrant({ capability: "identity.admin" }),
+		]);
+		await expect(
+			hasCapability(
+				{ grantRepository },
+				{ principalId, capability: "identity.admin", asOf },
+			),
+		).resolves.toBe(true);
+		await expect(
+			hasCapability(
+				{ grantRepository },
+				{ principalId, capability: "identity.read", asOf },
+			),
+		).resolves.toBe(false);
+	});
+
+	test("fails closed when the grant is outside its validity window", async () => {
+		const grantRepository = createInMemoryGrantRepository([
+			seedGrant({
+				capability: "identity.admin",
+				validFrom: new Date("2026-09-01T00:00:00.000Z"),
+				validUntil: new Date("2026-09-05T00:00:00.000Z"),
+			}),
+		]);
+		await expect(
+			hasCapability(
+				{ grantRepository },
+				{ principalId, capability: "identity.admin", asOf },
+			),
+		).resolves.toBe(false);
+	});
+
+	test("honours the optional scope filter", async () => {
+		const grantRepository = createInMemoryGrantRepository([
+			seedGrant({ capability: "identity.read", scopeId }),
+		]);
+		await expect(
+			hasCapability(
+				{ grantRepository },
+				{ principalId, capability: "identity.read", asOf, scopeId },
+			),
+		).resolves.toBe(true);
+		await expect(
+			hasCapability(
+				{ grantRepository },
+				{
+					principalId,
+					capability: "identity.read",
+					asOf,
+					scopeId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+				},
+			),
+		).resolves.toBe(false);
+	});
+
+	test("is false for a principal without grants", async () => {
+		const grantRepository = createInMemoryGrantRepository([]);
+		await expect(
+			hasCapability(
+				{ grantRepository },
+				{ principalId, capability: "identity.read", asOf },
+			),
+		).resolves.toBe(false);
 	});
 });
 

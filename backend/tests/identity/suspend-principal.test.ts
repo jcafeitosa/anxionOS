@@ -9,6 +9,7 @@ import {
 import { IdentityCommandError } from "../../modules/identity/src/application/errors";
 import {
 	createInMemoryPrincipalRepository,
+	createInMemoryServiceCredentialRepository,
 	createInMemoryServiceIdentityRepository,
 	createRecordingUnitOfWork,
 } from "./test-support";
@@ -65,7 +66,7 @@ describe("suspendPrincipal", () => {
 		expect(published).toHaveLength(0);
 	});
 
-	test("cascade revokes active service identities with audited events", async () => {
+	test("cascade revokes active credentials but keeps the service identity (suspend is reversible)", async () => {
 		const serviceIdentity: ServiceIdentity = {
 			id: "22222222-2222-4222-8222-222222222222",
 			principalId: activePrincipal.id,
@@ -78,9 +79,25 @@ describe("suspendPrincipal", () => {
 		const serviceIdentityRepository = createInMemoryServiceIdentityRepository([
 			serviceIdentity,
 		]);
+		const serviceCredentialRepository =
+			createInMemoryServiceCredentialRepository([
+				{
+					id: "44444444-4444-4444-8444-444444444444",
+					serviceIdentityId: serviceIdentity.id,
+					prefix: "anxabcdefghi",
+					secretHash: "scrypt$salt$hash",
+					status: "active",
+					issuedAt: new Date("2026-09-08T12:00:00.000Z"),
+					expiresAt: null,
+					rotatedAt: null,
+					rotatedToId: null,
+					revokedAt: null,
+				},
+			]);
 		const { unitOfWork, published } = createRecordingUnitOfWork(
 			repository,
 			serviceIdentityRepository,
+			{ serviceCredentialRepository },
 		);
 		await suspendPrincipal(
 			{ repository, unitOfWork },
@@ -91,13 +108,19 @@ describe("suspendPrincipal", () => {
 			IDENTITY_EVENT_TYPES.PRINCIPAL_SUSPENDED,
 		);
 		expect(published[1]?.eventType).toBe(
-			IDENTITY_EVENT_TYPES.SERVICE_IDENTITY_REVOKED,
+			IDENTITY_EVENT_TYPES.SERVICE_CREDENTIAL_REVOKED,
 		);
-		const revoked = await serviceIdentityRepository.findById(
+		// The identity survives suspension so credentials can be reissued after
+		// reactivation (R03: suspend is reversible).
+		const identity = await serviceIdentityRepository.findById(
 			serviceIdentity.id,
 		);
-		expect(revoked?.status).toBe("revoked");
-		expect(revoked?.revokedAt).not.toBeNull();
+		expect(identity?.status).toBe("active");
+		const credential = await serviceCredentialRepository.findById(
+			"44444444-4444-4444-8444-444444444444",
+		);
+		expect(credential?.status).toBe("revoked");
+		expect(credential?.revokedAt).not.toBeNull();
 	});
 
 	test("revokes Better Auth sessions synchronously on suspend (ANX-235)", async () => {

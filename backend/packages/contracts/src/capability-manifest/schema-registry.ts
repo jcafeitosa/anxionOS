@@ -9,7 +9,13 @@ import {
 } from "../governance/commands";
 import { governanceErrorDetailsSchema } from "../governance/errors";
 import { T01_INPUT_SCHEMA, T01_OUTPUT_SCHEMA } from "../graph/traversals/T01";
-import { registerPrincipalCommandSchema } from "../identity/commands";
+import {
+	identityCommandResultSchema,
+	recordSessionRevokedCommandSchema,
+	registerPrincipalCommandSchema,
+	revokePrincipalCommandSchema,
+	suspendPrincipalCommandSchema,
+} from "../identity/commands";
 import { identityErrorDetailsSchema } from "../identity/errors";
 import {
 	acceptInviteByTokenCommandSchema,
@@ -32,6 +38,9 @@ export interface CapabilitySchemaBundle {
 
 const INPUT_SCHEMAS: Record<CapabilitySchemaRef, z.ZodTypeAny> = {
 	registerPrincipalCommandSchema,
+	suspendPrincipalCommandSchema,
+	revokePrincipalCommandSchema,
+	recordSessionRevokedCommandSchema,
 	createAgencyCommandSchema,
 	updateAgencyMarketsCommandSchema,
 	inviteMemberCommandSchema,
@@ -48,6 +57,7 @@ const INPUT_SCHEMAS: Record<CapabilitySchemaRef, z.ZodTypeAny> = {
 
 const OUTPUT_SCHEMAS: Record<CapabilitySchemaRef, z.ZodTypeAny> = {
 	commandResultSchema,
+	identityCommandResultSchema,
 	governanceCommandResultSchema,
 	T01_OUTPUT_SCHEMA,
 };

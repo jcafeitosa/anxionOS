@@ -73,17 +73,29 @@ describe("capability manifest registry", () => {
 	});
 
 	test("deferred input schema fails explicitly", () => {
-		expect(() =>
-			validateCapabilityInput("identity.session.revoke", { commandId: "x" }),
-		).toThrow(CapabilityManifestError);
+		// `identity.principal.get` is a read with no request body, so its input
+		// contract is intentionally absent and must fail closed.
+		expect(() => validateCapabilityInput("identity.principal.get", {})).toThrow(
+			CapabilityManifestError,
+		);
 		try {
-			validateCapabilityInput("identity.session.revoke", { commandId: "x" });
+			validateCapabilityInput("identity.principal.get", {});
 		} catch (error) {
 			expect(error).toBeInstanceOf(CapabilityManifestError);
 			expect((error as CapabilityManifestError).code).toBe(
 				"CAP_MANIFEST_INPUT_SCHEMA_UNAVAILABLE",
 			);
 		}
+	});
+
+	test("identity.session.revoke now validates its declared input schema", () => {
+		const parsed = validateCapabilityInput("identity.session.revoke", {
+			principalId: "11111111-1111-4111-8111-111111111111",
+			sessionRefId: "22222222-2222-4222-8222-222222222222",
+		});
+		expect(parsed).toMatchObject({
+			sessionRefId: "22222222-2222-4222-8222-222222222222",
+		});
 	});
 
 	test("UNKNOWN outcome is not treated as success", () => {

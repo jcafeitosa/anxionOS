@@ -1,11 +1,11 @@
 import { identityPrincipalSuspendedV1PayloadSchema } from "@anxionos/contracts/identity";
-import { createSessionRevokedEvent } from "../../domain/events/identity-events";
 import type { IdentityUnitOfWork } from "../../domain/ports/identity-unit-of-work";
 import type { PrincipalRepository } from "../../domain/ports/principal-repository";
 import {
 	type SessionRevocationPort,
 	SessionRevocationUnavailableError,
 } from "../../domain/ports/session-revoker";
+import { recordRevokedSessionRefs } from "../commands/principal-transition";
 
 export interface HandlePrincipalSuspendedDeps {
 	principalRepository: PrincipalRepository;
@@ -50,23 +50,11 @@ export async function handlePrincipalSuspended(
 		return;
 	}
 	await deps.unitOfWork.runInTransaction(async (context) => {
-		const events = [];
-		for (const ref of revokedRefs) {
-			const recorded = await context.sessionRefRepository.recordRevoked({
-				principalId: principal.id,
-				externalRefHash: ref.externalRefHash,
-				revokedAt: ref.revokedAt,
-				reasonCode: parsed.reasonCode,
-			});
-			events.push(
-				createSessionRevokedEvent({
-					sessionRefId: recorded.id,
-					principalId: principal.id,
-					revokedAt: (recorded.revokedAt ?? ref.revokedAt).toISOString(),
-					reasonCode: parsed.reasonCode,
-				}),
-			);
-		}
+		const events = await recordRevokedSessionRefs(context, {
+			principalId: principal.id,
+			revokedRefs,
+			reasonCode: parsed.reasonCode,
+		});
 		await context.publishEvents(events);
 	});
 }

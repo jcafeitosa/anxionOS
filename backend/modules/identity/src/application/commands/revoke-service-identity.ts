@@ -37,6 +37,14 @@ export async function revokeServiceIdentity(
 			revokedAt,
 		);
 		if (!serviceIdentity) {
+			// Lost a concurrent race: an already-revoked identity is an
+			// idempotent success, not a 404.
+			const current = await context.serviceIdentityRepository.findById(
+				command.serviceIdentityId,
+			);
+			if (current?.status === "revoked") {
+				return current;
+			}
 			throwIdentityError(
 				"IDN_SERVICE_IDENTITY_NOT_FOUND",
 				"Service identity not found",

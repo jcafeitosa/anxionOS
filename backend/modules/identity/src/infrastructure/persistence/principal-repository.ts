@@ -1,4 +1,4 @@
-import { and, eq, ne, sql } from "drizzle-orm";
+import { and, eq, isNull, ne, or, sql } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { NewPrincipal, Principal } from "../../domain/entities/principal";
 import type { PrincipalRepository } from "../../domain/ports/principal-repository";
@@ -162,12 +162,30 @@ export function createDrizzlePrincipalRepository(
 			id: string,
 			authUserId: string,
 		): Promise<Principal | null> {
+			// Relinking the same auth user is a no-op and must not bump revision
+			// (mirrors updateEmail). A NULL auth_user_id means "not linked yet".
 			const rows = await db
 				.update(principals)
 				.set({ authUserId, revision: nextRevision })
-				.where(eq(principals.id, id))
+				.where(
+					and(
+						eq(principals.id, id),
+						or(
+							isNull(principals.authUserId),
+							ne(principals.authUserId, authUserId),
+						),
+					),
+				)
 				.returning();
-			return rows[0] ? toPrincipal(rows[0]) : null;
+			if (rows[0]) {
+				return toPrincipal(rows[0]);
+			}
+			const existing = await db
+				.select()
+				.from(principals)
+				.where(eq(principals.id, id))
+				.limit(1);
+			return existing[0] ? toPrincipal(existing[0]) : null;
 		},
 		async updateEmail(id: string, email: string): Promise<Principal | null> {
 			const rows = await db
