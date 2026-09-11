@@ -6,6 +6,16 @@ type: debate
 **Rodada:** R7 · 2026-09-11 · ANX-389 · ANX-111  
 **Callers:** [R06-dependencies.md](./R06-dependencies.md) · [R08-decision-log.md](./R08-decision-log.md) · [ROUNDS.md](./ROUNDS.md).
 
+## In / Out (R7)
+
+**In scope:** ameaças de export/incident cross-tenant, retention vs ledger, PII no grafo, replay no módulo errado, SQLite incidente, D-GOV-010, pasta infrastructure/, health como grant.
+
+**Out of scope:** venue (`execution`); Flight Recorder (`audit`); kill switch (`risk`).
+
+## Non-goals deste round
+
+CI/CD real; spec accepted; ANX-342 done.
+
 ## Registro
 
 | ID | Risco | L | I | Sev | Mitigação | Gate |

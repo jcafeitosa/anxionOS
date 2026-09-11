@@ -7,6 +7,12 @@ type: debate
 **Rodada:** R8 · 2026-09-11 · ANX-389 · ANX-107  
 **Callers:** [R07-risks.md](./R07-risks.md) · [R09-dev-plan.md](./R09-dev-plan.md) · [ROUNDS.md](./ROUNDS.md).
 
+## In / Out (R8)
+
+**In scope:** decisões Flight Recorder / DeltaRef / Manifest / ReplaySession; engines PG+object; grant replay.
+
+**Out of scope:** G1 ANX-108; ANX-342 done; spec accepted.
+
 | ID | Decisão | Rodada | Status |
 | --- | --- | --- | --- |
 | D-AUD-001 | Dono Flight Recorder / DeltaRef / Manifest / ReplaySession | R1–R3 | fechada |
