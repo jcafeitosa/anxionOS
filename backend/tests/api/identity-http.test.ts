@@ -624,4 +624,49 @@ describe("identity HTTP boundary (/v1/identity)", () => {
 		expect(response.status).toBe(400);
 		expect((await response.json()).error.code).toBe("VALIDATION_ERROR");
 	});
+
+	/**
+	 * ANX-465 (HIGH da revalidacao G4): o alvo so' e' gerenciavel por agencia se
+	 * NAO tiver vinculo ativo em outra. A assisted activation de organizations
+	 * permite anexar um principal de outro tenant a agencia do atacante; sem esta
+	 * regra, o escopo do alvo passava a autorizar ler o e-mail dele e suspende-lo.
+	 */
+	test("alvo com vínculo ativo em OUTRA agência exige plataforma", async () => {
+		const foreignAgency = "99999999-9999-4999-8999-999999999999";
+		const agencyScoped = harness({
+			principals: [activePrincipal, targetPrincipal],
+			capabilities: ["identity.read"],
+			grantScopeId: agencyId,
+			memberships: [agencyId],
+			// o alvo foi anexado a A pelo atacante, mas tem casa em outra agencia
+			targetAgencyIds: [agencyId, foreignAgency],
+		});
+		const denied = await agencyScoped.app.handle(
+			request(`/v1/identity/principals/${otherPrincipalId}`, {
+				headers: { "x-agency-id": agencyId },
+			}),
+		);
+		expect(denied.status).toBe(403);
+		expect((await denied.json()).error.details.code).toBe("IDN_CROSS_TENANT");
+
+		const suspend = await agencyScoped.app.handle(
+			request(`/v1/identity/principals/${otherPrincipalId}/suspend`, {
+				method: "POST",
+				headers: { "x-agency-id": agencyId, "idempotency-key": commandId },
+				body: { reasonCode: "ops.manual" },
+			}),
+		);
+		expect(suspend.status).toBe(403);
+
+		// autoridade de plataforma continua operando sobre qualquer alvo
+		const platform = harness({
+			principals: [activePrincipal, targetPrincipal],
+			capabilities: ["identity.read"],
+			targetAgencyIds: [foreignAgency],
+		});
+		const allowed = await platform.app.handle(
+			request(`/v1/identity/principals/${otherPrincipalId}`),
+		);
+		expect(allowed.status).toBe(200);
+	});
 });

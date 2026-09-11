@@ -50,6 +50,19 @@ async function assertTargetInDeclaredAgency(
 			"Target principal does not belong to the declared agency",
 		);
 	}
+	// ANX-465 (HIGH da revalidacao G4): a premissa de que membership e' vinculo
+	// confiavel e' falsa — a assisted activation de organizations (D-ORG-036)
+	// permite que owner/admin de A anexe a A um principal de OUTRO tenant sem
+	// consentimento. Sem esta regra, o escopo do alvo passava a autorizar leitura
+	// de e-mail e suspensao global desse principal. Autoridade agency-scoped
+	// exige que o alvo NAO tenha vinculo ativo em outra agencia; nesse caso so'
+	// autoridade de plataforma (escopo PLATFORM) opera sobre ele.
+	if (agencies.some((other) => other !== agencyId)) {
+		throwIdentityError(
+			"IDN_CROSS_TENANT",
+			"Target principal belongs to another agency; platform authority required",
+		);
+	}
 }
 
 async function assertCapability(
