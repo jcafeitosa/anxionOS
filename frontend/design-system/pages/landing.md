@@ -1,3 +1,7 @@
+---
+type: reference
+---
+
 # Page Override: Landing (`/`)
 
 Overrides `MASTER.md` for the public marketing landing.
