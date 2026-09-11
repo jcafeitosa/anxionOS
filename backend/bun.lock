@@ -38,7 +38,7 @@
         "@types/bun": "1.4.2",
         "dependency-cruiser": "16.10.4",
         "elysia": "1.4.30",
-        "nats": "^2.29.3",
+        "nats": "2.29.3",
         "neo4j-driver": "6.2.0",
         "typescript": "7.0.2",
       },
@@ -55,14 +55,15 @@
         "@anxionos/observability": "workspace:*",
         "@anxionos/organizations": "workspace:*",
         "@anxionos/partners": "workspace:*",
+        "@anxionos/strategies": "workspace:*",
         "@better-auth/drizzle-adapter": "1.7.4",
-        "@elysia/cors": "^1.4.2",
-        "@elysia/openapi": "^1.4.16",
+        "@elysia/cors": "1.4.2",
+        "@elysia/openapi": "1.4.16",
         "better-auth": "1.7.4",
         "drizzle-orm": "0.45.2",
         "elysia": "1.4.30",
-        "nats": "^2.29.3",
-        "pg": "^8.23.0",
+        "nats": "2.29.3",
+        "pg": "8.23.0",
         "zod": "4.6.2",
       },
     },
@@ -75,8 +76,8 @@
         "@anxionos/graph": "workspace:*",
         "@anxionos/observability": "workspace:*",
         "@anxionos/orchestration": "workspace:*",
-        "nats": "^2.29.3",
-        "pg": "^8.23.0",
+        "nats": "2.29.3",
+        "pg": "8.23.0",
       },
     },
     "modules/accounting": {
@@ -86,10 +87,10 @@
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/adapter-gateway": {
@@ -107,10 +108,10 @@
         "@anxionos/database": "workspace:*",
         "@anxionos/eventing": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/audit": {
@@ -120,10 +121,10 @@
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/billing": {
@@ -133,10 +134,10 @@
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/capital": {
@@ -146,10 +147,10 @@
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/connections": {
@@ -159,10 +160,10 @@
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/decisions": {
@@ -172,10 +173,10 @@
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/evaluation": {
@@ -185,10 +186,10 @@
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/execution": {
@@ -198,10 +199,10 @@
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/governance": {
@@ -212,10 +213,10 @@
         "@anxionos/eventing": "workspace:*",
         "@anxionos/identity": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/graph": {
@@ -225,11 +226,11 @@
         "@anxionos/contracts": "workspace:*",
         "drizzle-orm": "0.45.2",
         "neo4j-driver": "6.2.0",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
         "zod": "4.6.2",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/identity": {
@@ -240,10 +241,10 @@
         "@anxionos/eventing": "workspace:*",
         "@anxionos/observability": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/knowledge": {
@@ -253,10 +254,10 @@
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/market-data": {
@@ -267,10 +268,10 @@
         "@anxionos/eventing": "workspace:*",
         "@anxionos/observability": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/operations": {
@@ -280,10 +281,10 @@
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/orchestration": {
@@ -293,10 +294,10 @@
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/organizations": {
@@ -307,10 +308,10 @@
         "@anxionos/eventing": "workspace:*",
         "@anxionos/identity": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/partners": {
@@ -320,10 +321,10 @@
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/performance": {
@@ -333,10 +334,10 @@
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/portfolios": {
@@ -345,11 +346,12 @@
       "dependencies": {
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
+        "@anxionos/market-data": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/risk": {
@@ -359,10 +361,10 @@
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/simulation": {
@@ -372,10 +374,10 @@
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "modules/strategies": {
@@ -385,10 +387,10 @@
         "@anxionos/contracts": "workspace:*",
         "@anxionos/eventing": "workspace:*",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "packages/contracts": {
@@ -402,12 +404,12 @@
       "name": "@anxionos/database",
       "version": "0.1.0",
       "dependencies": {
-        "drizzle-kit": "^0.31.10",
+        "drizzle-kit": "0.31.10",
         "drizzle-orm": "0.45.2",
-        "pg": "^8.23.0",
+        "pg": "8.23.0",
       },
       "devDependencies": {
-        "@types/pg": "^8.23.1",
+        "@types/pg": "8.23.1",
       },
     },
     "packages/eventing": {
@@ -415,17 +417,17 @@
       "version": "0.1.0",
       "dependencies": {
         "@anxionos/contracts": "workspace:*",
-        "nats": "^2.29.3",
-        "pg": "^8.23.0",
+        "nats": "2.29.3",
+        "pg": "8.23.0",
       },
     },
     "packages/observability": {
       "name": "@anxionos/observability",
       "version": "0.1.0",
       "dependencies": {
-        "@elysia/opentelemetry": "^1.4.12",
-        "@opentelemetry/api": "^1.9.1",
-        "@opentelemetry/sdk-node": "^0.222.0",
+        "@elysia/opentelemetry": "1.4.12",
+        "@opentelemetry/api": "1.9.1",
+        "@opentelemetry/sdk-node": "0.222.0",
       },
     },
     "packages/secrets": {
