@@ -22,7 +22,7 @@ Eventing inbox; catálogo de projeções; consumers por `ownerDomain`; T01–T05
 | S6 | rebuild a partir de journal |
 | S8 | defer checklist structure |
 
-P1 **só** pack documental. APIs neste dir permanecem draft até issue impl. Graph **projeta**, não é ledger (PC 09). Specs 001–005 **draft**. D-GOV-010 **não** aqui. ANX-342 **não** done.
+P1 **só** pack documental. APIs neste dir permanecem draft até issue impl. Graph **projeta**, não é ledger (PC 09). Specs 001–005 **draft**. D-GOV-010 **não** aqui. ANX-342 **não** done. Oráculos a preservar na G1: G3-GRP-01..03 · G5-GRP-01..02 · AR04 · AR05.
 
 ## Defer
 

@@ -8,7 +8,7 @@ type: debate
 
 Upstream: eventing (inbox), contracts (GraphQuery, T01 types), secrets (adapter only), observability.
 
-Downstream: todos os 22 outros módulos consomem `/v1/graph` ou SDK; **nunca** driver.
+Downstream: os outros 22 módulos consomem `/v1/graph` ou SDK; **nunca** `neo4j-driver`. AR01/AR04: domain sem import de donos; agentes sem credencial Neo4j. D-GOV-010 fora.
 
 Sub-planos registrados no bootstrap por capital/portfolios/strategies/connections/execution — interfaces públicas, não infra.
 

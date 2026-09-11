@@ -13,8 +13,10 @@ Métricas oficiais, contratos `performance.*`, PG+Timescale derivado, oráculos 
 
 ### Out of scope
 
-Ledger (accounting), posição (portfolios), pasta analytics/, D-GOV-010, spec accepted, ANX-342 G7, migrations ST08.
+Ledger (accounting), posição (portfolios), pasta analytics/ (PC 22), D-GOV-010, spec accepted, ANX-342 G7, migrations ST08. Fill não substitui ledger.
 
-**Veredito P1:** pack documental fat. **Não** autoriza G1. Spec 003 `draft`. Próximo: [audit](../audit/ROUNDS.md).
+**Ownership:** OfficialMetricDefinition, OutcomeSnapshot, AttributionRun, MetricSeries (Timescale derivado). **Não** ledger (accounting) nem posição (portfolios). Fill só cross-check (PERF-R03-02).
+
+**Veredito P1:** pack documental. **Não** autoriza G1. Spec 003 `draft`. Pasta `analytics/` **não criar**. D-GOV-010 = risk P06.
 
 ANX-389 evidência; ANX-342 permanece `todo`.

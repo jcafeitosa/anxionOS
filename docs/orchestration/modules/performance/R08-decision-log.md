@@ -18,7 +18,9 @@ status: draft
 | D-PERF-007 | Spec 003 draft; ST08 0/23 | fechada |
 | D-PERF-008 | D-GOV-010 não é deste módulo | fechada |
 | P1-PERF-01 | Pack não é G7 código nem ANX-342 | fechada |
+| P1-PERF-02 | D-GOV-010 não é deste módulo (risk P06) | fechada |
+| P1-PERF-03 | Pasta analytics/ não existe (PC 22) | fechada |
 
 ## Saída R8
 
-Para R9.
+Ownership: métricas oficiais; PG autoritativo; Timescale derivado. Oráculos G3-PERF-01 rebuild idempotente · G3-PERF-02 fill ≠ ledger. Para [R09](./R09-dev-plan.md).
