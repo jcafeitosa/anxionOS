@@ -29,16 +29,22 @@ anxionOS é uma plataforma multi-tenant de investimentos autônomos governados p
 
 | Aspecto | Situação |
 | --- | --- |
-| Código | Esqueleto parcial em `backend/`; aplicação implantada não verificada. Revalidar source e board antes de implementar |
-| Documentação | Ativa em `brain/` **local** (OKF; não versionada no GitHub) |
+| Board | Dashi ativo — 453 issues (442 `done`, 3 `in_review`, 1 `in_progress`, 2 `backlog`, 5 `canceled`) em 2026-09-11. **O board é a fonte de status**; revalidar antes de implementar |
+| Código | Baseline P01–P09 implementado: `backend/` com os 23 módulos do ADR0002, API Bun/Elysia, `frontend/` Astro+React e deploy Docker com sandbox de engines. Verificado localmente em 2026-09-11: `bun run lint` e `tsc --build` com exit 0; `bun test` 1576 pass / 3 skip / 0 fail |
+| Implantação | Ambiente real de produção **não verificado**; engines operam em sandbox/SIMULATED |
+| Documentação | Ativa em `brain/` **local** (OKF; não versionada no GitHub). `notes/`, `project-docs/` e `docs/decisions/` versionados são **legado** — em conflito, `brain/` prevalece |
 | Organização do backend | **Aceita** — [ADR0002](brain/project-docs/decisions/0002-adopt-modular-backend-layout.md) |
 | Modelo operacional do grafo | **Proposto** — [ADR0001](brain/project-docs/decisions/0001-graph-operational-domain-authority.md) |
 | PRD | Rascunho — [0001-anxionos-prd-mestre](brain/project-docs/proposals/0001-anxionos-prd-mestre.md) |
+| Capital real e autonomia L3/L4 | **Não autorizados** — REAL e certificação L3/L4 permanecem em `backlog` (ANX-172, ANX-173) |
 
-Esta fase autoriza **planejamento e documentação**.
+Este retrato é factual e datado; autorizações de escopo continuam regidas pelo board e pelo greenlight explícito do usuário.
+
 ## Repositório público vs. `brain/` local
 
-A pasta **`brain/`** (Open Knowledge / OKF) é **somente local**: está no `.gitignore` e **não** é enviada ao GitHub. Os caminhos abaixo (`brain/index.md`, specs, ADRs) são fontes de verdade **no workspace local**; links relativos continuam válidos para quem tem `brain/` clonado ou sincronizado fora do git. Colaboradores que só clonam o remote veem [README.md](README.md) e este arquivo — obtenham `brain/` pelo canal acordado com o mantenedor.
+A pasta **`brain/`** (Open Knowledge / OKF) é **somente local**: está no `.gitignore` e **não** é enviada ao GitHub. Os caminhos abaixo (`brain/index.md`, specs, ADRs) são fontes de verdade **no workspace local**; links relativos continuam válidos para quem tem `brain/` clonado ou sincronizado fora do git.
+
+Além de [README.md](README.md) e deste arquivo, o remote publica documentação **legada** em `notes/` (70 arquivos), `project-docs/` (12 arquivos, incluindo specs e o ADR0005) e `docs/` (548 arquivos). Esse material **não** é canônico: em conflito de numeração, status decisório ou conteúdo, prevalece `brain/` (ver ANX-455). Obtenham `brain/` pelo canal acordado com o mantenedor.
 
 **Não** commitar `brain/` neste repositório.
 
