@@ -7,11 +7,19 @@ type: debate
 **Callers:** [R05-storage-pg.md](./R05-storage-pg.md) · [R07-risks.md](./R07-risks.md).  
 **Fonte:** `brain/notes/anxionos-backend-structure.md`.
 
+## Debate R6 (síntese)
+
+**Arquiteto:** simulation consome eventos/contratos — nunca `strategies/infrastructure` nem `execution/infrastructure`.
+
+**Crítico:** D-GOV-010 **não** é mitigação deste módulo. Research-python (ANX-90 S3) defer.
+
+**QA:** oráculos de fronteira G3-SIM-04/05 e G5-SIM-02/05.
+
 ## In / Out (R6)
 
 **In:** backtest.requested; fixtures pinadas; grant de experimento; T01 start run.
 
-**Out:** Certificação. Ordens reais. Pasta `experiments/`. D-GOV-010.
+**Out:** Certificação. Ordens reais. Pasta `experiments/`. D-GOV-010. Import neo4j-driver. Spec `accepted`.
 
 ## Ownership
 

@@ -7,11 +7,19 @@ type: debate
 **Callers:** [R04-contracts-events.md](./R04-contracts-events.md) · [R06-dependencies.md](./R06-dependencies.md).  
 **Fonte:** `brain/notes/anxionos-storage-ownership.md` · ADR0004 · P08 na estrutura.
 
+## Debate R5 (síntese)
+
+**Arquiteto:** PG é verdade do run; object store guarda blob; SQLite é scratch do processo.
+
+**Crítico:** ST08 **0/23** — nenhuma migration neste pack. Apagar sandbox.db não muda `simulation_runs`.
+
+**Security:** path 0700; sem ATTACH; sem secret_ref com valor.
+
 ## In / Out (R5)
 
 **In:** PG run/snapshot/manifest; object store resultRef; SQLite sandbox non-auth; projector isolado.
 
-**Out:** Mutar grafo de produção. SQLite como ledger. Certificação (`evaluation`).
+**Out:** Mutar grafo de produção. SQLite como ledger. Certificação (`evaluation`). Migration ST08. ANX-342/389 `done`.
 
 ## Ownership
 

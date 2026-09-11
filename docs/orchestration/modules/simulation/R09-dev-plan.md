@@ -2,23 +2,25 @@
 type: debate
 status: draft
 ---
-# R09 — Plano de implementacao: `modules/simulation`
+
+# R09 — Plano de implementação: `modules/simulation`
 
 **Rodada:** R9 · 2026-09-11 · ANX-389 / ANX-115  
-**Implementacao:** **ANX-116** — nao neste pack.  
+**Implementação:** **ANX-116** — não neste pack.  
 **Callers:** [R08-decision-log.md](./R08-decision-log.md) · [R10-g0-handoff.md](./R10-g0-handoff.md).
 
 ## In / Out (R9)
 
-**In:** plano G1 futuro (`simulation_*`, sandbox, HTTP runs, projector isolado).
+**In:** plano G1 futuro (`simulation_*`, sandbox, HTTP runs, projector isolado, consumer backtest.requested).
 
-**Out:** Migration agora. D-GOV-010. Pasta `experiments/`. Certificação. Ordens reais.
+**Out:** Migration agora. D-GOV-010. Pasta `experiments/`. Certificação. Ordens reais. ST08 live. ANX-342/389 done.
 
 ## Ownership
 
 | Superfície | Dono |
 | --- | --- |
 | Plano G0 documental | **simulation** |
+| Certificação G1 | **evaluation** (issue distinta) |
 | adapter-gateway | **KEEP** |
 
 ## In scope (G1 futuro)
@@ -27,37 +29,38 @@ Schema `simulation_*`, contratos, consumer `backtest.requested`, sandbox SQLite 
 
 ## Out of scope
 
-Migration agora; D-GOV-010; RLS P09; ST08; research-python (ANX-90 S3); pasta `experiments/`; certificacao; ordens reais.
+Migration agora; D-GOV-010; RLS P09; ST08; research-python (ANX-90 S3); pasta `experiments/`; certificação; ordens reais; scaffold 23 módulos.
 
 ## Non-goals P1
 
-So G0 documental. Nao scaffold 23 modulos. Nao criar `experiments/`.
+Só G0 documental. Não executar ANX-116. Não criar `experiments/`. Não fake ST08.
 
-## Pre-requisitos G1
+## Pré-requisitos G1 (greenlight Owner)
 
 eventing · graph T01 · AgencyScope · fixtures market-data com hash · object store para resultRef.
 
-## Arvore alvo
+## Árvore alvo
 
 ```text
 backend/modules/simulation/src/
-  domain/  application/commands/  infrastructure/persistence/  api/  index.ts
+  domain/  application/commands/  application/consumers/
+  infrastructure/persistence/  api/  index.ts
 ```
 
-## Fatias P08
+## Fatias P08 (pós-Owner)
 
-| Slice | Entrega | Criterio |
+| Slice | Entrega | Critério |
 | --- | --- | --- |
-| P08-S1 | Schema + contracts | PG run state; SQLite so sandbox |
+| P08-S1 | Schema + contracts | PG run state; SQLite só sandbox |
 | P08-S2 | Consumer backtest.requested | G3-SIM-01 |
 | P08-S3 | Sandbox + resultRef | G3-SIM-02; G5-SIM-02 |
 | P08-S4 | HTTP runs | G5-SIM-01 |
 
-## Matriz oraculos
+## Matriz oráculos
 
 | ID | Caso |
 | --- | --- |
-| G3-SIM-01 | requested para started+completed/failed |
+| G3-SIM-01 | requested → started+completed/failed |
 | G3-SIM-02 | hash mismatch FAILED |
 | G3-SIM-03 | sem certification.* |
 | G3-SIM-04 | boundaries sem execution/infra |
@@ -70,8 +73,16 @@ backend/modules/simulation/src/
 
 ## Defer
 
-D-GOV-010; RLS P09; ST08; research-python protocol.
+D-GOV-010; RLS P09; ST08; research-python protocol; spec `accepted`.
 
-## Saida R9
+```mermaid
+flowchart LR
+  s1[S1 schema] --> s2[S2 consumer]
+  s2 --> s3[S3 sandbox]
+  s3 --> s4[S4 HTTP]
+  s4 -.->|não neste pack| g1[G1 ANX-116]
+```
 
-Plano para R10. P1 nao executa S1-S4.
+## Saída R9
+
+Plano para R10. P1 **não** executa S1–S4.
