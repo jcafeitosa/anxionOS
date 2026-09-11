@@ -6,6 +6,18 @@ type: debate
 **Rodada:** R6 · 2026-09-11 · ANX-389 · ANX-111 · **ANX-112** não impl  
 **Callers:** [R05-storage-pg.md](./R05-storage-pg.md) · [R07-risks.md](./R07-risks.md) · [ROUNDS.md](./ROUNDS.md). Sem API runtime neste artefato. D-GOV-010 = **risk P06**.
 
+## In / Out (R6)
+
+**In:** PrincipalLookup, AgencyScopePort, TraversalEvaluator T01, deltaRefId de audit, GraphContextPort leitura, probes de observability, eventing.
+
+**Out:** HTTP `/v1/operations`, eventos `operations.*`, projector `graph:operations:v1`. Sem mutate de execution/capital/audit journal.
+
+## Non-goals
+
+- D-GOV-010 = **risk P06**.
+- Não pasta `infrastructure/` 24º.
+- Não Flight Recorder neste módulo.
+
 ## Decisões-chave
 
 | ID | Decisão |
