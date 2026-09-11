@@ -2,20 +2,19 @@
 type: debate
 status: draft
 ---
-
 # R10 — Pacote G0: `modules/performance`
 
-**Issues:** ANX-105 · **ANX-106**
+**Issues:** ANX-105 · ANX-106 · pack ANX-389  
+**Callers:** [R09-dev-plan.md](./R09-dev-plan.md) · [ROUNDS.md](./ROUNDS.md).
 
-## PC-G0 — 10/10 ✅
+### In scope
 
-| Gate | PASS |
-| --- | --- |
-| G2–G6 | R04–R09 |
-| G7 | pendente ANX-105 |
+Métricas oficiais, contratos `performance.*`, PG+Timescale derivado, oráculos G3/G5.
 
-## Handoff
+### Out of scope
 
-Fila: **g0_ready**. **ANX-106** blocked_by ANX-105 G7.
+Ledger (accounting), posição (portfolios), pasta analytics/, D-GOV-010, spec accepted, ANX-342 G7, migrations ST08.
 
-| G7-ready? | **Sim** |
+**Veredito P1:** pack documental fat. **Não** autoriza G1. Spec 003 `draft`. Próximo: [audit](../audit/ROUNDS.md).
+
+ANX-389 evidência; ANX-342 permanece `todo`.
