@@ -103,6 +103,7 @@ Containers de engine externo em modo **SIMULATED** — sem credenciais live:
 | --- | --- | --- |
 | `gocryptotrader-sandbox` | `9053` | ANX-175 (GoCryptoTrader REAL) |
 | `hummingbot-sandbox` | `9054` | ANX-176 (Hummingbot REAL) |
+| `freqtrade-sandbox` | `9055` | ANX-177 (Freqtrade REAL) |
 
 ```bash
 cp backend/deploy/docker/.env.example backend/deploy/docker/.env
@@ -110,10 +111,11 @@ docker-compose -f backend/deploy/docker/docker-compose.yml --profile engines-san
 docker-compose -f backend/deploy/docker/docker-compose.yml --profile engines-sandbox up -d
 curl -s http://127.0.0.1:9053/health | jq .
 curl -s http://127.0.0.1:9054/health | jq .
+curl -s http://127.0.0.1:9055/health | jq .
 npm run anx162:s3-engines-homologation
 ```
 
-Isolamento aplicado a ambos os serviços (`gocryptotrader-sandbox`, `hummingbot-sandbox`):
+Isolamento aplicado a todos os serviços (`gocryptotrader-sandbox`, `hummingbot-sandbox`, `freqtrade-sandbox`):
 
 | Controle | Valor |
 | --- | --- |
@@ -124,8 +126,9 @@ Isolamento aplicado a ambos os serviços (`gocryptotrader-sandbox`, `hummingbot-
 | Docker socket | proibido (verificado pelo oracle S3) |
 | Health GCT | `GET /health` na porta `9053` |
 | Health Hummingbot | `GET /health` na porta `9054` |
+| Health Freqtrade | `GET /health` na porta `9055` |
 
-> Os containers S3 são **stubs sandbox** com superfície compatível (`/health`, `/v1/getinfo` ou `/v1/status`). ANX-175/ANX-176 substituem pelos terminais reais mantendo o mesmo profile e oráculos.
+> Os containers S3 são **stubs sandbox** com superfície compatível (`/health`, `/v1/getinfo`, `/v1/status` ou `/api/v1/ping`). ANX-175/176/177 substituem pelos terminais reais mantendo o mesmo profile e oráculos.
 
 > **Migração Timescale (ADR0004):** se o volume `pgdata` foi criado com imagem Postgres plain (pré-ANX-162), remova o volume antes de subir `timescale/timescaledb` — extensões `timescaledb` e `vector` são aplicadas via `initdb/001-adr0004-extensions.sql` apenas em cluster novo:
 >
@@ -141,6 +144,7 @@ Isolamento aplicado a ambos os serviços (`gocryptotrader-sandbox`, `hummingbot-
 | Neo4j     | 7474, 7687   | `neo4j:5.26.2-community`            | Grafo institucional (`--profile graph-sandbox`) |
 | GoCryptoTrader (sandbox) | 9053 | `anxionos/gocryptotrader-sandbox:0.1.0-anx162-s3` | Engine SIMULATED (`--profile engines-sandbox`) |
 | Hummingbot (sandbox) | 9054 | `anxionos/hummingbot-sandbox:0.1.0-anx162-s3` | Engine SIMULATED (`--profile engines-sandbox`) |
+| Freqtrade (sandbox) | 9055 | `anxionos/freqtrade-sandbox:0.1.0-anx162-s3` | Engine SIMULATED (`--profile engines-sandbox`) |
 | Taskboard | 47823        | (host, não compose)       | Dashi/Codex Taskboard        |
 
 Copie `.env.example` para `.env` e ajuste se necessário:
