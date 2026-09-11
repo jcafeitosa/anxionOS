@@ -6,7 +6,17 @@ type: debate
 **Rodada:** R4 · ANX-389 · ANX-115 · ANX-116 não impl  
 **Callers:** [R05-storage-pg.md](./R05-storage-pg.md). API esboço `/v1/simulation`. Sem schema produção.
 
-ownerDomain `simulation` · `simulation.<aggregate>.<action>.v1`.
+## Convenções
+
+| Aspecto | Decisão |
+| --- | --- |
+| schemaVersion | 0.1.0 |
+| ownerDomain | `simulation` |
+| eventType | `simulation.<aggregate>.<action>.v1` |
+| Idempotência | `Idempotency-Key` → `commandId` |
+| Segredos | **proibido** |
+
+**KEEP adapter-gateway** nos contratos se já existir export — não remover.
 
 Códigos: SIM_DUPLICATE_IDEMPOTENCY · SIM_CROSS_TENANT · SIM_GRANT_INVALID · SIM_DATASET_HASH_MISMATCH · SIM_REAL_EGRESS_FORBIDDEN · SIM_TIER_INVALID.
 

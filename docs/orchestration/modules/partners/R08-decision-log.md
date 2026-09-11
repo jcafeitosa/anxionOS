@@ -9,6 +9,25 @@ status: draft
 **Issues:** ANX-389 · ANX-113  
 **Callers:** [R07-risks.md](./R07-risks.md) · [R09-dev-plan.md](./R09-dev-plan.md).
 
+## In / Out (R8)
+
+**In scope:** ownership Referral/Rule/Accrual/PayoutBatch; PG vs grafo; billing events; KEEP adapter-gateway.
+
+**Out of scope:** aceite spec; ANX-342 done; stamp `accepted`; ST08 live; G7 ANX-114; ANX-389 `done`.
+
+## Non-goals
+
+Não reabrir R02. Não fake ST08. Não criar `marketplace/`.
+
+## Ownership consolidado
+
+| Superfície | Dono |
+| --- | --- |
+| Referral / Rule / Accrual / PayoutBatch | **partners** |
+| Invoice | **billing** |
+| Ledger | **accounting** |
+| adapter-gateway | **KEEP** |
+
 | ID | Decisão | Status |
 | --- | --- | --- |
 | D-PTR-001 | Dono Referral/Rule/Accrual/PayoutBatch | fechada |

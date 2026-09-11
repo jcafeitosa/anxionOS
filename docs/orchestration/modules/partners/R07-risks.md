@@ -8,6 +8,24 @@ type: debate
 **Issues:** ANX-389 · ANX-113  
 **Callers:** [R06-dependencies.md](./R06-dependencies.md) · [R08-decision-log.md](./R08-decision-log.md).
 
+## In / Out (R7)
+
+**In scope:** double commission, refund sem reverse, payout duplicado, cross-tenant, T01 bypass, ledger neste módulo.
+
+**Out of scope:** venue (`execution`); D-GOV-010 (`risk` P06); invoice leak (`billing`).
+
+## Non-goals
+
+Não mitigar com stub de accrual. Não pasta marketplace. Não SQLite payout.
+
+## Ownership de controles
+
+| Risco | Controle vive em |
+| --- | --- |
+| UNIQUE invoice+referral | **partners** PG |
+| Invoice paid verdade | **billing** |
+| Ledger | **accounting** |
+
 ## Registro
 
 | ID | Risco | L | I | Sev | Mitigação | Gate |

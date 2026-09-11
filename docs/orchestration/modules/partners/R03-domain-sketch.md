@@ -30,6 +30,25 @@ type: debate
 **PTR-R03-01:** accrue só após `billing.invoice.paid.v1`.  
 **PTR-R03-02:** `billing.refund.processed.v1` → reverse (não SETTLED cego).
 
+## In / Out (R3)
+
+**In:** `billing.invoice.paid.v1` / `billing.refund.processed.v1`; AgencyScopePort; TraversalEvaluator T01 `partners.*`; partnerPrincipal via identity.
+
+**Out:** Referral / CommissionRule / CommissionAccrual / PayoutBatch; eventos `partners.*`. **Não** Invoice, **não** JournalEntry, **não** Product listing.
+
+## Non-goals
+
+Não pasta `marketplace/` `approvals/` `policies/`. Não FK física para `billing_invoices`. Não spec accepted. Não ST08 live. Não ANX-342/389 done.
+
+## Ownership
+
+| Agregado | Dono |
+| --- | --- |
+| Referral, CommissionRule, CommissionAccrual, PayoutBatch | **partners** |
+| Invoice / webhook PSP | **billing** |
+| Ledger | **accounting** |
+| Membership | **organizations** |
+
 ## Ports
 
 | Port | Uso |

@@ -21,9 +21,15 @@ SimulationRun, ScenarioSnapshot, TwinManifest, SandboxCheckpoint.
 | D-GOV-010 | risk P06 |
 | Pasta experiments/ | PC 21 composto |
 
+## In / Out (R2)
+
+**In:** `strategies.backtest.requested.v1`; POST run com grant SIMULATED; datasetRef+hash; seed; AgencyScopePort; TraversalEvaluator (TIER_SIMULATED).
+
+**Out:** SimulationRun + snapshot isolado. **Não** Order REAL, **não** Certification, **não** mutação de capital.
+
 ## Non-goals
 
-Egress REAL; SQLite como verdade cross-tenant; emitir `execution.order.*`; auto-promote.
+Egress REAL; SQLite como verdade cross-tenant; emitir `execution.order.*`; auto-promote; spec accepted; ST08 live; ANX-342/389 done.
 
 ```mermaid
 flowchart LR

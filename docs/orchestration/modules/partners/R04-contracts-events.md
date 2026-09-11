@@ -10,7 +10,25 @@ type: debate
 
 ## Convenções
 
-`schemaVersion` 0.1.0 · `ownerDomain: partners` · `partners.<aggregate>.<action>.v1` · Idempotency-Key → commandId · **sem secrets** em DTO.
+| Aspecto | Decisão |
+| --- | --- |
+| schemaVersion | 0.1.0 |
+| ownerDomain | `partners` |
+| eventType | `partners.<aggregate>.<action>.v1` |
+| Idempotência | `Idempotency-Key` → `commandId` |
+| Segredos | **proibido** em DTO/evento |
+
+**KEEP adapter-gateway** no pacote de contratos se já exportado.
+
+## In / Out (R4)
+
+**In:** GET/POST `/v1/partners/referrals`; GET `/v1/partners/accruals/:id`; POST `/v1/partners/payouts`; consumers billing paid/refund.
+
+**Out:** envelope SDD; códigos PTR_*; eventos listados. **PTR-R04-01:** não emite `billing.*` nem `accounting.journal.*`.
+
+## Non-goals
+
+Não OpenAPI público neste pack. Não schema produção. Não pasta marketplace. Specs draft. ST08 0/23.
 
 ### Códigos
 

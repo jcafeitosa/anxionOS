@@ -8,6 +8,27 @@ type: debate
 **Issues:** ANX-389 · ANX-113 · gate billing ANX-103  
 **Callers:** [R05-storage-pg.md](./R05-storage-pg.md) · [R07-risks.md](./R07-risks.md). Sem API runtime.
 
+## In / Out (R6)
+
+**In:** billing events paid/refund; PrincipalLookup; AgencyScopePort; TraversalEvaluator T01; eventing.
+
+**Out:** `partners.*` para accounting/operations/graph/audit; projector `graph:partners:v1`. Sem mutate de invoice ou journal alheio.
+
+## Non-goals
+
+D-GOV-010 = **risk P06**. Sem pasta marketplace. Sem neo4j-driver neste módulo. Sem import `billing/infrastructure/**`.
+
+## Ownership de ports
+
+| Port | Dono |
+| --- | --- |
+| EventConsumer billing | **partners** application |
+| AgencyScopePort | **organizations** |
+| TraversalEvaluator | **governance** |
+| Projector | **graph** |
+
+**KEEP adapter-gateway**.
+
 ## Decisões
 
 | ID | Decisão |

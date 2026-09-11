@@ -27,6 +27,22 @@ SimulationRun, ScenarioSnapshot, TwinManifest, SandboxCheckpoint.
 
 SQLite sandbox **non-auth** por run. PG autoritativo para estado do run. ST08 0/23.
 
+## Non-goals
+
+- Não spec `accepted`. Não ST08 live. Não ANX-342 / ANX-389 `done`.
+- Não emitir `execution.order.*`. Não certificar (evaluation). Não aplicar ChangeProposal.
+- D-GOV-010 = **risk P06**. Sem pasta `experiments/` (PC 21 composto).
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| SimulationRun / ScenarioSnapshot / TwinManifest / SandboxCheckpoint | **simulation** |
+| StrategyVersion | **strategies** |
+| Certification | **evaluation** |
+| Ordens reais | **execution** |
+| adapter-gateway | **KEEP** |
+
 ## In / Out (R1)
 
 **In:** `strategies.backtest.requested.v1` ou POST run (grant SIMULATED); datasetRef+hash; seed.

@@ -9,6 +9,26 @@ status: draft
 **Issue debate:** ANX-389 / ANX-113 · impl **ANX-114** (não neste pack)  
 **Callers:** [R08-decision-log.md](./R08-decision-log.md) · [R10-g0-handoff.md](./R10-g0-handoff.md). Sem migration.
 
+## In / Out (R9)
+
+**In scope (G1 futuro):** schema `partners_*`, contratos, consumers paid/refund, HTTP `/v1/partners`, projector `graph:partners:v1`.
+
+**Out of scope:** Invoice (`billing`); ledger (`accounting`); pasta `marketplace/`; spec accepted; ST08 migration agora; ANX-342/389 done; rails PSP payout live.
+
+## Non-goals P1
+
+Só G0 documental. Não scaffoldar 23 módulos. Não G7 ANX-114 neste pack.
+
+## Ownership (plano)
+
+| Fatia | Dono |
+| --- | --- |
+| partners_* + contracts | **partners** |
+| invoice.paid verdade | **billing** (contrato já fechado) |
+| journal efeito | **accounting** (consumer) |
+
+**KEEP adapter-gateway**.
+
 ## Pré-requisitos G1
 
 R10 documental; eventing; graph:partners:v1; billing paid/refund contratos; AgencyScopePort.
