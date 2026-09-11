@@ -17,7 +17,7 @@ interface PlatformDashboardProps {
 
 /**
  * ANX-166 P07 — Platform Console.
- * Escopo PLATFORM explícito: nenhum agencyId, nenhum GET /v1/agencies/*.
+ * Escopo PLATFORM explícito: nenhum agencyId, nenhum endpoint de Agency.
  */
 export function PlatformDashboard({ platformAccess }: PlatformDashboardProps) {
 	if (!platformAccess) {
