@@ -15,7 +15,7 @@
 | connections | Binding usado na inferência | Quotas verdade (connections) |
 | evaluation | Consumo de certificação para promoção de versão | Rubrica autoritativa |
 
-Os outros 16 módulos físicos **existem** no baseline; não são donos do Brain. Lista completa: [spec 001 ownership](../001-institutional-contract/spec.md). Sem pasta `approvals/` / `policies/` / `adapter-gateway`.
+Os outros 16 módulos físicos **existem** no baseline; não são donos do Brain. Lista completa: [spec 001 ownership](../001-institutional-contract/spec). Sem pasta `approvals/` / `policies/` / `adapter-gateway`.
 
 ### Eventos (ownerDomain)
 
