@@ -10,6 +10,24 @@ type: debate
 **Data:** 2026-09-08  
 **Issue debate estrutura:** ANX-42 · debate módulo: **ANX-87** · contrato P06: **ANX-58**
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R2)
+
+**In:** registry + observações temporais. **Out:** não connections (feeds brutos), não accounting, não execution.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem paths REAL/live v1.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Séries Timescale | **market-data** |
+| adapter-gateway | **KEEP** |
+| Provider binding | **connections** |
+
 ## Objetivo da rodada
 
 Fechar fronteiras **possui / não possui** entre market-data e vizinhos (**connections**, **accounting**, **strategies**, **graph**, **portfolios**, **execution**, **risk**); ratificar **TimescaleDB** como dono de séries vs **PostgreSQL transacional** para registry/journal; proibir paths **REAL/live trading** em v1; definir invariantes testáveis para R03/R04.

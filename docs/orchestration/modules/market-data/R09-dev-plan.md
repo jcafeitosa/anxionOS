@@ -9,6 +9,23 @@ status: draft
 **Data:** 2026-09-08  
 **Issue:** ANX-87 · gate: **ANX-58** · impl: **ANX-88** · connections: ANX-62/84
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R9)
+
+**In:** slices P06-S1–S5. **Out:** plano documental. Zero código até claim ANX-88.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Plano market-data | **market-data** |
+| adapter-gateway | **KEEP** |
+
 ## Objetivo
 
 Traduzir D-MD-* em slices P06-S1–S5 com matriz G3/G4/G5. Zero código até claim ANX-88.

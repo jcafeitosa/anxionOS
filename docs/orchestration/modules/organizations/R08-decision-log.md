@@ -8,6 +8,23 @@ type: debate
 **Data:** 2026-09-07  
 **Issue:** ANX-39 (debate) · ANX-29 (implementação, bloqueada até R10 G0) · ANX-28 (identity `in_review`)
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R8)
+
+**In:** síntese D-ORG-*. **Out:** decision log. **Não** fechar spec accepted.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Decisões D-ORG-* | **organizations** |
+| adapter-gateway | **KEEP** |
+
 ## Participantes
 
 | Papel | Agente |

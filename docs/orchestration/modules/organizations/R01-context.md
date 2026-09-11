@@ -9,6 +9,24 @@ type: debate
 **Data:** 2026-09-07  
 **Issue:** ANX-29 (implementação) · ANX-39 (debate)
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R1)
+
+**In:** Agency, Owner, Membership, onboarding. **Out:** contexto R2. **Não** grants, sessão Better Auth, invoice, Agent.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto neste pack.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Agency / Membership | **organizations** |
+| adapter-gateway | **KEEP** |
+| Principal/session | **identity** |
+
 ## Participantes
 
 | Papel | Agente |

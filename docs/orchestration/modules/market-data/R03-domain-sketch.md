@@ -11,6 +11,24 @@ type: debate
 **Issues:** ANX-42 (debate estrutura) · **ANX-87** (R02–R10) · contrato P06: **ANX-58**  
 **Pré-requisito:** [R02-boundaries.md](./R02-boundaries.md) · [R01-context.md](./R01-context.md) · spec 003 (R12)
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R3)
+
+**In:** Instrument/Observation/Freshness/Dataset. **Out:** `market_data.*.v1`. Consome `connections.market_data.observed.v1` sem reemitir bruto.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Domain sketch | **market-data** |
+| adapter-gateway | **KEEP** |
+| Timescale | **market-data** (ADR0004) |
+
 ## Objetivo da rodada
 
 Esboçar o modelo de domínio após [R02-boundaries.md](./R02-boundaries.md): agregados `Instrument`, `MarketObservation`, `FreshnessPolicy`, `MarketEvent`, `MarketDataset`; ports `getPriceAsOf`, `resolveInstrument`; invariantes `MD-R03-INV-*`; sketch de eventos `market_data.*.v1`; integração consumo `connections.market_data.observed.v1` sem reemitir bruto; ownership Timescale conforme ADR0004.

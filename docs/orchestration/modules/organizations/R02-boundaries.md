@@ -7,6 +7,24 @@ type: debate
 **Rodada:** R2 — Scope boundary  
 **Data:** 2026-09-07
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R2)
+
+**In:** Agency, Owner, Membership, blueprint de mercados, onboarding. **Out:** não governance grants, não identity session, não billing, não agents, não Neo4j autoritativo.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Agency / Membership | **organizations** |
+| adapter-gateway | **KEEP** |
+| Grant / Mandate | **governance** |
+
 ## Debate R2 (diálogo atribuído)
 
 **Arquiteto:** organizations é dono de Agency, Owner (vínculo titular↔Agency), Membership (convite, papéis operacionais), blueprint de mercados (stocks/crypto/both) e estado de onboarding da empresa (DRAFT → READY).

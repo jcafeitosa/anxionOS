@@ -8,6 +8,23 @@ type: debate
 **Data:** 2026-09-07  
 **Issue:** ANX-39 (debate) · ANX-29 (implementação, bloqueada até R10 G0 + identity G7)
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R9)
+
+**In:** plano G1 futuro. **Out:** slices documentais. Bloqueado até R10 G0 + identity G7.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto neste pack.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Plano organizations | **organizations** |
+| adapter-gateway | **KEEP** |
+
 ## Participantes
 
 | Papel | Agente |

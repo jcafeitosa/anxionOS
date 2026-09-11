@@ -11,6 +11,23 @@ type: debate
 **Issues:** ANX-87 (debate) · ANX-58 (contrato P06) · ANX-62 (observed upstream)  
 **Pré-requisito:** [R03-domain-sketch.md](./R03-domain-sketch.md) · [R02-boundaries.md](./R02-boundaries.md)
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R4)
+
+**In:** `/v1/market-data/*` e Zod. **Out:** `market_data.*.v1`. Sem quotes live REAL.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Contratos market-data | **market-data** |
+| adapter-gateway | **KEEP** |
+
 ## Objetivo
 
 Schemas Zod `@anxionos/contracts/market-data/*`, HTTP `/v1/market-data/*`, catálogo `market_data.*.v1`, integração `connections.market_data.observed.v1`, testes contrato MD-R02/MD-R03.

@@ -7,6 +7,23 @@ type: debate
 **Rodada:** R3 — Domain model  
 **Data:** 2026-09-07
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R3)
+
+**In:** Agency, Owner, Membership, Organization. **Out:** eventos `organizations.*.v1`. Sem plaintext de invite token.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Domain sketch | **organizations** |
+| adapter-gateway | **KEEP** |
+
 ## Debate R3 (diálogo atribuído)
 
 **Arquiteto:** Proponho quatro entidades núcleo v1: `Agency`, `Owner`, `Membership`, `Organization`. Value objects: `AgencyStatus`, `MarketScope`, `MembershipRole`, `InviteToken` (hash, não plaintext).

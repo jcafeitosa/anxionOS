@@ -10,6 +10,24 @@ type: debate
 **Data:** 2026-09-07 (expandido 2026-09-08)  
 **Issue debate estrutura:** ANX-42 · **debate módulo:** ANX-87
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R1)
+
+**In:** instrumentos, feeds, séries asOf. **Out:** preços/metadados para risk/strategies/portfolios. **Não** ordens nem ledger.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem REAL/live trading. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Instrument / séries | **market-data** |
+| adapter-gateway | **KEEP** |
+| Venue orders | **execution** |
+
 ## Propósito
 
 Dono institucional de **identidade de mercado** e **observações temporais** — instrumentos, catálogos, feeds, qualidade de dados, calendários/sessões, corporate actions como eventos de mercado, e séries (ticks, candles, trades, order books, funding, métricas derivadas elegíveis). Fornece preços e metadados **asOf** para risk, strategies, portfolios e simulation, sem executar ordens nem registrar ledger financeiro.

@@ -8,6 +8,24 @@ type: debate
 **Data:** 2026-09-07  
 **Issue:** ANX-39 (debate) · ANX-29 (implementação, bloqueada até G0)
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R5)
+
+**In:** PG `organizations_*` + journal/outbox. **Out:** projeção graph. Sem Neo4j autoritativo.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Tabelas organizations_* | **organizations** |
+| adapter-gateway | **KEEP** |
+| Neo4j | **graph** |
+
 ## Participantes
 
 | Papel | Agente |

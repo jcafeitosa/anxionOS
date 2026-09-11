@@ -8,6 +8,23 @@ type: debate
 **Data:** 2026-09-07  
 **Issue:** ANX-39 (debate) · ANX-29 (implementação, bloqueada até G0)
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R4)
+
+**In:** `/v1/organizations` e Zod. **Out:** `organizations.*.v1`. Sem grants neste módulo.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Contratos organizations | **organizations** |
+| adapter-gateway | **KEEP** |
+
 ## Participantes
 
 | Papel | Agente |

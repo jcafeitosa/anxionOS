@@ -8,6 +8,23 @@ type: debate
 **Data:** 2026-09-07  
 **Issue:** ANX-39 (debate) · ANX-29 (implementação, bloqueada até G0) · ANX-28 (identity `in_review`)
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R6)
+
+**In:** identity PrincipalLookup. **Out:** AgencyScopePort para módulos downstream.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Wiring organizations | **organizations** |
+| adapter-gateway | **KEEP** |
+
 ## Participantes
 
 | Papel | Agente |

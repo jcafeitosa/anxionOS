@@ -10,6 +10,23 @@ type: debate
 **Data:** 2026-09-08  
 **Issues:** ANX-87 · ANX-58
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R7)
+
+**In:** stale data, manipulação, cross-tenant. **Out:** controles G4/G5. **Não** D-GOV-010.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Riscos freshness/qualidade | **market-data** |
+| adapter-gateway | **KEEP** |
+
 ## Objetivo
 
 Matriz L×I, controles G4/G5, top 5 → R08.

@@ -10,6 +10,23 @@ type: debate
 **Data:** 2026-09-08  
 **Issues:** ANX-87 · ANX-58 · ANX-62 (connections upstream) · ANX-83 (connections debate)
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R6)
+
+**In:** connections observed + identity/orgs. **Out:** consumers strategies/risk/portfolios/simulation.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Wiring market-data | **market-data** |
+| adapter-gateway | **KEEP** |
+
 ## Objetivo
 
 Mapa upstream/downstream, ordem bootstrap, wiring connections/graph/organizations/strategies.

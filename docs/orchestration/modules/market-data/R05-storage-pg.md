@@ -11,6 +11,24 @@ type: debate
 **Issues:** ANX-87 · ANX-58 · graph consumer: ANX-32  
 **Pré-requisito:** [R04-contracts-events.md](./R04-contracts-events.md) · ADR0004
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R5)
+
+**In:** PG registry + Timescale séries. **Out:** projeção graph. Sem ledger.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| market_data_* / hypertables | **market-data** |
+| adapter-gateway | **KEEP** |
+| Neo4j | **graph** |
+
 ## Princípios
 
 | Princípio | Decisão |
