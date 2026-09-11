@@ -69,6 +69,16 @@ type: guide
 
 ---
 
+## Ponteiros P1 (ANX-389)
+
+Debates seriais: [índice PC](../../../notes/anxionos-pc-serial-index.md). Packs `modules/agents` e `modules/orchestration` (ANX-392/393). Graph R01–R10 em `modules/graph/` só depois desses packs; histórico em [structure-debate/graph](../structure-debate/graph/R10-g0-handoff.md). Specs 001–005 permanecem draft.
+
+| Módulo | Debate PC | Pack canônico |
+| --- | --- | --- |
+| agents | [PC 03](../../../notes/anxionos-pc03-agents-debate.md) | [modules/agents](../modules/agents/ROUNDS.md) |
+| orchestration | [PC 12](../../../notes/anxionos-pc12-tasks-debate.md) | [modules/orchestration](../modules/orchestration/ROUNDS.md) |
+| governance | [PC 01](../../../notes/anxionos-pc01-governance-debate.md) | [modules/governance](../modules/governance/ROUNDS.md) |
+
 ## Referências
 
 - [SLACK-TRANSCRIPTS.md](./SLACK-TRANSCRIPTS.md)

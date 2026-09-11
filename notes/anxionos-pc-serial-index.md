@@ -48,4 +48,6 @@ Programa ANX-342. Cada unidade: debate OKF + Mermaid + in/out + non-goals. **Nao
 
 Atlas: [sistema](./anxionos-diagram-atlas.md) · [23 modulos](./anxionos-diagram-atlas-modules.md) · [alinhamento](./anxionos-product-company-module-alignment.md) · [briefing Owner](/external-sources/owner-briefing-product-company-2026-09-10)
 
+Hub em brain (sem duplicar estes 30 arquivos): [anxionos-pc-serial-hub](../brain/notes/anxionos-pc-serial-hub.md). Programa P1: ANX-389.
+
 Satélites ANX-342 (docs, não done do programa): ANX-343 atlas/Archify · ANX-344 ingest · ANX-345 alignment 30→23 · ANX-346 CAPABILITY-MAP · ANX-347 fichas dos 19 módulos.
