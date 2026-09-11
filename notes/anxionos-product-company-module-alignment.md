@@ -93,6 +93,22 @@ Prova: parágrafo «Resultado da auditoria» acima + [briefing ingestido](/exter
 
 Fechada a pergunta Approvals/Policies: **não** há módulos físicos novos. Serial PC 01–30 **fechado em docs** — [indice](./anxionos-pc-serial-index.md). ANX-342 permanece aberto para auditoria do coordenador.
 
+## Inspeção 2026-09-11 — pasta física `backend/modules/adapter-gateway`
+
+**Disposição:** **KEEP + documentar**. Não é o 24º módulo de domínio (ADR0006). Não apagar.
+
+A pasta **não** é scaffold vazio. Contém registry, suite de conformidade e manifest SIMULATED de referência, wired a `@anxionos/contracts/adapter-gateway` e a `backend/tests/contracts/adapter-gateway-conformance.test.ts`.
+
+| Item | Estado |
+| --- | --- |
+| `src/index.ts` | reexporta contratos + `InMemoryAdapterRegistry` + `runAdapterConformanceSuite` + manifest de referência |
+| Ficha `docs/orchestration/system-capabilities/modules/adapter-gateway.md` | **ausente** (correto) |
+| Spec Archify `anxionos-module-adapter-gateway` | **ausente** (correto) |
+| R10 em `docs/orchestration/modules/adapter-gateway/` | **ausente** (correto) |
+| Pastas `backend/modules/approvals` e `policies` | **ausentes** (correto) |
+
+Contar 24 pastas em `backend/modules/` **não** autoriza ficha/R10/Archify de módulo. A 24ª pasta é biblioteca técnica; os 23 donos continuam a lista ADR0002.
+
 ## Próximo passo
 
 Criar issues separadas para os gaps `products` e `marketplace` somente após Product Definition/Architecture (spec 007 composta). D-GOV-010 permanece deferido até P06 ([ANX-350](./anxionos-pc01-governance-debate.md#d-gov-010)).
