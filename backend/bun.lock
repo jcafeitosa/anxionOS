@@ -55,6 +55,7 @@
         "@anxionos/observability": "workspace:*",
         "@anxionos/organizations": "workspace:*",
         "@anxionos/partners": "workspace:*",
+        "@anxionos/portfolios": "workspace:*",
         "@anxionos/strategies": "workspace:*",
         "@better-auth/drizzle-adapter": "1.7.4",
         "@elysia/cors": "1.4.2",
