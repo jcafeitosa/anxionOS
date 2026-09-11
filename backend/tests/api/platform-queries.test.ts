@@ -2,6 +2,8 @@ import { describe, expect, test } from "bun:test";
 import {
 	handleGetPlatformHealth,
 	handleListPlatformIncidents,
+	handleListPlatformRecovery,
+	handleListPlatformRuntimes,
 	requirePlatformConsoleGrant,
 } from "../../apps/api/src/operations/handlers/platform-queries";
 import { PLATFORM_CONSOLE_CAPABILITY } from "@anxionos/contracts/governance";
@@ -50,6 +52,14 @@ describe("platform operations queries (ANX-166)", () => {
 
 	test("handleListPlatformIncidents never returns agency rows", () => {
 		expect(handleListPlatformIncidents()).toEqual({ incidents: [] });
+	});
+
+	test("handleListPlatformRuntimes is an empty PLATFORM ledger", () => {
+		expect(handleListPlatformRuntimes()).toEqual({ runtimes: [] });
+	});
+
+	test("handleListPlatformRecovery does not list agency recovery tasks", () => {
+		expect(handleListPlatformRecovery()).toEqual({ recoveryTasks: [] });
 	});
 
 	test("handleGetPlatformHealth records source and checkedAt", async () => {

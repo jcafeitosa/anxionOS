@@ -14,6 +14,14 @@ export interface ListPlatformIncidentsResponse {
 	incidents: [];
 }
 
+export interface ListPlatformRuntimesResponse {
+	runtimes: [];
+}
+
+export interface ListPlatformRecoveryResponse {
+	recoveryTasks: [];
+}
+
 export async function requirePlatformConsoleGrant(
 	grantRepository: GrantRepository,
 	principalId: string,
@@ -51,4 +59,20 @@ export async function handleGetPlatformHealth(
  */
 export function handleListPlatformIncidents(): ListPlatformIncidentsResponse {
 	return { incidents: [] };
+}
+
+/**
+ * No PLATFORM runtime/quota ledger exists yet. Empty collection is honest;
+ * Agency metrics must not be copied here (ANX-166 S3).
+ */
+export function handleListPlatformRuntimes(): ListPlatformRuntimesResponse {
+	return { runtimes: [] };
+}
+
+/**
+ * Recovery tasks remain agency-scoped (ANX-158). PLATFORM break-glass is not
+ * executed from this console; empty collection is the honest ledger (ANX-166 S4).
+ */
+export function handleListPlatformRecovery(): ListPlatformRecoveryResponse {
+	return { recoveryTasks: [] };
 }

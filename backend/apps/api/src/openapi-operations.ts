@@ -1543,6 +1543,58 @@ export const operationsOpenApi = {
 			...ERROR_RESPONSES,
 		},
 	}),
+	listPlatformRuntimes: op({
+		tag: "Operations",
+		operationId: "listPlatformRuntimes",
+		summary: "List platform runtimes",
+		description:
+			"Module: operations. PLATFORM runtime/quota collection. Requires `console.platform` grant. Empty array is the honest ledger until a platform runtime store exists. Never copies Agency metrics.",
+		security: COOKIE_SECURITY,
+		responses: {
+			"200": {
+				description: "Platform runtimes (never agency rows).",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							additionalProperties: false,
+							required: ["runtimes"],
+							properties: {
+								runtimes: { type: "array", maxItems: 0, items: { type: "object" } },
+							},
+						},
+					},
+				},
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
+	listPlatformRecovery: op({
+		tag: "Operations",
+		operationId: "listPlatformRecovery",
+		summary: "List platform recovery tasks",
+		description:
+			"Module: operations. PLATFORM recovery collection. Requires `console.platform` grant. Does not list agency recovery-tasks. Empty array is honest; this console does not execute break-glass.",
+		security: COOKIE_SECURITY,
+		responses: {
+			"200": {
+				description: "Platform recovery tasks (never agency rows).",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							additionalProperties: false,
+							required: ["recoveryTasks"],
+							properties: {
+								recoveryTasks: { type: "array", maxItems: 0, items: { type: "object" } },
+							},
+						},
+					},
+				},
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
 	listIncidents: op({
 		tag: "Operations",
 		operationId: "listIncidents",

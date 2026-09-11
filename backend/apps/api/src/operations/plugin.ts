@@ -38,6 +38,8 @@ import {
 import {
 	handleGetPlatformHealth,
 	handleListPlatformIncidents,
+	handleListPlatformRecovery,
+	handleListPlatformRuntimes,
 	requirePlatformConsoleGrant,
 } from "./handlers/platform-queries";
 
@@ -98,6 +100,16 @@ export function createOperationsPlugin(deps: OperationsPluginDeps) {
 					"/incidents",
 					() => handleListPlatformIncidents(),
 					operationsOpenApi.listPlatformIncidents,
+				)
+				.get(
+					"/runtimes",
+					() => handleListPlatformRuntimes(),
+					operationsOpenApi.listPlatformRuntimes,
+				)
+				.get(
+					"/recovery",
+					() => handleListPlatformRecovery(),
+					operationsOpenApi.listPlatformRecovery,
 				),
 		)
 		.group("/agencies/:agencyId", (scoped) =>
