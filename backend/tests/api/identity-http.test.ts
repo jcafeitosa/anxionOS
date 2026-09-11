@@ -608,4 +608,20 @@ describe("identity HTTP boundary (/v1/identity)", () => {
 		expect(response.status).toBe(403);
 		expect((await response.json()).error.details.code).toBe("IDN_CROSS_TENANT");
 	});
+
+	/**
+	 * LOW NEW-3 da revalidacao G4: header presente com valor VAZIO era falsy e
+	 * caia no mesmo ramo da ausencia ("sem escopo"), contrariando o invariante de
+	 * que um header presente e invalido nunca vira sem escopo.
+	 */
+	test("x-agency-id vazio é 400, não 'sem escopo'", async () => {
+		const { app } = harness({ capabilities: ["identity.read"] });
+		const response = await app.handle(
+			request(`/v1/identity/principals/${principalId}`, {
+				headers: { "x-agency-id": "" },
+			}),
+		);
+		expect(response.status).toBe(400);
+		expect((await response.json()).error.code).toBe("VALIDATION_ERROR");
+	});
 });

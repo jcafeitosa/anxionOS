@@ -48,6 +48,12 @@ async function resolveRequestContext(
 		session.user.id,
 	);
 	const rawAgencyId = request.headers.get("x-agency-id");
+	// Header PRESENTE com valor vazio nao e' "sem escopo": era falsy e caia no
+	// mesmo ramo da ausencia, contrariando o invariante de que um header presente
+	// e invalido nunca vira "sem escopo" (achado LOW NEW-3 da revalidacao G4).
+	if (rawAgencyId !== null && rawAgencyId.trim() === "") {
+		throw AppError.validation("x-agency-id must not be empty");
+	}
 	const agencyId = rawAgencyId
 		? institutionalUuidSchema.parse(rawAgencyId)
 		: undefined;
