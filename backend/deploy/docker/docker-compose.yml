@@ -422,6 +422,63 @@ services:
           memory: 64M
     restart: unless-stopped
 
+  cryptofeed-sandbox:
+    build:
+      context: ./engines
+      dockerfile: cryptofeed/Dockerfile
+    image: anxionos/cryptofeed-sandbox:0.1.0-anx179-s1
+    profiles:
+      - engines-sandbox
+    environment:
+      ENGINE_MODE: ${ENGINE_MODE:-SIMULATED}
+      ENGINE_SANDBOX_AUTH_TOKEN: ${ENGINE_SANDBOX_AUTH_TOKEN:?ENGINE_SANDBOX_AUTH_TOKEN required for engines-sandbox}
+      CRYPTOFEED_SANDBOX_PORT: ${CRYPTOFEED_SANDBOX_PORT:-9058}
+      CRYPTOFEED_SANDBOX_VERSION: 0.1.0-anx179-s1
+    ports:
+      - "${CRYPTOFEED_SANDBOX_PORT:-9058}:9058"
+    volumes:
+      - cfs-sandbox-data:/data
+    networks:
+      - anxion-engines-sandbox
+    read_only: true
+    tmpfs:
+      - /tmp:size=16M,mode=1777
+    user: "10001:10001"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--spider",
+          "-q",
+          "http://localhost:9058/health",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    labels:
+      anxion.issue: ANX-179
+      anxion.slice: S1
+      anxion.engine: cryptofeed
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 64M
+    restart: unless-stopped
+
 volumes:
   pgdata:
   neo4jdata:
@@ -431,3 +488,4 @@ volumes:
   fqt-sandbox-data:
   xch-sandbox-data:
   nts-sandbox-data:
+  cfs-sandbox-data:
