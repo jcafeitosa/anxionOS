@@ -1,3 +1,7 @@
+---
+type: reference
+---
+
 # Organograma da equipe anxionOS
 
 Hierarquia **circular** de agentes humanos e IA para desenvolvimento full-stack governado. Mandato desce (C→B→A→Workers); evidência e revisão sobem (Workers→A→B→C).

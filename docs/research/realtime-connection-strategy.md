@@ -1,3 +1,7 @@
+---
+type: research
+---
+
 # Estratégia de conexão realtime — anxionOS
 
 > Resumo da análise 43921102 (PT-BR). Status: **implementado (MVP P02/P07)**.
