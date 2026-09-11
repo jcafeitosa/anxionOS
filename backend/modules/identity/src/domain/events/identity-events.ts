@@ -7,10 +7,16 @@ import {
 	identityPrincipalEmailUpdatedV1PayloadSchema,
 	identityPrincipalReactivatedV1PayloadSchema,
 	identityPrincipalRegisteredV1PayloadSchema,
+	identityPrincipalRevokedV1PayloadSchema,
 	identityPrincipalSuspendedV1PayloadSchema,
+	identityServiceCredentialIssuedV1PayloadSchema,
+	identityServiceCredentialRevokedV1PayloadSchema,
+	identityServiceCredentialRotatedV1PayloadSchema,
 	identityServiceIdentityRegisteredV1PayloadSchema,
 	identityServiceIdentityRevokedV1PayloadSchema,
+	identitySessionRevokedV1PayloadSchema,
 } from "@anxionos/contracts/identity";
+import type { PrincipalKind } from "../entities/principal";
 
 function baseEnvelope(
 	eventType: string,
@@ -30,6 +36,8 @@ function baseEnvelope(
 export function createPrincipalRegisteredEvent(input: {
 	principalId: string;
 	email: string;
+	kind?: PrincipalKind;
+	revision?: number;
 	occurredAt?: string;
 }): DomainEventEnvelope {
 	return baseEnvelope(
@@ -38,6 +46,8 @@ export function createPrincipalRegisteredEvent(input: {
 		identityPrincipalRegisteredV1PayloadSchema.parse({
 			principalId: input.principalId,
 			email: input.email,
+			kind: input.kind,
+			revision: input.revision,
 		}),
 	);
 }
@@ -46,6 +56,7 @@ export function createPrincipalSuspendedEvent(input: {
 	principalId: string;
 	reasonCode: string;
 	suspendedAt: string;
+	revision?: number;
 }): DomainEventEnvelope {
 	return baseEnvelope(
 		IDENTITY_EVENT_TYPES.PRINCIPAL_SUSPENDED,
@@ -54,6 +65,25 @@ export function createPrincipalSuspendedEvent(input: {
 			principalId: input.principalId,
 			reasonCode: input.reasonCode,
 			suspendedAt: input.suspendedAt,
+			revision: input.revision,
+		}),
+	);
+}
+
+export function createPrincipalRevokedEvent(input: {
+	principalId: string;
+	reasonCode: string;
+	revokedAt: string;
+	revision?: number;
+}): DomainEventEnvelope {
+	return baseEnvelope(
+		IDENTITY_EVENT_TYPES.PRINCIPAL_REVOKED,
+		input.revokedAt,
+		identityPrincipalRevokedV1PayloadSchema.parse({
+			principalId: input.principalId,
+			reasonCode: input.reasonCode,
+			revokedAt: input.revokedAt,
+			revision: input.revision,
 		}),
 	);
 }
@@ -62,6 +92,7 @@ export function createPrincipalReactivatedEvent(input: {
 	principalId: string;
 	reactivatedAt: string;
 	actorPrincipalId?: string;
+	revision?: number;
 }): DomainEventEnvelope {
 	return baseEnvelope(
 		IDENTITY_EVENT_TYPES.PRINCIPAL_REACTIVATED,
@@ -70,6 +101,7 @@ export function createPrincipalReactivatedEvent(input: {
 			principalId: input.principalId,
 			reactivatedAt: input.reactivatedAt,
 			actorPrincipalId: input.actorPrincipalId,
+			revision: input.revision,
 		}),
 	);
 }
@@ -102,6 +134,25 @@ export function createPrincipalEmailUpdatedEvent(input: {
 	);
 }
 
+/** INV-IDN-03: carries the logical `sessionRefId`, never a token or cookie. */
+export function createSessionRevokedEvent(input: {
+	sessionRefId: string;
+	principalId: string;
+	revokedAt: string;
+	reasonCode?: string;
+}): DomainEventEnvelope {
+	return baseEnvelope(
+		IDENTITY_EVENT_TYPES.SESSION_REVOKED,
+		input.revokedAt,
+		identitySessionRevokedV1PayloadSchema.parse({
+			sessionRefId: input.sessionRefId,
+			principalId: input.principalId,
+			revokedAt: input.revokedAt,
+			reasonCode: input.reasonCode,
+		}),
+	);
+}
+
 export function createServiceIdentityRegisteredEvent(input: {
 	serviceIdentityId: string;
 	principalId: string;
@@ -130,6 +181,63 @@ export function createServiceIdentityRevokedEvent(input: {
 		identityServiceIdentityRevokedV1PayloadSchema.parse({
 			serviceIdentityId: input.serviceIdentityId,
 			principalId: input.principalId,
+			revokedAt: input.revokedAt,
+		}),
+	);
+}
+
+/** Secret never appears in the payload — only the public prefix. */
+export function createServiceCredentialIssuedEvent(input: {
+	credentialId: string;
+	serviceIdentityId: string;
+	principalId: string;
+	prefix: string;
+	issuedAt: string;
+}): DomainEventEnvelope {
+	return baseEnvelope(
+		IDENTITY_EVENT_TYPES.SERVICE_CREDENTIAL_ISSUED,
+		input.issuedAt,
+		identityServiceCredentialIssuedV1PayloadSchema.parse({
+			credentialId: input.credentialId,
+			serviceIdentityId: input.serviceIdentityId,
+			principalId: input.principalId,
+			prefix: input.prefix,
+			issuedAt: input.issuedAt,
+		}),
+	);
+}
+
+export function createServiceCredentialRotatedEvent(input: {
+	credentialId: string;
+	previousCredentialId: string;
+	serviceIdentityId: string;
+	prefix: string;
+	rotatedAt: string;
+}): DomainEventEnvelope {
+	return baseEnvelope(
+		IDENTITY_EVENT_TYPES.SERVICE_CREDENTIAL_ROTATED,
+		input.rotatedAt,
+		identityServiceCredentialRotatedV1PayloadSchema.parse({
+			credentialId: input.credentialId,
+			previousCredentialId: input.previousCredentialId,
+			serviceIdentityId: input.serviceIdentityId,
+			prefix: input.prefix,
+			rotatedAt: input.rotatedAt,
+		}),
+	);
+}
+
+export function createServiceCredentialRevokedEvent(input: {
+	credentialId: string;
+	serviceIdentityId: string;
+	revokedAt: string;
+}): DomainEventEnvelope {
+	return baseEnvelope(
+		IDENTITY_EVENT_TYPES.SERVICE_CREDENTIAL_REVOKED,
+		input.revokedAt,
+		identityServiceCredentialRevokedV1PayloadSchema.parse({
+			credentialId: input.credentialId,
+			serviceIdentityId: input.serviceIdentityId,
 			revokedAt: input.revokedAt,
 		}),
 	);

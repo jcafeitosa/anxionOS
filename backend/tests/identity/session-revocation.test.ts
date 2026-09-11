@@ -14,6 +14,10 @@ const principal: Principal = {
 	createdAt: new Date("2026-09-08T12:00:00.000Z"),
 	suspendedAt: new Date("2026-09-08T12:00:00.000Z"),
 	suspensionReason: "ops.manual",
+	kind: "human",
+	revision: 1,
+	revokedAt: null,
+	revocationReason: null,
 };
 
 const activePrincipal: Principal = {
@@ -21,6 +25,10 @@ const activePrincipal: Principal = {
 	status: "active",
 	suspendedAt: null,
 	suspensionReason: null,
+	kind: "human",
+	revision: 1,
+	revokedAt: null,
+	revocationReason: null,
 };
 
 describe("handlePrincipalSuspended", () => {

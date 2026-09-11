@@ -22,7 +22,7 @@ export async function syncPrincipalEmail(
 	const command = syncPrincipalEmailCommandSchema.parse(input);
 	const existing = await deps.repository.findById(command.principalId);
 	if (!existing) {
-		throwIdentityError("PRINCIPAL_NOT_FOUND", "Principal not found");
+		throwIdentityError("IDN_PRINCIPAL_NOT_FOUND", "Principal not found");
 	}
 	if (existing.email === command.email) {
 		return existing;
@@ -32,14 +32,17 @@ export async function syncPrincipalEmail(
 			command.email,
 		);
 		if (emailTaken && emailTaken.id !== command.principalId) {
-			throwIdentityError("PRINCIPAL_EMAIL_TAKEN", "Email already registered");
+			throwIdentityError(
+				"IDN_PRINCIPAL_EMAIL_TAKEN",
+				"Email already registered",
+			);
 		}
 		const principal = await context.principalRepository.updateEmail(
 			command.principalId,
 			command.email,
 		);
 		if (!principal) {
-			throwIdentityError("PRINCIPAL_NOT_FOUND", "Principal not found");
+			throwIdentityError("IDN_PRINCIPAL_NOT_FOUND", "Principal not found");
 		}
 		await context.publishEvents([
 			createPrincipalEmailUpdatedEvent({

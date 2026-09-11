@@ -41,7 +41,7 @@ describe("registerPrincipal", () => {
 				{ repository, unitOfWork },
 				{ authUserId: "auth-new", email: "taken@example.com" },
 			),
-		).rejects.toMatchObject({ identityCode: "PRINCIPAL_EMAIL_TAKEN" });
+		).rejects.toMatchObject({ identityCode: "IDN_PRINCIPAL_EMAIL_TAKEN" });
 	});
 
 	test("replay by authUserId is idempotent without second event", async () => {

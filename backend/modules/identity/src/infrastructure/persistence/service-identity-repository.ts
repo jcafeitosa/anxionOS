@@ -1,11 +1,14 @@
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type {
 	NewServiceIdentity,
 	ServiceIdentity,
 } from "../../domain/entities/service-identity";
 import type { ServiceIdentityRepository } from "../../domain/ports/service-identity-repository";
+import type * as schema from "./schema";
 import { type ServiceIdentityRow, serviceIdentities } from "./schema";
+
+type IdentityDb = NodePgDatabase<typeof schema>;
 
 function toServiceIdentity(row: ServiceIdentityRow): ServiceIdentity {
 	return {
@@ -19,10 +22,7 @@ function toServiceIdentity(row: ServiceIdentityRow): ServiceIdentity {
 }
 
 export function createDrizzleServiceIdentityRepository(
-	db: NodePgDatabase<{
-		serviceIdentities: typeof serviceIdentities;
-		principals: typeof import("./schema").principals;
-	}>,
+	db: IdentityDb,
 ): ServiceIdentityRepository {
 	return {
 		async findById(id: string): Promise<ServiceIdentity | null> {
@@ -39,10 +39,14 @@ export function createDrizzleServiceIdentityRepository(
 			const rows = await db
 				.select()
 				.from(serviceIdentities)
-				.where(eq(serviceIdentities.principalId, principalId));
-			return rows
-				.filter((row) => row.status === "active")
-				.map(toServiceIdentity);
+				.where(
+					and(
+						eq(serviceIdentities.principalId, principalId),
+						eq(serviceIdentities.status, "active"),
+					),
+				)
+				.orderBy(desc(serviceIdentities.createdAt));
+			return rows.map(toServiceIdentity);
 		},
 		async create(input: NewServiceIdentity): Promise<ServiceIdentity> {
 			const rows = await db
@@ -62,7 +66,12 @@ export function createDrizzleServiceIdentityRepository(
 			const rows = await db
 				.update(serviceIdentities)
 				.set({ status: "revoked", revokedAt })
-				.where(eq(serviceIdentities.id, id))
+				.where(
+					and(
+						eq(serviceIdentities.id, id),
+						eq(serviceIdentities.status, "active"),
+					),
+				)
 				.returning();
 			return rows[0] ? toServiceIdentity(rows[0]) : null;
 		},

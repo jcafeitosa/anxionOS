@@ -15,6 +15,10 @@ const principalWithoutAuth: Principal = {
 	createdAt: new Date("2026-09-08T12:00:00.000Z"),
 	suspendedAt: null,
 	suspensionReason: null,
+	kind: "human",
+	revision: 1,
+	revokedAt: null,
+	revocationReason: null,
 };
 
 describe("linkAuthUserId", () => {
@@ -65,6 +69,6 @@ describe("linkAuthUserId", () => {
 					authUserId: "better-auth-user-42",
 				},
 			),
-		).rejects.toMatchObject({ identityCode: "PRINCIPAL_AUTH_USER_TAKEN" });
+		).rejects.toMatchObject({ identityCode: "IDN_PRINCIPAL_AUTH_USER_TAKEN" });
 	});
 });

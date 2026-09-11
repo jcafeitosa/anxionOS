@@ -74,7 +74,8 @@ export interface PostLoginDecisionInput {
 		authUserId: string;
 		email: string;
 		displayName?: string | null;
-		status: "active" | "suspended";
+		/** REVOKED is terminal (R03) and denies access with its own reason. */
+		status: "active" | "suspended" | "revoked";
 	} | null;
 	membershipsActive: Array<{ agencyId: string; role: string }>;
 	membershipsPending: PostLoginMembershipPending[];
@@ -206,6 +207,21 @@ export function decidePostLoginContext(
 					state: "principal_missing",
 				},
 				decision: { kind: "denied", reason: "PRINCIPAL_MISSING" },
+			},
+			now,
+		);
+	}
+
+	if (input.principal.status === "revoked") {
+		return withAuthorization(
+			{
+				...base,
+				onboardingState: {
+					needsProfile: false,
+					needsOrganization: false,
+					state: "revoked",
+				},
+				decision: { kind: "denied", reason: "PRINCIPAL_REVOKED" },
 			},
 			now,
 		);

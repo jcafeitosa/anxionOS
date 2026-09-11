@@ -6,9 +6,12 @@ import type {
 	IdentityTransactionContext,
 	IdentityUnitOfWork,
 } from "../domain/ports/identity-unit-of-work";
+import { createDrizzleCommandJournalRepository } from "./persistence/command-journal-repository";
 import { createDrizzlePrincipalRepository } from "./persistence/principal-repository";
 import * as schema from "./persistence/schema";
+import { createDrizzleServiceCredentialRepository } from "./persistence/service-credential-repository";
 import { createDrizzleServiceIdentityRepository } from "./persistence/service-identity-repository";
+import { createDrizzleSessionRefRepository } from "./persistence/session-ref-repository";
 
 function createTransactionContext(
 	client: PoolClient,
@@ -17,6 +20,9 @@ function createTransactionContext(
 	return {
 		principalRepository: createDrizzlePrincipalRepository(db),
 		serviceIdentityRepository: createDrizzleServiceIdentityRepository(db),
+		serviceCredentialRepository: createDrizzleServiceCredentialRepository(db),
+		sessionRefRepository: createDrizzleSessionRefRepository(db),
+		commandJournal: createDrizzleCommandJournalRepository(db),
 		async publishEvents(envelopes: DomainEventEnvelope[]) {
 			for (const envelope of envelopes) {
 				await appendJournal(client, envelope);
@@ -26,6 +32,7 @@ function createTransactionContext(
 	};
 }
 
+/** INV-IDN-02: state + journal + outbox share one transaction. */
 export function createIdentityUnitOfWork(pool: Pool): IdentityUnitOfWork {
 	return {
 		async runInTransaction<T>(

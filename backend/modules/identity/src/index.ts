@@ -18,6 +18,11 @@ export {
 	registerServiceIdentity,
 } from "./application/commands/register-service-identity";
 export {
+	type RevokePrincipalDeps,
+	type RevokePrincipalInput,
+	revokePrincipal,
+} from "./application/commands/revoke-principal";
+export {
 	type RevokeServiceIdentityDeps,
 	revokeServiceIdentity,
 } from "./application/commands/revoke-service-identity";
@@ -40,31 +45,81 @@ export {
 	reconcileSuspendedPrincipalSessions,
 } from "./application/consumers/reconcile-suspended-principal-sessions";
 export {
+	IdentityCommandError,
+	isUniqueViolation,
+	throwIdentityError,
+} from "./application/errors";
+export {
+	toPrincipalDto,
+	toServiceCredentialDto,
+	toSessionRefDto,
+} from "./application/presenters";
+export {
 	getPrincipalByAuthUserId,
 	getPrincipalById,
 } from "./application/queries/get-principal";
 export type {
 	NewPrincipal,
 	Principal,
+	PrincipalKind,
 	PrincipalStatus,
 } from "./domain/entities/principal";
+export type {
+	NewServiceCredential,
+	ServiceCredential,
+	ServiceCredentialStatus,
+} from "./domain/entities/service-credential";
 export type {
 	NewServiceIdentity,
 	ServiceIdentity,
 	ServiceIdentityStatus,
 } from "./domain/entities/service-identity";
 export type {
+	NewSessionRef,
+	SessionRef,
+	SessionRefStatus,
+} from "./domain/entities/session-ref";
+export {
+	canTransition,
+	revisionMatches,
+} from "./domain/policies/principal-lifecycle";
+export type {
+	CommandJournalRecord,
+	CommandJournalRepository,
+	NewCommandJournalRecord,
+} from "./domain/ports/command-journal";
+export type {
 	IdentityTransactionContext,
 	IdentityUnitOfWork,
 } from "./domain/ports/identity-unit-of-work";
+export type {
+	PrincipalLookup,
+	PrincipalLookupResult,
+} from "./domain/ports/principal-lookup";
 export type { PrincipalRepository } from "./domain/ports/principal-repository";
+export type {
+	GeneratedServiceCredential,
+	ServiceCredentialCrypto,
+} from "./domain/ports/service-credential-crypto";
+export type { ServiceCredentialRepository } from "./domain/ports/service-credential-repository";
 export type { ServiceIdentityRepository } from "./domain/ports/service-identity-repository";
-export type { SessionRevoker } from "./domain/ports/session-revoker";
+export type { SessionRefRepository } from "./domain/ports/session-ref-repository";
+export type {
+	RevokedSessionRef,
+	SessionRevocationPort,
+	SessionRevoker,
+} from "./domain/ports/session-revoker";
 export { SessionRevocationUnavailableError } from "./domain/ports/session-revoker";
+export { hashSessionRef } from "./infrastructure/adapters/credential-crypto";
+export { createPgPrincipalLookup } from "./infrastructure/adapters/principal-lookup";
+export { createServiceCredentialCrypto } from "./infrastructure/adapters/service-credential-crypto";
 export { createIdentityDb } from "./infrastructure/create-db";
 export { createIdentityUnitOfWork } from "./infrastructure/identity-unit-of-work";
 export { ensureIdentitySchema } from "./infrastructure/migrate";
 export {
+	commandJournal,
 	principals,
+	serviceCredentials,
 	serviceIdentities,
+	sessionRefs,
 } from "./infrastructure/persistence/schema";

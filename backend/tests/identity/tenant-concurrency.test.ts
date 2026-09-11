@@ -23,6 +23,10 @@ const activePrincipal: Principal = {
 	createdAt: new Date("2026-09-08T12:00:00.000Z"),
 	suspendedAt: null,
 	suspensionReason: null,
+	kind: "human",
+	revision: 1,
+	revokedAt: null,
+	revocationReason: null,
 };
 
 describe("identity tenant/concurrency", () => {
@@ -135,7 +139,7 @@ describe("identity tenant/concurrency", () => {
 		expect(rejected).toHaveLength(3);
 		for (const outcome of rejected) {
 			expect(outcome.reason).toMatchObject({
-				identityCode: "PRINCIPAL_EMAIL_TAKEN",
+				identityCode: "IDN_PRINCIPAL_EMAIL_TAKEN",
 			});
 		}
 	});

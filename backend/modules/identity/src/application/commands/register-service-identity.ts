@@ -17,7 +17,7 @@ export async function registerServiceIdentity(
 	const command = registerServiceIdentityCommandSchema.parse(input);
 	const principal = await deps.repository.findById(command.principalId);
 	if (!principal || principal.status !== "active") {
-		throwIdentityError("PRINCIPAL_NOT_FOUND", "Active principal not found");
+		throwIdentityError("IDN_PRINCIPAL_NOT_FOUND", "Active principal not found");
 	}
 	return deps.unitOfWork.runInTransaction(async (context) => {
 		const serviceIdentity = await context.serviceIdentityRepository.create({

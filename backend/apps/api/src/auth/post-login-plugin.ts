@@ -116,7 +116,7 @@ export function createPostLoginPlugin(deps: PostLoginPluginDeps) {
 						user: session.user,
 						session: session.session,
 					}),
-					principal: principal
+					principal: principal?.authUserId
 						? {
 								id: principal.id,
 								authUserId: principal.authUserId,

@@ -22,7 +22,7 @@ export async function linkAuthUserId(
 	const command = linkAuthUserIdCommandSchema.parse(input);
 	const existing = await deps.repository.findById(command.principalId);
 	if (!existing) {
-		throwIdentityError("PRINCIPAL_NOT_FOUND", "Principal not found");
+		throwIdentityError("IDN_PRINCIPAL_NOT_FOUND", "Principal not found");
 	}
 	if (existing.authUserId === command.authUserId) {
 		return existing;
@@ -32,7 +32,7 @@ export async function linkAuthUserId(
 	);
 	if (authUserTaken && authUserTaken.id !== command.principalId) {
 		throwIdentityError(
-			"PRINCIPAL_AUTH_USER_TAKEN",
+			"IDN_PRINCIPAL_AUTH_USER_TAKEN",
 			"Auth user already linked to another principal",
 		);
 	}
@@ -42,7 +42,7 @@ export async function linkAuthUserId(
 			command.authUserId,
 		);
 		if (!principal) {
-			throwIdentityError("PRINCIPAL_NOT_FOUND", "Principal not found");
+			throwIdentityError("IDN_PRINCIPAL_NOT_FOUND", "Principal not found");
 		}
 		await context.publishEvents([
 			createPrincipalAuthLinkedEvent({

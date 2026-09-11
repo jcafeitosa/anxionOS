@@ -1,6 +1,9 @@
 import { revokeServiceIdentityCommandSchema } from "@anxionos/contracts/identity";
 import type { ServiceIdentity } from "../../domain/entities/service-identity";
-import { createServiceIdentityRevokedEvent } from "../../domain/events/identity-events";
+import {
+	createServiceCredentialRevokedEvent,
+	createServiceIdentityRevokedEvent,
+} from "../../domain/events/identity-events";
 import type { IdentityUnitOfWork } from "../../domain/ports/identity-unit-of-work";
 import type { ServiceIdentityRepository } from "../../domain/ports/service-identity-repository";
 import { throwIdentityError } from "../errors";
@@ -20,7 +23,7 @@ export async function revokeServiceIdentity(
 	);
 	if (!existing) {
 		throwIdentityError(
-			"SERVICE_IDENTITY_NOT_FOUND",
+			"IDN_SERVICE_IDENTITY_NOT_FOUND",
 			"Service identity not found",
 		);
 	}
@@ -35,17 +38,33 @@ export async function revokeServiceIdentity(
 		);
 		if (!serviceIdentity) {
 			throwIdentityError(
-				"SERVICE_IDENTITY_NOT_FOUND",
+				"IDN_SERVICE_IDENTITY_NOT_FOUND",
 				"Service identity not found",
 			);
 		}
-		await context.publishEvents([
+		const events = [
 			createServiceIdentityRevokedEvent({
 				serviceIdentityId: serviceIdentity.id,
 				principalId: serviceIdentity.principalId,
 				revokedAt: revokedAt.toISOString(),
 			}),
-		]);
+		];
+		// Revoking the identity must invalidate the credentials it can present.
+		const revokedCredentials =
+			await context.serviceCredentialRepository.revokeActiveByServiceIdentityId(
+				serviceIdentity.id,
+				revokedAt,
+			);
+		for (const credential of revokedCredentials) {
+			events.push(
+				createServiceCredentialRevokedEvent({
+					credentialId: credential.id,
+					serviceIdentityId: credential.serviceIdentityId,
+					revokedAt: revokedAt.toISOString(),
+				}),
+			);
+		}
+		await context.publishEvents(events);
 		return serviceIdentity;
 	});
 }

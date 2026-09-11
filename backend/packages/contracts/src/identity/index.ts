@@ -1,18 +1,30 @@
 export type {
+	IdentityCommandResult,
+	IssueServiceCredentialCommand,
 	LinkAuthUserIdCommand,
 	ReactivatePrincipalCommand,
+	RecordSessionRevokedCommand,
 	RegisterPrincipalCommand,
 	RegisterServiceIdentityCommand,
+	RevokePrincipalCommand,
+	RevokeServiceCredentialCommand,
 	RevokeServiceIdentityCommand,
+	RotateServiceCredentialCommand,
 	SuspendPrincipalCommand,
 	SyncPrincipalEmailCommand,
 } from "./commands";
 export {
+	identityCommandResultSchema,
+	issueServiceCredentialCommandSchema,
 	linkAuthUserIdCommandSchema,
 	reactivatePrincipalCommandSchema,
+	recordSessionRevokedCommandSchema,
 	registerPrincipalCommandSchema,
 	registerServiceIdentityCommandSchema,
+	revokePrincipalCommandSchema,
+	revokeServiceCredentialCommandSchema,
 	revokeServiceIdentityCommandSchema,
+	rotateServiceCredentialCommandSchema,
 	suspendPrincipalCommandSchema,
 	syncPrincipalEmailCommandSchema,
 } from "./commands";
@@ -30,9 +42,14 @@ export type {
 	IdentityPrincipalEmailUpdatedV1Payload,
 	IdentityPrincipalReactivatedV1Payload,
 	IdentityPrincipalRegisteredV1Payload,
+	IdentityPrincipalRevokedV1Payload,
 	IdentityPrincipalSuspendedV1Payload,
+	IdentityServiceCredentialIssuedV1Payload,
+	IdentityServiceCredentialRevokedV1Payload,
+	IdentityServiceCredentialRotatedV1Payload,
 	IdentityServiceIdentityRegisteredV1Payload,
 	IdentityServiceIdentityRevokedV1Payload,
+	IdentitySessionRevokedV1Payload,
 } from "./events";
 export {
 	IDENTITY_EVENT_TYPES,
@@ -43,17 +60,42 @@ export {
 	identityPrincipalEmailUpdatedV1PayloadSchema,
 	identityPrincipalReactivatedV1PayloadSchema,
 	identityPrincipalRegisteredV1PayloadSchema,
+	identityPrincipalRevokedV1PayloadSchema,
 	identityPrincipalSuspendedV1PayloadSchema,
+	identityServiceCredentialIssuedV1PayloadSchema,
+	identityServiceCredentialRevokedV1PayloadSchema,
+	identityServiceCredentialRotatedV1PayloadSchema,
 	identityServiceIdentityRegisteredV1PayloadSchema,
 	identityServiceIdentityRevokedV1PayloadSchema,
+	identitySessionRevokedV1PayloadSchema,
 } from "./events";
-export type { PrincipalDto } from "./queries";
-export { principalDtoSchema } from "./queries";
-export type { PrincipalStatus, SuspensionReasonCode } from "./types";
+export type {
+	PrincipalDto,
+	ServiceCredentialDto,
+	SessionRefDto,
+} from "./queries";
+export {
+	principalDtoSchema,
+	serviceCredentialDtoSchema,
+	sessionRefDtoSchema,
+} from "./queries";
+export type {
+	PrincipalKind,
+	PrincipalStatus,
+	RevocationReasonCode,
+	SuspensionReasonCode,
+} from "./types";
 export {
 	authUserIdSchema,
+	commandIdSchema,
 	emailAddressSchema,
 	principalIdSchema,
+	principalKindSchema,
+	principalRevisionSchema,
 	principalStatusSchema,
+	revocationReasonCodeSchema,
+	serviceCredentialIdSchema,
+	serviceCredentialPrefixSchema,
+	sessionRefIdSchema,
 	suspensionReasonCodeSchema,
 } from "./types";

@@ -26,6 +26,10 @@ const activePrincipal: Principal = {
 	createdAt: new Date("2026-09-08T12:00:00.000Z"),
 	suspendedAt: null,
 	suspensionReason: null,
+	kind: "human",
+	revision: 1,
+	revokedAt: null,
+	revocationReason: null,
 };
 
 const suspendedPrincipal: Principal = {
@@ -33,6 +37,10 @@ const suspendedPrincipal: Principal = {
 	status: "suspended",
 	suspendedAt: new Date("2026-09-08T12:00:00.000Z"),
 	suspensionReason: "ops.manual",
+	kind: "human",
+	revision: 1,
+	revokedAt: null,
+	revocationReason: null,
 };
 
 describe("registerServiceIdentity", () => {
@@ -73,7 +81,7 @@ describe("registerServiceIdentity", () => {
 				{ principalId: suspendedPrincipal.id, label: "worker-a" },
 			),
 		).rejects.toMatchObject({
-			identityCode: "PRINCIPAL_NOT_FOUND",
+			identityCode: "IDN_PRINCIPAL_NOT_FOUND",
 		});
 	});
 
@@ -174,7 +182,7 @@ describe("revokeServiceIdentity", () => {
 				},
 			),
 		).rejects.toMatchObject({
-			identityCode: "SERVICE_IDENTITY_NOT_FOUND",
+			identityCode: "IDN_SERVICE_IDENTITY_NOT_FOUND",
 		});
 	});
 

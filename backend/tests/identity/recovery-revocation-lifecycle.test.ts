@@ -21,6 +21,10 @@ const activePrincipal: Principal = {
 	createdAt: new Date("2026-09-08T12:00:00.000Z"),
 	suspendedAt: null,
 	suspensionReason: null,
+	kind: "human",
+	revision: 1,
+	revokedAt: null,
+	revocationReason: null,
 };
 
 describe("identity recovery/revocation lifecycle", () => {
