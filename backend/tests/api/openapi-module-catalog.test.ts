@@ -6,6 +6,9 @@ const DOCUMENTED_OPERATIONS: Array<{
 	path: string;
 	method: string;
 	tag: string;
+	/** Asserted when declared: `operationId` fixo e status declarados. */
+	operationId?: string;
+	statuses?: string[];
 }> = [
 	{ path: "/health", method: "get", tag: "Health" },
 	{ path: "/api/auth/sign-in/email", method: "post", tag: "Identity" },
@@ -13,6 +16,55 @@ const DOCUMENTED_OPERATIONS: Array<{
 	{ path: "/api/auth/get-session", method: "get", tag: "Identity" },
 	{ path: "/api/auth/sign-out", method: "post", tag: "Identity" },
 	{ path: "/v1/auth/post-login-context", method: "get", tag: "Identity" },
+	{
+		path: "/v1/identity/principals/{principalId}",
+		method: "get",
+		tag: "Identity",
+		operationId: "identityGetPrincipal",
+		statuses: ["200", "400", "401", "403", "404"],
+	},
+	{
+		path: "/v1/identity/principals/{principalId}/sessions",
+		method: "get",
+		tag: "Identity",
+		operationId: "identityListSessions",
+		statuses: ["200", "400", "401", "403", "404"],
+	},
+	{
+		path: "/v1/identity/principals",
+		method: "post",
+		tag: "Identity",
+		operationId: "identityRegisterPrincipal",
+		statuses: ["200", "400", "401", "403", "404", "409"],
+	},
+	{
+		path: "/v1/identity/principals/{principalId}/suspend",
+		method: "post",
+		tag: "Identity",
+		operationId: "identitySuspendPrincipal",
+		statuses: ["200", "400", "401", "403", "404", "409", "503"],
+	},
+	{
+		path: "/v1/identity/principals/{principalId}/revoke",
+		method: "post",
+		tag: "Identity",
+		operationId: "identityRevokePrincipal",
+		statuses: ["200", "400", "401", "403", "404", "409", "503"],
+	},
+	{
+		path: "/v1/identity/sessions/revoke",
+		method: "post",
+		tag: "Identity",
+		operationId: "identityRevokeSession",
+		statuses: ["200", "400", "401", "403", "404", "409"],
+	},
+	{
+		path: "/v1/identity/sessions/revoked",
+		method: "get",
+		tag: "Identity",
+		operationId: "identityListRevokedSessions",
+		statuses: ["200", "400", "401", "403"],
+	},
 	{ path: "/v1/organizations/agencies", method: "post", tag: "Organizations" },
 	{ path: "/v1/organizations/agencies", method: "get", tag: "Organizations" },
 	{
@@ -389,6 +441,7 @@ describe("OpenAPI module catalog", () => {
 						summary?: string;
 						description?: string;
 						operationId?: string;
+						responses?: Record<string, unknown>;
 					}
 				>
 			>;
@@ -428,6 +481,42 @@ describe("OpenAPI module catalog", () => {
 				missing.push(
 					`${expected.method.toUpperCase()} ${expected.path} missing operationId`,
 				);
+			} else if (
+				expected.operationId &&
+				operation.operationId !== expected.operationId
+			) {
+				missing.push(
+					`${expected.method.toUpperCase()} ${expected.path} operationId=${operation.operationId} expected=${expected.operationId}`,
+				);
+			}
+			if (expected.statuses) {
+				const declared = Object.keys(operation.responses ?? {}).sort();
+				const wanted = [...expected.statuses].sort();
+				if (declared.join(",") !== wanted.join(",")) {
+					missing.push(
+						`${expected.method.toUpperCase()} ${expected.path} statuses=${declared.join(",")} expected=${wanted.join(",")}`,
+					);
+				}
+			}
+		}
+
+		// `operationId` é a chave estável consumida por agentes e tools; duplicata
+		// quebra o cliente gerado mesmo quando cada operação existe.
+		const seenOperationIds = new Map<string, string>();
+		for (const [path, methods] of Object.entries(spec.paths)) {
+			for (const [method, operation] of Object.entries(methods)) {
+				if (!operation.operationId) {
+					continue;
+				}
+				const where = `${method.toUpperCase()} ${path}`;
+				const previous = seenOperationIds.get(operation.operationId);
+				if (previous) {
+					missing.push(
+						`duplicate operationId ${operation.operationId} on ${previous} and ${where}`,
+					);
+					continue;
+				}
+				seenOperationIds.set(operation.operationId, where);
 			}
 		}
 		expect(missing).toEqual([]);

@@ -4,6 +4,7 @@ import { createPostLoginPlugin } from "./auth/post-login-plugin";
 import { createEvaluationPlugin } from "./evaluation/plugin";
 import { createExecutionPlugin } from "./execution/plugin";
 import { createGovernancePlugin } from "./governance/plugin";
+import { createIdentityPlugin } from "./identity/plugin";
 import {
 	healthOpenApiDetail,
 	hiddenAuthCatchAllDetail,
@@ -94,6 +95,16 @@ export function createOpenApiCatalogApp() {
 				scopedPool: unused,
 				identityRepository: unused,
 				traversalEvaluator: unused,
+			}),
+		)
+		.use(
+			createIdentityPlugin({
+				auth: stubAuth as never,
+				identityRepository: unused,
+				sessionRefRepository: unused,
+				identityUnitOfWork: unused,
+				grantRepository: unused,
+				agencyScope: unused,
 			}),
 		)
 		.use(
