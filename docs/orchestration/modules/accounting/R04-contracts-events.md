@@ -1,14 +1,39 @@
 ---
 type: debate
 ---
-
 # R04 — Contratos e eventos: `modules/accounting`
 
-**Issues:** ANX-93 · ANX-58 · ANX-91 (capital consumer)
+**Rodada:** R4  
+**Data:** 2026-09-11  
+**Issues:** ANX-93 · ANX-58 · ANX-91 · pack ANX-389  
+**Callers:** [R03-domain-sketch.md](./R03-domain-sketch.md) · [R05-storage-pg.md](./R05-storage-pg.md).
 
 ## Convenções
 
 `ownerDomain: accounting` · `accounting.<aggregate>.<action>.v1` · `executionMode` SIMULATED|PAPER only · payloads sem segredos venue/pagamento
+
+**KEEP adapter-gateway** se já exportado.
+
+## In / Out (R4)
+
+**In:** GET journal/balance; POST adjustments, reverse, reconciliation open/resolve. Idempotency-Key em POST; grant `accounting.*` + T01. Consumers: `execution.fill.confirmed.v1`, `billing.invoice.paid.v1`, `partners.commission.accrued.v1`, `capital.reservation.consumed.v1` (validação), `governance.grant.revoked.v1`.
+
+**Out:** `accounting.ledger.posted.v1` → capital/portfolios/performance/audit. **Não** Invoice status (`billing`). **Não** hold de capital. **Não** tick persist (`market-data`). Sem secrets.
+
+## Non-goals
+
+Não REAL v1. Não SQLite ledger. Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`. Não pasta `approvals/`.
+
+## Ownership (contratos)
+
+| Superfície | Dono |
+| --- | --- |
+| JournalEntry / LedgerPosting / FeePosting / ReconciliationCase financeiro | **accounting** |
+| Invoice | **billing** |
+| Reservation / Allocation | **capital** |
+| Fill | **execution** |
+| Observation | **market-data** |
+| adapter-gateway | **KEEP** |
 
 ## HTTP `/v1/accounting/*` (v1 debate)
 

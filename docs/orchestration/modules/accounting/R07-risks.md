@@ -1,13 +1,32 @@
 ---
 type: debate
 ---
-
 # R07 — Riscos: `modules/accounting`
 
+**Rodada:** R7  
+**Data:** 2026-09-11  
 **Issue:** ANX-93 · pack ANX-389  
 **Callers:** [R06-dependencies.md](./R06-dependencies.md) · [R08-decision-log.md](./R08-decision-log.md) · [ROUNDS.md](./ROUNDS.md)
 
-## Ownership
+## In / Out (R7)
+
+**In:** double posting, unbalanced journal, cross-tenant, SQLite, billing double revenue, stale priceRef, REAL bypass.
+
+**Out:** R-ACC-* + G5. **Não** D-GOV-010. Sem ST08 live.
+
+## Non-goals
+
+Pasta approvals; spec 003 `accepted`; ANX-342 G7; ST08 stamp; ANX-389 `done`.
+
+## Ownership (riscos)
+
+| Superfície | Dono |
+| --- | --- |
+| journal / ACC_* rejects | **accounting** |
+| Allocation | **capital** |
+| Invoice | **billing** |
+| Observation | **market-data** |
+| adapter-gateway | **KEEP** |
 
 accounting = ledger institucional (partida dobrada). **Não** Allocation (capital), Invoice (billing), Observation (market-data). D-GOV-010 **não** aqui.
 
@@ -35,9 +54,5 @@ Top 5 (02, 08, 04, 05, 01) → R08.
 ## Oráculos
 
 G5-ACC-01 cross-tenant · G5-ACC-02 double posting · G5-ACC-03 unbalanced reject · G3-ACC-01 fill idempotente.
-
-## Non-goals
-
-Pasta approvals; spec 003 `accepted`; ANX-342 G7; ST08 stamp.
 
 → **R08** ([R08-decision-log.md](./R08-decision-log.md))

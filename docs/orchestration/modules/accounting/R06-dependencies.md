@@ -1,10 +1,32 @@
 ---
 type: debate
 ---
-
 # R06 — Dependências: `modules/accounting`
 
-**Issues:** ANX-93 · ANX-91 · ANX-58 · ANX-29
+**Rodada:** R6  
+**Data:** 2026-09-11  
+**Issues:** ANX-93 · ANX-91 · ANX-58 · ANX-29 · pack ANX-389  
+**Callers:** [R05-storage-pg.md](./R05-storage-pg.md) · [R07-risks.md](./R07-risks.md).
+
+## In / Out (R6)
+
+**In:** fill.confirmed (execution); reservation.consumed validação (capital); invoice.paid (billing); MarketDataPort; grant `accounting.adjust`; org scope; eventing P02.
+
+**Out:** `accounting.ledger.posted.v1` → capital BalanceView; recon events → operations; todos `accounting.*` → audit. Sem mutate Invoice, Allocation, Observation ou Neo4j driver.
+
+## Non-goals
+
+D-GOV-010 = **risk P06**. Sem import `execution/infrastructure` nem `billing/infrastructure`. Sem spec `accepted`. Sem ST08 live. Sem ANX-342/389 `done`.
+
+## Ownership (dependências)
+
+| Superfície | Dono |
+| --- | --- |
+| JournalEntry | **accounting** |
+| Fill | **execution** |
+| Invoice | **billing** |
+| Reservation | **capital** |
+| adapter-gateway | **KEEP** |
 
 ## Upstream
 

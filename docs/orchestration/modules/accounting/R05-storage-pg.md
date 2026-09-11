@@ -1,10 +1,31 @@
 ---
 type: debate
 ---
-
 # R05 — Armazenamento: `modules/accounting`
 
-**Issue:** ANX-93
+**Rodada:** R5  
+**Data:** 2026-09-11  
+**Issue:** ANX-93 · pack ANX-389  
+**Callers:** [R04-contracts-events.md](./R04-contracts-events.md) · [R06-dependencies.md](./R06-dependencies.md). ADR0004. **Sem migration.** ST08 **0/23**.
+
+## In / Out (R5)
+
+**In:** PG journal/postings/fees/reconciliation + outbox; snapshots rebuildáveis.
+
+**Out:** modelo documental. **Não** Timescale ledger. **Não** Neo4j writer. Sem SQLite.
+
+## Non-goals
+
+Não RLS P09. Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`.
+
+## Ownership (storage)
+
+| Superfície | Dono |
+| --- | --- |
+| chart/journal/postings/fees/recon/snapshots | **accounting** |
+| ticks | **market-data** (Timescale) |
+| graph:accounting:v1 | **graph** projector |
+| adapter-gateway | **KEEP** |
 
 ## Decisão R05 (núcleo)
 
