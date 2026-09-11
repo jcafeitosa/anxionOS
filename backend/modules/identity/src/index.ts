@@ -116,6 +116,7 @@ export {
 	canTransition,
 	revisionMatches,
 } from "./domain/policies/principal-lifecycle";
+export type { AgencyScopePort } from "./domain/ports/agency-scope";
 export type {
 	CommandJournalRecord,
 	CommandJournalRepository,
@@ -143,6 +144,13 @@ export type {
 	SessionRevoker,
 } from "./domain/ports/session-revoker";
 export { SessionRevocationUnavailableError } from "./domain/ports/session-revoker";
+export type { IdentityUserProjectionNode } from "./graph/projection-contract";
+export {
+	IDENTITY_PROJECTION_FORBIDDEN_ATTRIBUTES,
+	IDENTITY_USER_PROJECTED_EVENT_TYPES,
+	identityUserProjectionNodeSchema,
+	toIdentityUserProjectionNode,
+} from "./graph/projection-contract";
 export { hashSessionRef } from "./infrastructure/adapters/credential-crypto";
 export { createPgPrincipalLookup } from "./infrastructure/adapters/principal-lookup";
 export { createServiceCredentialCrypto } from "./infrastructure/adapters/service-credential-crypto";

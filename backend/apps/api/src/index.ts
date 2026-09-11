@@ -39,7 +39,10 @@ import { createGovernanceApiRuntime } from "./governance/bootstrap";
 import { bootstrapGovernanceOrganizationsMembership } from "./governance/bootstrap-organizations-membership";
 import { createGovernancePlugin } from "./governance/plugin";
 import { probeHealthDeps } from "./health/probe-deps";
+import { createAgencyScope } from "./identity/agency-scope";
+import { createIdentityApiRuntime } from "./identity/bootstrap";
 import { bootstrapIdentitySessionRevocation } from "./identity/bootstrap-session-revocation";
+import { createIdentityPlugin } from "./identity/plugin";
 import {
 	createSloMetricsPlugin,
 	getApiMetricsCollector,
@@ -168,6 +171,18 @@ if (pool && resolveBetterAuthConfig()) {
 	) as unknown as Elysia;
 	logger.info(
 		"Governance API mounted at /v1/agencies/:agencyId/grants, /v1/agencies/:agencyId/change-proposals, /v1/agencies/:agencyId/agents/:agentId/autonomy and /v1/governance/*",
+	);
+	const identityRuntime = createIdentityApiRuntime(pool);
+	app = app.use(
+		createIdentityPlugin({
+			auth,
+			...identityRuntime,
+			grantRepository: govRuntime.grantRepository,
+			agencyScope: createAgencyScope(orgRuntime.membershipRepository),
+		}),
+	) as unknown as Elysia;
+	logger.info(
+		"Identity API mounted at /v1/identity/principals and /v1/identity/sessions",
 	);
 	const partnersRuntime = createPartnersApiRuntime(pool);
 	app = app.use(

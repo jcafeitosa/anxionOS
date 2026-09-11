@@ -227,6 +227,217 @@ export const postLoginContextOpenApiDetail = op({
 	},
 });
 
+const identityPrincipalParams = [
+	pathUuid(
+		"principalId",
+		"Principal UUID owned by `identity`. This is the institutional principal id, never the Better Auth user id.",
+	),
+	REQUEST_ID,
+];
+
+const identityCommandParams = [...identityPrincipalParams, idempotencyKey()];
+
+export const identityPrincipalsOpenApi = {
+	getPrincipal: op({
+		tag: "Identity",
+		operationId: "identityGetPrincipal",
+		summary: "Get one principal",
+		description:
+			"Module: identity. Returns the public principal DTO (no `authUserId`, no credential material). Self-access is allowed; otherwise the caller needs the `identity.admin`/`identity.read` grant. Suspended and revoked principals fail closed with 404. Optional `x-agency-id` requires membership in that agency (otherwise `IDN_CROSS_TENANT`).",
+		security: [{ cookieAuth: [] }],
+		parameters: identityPrincipalParams,
+		responses: {
+			"200": {
+				description: "`{ principal }` with id, email, kind, status, revision.",
+			},
+			"401": { description: "No session." },
+			"403": { description: "`IDN_FORBIDDEN` / `IDN_CROSS_TENANT`." },
+			"404": {
+				description: "`IDN_PRINCIPAL_NOT_FOUND` (includes suspended/revoked).",
+			},
+		},
+	}),
+	listSessions: op({
+		tag: "Identity",
+		operationId: "identityListSessions",
+		summary: "List session references of a principal",
+		description:
+			"Module: identity. Logical session references only — never a token, cookie or raw session id. Self-access allowed; otherwise requires `identity.read`.",
+		security: [{ cookieAuth: [] }],
+		parameters: identityPrincipalParams,
+		responses: {
+			"200": { description: "`{ sessions }` newest first." },
+			"403": { description: "`IDN_FORBIDDEN` / `IDN_CROSS_TENANT`." },
+		},
+	}),
+	registerPrincipal: op({
+		tag: "Identity",
+		operationId: "identityRegisterPrincipal",
+		summary: "Register a principal",
+		description:
+			"Module: identity. Requires `identity.admin` and an `Idempotency-Key` header (materialized as `commandId`). Idempotent by `authUserId`: a repeated registration returns the existing principal without a second event.",
+		security: [{ cookieAuth: [] }],
+		parameters: [idempotencyKey(), REQUEST_ID],
+		requestBody: {
+			required: true,
+			content: {
+				"application/json": {
+					schema: {
+						type: "object",
+						required: ["authUserId", "email"],
+						properties: {
+							authUserId: { type: "string" },
+							email: { type: "string", format: "email" },
+							kind: { type: "string", enum: ["human", "service"] },
+						},
+					},
+				},
+			},
+		},
+		responses: {
+			"200": { description: "`{ principal }`." },
+			"403": { description: "`IDN_FORBIDDEN`." },
+			"409": {
+				description:
+					"`IDN_PRINCIPAL_EMAIL_TAKEN` / `IDN_DUPLICATE_IDEMPOTENCY`.",
+			},
+		},
+	}),
+	suspendPrincipal: op({
+		tag: "Identity",
+		operationId: "identitySuspendPrincipal",
+		summary: "Suspend a principal (reversible)",
+		description:
+			"Module: identity. Requires `identity.admin` and `Idempotency-Key`. Revokes every active service credential and inline-revokes Better Auth sessions (fail-closed), but keeps service identities so they can be reissued after reactivation. `expectedRevision` mismatch returns `IDN_REVISION_CONFLICT`.",
+		security: [{ cookieAuth: [] }],
+		parameters: identityCommandParams,
+		requestBody: {
+			required: false,
+			content: {
+				"application/json": {
+					schema: {
+						type: "object",
+						properties: {
+							reasonCode: {
+								type: "string",
+								enum: [
+									"ops.manual",
+									"governance.revoked",
+									"security.incident",
+									"user.requested",
+								],
+							},
+							expectedRevision: { type: "integer", minimum: 0 },
+						},
+					},
+				},
+			},
+		},
+		responses: {
+			"200": { description: "`{ principal }` suspended." },
+			"409": {
+				description: "`IDN_REVISION_CONFLICT` / `IDN_PRINCIPAL_REVOKED`.",
+			},
+			"503": {
+				description:
+					"`IDN_IDENTITY_UNAVAILABLE` when session revocation fails.",
+			},
+		},
+	}),
+	revokePrincipal: op({
+		tag: "Identity",
+		operationId: "identityRevokePrincipal",
+		summary: "Revoke a principal (terminal)",
+		description:
+			"Module: identity. Requires `identity.admin` and `Idempotency-Key`. Terminal: also revokes service identities, their credentials and sessions. A revoked principal can never be reactivated.",
+		security: [{ cookieAuth: [] }],
+		parameters: identityCommandParams,
+		requestBody: {
+			required: false,
+			content: {
+				"application/json": {
+					schema: {
+						type: "object",
+						properties: {
+							reasonCode: {
+								type: "string",
+								enum: [
+									"ops.manual",
+									"governance.revoked",
+									"security.incident",
+									"user.requested",
+									"gdpr.erasure",
+								],
+							},
+							expectedRevision: { type: "integer", minimum: 0 },
+						},
+					},
+				},
+			},
+		},
+		responses: {
+			"200": { description: "`{ principal }` revoked." },
+			"409": { description: "`IDN_REVISION_CONFLICT`." },
+		},
+	}),
+	revokeSession: op({
+		tag: "Identity",
+		operationId: "identityRevokeSession",
+		summary: "Record a revoked session reference",
+		description:
+			"Module: identity. Requires `Idempotency-Key`. Records a revocation learned from the session owner; `externalRefHash` is required only when the reference is unknown to the module. Emits `identity.session.revoked.v1` carrying the logical sessionRefId — never a token.",
+		security: [{ cookieAuth: [] }],
+		parameters: [idempotencyKey(), REQUEST_ID],
+		requestBody: {
+			required: true,
+			content: {
+				"application/json": {
+					schema: {
+						type: "object",
+						required: ["principalId", "sessionRefId"],
+						properties: {
+							principalId: { type: "string", format: "uuid" },
+							sessionRefId: { type: "string", format: "uuid" },
+							externalRefHash: { type: "string", minLength: 16 },
+							revokedAt: { type: "string", format: "date-time" },
+							reasonCode: { type: "string" },
+						},
+					},
+				},
+			},
+		},
+		responses: {
+			"200": { description: "`{ sessionRef, transitioned }`." },
+			"403": { description: "`IDN_FORBIDDEN`." },
+			"404": {
+				description: "`IDN_PRINCIPAL_NOT_FOUND` / `IDN_SESSION_NOT_FOUND`.",
+			},
+		},
+	}),
+	listRevokedSessions: op({
+		tag: "Identity",
+		operationId: "identityListRevokedSessions",
+		summary: "List revoked session references",
+		description:
+			"Module: identity. Requires `identity.admin`. Revocation audit trail across principals, optionally bounded by `since` (ISO-8601).",
+		security: [{ cookieAuth: [] }],
+		parameters: [
+			{
+				name: "since",
+				in: "query",
+				required: false,
+				schema: { type: "string", format: "date-time" },
+				description: "Only revocations at or after this instant.",
+			},
+			REQUEST_ID,
+		],
+		responses: {
+			"200": { description: "`{ sessions }` newest first." },
+			"403": { description: "`IDN_FORBIDDEN`." },
+		},
+	}),
+} as const;
+
 export const organizationsOpenApi = {
 	createAgency: op({
 		tag: "Organizations",
