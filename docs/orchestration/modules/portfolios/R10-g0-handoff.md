@@ -1,45 +1,93 @@
 ---
-type: debate
 status: draft
+type: debate
 ---
-
 # R10 — Pacote G0 (handoff): `modules/portfolios`
 
-**Issues:** ANX-95 · ANX-58 · **ANX-96** (impl)
+**Rodada:** R10  
+**Data:** 2026-09-11  
+**Issues:** ANX-389 (pack P1) · ANX-95 (debate histórico) · **ANX-96** (impl — **não** executada neste pack)  
+**Callers:** [R09-dev-plan.md](./R09-dev-plan.md) · [ROUNDS.md](./ROUNDS.md). Sem código de produto. Specs 001–005 **draft**. ANX-342 permanece `todo`. D-GOV-010 = **risk P06**.
 
-## Gates documentais G2–G6 (ANX-95)
+## Classificação epistemológica
 
-| Gate | Disposição | Evidência |
+| Afirmação | Status |
+| --- | --- |
+| Debate R01–R10 neste dir | fechado P1 documental |
+| Specs 001–005 | **draft** (ST08 0/23) |
+| ANX-342 | **todo** — não hijack |
+| D-GOV-010 | **risk P06** — fora |
+| Pasta approvals/policies | **não criar** |
+| Código `backend/modules/portfolios` | pack ≠ G1/G7 |
+
+## In scope documental
+
+| Área | Entrega |
+| --- | --- |
+| Domínio | Portfolio, Position, Holding, ValuationSnapshot, RebalancePlan, PositionReconciliationCase |
+| Contratos | `@anxionos/contracts/portfolios/*` + eventos R04 |
+| Persistência nomeada | PostgreSQL `portfolios_portfolios`, `portfolios_positions`, `portfolios_holdings`, `portfolios_valuation_snapshots`, `portfolios_rebalance_plans`, `portfolios_position_reconciliation_cases`, `portfolios_exposure_lines`, `portfolios_command_journal` |
+| Grafo | projector `graph:portfolios:v1` — portfolio→posição→instrumento |
+| API | `/v1/portfolios` esboço R04 |
+| Testes | G3-PF-* / G5-PF-* abaixo |
+
+## Out of scope
+
+| Item | Destino |
+| --- | --- |
+| Ledger | accounting |
+| Reservation / Allocation | capital |
+| Order / Fill canônico | execution (portfolios só consome fill) |
+| Preço tick | market-data |
+| Neo4j driver | graph |
+| D-GOV-010 | risk P06 |
+| Spec accepted | Owner + checklist |
+| ANX-342 G7 | Owner |
+| G1 código ANX-96 | issue distinta |
+
+## Non-goals
+
+- Nenhuma migration ST08 neste pack.
+- SQLite **não** é Position autoritativa (PF-R05-01).
+- RebalancePlan **não** envia ordem direto (PF-R02-INV-11).
+- NAV Timescale sem ValuationSnapshot PG **não** confirma.
+- Sem pasta `approvals/` / `policies/`.
+- REAL venue position bypass reject v1.
+
+## Oráculos G3 / G5 (fecho do pack)
+
+| ID | Gate | Esperado |
 | --- | --- | --- |
-| G2 | PASS | R04 contratos |
-| G3 | PASS | Matriz G3-PF-* R09 |
-| G4 | PASS | R07 cross-tenant, grant, REAL, SQLite ban |
-| G5 | PASS | G5-PF-01..03 — exec G1 |
-| G6 | PASS | R01–R10; handoff ANX-96 |
+| G3-PF-S2-01 | G3 | fill apply atualiza quantity |
+| G3-PF-S2-02 | G3 | duplicate idempotency → same revision |
+| G3-PF-S2-03 | G3 | cross-tenant reject |
+| G3-PF-S2-04 | G3 | REAL mode reject |
+| G3-PF-S2-05 | G3 | position key uniqueness |
+| G3-PF-S4-01 | G3 | ledger lag → reconciliation OPEN |
+| G5-PF-01 | G5 | positions outra org → 403 |
+| G5-PF-02 | G5 | double fill → mesma revision |
+| G5-PF-03 | G5 | position drift vs fills |
 
-**G7:** pendente aceite **ANX-95**.
+## Critérios de aceite **deste** pack (P1 documental)
 
-## PC-G0 — Status
+| # | Critério |
+| --- | --- |
+| AC-P1-01 | In/out/non-goals explícitos |
+| AC-P1-02 | Oráculos G3/G5 nomeados |
+| AC-P1-03 | Tabelas PG nomeadas em R05 + R10 |
+| AC-P1-04 | Decision log R08 com P1-PF-* |
+| AC-P1-05 | R09 **sem** greenlight G1 |
 
-| # | Pré-condição | Status |
-| --- | --- | --- |
-| PC-G0-01 | Decision log R8 | ✅ |
-| PC-G0-02 | Plano R9 | ✅ |
-| PC-G0-03 | Pacote G0 R10 | ✅ |
-| PC-G0-04 | spec 003 Position + ValuationSnapshot | ✅ |
-| PC-G0-05 | R06–R08 sem bloqueios documentados | ✅ |
-| PC-G0-06 | ANX-58 contrato P06 | ✅ in_review |
-| PC-G0-07 | Top 5 riscos R07 | ✅ |
-| PC-G0-08 | graph:portfolios:v1 spec defer S5 | ✅ |
-| PC-G0-09 | RLS D-PF-015 | ✅ |
-| PC-G0-10 | Impl ANX-96 criada | ✅ |
+**Veredito P1:** G0 documental completo. **Não** autoriza G1. Próximo serial: [risk](../risk/ROUNDS.md).
 
-**Resumo:** 10/10 ✅
+```mermaid
+flowchart TB
+  doc[Pack modules/portfolios] --> p1[P1 in_review ANX-389]
+  p1 -.->|Owner| st08[ST08 spec accepted]
+  p1 -.->|Owner| a342[ANX-342 G7]
+  p1 -.->|ANX-96| g1[G1 código]
+```
 
-## Handoff
+## Saída R10
 
-Debate R01–R10 encerrado. Fila: **g0_ready**.
-
-**ANX-96** — `P06 G1: modules/portfolios S1–S2` · blocked_by ANX-95 G7
-
-| G7-ready? | **Sim** — aguarda aceite ANX-95 |
+G0 debate P1 fechado. ANX-389 evidência — não G7. ANX-342 `todo`. Specs 001–005 **draft**.
