@@ -4,65 +4,29 @@ type: debate
 
 # R01 — Contexto: `modules/evaluation`
 
-**Componente:** modules/evaluation  
-**Rodada:** R1 — Inventário documental e de código  
-**Pacote SDD:** P08  
-**Data:** 2026-09-07  
-**Issue debate estrutura:** ANX-42
+**Rodada:** R1 · P08 · 2026-09-11 · ANX-389 · ANX-109  
+**Callers:** [R02-boundaries.md](./R02-boundaries.md) · [ROUNDS.md](./ROUNDS.md). Fatten in-place. Fonte PC 15: `brain/notes/anxionos-pc15-testing-debate.md`.
 
 ## Propósito
 
-Avaliação, certificação, reputação e promoção — critérios de qualidade institucional.
+Avaliação, certificação, reputação e **recomendação** de promoção. **Não** publica StrategyVersion, **não** corre SimulationRun, **não** aplica ChangeProposal. CERTIFIED é o único caminho de promoção para strategies (D-ST-003). Specs **draft**. Sem `approvals/`. D-GOV-010 em **risk P06**.
 
-## O que possui / não possui
+## POSSUI
 
-### Possui (donos de estado ou composição)
+EvaluationRecord, Certification, ReputationScore, PromotionRecommendation, ScoringPolicy.
 
-- Evaluation
-- Certification
-- Reputation versionada
-- promoções
+## NÃO POSSUI
 
-### Não possui (fronteiras ADR0002 / brain)
-
-- StrategyVersion — strategies
-- Simulation runs — simulation
-- Agent config — agents
-
-## Dependências
-
-| Direção | Componentes / artefatos |
+| Item | Dono |
 | --- | --- |
-| **Upstream** | strategies, agents, knowledge, performance, simulation |
-| **Downstream** | strategies (deployment promoção), governance (ChangeProposal), agents |
+| StrategyVersion / Deployment | strategies |
+| SimulationRun | simulation |
+| Agent config | agents |
+| ChangeProposal apply | governance |
+| P&L | performance (input via evento) |
 
 ## Armazenamento
 
-PG: avaliações, certificações, reputação. Neo4j: evidências qualidade. SQLite: resultados temporários.
+PG evaluation_*; Neo4j reputação **projeção**; SQLite não. ST08 0/23.
 
-Fonte: `brain/notes/anxionos-storage-ownership.md`.
-
-## Estado do código atual
-
-**Ausente.**
-
-## Perguntas abertas para debate
-
-- Promoção simulation→produção: workflow governance+evaluation?
-- Reputação: agregado por Agent vs Strategy vs tenant?
-- Certificação expira e revalidação automática?
-- Critérios OP01–OP08: mapeamento para entidades?
-
-## Fontes
-
-| Documento | Caminho |
-| --- | --- |
-| Estrutura modular (aceita) | `brain/notes/anxionos-backend-structure.md` |
-| Mapa de armazenamento | `brain/notes/anxionos-storage-ownership.md` |
-| SDD institucional | `brain/project-docs/specs/001-institutional-contract/spec.md` |
-| ADR0002 layout modular | `brain/project-docs/decisions/0002-adopt-modular-backend-layout.md` |
-| Playbook orquestração | `docs/orchestration/module-development-playbook.md` |
-
-## Próxima rodada
-
-→ **R02 — Fronteiras** (`R02-boundaries.md`) após consenso sobre inventário R1.
+→ **R02** ([R02-boundaries.md](./R02-boundaries.md))

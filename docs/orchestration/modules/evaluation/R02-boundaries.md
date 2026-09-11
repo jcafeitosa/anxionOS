@@ -4,24 +4,38 @@ type: debate
 
 # R02 — Fronteiras: `modules/evaluation`
 
-**Pacote SDD:** P08 · **Issue:** **ANX-109**
+**Rodada:** R2 · P08 · ANX-109 · ANX-389  
+**Callers:** [R01-context.md](./R01-context.md) · [R03-domain-sketch.md](./R03-domain-sketch.md). Sem API runtime. Instrução: fatten evaluation.
 
-## Objetivo
+## POSSUI
 
-Fechar fronteiras possui/não possui; ratificar ownership; invariantes para R03/R04.
+EvaluationRecord (subjectKind AGENT|STRATEGY), Certification, ReputationScore, PromotionRecommendation (read-only p/ governance), ScoringPolicy.
 
-## Síntese R2
+## NÃO POSSUI
 
-evaluation dono scoring P08; promoção via governance
-
-## Invariantes (`EVL-R02-INV-*`)
-
-| ID | Regra |
+| Item | Dono |
 | --- | --- |
-| EVL-R02-INV-01 | Dono único agregados R03 |
-| EVL-R02-INV-02 | Cross-module só contrato/evento |
-| EVL-R02-INV-03 | SQLite proibido estado autoritativo |
-| EVL-R02-INV-04 | ownerDomain=evaluation em comandos/eventos |
-| EVL-R02-INV-05 | REAL/live rejeitado v1 |
+| Backtest ticks / Twin | simulation |
+| Strategy publish | strategies |
+| Grant apply | governance |
+| D-GOV-010 | risk P06 |
+| Pasta testing/ | PC 15 composto |
+
+## Non-goals
+
+Auto-promote por score; REAL/live; pasta testing/; emitir `strategies.deployment.*`.
+
+```mermaid
+flowchart LR
+  sim[simulation.completed] --> evl[evaluation]
+  agt[agents.version.published] --> evl
+  perf[performance.outcome] --> evl
+  evl -->|certification.issued| st[strategies]
+  evl -->|promotion.recommended| gov[governance]
+```
+
+## Invariantes EVL-R02-INV-*
+
+01 dono único · 02 só eventos · 03 SQLite não · 04 ownerDomain=evaluation · 05 CERTIFIED só via certification.issued · 06 recommendation ≠ apply · 07 D-GOV-010 não aqui.
 
 → **R03** ([R03-domain-sketch.md](./R03-domain-sketch.md))

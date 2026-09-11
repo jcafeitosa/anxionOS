@@ -1,27 +1,19 @@
 ---
 type: debate
 ---
-
 # R06 — Dependências: `modules/evaluation`
 
-**Issues:** ANX-109 · **ANX-110**
+**Rodada:** R6 · ANX-389 · ANX-109  
+**Callers:** [R05-storage-pg.md](./R05-storage-pg.md) · [R07-risks.md](./R07-risks.md).
 
-## Upstream
+EVL-R06-01 não importa simulation/infra · EVL-R06-02 T01 cert · EVL-R06-03 graph:evaluation:v1 · EVL-R06-04 D-GOV-010 = risk P06 · EVL-R06-05 sem pasta testing/
 
-| **strategies** | contrato |
-| **agents** | contrato |
-| **knowledge** | contrato |
-| **performance** | contrato |
-| **simulation** | contrato |
+Upstream: strategies (subject ids), agents, simulation events, performance events, knowledge (evidence refs), identity, organizations, governance, eventing.
 
-## Downstream
+Downstream: strategies (certification.issued), governance (recommendation), agents (reputation), graph, audit.
 
-| **strategies** | consome evaluation.* |
-| **governance** | consome evaluation.* |
-| **agents** | consome evaluation.* |
+Imports proibidos: `strategies/infrastructure/**`, `simulation/infrastructure/**`, `neo4j-driver`.
 
-## Gate
+## Saída R6
 
-ANX-105, ANX-115
-
-→ **R07** ([R07-risks.md](./R07-risks.md))
+Mapa v1.
