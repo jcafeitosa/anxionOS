@@ -861,7 +861,7 @@ export const governanceOpenApi = {
 		operationId: "revokeGrant",
 		summary: "Revoke a grant",
 		description:
-			"Module: governance. Revokes `grantId`. Body may be empty (`Content-Length: 0`) or `{ reason }`. `commandId`/`grantId` in JSON are ignored in favor of header/path.",
+			"Module: governance. Revokes `grantId`. Authorization (ANX-469): the caller must be an **owner/admin** of the declared agency **or** the grant's **issuer** (`issued_by_principal_id`); anyone else is refused with `GOV_INSUFFICIENT_AUTHORITY` (403) and **nothing is written**. `revokeGrant` is never a way to undo a grant issued by a higher role. Body may be empty (`Content-Length: 0`) or `{ reason }`. `commandId`/`grantId` in JSON are ignored in favor of header/path.",
 		security: COOKIE_SECURITY,
 		parameters: [
 			...commandParams,
@@ -881,7 +881,20 @@ export const governanceOpenApi = {
 		},
 		responses: {
 			"200": { description: "Command result after revoke." },
-			...ERROR_RESPONSES,
+			"400": {
+				description:
+					"Missing/invalid `Idempotency-Key`, invalid path/body (`VALIDATION_ERROR`).",
+			},
+			"401": { description: "No session." },
+			"403": {
+				description:
+					"`GOV_INSUFFICIENT_AUTHORITY` (not owner/admin and not the issuer) / `ORG_CROSS_TENANT`.",
+			},
+			"404": {
+				description: "`GOV_GRANT_NOT_FOUND` / `GOV_PRINCIPAL_NOT_FOUND`.",
+			},
+			"409": { description: "`GOV_GRANT_REVOKED` (already revoked)." },
+			"429": ERROR_RESPONSES["429"],
 		},
 	}),
 	getAutonomy: op({
