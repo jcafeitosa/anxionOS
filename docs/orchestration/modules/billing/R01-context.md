@@ -5,64 +5,64 @@ type: debate
 # R01 — Contexto: `modules/billing`
 
 **Componente:** modules/billing  
-**Rodada:** R1 — Inventário documental e de código  
+**Rodada:** R1 — Inventário documental  
 **Pacote SDD:** P07  
-**Data:** 2026-09-07  
-**Issue debate estrutura:** ANX-42
+**Data:** 2026-09-11  
+**Issue pack:** ANX-389 · debate estrutura ANX-42 · debate módulo **ANX-103**  
+**Callers:** [R02-boundaries.md](./R02-boundaries.md) · [ROUNDS.md](./ROUNDS.md).  
+**Fonte debate thin:** `brain/notes/anxionos-thin-billing-debate.md` (OpenKnowledge).
 
 ## Propósito
 
-Assinatura/cobrança da plataforma — invoices, refunds, idempotência webhooks.
+Cobrança **comercial da plataforma** (assinatura, invoice, refund, webhook). **Não** é ledger de trading. Código de produto **ausente**; este pack é G0 documental. Spec 003 ciclo de investimento permanece **draft** (ST08 0/23). Não criar pastas `approvals/` nem `policies/`. D-GOV-010 fica em **risk P06**.
 
-## O que possui / não possui
+## O módulo POSSUI (estado)
 
-### Possui (donos de estado ou composição)
+- Subscription e BillingPlan da plataforma (org-scoped)
+- Invoice + InvoiceLine (usage rollup, não ticks)
+- Refund
+- WebhookReceipt (idempotência de pagamento)
 
-- Subscription plataforma
-- Invoice
-- refund
-- webhook idempotency
+## O módulo NÃO POSSUI
 
-### Não possui (fronteiras ADR0002 / brain)
-
-- Provider usage IA — connections
-- Ledger trading — accounting
-- Comissão parceiro — partners
+| Item | Dono |
+| --- | --- |
+| Ledger / lançamentos de trading | accounting |
+| Comissão e payout | partners |
+| Usage bruto de provider IA | connections (`connections.usage.recorded.v1`) |
+| Grants / T01 | governance |
+| Identidade de sessão | identity |
+| Cobrança confirmada em SQLite | **proibido** |
 
 ## Dependências
 
-| Direção | Componentes / artefatos |
+| Direção | Componentes |
 | --- | --- |
-| **Upstream** | organizations, connections (usage read), identity |
-| **Downstream** | accounting, partners (evento pago), operations |
+| Upstream | organizations, identity, connections (usage eventos), governance (T01 `billing.*`) |
+| Downstream | accounting (invoice paid / refund), partners (accrual), operations, graph projector, audit |
 
-## Armazenamento
+## Armazenamento (mapa draft)
 
-PG: assinaturas, invoices, refunds. Neo4j: cliente/plano/fatura. SQLite: nenhuma cobrança local.
+PostgreSQL autoritativo (`billing_*` + journal + outbox). Neo4j: projeção `graph:billing:v1` (org→plano→fatura, **sem** valor de capital). SQLite: **nenhuma** cobrança local. Timescale/pgvector: **não** neste módulo. Fonte: `brain/notes/anxionos-storage-ownership.md` (**draft**; ST08 0/23).
 
-Fonte: `brain/notes/anxionos-storage-ownership.md`.
+## Spec / ADR
 
-## Estado do código atual
+| Artefato | Papel | Status |
+| --- | --- | --- |
+| ADR0002 | módulo físico `billing/` | accepted |
+| ADR0004 | PG + Neo4j; sem SQLite autoritativo | accepted |
+| spec 001 | envelope institucional, tenancy | **draft** |
+| spec 003 | ciclo investimento — billing **não** substitui accounting | **draft** |
+| PC 29 marketplace | composto spec 007 — **sem pasta** | P1 |
 
-**Ausente.**
+## Estado do código
 
-## Perguntas abertas para debate
+**Ausente.** ANX-104 não começa neste pack.
 
-- Onboarding saga billing step — contrato organizations?
-- Usage connections→invoice: agregação período?
-- Webhook provider pagamento — secrets e replay?
-- Refund idempotente e impacto partners commission?
+## Perguntas fechadas neste pack (R2+)
 
-## Fontes
-
-| Documento | Caminho |
-| --- | --- |
-| Estrutura modular (aceita) | `brain/notes/anxionos-backend-structure.md` |
-| Mapa de armazenamento | `brain/notes/anxionos-storage-ownership.md` |
-| SDD institucional | `brain/project-docs/specs/001-institutional-contract/spec.md` |
-| ADR0002 layout modular | `brain/project-docs/decisions/0002-adopt-modular-backend-layout.md` |
-| Playbook orquestração | `docs/orchestration/module-development-playbook.md` |
+Onboarding billing vs organizations → contrato + evento `organizations.subscription.changed.v1`. Usage → invoice via consumer assíncrono (D-CX-041). Webhook: secrets só infra; replay por `(provider, external_id)`. Refund idempotente; partners reverte comissão por `refundId`.
 
 ## Próxima rodada
 
-→ **R02 — Fronteiras** (`R02-boundaries.md`) após consenso sobre inventário R1.
+→ **R02** ([R02-boundaries.md](./R02-boundaries.md))
