@@ -5,7 +5,7 @@ import {
 	type RevokeGrantCommand,
 	revokeGrantCommandSchema,
 } from "@anxionos/contracts/governance";
-import { isGrantRevoked } from "../../domain/entities/grant";
+import { type Grant, isGrantRevoked } from "../../domain/entities/grant";
 import {
 	createAuthorityEpochBumpedEvent,
 	createGrantRevokedEvent,
@@ -16,9 +16,10 @@ import type { GrantRepository } from "../../domain/ports/grant-repository";
 import type { TenantContext } from "../../domain/ports/tenant-context";
 import {
 	loadIdempotentCommandResult,
+	recordGovernanceCommand,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwGovernanceError } from "../errors";
+import { throwGovernanceError } from "../errors";
 
 export interface RevokeGrantDeps {
 	unitOfWork: GovernanceUnitOfWork;
@@ -53,12 +54,39 @@ export async function revokeGrant(
 		principalId: grant.granteePrincipalId,
 	};
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
-		const raced = await context.commandJournal.findByCommandId(
+		// ANX-476/FURO 2 (MEDIUM do G5 r2): o antigo `raced` devolvia o snapshot
+		// SEM validar intencao. Como o check externo roda antes de 2 roundtrips +
+		// pool.connect + BEGIN, um comando concorrente com a MESMA key commitava
+		// na janela e o DELETE respondia 200 `idempotentReplay` com o agregado do
+		// outro comando, sem revogar. Agora a resolucao valida a intencao
+		// (`commandName`/`aggregateId`), como no `issueGrant`.
+		const raced = await loadIdempotentCommandResult(
+			context.commandJournal,
 			command.commandId,
+			{ commandName: "RevokeGrant", aggregateId: command.grantId },
 		);
 		if (raced) {
-			return parseCommandResultSnapshot(raced.responseSnapshot);
+			return raced;
 		}
+		const recordAlreadyRevoked = async (current: Grant) => {
+			const currentEpoch = await context.authorityEpochStore.get(
+				current.scopeId,
+			);
+			const unchanged = governanceCommandResultSchema.parse({
+				aggregateId: current.id,
+				revision: current.revision,
+				authorityEpoch: currentEpoch.epoch,
+			});
+			await recordGovernanceCommand(context, {
+				commandId: command.commandId,
+				commandName: "RevokeGrant",
+				aggregateId: current.id,
+				aggregateType: "Grant",
+				revision: current.revision,
+				responseSnapshot: toCommandResultSnapshot(unchanged),
+			});
+			return unchanged;
+		};
 		const grant = await context.grantRepository.findById(command.grantId);
 		if (!grant) {
 			throwGovernanceError(
@@ -67,31 +95,33 @@ export async function revokeGrant(
 			);
 		}
 		if (isGrantRevoked(grant)) {
-			const currentEpoch = await context.authorityEpochStore.get(grant.scopeId);
-			const unchanged = governanceCommandResultSchema.parse({
-				aggregateId: grant.id,
-				revision: grant.revision,
-				authorityEpoch: currentEpoch.epoch,
-			});
-			await context.commandJournal.record({
-				commandId: command.commandId,
-				commandName: "RevokeGrant",
-				aggregateId: grant.id,
-				aggregateType: "Grant",
-				revision: grant.revision,
-				responseSnapshot: toCommandResultSnapshot(unchanged),
-			});
-			return unchanged;
+			return await recordAlreadyRevoked(grant);
 		}
 		const bumpedEpoch = await context.authorityEpochStore.increment(
 			grant.scopeId,
 			grant.tenantId,
 			grant.agencyId,
 		);
+		// ANX-476 — o bump de epoch serializa o escopo, mas a leitura do grant
+		// aconteceu ANTES dele. Sem a re-leitura, o perdedor de duas revogacoes
+		// concorrentes salvava o estado obsoleto (revision ja' bumpada pelo
+		// vencedor) e subia 500 `Grant revision conflict` em vez de 409. Com a
+		// re-leitura ele cai no no-op e o `recordGovernanceCommand` devolve o
+		// conflito institucional, derrubando a transacao.
+		const fresh = await context.grantRepository.findById(command.grantId);
+		if (!fresh) {
+			throwGovernanceError(
+				"GOV_GRANT_NOT_FOUND",
+				`Grant ${command.grantId} not found`,
+			);
+		}
+		if (isGrantRevoked(fresh)) {
+			return await recordAlreadyRevoked(fresh);
+		}
 		const now = new Date();
-		const revision = grant.revision + 1;
+		const revision = fresh.revision + 1;
 		const updated = await context.grantRepository.save({
-			...grant,
+			...fresh,
 			status: "revoked",
 			revision,
 			updatedAt: now,
@@ -118,7 +148,7 @@ export async function revokeGrant(
 				reason: "RevokeGrant",
 			}),
 		];
-		await context.commandJournal.record({
+		await recordGovernanceCommand(context, {
 			commandId: command.commandId,
 			commandName: "RevokeGrant",
 			aggregateId: updated.id,

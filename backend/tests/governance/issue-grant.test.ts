@@ -4,7 +4,7 @@ import {
 	PLATFORM_CONSOLE_CAPABILITY,
 	PLATFORM_SCOPE_ID,
 } from "@anxionos/contracts/governance";
-import { issueGrant } from "@anxionos/governance";
+import { activateBreakGlass, issueGrant } from "@anxionos/governance";
 import { GovernanceCommandError } from "../../modules/governance/src/application/errors";
 import {
 	createInMemoryApprovalRepository,
@@ -252,5 +252,76 @@ describe("issueGrant — catalogo de capability (ANX-466)", () => {
 			capability: "identity.read",
 		});
 		expect(second.aggregateId).toBe(first.aggregateId);
+	});
+
+	/**
+	 * ANX-476/FURO 3 — a intencao NAO cobria `validUntil`/`resourceRef`: reusar a
+	 * key com esses campos divergentes devolvia 200 replay e o payload novo era
+	 * silenciosamente ignorado.
+	 */
+	test("reusing a key with a divergent validUntil/resourceRef is a conflict", async () => {
+		const { deps, grantRepository } = createIssueGrantDeps();
+		const key = "adadadad-adad-4ada-8ada-adadadadadad";
+		const first = await issueGrant(deps, {
+			commandId: key,
+			scopeId,
+			granteePrincipalId,
+			capability: "identity.read",
+			validUntil: "2027-01-01T00:00:00.000Z",
+		});
+		await expect(
+			issueGrant(deps, {
+				commandId: key,
+				scopeId,
+				granteePrincipalId,
+				capability: "identity.read",
+				validUntil: "2030-01-01T00:00:00.000Z",
+				resourceRef: "resource/other",
+			}),
+		).rejects.toMatchObject({
+			governanceCode: "GOV_DUPLICATE_IDEMPOTENCY",
+		});
+		const stored = await grantRepository.findById(first.aggregateId);
+		expect(stored?.validUntil?.toISOString()).toBe("2027-01-01T00:00:00.000Z");
+		expect(stored?.resourceRef).toBeNull();
+	});
+
+	/**
+	 * ANX-476/FURO 4 — os demais comandos do governance nao declaravam intencao:
+	 * a key de um `IssueGrant` era aceita por outro comando como replay 200 sem
+	 * aplicar a operacao.
+	 */
+	test("reusing an IssueGrant key in another governance command is a conflict", async () => {
+		const { deps, grantRepository } = createIssueGrantDeps();
+		const key = "aeaeaeae-aeae-4aea-8aea-aeaeaeaeaeae";
+		await issueGrant(deps, {
+			commandId: key,
+			scopeId,
+			granteePrincipalId,
+			capability: "identity.read",
+		});
+		await expect(
+			activateBreakGlass(
+				{
+					unitOfWork: deps.unitOfWork,
+					commandJournal: deps.commandJournal,
+					principalLookup: deps.principalLookup,
+				},
+				{
+					commandId: key,
+					scopeId,
+					granteePrincipalId,
+					capability: "owner.manage",
+					reason: "incident",
+					expiresAt: new Date(Date.now() + 60_000).toISOString(),
+				},
+			),
+		).rejects.toMatchObject({
+			governanceCode: "GOV_DUPLICATE_IDEMPOTENCY",
+		});
+		// O break-glass NAO foi aplicado.
+		expect(
+			await grantRepository.listActiveByPrincipal(granteePrincipalId),
+		).toHaveLength(1);
 	});
 });

@@ -1,5 +1,9 @@
 import type { GovernanceCommandResult } from "@anxionos/contracts/governance";
-import type { CommandJournalRepository } from "../domain/ports/command-journal";
+import {
+	CommandJournalConflictError,
+	type CommandJournalRepository,
+	type NewCommandJournalRecord,
+} from "../domain/ports/command-journal";
 import { parseCommandResultSnapshot, throwGovernanceError } from "./errors";
 
 /**
@@ -50,16 +54,41 @@ async function assertIntentMatches(
 export async function loadIdempotentCommandResult(
 	commandJournal: CommandJournalRepository,
 	commandId: string,
-	intent?: GovernanceCommandIntent,
+	intent: GovernanceCommandIntent,
 ): Promise<GovernanceCommandResult | null> {
 	const existing = await commandJournal.findByCommandId(commandId);
 	if (!existing) {
 		return null;
 	}
-	if (intent) {
-		await assertIntentMatches(existing, intent, commandId);
-	}
+	await assertIntentMatches(existing, intent, commandId);
 	return parseCommandResultSnapshot(existing.responseSnapshot);
+}
+
+/**
+ * ANX-476/ANX-475 (FURO 1 HIGH do G5 r2) — grava o journal convertendo a colisao
+ * de `command_id` no codigo institucional de duplicata.
+ *
+ * O replay legitimo e' resolvido ANTES (por `loadIdempotentCommandResult`, com
+ * validacao de intencao). Chegar aqui com a key ja' registrada significa que
+ * outra transacao commitou o MESMO comando concorrentemente: nao ha find-then-
+ * insert que devolva a linha alheia; o conflito derruba ESTA transacao, entao o
+ * agregado duplicado nao persiste (sem double-apply) e o chamador recebe 409.
+ */
+export async function recordGovernanceCommand(
+	context: { commandJournal: CommandJournalRepository },
+	entry: NewCommandJournalRecord,
+): Promise<void> {
+	try {
+		await context.commandJournal.record(entry);
+	} catch (error) {
+		if (error instanceof CommandJournalConflictError) {
+			throwGovernanceError(
+				"GOV_DUPLICATE_IDEMPOTENCY",
+				`Idempotency key ${entry.commandId} was already recorded by another command`,
+			);
+		}
+		throw error;
+	}
 }
 
 export function toCommandResultSnapshot(

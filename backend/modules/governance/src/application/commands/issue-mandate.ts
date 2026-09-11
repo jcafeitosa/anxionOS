@@ -13,9 +13,10 @@ import type { GrantRepository } from "../../domain/ports/grant-repository";
 import type { TenantContext } from "../../domain/ports/tenant-context";
 import {
 	loadIdempotentCommandResult,
+	recordGovernanceCommand,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwGovernanceError } from "../errors";
+import { throwGovernanceError } from "../errors";
 
 export interface IssueMandateDeps {
 	unitOfWork: GovernanceUnitOfWork;
@@ -28,13 +29,6 @@ export async function issueMandate(
 	input: IssueMandateCommand,
 ): Promise<GovernanceCommandResult> {
 	const command = issueMandateCommandSchema.parse(input);
-	const replay = await loadIdempotentCommandResult(
-		deps.commandJournal,
-		command.commandId,
-	);
-	if (replay) {
-		return replay;
-	}
 
 	const backingGrant = await deps.grantRepository.findById(command.grantId);
 	if (!backingGrant) {
@@ -57,11 +51,29 @@ export async function issueMandate(
 	};
 
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
-		const raced = await context.commandJournal.findByCommandId(
+		// ANX-476/FURO 4 — mesma key so' repete para o MESMO mandate
+		// (grant de lastro + agente + tipo).
+		const raced = await loadIdempotentCommandResult(
+			context.commandJournal,
 			command.commandId,
+			{
+				commandName: "IssueMandate",
+				matchesAggregate: async (aggregateId) => {
+					const existing =
+						await context.mandateRepository.findById(aggregateId);
+					if (!existing) {
+						return false;
+					}
+					return (
+						existing.grantId === command.grantId &&
+						existing.agentId === command.agentId &&
+						existing.mandateKind === command.mandateKind
+					);
+				},
+			},
 		);
 		if (raced) {
-			return parseCommandResultSnapshot(raced.responseSnapshot);
+			return raced;
 		}
 
 		const grant = await context.grantRepository.findById(command.grantId);
@@ -92,7 +104,7 @@ export async function issueMandate(
 			revision: mandate.revision,
 		});
 
-		await context.commandJournal.record({
+		await recordGovernanceCommand(context, {
 			commandId: command.commandId,
 			commandName: "IssueMandate",
 			aggregateId: mandate.id,

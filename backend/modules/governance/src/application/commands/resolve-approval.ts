@@ -17,9 +17,10 @@ import type { GovernanceUnitOfWork } from "../../domain/ports/governance-unit-of
 import type { TenantContext } from "../../domain/ports/tenant-context";
 import {
 	loadIdempotentCommandResult,
+	recordGovernanceCommand,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwGovernanceError } from "../errors";
+import { throwGovernanceError } from "../errors";
 
 export interface ResolveApprovalInput extends ResolveApprovalCommand {
 	resolverPrincipalId: string;
@@ -36,13 +37,6 @@ export async function resolveApproval(
 	input: ResolveApprovalInput,
 ): Promise<GovernanceCommandResult> {
 	const command = resolveApprovalCommandSchema.parse(input);
-	const replay = await loadIdempotentCommandResult(
-		deps.commandJournal,
-		command.commandId,
-	);
-	if (replay) {
-		return replay;
-	}
 	// Fetch proposal outside transaction to derive TenantContext (Pattern B híbrido)
 	const proposal = await deps.changeProposalRepository.findById(
 		command.changeProposalId,
@@ -59,11 +53,27 @@ export async function resolveApproval(
 		principalId: input.resolverPrincipalId,
 	};
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
-		const raced = await context.commandJournal.findByCommandId(
+		// ANX-476/FURO 4 — o journal guarda o id da Approval; a intencao e'
+		// resolvida pela proposta (uma Approval por proposta) + decisao.
+		const raced = await loadIdempotentCommandResult(
+			context.commandJournal,
 			command.commandId,
+			{
+				commandName: "ResolveApproval",
+				matchesAggregate: async (aggregateId) => {
+					const existing =
+						await context.approvalRepository.findByChangeProposalId(
+							command.changeProposalId,
+						);
+					return (
+						existing?.id === aggregateId &&
+						existing.decision === command.decision
+					);
+				},
+			},
 		);
 		if (raced) {
-			return parseCommandResultSnapshot(raced.responseSnapshot);
+			return raced;
 		}
 		const proposal = await context.changeProposalRepository.findById(
 			command.changeProposalId,
@@ -129,7 +139,7 @@ export async function resolveApproval(
 				revision: savedApproval.revision,
 			}),
 		];
-		await context.commandJournal.record({
+		await recordGovernanceCommand(context, {
 			commandId: command.commandId,
 			commandName: "ResolveApproval",
 			aggregateId: savedApproval.id,

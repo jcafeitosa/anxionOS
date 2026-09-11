@@ -19,6 +19,7 @@ import type { PrincipalLookup } from "../../domain/ports/principal-lookup";
 import type { TenantContext } from "../../domain/ports/tenant-context";
 import {
 	loadIdempotentCommandResult,
+	recordGovernanceCommand,
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwGovernanceError } from "../errors";
@@ -110,10 +111,13 @@ export async function issueGrant(
 		principalId: command.granteePrincipalId,
 	};
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
-		// Replay resolvido NA TRANSCACAO, com validacao de intencao: o comando
-		// CRIA o agregado, entao a intencao e' checada pelo grant que o journal
-		// aponta (mesmo grantee, mesma capability, mesmo escopo). Reuso da chave
-		// por outro payload e' 409, nao 200 sem efeito (ANX-457/F1 do G5).
+		// Replay resolvido NA TRANSACAO sob o lock da key e com validacao de
+		// intencao: o comando CRIA o agregado, entao a intencao e' checada pelo
+		// grant que o journal aponta. `matchesAggregate` compara TAMBEM
+		// `resourceRef`/`validUntil`/emissor (ANX-476/FURO 3: antes um payload
+		// divergente nesses campos devolvia 200 sem aplicar). O lock serializa
+		// duas requisicoes concorrentes com a MESMA key (ANX-476/FURO 1: antes
+		// ambas gravavam e o 409 era contornado).
 		const journaled = await loadIdempotentCommandResult(
 			context.commandJournal,
 			command.commandId,
@@ -121,10 +125,19 @@ export async function issueGrant(
 				commandName: "IssueGrant",
 				matchesAggregate: async (aggregateId) => {
 					const granted = await context.grantRepository.findById(aggregateId);
+					if (!granted) {
+						return false;
+					}
 					return (
-						granted?.granteePrincipalId === command.granteePrincipalId &&
+						granted.granteePrincipalId === command.granteePrincipalId &&
 						granted.capability === command.capability &&
-						granted.scopeId === command.scopeId
+						granted.scopeId === command.scopeId &&
+						(granted.resourceRef ?? null) === (command.resourceRef ?? null) &&
+						(granted.validUntil?.toISOString() ?? null) ===
+							(command.validUntil
+								? new Date(command.validUntil).toISOString()
+								: null) &&
+						granted.issuedByPrincipalId === input.issuedByPrincipalId
 					);
 				},
 			},
@@ -196,7 +209,7 @@ export async function issueGrant(
 				reason: "IssueGrant",
 			}),
 		];
-		await context.commandJournal.record({
+		await recordGovernanceCommand(context, {
 			commandId: command.commandId,
 			commandName: "IssueGrant",
 			aggregateId: saved.id,

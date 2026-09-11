@@ -17,9 +17,10 @@ import type { PrincipalLookup } from "../../domain/ports/principal-lookup";
 import type { TenantContext } from "../../domain/ports/tenant-context";
 import {
 	loadIdempotentCommandResult,
+	recordGovernanceCommand,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwGovernanceError } from "../errors";
+import { throwGovernanceError } from "../errors";
 
 const MAX_BREAK_GLASS_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -44,14 +45,6 @@ export async function activateBreakGlass(
 			`Capability ${command.capability} is not in the grant capability catalog`,
 		);
 	}
-	const replay = await loadIdempotentCommandResult(
-		deps.commandJournal,
-		command.commandId,
-	);
-	if (replay) {
-		return replay;
-	}
-
 	const expiresAt = new Date(command.expiresAt);
 	const now = new Date();
 	if (expiresAt <= now) {
@@ -84,11 +77,32 @@ export async function activateBreakGlass(
 	};
 
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
-		const raced = await context.commandJournal.findByCommandId(
+		const incidentRef = command.incidentRef ?? command.commandId;
+		// ANX-476/FURO 4 — mesma key so' repete para a MESMA elevacao (alvo,
+		// capability, escopo, incidente e janela de validade).
+		const raced = await loadIdempotentCommandResult(
+			context.commandJournal,
 			command.commandId,
+			{
+				commandName: "ActivateBreakGlass",
+				matchesAggregate: async (aggregateId) => {
+					const existing = await context.grantRepository.findById(aggregateId);
+					if (!existing) {
+						return false;
+					}
+					return (
+						existing.granteePrincipalId === command.granteePrincipalId &&
+						existing.capability === command.capability &&
+						existing.scopeId === command.scopeId &&
+						existing.resourceRef === `break-glass:${incidentRef}` &&
+						(existing.validUntil?.toISOString() ?? null) ===
+							expiresAt.toISOString()
+					);
+				},
+			},
 		);
 		if (raced) {
-			return parseCommandResultSnapshot(raced.responseSnapshot);
+			return raced;
 		}
 
 		const bumpedEpoch = await context.authorityEpochStore.increment(
@@ -97,7 +111,6 @@ export async function activateBreakGlass(
 			command.scopeId,
 		);
 		const grantId = randomUUID();
-		const incidentRef = command.incidentRef ?? command.commandId;
 		const saved = await context.grantRepository.save({
 			id: grantId,
 			tenantId: command.scopeId,
@@ -127,7 +140,7 @@ export async function activateBreakGlass(
 			authorityEpoch: bumpedEpoch.epoch,
 		});
 
-		await context.commandJournal.record({
+		await recordGovernanceCommand(context, {
 			commandId: command.commandId,
 			commandName: "ActivateBreakGlass",
 			aggregateId: saved.id,

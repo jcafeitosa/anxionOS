@@ -105,8 +105,15 @@ describe("createDelegation (G3-GOV-04)", () => {
 		).toBe(true);
 	});
 
+	/**
+	 * FURO 5 (LOW do G5 r2) — o subset que AMPLIA o parent e' recusado com 409 e
+	 * ZERO escrita (nenhum grant filho, nenhum evento): a delegacao nunca amplia
+	 * autoridade.
+	 */
 	test("rejects capability subset that exceeds parent grant", async () => {
-		const { deps } = createDelegationDeps(seedParentGrant("owner.read"));
+		const { deps, grantRepository, published } = createDelegationDeps(
+			seedParentGrant("owner.read"),
+		);
 		await expect(
 			createDelegation(deps, {
 				commandId: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
@@ -117,7 +124,39 @@ describe("createDelegation (G3-GOV-04)", () => {
 			}),
 		).rejects.toMatchObject({
 			governanceCode: "GOV_DELEGATION_EXCEEDS_PARENT",
+			statusCode: 409,
 		} satisfies Partial<GovernanceCommandError>);
+		expect(
+			await grantRepository.listEffective(scopeId, delegatePrincipalId),
+		).toHaveLength(0);
+		expect(published).toHaveLength(0);
+	});
+
+	/**
+	 * FURO 5 (LOW do G5 r2) — o invariante de catalogo do ANX-466/N3 nao tinha
+	 * teste commitado: subset com token fora do catalogo e' 400
+	 * `GOV_CAPABILITY_UNKNOWN` e nao grava nem o filho nem o evento.
+	 */
+	test("rejects a capability subset outside the catalog and writes nothing", async () => {
+		const { deps, grantRepository, published } = createDelegationDeps(
+			seedParentGrant(),
+		);
+		await expect(
+			createDelegation(deps, {
+				commandId: "f0f0f0f0-f0f0-40f0-80f0-f0f0f0f0f0f0",
+				parentGrantId,
+				delegatePrincipalId,
+				capabilitySubset: ["totally.unknown.capability"],
+				validUntil: "2027-01-01T00:00:00.000Z",
+			}),
+		).rejects.toMatchObject({
+			governanceCode: "GOV_CAPABILITY_UNKNOWN",
+			statusCode: 400,
+		} satisfies Partial<GovernanceCommandError>);
+		expect(
+			await grantRepository.listEffective(scopeId, delegatePrincipalId),
+		).toHaveLength(0);
+		expect(published).toHaveLength(0);
 	});
 
 	test("unknown parent grant fails closed", async () => {
@@ -246,5 +285,49 @@ describe("activateBreakGlass", () => {
 				},
 			),
 		).rejects.toMatchObject({ governanceCode: "GOV_INSUFFICIENT_AUTHORITY" });
+	});
+
+	/**
+	 * FURO 5 (LOW do G5 r2) — o invariante de catalogo do ANX-466/N2 nao tinha
+	 * teste commitado: capability fora do catalogo e' 400
+	 * `GOV_CAPABILITY_UNKNOWN`, sem grant e sem evento (o break-glass nao pode
+	 * perpetuar token que o sistema nao consome).
+	 */
+	test("rejects a capability outside the catalog and writes nothing", async () => {
+		const grantRepository = createInMemoryGrantRepository();
+		const commandJournal = createInMemoryCommandJournalRepository();
+		const { unitOfWork, published } = createRecordingGovernanceUnitOfWork({
+			grantRepository,
+			changeProposalRepository: createInMemoryChangeProposalRepository(),
+			approvalRepository: createInMemoryApprovalRepository(),
+			authorityEpochStore: createInMemoryAuthorityEpochStore(),
+			commandJournal,
+		});
+		const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+		await expect(
+			activateBreakGlass(
+				{
+					unitOfWork,
+					commandJournal,
+					principalLookup: createStubPrincipalLookup([delegatePrincipalId]),
+				},
+				{
+					commandId: "efefefef-efef-4efe-8efe-efefefefefef",
+					scopeId,
+					granteePrincipalId: delegatePrincipalId,
+					capability: "totally.unknown.capability",
+					reason: "incident INC-003",
+					expiresAt,
+					incidentRef: "INC-003",
+				},
+			),
+		).rejects.toMatchObject({
+			governanceCode: "GOV_CAPABILITY_UNKNOWN",
+			statusCode: 400,
+		} satisfies Partial<GovernanceCommandError>);
+		expect(
+			await grantRepository.listActiveByPrincipal(delegatePrincipalId),
+		).toHaveLength(0);
+		expect(published).toHaveLength(0);
 	});
 });

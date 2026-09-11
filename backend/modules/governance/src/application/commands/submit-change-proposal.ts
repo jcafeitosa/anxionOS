@@ -13,9 +13,10 @@ import type { PrincipalLookup } from "../../domain/ports/principal-lookup";
 import type { TenantContext } from "../../domain/ports/tenant-context";
 import {
 	loadIdempotentCommandResult,
+	recordGovernanceCommand,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwGovernanceError } from "../errors";
+import { throwGovernanceError } from "../errors";
 
 export interface SubmitChangeProposalInput extends SubmitChangeProposalCommand {
 	proposerPrincipalId: string;
@@ -32,24 +33,36 @@ export async function submitChangeProposal(
 	input: SubmitChangeProposalInput,
 ): Promise<GovernanceCommandResult> {
 	const command = submitChangeProposalCommandSchema.parse(input);
-	const replay = await loadIdempotentCommandResult(
-		deps.commandJournal,
-		command.commandId,
-	);
-	if (replay) {
-		return replay;
-	}
 	const tenantContext: TenantContext = {
 		tenantId: command.scopeId,
 		agencyId: command.scopeId,
 		principalId: input.proposerPrincipalId,
 	};
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
-		const raced = await context.commandJournal.findByCommandId(
+		// ANX-476/FURO 4 — a key so' repete para a MESMA proposta
+		// (escopo + tipo + payload + proponente); resolvido sob o lock da key.
+		const raced = await loadIdempotentCommandResult(
+			context.commandJournal,
 			command.commandId,
+			{
+				commandName: "SubmitChangeProposal",
+				matchesAggregate: async (aggregateId) => {
+					const existing =
+						await context.changeProposalRepository.findById(aggregateId);
+					if (!existing) {
+						return false;
+					}
+					return (
+						existing.scopeId === command.scopeId &&
+						existing.kind === command.kind &&
+						existing.payloadHash === command.payloadHash &&
+						existing.proposerPrincipalId === input.proposerPrincipalId
+					);
+				},
+			},
 		);
 		if (raced) {
-			return parseCommandResultSnapshot(raced.responseSnapshot);
+			return raced;
 		}
 		const proposerExists = await deps.principalLookup.exists(
 			input.proposerPrincipalId,
@@ -90,7 +103,7 @@ export async function submitChangeProposal(
 				revision: saved.revision,
 			}),
 		];
-		await context.commandJournal.record({
+		await recordGovernanceCommand(context, {
 			commandId: command.commandId,
 			commandName: "SubmitChangeProposal",
 			aggregateId: saved.id,

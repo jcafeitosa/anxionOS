@@ -20,9 +20,10 @@ import type { PrincipalLookup } from "../../domain/ports/principal-lookup";
 import type { TenantContext } from "../../domain/ports/tenant-context";
 import {
 	loadIdempotentCommandResult,
+	recordGovernanceCommand,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwGovernanceError } from "../errors";
+import { throwGovernanceError } from "../errors";
 
 export interface CreateDelegationDeps {
 	unitOfWork: GovernanceUnitOfWork;
@@ -48,14 +49,6 @@ export async function createDelegation(
 			);
 		}
 	}
-	const replay = await loadIdempotentCommandResult(
-		deps.commandJournal,
-		command.commandId,
-	);
-	if (replay) {
-		return replay;
-	}
-
 	const parentGrant = await deps.grantRepository.findById(
 		command.parentGrantId,
 	);
@@ -95,11 +88,32 @@ export async function createDelegation(
 	};
 
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
-		const raced = await context.commandJournal.findByCommandId(
+		// ANX-476/FURO 4 — mesma key so' repete para a MESMA delegacao
+		// (grant pai + delegado + subset + janela).
+		const raced = await loadIdempotentCommandResult(
+			context.commandJournal,
 			command.commandId,
+			{
+				commandName: "CreateDelegation",
+				matchesAggregate: async (aggregateId) => {
+					const existing =
+						await context.delegationRepository.findById(aggregateId);
+					if (!existing) {
+						return false;
+					}
+					return (
+						existing.parentGrantId === command.parentGrantId &&
+						existing.delegatePrincipalId === command.delegatePrincipalId &&
+						JSON.stringify(existing.capabilitySubset) ===
+							JSON.stringify(command.capabilitySubset) &&
+						existing.validUntil.toISOString() ===
+							new Date(command.validUntil).toISOString()
+					);
+				},
+			},
 		);
 		if (raced) {
-			return parseCommandResultSnapshot(raced.responseSnapshot);
+			return raced;
 		}
 
 		const parent = await context.grantRepository.findById(
@@ -220,7 +234,7 @@ export async function createDelegation(
 			}),
 		];
 
-		await context.commandJournal.record({
+		await recordGovernanceCommand(context, {
 			commandId: command.commandId,
 			commandName: "CreateDelegation",
 			aggregateId: delegation.id,

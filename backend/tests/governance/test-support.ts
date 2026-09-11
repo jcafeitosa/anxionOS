@@ -17,10 +17,11 @@ import type {
 } from "../../modules/governance/src/domain/ports/authority-epoch-store";
 import type { AutonomyAssignmentRepository } from "../../modules/governance/src/domain/ports/autonomy-assignment-repository";
 import type { ChangeProposalRepository } from "../../modules/governance/src/domain/ports/change-proposal-repository";
-import type {
-	CommandJournalRecord,
-	CommandJournalRepository,
-	NewCommandJournalRecord,
+import {
+	CommandJournalConflictError,
+	type CommandJournalRecord,
+	type CommandJournalRepository,
+	type NewCommandJournalRecord,
 } from "../../modules/governance/src/domain/ports/command-journal";
 import type { DelegationRepository } from "../../modules/governance/src/domain/ports/delegation-repository";
 import type {
@@ -249,7 +250,9 @@ export function createInMemoryCommandJournalRepository(
 		async record(entry: NewCommandJournalRecord) {
 			const existing = records.get(entry.commandId);
 			if (existing) {
-				return existing;
+				// Mesma semantica do adapter PostgreSQL (ANX-476): colisao de
+				// `command_id` e' conflito, nao devolucao da linha alheia.
+				throw new CommandJournalConflictError(entry.commandId);
 			}
 			const stored: CommandJournalRecord = {
 				...entry,

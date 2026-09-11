@@ -10,6 +10,7 @@ export type {
 	CommandJournalRepository,
 	NewCommandJournalRecord,
 } from "./command-journal";
+export { CommandJournalConflictError } from "./command-journal";
 export type { DelegationRepository } from "./delegation-repository";
 export type {
 	GovernanceTransactionContext,

@@ -16,9 +16,10 @@ import type { GovernanceUnitOfWork } from "../../domain/ports/governance-unit-of
 import type { TenantContext } from "../../domain/ports/tenant-context";
 import {
 	loadIdempotentCommandResult,
+	recordGovernanceCommand,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwGovernanceError } from "../errors";
+import { throwGovernanceError } from "../errors";
 
 export interface AssignAutonomyLevelDeps {
 	unitOfWork: GovernanceUnitOfWork;
@@ -30,13 +31,6 @@ export async function assignAutonomyLevel(
 	input: AssignAutonomyLevelCommand,
 ): Promise<GovernanceCommandResult> {
 	const command = assignAutonomyLevelCommandSchema.parse(input);
-	const replay = await loadIdempotentCommandResult(
-		deps.commandJournal,
-		command.commandId,
-	);
-	if (replay) {
-		return replay;
-	}
 
 	const validation = validateInitialAssignment(
 		command.level,
@@ -58,11 +52,28 @@ export async function assignAutonomyLevel(
 	};
 
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
-		const raced = await context.commandJournal.findByCommandId(
+		// ANX-476/FURO 4 — mesma key so' repete para o MESMO agente/escopo/nivel.
+		const raced = await loadIdempotentCommandResult(
+			context.commandJournal,
 			command.commandId,
+			{
+				commandName: "AssignAutonomyLevel",
+				matchesAggregate: async (aggregateId) => {
+					const assignment =
+						await context.autonomyAssignmentRepository.findById(aggregateId);
+					if (!assignment) {
+						return false;
+					}
+					return (
+						assignment.scopeId === command.scopeId &&
+						assignment.subjectAgentId === command.subjectAgentId &&
+						assignment.level === command.level
+					);
+				},
+			},
 		);
 		if (raced) {
-			return parseCommandResultSnapshot(raced.responseSnapshot);
+			return raced;
 		}
 
 		const existing =
@@ -123,7 +134,7 @@ export async function assignAutonomyLevel(
 			revision: 1,
 			authorityEpoch: bumpedEpoch.epoch,
 		});
-		await context.commandJournal.record({
+		await recordGovernanceCommand(context, {
 			commandId: command.commandId,
 			commandName: "AssignAutonomyLevel",
 			aggregateId: assignmentId,
