@@ -4,7 +4,7 @@ import {
 } from "@anxionos/contracts/governance";
 import { createPgPool } from "@anxionos/eventing/postgres";
 import { ensureGovernanceSchema, issueGrant } from "@anxionos/governance";
-import { createIdentityDb } from "@anxionos/identity";
+import { createIdentityDb, isUniqueViolation } from "@anxionos/identity";
 import {
 	acceptInviteByToken,
 	createAgency,
@@ -209,13 +209,6 @@ async function insertAdditionalOwnedAgency(
 		],
 	);
 	return { aggregateId: agencyId, revision: 1 };
-}
-
-function isUniqueViolation(error: unknown): boolean {
-	if (!error || typeof error !== "object" || !("code" in error)) {
-		return false;
-	}
-	return error.code === "23505";
 }
 
 async function ensureSeedAgency(
