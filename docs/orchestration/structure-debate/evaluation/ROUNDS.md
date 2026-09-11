@@ -1,3 +1,7 @@
+---
+type: debate
+---
+
 # Rodadas — `modules/evaluation`
 
 | Rodada | Artefato | Status |

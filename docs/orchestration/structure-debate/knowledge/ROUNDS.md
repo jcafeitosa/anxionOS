@@ -1,3 +1,7 @@
+---
+type: debate
+---
+
 # Rodadas — debate `modules/knowledge`
 
 Debate formal P04, alinhado ao [playbook](../../module-development-playbook.md) e spec 002.
