@@ -1,3 +1,7 @@
+---
+type: debate
+---
+
 # Rodadas — debate `modules/market-data`
 
 Debate formal P06, alinhado ao [playbook](../../module-development-playbook.md), spec 003 (R12) e ADR0004.
