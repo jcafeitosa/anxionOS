@@ -17,6 +17,8 @@ export const GOVERNANCE_ERROR_CODES = [
 	"GOV_CAPABILITY_SCOPE_MISMATCH",
 	// ANX-466: capability fora do catalogo declarado de grants (string livre).
 	"GOV_CAPABILITY_UNKNOWN",
+	// ANX-457/F1 (G5): reuso de Idempotency-Key por outro comando/agregado.
+	"GOV_DUPLICATE_IDEMPOTENCY",
 ] as const;
 export const governanceErrorCodeSchema = z.enum(GOVERNANCE_ERROR_CODES);
 export const GOVERNANCE_ERROR_STATUS_MAP = {
@@ -35,6 +37,7 @@ export const GOVERNANCE_ERROR_STATUS_MAP = {
 	GOV_AUTONOMY_ASSIGNMENT_NOT_FOUND: 404,
 	GOV_CAPABILITY_SCOPE_MISMATCH: 409,
 	GOV_CAPABILITY_UNKNOWN: 400,
+	GOV_DUPLICATE_IDEMPOTENCY: 409,
 };
 export const governanceErrorDetailsSchema = z.object({
 	code: governanceErrorCodeSchema,

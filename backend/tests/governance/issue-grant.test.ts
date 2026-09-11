@@ -207,4 +207,50 @@ describe("issueGrant — catalogo de capability (ANX-466)", () => {
 			await grantRepository.listActiveByPrincipal(granteePrincipalId);
 		expect(grants.map((grant) => grant.capability)).toEqual(["agents.publish"]);
 	});
+
+	/**
+	 * F1 do G5 (MEDIUM): o replay era chaveado SO' por `commandId`, entao reusar a
+	 * chave com outro payload devolvia 200 `idempotentReplay` **sem aplicar** a
+	 * operacao — mesma classe do achado A1/A2 do identity, que ja' responde 409.
+	 */
+	test("reusing a key for a different grant payload is a conflict, not a replay", async () => {
+		const { deps } = createIssueGrantDeps();
+		const key = "abababab-abab-4aba-8aba-abababababab";
+		await issueGrant(deps, {
+			commandId: key,
+			scopeId,
+			granteePrincipalId,
+			capability: "identity.read",
+		});
+
+		await expect(
+			issueGrant(deps, {
+				commandId: key,
+				scopeId,
+				granteePrincipalId,
+				// mesmo comando, mesma chave, intencao DIFERENTE
+				capability: "identity.admin",
+			}),
+		).rejects.toMatchObject({
+			governanceCode: "GOV_DUPLICATE_IDEMPOTENCY",
+		});
+	});
+
+	test("repeating the same key for the same intent still replays", async () => {
+		const { deps } = createIssueGrantDeps();
+		const key = "acacacac-acac-4aca-8aca-acacacacacac";
+		const first = await issueGrant(deps, {
+			commandId: key,
+			scopeId,
+			granteePrincipalId,
+			capability: "identity.read",
+		});
+		const second = await issueGrant(deps, {
+			commandId: key,
+			scopeId,
+			granteePrincipalId,
+			capability: "identity.read",
+		});
+		expect(second.aggregateId).toBe(first.aggregateId);
+	});
 });

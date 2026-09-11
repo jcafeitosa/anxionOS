@@ -34,6 +34,7 @@ export async function revokeGrant(
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
 		command.commandId,
+		{ commandName: "RevokeGrant", aggregateId: command.grantId },
 	);
 	if (replay) {
 		return replay;

@@ -21,7 +21,7 @@ import {
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwGovernanceError } from "../errors";
+import { throwGovernanceError } from "../errors";
 
 export interface IssueGrantInput extends IssueGrantCommand {
 	scopeKind?: GovernanceScopeKind;
@@ -104,24 +104,33 @@ export async function issueGrant(
 		scopeKind,
 		command.capability,
 	);
-	const replay = await loadIdempotentCommandResult(
-		deps.commandJournal,
-		command.commandId,
-	);
-	if (replay) {
-		return replay;
-	}
 	const tenantContext: TenantContext = {
 		tenantId: command.scopeId,
 		agencyId: command.scopeId,
 		principalId: command.granteePrincipalId,
 	};
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
-		const raced = await context.commandJournal.findByCommandId(
+		// Replay resolvido NA TRANSCACAO, com validacao de intencao: o comando
+		// CRIA o agregado, entao a intencao e' checada pelo grant que o journal
+		// aponta (mesmo grantee, mesma capability, mesmo escopo). Reuso da chave
+		// por outro payload e' 409, nao 200 sem efeito (ANX-457/F1 do G5).
+		const journaled = await loadIdempotentCommandResult(
+			context.commandJournal,
 			command.commandId,
+			{
+				commandName: "IssueGrant",
+				matchesAggregate: async (aggregateId) => {
+					const granted = await context.grantRepository.findById(aggregateId);
+					return (
+						granted?.granteePrincipalId === command.granteePrincipalId &&
+						granted.capability === command.capability &&
+						granted.scopeId === command.scopeId
+					);
+				},
+			},
 		);
-		if (raced) {
-			return parseCommandResultSnapshot(raced.responseSnapshot);
+		if (journaled) {
+			return journaled;
 		}
 		const granteeExists = await deps.principalLookup.exists(
 			command.granteePrincipalId,
