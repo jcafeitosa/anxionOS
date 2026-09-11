@@ -89,14 +89,16 @@ Resposta esperada:
 Subir Postgres, NATS (JetStream) e Neo4j:
 
 ```bash
-docker-compose -f deploy/docker/docker-compose.yml up -d
+docker compose -f backend/deploy/docker/docker-compose.yml up -d
+docker compose -f backend/deploy/docker/docker-compose.yml --profile graph-sandbox up -d
+npm run anx162:engine-isolation-homologation
 ```
 
-| Serviço   | Porta(s)     | Imagem (pin)              | Uso                          |
-| --------- | ------------ | ------------------------- | ---------------------------- |
-| Postgres  | 5432         | `postgres:16-alpine`      | Transações / Drizzle         |
-| NATS      | 4222, 8222   | `nats:2.10-alpine`        | Eventos / JetStream          |
-| Neo4j     | 7474, 7687   | `neo4j:5.26.2-community`  | Grafo institucional (P03+)   |
+| Serviço   | Porta(s)     | Imagem (pin)                        | Uso                                      |
+| --------- | ------------ | ----------------------------------- | ---------------------------------------- |
+| Postgres  | 5432         | `timescale/timescaledb:2.29.2-pg16` | OLTP + TimescaleDB + pgvector (ADR0004)  |
+| NATS      | 4222, 8222   | `nats:2.10.12-alpine`               | Eventos / JetStream                      |
+| Neo4j     | 7474, 7687   | `neo4j:5.26.2-community`            | Grafo institucional (`--profile graph-sandbox`) |
 | Taskboard | 47823        | (host, não compose)       | Dashi/Codex Taskboard        |
 
 Copie `.env.example` para `.env` e ajuste se necessário:
