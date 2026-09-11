@@ -37,6 +37,7 @@ type: reference
 | On Accent | `#0f172a` | `--color-on-accent` |
 | Border | `rgba(255,255,255,0.08)` | `--color-border` |
 | Destructive | `#ef4444` | `--color-destructive` |
+| On Destructive | `#0f172a` | `--color-on-destructive` |
 | Ring | `#f97316` | `--color-ring` |
 
 **Color Notes:** OLED deep blacks, orange primary CTA, blue secondary accent. Subtle aurora gradients (blue-orange) in hero only — never purple/pink AI gradients.
@@ -101,6 +102,7 @@ type: reference
 ### Buttons
 
 - **Primary:** `bg-accent text-on-accent`, glow on hover, `min-h-11`, `rounded-lg`, `font-semibold`
+- **Destructive filled:** `bg-destructive text-on-destructive` (≥4.5:1; do not use `text-foreground` on the fill)
 - **Secondary:** `border border-border bg-transparent text-foreground`, hover `bg-glass`
 - **Ghost:** text only, hover muted background
 - All: `cursor-pointer`, visible `:focus-visible` ring
