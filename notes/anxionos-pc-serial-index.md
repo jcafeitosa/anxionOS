@@ -13,6 +13,8 @@ type: index
 
 Programa ANX-342. Cada unidade: debate OKF + Mermaid + in/out + non-goals. **Nao** marcar ANX-342 done aqui.
 
+Thin debates spec 003 (módulos físicos sem PC serial): [strategies](./anxionos-thin-strategies-debate.md) · [capital](./anxionos-thin-capital-debate.md) · [portfolios](./anxionos-thin-portfolios-debate.md) · [execution](./anxionos-thin-execution-debate.md) · [accounting](./anxionos-thin-accounting-debate.md) · [billing](./anxionos-thin-billing-debate.md) · [partners](./anxionos-thin-partners-debate.md).
+
 | PC | Issue | Doc | Owner fisico | Status docs |
 | --- | --- | --- | --- | --- |
 | 01 | ANX-351 | [debate](./anxionos-pc01-governance-debate.md) | governance | fechado |
