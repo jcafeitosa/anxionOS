@@ -1,14 +1,36 @@
 ---
 type: debate
 ---
-
 # R06 — Dependências: `modules/risk`
 
-**Issues:** ANX-99 · ANX-97 · ANX-95 · ANX-91 · ANX-58
+**Rodada:** R6  
+**Data:** 2026-09-11
 
-Upstream: decisions, governance, portfolios, capital, market-data, strategies.  
-Downstream: decisions, capital, execution, audit, graph.
+## Upstream
 
-Bootstrap ANX-100: schema + runPreTradeCheck + check.completed.v1.
+| Módulo | Uso |
+| --- | --- |
+| governance | PolicyReference; NÃO corpo RISK até P06 |
+| portfolios | exposição canônica |
+| capital | reservas/saldos para limite |
+| market-data | preços para check |
+| strategies | StrategyVersion hash |
+| decisions | pré-TradeIntent check |
 
-→ **R07** ([R07-risks.md](./R07-risks.md))
+## Downstream
+
+decisions (RiskCheckResult), capital (bloqueio reserva), execution (permit), audit, graph projector.
+
+Imports proibidos: execution-go direto, Neo4j driver, secrets de venue.
+
+```mermaid
+flowchart LR
+  dec[decisions] --> rsk[risk check]
+  port[portfolios] --> rsk
+  rsk --> exec[execution permit]
+  rsk --> proj[projector]
+```
+
+## Saída R6
+
+Para R07.

@@ -1,11 +1,26 @@
 ---
 type: debate
 ---
-
 # R05 — Armazenamento: `modules/risk`
 
-**Issue:** ANX-99
+**Rodada:** R5  
+**Data:** 2026-09-11  
+**Issue:** ANX-99 · P1 ANX-389
 
-**PostgreSQL** journal de LimitPolicy, ExposureSnapshot, RiskCheckResult, RiskPermit, KillSwitchState, risk_epoch_registry. Neo4j projeção async. SQLite proibido para check/permit autoritativos.
+## ADR0004
 
-→ **R06** ([R06-dependencies.md](./R06-dependencies.md))
+| Engine | Uso neste módulo |
+| --- | --- |
+| PostgreSQL | LimitPolicy, ExposureSnapshot, RiskCheckResult, RiskPermit, KillSwitchState, risk_epoch_registry, command_journal |
+| Neo4j | projeção async via graph — restrições/violações |
+| Timescale | **não** — séries de exposição derivadas podem viver em performance/portfolios |
+| pgvector | **não** |
+| SQLite | **proibido** para check/permit/kill switch autoritativo |
+
+D-GOV-010 (corpo PolicyVersion RISK) **deferido P06** — este pack só referencia PolicyReference em governance.
+
+UoW: estado + journal + outbox na mesma transação. Sem FK para capital/portfolios.
+
+## Saída R5
+
+Para R06.

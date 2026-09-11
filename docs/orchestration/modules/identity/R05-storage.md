@@ -1,3 +1,7 @@
+---
+type: debate
+---
+
 # R05 — Armazenamento: `modules/identity`
 
 **Rodada:** R5  

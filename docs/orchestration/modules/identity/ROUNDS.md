@@ -8,11 +8,11 @@ Debate formal ANX-77 (R06–R10) + structure-debate ANX-42 (R01–R05). Alinhado
 
 | Rodada | Título | Artefato | Status |
 | --- | --- | --- | --- |
-| **R1** | Inventário documental e de código | [structure-debate/identity/R01-context.md](../../structure-debate/identity/R01-context.md) | ✅ ANX-42 |
-| **R2** | Fronteiras — possui / não possui | [structure-debate/identity/R02-boundaries.md](../../structure-debate/identity/R02-boundaries.md) | ✅ ANX-42 |
-| **R3** | Modelo de domínio | [structure-debate/identity/R03-domain-sketch.md](../../structure-debate/identity/R03-domain-sketch.md) | ✅ ANX-42 |
-| **R4** | Contratos e eventos | [structure-debate/identity/R04-contracts-events.md](../../structure-debate/identity/R04-contracts-events.md) | ✅ ANX-42 |
-| **R5** | Armazenamento — PG, journal, outbox | [structure-debate/identity/R05-storage.md](../../structure-debate/identity/R05-storage.md) | ✅ ANX-42 |
+| **R1** | Inventário | [R01-context.md](./R01-context.md) | P1 canônico |
+| **R2** | Fronteiras | [R02-boundaries.md](./R02-boundaries.md) | P1 canônico |
+| **R3** | Domínio | [R03-domain-sketch.md](./R03-domain-sketch.md) | P1 canônico |
+| **R4** | Contratos | [R04-contracts.md](./R04-contracts.md) | P1 canônico |
+| **R5** | Storage | [R05-storage.md](./R05-storage.md) | P1 canônico |
 | **R6** | Dependências — upstream/downstream | [R06-dependencies.md](./R06-dependencies.md) | ✅ draft — ANX-77 |
 | **R7** | Riscos e controles | [R07-risks.md](./R07-risks.md) | ✅ draft — ANX-77 |
 | **R8** | Decision log | [R08-decision-log.md](./R08-decision-log.md) | ✅ draft — ANX-77 |

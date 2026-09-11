@@ -5,7 +5,7 @@ type: guide
 # Mapa mestre de capacidades — anxionOS (23 módulos)
 
 **Issue:** ANX-43 · **Gap refresh:** ANX-346 (2026-09-10)  
-**Data:** 2026-09-10  
+**Data:** 2026-09-11 (P1 ANX-389: packs agents/orchestration/graph canônicos em `docs/orchestration/modules/`)  
 **Escopo:** Matriz humano + agente, eventos, grafo e API por módulo físico ADR0002  
 **Fontes canônicas:** `brain/notes/anxionos-backend-structure.md` · `brain/project-docs/specs/001-institutional-contract/spec.md` · `brain/project-docs/specs/002-agents-knowledge/spec.md` · `brain/project-docs/specs/003-investment-lifecycle/spec.md` · `brain/project-docs/specs/004-institutional-evolution/spec.md` · `brain/project-docs/specs/005-connections-integration/spec.md`
 
