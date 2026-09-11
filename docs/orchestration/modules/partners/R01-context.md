@@ -5,63 +5,51 @@ type: debate
 # R01 — Contexto: `modules/partners`
 
 **Componente:** modules/partners  
-**Rodada:** R1 — Inventário documental e de código  
+**Rodada:** R1 — Inventário documental  
 **Pacote SDD:** P07  
-**Data:** 2026-09-07  
-**Issue debate estrutura:** ANX-42
+**Data:** 2026-09-11  
+**Issue pack:** ANX-389 · ANX-42 · **ANX-113**  
+**Callers:** [R02-boundaries.md](./R02-boundaries.md) · [ROUNDS.md](./ROUNDS.md).  
+**Fonte:** `brain/notes/anxionos-thin-partners-debate.md` (OpenKnowledge).
 
 ## Propósito
 
-Indicações, comissões e payouts — atribuição comercial.
+Atribuição comercial: referrals, regras de comissão, acruo e payouts. **Não** emite invoice paid (billing) nem ledger (accounting). Marketplace é composto spec 007 — **sem pasta física**. Código de produto **ausente**. Specs 001–005 **draft**. D-GOV-010 em **risk P06**. Sem `approvals/`/`policies/`.
 
-## O que possui / não possui
+## O módulo POSSUI
 
-### Possui (donos de estado ou composição)
+Referral, CommissionRule, CommissionAccrual, PayoutBatch (e estados SETTLED/FAILED/REVERSED).
 
-- Referral
-- Commission
-- Payout
-- regras comissionamento
+## O módulo NÃO POSSUI
 
-### Não possui (fronteiras ADR0002 / brain)
-
-- Invoice plataforma — billing
-- Ledger — accounting (registra efeito)
+| Item | Dono |
+| --- | --- |
+| Invoice / webhook PSP | billing |
+| Ledger / JournalEntry | accounting |
+| Product listing | PC 10/29 composto |
+| Membership | organizations |
+| Approval / D-GOV-010 | governance / risk P06 |
 
 ## Dependências
 
-| Direção | Componentes / artefatos |
+| Direção | Componentes |
 | --- | --- |
-| **Upstream** | billing, organizations, accounting |
-| **Downstream** | accounting, operations, frontend Partner console |
+| Upstream | billing (`invoice.paid` / `refund.processed`), organizations, identity, governance T01 |
+| Downstream | accounting (efeito do acruo/payout), operations, graph, audit, Partner console (P07) |
 
-## Armazenamento
+## Armazenamento (mapa draft)
 
-PG: referrals, comissões, payouts. Neo4j: parceiro→campanha→receita. SQLite: sem payout autoritativo local.
+PG `partners_*` + journal + outbox. Neo4j `graph:partners:v1` (parceiro→campanha→receita **ids**). SQLite **sem** payout autoritativo. ST08 **0/23**.
 
-Fonte: `brain/notes/anxionos-storage-ownership.md`.
+## Spec / ADR
 
-## Estado do código atual
-
-**Ausente.**
-
-## Perguntas abertas para debate
-
-- Comissão idempotente em evento pago/revertido billing?
-- Payout batch vs realtime — owner único?
-- Multi-tier referral — modelagem PG vs graph?
-- Partner scope vs Agency tenant isolation?
-
-## Fontes
-
-| Documento | Caminho |
+| Artefato | Status |
 | --- | --- |
-| Estrutura modular (aceita) | `brain/notes/anxionos-backend-structure.md` |
-| Mapa de armazenamento | `brain/notes/anxionos-storage-ownership.md` |
-| SDD institucional | `brain/project-docs/specs/001-institutional-contract/spec.md` |
-| ADR0002 layout modular | `brain/project-docs/decisions/0002-adopt-modular-backend-layout.md` |
-| Playbook orquestração | `docs/orchestration/module-development-playbook.md` |
+| ADR0002 partners/ | accepted |
+| ADR0004 PG | accepted |
+| spec 003 comercial vs ledger | **draft** |
+| PC 29 | composto — não criar pasta |
 
 ## Próxima rodada
 
-→ **R02 — Fronteiras** (`R02-boundaries.md`) após consenso sobre inventário R1.
+→ **R02** ([R02-boundaries.md](./R02-boundaries.md))
