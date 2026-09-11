@@ -11,6 +11,7 @@ import {
 	OrganizationCommandError,
 	revokeMembership,
 } from "@anxionos/organizations";
+import { MEMBERSHIP_CONFLICT_CONSTRAINTS } from "../../../modules/organizations/src/domain/errors/membership-errors";
 import {
 	createStubPrincipalLookup,
 	shouldRunPgIntegrationTests,
@@ -320,6 +321,121 @@ describe("reativacao assistida contra PostgreSQL real (F-01/F-02)", () => {
 				[ownerMembershipId],
 			);
 			expect(row.rows[0]?.status).toBe("revoked");
+		});
+	});
+
+	test("G2-MEDIUM: aceite de convite role=owner e' recusado com 409 (guarda sem oraculo antes)", async () => {
+		if (!shouldRunPgIntegrationTests()) {
+			return;
+		}
+
+		await withOrganizationsPgHarness(async ({ pool }) => {
+			const ownerPrincipalId = randomUUID();
+			const orgDb = createOrganizationsDb(pool);
+			const unitOfWork = createOrganizationUnitOfWork(pool);
+			const inviteTokenHasher = createHmacInviteTokenHasher(PEPPER);
+			const deps = {
+				unitOfWork,
+				commandJournal: orgDb.commandJournal,
+				principalLookup: createStubPrincipalLookup([ownerPrincipalId]),
+				inviteTokenHasher,
+				membershipRepository: orgDb.membershipRepository,
+			};
+			const agency = await createAgency(
+				{ ...deps },
+				{
+					commandId: randomUUID(),
+					displayName: "Accept Owner Guard Agency",
+					marketScope: "both",
+					ownerPrincipalId,
+				},
+			);
+
+			// Convite `role=owner` e' impossivel pelo schema HTTP
+			// (`inviteMemberBodySchema` exclui owner), entao semeia direto — e' o
+			// unico jeito de exercitar a guarda. Sem este teste, apagar a guarda
+			// deixava 147 unit + 30 PG verdes (G2 MEDIUM, achado por falsificacao).
+			const membershipId = randomUUID();
+			const rawToken = "owner-invite-token-for-guard-test";
+			await pool.query(
+				`INSERT INTO organizations_memberships
+				   (id, tenant_id, agency_id, principal_id, invite_email, invite_token_hash,
+				    invite_expires_at, role, status, invited_at, revision, created_at, updated_at)
+				 VALUES ($1, $2, $2, NULL, $3, $4, now() + interval '7 days', 'owner', 'invited',
+				         now(), 1, now(), now())`,
+				[
+					membershipId,
+					agency.aggregateId,
+					"owner-invite@example.com",
+					inviteTokenHasher.hash(rawToken),
+				],
+			);
+
+			let caught: unknown;
+			try {
+				await acceptInviteByToken(deps, {
+					commandId: randomUUID(),
+					token: rawToken,
+					sessionPrincipalId: ownerPrincipalId,
+					sessionEmail: "owner-invite@example.com",
+				});
+			} catch (error) {
+				caught = error;
+			}
+			expect(caught).toBeInstanceOf(OrganizationCommandError);
+			expect((caught as OrganizationCommandError).organizationCode).toBe(
+				"ORG_INVALID_STATUS_TRANSITION",
+			);
+			expect((caught as OrganizationCommandError).statusCode).toBe(409);
+
+			// Banco INTACTO: continua convite, sem principal, um unico owner ativo e
+			// nenhum evento `membership.activated` (a transacao foi revertida).
+			const row = await pool.query<{
+				status: string;
+				principal_id: string | null;
+			}>(
+				"SELECT status, principal_id FROM organizations_memberships WHERE id = $1",
+				[membershipId],
+			);
+			expect(row.rows[0]?.status).toBe("invited");
+			expect(row.rows[0]?.principal_id).toBeNull();
+
+			const activeOwners = await pool.query<{ count: number }>(
+				`SELECT count(*)::int AS count FROM organizations_memberships
+				 WHERE agency_id = $1 AND role = 'owner' AND status = 'active'`,
+				[agency.aggregateId],
+			);
+			expect(activeOwners.rows[0]?.count).toBe(1);
+
+			const activated = await pool.query<{ count: number }>(
+				`SELECT count(*)::int AS count FROM domain_journal
+				 WHERE event_type = 'organizations.membership.activated.v1'
+				   AND payload->>'membershipId' = $1`,
+				[membershipId],
+			);
+			expect(activated.rows[0]?.count).toBe(0);
+		});
+	});
+
+	test("G5-LOW-1: as 3 constraints da allowlist existem no banco (o espelho nao pode derivar)", async () => {
+		if (!shouldRunPgIntegrationTests()) {
+			return;
+		}
+
+		await withOrganizationsPgHarness(async ({ pool }) => {
+			// `MEMBERSHIP_CONFLICT_CONSTRAINTS` e' um espelho em codigo dos indices
+			// criados pela migration 0001. Sem este oraculo, renomear um indice faz a
+			// classificacao degradar em SILENCIO para 500 (G5 LOW-1).
+			const indexes = await pool.query<{ indexname: string }>(
+				`SELECT indexname FROM pg_indexes
+				 WHERE schemaname = 'public' AND tablename = 'organizations_memberships'`,
+			);
+			const names = new Set(indexes.rows.map((row) => row.indexname));
+			for (const constraint of MEMBERSHIP_CONFLICT_CONSTRAINTS) {
+				expect(`${constraint}:${names.has(constraint)}`).toBe(
+					`${constraint}:true`,
+				);
+			}
 		});
 	});
 

@@ -11,6 +11,7 @@ import {
 import {
 	createStubPrincipalLookup,
 	shouldRunPgIntegrationTests,
+	TEST_POOL_APPLICATION_NAME,
 	withOrganizationsPgHarness,
 } from "../test-support";
 
@@ -37,7 +38,13 @@ const PEPPER = "organizations-invite-race-pepper";
  * observado; lanca no timeout para o teste falhar alto em vez de passar vazio.
  */
 async function waitForBlockedMembershipWrites(
-	pool: { query: (sql: string) => Promise<{ rows: Array<{ count: number }> }> },
+	pool: {
+		query: (
+			sql: string,
+			values?: unknown[],
+		) => Promise<{ rows: Array<{ count: number }> }>;
+	},
+	applicationName: string,
 	expected: number,
 	timeoutMs: number,
 ): Promise<number> {
@@ -45,10 +52,16 @@ async function waitForBlockedMembershipWrites(
 	let observed = 0;
 	for (;;) {
 		const { rows } = await pool.query(
+			// Escopado ao NOSSO pool (`application_name`): sem isso o contador e'
+			// global e sob execucao paralela outro arquivo pode satisfaze-lo (INFO
+			// do G5).
 			`SELECT count(*)::int AS count FROM pg_stat_activity
 			 WHERE wait_event_type = 'Lock'
 			   AND state = 'active'
+			   AND datname = current_database()
+			   AND application_name = $1
 			   AND query ILIKE '%organizations_memberships%'`,
+			[applicationName],
 		);
 		observed = rows[0]?.count ?? 0;
 		if (observed >= expected) {
@@ -117,6 +130,7 @@ describe("convite concorrente contra PostgreSQL real (F-01)", () => {
 				);
 				const blocked = await waitForBlockedMembershipWrites(
 					pool,
+					TEST_POOL_APPLICATION_NAME,
 					CONCURRENCY,
 					10_000,
 				);
@@ -150,6 +164,12 @@ describe("convite concorrente contra PostgreSQL real (F-01)", () => {
 				expect((rejection.reason as OrganizationCommandError).statusCode).toBe(
 					409,
 				);
+				// A mensagem tem de vir do mapeamento por CONSTRAINT (indice de convite),
+				// nao de outro ramo: sem esta assercao, trocar a mensagem do caminho de
+				// corrida deixava a suite verde (LOW-1 do G2).
+				expect(
+					(rejection.reason as OrganizationCommandError).message,
+				).toContain("pending invite");
 			}
 			expect(fulfilled.length + rejected.length).toBe(CONCURRENCY);
 

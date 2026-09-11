@@ -25,8 +25,11 @@ export class MembershipRevisionConflictError extends Error {
 export class MembershipUniquenessConflictError extends Error {
 	readonly constraint: MembershipConflictConstraint;
 
-	constructor(constraint: MembershipConflictConstraint) {
-		super(`Membership uniqueness conflict (${constraint})`);
+	constructor(
+		constraint: MembershipConflictConstraint,
+		options?: { cause?: unknown },
+	) {
+		super(`Membership uniqueness conflict (${constraint})`, options);
 		this.name = "MembershipUniquenessConflictError";
 		this.constraint = constraint;
 	}

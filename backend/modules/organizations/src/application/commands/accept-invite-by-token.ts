@@ -18,6 +18,7 @@ import {
 	hashCommandPayload,
 	loadIdempotentCommandResult,
 	recordOrganizationCommand,
+	throwMembershipUniquenessConflict,
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwOrganizationError } from "../errors";
@@ -161,11 +162,10 @@ export async function acceptInviteByToken(
 				// driver. Nao usa o 404 opaco do conflito de revisao: aqui nao ha'
 				// nada a esconder (o principal e' o dono da propria sessao).
 				if (error instanceof MembershipUniquenessConflictError) {
-					throwOrganizationError(
-						"ORG_MEMBERSHIP_EXISTS",
-						"This principal already has an active membership in the agency",
-						{ cause: error },
-					);
+					// Mesmo mapeamento derivado da constraint usado pelo wrapper: antes
+					// este ponto tinha mensagem FIXA de "active membership", que ficaria
+					// errada se a colisao fosse do indice de convite (G5 LOW-2).
+					throwMembershipUniquenessConflict(error);
 				}
 				if (error instanceof MembershipRevisionConflictError) {
 					throwOrganizationError(

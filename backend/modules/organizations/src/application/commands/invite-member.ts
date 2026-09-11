@@ -12,6 +12,7 @@ import type { OrganizationUnitOfWork } from "../../domain/ports/organization-uni
 import {
 	hashCommandPayload,
 	loadIdempotentCommandResult,
+	PENDING_INVITE_CONFLICT_MESSAGE,
 	recordOrganizationCommand,
 	saveWithRevisionConflictMapping,
 	toCommandResultSnapshot,
@@ -104,9 +105,11 @@ export async function inviteMember(
 					command.email,
 				);
 			if (existingInvite) {
+				// Mensagem UNICA com o caminho de corrida (mesmo indice parcial), para
+				// o cliente nao ver dois textos para o mesmo codigo.
 				throwOrganizationError(
 					"ORG_MEMBERSHIP_EXISTS",
-					`Pending invite already exists for ${command.email} in agency ${command.agencyId}`,
+					PENDING_INVITE_CONFLICT_MESSAGE,
 				);
 			}
 			const membershipId = randomUUID();

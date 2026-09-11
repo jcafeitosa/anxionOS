@@ -338,7 +338,7 @@ Como cada gate reproduziu:
 
 **Correção:** o `save` do `InviteMember` passa pelo `saveWithRevisionConflictMapping`, e a mensagem/código são derivados da `constraint` — "convite pendente", "vínculo ativo" e "outro owner ativo" são conflitos distintos e o cliente precisa saber qual (LOW do G2 e F-2 do G4).
 
-**Nota de método:** o oráculo que faltava não existia porque o teste de concorrência escrito antes exercitava só `createAgency`, que não toca o índice de e-mail. O novo `integration/invite-race.integration.test.ts` usa a **mesma barreira determinística** do G3 — e a primeira versão, com `Promise.allSettled` puro, dava **falso verde** (a corrida dependia do timing): com o defeito reintroduzido, 1 de 2 execuções passava. Com a barreira, a falsificação falha **3/3**.
+**Nota de método:** o oráculo que faltava não existia porque o teste de concorrência escrito antes exercitava só `createAgency`, que não toca o índice de e-mail. O novo `integration/invite-race.integration.test.ts` usa a **mesma barreira determinística** do G3 — e a primeira versão, com `Promise.allSettled` puro, dava **falso verde**: o G5 mediu **11 de 12 execuções passando** com o defeito presente (92%), porque sem barreira a corrida depende do timing. Com a barreira determinística, a falsificação falha **10/10**. O número original aqui era "1 de 2" — subestimava o falso verde; corrigido com a medição do G5.
 
 ### Guarda de `owner` no aceite (F-03 do G5)
 
@@ -351,6 +351,29 @@ O classificador convertia **qualquer** `23505` da tabela em conflito de membersh
 ### Disposições
 
 F-3 (reativação de principal suspenso → 200) e F-4 (500 desconhecido não é logado) estão registradas em [R05](./R05-storage.md#disposições-registradas-anx-460). A F-4 tem ressalva explícita: não há logger no boundary nem `onError` global — lacuna de plataforma a resolver antes de operar em produção.
+
+---
+
+## Nota de método — como (não) provar que um teste de PostgreSQL não rodou
+
+O `bun` **carrega `backend/.env` automaticamente**, e esse arquivo (gitignored) define
+`DATABASE_URL` apontando para o banco de desenvolvimento `anxionos`. Verificado nesta
+issue por três vias: `grep` no arquivo, o comportamento do runner, e a precedência
+(`DATABASE_URL=<outro> bun -e …` mostra que a variável **explícita vence** o `.env`).
+
+Consequência prática: **`env -u DATABASE_URL` NÃO é um controle negativo válido** — o
+processo continua conectando no banco de dev, e o teste "pula" pela flag, não pela
+ausência de banco. O jeito correto de provar que um teste de integração não executou é
+**omitir `RUN_PG_INTEGRATION_TESTS`** (a flag é o gate real) e conferir latência e
+efeito; e para provar que **executou**, observar `pg_stat_activity`, o estado deixado
+no banco, ou rodar o oráculo de banco novo (`bun run test:pg:fresh`).
+
+Os comandos desta issue sempre passaram `DATABASE_URL` explícito (bancos isolados por
+gate + oráculo), o que vence o `.env` — por isso a evidência de execução se sustenta.
+O achado é do G3, que também demonstrou que o mesmo teste "passa" em **0,03 ms** sem a
+flag (corpo não executa) e que um banco sem bootstrap produz erro real do Postgres
+(`permission denied for table domain_journal`), provando que o caminho com a flag
+conecta de verdade.
 
 ---
 

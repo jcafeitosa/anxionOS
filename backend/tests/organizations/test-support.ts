@@ -28,6 +28,9 @@ import { ensureOrganizationsSchema } from "../../modules/organizations/src/infra
 
 export const TEST_INVITE_PEPPER = "organizations-test-invite-pepper";
 
+/** `application_name` dos backends deste harness — usado para escopar oraculos. */
+export const TEST_POOL_APPLICATION_NAME = "anxionos-org-test-harness";
+
 export function createTestInviteTokenHasher() {
 	return createHmacInviteTokenHasher(TEST_INVITE_PEPPER);
 }
@@ -255,7 +258,16 @@ export async function withOrganizationsPgHarness<T>(
 		return undefined;
 	}
 
-	const pool = createPgPool(url);
+	// Marca os backends deste harness via `application_name` na propria URL de
+	// conexao. O oraculo de corrida conta backends bloqueados em `pg_stat_activity`
+	// e, sem marcador proprio, esse contador e' GLOBAL: sob execucao paralela outro
+	// arquivo poderia satisfaze-lo e produzir falso verde (INFO do G5 na ANX-460).
+	// Vai na URL (e nao num `SET` apos conectar) para nao correr com a primeira
+	// query do cliente — o `pool.on('connect')` gerava `client.query() when the
+	// client is already executing a query`, deprecado no pg 9.
+	const poolUrl = new URL(url);
+	poolUrl.searchParams.set("application_name", TEST_POOL_APPLICATION_NAME);
+	const pool = createPgPool(poolUrl.toString());
 	try {
 		await ensureEventingSchema(pool);
 		await ensureOrganizationsSchema(pool);

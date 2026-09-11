@@ -78,7 +78,9 @@ async function guardMembershipUniqueness<T>(
 	} catch (error) {
 		const constraint = membershipConflictConstraint(error);
 		if (constraint) {
-			throw new MembershipUniquenessConflictError(constraint);
+			// Preserva a causa: sem ela a cadeia de diagnostico do `23505` se perde
+			// (G3 INFO-1).
+			throw new MembershipUniquenessConflictError(constraint, { cause: error });
 		}
 		throw error;
 	}
