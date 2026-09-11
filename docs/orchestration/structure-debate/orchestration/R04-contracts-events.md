@@ -10,7 +10,7 @@ type: debate
 **Data:** 2026-09-08  
 **Issues:** ANX-46 · ANX-42 (debate estrutura) · ANX-44 (roster 8 personas)  
 **Sessão Slack:** [Session D — R04 contracts/events](./SLACK-TRANSCRIPTS.md#session-d--r04-contracts-events)  
-**Pré-requisito:** [R03-domain-sketch.md](./R03-domain-sketch.md) · [R02-paperclip-checkout-heartbeat.md](./R02-paperclip-checkout-heartbeat.md) · `brain/project-docs/specs/006-agent-hierarchy-orchestration/spec.md`
+**Pré-requisito:** [R03-domain-sketch.md](./R03-domain-sketch.md) · [R02-paperclip-checkout-heartbeat.md](./R02-paperclip-checkout-heartbeat.md) · `brain/project-docs/specs/010-agent-hierarchy-orchestration/spec.md`
 
 ## Participantes
 
@@ -35,7 +35,7 @@ Definir a superfície pública de **orchestration** após [R03-domain-sketch.md]
 | --- | --- |
 | [R03-domain-sketch.md](./R03-domain-sketch.md) | Agregados, invariantes INV-ORC-01..12, payloads sketch |
 | [R02-paperclip-checkout-heartbeat.md](./R02-paperclip-checkout-heartbeat.md) | ORCH-R02-01..08, checkout/heartbeat |
-| `brain/project-docs/specs/006-agent-hierarchy-orchestration/spec.md` | Gates G0–G7, OH01–OH12 |
+| `brain/project-docs/specs/010-agent-hierarchy-orchestration/spec.md` | Gates G0–G7, OH01–OH12 |
 | `backend/packages/contracts` | `domainEventEnvelopeSchema`, `schemaVersion` 0.1.0 |
 | [identity/R04-contracts-events.md](../identity/R04-contracts-events.md) | Padrão de layout contracts |
 

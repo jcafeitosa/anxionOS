@@ -54,4 +54,4 @@ Módulo mínimo em `backend/apps/api/src/realtime/` (não nos 23 módulos — AD
 
 ## Referência
 
-ADR público: [docs/decisions/0005-realtime-gateway-elysia-nats.md](../decisions/0005-realtime-gateway-elysia-nats.md)
+ADR público: [docs/decisions/0011-realtime-gateway-elysia-nats.md](../decisions/0011-realtime-gateway-elysia-nats.md)

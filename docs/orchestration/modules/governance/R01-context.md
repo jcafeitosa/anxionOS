@@ -47,8 +47,8 @@ Consolidar fontes de verdade, código existente e lacunas antes de definir front
 | Mapa de armazenamento | `brain/notes/anxionos-storage-ownership.md` | PG: grants/delegações/mandatos/aprovações; Neo4j: caminhos de autoridade temporal |
 | SDD institucional | `brain/project-docs/specs/001-institutional-contract/spec.md` | T01–T20, ExecutionPermit, authorityEpoch |
 | Spec investimento | `brain/project-docs/specs/003-investment-lifecycle/spec.md` | Segregação authority vs risk |
-| ADR0005 hierarquia agentes | `brain/project-docs/decisions/0005-agent-hierarchy-modes-triangular-circular.md` | ChangeProposal para troca TREE/CIRCULAR |
-| Spec 006 hierarquia | `brain/project-docs/specs/006-agent-hierarchy-orchestration/spec.md` | `HierarchyModeChange` via governance |
+| ADR0010 hierarquia agentes | `brain/project-docs/decisions/0010-agent-hierarchy-modes-triangular-circular.md` | ChangeProposal para troca TREE/CIRCULAR |
+| Spec 010 hierarquia | `brain/project-docs/specs/010-agent-hierarchy-orchestration/spec.md` | `HierarchyModeChange` via governance |
 | ADR0002 | `brain/project-docs/decisions/0002-adopt-modular-backend-layout.md` | Layout `modules/governance/` |
 | Fronteira org vs gov | [organizations R02](../organizations/R02-boundaries.md) | Membership → organizations; grant → governance |
 | Orchestration deps | [orchestration R06](../../structure-debate/orchestration/R06-dependencies.md) | Port `TraversalEvaluator` T01 |

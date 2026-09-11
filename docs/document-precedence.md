@@ -27,9 +27,9 @@ Este repositório mantém **duas árvores documentais ativas**:
 | 0002 | `brain/project-docs/decisions/0002-adopt-modular-backend-layout.md` | Layout modular do backend | stable | canônica |
 | 0003 | `brain/project-docs/decisions/0003-tool-gateway-module-placement.md` | Tool gateway no módulo `tools` | draft | única |
 | 0004 | `brain/project-docs/decisions/0004-postgresql-timescaledb-pgvector.md` | PostgreSQL / Timescale / pgvector / Neo4j | stable | canônica |
-| 0005 | `brain/project-docs/decisions/0005-agent-hierarchy-modes-triangular-circular.md` | **Hierarquia de agentes** TREE/CIRCULAR | draft | vale para hierarquia |
+| **0010** | `brain/project-docs/decisions/0010-agent-hierarchy-modes-triangular-circular.md` | **Hierarquia de agentes** TREE/CIRCULAR | draft | renumerado de 0005 (ANX-456) |
 | 0005 | `project-docs/decisions/0005-product-graph-neo4j-projection.md` | **Product Graph** como projeção Neo4j | **accepted** (ANX-276) | vale para Product Graph |
-| 0005 | `docs/decisions/0005-realtime-gateway-elysia-nats.md` | **Realtime gateway** (Elysia + NATS) | proposed | vale para o gateway |
+| **0011** | `docs/decisions/0011-realtime-gateway-elysia-nats.md` | **Realtime gateway** (Elysia + NATS) | proposed | renumerado de 0005 (ANX-456) |
 | 0006 | `brain/project-docs/decisions/0006-distribute-external-gateways-within-baseline.md` | Gateways externos nos 23 módulos | stable | canônica |
 | 0007 | `brain/project-docs/decisions/0007-multi-tenancy-strategy.md` | Estratégia multi-tenancy | stable | canônica |
 
@@ -46,19 +46,35 @@ Este repositório mantém **duas árvores documentais ativas**:
 | 004 | `project-docs/specs/004-institutional-evolution/` | Anexo de completude P1 | superseded | anexo do **mesmo** assunto |
 | 005 | `brain/project-docs/specs/005-connections-integration/` | Connections | accepted | canônica |
 | 005 | `project-docs/specs/005-connections-integration/` | Anexo de completude P1 | superseded | anexo do **mesmo** assunto |
-| 006 | `brain/project-docs/specs/006-agent-hierarchy-orchestration/` | **Hierarquia de agentes** | draft | vale para hierarquia |
+| **010** | `brain/project-docs/specs/010-agent-hierarchy-orchestration/` | **Hierarquia de agentes** | draft | renumerado de 006 (ANX-456) |
 | 006 | `project-docs/specs/006-product-agent-graph/spec.md` | **Product Graph / Agent Graph** | accepted (ANX-276) | vale para Product Graph |
 | 007 | `project-docs/specs/007-products-marketplace-capability/spec.md` | Products / Marketplace | draft | **única**, sem contraparte |
 | 008 | `brain/project-docs/specs/008-multi-tenant-isolation/` | Isolamento multi-tenant | stable | canônica |
 | — | `project-docs/specs/anx-governance-decision-engine/` | Decision engine | sem `status` | única; regularizar frontmatter |
 
-## Pendência estrutural
+## Pendência estrutural — RESOLVIDA (ANX-456)
 
-A colisão na origem (0005 e 006) permanece. Decisão do Owner em 2026-09-11: **renumerar o lado `brain/`** para eliminar a ambiguidade. Rastreado em ANX-455.
+A colisão em 0005 e 006 foi **eliminada na origem**. Numeração final:
+
+| Antes | Depois | Onde |
+| --- | --- | --- |
+| ADR 0005 hierarquia de agentes | **ADR 0010** | `brain/` (renumerado; era o lado `draft`) |
+| spec 006 hierarquia de agentes | **spec 010** | `brain/` (renumerado; era o lado `draft`) |
+| ADR 0005 realtime gateway | **ADR 0011** | `docs/decisions/` (renumerado; era `proposed`) |
+
+Os dois artefatos **aceitos** mantiveram o número: `project-docs/decisions/0005-product-graph-neo4j-projection.md` (accepted, ANX-276) e `project-docs/specs/006-product-agent-graph/` (accepted, ANX-276). Regra aplicada: **nunca renumerar artefato aceito** — renumera-se o `draft`/`proposed`.
+
+> **Extensão de escopo registrada (ANX-456).** O enunciado pedia renumerar só o lado `brain/`, mas o próprio critério de aceite exige que "ADR0005 e spec 006 existam em um **único** caminho cada (raiz)". Renumerar apenas `brain/` deixaria 0005 em **dois** caminhos versionados (`project-docs/decisions/` e `docs/decisions/`), porque o ADR do gateway (então numerado 0005) também vive em `docs/decisions/`. Para satisfazer o critério, o ADR `proposed` do gateway foi renumerado para **0011** — mesma regra de precedência (o aceito prevalece).
 
 ## Verificação
 
 ```bash
+# Colisão eliminada: nao deve sobrar nenhuma referencia as numeracoes antigas
+# Padrao em alternacao regex para o comando NAO casar consigo mesmo.
+grep -rnE "0(005|06)-agent-hierarchy|0(005)-realtime-gateway" . \
+  --include="*.md" 2>/dev/null | grep -v node_modules || echo "ok: sem referencia as numeracoes antigas"
+# Um unico artefato por numero reivindicado
+ls brain/project-docs/decisions/ | grep -E "^0010"; ls docs/decisions/ | grep -E "^0011"
 # Colisões conhecidas
 grep -rl "^status: superseded" project-docs/decision* docs/decisions 2>/dev/null
 # Nenhum artefato aceito deve estar superseded

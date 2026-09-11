@@ -8,7 +8,7 @@ Hierarquia **circular** de agentes humanos e IA para desenvolvimento full-stack 
 
 ## Modos de hierarquia (ADR 0005)
 
-Dois modos configuráveis por organização, com **Owner** e **Orchestrator/CEO** no centro. Detalhes: [ADR 0005](../../brain/project-docs/decisions/0005-agent-hierarchy-modes-triangular-circular.md) (local) e [spec 006](../../brain/project-docs/specs/006-agent-hierarchy-orchestration/spec.md).
+Dois modos configuráveis por organização, com **Owner** e **Orchestrator/CEO** no centro. Detalhes: [ADR 0010](../../brain/project-docs/decisions/0010-agent-hierarchy-modes-triangular-circular.md) (local) e [spec 010](../../brain/project-docs/specs/010-agent-hierarchy-orchestration/spec.md).
 
 | Modo | Identificador | Comportamento |
 | --- | --- | --- |

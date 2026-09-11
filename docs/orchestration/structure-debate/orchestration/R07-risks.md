@@ -10,7 +10,7 @@ type: debate
 **Data:** 2026-09-08  
 **Issues:** ANX-46 · ANX-42 (debate estrutura) · ANX-44 (roster 8 personas)  
 **Sessão Slack:** [Session G — R07 risks](./SLACK-TRANSCRIPTS.md#session-g--r07-risks)  
-**Pré-requisito:** [R06-dependencies.md](./R06-dependencies.md) · [R05-storage-pg.md](./R05-storage-pg.md) · `brain/project-docs/specs/006-agent-hierarchy-orchestration/spec.md`
+**Pré-requisito:** [R06-dependencies.md](./R06-dependencies.md) · [R05-storage-pg.md](./R05-storage-pg.md) · `brain/project-docs/specs/010-agent-hierarchy-orchestration/spec.md`
 
 ## Participantes
 

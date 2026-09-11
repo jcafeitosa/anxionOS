@@ -18,7 +18,7 @@ tags:
 
 ## Status e escopo
 
-> **Colisão de número (ANX-455).** Existe uma *outra* spec 006 em `brain/project-docs/specs/006-agent-hierarchy-orchestration/`, sobre **hierarquia de agentes** (draft) — assunto distinto. Esta spec permanece **accepted** e prevalece para Product/Agent Graph. Identificar por caminho + título. Registro: [docs/document-precedence.md](../../../docs/document-precedence.md).
+> **Numeração (ANX-456).** A spec de **hierarquia de agentes**, que colidia neste numero, foi renumerada para **010** (`brain/project-docs/specs/010-agent-hierarchy-orchestration/`). Esta spec permanece **accepted** (ANX-276) e e' a unica **006**. Registro: [docs/document-precedence.md](../../../docs/document-precedence.md).
 
 Esta spec é **proposta**. Descreve o modelo cognitivo da AI Product Company Engine sem afirmar implementação runtime completa. Persistência autoritativa em P0 = OKF (`brain/`) + issues `ANX-*`; projeção Neo4j = P3 (proposed). Não substitui o grafo institucional de runtime (`backend/modules/graph/`).
 

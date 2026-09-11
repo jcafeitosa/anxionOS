@@ -14,7 +14,7 @@ type: debate
 
 A análise do Paperclip confirmou organograma **tree-only** (CEO → reports), Board como Owner, checkout atômico e aprovações — sem nomenclatura triangular/circular. O anxionOS documentava modo **circular** em [org-chart](../../../team/org-chart.md) e deixava o modo **triangular** (árvore pura) implícito.
 
-**Decisão proposta:** `brain/project-docs/decisions/0005-agent-hierarchy-modes-triangular-circular.md` + `brain/project-docs/specs/006-agent-hierarchy-orchestration/spec.md`.
+**Decisão proposta:** `brain/project-docs/decisions/0010-agent-hierarchy-modes-triangular-circular.md` + `brain/project-docs/specs/010-agent-hierarchy-orchestration/spec.md`.
 
 | Modo | Identificador | Uso |
 | --- | --- | --- |

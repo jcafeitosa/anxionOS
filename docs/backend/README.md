@@ -331,7 +331,7 @@ Canais allowlist: `health.deps`, `dashboard.metrics`, `notifications`, `session.
 
 NATS (`NATS_URL`): bridge server-side em `anxionos.tenant.*.events` e `anxionos.broadcast` — degrada se offline.
 
-Contrato: `RealtimeEnvelope` em `@anxionos/contracts`. Docs: [realtime-connection-strategy.md](../research/realtime-connection-strategy.md), [ADR0005](../decisions/0005-realtime-gateway-elysia-nats.md).
+Contrato: `RealtimeEnvelope` em `@anxionos/contracts`. Docs: [realtime-connection-strategy.md](../research/realtime-connection-strategy.md), [ADR0005](../decisions/0011-realtime-gateway-elysia-nats.md).
 
 ### OpenAPI / Scalar
 

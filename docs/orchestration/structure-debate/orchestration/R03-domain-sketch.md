@@ -10,7 +10,7 @@ type: debate
 **Data:** 2026-09-08  
 **Issues:** ANX-46 · ANX-42 (debate estrutura) · ANX-44 (roster 8 personas)  
 **Sessão Slack:** [Session C — R03 domain sketch](./SLACK-TRANSCRIPTS.md#session-c--r03-domain-sketch)  
-**Pré-requisito:** [R02-paperclip-checkout-heartbeat.md](./R02-paperclip-checkout-heartbeat.md) · [R01-hierarchy-modes.md](./R01-hierarchy-modes.md) · `brain/project-docs/specs/006-agent-hierarchy-orchestration/spec.md` · `brain/project-docs/decisions/0005-agent-hierarchy-modes-triangular-circular.md`
+**Pré-requisito:** [R02-paperclip-checkout-heartbeat.md](./R02-paperclip-checkout-heartbeat.md) · [R01-hierarchy-modes.md](./R01-hierarchy-modes.md) · `brain/project-docs/specs/010-agent-hierarchy-orchestration/spec.md` · `brain/project-docs/decisions/0010-agent-hierarchy-modes-triangular-circular.md`
 
 ## Objetivo da rodada
 
@@ -21,7 +21,7 @@ Esboçar o modelo de domínio de **orchestration** após R02: agregados `Goal`, 
 | Fonte | Uso em R3 |
 | --- | --- |
 | [R02-paperclip-checkout-heartbeat.md](./R02-paperclip-checkout-heartbeat.md) | ORCH-R02-01..08, perguntas abertas R03 |
-| `brain/project-docs/specs/006-agent-hierarchy-orchestration/spec.md` | `GateBinding`, OH01–OH12, gates G0–G7 |
+| `brain/project-docs/specs/010-agent-hierarchy-orchestration/spec.md` | `GateBinding`, OH01–OH12, gates G0–G7 |
 | `brain/project-docs/specs/002-agents-knowledge/spec.md` | Run, heartbeat, CEO Agent |
 | [DEBATE-ROSTER.md](../../DEBATE-ROSTER.md) | 8 personas Session C |
 

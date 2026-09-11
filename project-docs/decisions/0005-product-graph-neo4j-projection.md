@@ -20,7 +20,7 @@ tags:
 
 **Accepted** — greenlight Owner ANX-276; sandbox P2 homologado ANX-290; staging P3 em ANX-292.
 
-> **Colisão de número (ANX-455).** Existe um *outro* ADR0005 em `brain/project-docs/decisions/0005-agent-hierarchy-modes-triangular-circular.md`, sobre **hierarquia de agentes** (draft) — assunto distinto. Este documento permanece **accepted** e prevalece para Product Graph / Neo4j. Identificar por caminho + título. Registro: [docs/document-precedence.md](../../docs/document-precedence.md).
+> **Numeração (ANX-456).** Os ADRs que colidiam neste numero foram renumerados: o de **hierarquia de agentes** (draft, `brain/`) para **0010** e o de **realtime gateway** (`proposed`, `docs/decisions/`) para **0011**. Este documento permanece **accepted** (ANX-276) e e' o unico **0005**. Registro: [docs/document-precedence.md](../../docs/document-precedence.md).
 
 ## Contexto
 

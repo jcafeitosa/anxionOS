@@ -10,7 +10,7 @@ type: debate
 **Data:** 2026-09-08  
 **Issues:** ANX-46 · ANX-42 (debate estrutura) · ANX-44 (roster 8 personas)  
 **Sessão Slack:** [Session B — #module-orchestration](./SLACK-TRANSCRIPTS.md#session-b--r02-paperclip-checkout-heartbeat)  
-**Pré-requisito:** [R01-hierarchy-modes.md](./R01-hierarchy-modes.md) · `brain/project-docs/decisions/0005-agent-hierarchy-modes-triangular-circular.md` · `brain/project-docs/specs/006-agent-hierarchy-orchestration/spec.md`
+**Pré-requisito:** [R01-hierarchy-modes.md](./R01-hierarchy-modes.md) · `brain/project-docs/decisions/0010-agent-hierarchy-modes-triangular-circular.md` · `brain/project-docs/specs/010-agent-hierarchy-orchestration/spec.md`
 
 ## Objetivo da rodada
 
@@ -28,8 +28,8 @@ Mapear quatro capacidades centrais do `brain/external-sources/paperclip-readme.m
 | Fonte | Uso em R2 |
 | --- | --- |
 | `brain/external-sources/paperclip-readme.md` | Atomic execution, heartbeats, goal alignment, governance |
-| `brain/project-docs/decisions/0005-agent-hierarchy-modes-triangular-circular.md` | Modos TREE/CIRCULAR, centro Owner+Orchestrator |
-| `brain/project-docs/specs/006-agent-hierarchy-orchestration/spec.md` | `GateBinding`, `HierarchyMode`, invariantes OH* |
+| `brain/project-docs/decisions/0010-agent-hierarchy-modes-triangular-circular.md` | Modos TREE/CIRCULAR, centro Owner+Orchestrator |
+| `brain/project-docs/specs/010-agent-hierarchy-orchestration/spec.md` | `GateBinding`, `HierarchyMode`, invariantes OH* |
 | [R01-hierarchy-modes.md](./R01-hierarchy-modes.md) | Perguntas abertas R02 |
 | [org-chart.md](../../../team/org-chart.md) | Papéis Level C–W, G0–G7 |
 | `brain/project-docs/specs/002-agents-knowledge/spec.md` | Heartbeat, Run, CEO Agent |

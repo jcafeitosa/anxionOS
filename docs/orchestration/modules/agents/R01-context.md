@@ -50,7 +50,7 @@ Personas Cursor (Renata, Lucas) **não** são os agentes institucionais deste m�
 | Spec 002 | `brain/project-docs/specs/002-agents-knowledge/spec.md` | Lifecycle, Brain, paridade AP01–AP08 |
 | ADR0002 | `brain/project-docs/decisions/0002-adopt-modular-backend-layout.md` | Layout `modules/agents/` |
 | ADR0004 | `brain/project-docs/decisions/0004-postgresql-timescaledb-pgvector.md` | Engines: PG + Neo4j; sem Timescale/pgvector neste módulo |
-| ADR0005 | `brain/project-docs/decisions/0005-agent-hierarchy-modes-triangular-circular.md` | TREE/CIRCULAR via governance, não neste módulo |
+| ADR0010 | `brain/project-docs/decisions/0010-agent-hierarchy-modes-triangular-circular.md` | TREE/CIRCULAR via governance, não neste módulo |
 | PC 03 | [debate M03](../../../../notes/anxionos-pc03-agents-debate.md) | In/out/non-goals + mermaid |
 | Ficha | [agents.md](../../system-capabilities/modules/agents.md) | Histórias humano+agente |
 | Governance R02 | [R02](../governance/R02-boundaries.md) | Mandate vs Grant; Authority L0–L6 ≠ autonomia L0–L4 |

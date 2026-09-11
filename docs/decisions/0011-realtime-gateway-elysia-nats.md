@@ -8,7 +8,7 @@ type: decision
 | --- | --- |
 | Status | **proposed** |
 
-> **Colisão de número (ANX-455).** Existem *outros* ADR0005 com assuntos distintos: `brain/project-docs/decisions/0005-agent-hierarchy-modes-triangular-circular.md` (draft, hierarquia de agentes) e `project-docs/decisions/0005-product-graph-neo4j-projection.md` (accepted, Product Graph). Identificar por caminho + título. Registro: [document-precedence.md](../document-precedence.md).
+> **Numeração (ANX-456).** Este ADR era **0005** e foi renumerado para **0011** por ser `proposed` — o ADR0005 remanescente e' o `project-docs/decisions/0005-product-graph-neo4j-projection.md` (**accepted**, ANX-276), que preservou o número. A colisão tripla em 0005 (que envolvia tambem `brain/`) foi eliminada. Registro: [document-precedence.md](../document-precedence.md).
 | Data | 2026-09-08 |
 | Issue | ANX-21 |
 
