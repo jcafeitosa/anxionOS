@@ -8,7 +8,6 @@ import { canTransitionMembershipStatus } from "../../domain/entities/membership"
 import { createMembershipActivatedEvent } from "../../domain/events/organization-events";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { OrganizationUnitOfWork } from "../../domain/ports/organization-unit-of-work";
-import type { PrincipalLookup } from "../../domain/ports/principal-lookup";
 import {
 	hashCommandPayload,
 	loadIdempotentCommandResult,
@@ -18,7 +17,6 @@ import {
 } from "../command-support";
 import { throwOrganizationError } from "../errors";
 import { assertActorIsOwnerOrAdmin } from "../services/membership-role-guard";
-import { assertPrincipalExists } from "../services/principal-guard";
 import { buildAgencyTenantContext } from "../services/tenant-context";
 
 /**
@@ -47,7 +45,6 @@ export async function activateMembership(
 	if (replay) {
 		return replay;
 	}
-	await assertPrincipalExists(deps.principalLookup, input.targetPrincipalId);
 	return deps.unitOfWork.runInTransaction(
 		buildAgencyTenantContext(command.agencyId, input.actorPrincipalId),
 		async (context) => {
@@ -59,7 +56,7 @@ export async function activateMembership(
 			if (raced) {
 				return raced;
 			}
-			const actorMembership = await assertActorIsOwnerOrAdmin(
+			await assertActorIsOwnerOrAdmin(
 				context.membershipRepository,
 				input.actorPrincipalId,
 				command.agencyId,
@@ -74,21 +71,24 @@ export async function activateMembership(
 					`Membership ${command.membershipId} not found in agency ${command.agencyId}`,
 				);
 			}
-			// D-ORG-046 — restaurar autoridade de OWNER e' ato de owner. O convite
-			// nunca aceita `role=owner` (schema exclui), entao um admin NAO consegue
-			// criar owner; sem esta guarda ele conseguiria o mesmo efeito pela porta
-			// dos fundos: reativar uma membership `revoked` de role `owner` e fazer o
-			// governance reemitir a baseline de owner (`membership.activated`).
-			if (membership.role === "owner" && actorMembership.role !== "owner") {
-				throwOrganizationError(
-					"ORG_OWNER_REQUIRED",
-					"Only an owner can reactivate an owner membership",
-				);
-			}
 			if (membership.status !== "invited" && membership.status !== "revoked") {
 				throwOrganizationError(
 					"ORG_MEMBERSHIP_NOT_INVITED",
 					`Membership ${command.membershipId} is not invited`,
+				);
+			}
+			// D-ORG-046 (F-02 do G5) — autoridade de OWNER nao e' ativavel por aqui.
+			// `role=owner` so' nasce em `CreateAgency` e `TransferOwnership`, e ambos
+			// mantem exatamente UM owner ativo (INV-ORG-02, garantida pelo indice
+			// parcial `organizations_memberships_one_owner_active_uidx`). Logo uma
+			// membership de owner `revoked` nao e' producivel pela API, e tentar
+			// reativa-la colidiria com esse mesmo indice — o `23505` cru subia como
+			// 500. Recusar explicitamente e' fail-closed, nao oferece superficie
+			// morta e nao promete uma restauracao de autoridade que nao existe.
+			if (membership.role === "owner") {
+				throwOrganizationError(
+					"ORG_INVALID_STATUS_TRANSITION",
+					"Owner authority is granted only by CreateAgency or TransferOwnership and cannot be activated here",
 				);
 			}
 			// D-ORG-046 (G5-F2) — consentimento na PRIMEIRA vinculacao. A ativacao
@@ -152,7 +152,9 @@ export async function activateMembership(
 			const event = createMembershipActivatedEvent({
 				membershipId: updated.id,
 				agencyId: updated.agencyId,
-				principalId: input.targetPrincipalId,
+				// Fato persistido (o gate de consentimento garante nao-nulo), nunca o
+				// parametro do chamador — mesma licao do S4b.
+				principalId: updated.principalId ?? input.targetPrincipalId,
 				role: updated.role,
 				revision: updated.revision,
 			});
@@ -179,5 +181,4 @@ export interface ActivateMembershipInput extends ActivateMembershipCommand {
 export interface ActivateMembershipDeps {
 	unitOfWork: OrganizationUnitOfWork;
 	commandJournal: CommandJournalRepository;
-	principalLookup: PrincipalLookup;
 }

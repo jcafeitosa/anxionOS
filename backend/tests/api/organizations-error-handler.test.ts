@@ -41,12 +41,26 @@ describe("organizations error handler (S2/ANX-460)", () => {
 		expect(mapped.body.error.requestId).toBe("req-anx-460-s4a");
 	});
 
-	test("erro cru de dominio desconhecido continua 500 (nao mascara bug)", () => {
+	test("erro desconhecido continua 500, mas SEM vazar a mensagem crua", () => {
+		// F-01/F-02 (G3/G4/G5): o default de `toErrorResponse` expoe a mensagem
+		// quando `NODE_ENV !== "production"`, e nenhum arquivo de deploy deste repo
+		// define `NODE_ENV=production` para a API — a mensagem do driver (query SQL
+		// + parametros ligados) podia chegar ao cliente. O boundary agora responde
+		// sempre generico e preserva o detalhe na causa.
+		const rawMessage =
+			'Failed query: update "organizations_memberships" set status = $1';
 		const mapped = mapOrganizationsError(
-			new Error("Failed to update agency"),
+			new Error(rawMessage),
 			"req-anx-460-raw",
 		);
 		expect(mapped.status).toBe(500);
+		expect(mapped.body.error.code).toBe("INTERNAL_ERROR");
+		expect(mapped.body.error.message).not.toContain("Failed query");
+		expect(mapped.body.error.message).not.toContain(
+			"organizations_memberships",
+		);
+		expect(mapped.body.error.details).toBeUndefined();
+		expect(mapped.body.error.requestId).toBe("req-anx-460-raw");
 	});
 });
 

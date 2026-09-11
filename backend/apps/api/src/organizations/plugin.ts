@@ -1,3 +1,4 @@
+import { institutionalUuidSchema } from "@anxionos/contracts";
 import type { TenantScopedQueryable } from "@anxionos/database";
 import type { PrincipalRepository } from "@anxionos/identity";
 import type {
@@ -47,6 +48,15 @@ export interface OrganizationsPluginDeps {
 	inviteTokenHasher: InviteTokenHasher;
 	identityRepository: PrincipalRepository;
 	scopedPool: TenantScopedQueryable;
+}
+
+/**
+ * G3 (ANX-460): valida o path param de membership no boundary. Sem isto um valor
+ * nao-UUID virava contexto de tenant invalido e o boundary devolvia 500 com a
+ * mensagem crua do driver; path invalido e' 400.
+ */
+function parseMembershipId(raw: string): string {
+	return institutionalUuidSchema.parse(raw);
 }
 
 function requestIdFrom(headers: Headers): string | undefined {
@@ -105,12 +115,19 @@ export function createOrganizationsPlugin(deps: OrganizationsPluginDeps) {
 			scoped
 				.resolve(async ({ request, params }) => {
 					const { principal } = await resolveSessionPrincipal(deps, request);
+					// G3 (ANX-460): o path param tem de ser validado ANTES de virar
+					// contexto de tenant. Sem isso `GET /agencies/not-a-uuid` chegava ao
+					// `TenantContextError` cru ("tenantId must be a UUID") e o boundary
+					// devolvia **500** para qualquer sessao autenticada — body invalido
+					// e' 400, e o mesmo vale para path. `identity/plugin.ts` ja' usava
+					// `institutionalUuidSchema.parse` para o header de escopo.
+					const agencyId = institutionalUuidSchema.parse(params.agencyId);
 					await requireAgencyMembership(
 						deps.scopedPool,
-						params.agencyId,
+						agencyId,
 						principal.id,
 					);
-					return { principal };
+					return { principal, agencyId };
 				})
 				.get(
 					"",
@@ -168,7 +185,7 @@ export function createOrganizationsPlugin(deps: OrganizationsPluginDeps) {
 					async ({ params, principal }) =>
 						handleGetMembership(deps, {
 							agencyId: params.agencyId,
-							membershipId: params.membershipId,
+							membershipId: parseMembershipId(params.membershipId),
 							principalId: principal.id,
 						}),
 					organizationsOpenApi.getMembership,
@@ -194,7 +211,7 @@ export function createOrganizationsPlugin(deps: OrganizationsPluginDeps) {
 						return handleActivateMembership(deps, {
 							commandId,
 							agencyId: params.agencyId,
-							membershipId: params.membershipId,
+							membershipId: parseMembershipId(params.membershipId),
 							principalId: principal.id,
 						});
 					},
@@ -207,7 +224,7 @@ export function createOrganizationsPlugin(deps: OrganizationsPluginDeps) {
 						return handleRevokeMembership(deps, {
 							commandId,
 							agencyId: params.agencyId,
-							membershipId: params.membershipId,
+							membershipId: parseMembershipId(params.membershipId),
 							principalId: principal.id,
 						});
 					},

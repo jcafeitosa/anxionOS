@@ -747,9 +747,9 @@ export const organizationsOpenApi = {
 	activateMembership: op({
 		tag: "Organizations",
 		operationId: "activateMembership",
-		summary: "Activate invited membership",
+		summary: "Reactivate an already-bound membership",
 		description:
-			"Module: organizations. Activates an invited membership. Empty JSON body. `Idempotency-Key` required.",
+			"Module: organizations. Assisted reactivation (`revoked` → `active`). Requires the membership to be **already bound to a principal**: a pending invite is refused with 403 `ORG_INVITEE_CONSENT_REQUIRED`, because the first binding must be accepted by the invitee via `/invites/accept`. Owner authority is never activated here (409). Empty JSON body. `Idempotency-Key` required.",
 		security: COOKIE_SECURITY,
 		parameters: [
 			...commandParams,

@@ -136,7 +136,6 @@ export async function handleActivateMembership(
 		{
 			unitOfWork: deps.unitOfWork,
 			commandJournal: deps.commandJournal,
-			principalLookup: deps.principalLookup,
 		},
 		{
 			...command,

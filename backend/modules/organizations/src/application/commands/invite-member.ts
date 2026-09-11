@@ -69,7 +69,12 @@ export async function inviteMember(
 						}
 						return (
 							membership.agencyId === command.agencyId &&
-							membership.inviteEmail === command.email &&
+							// F-04/G2: compara NORMALIZADO, igual ao `requestHash` e ao
+							// indice parcial (`lower(invite_email)`). Comparar o texto cru
+							// fazia um retry legitimo com outra caixa virar 409 no caminho
+							// de corrida, mesmo com o hash ja' normalizado.
+							membership.inviteEmail?.toLowerCase() ===
+								command.email.toLowerCase() &&
 							membership.role === command.role
 						);
 					},

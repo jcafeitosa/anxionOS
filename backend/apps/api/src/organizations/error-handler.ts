@@ -75,8 +75,15 @@ export function mapOrganizationsError(
 			body: toErrorResponse(error, { requestId }),
 		};
 	}
+	// Erro desconhecido NAO vai ao cliente com a mensagem crua. O default de
+	// `toErrorResponse` e' `exposeDetails = NODE_ENV !== "production"`
+	// (`packages/contracts/src/errors.ts:182`) e nenhum arquivo de deploy deste
+	// repo define `NODE_ENV=production` para a API — entao a mensagem do driver
+	// (query SQL + parametros ligados) podia chegar ao cliente em producao.
+	// `AppError.internal` tem `expose: false`: resposta sempre generica, detalhe
+	// preservado na causa (F-01/F-02 dos gates G3/G4/G5, ANX-460).
 	return {
 		status: 500,
-		body: toErrorResponse(error, { requestId }),
+		body: toErrorResponse(AppError.internal(undefined, error), { requestId }),
 	};
 }

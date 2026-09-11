@@ -1,7 +1,10 @@
 import { and, eq, or, sql } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Membership } from "../../domain/entities/membership";
-import { MembershipRevisionConflictError } from "../../domain/errors/membership-errors";
+import {
+	MembershipAlreadyActiveError,
+	MembershipRevisionConflictError,
+} from "../../domain/errors/membership-errors";
 import type { MembershipRepository } from "../../domain/ports/membership-repository";
 import { type MembershipRow, memberships } from "./schema";
 
@@ -24,6 +27,49 @@ export function toMembership(row: MembershipRow): Membership {
 	};
 }
 
+/**
+ * Extrai o nome da constraint de uma violacao `23505`. O driver nao expoe o
+ * codigo no topo: drizzle envolve o erro do `pg` em `DrizzleQueryError` com
+ * `cause = DatabaseError`, entao a cadeia de `cause` e' percorrida (mesmo
+ * cuidado ja' tomado no `identity`, onde ler so' `error.code` deixava os
+ * mapeamentos mortos em producao).
+ */
+function membershipUniquenessConstraint(error: unknown): string | undefined {
+	let current: unknown = error;
+	for (let depth = 0; depth < 5; depth += 1) {
+		if (typeof current !== "object" || current === null) {
+			return undefined;
+		}
+		const candidate = current as { code?: unknown; constraint?: unknown };
+		if (candidate.code === "23505") {
+			return typeof candidate.constraint === "string"
+				? candidate.constraint
+				: "unknown";
+		}
+		current = (current as { cause?: unknown }).cause;
+	}
+	return undefined;
+}
+
+/**
+ * Converte violacao de unicidade de membership no erro de dominio. Sem isto o
+ * `23505` cru subia ate' o boundary como **500** (a transicao `revoked -> active`
+ * tornou a colisao alcancavel pela API — F-01 dos gates G3/G4/G5 da ANX-460).
+ */
+async function guardMembershipUniqueness<T>(
+	operation: () => Promise<T>,
+): Promise<T> {
+	try {
+		return await operation();
+	} catch (error) {
+		const constraint = membershipUniquenessConstraint(error);
+		if (constraint) {
+			throw new MembershipAlreadyActiveError(constraint);
+		}
+		throw error;
+	}
+}
+
 export function createDrizzleMembershipRepository(
 	db: NodePgDatabase<{ memberships: typeof memberships }>,
 ): MembershipRepository {
@@ -41,9 +87,44 @@ export function createDrizzleMembershipRepository(
 				.limit(1);
 			if (existing[0]) {
 				const expectedRevision = membership.revision - 1;
-				const rows = await db
-					.update(memberships)
-					.set({
+				const rows = await guardMembershipUniqueness(() =>
+					db
+						.update(memberships)
+						.set({
+							principalId: membership.principalId,
+							inviteEmail: membership.inviteEmail,
+							inviteTokenHash: membership.inviteTokenHash,
+							inviteExpiresAt: membership.inviteExpiresAt,
+							role: membership.role,
+							status: membership.status,
+							invitedAt: membership.invitedAt,
+							joinedAt: membership.joinedAt,
+							revokedAt: membership.revokedAt,
+							revision: membership.revision,
+							updatedAt: membership.updatedAt,
+						})
+						.where(
+							and(
+								eq(memberships.id, membership.id),
+								eq(memberships.agencyId, membership.agencyId),
+								eq(memberships.revision, expectedRevision),
+							),
+						)
+						.returning(),
+				);
+				const row = rows[0];
+				if (!row) {
+					throw new MembershipRevisionConflictError();
+				}
+				return toMembership(row);
+			}
+			const rows = await guardMembershipUniqueness(() =>
+				db
+					.insert(memberships)
+					.values({
+						id: membership.id,
+						tenantId: membership.agencyId,
+						agencyId: membership.agencyId,
 						principalId: membership.principalId,
 						inviteEmail: membership.inviteEmail,
 						inviteTokenHash: membership.inviteTokenHash,
@@ -54,42 +135,11 @@ export function createDrizzleMembershipRepository(
 						joinedAt: membership.joinedAt,
 						revokedAt: membership.revokedAt,
 						revision: membership.revision,
+						createdAt: membership.createdAt,
 						updatedAt: membership.updatedAt,
 					})
-					.where(
-						and(
-							eq(memberships.id, membership.id),
-							eq(memberships.agencyId, membership.agencyId),
-							eq(memberships.revision, expectedRevision),
-						),
-					)
-					.returning();
-				const row = rows[0];
-				if (!row) {
-					throw new MembershipRevisionConflictError();
-				}
-				return toMembership(row);
-			}
-			const rows = await db
-				.insert(memberships)
-				.values({
-					id: membership.id,
-					tenantId: membership.agencyId,
-					agencyId: membership.agencyId,
-					principalId: membership.principalId,
-					inviteEmail: membership.inviteEmail,
-					inviteTokenHash: membership.inviteTokenHash,
-					inviteExpiresAt: membership.inviteExpiresAt,
-					role: membership.role,
-					status: membership.status,
-					invitedAt: membership.invitedAt,
-					joinedAt: membership.joinedAt,
-					revokedAt: membership.revokedAt,
-					revision: membership.revision,
-					createdAt: membership.createdAt,
-					updatedAt: membership.updatedAt,
-				})
-				.returning();
+					.returning(),
+			);
 			const row = rows[0];
 			if (!row) throw new Error("Failed to create membership");
 			return toMembership(row);

@@ -123,7 +123,7 @@ async function captureError(work: () => Promise<unknown>): Promise<unknown> {
 }
 
 describe("reativacao assistida — D-ORG-046", () => {
-	test("admin NAO reativa membership de role owner", async () => {
+	test("reativar membership de role owner e' recusado para admin", async () => {
 		const harness = buildHarness();
 		const error = await captureError(() =>
 			activateMembership(harness.deps, {
@@ -135,7 +135,7 @@ describe("reativacao assistida — D-ORG-046", () => {
 			}),
 		);
 		expect((error as OrganizationCommandError).organizationCode).toBe(
-			"ORG_OWNER_REQUIRED",
+			"ORG_INVALID_STATUS_TRANSITION",
 		);
 		// Nada foi reativado nem publicado.
 		const membership = await harness.membershipRepository.findById(
@@ -146,23 +146,36 @@ describe("reativacao assistida — D-ORG-046", () => {
 		expect(harness.published).toHaveLength(0);
 	});
 
-	test("owner reativa membership de role owner", async () => {
+	// F-02 do G5 (ANX-460) — o teste anterior aqui afirmava 200 ("owner reativa
+	// membership de role owner") e era um FALSO PASS: o repositorio in-memory nao
+	// tem o indice parcial `organizations_memberships_one_owner_active_uidx` que,
+	// no PostgreSQL, rejeita a gravacao com 23505. O estado "owner revogado" e'
+	// inalcancavel pela API (o convite exclui owner; revogar o unico owner ativo e'
+	// bloqueado; a transferencia rebaixa o owner anterior para admin), entao a
+	// restauracao de autoridade de owner foi REMOVIDA daqui em vez de mantida como
+	// superficie morta. A prova de que nao ha 500 vive no teste PG
+	// (`integration/assisted-reactivation.integration.test.ts`).
+	test("reativar role owner e' recusado tambem para owner (nao ha restauracao de owner)", async () => {
 		const harness = buildHarness();
-		const result = await activateMembership(harness.deps, {
-			commandId: randomUUID(),
-			agencyId: AGENCY_ID,
-			membershipId: REVOKED_OWNER_MEMBERSHIP,
-			actorPrincipalId: OWNER_PRINCIPAL,
-			targetPrincipalId: EX_OWNER_PRINCIPAL,
-		});
-		expect(result.aggregateId).toBe(REVOKED_OWNER_MEMBERSHIP);
+		const error = await captureError(() =>
+			activateMembership(harness.deps, {
+				commandId: randomUUID(),
+				agencyId: AGENCY_ID,
+				membershipId: REVOKED_OWNER_MEMBERSHIP,
+				actorPrincipalId: OWNER_PRINCIPAL,
+				targetPrincipalId: EX_OWNER_PRINCIPAL,
+			}),
+		);
+		expect((error as OrganizationCommandError).organizationCode).toBe(
+			"ORG_INVALID_STATUS_TRANSITION",
+		);
+		expect((error as OrganizationCommandError).statusCode).toBe(409);
 		const membership = await harness.membershipRepository.findById(
 			AGENCY_ID,
 			REVOKED_OWNER_MEMBERSHIP,
 		);
-		expect(membership?.status).toBe("active");
-		expect(membership?.revokedAt).toBeNull();
-		expect(harness.published).toHaveLength(1);
+		expect(membership?.status).toBe("revoked");
+		expect(harness.published).toHaveLength(0);
 	});
 
 	test("admin PODE reativar membership de role admin (dentro do seu nivel)", async () => {

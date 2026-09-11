@@ -1,7 +1,10 @@
 import { createHash } from "node:crypto";
 import type { CommandResult } from "@anxionos/contracts/organizations";
 import { AgencyRevisionConflictError } from "../domain/errors/agency-errors";
-import { MembershipRevisionConflictError } from "../domain/errors/membership-errors";
+import {
+	MembershipAlreadyActiveError,
+	MembershipRevisionConflictError,
+} from "../domain/errors/membership-errors";
 import {
 	CommandJournalConflictError,
 	type CommandJournalRepository,
@@ -45,9 +48,13 @@ async function assertIntentMatches(
 	commandId: string,
 ): Promise<void> {
 	if (existing.commandName !== intent.commandName) {
+		// F-06 do G5: a mensagem NAO nomeia o comando alheio. O namespace de
+		// `Idempotency-Key` e' global (sem tenant_id — ANX-480), entao nomear o
+		// comando vazaria o nome de um comando de OUTRO tenant para quem
+		// adivinhasse a key. O codigo em `details.code` ja' basta para depurar.
 		throwOrganizationError(
 			"ORG_DUPLICATE_IDEMPOTENCY",
-			`Idempotency key ${commandId} was already used by ${existing.commandName}`,
+			`Idempotency key ${commandId} was already used by another command`,
 		);
 	}
 	if (
@@ -122,15 +129,20 @@ export async function loadIdempotentCommandResult(
 }
 
 /**
- * Executa uma gravacao de agregado traduzindo **corrida de revisao** no codigo
- * institucional `ORG_REVISION_CONFLICT` (409). Sem isto o erro cru de dominio
- * vazava ate' o boundary e o perdedor de uma corrida recebia **500** — os 8
- * modulos que ja' tem `<MOD>_REVISION_CONFLICT` (identity, agents, capital,
- * strategies, operations, connections, knowledge, market-data) sempre
- * responderam 409 (S4a/S4c, ANX-460).
+ * Executa uma gravacao de agregado traduzindo os conflitos de dominio em codigos
+ * institucionais:
  *
- * Nao use em `accept-invite-by-token`: ali o conflito e' mapeado para um 404
- * opaco de proposito, para nao confirmar a existencia/consumo de um token.
+ * - **corrida de revisao** → `ORG_REVISION_CONFLICT` (409). Sem isto o erro cru
+ *   vazava ate' o boundary e o perdedor recebia **500** — os 8 modulos que ja'
+ *   tem `<MOD>_REVISION_CONFLICT` sempre responderam 409 (S4a/S4c, ANX-460);
+ * - **vinculo ativo duplicado** → `ORG_MEMBERSHIP_EXISTS` (409). O repositorio
+ *   converte a violacao `23505` dos indices parciais de membership em
+ *   `MembershipAlreadyActiveError`; sem este mapeamento o `23505` cru subia como
+ *   500 (F-01 dos gates G3/G4/G5, alcancavel pela transicao `revoked -> active`).
+ *
+ * Nao use em `accept-invite-by-token`: ali o conflito de revisao e' mapeado para
+ * um 404 opaco de proposito, para nao confirmar a existencia/consumo de um token.
+ * O conflito de vinculo ativo, esse, vale para os dois (ANX-482).
  */
 export async function saveWithRevisionConflictMapping<T>(
 	operation: () => Promise<T>,
@@ -138,6 +150,13 @@ export async function saveWithRevisionConflictMapping<T>(
 	try {
 		return await operation();
 	} catch (error) {
+		if (error instanceof MembershipAlreadyActiveError) {
+			throwOrganizationError(
+				"ORG_MEMBERSHIP_EXISTS",
+				"Target principal already has an active membership in this agency",
+				{ cause: error },
+			);
+		}
 		if (
 			error instanceof MembershipRevisionConflictError ||
 			error instanceof AgencyRevisionConflictError

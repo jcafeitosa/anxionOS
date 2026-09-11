@@ -91,7 +91,7 @@ Consolidar todas as posições aceitas em R1–R7 num **decision log** rastreáv
 | **D-ORG-033** | ANX-29 bloqueada até identity G7 (ANX-28) + pacote G0 (R10) | R6, R7 | ✅ Aceito |
 | **D-ORG-034** | Accept-invite por token exige **match** `lower(session.email) === lower(invite_email)` | R8 | ✅ Aceito — resolve P-R7-01 |
 | **D-ORG-035** | Quota comercial `maxCompanies` (SDD) enforced por **billing** P07 — organizations v1 sem quota | R8 | ✅ Aceito — resolve P-R7-02 |
-| **D-ORG-036** | Admin/owner pode ativar via `membershipId` sem match de email (fluxo assistido) | R8 | ✅ Aceito |
+| **D-ORG-036** | Admin/owner pode ativar via `membershipId` sem match de email (fluxo assistido) | R8 | ✅ Aceito — ⚠️ **restringido por D-ORG-046** (ANX-460): sem criação de vínculo novo |
 | **D-ORG-037** | Bootstrap `apps/api`: eventing → identity → organizations schemas | R5, R6 | ✅ Aceito |
 | **D-ORG-038** | Realtime canal `organizations:agency:{agencyId}` — wiring opcional v1 | R4 | ⏸ Deferido R9 |
 | **D-ORG-039** | Saga onboarding UI01 completa (`AdvanceOnboarding`, billing webhook) — fora v1 organizations | R4, R7 | ⏸ Deferido R9/P04 |
@@ -103,9 +103,11 @@ Consolidar todas as posições aceitas em R1–R7 num **decision log** rastreáv
 | **D-ORG-045** | `TransferOwnership` ganha rota `POST /agencies/{agencyId}/ownership/transfer` (owner-only) e `agency.ownership_transferred.v1` entra na lista fechada v1 | ANX-460 | ✅ Aceito — decisão do dono em 2026-09-11 (resolve superfície órfã) |
 | **D-ORG-046** | Ativação assistida **não** cria primeira vinculação: exige principal já vinculado (reativação) e erro opaco `ORG_INVITEE_CONSENT_REQUIRED`; `revoked → active` passa a existir | ANX-460 | ✅ Aceito — decisão do dono em 2026-09-11 (achado G5-F2); **restringe D-ORG-036** |
 | **D-ORG-047** | Existência do sucessor na transferência é validada **depois** da autoridade e colapsa em erro opaco único | ANX-460 | ✅ Aceito — achado G5-F1/G4-F1; sem oráculo de existência de principal |
+| **D-ORG-048** | Violação de unicidade de membership (23505) vira **409 `ORG_MEMBERSHIP_EXISTS`**; path param não-UUID é **400**; erro desconhecido é **500 com mensagem genérica** | ANX-460 | ✅ Aceito — achados F-01/F-02/F-03 dos gates G3/G4/G5 |
+| **D-ORG-049** | Reativação assistida **não** cobre `role=owner`: recusada com 409 (não há caminho que produza owner revogado e a restauração colidiria com `one_owner_active_uidx`) | ANX-460 | ✅ Aceito — achado F-02 do G5; corrige o ramo positivo do D-ORG-046 |
 
-**Total decisões registradas:** 47 (`D-ORG-001` … `D-ORG-047`)  
-**Aceitas v1:** 40 · **Deferidas:** 7
+**Total decisões registradas:** 49 (`D-ORG-001` … `D-ORG-049`)  
+**Aceitas v1:** 42 · **Deferidas:** 7
 
 ---
 
@@ -135,7 +137,7 @@ Decisões registradas nas sessões Slack ([SLACK-TRANSCRIPTS.md](./SLACK-TRANSCR
 | --- | --- |
 | Rota por token (`/invites/accept`) | Rejeitar se `lower(principal.email) !== lower(membership.invite_email)` → `403` + `details.code: ORG_INVITE_EMAIL_MISMATCH` |
 | Rota por `membershipId` autenticada | Mesma regra quando o ativador é o **convidado** (não admin) |
-| Rota admin/owner (`membershipId/activate`) | **Bypass** permitido — owner/admin pode ativar convite pendente (suporte, onboarding assistido) |
+| Rota admin/owner (`membershipId/activate`) | **Bypass** permitido — owner/admin pode ativar convite pendente (suporte, onboarding assistido). ⚠️ **Restringido por D-ORG-046:** a primeira vinculação passou a ser só pelo próprio convidado; a rota apenas **reativa** membership já vinculada |
 | Comparação | Case-insensitive via `lower()` — alinhado ao índice único parcial |
 | Principal sem email | Fail-closed `409` — convite exige Principal com email verificado (identity) |
 | Token válido + sessão errada | Não vincula membership; token permanece válido até TTL para o email correto |
@@ -242,7 +244,7 @@ Os quatro gates independentes sobre o candidato `10015392` encontraram dois veto
 | Erro de recusa | `ORG_INVITEE_CONSENT_REQUIRED` (403) — **o mesmo** exista ou não principal para o e-mail, para não sobrar oráculo |
 | Handler | Deixa de consultar `findByEmail`; usa o `principalId` **já vinculado** (nunca um id do cliente) |
 | Revinculação | `principalId !== targetPrincipalId` → `ORG_INVITE_EMAIL_MISMATCH` (403): a reativação não troca de dono |
-| Reativação de `role=owner` | Só um **owner** pode (um `admin` recebe `ORG_OWNER_REQUIRED`): o convite exclui `owner`, então sem esta guarda o admin restauraria autoridade de owner pela porta dos fundos, e o `governance` reemite a baseline de owner em `membership.activated` |
+| Reativação de `role=owner` | **Recusada** (409 `ORG_INVALID_STATUS_TRANSITION`) — ver D-ORG-049. O convite exclui `owner`, então a autoridade de owner só nasce em `CreateAgency`/`TransferOwnership` |
 | Transição nova | `revoked → active` (antes `revoked` era terminal) |
 | Escopo de privilégio | Sem mudança: o convite nunca aceita `role=owner`, então não há emissão de grant baseline para o vinculado |
 
@@ -272,6 +274,49 @@ Os quatro gates independentes sobre o candidato `10015392` encontraram dois veto
 | ANX-479 | OpenAPI publica `200` sem `content`/schema em 45 operações enquanto o manifest promete `outputSchemaRef` |
 | ANX-480 | `organizations_command_journal` sem `tenant_id`/RLS — namespace global de `Idempotency-Key` |
 | ANX-481 | `PrincipalLookup` sem escopo de tenant (`identity_principals` sem RLS) — causa-raiz de D-ORG-047 |
+
+---
+
+## Resolução ANX-460 — revalidação dos gates (D-ORG-048, D-ORG-049)
+
+Segunda rodada dos quatro gates sobre o digest `34962ff5`. Três gates convergiram no **mesmo** defeito (F-01), e o G5 encontrou um **falso PASS** num teste meu (F-02).
+
+### F-01 — `revoked → active` colidia com o índice parcial de vínculo ativo (G3, G4, G5)
+
+Fluxo 100% pela API: convidar → aceitar → revogar → **reconvidar o mesmo e-mail** → aceitar (o principal passa a ter outro vínculo ativo) → reativar o vínculo antigo. O `UPDATE` violava `organizations_memberships_agency_principal_active_uidx` e o `23505` cru subia como **500**. Em `10015392` o passo devolvia 409, porque a transição não existia — **regressão introduzida pelo D-ORG-046**, não defeito pré-existente.
+
+Mesma causa em `acceptInviteByToken` (ANX-482): convidar o próprio e-mail e aceitar.
+
+**Correção:** o repositório classifica a violação `23505` (percorrendo a cadeia de `cause`, como o `identity` já fazia) e lança `MembershipAlreadyActiveError`; a aplicação converte em **409 `ORG_MEMBERSHIP_EXISTS`** nos dois comandos.
+
+### F-02 — o ramo positivo do D-ORG-046 era um FALSO PASS (G5)
+
+`assisted-activation.test.ts` afirmava que um owner reativa membership `role=owner` com **200**. O repositório in-memory não tem o índice `organizations_memberships_one_owner_active_uidx`; no PostgreSQL a gravação viola o índice → **500**. Ou seja: o teste passava por não modelar o banco, e o caminho que ele "provia" estava quebrado.
+
+Mais: o estado "owner revogado" é **inalcançável pela API** — o convite exclui `owner`, revogar o único owner ativo é bloqueado e a transferência rebaixa o owner anterior para `admin` (o fuzz de 540 comandos do G5 não produziu nenhum).
+
+**Correção (D-ORG-049):** a reativação de `role=owner` é **recusada** com 409 em vez de mantida como superficie morta e quebrada. A prova de que não há 500 vive no teste PG `integration/assisted-reactivation.integration.test.ts`.
+
+### F-02 (boundary) — path param não-UUID era 500 (G3)
+
+`GET /agencies/not-a-uuid` e `.../memberships/not-a-uuid/...` chegavam ao `TenantContextError` cru → **500** para qualquer sessão autenticada. Agora o boundary valida com `institutionalUuidSchema` → **400**.
+
+### Vazamento da mensagem crua (G3/G4/G5)
+
+O default de `toErrorResponse` é `exposeDetails = NODE_ENV !== "production"` **e nenhum arquivo de deploy deste repo define `NODE_ENV=production` para a API** — o G5 confirmou e eu verifiquei (`backend/deploy/docker/docker-compose.yml` não tem a variável). Ou seja, a mensagem do driver (query SQL + parâmetros ligados) podia chegar ao cliente **em produção**, não só em dev. O boundary passou a responder sempre genérico (`AppError.internal`, `expose:false`), com o detalhe preservado na causa.
+
+### Correções de baixa severidade no mesmo ciclo
+
+| Achado | Correção |
+| --- | --- |
+| G2 MEDIUM — contrato OpenAPI **servido** do `activateMembership` dizia "Activates an invited membership" | sumário/descrição alinhados a D-ORG-046 (reativação, consentimento, recusa de owner). O teste de catálogo não cobre descrição — foi o gate que pegou |
+| G4-A2 — `assertPrincipalExists` rodava **antes** da autoridade em `/activate`, permitindo a um `viewer` distinguir principal vivo (409) de suspenso (404) | lookup **removido** do comando: o alvo vem de linha persistida, então a existência é consequência, não checagem. `principalLookup` saiu de `ActivateMembershipDeps` |
+| G4-A3 — o teste de oráculo do D-ORG-047 usava **admin**, barrado antes do gate do sucessor (passaria mesmo com o oráculo reintroduzido depois da autoridade) | reescrito com ator **owner** + **controle positivo** (sucessor ativo → 200), que é o que prova que o gate foi alcançado |
+| F-04/G2 — `matchesAggregate` comparava e-mail cru | comparado normalizado, como o `requestHash` e o índice parcial |
+| F-06/G5 — a mensagem do 409 de idempotência nomeava o comando do outro tenant | mensagem genérica; o código em `details.code` basta para depurar |
+| G4 — disposições de fingerprint do token / `request_hash` NULL estavam atribuídas a ANX-480 | registradas em R05, onde pertencem (ANX-480 é o namespace de `Idempotency-Key`) |
+
+**Falsificação executada:** revertendo cada correção central (mapeamento `23505`, recusa de owner, validação de path), o teste correspondente **falha**. Sondas dos gates: `/tmp/g3/c4c-collision.ts`, `/tmp/g4probe/prodmap.ts`, `/tmp/g5rt2`.
 
 ---
 

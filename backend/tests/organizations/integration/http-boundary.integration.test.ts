@@ -259,26 +259,50 @@ describe("organizations boundary HTTP (PG real + app.handle)", () => {
 		});
 	});
 
-	test("admin nao-owner nao distingue sucessor existente de inexistente (sem oraculo) — G5-F1/G4-F1", async () => {
+	// G4-A3 (ANX-460) — o UNICO ator que chega ao gate do sucessor e' o OWNER.
+	// A versao anterior deste teste usava um admin, que e' barrado em
+	// `ORG_CROSS_TENANT` ANTES do gate: os dois alvos davam 403 pelo mesmo motivo
+	// e o teste passaria mesmo se o oraculo fosse reintroduzido DEPOIS da
+	// autorizacao. Aqui o ator e' o owner e ha' controle positivo (sucessor ativo
+	// legitimo -> 200), que e' o que prova que o caminho e' alcancado de verdade.
+	test("owner nao distingue sucessor existente-sem-membership de inexistente (sem oraculo) — G4-A3/G5-F1", async () => {
 		await withOrganizationsHttpHarness(async ({ app, createSession }) => {
 			const owner = await createSession("owner-oracle@example.com");
-			// O ATOR precisa passar o boundary (membership ativa + papel de mutacao)
-			// e falhar apenas na autorizacao de DOMINIO — so' assim o caminho chega
-			// a' verificacao do sucessor. Um nao-membro e' barrado antes (o mesmo
-			// 403 para qualquer alvo), o que nao exercita o oraculo.
-			const admin = await createSession("admin-oracle@example.com");
 			const stranger = await createSession("stranger-oracle@example.com");
+			const successor = await createSession("successor-oracle@example.com");
 			const agencyId = await createAgencyFor(app, owner, "Agency Oracle");
 			const base = `/v1/organizations/agencies/${agencyId}/ownership/transfer`;
 
-			// Torna `admin` membro ATIVO com papel admin (convite + aceite pelo
-			// proprio principal = caminho consensual).
+			// `stranger` EXISTE como principal na plataforma mas nao tem membership
+			// na agency; `randomUUID()` nao existe em lugar nenhum. Os dois tem de
+			// produzir a MESMA resposta para o owner.
+			const existingWithoutMembership = await app.handle(
+				jsonRequest(base, {
+					headers: { ...owner.headers, "idempotency-key": randomUUID() },
+					body: { newOwnerPrincipalId: stranger.principalId },
+				}),
+			);
+			const missingPrincipal = await app.handle(
+				jsonRequest(base, {
+					headers: { ...owner.headers, "idempotency-key": randomUUID() },
+					body: { newOwnerPrincipalId: randomUUID() },
+				}),
+			);
+
+			expect(existingWithoutMembership.status).toBe(409);
+			expect(missingPrincipal.status).toBe(409);
+			expect(await envelopeOf(existingWithoutMembership)).toEqual(
+				await envelopeOf(missingPrincipal),
+			);
+
+			// Controle POSITIVO: com um sucessor ativo de verdade o owner transfere.
+			// Sem isto o teste nao prova que ele alcancou o gate do sucessor.
 			const inviteResponse = await app.handle(
 				jsonRequest(
 					`/v1/organizations/agencies/${agencyId}/memberships/invite`,
 					{
 						headers: { ...owner.headers, "idempotency-key": randomUUID() },
-						body: { email: "admin-oracle@example.com", role: "admin" },
+						body: { email: "successor-oracle@example.com", role: "admin" },
 					},
 				),
 			);
@@ -286,40 +310,112 @@ describe("organizations boundary HTTP (PG real + app.handle)", () => {
 			const { inviteToken } = (await inviteResponse.json()) as {
 				inviteToken: string;
 			};
-			const acceptResponse = await app.handle(
-				jsonRequest("/v1/organizations/invites/accept", {
-					headers: {
-						...admin.headers,
-						"idempotency-key": randomUUID(),
-						"x-forwarded-for": "203.0.113.43",
-					},
-					body: { token: inviteToken },
+			expect(
+				(
+					await app.handle(
+						jsonRequest("/v1/organizations/invites/accept", {
+							headers: {
+								...successor.headers,
+								"idempotency-key": randomUUID(),
+								"x-forwarded-for": "203.0.113.44",
+							},
+							body: { token: inviteToken },
+						}),
+					)
+				).status,
+			).toBe(200);
+
+			const positive = await app.handle(
+				jsonRequest(base, {
+					headers: { ...owner.headers, "idempotency-key": randomUUID() },
+					body: { newOwnerPrincipalId: successor.principalId },
 				}),
 			);
-			expect(acceptResponse.status).toBe(200);
+			expect(positive.status).toBe(200);
+		});
+	});
 
-			// `stranger` existe na plataforma (principal registrado) mas nao e'
-			// membro; `randomUUID()` nao existe em lugar nenhum.
-			const existingTarget = await app.handle(
+	test("nao-owner recebe a mesma resposta para sucessor existente e inexistente", async () => {
+		await withOrganizationsHttpHarness(async ({ app, createSession }) => {
+			const owner = await createSession("owner-oracle2@example.com");
+			const outsider = await createSession("outsider-oracle2@example.com");
+			const stranger = await createSession("stranger-oracle2@example.com");
+			const agencyId = await createAgencyFor(app, owner, "Agency Oracle 2");
+			const base = `/v1/organizations/agencies/${agencyId}/ownership/transfer`;
+
+			const existing = await app.handle(
 				jsonRequest(base, {
-					headers: { ...admin.headers, "idempotency-key": randomUUID() },
+					headers: { ...outsider.headers, "idempotency-key": randomUUID() },
 					body: { newOwnerPrincipalId: stranger.principalId },
 				}),
 			);
-			const missingTarget = await app.handle(
+			const missing = await app.handle(
 				jsonRequest(base, {
-					headers: { ...admin.headers, "idempotency-key": randomUUID() },
+					headers: { ...outsider.headers, "idempotency-key": randomUUID() },
 					body: { newOwnerPrincipalId: randomUUID() },
 				}),
 			);
+			for (const response of [existing, missing]) {
+				expect(response.status).toBe(403);
+			}
+			expect(await envelopeOf(existing)).toEqual(await envelopeOf(missing));
+		});
+	});
 
-			expect(existingTarget.status).toBe(403);
-			expect(missingTarget.status).toBe(403);
-			// `timestamp` difere por milissegundos; o que importa e' que codigo,
-			// mensagem e details sejam identicos.
-			expect(await envelopeOf(existingTarget)).toEqual(
-				await envelopeOf(missingTarget),
-			);
+	test("path param nao-UUID e' 400, nunca 500 (G3-F2)", async () => {
+		await withOrganizationsHttpHarness(async ({ app, createSession }) => {
+			const owner = await createSession("owner-path@example.com");
+			const agencyId = await createAgencyFor(app, owner, "Agency Path");
+			const headers = { ...owner.headers, "idempotency-key": randomUUID() };
+
+			// Sem validacao no boundary o param invalido virava contexto de tenant
+			// invalido e o `TenantContextError` cru subia como 500 (com a mensagem do
+			// driver); path invalido e' 400. Valia para QUALQUER sessao autenticada.
+			const cases: Array<[string, string, Request]> = [
+				[
+					"GET agencies/:agencyId",
+					"agencia",
+					jsonRequest("/v1/organizations/agencies/not-a-uuid", {
+						method: "GET",
+						headers,
+					}),
+				],
+				[
+					"GET memberships/:membershipId",
+					"membership",
+					jsonRequest(
+						`/v1/organizations/agencies/${agencyId}/memberships/not-a-uuid`,
+						{ method: "GET", headers },
+					),
+				],
+				[
+					"POST memberships/:membershipId/activate",
+					"membership",
+					jsonRequest(
+						`/v1/organizations/agencies/${agencyId}/memberships/not-a-uuid/activate`,
+						{ headers },
+					),
+				],
+				[
+					"POST memberships/:membershipId/revoke",
+					"membership",
+					jsonRequest(
+						`/v1/organizations/agencies/${agencyId}/memberships/not-a-uuid/revoke`,
+						{ headers },
+					),
+				],
+			];
+
+			for (const [label, , request] of cases) {
+				const response = await app.handle(request);
+				expect(`${label}:${response.status}`).toBe(`${label}:400`);
+				const body = (await response.json()) as {
+					error: { message: string; details?: unknown };
+				};
+				// Nunca a mensagem crua do driver na resposta.
+				expect(body.error.message).not.toContain("must be a UUID");
+				expect(body.error.message).not.toContain("Failed query");
+			}
 		});
 	});
 

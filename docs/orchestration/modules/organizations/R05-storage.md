@@ -156,6 +156,8 @@ Vínculo titular ↔ perfil Owner. **Uma linha por `(tenant_id, principal_id)`**
 | Coluna | Tipo | Nullable | Descrição |
 | --- | --- | --- | --- |
 | `id` | `uuid` PK | não | |
+| `tenant_id` | `uuid` | não | Agency (tenant) dona da linha; usado pelo RLS e pelo índice único |
+| `agency_id` | `uuid` | não | Agency à qual o vínculo pertence |
 | `principal_id` | `uuid` | não | Referência lógica identity. **Não** é UNIQUE sozinho (D-ORG-035) |
 | `default_organization_id` | `uuid` | sim | Reservado v2 multi-company; null em v1 |
 | `created_at` | `timestamptz` | não | |
@@ -164,8 +166,8 @@ Vínculo titular ↔ perfil Owner. **Uma linha por `(tenant_id, principal_id)`**
 
 | Nome | Colunas | Propósito |
 | --- | --- | --- |
-| `organizations_owners_principal_id_idx` | `(principal_id)` | Lookup por principal |
-| `organizations_owners_tenant_principal_uidx` | `(tenant_id, principal_id)` **UNIQUE** | Uma linha de owner por Agency (D-ORG-046) |
+| `organizations_owners_principal_id_idx` | `(principal_id)` | Lookup por principal (não-único) |
+| `organizations_owners_tenant_principal_uidx` | `(tenant_id, principal_id)` **UNIQUE** | Uma linha de owner por `(tenant, principal)` — como cada Agency é um tenant, isso permite N Agencies por Owner e dá integridade de banco à tabela (D-ORG-046) |
 
 ---
 
@@ -229,6 +231,18 @@ Registro de idempotência de **comandos** (distinto de `domain_journal` de event
 3. **Na gravação:** `INSERT ... ON CONFLICT (command_id) DO NOTHING` + `RETURNING`. Colisão de `command_id` **não** devolve a linha alheia — lança `CommandJournalConflictError`, a transação do perdedor faz **ROLLBACK** e o chamador recebe 409. Devolver a linha alheia era o **double-apply**, corrigido em S2.
 
 > A descrição anterior ("leitura prévia; se existir, retornar `response_snapshot`") descrevia o comportamento com double-apply e foi corrigida. Ver [R04](./R04-contracts.md) e D-ORG-045/D-ORG-046 em [R08](./R08-decision-log.md).
+
+---
+
+## Disposições registradas (ANX-460)
+
+| Achado | Severidade | Disposição |
+| --- | --- | --- |
+| `request_hash` de `AcceptInviteByToken` retém um derivado de 2ª ordem do HMAC do token de convite (SHA-256 sobre o `token_hash`, não o token) | LOW | **Aceito, sem correção.** O valor não é invertível nem testável sem o pepper (que vive em env, não no banco), o token tem 256 bits e TTL curto, e o consumo já anula `invite_token_hash` na membership. Não há token cru em journal, evento ou DTO. |
+| Linhas de `organizations_command_journal` anteriores à migration 0006 têm `request_hash = NULL`; um retry legítimo de uma key em voo passa a **409** | LOW | **Aceito, fail-closed.** Mesmo padrão do `governance` (migration 0011 sem backfill); as keys são de curta duração. Um backfill não é possível (o hash não é reconstruível do snapshot). |
+| `revoked → active` reconcede acesso sem consentimento **fresco** | LOW | **Aceito por desenho (D-ORG-046).** A premissa de consentimento é a da **primeira** vinculação; a reativação é ato de owner/admin sobre quem já consentiu antes. |
+
+> **Correção de rastreabilidade:** uma versão anterior deste registro atribuía o primeiro item a `ANX-480`. ANX-480 trata de outro achado (namespace global de `Idempotency-Key`); nenhuma issue do board cobria o fingerprint do token nem o `request_hash` NULL. Por isso as disposições estão registradas **aqui**, na issue da ANX-460, e não em ANX-480.
 
 ---
 

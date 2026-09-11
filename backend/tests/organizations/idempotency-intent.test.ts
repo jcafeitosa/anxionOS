@@ -252,6 +252,46 @@ describe("organizations idempotency intent (S2/ANX-460)", () => {
 		expect(second.inviteToken).toBe("");
 	});
 
+	test("inviteMember: mesma intencao com caixa diferente no e-mail e' replay, nao 409", async () => {
+		// F-04/G2-6 (ANX-460): a busca de convite e o indice unico parcial comparam
+		// `lower(invite_email)`, entao `Ana.Case@X.com` e `ana.case@x.com` sao o
+		// MESMO convite. O `requestHash` normaliza e o `matchesAggregate` tambem —
+		// sem isso um retry legitimo com outra caixa virava 409.
+		const harness = createHarness({
+			agencies: [buildAgency(AGENCY_ID, OWNER)],
+			memberships: [
+				buildMembership(OWNER_MEMBERSHIP, AGENCY_ID, OWNER, "owner", "active"),
+			],
+		});
+		const deps = {
+			...harness.baseDeps,
+			inviteTokenHasher: harness.inviteTokenHasher,
+		};
+		const first = await inviteMember(deps, {
+			commandId: KEY,
+			agencyId: AGENCY_ID,
+			email: "Ana.Case@Example.com",
+			role: "operator",
+			actorPrincipalId: OWNER,
+		});
+		const retry = await inviteMember(deps, {
+			commandId: KEY,
+			agencyId: AGENCY_ID,
+			email: "ana.case@example.com",
+			role: "operator",
+			actorPrincipalId: OWNER,
+		});
+		expect(retry.result.aggregateId).toBe(first.result.aggregateId);
+		expect(retry.result.idempotentReplay).toBe(true);
+		expect(retry.inviteToken).toBe("");
+
+		// E so' existe UM convite criado.
+		const invited = (
+			await harness.membershipRepository.listByAgency(AGENCY_ID)
+		).filter((membership) => membership.status === "invited");
+		expect(invited).toHaveLength(1);
+	});
+
 	test("activateMembership: divergent target is 409 and does not re-apply", async () => {
 		// D-ORG-046: a ativacao assistida so' REATIVA membership ja' vinculada
 		// (aqui `revoked` com principal). Convite novo sem principal e' recusado

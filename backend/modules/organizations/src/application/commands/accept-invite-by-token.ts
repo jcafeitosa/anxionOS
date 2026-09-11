@@ -5,7 +5,10 @@ import {
 	commandResultSchema,
 } from "@anxionos/contracts/organizations";
 import { canTransitionMembershipStatus } from "../../domain/entities/membership";
-import { MembershipRevisionConflictError } from "../../domain/errors/membership-errors";
+import {
+	MembershipAlreadyActiveError,
+	MembershipRevisionConflictError,
+} from "../../domain/errors/membership-errors";
 import { createMembershipActivatedEvent } from "../../domain/events/organization-events";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { InviteTokenHasher } from "../../domain/ports/invite-token-hasher";
@@ -140,6 +143,18 @@ export async function acceptInviteByToken(
 					updatedAt: now,
 				});
 			} catch (error) {
+				// ANX-482/F-01: o principal ja' tem outro vinculo ATIVO nesta agency
+				// (ex.: o membro foi reconvidado e aceitou). O `23505` do indice
+				// parcial vira 409 institucional — antes subia como 500 com o erro do
+				// driver. Nao usa o 404 opaco do conflito de revisao: aqui nao ha'
+				// nada a esconder (o principal e' o dono da propria sessao).
+				if (error instanceof MembershipAlreadyActiveError) {
+					throwOrganizationError(
+						"ORG_MEMBERSHIP_EXISTS",
+						"This principal already has an active membership in the agency",
+						{ cause: error },
+					);
+				}
 				if (error instanceof MembershipRevisionConflictError) {
 					throwOrganizationError(
 						"ORG_AGENCY_NOT_FOUND",

@@ -83,14 +83,19 @@ Definir a superfície pública do módulo **organizations** antes de armazenamen
 | --- | --- | --- |
 | `ORG_PRINCIPAL_NOT_FOUND` | 404 | `PrincipalLookup` falha |
 | `ORG_AGENCY_NOT_FOUND` | 404 | Agency inexistente ou fora do scope |
-| `ORG_MEMBERSHIP_EXISTS` | 409 | Convite duplicado ativo |
 | `ORG_MEMBERSHIP_NOT_INVITED` | 409 | Activate sem status `invited` |
 | `ORG_OWNER_REQUIRED` | 409 | Revogar último owner ativo |
 | `ORG_INVALID_STATUS_TRANSITION` | 409 | Viola INV-ORG-01 |
 | `ORG_CROSS_TENANT` | 403 | agencyId não pertence ao principal da sessão |
+| `ORG_IDENTITY_UNAVAILABLE` | 503 | `PrincipalLookup` indisponível (identity fora) |
+| `ORG_INVITE_EXPIRED` | 410 | Convite vencido no momento da ativação |
+| `ORG_INVITE_EMAIL_MISMATCH` | 403 | E-mail da sessão ≠ e-mail do convite; ou reativação tentando revincular a membership a outro principal |
 | `ORG_DUPLICATE_IDEMPOTENCY` | 409 | Reuso da `Idempotency-Key` com comando, recurso ou payload divergente (S2) |
 | `ORG_REVISION_CONFLICT` | 409 | Corrida de revisão em `Agency`/`Membership`: outro escritor gravou primeiro (S4a/S4c) |
+| `ORG_MEMBERSHIP_EXISTS` | 409 | Convite duplicado ativo; ou o principal já tem vínculo **ativo** na Agency (D-ORG-048) |
 | `ORG_INVITEE_CONSENT_REQUIRED` | 403 | Ativação assistida de convite **sem principal vinculado** — a primeira vinculação exige que o próprio convidado aceite (D-ORG-046) |
+
+> **Contrato HTTP do boundary (D-ORG-048):** body inválido (`ZodError`), JSON malformado e **path param não-UUID** são **400**; erro desconhecido é **500 com mensagem genérica** — a mensagem crua do driver (query SQL + parâmetros) nunca vai ao cliente.
 
 ---
 
@@ -188,7 +193,7 @@ Inputs validados na borda HTTP e revalidados no application layer.
 | `UpdateAgencyMarkets` | `agencyId`, `marketScope` | Atualiza mercados; pode acionar drain futuro (governance) | `agency.markets_updated.v1` |
 | `AdvanceOnboarding` | `agencyId`, `step` | Avança máquina finita (interno/saga) | `agency.status_changed.v1` |
 | `InviteMember` | `agencyId`, `email`, `role` | Cria membership `invited` | `membership.invited.v1` |
-| `ActivateMembership` | `agencyId`, `membershipId` | `revoked` → `active` (reativação assistida); `invited` → `active` só se já houver principal vinculado | `membership.activated.v1` |
+| `ActivateMembership` | `agencyId`, `membershipId` | `revoked` → `active` (reativação assistida, **exceto `role=owner`**); `invited` → `active` só se já houver principal vinculado. Nunca cria primeira vinculação | `membership.activated.v1` |
 | `RevokeMembership` | `agencyId`, `membershipId` | `active`/`invited` → `revoked` | `membership.revoked.v1` |
 
 ### Schemas de comando (`commands.ts`)
@@ -307,7 +312,7 @@ Prefixo: `/v1/organizations`. Autenticação via Better Auth (sessão). OpenAPI 
 | `GET` | `/agencies/:agencyId/memberships` | `ListMembershipsByAgency` | membership ativo |
 | `GET` | `/agencies/:agencyId/memberships/:membershipId` | `GetMembership` | membership ativo |
 | `POST` | `/agencies/:agencyId/memberships/invite` | `InviteMember` | role `owner` ou `admin` |
-| `POST` | `/agencies/:agencyId/memberships/:membershipId/activate` | `ActivateMembership` | role `owner`/`admin` **e** membership já vinculada; alvo `role=owner` exige ator `owner` |
+| `POST` | `/agencies/:agencyId/memberships/:membershipId/activate` | `ActivateMembership` | role `owner`/`admin` **e** membership já vinculada; alvo `role=owner` é recusado (409) |
 | `POST` | `/agencies/:agencyId/memberships/:membershipId/revoke` | `RevokeMembership` | role `owner` ou `admin` |
 | `POST` | `/invites/accept` | `AcceptInviteByToken` | Principal autenticado com o e-mail do convite |
 
