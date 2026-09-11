@@ -10,6 +10,14 @@ import {
 import { createOpenApiPlugin } from "./openapi-plugin";
 import { createOrganizationsPlugin } from "./organizations/plugin";
 import { createPartnersPlugin } from "./partners/plugin";
+import { createOperationsPlugin } from "./operations/plugin";
+import { createPerformancePlugin } from "./performance/plugin";
+import { createSimulationPlugin } from "./simulation/plugin";
+import { createExecutionPlugin } from "./execution/plugin";
+import { createRiskPlugin } from "./risk/plugin";
+import { createEvaluationPlugin } from "./evaluation/plugin";
+import { createPortfoliosPlugin } from "./portfolios/plugin";
+import { createStrategiesPlugin } from "./strategies/plugin";
 import { createRealtimePlugin } from "./realtime/plugin";
 import { SubscriptionManager } from "./realtime/subscription-manager";
 
@@ -76,6 +84,7 @@ export function createOpenApiCatalogApp() {
 			createGovernancePlugin({
 				auth: stubAuth as never,
 				grantRepository: unused,
+				changeProposalRepository: unused,
 				autonomyAssignmentRepository: unused,
 				commandJournal: unused,
 				unitOfWork: unused,
@@ -107,6 +116,89 @@ export function createOpenApiCatalogApp() {
 				partners: unused,
 				commissionAccruals: unused,
 				payouts: unused,
+				identityRepository: unused,
+				scopedPool: unused,
+			}),
+		)
+		.use(
+			createPortfoliosPlugin({
+				auth: stubAuth as never,
+				portfolios: unused,
+				positions: unused,
+				valuationSnapshots: unused,
+				identityRepository: unused,
+				scopedPool: unused,
+			}),
+		)
+		.use(
+			createStrategiesPlugin({
+				auth: stubAuth as never,
+				unitOfWork: unused,
+				commandJournal: unused,
+				backtestRunner: unused,
+				identityRepository: unused,
+				scopedPool: unused,
+			}),
+		)
+		.use(
+			createOperationsPlugin({
+				auth: stubAuth as never,
+				unitOfWork: unused,
+				commandJournal: unused,
+				incidents: unused,
+				recoveryTasks: unused,
+				identityRepository: unused,
+				scopedPool: unused,
+			}),
+		)
+		.use(
+			createPerformancePlugin({
+				auth: stubAuth as never,
+				outcomeSnapshots: unused,
+				positionExposureSnapshots: unused,
+				metricSeries: unused,
+				identityRepository: unused,
+				scopedPool: unused,
+			}),
+		)
+		.use(
+			createSimulationPlugin({
+				auth: stubAuth as never,
+				runs: unused,
+				snapshots: unused,
+				identityRepository: unused,
+				scopedPool: unused,
+			}),
+		)
+		.use(
+			createExecutionPlugin({
+				auth: stubAuth as never,
+				orders: unused,
+				reconciliationCases: unused,
+				identityRepository: unused,
+				scopedPool: unused,
+			}),
+		)
+		.use(
+			createEvaluationPlugin({
+				auth: stubAuth as never,
+				unitOfWork: unused,
+				commandJournal: unused,
+				certifications: unused,
+				evaluationRecords: unused,
+				evaluationScores: unused,
+				subjectQuery: unused,
+				scoringPolicyQuery: unused,
+				identityRepository: unused,
+				scopedPool: unused,
+			}),
+		)
+		.use(
+			createRiskPlugin({
+				auth: stubAuth as never,
+				unitOfWork: unused,
+				commandJournal: unused,
+				killSwitch: unused,
 				identityRepository: unused,
 				scopedPool: unused,
 			}),

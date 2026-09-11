@@ -1,0 +1,53 @@
+# ANX-175 — GoCryptoTrader REAL runtime (multi-stage build PLAN — not wired to compose default)
+#
+# Blockers before enabling in engines-sandbox profile:
+# - Upstream não publica binários; build from source (~5min+, Go 1.26+).
+# - gRPC JSON proxy: HTTPS + self-signed TLS + basic auth (config remoteControl.gRPC).
+# - Imagem oficial usa /root/.gocryptotrader — conflita com non-root/read_only ANX-162.
+# - Contas exchange exigem API keys — fora do escopo ANX-175.
+#
+# Build (manual homologation only):
+#   docker build -f Dockerfile.real \
+#     --build-arg GCT_REF=v1.0.0 \
+#     -t anxionos/gocryptotrader-real:0.1.0-anx175-plan .
+#
+# Run requires config.json with grpcProxyEnabled=true and exchanges disabled for health-only.
+
+ARG GCT_REF=v1.0.0
+
+FROM golang:1.26-alpine AS build
+ARG GCT_REF
+RUN apk add --no-cache git ca-certificates
+WORKDIR /src
+RUN git clone --depth 1 --branch "${GCT_REF}" \
+	https://github.com/thrasher-corp/gocryptotrader.git .
+RUN GO111MODULE=on go mod download
+RUN cp config_example.json config.json \
+	&& CGO_ENABLED=0 GOOS=linux go build -o /out/gocryptotrader . \
+	&& CGO_ENABLED=0 GOOS=linux go build -o /out/gctcli ./cmd/gctcli
+
+FROM alpine:3.21
+RUN apk add --no-cache ca-certificates wget \
+	&& adduser -D -u 10001 -h /app anxion \
+	&& mkdir -p /data/gct /app \
+	&& chown -R anxion:anxion /app /data
+
+COPY --from=build --chown=anxion:anxion /out/gocryptotrader /app/gocryptotrader
+COPY --from=build --chown=anxion:anxion /out/gctcli /app/gctcli
+COPY --chown=anxion:anxion real-config.json /data/gct/config.json
+
+USER 10001
+WORKDIR /app
+
+ENV GCT_HOME=/data/gct \
+	ENGINE_MODE=REAL \
+	GCT_SANDBOX_PORT=9053
+
+EXPOSE 9050-9053
+
+# Official binary; enable gRPC proxy via config (grpcProxyEnabled). Health via wget to /v1/getinfo
+# requires TLS client flags — use adapter GCT_RPC_* env when wiring ANX-175 follow-up.
+HEALTHCHECK --interval=10s --timeout=5s --retries=5 --start-period=30s \
+	CMD wget --spider -q "http://localhost:${GCT_SANDBOX_PORT}/health" || exit 1
+
+ENTRYPOINT ["/app/gocryptotrader", "-config", "/data/gct/config.json"]

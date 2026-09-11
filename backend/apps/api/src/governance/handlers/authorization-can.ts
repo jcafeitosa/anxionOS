@@ -1,10 +1,11 @@
+import { institutionalUuidSchema } from "@anxionos/contracts";
 import { AppError } from "@anxionos/contracts/errors";
 import { T01_INPUT_SCHEMA } from "@anxionos/contracts/graph";
 import { z } from "zod";
 import type { GovernancePluginDeps } from "../plugin";
 
 export const authorizationCanBodySchema = T01_INPUT_SCHEMA.extend({
-	agencyId: z.string().uuid(),
+	agencyId: institutionalUuidSchema,
 }).strict();
 
 export async function handleAuthorizationCan(

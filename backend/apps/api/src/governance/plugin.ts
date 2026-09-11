@@ -2,6 +2,7 @@ import type { TenantScopedQueryable } from "@anxionos/database";
 import type { PrincipalRepository } from "@anxionos/identity";
 import type {
 	AutonomyAssignmentRepository,
+	ChangeProposalRepository,
 	CommandJournalRepository,
 	GrantRepository,
 	GovernanceUnitOfWork,
@@ -27,6 +28,7 @@ import {
 	handleGetEffectiveAutonomy,
 	handleTransitionAutonomy,
 } from "./handlers/autonomy";
+import { handleListPendingChangeProposals } from "./handlers/change-proposals";
 import {
 	agencyIdParamSchema,
 	grantIdParamSchema,
@@ -37,6 +39,7 @@ import {
 import { governanceOpenApi } from "../openapi-operations";
 import { parseIdempotencyKey } from "../organizations/middleware/idempotency-key";
 import { requireAgencyMembership } from "../organizations/middleware/require-agency-membership";
+import { requireAgencyMutationRole } from "../organizations/middleware/require-agency-mutation-role";
 import { resolvePrincipalFromSession } from "../organizations/resolve-principal";
 
 type OrganizationsDb = ReturnType<typeof createOrganizationsDb>;
@@ -44,6 +47,7 @@ type OrganizationsDb = ReturnType<typeof createOrganizationsDb>;
 export interface GovernancePluginDeps {
 	auth: ReturnType<typeof betterAuth>;
 	grantRepository: GrantRepository;
+	changeProposalRepository: ChangeProposalRepository;
 	autonomyAssignmentRepository: AutonomyAssignmentRepository;
 	commandJournal: CommandJournalRepository;
 	unitOfWork: GovernanceUnitOfWork;
@@ -81,8 +85,8 @@ export function createGovernancePlugin(deps: GovernancePluginDeps) {
 			set.status = mapped.status;
 			return mapped.body;
 		})
-		.group("/:agencyId", (scoped) =>
-			scoped
+		.group("/:agencyId", (readScoped) =>
+			readScoped
 				.resolve(async ({ request, params }) => {
 					const { agencyId } = agencyIdParamSchema.parse(params);
 					const { principal } = await resolveSessionPrincipal(deps, request);
@@ -102,57 +106,76 @@ export function createGovernancePlugin(deps: GovernancePluginDeps) {
 						}),
 					governanceOpenApi.listGrants,
 				)
+				.get(
+					"/change-proposals",
+					({ agencyId }) =>
+						handleListPendingChangeProposals(deps, { agencyId }),
+					governanceOpenApi.listChangeProposals,
+				)
+				.get(
+					"/agents/:agentId/autonomy",
+					({ agencyId, params }) => {
+						const { agentId } = agentIdParamSchema.parse(params);
+						return handleGetEffectiveAutonomy(deps, { agencyId, agentId });
+					},
+					governanceOpenApi.getAutonomy,
+				),
+		)
+		.group("/:agencyId", (mutationScoped) =>
+			mutationScoped
+				.resolve(async ({ request, params }) => {
+					const { agencyId } = agencyIdParamSchema.parse(params);
+					const { principal } = await resolveSessionPrincipal(deps, request);
+					await requireAgencyMutationRole(
+						deps.scopedPool,
+						agencyId,
+						principal.id,
+					);
+					return { principal, agencyId };
+				})
 				.post(
 					"/grants",
 					async ({ request, agencyId }) => {
-					const commandId = parseIdempotencyKey(request.headers);
-					const body = await request.json();
-					return handleIssueGrant(deps, {
-						commandId,
-						agencyId,
-						body,
-					});
+						const commandId = parseIdempotencyKey(request.headers);
+						const body = await request.json();
+						return handleIssueGrant(deps, {
+							commandId,
+							agencyId,
+							body,
+						});
 					},
 					governanceOpenApi.issueGrant,
 				)
 				.delete(
 					"/grants/:grantId",
 					async ({ request, params, agencyId }) => {
-					const { grantId } = grantIdParamSchema.parse(params);
-					const commandId = parseIdempotencyKey(request.headers);
-					const body =
-						request.headers.get("content-length") === "0"
-							? {}
-							: await request.json();
-					return handleRevokeGrant(deps, {
-						commandId,
-						agencyId,
-						grantId,
-						body,
-					});
+						const { grantId } = grantIdParamSchema.parse(params);
+						const commandId = parseIdempotencyKey(request.headers);
+						const body =
+							request.headers.get("content-length") === "0"
+								? {}
+								: await request.json();
+						return handleRevokeGrant(deps, {
+							commandId,
+							agencyId,
+							grantId,
+							body,
+						});
 					},
 					governanceOpenApi.revokeGrant,
-				)
-				.get(
-					"/agents/:agentId/autonomy",
-					({ agencyId, params }) => {
-					const { agentId } = agentIdParamSchema.parse(params);
-					return handleGetEffectiveAutonomy(deps, { agencyId, agentId });
-					},
-					governanceOpenApi.getAutonomy,
 				)
 				.post(
 					"/agents/:agentId/autonomy",
 					async ({ request, agencyId, params }) => {
-					const { agentId } = agentIdParamSchema.parse(params);
-					const commandId = parseIdempotencyKey(request.headers);
-					const body = await request.json();
-					return handleAssignAutonomy(deps, {
-						commandId,
-						agencyId,
-						agentId,
-						body,
-					});
+						const { agentId } = agentIdParamSchema.parse(params);
+						const commandId = parseIdempotencyKey(request.headers);
+						const body = await request.json();
+						return handleAssignAutonomy(deps, {
+							commandId,
+							agencyId,
+							agentId,
+							body,
+						});
 					},
 					governanceOpenApi.assignAutonomy,
 				)

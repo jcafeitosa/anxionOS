@@ -1,3 +1,4 @@
+import { institutionalUuidSchema } from "@anxionos/contracts";
 import {
 	AUTONOMY_NORMATIVE_MATRIX,
 	assignAutonomyLevelCommandSchema,
@@ -28,14 +29,14 @@ const transitionAutonomyBodySchema = transitionAutonomyLevelCommandSchema
 
 export const evaluateAutonomyBodySchema = z
 	.object({
-		agencyId: z.string().uuid(),
-		subjectAgentId: z.string().uuid(),
+		agencyId: institutionalUuidSchema,
+		subjectAgentId: institutionalUuidSchema,
 		capability: z.string().min(1),
 	})
 	.strict();
 
 export const agentIdParamSchema = z.object({
-	agentId: z.string().uuid(),
+	agentId: institutionalUuidSchema,
 });
 
 export function toAutonomyAssignmentDto(assignment: AutonomyAssignment) {

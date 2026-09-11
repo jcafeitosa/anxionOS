@@ -14,6 +14,11 @@ type OpenApiRequestBody = {
 	content: Record<string, { schema: JsonSchema }>;
 };
 
+type OpenApiResponse = {
+	description: string;
+	content?: Record<string, { schema: JsonSchema }>;
+};
+
 export { OPENAPI_MODULE_TAG_GROUPS } from "./openapi-baseline";
 
 const UUID: JsonSchema = { type: "string", format: "uuid" };
@@ -90,7 +95,7 @@ function op(input: {
 	security?: Array<Record<string, string[]>>;
 	parameters?: OpenApiParameter[];
 	requestBody?: OpenApiRequestBody;
-	responses?: Record<string, { description: string }>;
+	responses?: Record<string, OpenApiResponse>;
 }) {
 	return {
 		detail: {
@@ -414,6 +419,19 @@ export const governanceOpenApi = {
 		parameters: agencyParams,
 		responses: {
 			"200": { description: "Grant collection for the agency scope." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	listChangeProposals: op({
+		tag: "Governance",
+		operationId: "listPendingChangeProposals",
+		summary: "List pending change proposals",
+		description:
+			"Module: governance. Lists pending ChangeProposal rows for the agency scope (`scopeId` = `agencyId`). Membership required. Resolve via POST /v1/governance/approvals/resolve.",
+		security: COOKIE_SECURITY,
+		parameters: agencyParams,
+		responses: {
+			"200": { description: "Pending change proposal collection for the agency." },
 			...ERROR_RESPONSES,
 		},
 	}),
@@ -1058,6 +1076,965 @@ export const partnersOpenApi = {
 	}),
 } as const;
 
+const contentHashProperty = {
+	type: "string",
+	pattern: "^[a-f0-9]{64}$",
+};
+
+export const strategiesOpenApi = {
+	register: op({
+		tag: "Strategies",
+		operationId: "registerStrategy",
+		summary: "Register strategy",
+		description:
+			"Module: strategies. Registers a strategy identity in the agency. `executionMode`: SIMULATED | PAPER (REAL blocked). Idempotent via `Idempotency-Key`.",
+		security: COOKIE_SECURITY,
+		parameters: commandParams,
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["displayName", "executionMode"],
+				properties: {
+					displayName: { type: "string", minLength: 1, maxLength: 256 },
+					description: { type: "string", maxLength: 1024 },
+					executionMode: { type: "string", enum: ["SIMULATED", "PAPER"] },
+				},
+			},
+			"Strategy identity (commandId via Idempotency-Key).",
+		),
+		responses: {
+			"200": { description: "Command result with strategyId." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	createVersion: op({
+		tag: "Strategies",
+		operationId: "createStrategyVersion",
+		summary: "Create draft strategy version",
+		description:
+			"Module: strategies. Creates a DRAFT version with immutable content hashes. Versions become immutable after publish.",
+		security: COOKIE_SECURITY,
+		parameters: [...commandParams, pathUuid("strategyId", "Strategy aggregate id.")],
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: [
+					"sourceHash",
+					"rulesHash",
+					"parametersHash",
+					"executionMode",
+				],
+				properties: {
+					sourceHash: contentHashProperty,
+					rulesHash: contentHashProperty,
+					parametersHash: contentHashProperty,
+					executionMode: { type: "string", enum: ["SIMULATED", "PAPER"] },
+				},
+			},
+			"Draft version hashes and execution mode.",
+		),
+		responses: {
+			"200": { description: "Command result with strategyVersionId." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	publish: op({
+		tag: "Strategies",
+		operationId: "publishStrategyVersion",
+		summary: "Publish strategy version",
+		description:
+			"Module: strategies. Publishes a draft version (immutability trigger). Empty JSON body accepted.",
+		security: COOKIE_SECURITY,
+		parameters: [
+			...commandParams,
+			pathUuid("strategyId", "Strategy aggregate id."),
+			pathUuid("strategyVersionId", "Strategy version id."),
+		],
+		requestBody: {
+			required: false,
+			content: {
+				"application/json": {
+					schema: { type: "object", additionalProperties: false },
+				},
+			},
+		},
+		responses: {
+			"200": { description: "Command result after publish." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	requestBacktest: op({
+		tag: "Strategies",
+		operationId: "requestStrategyBacktest",
+		summary: "Request backtest for a version",
+		description:
+			"Module: strategies. Opens a backtest run for a published version. Completes via POST .../backtest-runs/:backtestRunId/complete.",
+		security: COOKIE_SECURITY,
+		parameters: [
+			...commandParams,
+			pathUuid("strategyId", "Strategy aggregate id."),
+			pathUuid("strategyVersionId", "Strategy version id."),
+		],
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["datasetId", "datasetRevision", "seed"],
+				properties: {
+					datasetId: { type: "string", minLength: 1, maxLength: 256 },
+					datasetRevision: { type: "string", minLength: 1, maxLength: 128 },
+					seed: { type: "string", minLength: 1, maxLength: 256 },
+				},
+			},
+			"Dataset binding and deterministic seed.",
+		),
+		responses: {
+			"200": { description: "Command result with backtestRunId." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	completeBacktest: op({
+		tag: "Strategies",
+		operationId: "completeStrategyBacktest",
+		summary: "Complete backtest run",
+		description:
+			"Module: strategies. Finalizes a backtest via sandbox runner adapter. Transitions version to BACKTESTED on success.",
+		security: COOKIE_SECURITY,
+		parameters: [
+			...commandParams,
+			pathUuid("backtestRunId", "Backtest run id (`st_btr_*`)."),
+		],
+		requestBody: {
+			required: false,
+			content: {
+				"application/json": {
+					schema: { type: "object", additionalProperties: false },
+				},
+			},
+		},
+		responses: {
+			"200": { description: "Command result after backtest completion." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	activateDeployment: op({
+		tag: "Strategies",
+		operationId: "activateStrategyDeployment",
+		summary: "Activate deployment binding",
+		description:
+			"Module: strategies. Activates a deployment for a certified/backtested version. PAPER requires certification bridge (EVALUATED→CERTIFIED). Binding snapshot is immutable after activation.",
+		security: COOKIE_SECURITY,
+		parameters: [...commandParams, pathUuid("strategyId", "Strategy aggregate id.")],
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["strategyVersionId", "executionMode", "bindingSnapshot"],
+				properties: {
+					strategyVersionId: UUID,
+					executionMode: { type: "string", enum: ["SIMULATED", "PAPER"] },
+					portfolioId: { type: "string", minLength: 1, maxLength: 256 },
+					bindingSnapshot: {
+						type: "object",
+						required: ["instrumentRefs", "parametersHash"],
+						properties: {
+							instrumentRefs: {
+								type: "array",
+								items: { type: "string", minLength: 1 },
+								minItems: 1,
+							},
+							parametersHash: contentHashProperty,
+							rulesHash: contentHashProperty,
+						},
+					},
+				},
+			},
+			"Deployment target version, mode and binding snapshot.",
+		),
+		responses: {
+			"200": { description: "Command result with deploymentId." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	emitSignal: op({
+		tag: "Strategies",
+		operationId: "emitStrategySignal",
+		summary: "Emit strategy signal",
+		description:
+			"Module: strategies. Emits a time-bound signal for instruments. Optional deploymentId scopes to an active deployment.",
+		security: COOKIE_SECURITY,
+		parameters: [...commandParams, pathUuid("strategyId", "Strategy aggregate id.")],
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["instrumentRefs", "valueRef", "expiresAt"],
+				properties: {
+					deploymentId: UUID,
+					instrumentRefs: {
+						type: "array",
+						items: { type: "string", minLength: 1 },
+						minItems: 1,
+					},
+					valueRef: { type: "string", minLength: 1, maxLength: 512 },
+					expiresAt: { type: "string", format: "date-time" },
+				},
+			},
+			"Signal payload with ISO-8601 expiry.",
+		),
+		responses: {
+			"200": { description: "Command result with signalId." },
+			...ERROR_RESPONSES,
+		},
+	}),
+} as const;
+
+const recoveryTaskIdPath = {
+	name: "recoveryTaskId",
+	in: "path" as const,
+	required: true,
+	schema: { type: "string", pattern: "^ops_rcv_[0-9a-f-]{36}$" },
+	description: "Recovery task aggregate id (`ops_rcv_*`).",
+};
+
+const incidentIdPath = {
+	name: "incidentId",
+	in: "path" as const,
+	required: true,
+	schema: { type: "string", pattern: "^ops_inc_[0-9a-f-]{36}$" },
+	description: "Incident aggregate id (`ops_inc_*`).",
+};
+
+const recoveryStepKindProperty = {
+	type: "string",
+	enum: [
+		"VALIDATE_SCHEMA",
+		"CHECK_CHECKPOINT",
+		"VERIFY_INTEGRITY",
+		"RESTORE_DATABASE",
+		"REPLAY_OUTBOX",
+		"REBUILD_PROJECTION",
+		"PURGE_QUEUE",
+	],
+};
+
+const expectedRevisionBody = {
+	type: "object",
+	additionalProperties: false,
+	required: ["expectedRevision"],
+	properties: {
+		expectedRevision: { type: "integer", minimum: 1 },
+	},
+};
+
+const incidentSeverityProperty = {
+	type: "string",
+	enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+};
+
+const incidentStatusProperty = {
+	type: "string",
+	enum: [
+		"OPEN",
+		"ACKNOWLEDGED",
+		"INVESTIGATING",
+		"MITIGATING",
+		"ESCALATED",
+		"RESOLVED",
+		"CLOSED",
+	],
+};
+
+const incidentSnapshotOpenApiSchema = {
+	type: "object",
+	additionalProperties: false,
+	required: [
+		"incidentId",
+		"organizationId",
+		"title",
+		"description",
+		"severity",
+		"status",
+		"serviceId",
+		"openedAt",
+		"revision",
+		"runbookId",
+		"runbookVersion",
+		"runbookAttachedAt",
+		"responsiblePrincipalId",
+		"resolvedAt",
+		"closedAt",
+	],
+	properties: {
+		incidentId: {
+			type: "string",
+			pattern: "^ops_inc_[0-9a-f-]{36}$",
+		},
+		organizationId: UUID,
+		title: { type: "string", minLength: 1, maxLength: 256 },
+		description: { type: "string", maxLength: 4096, nullable: true },
+		severity: incidentSeverityProperty,
+		status: incidentStatusProperty,
+		serviceId: { type: "string", maxLength: 128, nullable: true },
+		openedAt: { type: "string", format: "date-time" },
+		revision: { type: "integer", minimum: 1 },
+		runbookId: {
+			type: "string",
+			pattern: "^ops_rnb_[0-9a-f-]{36}$",
+			nullable: true,
+		},
+		runbookVersion: { type: "string", maxLength: 64, nullable: true },
+		runbookAttachedAt: { type: "string", format: "date-time", nullable: true },
+		responsiblePrincipalId: { ...UUID, nullable: true },
+		resolvedAt: { type: "string", format: "date-time", nullable: true },
+		closedAt: { type: "string", format: "date-time", nullable: true },
+	},
+};
+
+const recoveryTaskSnapshotSchema = {
+	type: "object",
+	additionalProperties: false,
+	required: [
+		"recoveryTaskId",
+		"organizationId",
+		"incidentId",
+		"stepKind",
+		"status",
+		"stepRequiresApproval",
+		"hasRequiredApproval",
+		"startedAt",
+		"revision",
+		"initiatedByPrincipalId",
+	],
+	properties: {
+		recoveryTaskId: {
+			type: "string",
+			pattern: "^ops_rcv_[0-9a-f-]{36}$",
+		},
+		organizationId: UUID,
+		incidentId: {
+			type: "string",
+			pattern: "^ops_inc_[0-9a-f-]{36}$",
+		},
+		stepKind: recoveryStepKindProperty,
+		status: {
+			type: "string",
+			enum: [
+				"PENDING",
+				"AWAITING_APPROVAL",
+				"APPROVED",
+				"IN_PROGRESS",
+				"COMPLETED",
+				"FAILED",
+				"CANCELLED",
+			],
+		},
+		stepRequiresApproval: { type: "boolean" },
+		hasRequiredApproval: { type: "boolean" },
+		startedAt: { type: "string", format: "date-time" },
+		revision: { type: "integer", minimum: 1 },
+		initiatedByPrincipalId: { ...UUID, nullable: true },
+	},
+};
+
+export const operationsOpenApi = {
+	listIncidents: op({
+		tag: "Operations",
+		operationId: "listIncidents",
+		summary: "List incidents",
+		description:
+			"Module: operations. Lists incidents for the agency ordered by openedAt descending. Active agency membership required.",
+		security: COOKIE_SECURITY,
+		parameters: [...agencyParams],
+		responses: {
+			"200": {
+				description: "Incidents ordered by openedAt descending.",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							additionalProperties: false,
+							required: ["incidents"],
+							properties: {
+								incidents: {
+									type: "array",
+									items: incidentSnapshotOpenApiSchema,
+								},
+							},
+						},
+					},
+				},
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
+	getIncident: op({
+		tag: "Operations",
+		operationId: "getIncident",
+		summary: "Get incident",
+		description:
+			"Module: operations. Returns an incident snapshot scoped to the agency. Active agency membership required.",
+		security: COOKIE_SECURITY,
+		parameters: [...agencyParams, incidentIdPath],
+		responses: {
+			"200": {
+				description: "Incident snapshot.",
+				content: {
+					"application/json": {
+						schema: incidentSnapshotOpenApiSchema,
+					},
+				},
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
+	openIncident: op({
+		tag: "Operations",
+		operationId: "openIncident",
+		summary: "Open incident",
+		description:
+			"Module: operations. Opens a new incident for the agency. Idempotent via `Idempotency-Key`. Requires operator+ agency role.",
+		security: COOKIE_SECURITY,
+		parameters: [...commandParams],
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["title", "severity"],
+				properties: {
+					title: { type: "string", minLength: 1, maxLength: 256 },
+					description: { type: "string", maxLength: 4096 },
+					severity: incidentSeverityProperty,
+					serviceId: { type: "string", minLength: 1, maxLength: 128 },
+				},
+			},
+			"Incident title, severity and optional context.",
+		),
+		responses: {
+			"200": { description: "Command result with incidentId." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	transitionIncidentStatus: op({
+		tag: "Operations",
+		operationId: "transitionIncidentStatus",
+		summary: "Transition incident status",
+		description:
+			"Module: operations. Transitions an incident through the lifecycle. Optimistic revision required.",
+		security: COOKIE_SECURITY,
+		parameters: [...commandParams, incidentIdPath],
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["expectedRevision", "targetStatus"],
+				properties: {
+					expectedRevision: { type: "integer", minimum: 1 },
+					targetStatus: incidentStatusProperty,
+					reason: { type: "string", maxLength: 1024 },
+				},
+			},
+			"Target status with expected revision.",
+		),
+		responses: {
+			"200": { description: "Command result after status transition." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	attachIncidentRunbook: op({
+		tag: "Operations",
+		operationId: "attachIncidentRunbook",
+		summary: "Attach runbook to incident",
+		description:
+			"Module: operations. Attaches a versioned runbook to an incident. Responsible principal is taken from the session.",
+		security: COOKIE_SECURITY,
+		parameters: [...commandParams, incidentIdPath],
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["expectedRevision", "runbookId", "runbookVersion"],
+				properties: {
+					expectedRevision: { type: "integer", minimum: 1 },
+					runbookId: {
+						type: "string",
+						pattern: "^ops_rnb_[0-9a-f-]{36}$",
+					},
+					runbookVersion: { type: "string", minLength: 1, maxLength: 64 },
+					evidence: { type: "string", maxLength: 4096 },
+				},
+			},
+			"Runbook reference with expected revision.",
+		),
+		responses: {
+			"200": { description: "Command result after runbook attachment." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	getRecoveryTask: op({
+		tag: "Operations",
+		operationId: "getRecoveryTask",
+		summary: "Get recovery task",
+		description:
+			"Module: operations. Returns a recovery task snapshot scoped to the agency. Active agency membership required.",
+		security: COOKIE_SECURITY,
+		parameters: [...agencyParams, recoveryTaskIdPath],
+		responses: {
+			"200": {
+				description: "Recovery task snapshot.",
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
+	listRecoveryTasksByIncident: op({
+		tag: "Operations",
+		operationId: "listRecoveryTasksByIncident",
+		summary: "List recovery tasks for incident",
+		description:
+			"Module: operations. Lists recovery tasks linked to an incident within the agency. Active agency membership required.",
+		security: COOKIE_SECURITY,
+		parameters: [...agencyParams, incidentIdPath],
+		responses: {
+			"200": {
+				description: "Recovery tasks ordered by startedAt ascending.",
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
+	startRecoveryTask: op({
+		tag: "Operations",
+		operationId: "startRecoveryTask",
+		summary: "Start recovery task for incident",
+		description:
+			"Module: operations. Starts a deterministic recovery step linked to an incident. Idempotent via `Idempotency-Key`. Requires operator+ agency role.",
+		security: COOKIE_SECURITY,
+		parameters: [...commandParams, incidentIdPath],
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["stepKind"],
+				properties: {
+					stepKind: recoveryStepKindProperty,
+					hasRequiredApproval: { type: "boolean" },
+				},
+			},
+			"Recovery step kind and optional approval override.",
+		),
+		responses: {
+			"200": { description: "Command result with recoveryTaskId." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	approveRecoveryTask: op({
+		tag: "Operations",
+		operationId: "approveRecoveryTask",
+		summary: "Approve recovery task",
+		description:
+			"Module: operations. Approves a recovery task awaiting approval. Optimistic revision required.",
+		security: COOKIE_SECURITY,
+		parameters: [...commandParams, recoveryTaskIdPath],
+		requestBody: jsonBody(
+			expectedRevisionBody,
+			"Expected revision.",
+		),
+		responses: {
+			"200": { description: "Command result after approval." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	startRecoveryTaskExecution: op({
+		tag: "Operations",
+		operationId: "startRecoveryTaskExecution",
+		summary: "Start recovery task execution",
+		description:
+			"Module: operations. Transitions an approved recovery task to IN_PROGRESS.",
+		security: COOKIE_SECURITY,
+		parameters: [...commandParams, recoveryTaskIdPath],
+		requestBody: jsonBody(expectedRevisionBody, "Expected revision."),
+		responses: {
+			"200": { description: "Command result after execution start." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	completeRecoveryTask: op({
+		tag: "Operations",
+		operationId: "completeRecoveryTask",
+		summary: "Complete recovery task",
+		description:
+			"Module: operations. Marks an in-progress recovery task as COMPLETED.",
+		security: COOKIE_SECURITY,
+		parameters: [...commandParams, recoveryTaskIdPath],
+		requestBody: jsonBody(
+			expectedRevisionBody,
+			"Expected revision.",
+		),
+		responses: {
+			"200": { description: "Command result after completion." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	failRecoveryTask: op({
+		tag: "Operations",
+		operationId: "failRecoveryTask",
+		summary: "Fail recovery task",
+		description:
+			"Module: operations. Marks a recovery task as FAILED from an allowed source status.",
+		security: COOKIE_SECURITY,
+		parameters: [...commandParams, recoveryTaskIdPath],
+		requestBody: jsonBody(
+			{
+				...expectedRevisionBody,
+				properties: {
+					...expectedRevisionBody.properties,
+					failureReason: { type: "string", maxLength: 4096 },
+				},
+			},
+			"Expected revision and optional failure reason.",
+		),
+		responses: {
+			"200": { description: "Command result after failure." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	cancelRecoveryTask: op({
+		tag: "Operations",
+		operationId: "cancelRecoveryTask",
+		summary: "Cancel recovery task",
+		description:
+			"Module: operations. Cancels a non-terminal recovery task.",
+		security: COOKIE_SECURITY,
+		parameters: [...commandParams, recoveryTaskIdPath],
+		requestBody: jsonBody(
+			{
+				...expectedRevisionBody,
+				properties: {
+					...expectedRevisionBody.properties,
+					cancelReason: { type: "string", maxLength: 4096 },
+				},
+			},
+			"Expected revision and optional cancel reason.",
+		),
+		responses: {
+			"200": { description: "Command result after cancellation." },
+			...ERROR_RESPONSES,
+		},
+	}),
+} as const;
+
+const outcomeSnapshotIdPath = {
+	name: "outcomeSnapshotId",
+	in: "path" as const,
+	required: true,
+	schema: { type: "string", pattern: "^perf_out_[0-9a-f-]{36}$" },
+	description: "Outcome snapshot id (`perf_out_*`).",
+};
+
+const positionExposureSnapshotIdPath = {
+	name: "positionExposureSnapshotId",
+	in: "path" as const,
+	required: true,
+	schema: { type: "string", pattern: "^perf_pes_[0-9a-f-]{36}$" },
+	description: "Position exposure snapshot id (`perf_pes_*`).",
+};
+
+const outcomeSnapshotOpenApiSchema: JsonSchema = {
+	type: "object",
+	additionalProperties: false,
+	required: [
+		"outcomeSnapshotId",
+		"organizationId",
+		"journalEntryId",
+		"valueDate",
+		"linesSummary",
+		"recordedAt",
+	],
+	properties: {
+		outcomeSnapshotId: outcomeSnapshotIdPath.schema,
+		organizationId: UUID,
+		journalEntryId: { type: "string" },
+		valueDate: { type: "string" },
+		linesSummary: { type: "array", items: { type: "object" } },
+		recordedAt: { type: "string", format: "date-time" },
+	},
+};
+
+const positionExposureSnapshotOpenApiSchema: JsonSchema = {
+	type: "object",
+	additionalProperties: false,
+	required: [
+		"positionExposureSnapshotId",
+		"organizationId",
+		"portfolioId",
+		"positionId",
+		"revision",
+		"instrumentId",
+		"positionSide",
+		"book",
+		"quantity",
+		"fillId",
+		"side",
+		"provisionalCash",
+		"observedAt",
+	],
+	properties: {
+		positionExposureSnapshotId: positionExposureSnapshotIdPath.schema,
+		organizationId: UUID,
+		portfolioId: { type: "string" },
+		positionId: { type: "string" },
+		revision: { type: "integer", minimum: 1 },
+		instrumentId: { type: "string" },
+		positionSide: { type: "string" },
+		book: { type: "string" },
+		quantity: { type: "string" },
+		fillId: { type: "string" },
+		side: { type: "string" },
+		provisionalCash: { type: "boolean" },
+		observedAt: { type: "string", format: "date-time" },
+	},
+};
+
+const metricSeriesItemOpenApiSchema: JsonSchema = {
+	type: "object",
+	additionalProperties: false,
+	required: [
+		"metricSeriesId",
+		"organizationId",
+		"metricName",
+		"metricValue",
+		"observedAt",
+	],
+	properties: {
+		metricSeriesId: {
+			type: "string",
+			pattern: "^perf_mtr_[0-9a-f-]{36}$",
+		},
+		organizationId: UUID,
+		outcomeSnapshotId: outcomeSnapshotIdPath.schema,
+		positionExposureSnapshotId: positionExposureSnapshotIdPath.schema,
+		metricName: { type: "string" },
+		metricValue: { type: "string" },
+		observedAt: { type: "string", format: "date-time" },
+	},
+};
+
+export const performanceOpenApi = {
+	listOutcomeSnapshots: op({
+		tag: "Performance",
+		operationId: "listOutcomeSnapshots",
+		summary: "List outcome snapshots",
+		description:
+			"Module: performance. Lists ledger-derived outcome snapshots for the agency ordered by recordedAt descending. Optional journalEntryId filter. Active agency membership required.",
+		security: COOKIE_SECURITY,
+		parameters: [
+			...agencyParams,
+			{
+				name: "journalEntryId",
+				in: "query",
+				required: false,
+				schema: { type: "string", minLength: 1 },
+				description: "Filter by accounting journal entry id.",
+			},
+			{
+				name: "limit",
+				in: "query",
+				required: false,
+				schema: { type: "integer", minimum: 1, maximum: 100 },
+				description: "Maximum rows to return (default 50).",
+			},
+		],
+		responses: {
+			"200": {
+				description: "Outcome snapshots for the agency.",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							additionalProperties: false,
+							required: ["outcomeSnapshots"],
+							properties: {
+								outcomeSnapshots: {
+									type: "array",
+									items: outcomeSnapshotOpenApiSchema,
+								},
+							},
+						},
+					},
+				},
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
+	getOutcomeSnapshot: op({
+		tag: "Performance",
+		operationId: "getOutcomeSnapshot",
+		summary: "Get outcome snapshot",
+		description:
+			"Module: performance. Returns a single outcome snapshot scoped to the agency.",
+		security: COOKIE_SECURITY,
+		parameters: [...agencyParams, outcomeSnapshotIdPath],
+		responses: {
+			"200": {
+				description: "Outcome snapshot.",
+				content: {
+					"application/json": {
+						schema: outcomeSnapshotOpenApiSchema,
+					},
+				},
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
+	listOutcomeSnapshotMetrics: op({
+		tag: "Performance",
+		operationId: "listOutcomeSnapshotMetrics",
+		summary: "List derived metrics for outcome snapshot",
+		description:
+			"Module: performance. Returns derived P&L metric series rows for the outcome snapshot.",
+		security: COOKIE_SECURITY,
+		parameters: [...agencyParams, outcomeSnapshotIdPath],
+		responses: {
+			"200": {
+				description: "Derived metric series for the outcome snapshot.",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							additionalProperties: false,
+							required: ["metrics"],
+							properties: {
+								metrics: {
+									type: "array",
+									items: metricSeriesItemOpenApiSchema,
+								},
+							},
+						},
+					},
+				},
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
+	listPositionExposureSnapshots: op({
+		tag: "Performance",
+		operationId: "listPositionExposureSnapshots",
+		summary: "List position exposure snapshots",
+		description:
+			"Module: performance. Lists position exposure snapshots for the agency with optional portfolioId and positionId filters.",
+		security: COOKIE_SECURITY,
+		parameters: [
+			...agencyParams,
+			{
+				name: "portfolioId",
+				in: "query",
+				required: false,
+				schema: { type: "string", minLength: 1 },
+			},
+			{
+				name: "positionId",
+				in: "query",
+				required: false,
+				schema: { type: "string", minLength: 1 },
+			},
+			{
+				name: "limit",
+				in: "query",
+				required: false,
+				schema: { type: "integer", minimum: 1, maximum: 100 },
+			},
+		],
+		responses: {
+			"200": {
+				description: "Position exposure snapshots for the agency.",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							additionalProperties: false,
+							required: ["positionExposureSnapshots"],
+							properties: {
+								positionExposureSnapshots: {
+									type: "array",
+									items: positionExposureSnapshotOpenApiSchema,
+								},
+							},
+						},
+					},
+				},
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
+	getPositionExposureSnapshot: op({
+		tag: "Performance",
+		operationId: "getPositionExposureSnapshot",
+		summary: "Get position exposure snapshot",
+		description:
+			"Module: performance. Returns a single position exposure snapshot scoped to the agency.",
+		security: COOKIE_SECURITY,
+		parameters: [...agencyParams, positionExposureSnapshotIdPath],
+		responses: {
+			"200": {
+				description: "Position exposure snapshot.",
+				content: {
+					"application/json": {
+						schema: positionExposureSnapshotOpenApiSchema,
+					},
+				},
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
+	listPositionExposureSnapshotMetrics: op({
+		tag: "Performance",
+		operationId: "listPositionExposureSnapshotMetrics",
+		summary: "List derived metrics for position exposure snapshot",
+		description:
+			"Module: performance. Returns derived exposure metric series rows for the position exposure snapshot.",
+		security: COOKIE_SECURITY,
+		parameters: [...agencyParams, positionExposureSnapshotIdPath],
+		responses: {
+			"200": {
+				description: "Derived metric series for the position exposure snapshot.",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							additionalProperties: false,
+							required: ["metrics"],
+							properties: {
+								metrics: {
+									type: "array",
+									items: metricSeriesItemOpenApiSchema,
+								},
+							},
+						},
+					},
+				},
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
+} as const;
+
+export const portfoliosOpenApi = {
+	listAgencyPortfolios: op({
+		tag: "Portfolios",
+		operationId: "listAgencyPortfolios",
+		summary: "List agency portfolio overview",
+		description:
+			"Module: portfolios. Lists portfolios for the agency (`organizationId` = `agencyId`) with position counts and latest valuation snapshot when present. Membership required. ANX-153 S1–S4 + ANX-164 slice 6.",
+		security: COOKIE_SECURITY,
+		parameters: agencyParams,
+		responses: {
+			"200": { description: "Portfolio overview collection for the agency." },
+			...ERROR_RESPONSES,
+		},
+	}),
+} as const;
+
 const realtimeChannelQuery = {
 	name: "channels",
 	in: "query" as const,
@@ -1073,6 +2050,442 @@ const lastEventQuery = {
 	schema: { type: "string" },
 	description: "Replay cursor. Also accepted as `Last-Event-Id` header on SSE.",
 };
+
+const simulationRunIdPath = {
+	name: "simulationRunId",
+	in: "path" as const,
+	required: true,
+	schema: { type: "string", pattern: "^sim_run_[0-9a-f-]{36}$" },
+	description: "Simulation run id (`sim_run_*`).",
+};
+
+const simulationRunOpenApiSchema: JsonSchema = {
+	type: "object",
+	additionalProperties: false,
+	required: [
+		"simulationRunId",
+		"organizationId",
+		"executionMode",
+		"status",
+		"isolationFlags",
+		"revision",
+		"startedAt",
+	],
+	properties: {
+		simulationRunId: simulationRunIdPath.schema,
+		organizationId: UUID,
+		manifestId: { type: "string", nullable: true },
+		strategyId: { type: "string", nullable: true },
+		strategyVersionId: { type: "string", nullable: true },
+		backtestRequestId: {
+			type: "string",
+			pattern: "^st_btr_[0-9a-f-]{36}$",
+			nullable: true,
+		},
+		executionMode: { type: "string", enum: ["SIMULATED"] },
+		status: { type: "string", enum: ["STARTED", "COMPLETED", "FAILED"] },
+		scenarioLabel: { type: "string", nullable: true },
+		isolationFlags: { type: "object" },
+		seedHash: { type: "string", nullable: true },
+		resultRef: { type: "string", nullable: true },
+		revision: { type: "integer", minimum: 1 },
+		startedAt: { type: "string", format: "date-time" },
+		completedAt: { type: "string", format: "date-time", nullable: true },
+		failedAt: { type: "string", format: "date-time", nullable: true },
+		failureCode: { type: "string", nullable: true },
+	},
+};
+
+const simulationRunSnapshotOpenApiSchema: JsonSchema = {
+	type: "object",
+	additionalProperties: false,
+	required: [
+		"snapshotId",
+		"simulationRunId",
+		"organizationId",
+		"datasetHash",
+	],
+	properties: {
+		snapshotId: {
+			type: "string",
+			pattern: "^sim_snap_[0-9a-f-]{36}$",
+		},
+		simulationRunId: simulationRunIdPath.schema,
+		organizationId: UUID,
+		datasetRef: { type: "string", nullable: true },
+		datasetHash: { type: "string" },
+		snapshotPayload: { type: "object", nullable: true },
+	},
+};
+
+export const simulationOpenApi = {
+	listSimulationRuns: op({
+		tag: "Simulation",
+		operationId: "listSimulationRuns",
+		summary: "List simulation runs",
+		description:
+			"Module: simulation. Lists isolated scenario runs for the agency ordered by startedAt descending. Optional status, backtestRequestId and strategyId filters. Active agency membership required. Run creation is event-driven (no HTTP POST).",
+		security: COOKIE_SECURITY,
+		parameters: [
+			...agencyParams,
+			{
+				name: "status",
+				in: "query",
+				required: false,
+				schema: { type: "string", enum: ["STARTED", "COMPLETED", "FAILED"] },
+			},
+			{
+				name: "backtestRequestId",
+				in: "query",
+				required: false,
+				schema: { type: "string", pattern: "^st_btr_[0-9a-f-]{36}$" },
+			},
+			{
+				name: "strategyId",
+				in: "query",
+				required: false,
+				schema: { type: "string", minLength: 1, maxLength: 128 },
+			},
+			{
+				name: "limit",
+				in: "query",
+				required: false,
+				schema: { type: "integer", minimum: 1, maximum: 100 },
+				description: "Maximum rows to return (default 50).",
+			},
+		],
+		responses: {
+			"200": {
+				description: "Simulation runs for the agency.",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							additionalProperties: false,
+							required: ["simulationRuns"],
+							properties: {
+								simulationRuns: {
+									type: "array",
+									items: simulationRunOpenApiSchema,
+								},
+							},
+						},
+					},
+				},
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
+	getSimulationRun: op({
+		tag: "Simulation",
+		operationId: "getSimulationRun",
+		summary: "Get simulation run",
+		description:
+			"Module: simulation. Returns a single simulation run scoped to the agency.",
+		security: COOKIE_SECURITY,
+		parameters: [...agencyParams, simulationRunIdPath],
+		responses: {
+			"200": {
+				description: "Simulation run.",
+				content: {
+					"application/json": {
+						schema: simulationRunOpenApiSchema,
+					},
+				},
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
+	getSimulationRunSnapshot: op({
+		tag: "Simulation",
+		operationId: "getSimulationRunSnapshot",
+		summary: "Get simulation run snapshot",
+		description:
+			"Module: simulation. Returns the result snapshot for a completed simulation run (payload from sandbox execution).",
+		security: COOKIE_SECURITY,
+		parameters: [...agencyParams, simulationRunIdPath],
+		responses: {
+			"200": {
+				description: "Simulation run snapshot.",
+				content: {
+					"application/json": {
+						schema: simulationRunSnapshotOpenApiSchema,
+					},
+				},
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
+} as const;
+
+
+export const executionOpenApi = {
+	listOrders: op({
+		tag: "Execution",
+		operationId: "listExecutionOrders",
+		summary: "List open execution orders",
+		description:
+			"Module: execution. Lists open orders (SUBMITTED or PARTIALLY_FILLED) for the agency ordered by submittedAt descending. Active agency membership required.",
+		security: COOKIE_SECURITY,
+		parameters: [
+			...agencyParams,
+			{
+				name: "limit",
+				in: "query",
+				required: false,
+				schema: { type: "integer", minimum: 1, maximum: 100 },
+				description: "Maximum rows to return (default 50).",
+			},
+		],
+		responses: {
+			"200": {
+				description: "Open orders for the agency.",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							additionalProperties: false,
+							required: ["orders"],
+							properties: {
+								orders: { type: "array", items: { type: "object" } },
+							},
+						},
+					},
+				},
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
+	listReconciliationCases: op({
+		tag: "Execution",
+		operationId: "listExecutionReconciliationCases",
+		summary: "List venue reconciliation cases",
+		description:
+			"Module: execution. Lists venue reconciliation cases for the agency ordered by openedAt descending.",
+		security: COOKIE_SECURITY,
+		parameters: [
+			...agencyParams,
+			{
+				name: "limit",
+				in: "query",
+				required: false,
+				schema: { type: "integer", minimum: 1, maximum: 100 },
+				description: "Maximum rows to return (default 50).",
+			},
+		],
+		responses: {
+			"200": {
+				description: "Reconciliation cases for the agency.",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							additionalProperties: false,
+							required: ["reconciliationCases"],
+							properties: {
+								reconciliationCases: {
+									type: "array",
+									items: { type: "object" },
+								},
+							},
+						},
+					},
+				},
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
+} as const;
+
+export const riskOpenApi = {
+	getKillSwitchStatus: op({
+		tag: "Risk",
+		operationId: "getKillSwitchStatus",
+		summary: "Get organization kill switch status",
+		description:
+			"Module: risk. Returns organization-scope kill switch status for the agency. Active agency membership required.",
+		security: COOKIE_SECURITY,
+		parameters: agencyParams,
+		responses: {
+			"200": {
+				description: "Kill switch status envelope.",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							additionalProperties: false,
+							required: ["status"],
+							properties: { status: { type: "object" } },
+						},
+					},
+				},
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
+	activateKillSwitch: op({
+		tag: "Risk",
+		operationId: "activateKillSwitch",
+		summary: "Activate kill switch",
+		description:
+			"Module: risk. Activates organization or portfolio kill switch. `activatedBy` is taken from the session principal, not the request body. Requires agency mutation role and Idempotency-Key.",
+		security: COOKIE_SECURITY,
+		parameters: commandParams,
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["reason"],
+				properties: {
+					reason: { type: "string", minLength: 1, maxLength: 512 },
+					scope: { type: "string", enum: ["ORGANIZATION", "PORTFOLIO"] },
+					portfolioId: { type: "string", minLength: 1 },
+				},
+			},
+			"Kill switch activation payload. Principal identity is session-bound.",
+		),
+		responses: {
+			"200": { description: "Command result after activation." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	releaseKillSwitch: op({
+		tag: "Risk",
+		operationId: "releaseKillSwitch",
+		summary: "Release kill switch",
+		description:
+			"Module: risk. Releases organization or portfolio kill switch. `releasedBy` is taken from the session principal, not the request body. Requires agency mutation role and Idempotency-Key.",
+		security: COOKIE_SECURITY,
+		parameters: commandParams,
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				properties: {
+					scope: { type: "string", enum: ["ORGANIZATION", "PORTFOLIO"] },
+					portfolioId: { type: "string", minLength: 1 },
+				},
+			},
+			"Kill switch release payload. Principal identity is session-bound.",
+		),
+		responses: {
+			"200": { description: "Command result after release." },
+			...ERROR_RESPONSES,
+		},
+	}),
+} as const;
+
+
+export const evaluationOpenApi = {
+	getCertificationBySubject: op({
+		tag: "Evaluation",
+		operationId: "getCertificationBySubject",
+		summary: "Get issued certification by strategy subject",
+		description:
+			"Module: evaluation. Returns the active issued certification for a strategy version and optional policy hash. Active agency membership required.",
+		security: COOKIE_SECURITY,
+		parameters: [
+			...agencyParams,
+			{
+				name: "strategyId",
+				in: "query",
+				required: true,
+				schema: { type: "string", pattern: "^st_str_[0-9a-f-]{36}$" },
+			},
+			{
+				name: "strategyVersionId",
+				in: "query",
+				required: true,
+				schema: { type: "string", pattern: "^st_ver_[0-9a-f-]{36}$" },
+			},
+			{
+				name: "policyHash",
+				in: "query",
+				required: false,
+				schema: { type: "string", pattern: "^[a-f0-9]{64}$" },
+			},
+		],
+		responses: {
+			"200": { description: "Issued certification envelope." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	getEvaluationRecord: op({
+		tag: "Evaluation",
+		operationId: "getEvaluationRecord",
+		summary: "Get evaluation record",
+		description:
+			"Module: evaluation. Returns an evaluation record by id for the agency. Active agency membership required.",
+		security: COOKIE_SECURITY,
+		parameters: [
+			...agencyParams,
+			{
+				name: "evaluationRecordId",
+				in: "path",
+				required: true,
+				schema: { type: "string", pattern: "^evl_rec_[0-9a-f-]{36}$" },
+			},
+		],
+		responses: {
+			"200": { description: "Evaluation record envelope." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	getEvaluationScore: op({
+		tag: "Evaluation",
+		operationId: "getEvaluationScore",
+		summary: "Get evaluation score for record",
+		description:
+			"Module: evaluation. Returns the computed score for an evaluation record. Active agency membership required.",
+		security: COOKIE_SECURITY,
+		parameters: [
+			...agencyParams,
+			{
+				name: "evaluationRecordId",
+				in: "path",
+				required: true,
+				schema: { type: "string", pattern: "^evl_rec_[0-9a-f-]{36}$" },
+			},
+		],
+		responses: {
+			"200": { description: "Evaluation score envelope." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	issueCertification: op({
+		tag: "Evaluation",
+		operationId: "issueCertification",
+		summary: "Issue strategy version certification",
+		description:
+			"Module: evaluation. Issues a certification for an EVALUATED strategy version with a published scoring policy hash. Requires agency mutation role and Idempotency-Key.",
+		security: COOKIE_SECURITY,
+		parameters: commandParams,
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["strategyId", "strategyVersionId", "policyHash"],
+				properties: {
+					strategyId: { type: "string", pattern: "^st_str_[0-9a-f-]{36}$" },
+					strategyVersionId: {
+						type: "string",
+						pattern: "^st_ver_[0-9a-f-]{36}$",
+					},
+					evaluationRecordId: {
+						type: "string",
+						pattern: "^evl_rec_[0-9a-f-]{36}$",
+					},
+					policyHash: { type: "string", pattern: "^[a-f0-9]{64}$" },
+				},
+			},
+			"Issue certification payload. organizationId is taken from agencyId path param.",
+		),
+		responses: {
+			"200": { description: "Command result after certification issue." },
+			...ERROR_RESPONSES,
+		},
+	}),
+} as const;
 
 export const realtimeOpenApi = {
 	sse: op({

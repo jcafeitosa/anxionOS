@@ -27,6 +27,14 @@
 		"@anxionos/identity": "workspace:*",
 		"@anxionos/organizations": "workspace:*",
 		"@anxionos/partners": "workspace:*",
+		"@anxionos/performance": "workspace:*",
+		"@anxionos/portfolios": "workspace:*",
+		"@anxionos/operations": "workspace:*",
+		"@anxionos/strategies": "workspace:*",
+		"@anxionos/simulation": "workspace:*",
+		"@anxionos/evaluation": "workspace:*",
+		"@anxionos/execution": "workspace:*",
+		"@anxionos/risk": "workspace:*",
 		"drizzle-orm": "0.45.2"
 	}
 }

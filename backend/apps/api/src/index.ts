@@ -9,6 +9,14 @@ import { createIdentityDb, ensureIdentitySchema } from "@anxionos/identity";
 import { createLogger } from "@anxionos/observability";
 import { ensureOrganizationsSchema } from "@anxionos/organizations";
 import { ensurePartnersSchema } from "@anxionos/partners";
+import { ensurePortfoliosSchema } from "@anxionos/portfolios";
+import { ensurePerformanceSchema } from "@anxionos/performance";
+import { ensureOperationsSchema } from "@anxionos/operations";
+import { ensureStrategiesSchema } from "@anxionos/strategies";
+import { ensureSimulationSchema } from "@anxionos/simulation";
+import { ensureEvaluationSchema } from "@anxionos/evaluation";
+import { ensureExecutionSchema } from "@anxionos/execution";
+import { ensureRiskSchema } from "@anxionos/risk";
 import { Elysia } from "elysia";
 import {
 	createBetterAuthRuntime,
@@ -24,6 +32,15 @@ import { createAgentsPlugin } from "./agents/plugin";
 import { createGovernanceApiRuntime } from "./governance/bootstrap";
 import { bootstrapGovernanceOrganizationsMembership } from "./governance/bootstrap-organizations-membership";
 import { createGovernancePlugin } from "./governance/plugin";
+import { createEvaluationApiRuntime } from "./evaluation/bootstrap";
+import { bootstrapEvaluationEventConsumers } from "./evaluation/bootstrap-event-consumers";
+import { createEvaluationPlugin } from "./evaluation/plugin";
+import { createPerformanceApiRuntime } from "./performance/bootstrap";
+import { bootstrapPerformanceEventConsumers } from "./performance/bootstrap-event-consumers";
+import { bootstrapSimulationEventConsumers } from "./simulation/bootstrap-event-consumers";
+import { createSimulationApiRuntime } from "./simulation/bootstrap";
+import { createPerformancePlugin } from "./performance/plugin";
+import { createSimulationPlugin } from "./simulation/plugin";
 import { probeHealthDeps } from "./health/probe-deps";
 import { bootstrapIdentitySessionRevocation } from "./identity/bootstrap-session-revocation";
 import {
@@ -42,6 +59,16 @@ import { createOrganizationsPlugin } from "./organizations/plugin";
 import { configureInviteAcceptRateLimit } from "./organizations/rate-limit";
 import { createPartnersApiRuntime } from "./partners/bootstrap";
 import { createPartnersPlugin } from "./partners/plugin";
+import { createPortfoliosApiRuntime } from "./portfolios/bootstrap";
+import { createPortfoliosPlugin } from "./portfolios/plugin";
+import { createOperationsApiRuntime } from "./operations/bootstrap";
+import { createOperationsPlugin } from "./operations/plugin";
+import { createStrategiesApiRuntime } from "./strategies/bootstrap";
+import { createStrategiesPlugin } from "./strategies/plugin";
+import { createExecutionApiRuntime } from "./execution/bootstrap";
+import { createExecutionPlugin } from "./execution/plugin";
+import { createRiskApiRuntime } from "./risk/bootstrap";
+import { createRiskPlugin } from "./risk/plugin";
 import {
 	createRealtimePlugin,
 	createRealtimeRuntime,
@@ -61,10 +88,21 @@ if (pool) {
 	await ensureGovernanceSchema(pool);
 	await ensureAgentsSchema(pool);
 	await ensurePartnersSchema(pool);
+	await ensurePortfoliosSchema(pool);
+	await ensurePerformanceSchema(pool);
+	await ensureOperationsSchema(pool);
+	await ensureStrategiesSchema(pool);
+	await ensureSimulationSchema(pool);
+	await ensureEvaluationSchema(pool);
+	await ensureExecutionSchema(pool);
+	await ensureRiskSchema(pool);
 	await ensureInviteAcceptRateLimitSchema(pool);
 	configureInviteAcceptRateLimit(pool);
 	bootstrapIdentitySessionRevocation(pool);
 	bootstrapGovernanceOrganizationsMembership(pool);
+	bootstrapPerformanceEventConsumers(pool);
+	bootstrapSimulationEventConsumers(pool);
+	bootstrapEvaluationEventConsumers(pool);
 	logger.info(
 		"DATABASE_URL loaded — eventing, identity, organizations, governance and auth schema ready",
 	);
@@ -116,7 +154,7 @@ if (pool && resolveBetterAuthConfig()) {
 		}),
 	) as unknown as Elysia;
 	logger.info(
-		"Governance API mounted at /v1/agencies/:agencyId/grants, /v1/agencies/:agencyId/agents/:agentId/autonomy and /v1/governance/*",
+		"Governance API mounted at /v1/agencies/:agencyId/grants, /v1/agencies/:agencyId/change-proposals, /v1/agencies/:agencyId/agents/:agentId/autonomy and /v1/governance/*",
 	);
 	const partnersRuntime = createPartnersApiRuntime(pool);
 	app = app.use(
@@ -149,6 +187,102 @@ if (pool && resolveBetterAuthConfig()) {
 	) as unknown as Elysia;
 	logger.info(
 		"Agents API mounted at /v1/agencies/:agencyId/agents and /v1/agencies/:agencyId/skills",
+	);
+	const strategiesRuntime = createStrategiesApiRuntime(pool);
+	app = app.use(
+		createStrategiesPlugin({
+			auth,
+			...strategiesRuntime,
+			identityRepository: orgRuntime.identityRepository,
+			scopedPool: orgRuntime.scopedPool,
+		}),
+	) as unknown as Elysia;
+	logger.info(
+		"Strategies API mounted at /v1/strategies/agencies/:agencyId/*",
+	);
+	const portfoliosRuntime = createPortfoliosApiRuntime(pool);
+	app = app.use(
+		createPortfoliosPlugin({
+			auth,
+			...portfoliosRuntime,
+			identityRepository: orgRuntime.identityRepository,
+			scopedPool: orgRuntime.scopedPool,
+		}),
+	) as unknown as Elysia;
+	logger.info(
+		"Portfolios API mounted at GET /v1/agencies/:agencyId/portfolios",
+	);
+	const operationsRuntime = createOperationsApiRuntime(pool);
+	app = app.use(
+		createOperationsPlugin({
+			auth,
+			...operationsRuntime,
+			identityRepository: orgRuntime.identityRepository,
+			scopedPool: orgRuntime.scopedPool,
+		}),
+	) as unknown as Elysia;
+	logger.info(
+		"Operations API mounted at /v1/operations/agencies/:agencyId/incidents/:incidentId/recovery-tasks and /v1/operations/agencies/:agencyId/recovery-tasks/:recoveryTaskId/*",
+	);
+	const performanceRuntime = createPerformanceApiRuntime(pool);
+	app = app.use(
+		createPerformancePlugin({
+			auth,
+			...performanceRuntime,
+			identityRepository: orgRuntime.identityRepository,
+			scopedPool: orgRuntime.scopedPool,
+		}),
+	) as unknown as Elysia;
+	logger.info(
+		"Performance API mounted at /v1/performance/agencies/:agencyId/outcome-snapshots and /v1/performance/agencies/:agencyId/position-exposure-snapshots",
+	);
+	const simulationRuntime = createSimulationApiRuntime(pool);
+	app = app.use(
+		createSimulationPlugin({
+			auth,
+			...simulationRuntime,
+			identityRepository: orgRuntime.identityRepository,
+			scopedPool: orgRuntime.scopedPool,
+		}),
+	) as unknown as Elysia;
+	logger.info(
+		"Simulation API mounted at /v1/simulation/agencies/:agencyId/runs",
+	);
+	const evaluationRuntime = createEvaluationApiRuntime(pool);
+	app = app.use(
+		createEvaluationPlugin({
+			auth,
+			...evaluationRuntime,
+			identityRepository: orgRuntime.identityRepository,
+			scopedPool: orgRuntime.scopedPool,
+		}),
+	) as unknown as Elysia;
+	logger.info(
+		"Evaluation API mounted at /v1/evaluation/agencies/:agencyId/certifications and /v1/evaluation/agencies/:agencyId/evaluation-records/:evaluationRecordId/*",
+	);
+	const executionRuntime = createExecutionApiRuntime(pool);
+	app = app.use(
+		createExecutionPlugin({
+			auth,
+			...executionRuntime,
+			identityRepository: orgRuntime.identityRepository,
+			scopedPool: orgRuntime.scopedPool,
+		}),
+	) as unknown as Elysia;
+	logger.info(
+		"Execution API mounted at /v1/execution/agencies/:agencyId/orders and /v1/execution/agencies/:agencyId/reconciliation-cases",
+	);
+	const riskRuntime = createRiskApiRuntime(pool);
+	app = app.use(
+		createRiskPlugin({
+			auth,
+			...riskRuntime,
+			identityRepository: orgRuntime.identityRepository,
+			scopedPool: orgRuntime.scopedPool,
+		}),
+	) as unknown as Elysia;
+	logger.info(
+		"Risk API mounted at /v1/risk/agencies/:agencyId/kill-switch",
 	);
 	const realtimeRuntime = createRealtimeRuntime(pool);
 	app = app.use(

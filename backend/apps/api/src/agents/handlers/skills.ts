@@ -1,3 +1,4 @@
+import { institutionalUuidSchema } from "@anxionos/contracts";
 import {
 	bindAgentSkillCommandSchema,
 	createSkillVersionCommandSchema,
@@ -38,11 +39,11 @@ const bindAgentSkillBodySchema = bindAgentSkillCommandSchema
 	.strict();
 
 export const skillIdParamSchema = z.object({
-	skillId: z.string().uuid(),
+	skillId: institutionalUuidSchema,
 });
 
 export const skillVersionIdParamSchema = z.object({
-	skillVersionId: z.string().uuid(),
+	skillVersionId: institutionalUuidSchema,
 });
 
 async function assertSkillInAgency(

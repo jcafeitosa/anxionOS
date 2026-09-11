@@ -1,3 +1,4 @@
+import { institutionalUuidSchema } from "@anxionos/contracts";
 import {
 	invokeBrainCapabilityCommandSchema,
 	publishAgentVersionCommandSchema,
@@ -40,7 +41,7 @@ const invokeBrainCapabilityBodySchema = invokeBrainCapabilityCommandSchema
 	.strict();
 
 export const agentIdParamSchema = z.object({
-	agentId: z.string().uuid(),
+	agentId: institutionalUuidSchema,
 });
 
 export function toAgentDto(agent: Agent) {

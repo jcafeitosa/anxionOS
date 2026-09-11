@@ -4,12 +4,21 @@ import {
 	toErrorResponse,
 } from "@anxionos/contracts/errors";
 import { GovernanceCommandError } from "@anxionos/governance";
-import { PrincipalLookupUnavailableError } from "@anxionos/organizations";
+import {
+	OrganizationCommandError,
+	PrincipalLookupUnavailableError,
+} from "@anxionos/organizations";
 
 export function mapGovernanceError(
 	error: unknown,
 	requestId?: string,
 ): { status: number; body: ReturnType<typeof toErrorResponse> } {
+	if (error instanceof OrganizationCommandError) {
+		return {
+			status: error.statusCode,
+			body: toErrorResponse(error, { requestId }),
+		};
+	}
 	if (error instanceof PrincipalLookupUnavailableError) {
 		const mapped = new GovernanceCommandError(
 			"GOV_PRINCIPAL_NOT_FOUND",

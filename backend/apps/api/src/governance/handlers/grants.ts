@@ -1,3 +1,4 @@
+import { institutionalUuidSchema } from "@anxionos/contracts";
 import { issueGrantCommandSchema, revokeGrantCommandSchema } from "@anxionos/contracts/governance";
 import {
 	GovernanceCommandError,
@@ -98,9 +99,9 @@ export async function handleRevokeGrant(
 }
 
 export const agencyIdParamSchema = z.object({
-	agencyId: z.string().uuid(),
+	agencyId: institutionalUuidSchema,
 });
 
 export const grantIdParamSchema = z.object({
-	grantId: z.string().uuid(),
+	grantId: institutionalUuidSchema,
 });

@@ -1,3 +1,4 @@
+import { institutionalUuidSchema } from "@anxionos/contracts";
 import {
 	getPartnerByOrganization,
 	listCommissionAccruals,
@@ -10,8 +11,8 @@ import { partnersPartnerIdSchema } from "@anxionos/contracts/partners";
 import { z } from "zod";
 import type { PartnersPluginDeps } from "../plugin";
 
-const organizationIdParamSchema = z.object({
-	organizationId: z.string().uuid(),
+export const organizationIdParamSchema = z.object({
+	organizationId: institutionalUuidSchema,
 });
 
 const partnerIdQuerySchema = z

@@ -83,9 +83,9 @@ export const BASELINE_MODULE_OPENAPI_TAGS = [
 	{
 		name: "Strategies",
 		folder: "strategies",
-		mounted: false as const,
+		mounted: true as const,
 		description:
-			"Strategies, backtests and deployments. HTTP `/v1/strategies/*` not mounted yet.",
+			"Strategies, backtests, deployments and signals (`/v1/strategies/agencies/:agencyId/*`).",
 	},
 	{
 		name: "Capital",
@@ -97,9 +97,9 @@ export const BASELINE_MODULE_OPENAPI_TAGS = [
 	{
 		name: "Portfolios",
 		folder: "portfolios",
-		mounted: false as const,
+		mounted: true as const,
 		description:
-			"Portfolios, positions, exposure and valuation. HTTP `/v1/portfolios/*` not mounted yet.",
+			"Portfolios, positions and valuation overview. HTTP GET `/v1/agencies/:agencyId/portfolios`.",
 	},
 	{
 		name: "Decisions",
@@ -111,16 +111,16 @@ export const BASELINE_MODULE_OPENAPI_TAGS = [
 	{
 		name: "Risk",
 		folder: "risk",
-		mounted: false as const,
+		mounted: true as const,
 		description:
-			"Risk policies, limits, checks and kill switch. HTTP `/v1/risk/*` not mounted yet.",
+			"Risk policies, limits, checks and kill switch (`/v1/risk/agencies/:agencyId/kill-switch`).",
 	},
 	{
 		name: "Execution",
 		folder: "execution",
-		mounted: false as const,
+		mounted: true as const,
 		description:
-			"Orders, fills and venue reconciliation. HTTP `/v1/execution/*` not mounted yet.",
+			"Orders, fills and venue reconciliation (`/v1/execution/agencies/:agencyId/orders`, reconciliation cases).",
 	},
 	{
 		name: "Accounting",
@@ -132,23 +132,23 @@ export const BASELINE_MODULE_OPENAPI_TAGS = [
 	{
 		name: "Performance",
 		folder: "performance",
-		mounted: false as const,
+		mounted: true as const,
 		description:
-			"P&L, metrics and attribution. HTTP `/v1/performance/*` not mounted yet.",
+			"P&L, metrics and attribution (`/v1/performance/agencies/:agencyId/outcome-snapshots`, position exposure snapshots and derived metrics).",
 	},
 	{
 		name: "Evaluation",
 		folder: "evaluation",
-		mounted: false as const,
+		mounted: true as const,
 		description:
-			"Evaluation, certification, reputation and promotion. HTTP `/v1/evaluation/*` not mounted yet.",
+			"Evaluation records, scores and strategy certifications (`/v1/evaluation/agencies/:agencyId/*`). Outcome scoring is event-driven via performance.outcome.recorded.v1.",
 	},
 	{
 		name: "Simulation",
 		folder: "simulation",
-		mounted: false as const,
+		mounted: true as const,
 		description:
-			"Digital twin and isolated scenario runs. HTTP `/v1/simulation/*` not mounted yet.",
+			"Digital twin and isolated scenario runs (`/v1/simulation/agencies/:agencyId/runs`). Read-only HTTP; run creation is event-driven.",
 	},
 	{
 		name: "Audit",
@@ -174,9 +174,9 @@ export const BASELINE_MODULE_OPENAPI_TAGS = [
 	{
 		name: "Operations",
 		folder: "operations",
-		mounted: false as const,
+		mounted: true as const,
 		description:
-			"Incidents, retention, export and recovery. HTTP `/v1/operations/*` not mounted yet.",
+			"Incidents, retention, export and recovery (`/v1/operations/agencies/:agencyId/*`). Recovery task lifecycle mounted in S4e.",
 	},
 ] as const;
 

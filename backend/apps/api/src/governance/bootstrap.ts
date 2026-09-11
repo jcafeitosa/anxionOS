@@ -26,6 +26,7 @@ export function createGovernanceApiRuntime(pool: Pool): GovernanceApiRuntime {
 	});
 	const runtime = {
 		grantRepository: governanceDb.grantRepository,
+		changeProposalRepository: governanceDb.changeProposalRepository,
 		autonomyAssignmentRepository: governanceDb.autonomyAssignmentRepository,
 		commandJournal: governanceDb.commandJournal,
 		unitOfWork: createGovernanceUnitOfWork(pool),

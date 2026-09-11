@@ -1,7 +1,7 @@
+import { institutionalUuidSchema } from "@anxionos/contracts";
 import { AppError } from "@anxionos/contracts/errors";
-import { z } from "zod";
 
-const idempotencyKeySchema = z.string().uuid();
+const idempotencyKeySchema = institutionalUuidSchema;
 
 export function parseIdempotencyKey(headers: Headers): string {
 	const raw = headers.get("idempotency-key") ?? headers.get("Idempotency-Key");
@@ -10,7 +10,7 @@ export function parseIdempotencyKey(headers: Headers): string {
 	}
 	const parsed = idempotencyKeySchema.safeParse(raw.trim());
 	if (!parsed.success) {
-		throw AppError.validation("Idempotency-Key must be a UUID");
+		throw AppError.validation("Idempotency-Key must be a valid institutional UUID");
 	}
 	return parsed.data;
 }
