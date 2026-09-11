@@ -49,6 +49,7 @@
     "orchestration:product-intelligence": "bun backend/scripts/product-intelligence-cycle.mjs",
     "orchestration:self-healing": "node .cursor/orchestration/agent-workflow/self-healing-cli.mjs",
     "anx162:engine-isolation-homologation": "bun backend/scripts/anx162-engine-isolation-homologation.mjs",
+    "anx162:s3-engines-homologation": "bun backend/scripts/anx162-s3-engines-homologation.mjs",
     "p2:sandbox-homologation": "bun backend/scripts/p2-sandbox-homologation.mjs",
     "p3:staging-homologation": "bun backend/scripts/p3-staging-homologation.mjs",
     "p4:rebuild-homologation": "bun backend/scripts/p4-rebuild-homologation.mjs",
