@@ -1,3 +1,7 @@
+---
+type: guide
+---
+
 # Contribuindo com o anxionOS
 
 Obrigado por participar. Este repositório prioriza **documentação governada** (localmente) antes da implementação do backend.

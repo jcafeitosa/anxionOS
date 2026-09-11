@@ -1,3 +1,7 @@
+---
+type: guide
+---
+
 # Design system — anxionOS
 
 Documentação do design system (ui-ux-pro-max). **Tokens e overrides permanecem co-localizados com o frontend** para facilitar implementação; este índice centraliza os caminhos canônicos.

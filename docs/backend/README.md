@@ -1,3 +1,7 @@
+---
+type: guide
+---
+
 # anxionOS backend (P01–P02)
 
 Workspace Bun/TypeScript do backend anxionOS — composition root separado conforme [ADR0002](../../brain/project-docs/decisions/0002-adopt-modular-backend-layout.md).

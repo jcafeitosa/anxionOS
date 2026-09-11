@@ -1,3 +1,7 @@
+---
+type: guide
+---
+
 # Archify no anxionOS
 
 [Archify](https://github.com/tt-a1i/archify) gera diagramas interativos (arquitetura, workflow, sequência, dataflow, lifecycle) a partir de JSON tipado. **Não** indexa código — complementa o **code-review-graph** MCP (exploração de código) com artefatos visuais para humanos e agentes.

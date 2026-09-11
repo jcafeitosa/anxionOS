@@ -1,3 +1,7 @@
+---
+type: guide
+---
+
 # anxionOS backend
 
 Workspace Bun/TypeScript do backend anxionOS (P01–P02).
