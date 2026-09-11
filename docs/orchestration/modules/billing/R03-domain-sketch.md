@@ -76,6 +76,28 @@ Idempotência PSP. **BIL-R03-04:** replay mesmo `external_id` → 200 sem segund
 | RecordInvoicePaid | webhook receipt | `billing.invoice.paid.v1` |
 | ProcessRefund | Idempotency-Key | `billing.refund.processed.v1` |
 
+## In / Out (R3)
+
+**In:** AgencyScopePort; TraversalEvaluator T01 `billing.*`; EventConsumerPort (`connections.usage.recorded.v1`, `organizations.subscription.changed.v1`); PaymentProviderPort (infra — sem secret no domain).
+
+**Out:** Subscription / Invoice / Refund / WebhookReceipt / UsageAggregation via BillingUnitOfWork; eventos `billing.subscription.updated.v1`, `billing.invoice.issued.v1`, `billing.invoice.paid.v1`, `billing.refund.processed.v1`. **Não** `accounting.journal.*` nem `partners.commission.*`.
+
+## Non-goals
+
+- Não persistir ledger de trading.
+- Não chamar connections síncrono para InvoiceLine (D-CX-041).
+- Não D-GOV-010 neste módulo.
+- Não SQLite de cobrança.
+- Não pasta marketplace/products.
+
+## Oráculos
+
+| ID | Gate | Esperado |
+| --- | --- | --- |
+| G3-BIL-01 | G3 | Replay usageRecordId não cria segunda linha |
+| G3-BIL-04 | G3 | Webhook replay → 200 sem segundo paid |
+| G5-BIL-01 | G5 | GET invoice outra org → 403 |
+
 ## Saída R3
 
 Modelo v1 aprovado para R4.

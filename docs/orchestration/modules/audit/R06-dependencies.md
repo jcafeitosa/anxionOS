@@ -6,6 +6,18 @@ type: debate
 **Rodada:** R6 · 2026-09-11 · ANX-389 · ANX-107 · **ANX-108** não impl  
 **Callers:** [R05-storage-pg.md](./R05-storage-pg.md) · [R07-risks.md](./R07-risks.md) · [ROUNDS.md](./ROUNDS.md). Sem API runtime. D-GOV-010 = **risk P06**.
 
+## In / Out (R6)
+
+**In:** eventing tap; PrincipalLookup; AgencyScopePort; TraversalEvaluator T01 `audit.replay`.
+
+**Out:** operations (deltaRefId); graph `graph:audit:v1`; Platform UI. Sem mutate de journals alheios.
+
+## Non-goals
+
+- D-GOV-010 = **risk P06**.
+- Sem pasta policies/.
+- Sem neo4j-driver neste módulo.
+
 ## Decisões-chave
 
 | ID | Decisão |

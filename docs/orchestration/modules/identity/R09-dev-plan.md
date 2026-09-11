@@ -7,7 +7,17 @@ status: draft
 
 **Rodada:** R9 — Plano de follow-up pós-P0  
 **Data:** 2026-09-08  
-**Issue:** ANX-77 (debate) · P0 entregue: ANX-28 (`done`, G7 2026-09-07)
+**Issue:** ANX-77 (debate) · P0 entregue: ANX-28 (`done`, G7 2026-09-07) · pack ANX-389
+
+## In / Out (R9)
+
+**In (P1 futuro):** layout `@anxionos/contracts/identity/`; consumers de sessão; projector contract `graph:identity:v1`.
+
+**Out deste pack:** migration ST08; spec `accepted`; ANX-342/389 `done`.
+
+## Non-goals P1
+
+Não importar better-auth no domain. Não tokens no Neo4j. Não G1 não autorizado.
 
 ## Participantes
 
