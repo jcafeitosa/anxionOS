@@ -31,6 +31,12 @@ status: draft
 | Usage bruto | connections |
 | Neo4j driver | graph |
 | Pasta marketplace/ | PC 29 — não criar |
+
+## Non-goals
+
+- Nenhuma migration ST08 neste pack.
+- Specs 001–005 **draft**; ANX-342 `todo`; D-GOV-010 = risk P06.
+- Billing não é ledger; pasta marketplace/ não criar.
 | D-GOV-010 | risk P06 |
 | Spec 001–005 accepted | Owner + checklist (ST08 0/23) |
 | ANX-342 G7 | Owner — **não** marcar done |

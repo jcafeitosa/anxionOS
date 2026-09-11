@@ -59,6 +59,12 @@ Fechar o **pacote G0 do debate** identity R06–R10: escopo P0 vs P1, critérios
 | Projector Neo4j | graph ANX-32 | D-IDN-020 |
 | `reactivatePrincipal` | Pós-suspend | DEF-06 |
 
+## Non-goals
+
+- Nenhuma migration ST08 neste pack extra.
+- Specs 001–005 **draft**; ANX-342 permanece `todo`; D-GOV-010 = risk P06.
+- Sem pasta `approvals/` / `policies/`.
+
 ---
 
 ## Critérios de aceite G0 (debate)

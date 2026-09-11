@@ -27,6 +27,12 @@ R01 inventário · R02 fronteiras · R03 domínio · R04 contratos · R05 storag
 | RLS PostgreSQL | P09 (D-KN-015) |
 | Timescale em knowledge | market-data (D-KN-017) |
 
+## Non-goals
+
+- Nenhuma migration ST08 neste pack.
+- Specs 001–005 **draft**; ANX-342 `todo`; D-GOV-010 = risk P06.
+- Knowledge não é ledger nem Timescale de preço.
+
 ## Gates documentais G2–G6 (ANX-85)
 
 | Gate | Disposição | Evidência |

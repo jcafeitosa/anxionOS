@@ -51,6 +51,12 @@ Fechar o **pacote G0** que autoriza claim de ANX-29: escopo v1 fechado, critéri
 | Saga `AdvanceOnboarding` + webhook billing | P04 | D-ORG-039 |
 | Realtime `organizations:agency:{agencyId}` | P07 opcional | D-ORG-038 |
 | RLS PostgreSQL tenancy | P09 | D-ORG-040 |
+
+## Non-goals
+
+- Nenhuma migration ST08 neste pack extra.
+- Specs 001–005 **draft**; ANX-342 permanece `todo`; D-GOV-010 = risk P06.
+- Sem pasta `approvals/` / `policies/`.
 | Quota `maxCompanies` enforcement | billing P07 | D-ORG-035 |
 | Export/listagem global memberships | Pré-G4 | D-ORG-044 |
 | Graph projector Neo4j | graph P03 consumer | D-ORG-021 |

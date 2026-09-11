@@ -42,6 +42,12 @@ R01 inventário · R02 fronteiras SIMULATED/PAPER · R03 domínio · R04 contrat
 | RLS PostgreSQL | P09 (D-CX-062) |
 | Código `backend/modules/connections/` | **ANX-84** `in_review` (S1–S2 entregue; G2–G6 PASS batch) |
 
+## Non-goals
+
+- Nenhuma migration ST08 neste pack extra.
+- Specs 001–005 **draft**; ANX-342 `todo`; D-GOV-010 = risk P06.
+- REAL_EXECUTION / broker live fora deste pack (D-CX-061).
+
 ---
 
 ## Critérios de aceite G0

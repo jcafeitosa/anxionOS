@@ -31,6 +31,12 @@ status: draft
 | Ticks | market-data |
 | Certification | evaluation |
 | Neo4j driver | graph |
+
+## Non-goals
+
+- Nenhuma migration ST08 neste pack.
+- Specs 001–005 **draft**; ANX-342 `todo`; D-GOV-010 = risk P06.
+- Strategies não emite Order/TradeIntent.
 | Pasta products/ | PC 10 — não criar |
 | D-GOV-010 | risk P06 |
 | Spec 003 accepted | Owner + checklist (ST08 0/23) |

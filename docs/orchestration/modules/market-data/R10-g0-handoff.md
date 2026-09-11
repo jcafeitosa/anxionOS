@@ -28,6 +28,12 @@ R01 inventário · R02 fronteiras · R03 domínio · R04 contratos · R05 storag
 | RLS PostgreSQL | P09 (D-MD-015) |
 | Ledger/posting | accounting module |
 
+## Non-goals
+
+- Nenhuma migration ST08 neste pack.
+- Specs 001–005 **draft**; ANX-342 `todo`; D-GOV-010 = risk P06.
+- Market-data não posta ledger.
+
 ## Gates documentais G2–G6 (ANX-87)
 
 | Gate | Disposição | Evidência |

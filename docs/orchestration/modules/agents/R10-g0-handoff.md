@@ -30,6 +30,12 @@ type: debate
 | Provider secrets | connections |
 | Promotion auto | evaluation P08 |
 | D-GOV-010 | risk P06 |
+
+## Non-goals
+
+- Nenhuma migration ST08 neste pack documental.
+- Specs 001–005 **draft**; ANX-342 permanece `todo`.
+- Sem pasta `approvals/` / `policies/`.
 | Pastas agent-teams / capabilities | PC 04 / PC 05 — não criar |
 | G7 código | Owner + issue impl |
 
