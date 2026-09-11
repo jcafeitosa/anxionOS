@@ -4,8 +4,8 @@ title: Funcionalidades — modules/connections
 ---
 # Funcionalidades — `modules/connections` (P05)
 
-**Issue mapa:** ANX-347 · **Serial:** [PC 06 Models](/notes/anxionos-pc06-models-debate) · [PC 07](/notes/anxionos-pc07-connections-debate) · [PC 30](/notes/anxionos-pc30-integrations-debate)
-**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP) · spec 005
+**Issue mapa:** ANX-347 · **Serial:** [PC 06 Models](/notes/anxionos-pc06-models-debate.md) · [PC 07](/notes/anxionos-pc07-connections-debate.md) · [PC 30](/notes/anxionos-pc30-integrations-debate.md)
+**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules.md) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP.md) · spec 005
 
 ## Responsabilidade
 

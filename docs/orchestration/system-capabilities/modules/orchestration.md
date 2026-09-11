@@ -4,8 +4,8 @@ title: Funcionalidades — modules/orchestration
 ---
 # Funcionalidades — `modules/orchestration` (P04)
 
-**Issue mapa:** ANX-347 · **Serial:** [PC 04](/notes/anxionos-pc04-agent-teams-debate) · [PC 11](/notes/anxionos-pc11-projects-debate) · [PC 12](/notes/anxionos-pc12-tasks-debate)
-**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP) · spec 002
+**Issue mapa:** ANX-347 · **Serial:** [PC 04](/notes/anxionos-pc04-agent-teams-debate.md) · [PC 11](/notes/anxionos-pc11-projects-debate.md) · [PC 12](/notes/anxionos-pc12-tasks-debate.md)
+**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules.md) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP.md) · spec 002
 
 ## Responsabilidade
 

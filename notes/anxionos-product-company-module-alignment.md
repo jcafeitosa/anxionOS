@@ -85,7 +85,7 @@ A taxonomia conceitual do Owner lista 30 módulos. Ela é tratada como mapa de c
 - `adapter-gateway` = infra/composição (ADR0006), **não** context de domínio.
 - `agents` restaurado na lista e na linha da taxonomia Owner «Agents».
 
-Prova: parágrafo «Resultado da auditoria» acima + [briefing ingestido](/external-sources/owner-briefing-product-company-2026-09-10).
+Prova: parágrafo «Resultado da auditoria» acima + [briefing ingestido](/external-sources/owner-briefing-product-company-2026-09-10.md).
 
 **Fecho ANX-345:** evidência documentada; issue vai a `in_review`. ANX-342 permanece aberto (auditoria/Owner).
 

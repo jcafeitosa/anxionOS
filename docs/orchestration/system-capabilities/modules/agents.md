@@ -4,8 +4,8 @@ title: Funcionalidades — modules/agents
 ---
 # Funcionalidades — `modules/agents` (P04)
 
-**Issue mapa:** ANX-347 · **Serial:** [PC 03](/notes/anxionos-pc03-agents-debate) (ANX-353) · [PC 05 Capabilities](/notes/anxionos-pc05-capabilities-debate)
-**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP) · spec 002
+**Issue mapa:** ANX-347 · **Serial:** [PC 03](/notes/anxionos-pc03-agents-debate.md) (ANX-353) · [PC 05 Capabilities](/notes/anxionos-pc05-capabilities-debate.md)
+**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules.md) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP.md) · spec 002
 
 ## Responsabilidade
 

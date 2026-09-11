@@ -4,8 +4,8 @@ title: Funcionalidades — modules/knowledge
 ---
 # Funcionalidades — `modules/knowledge` (P04)
 
-**Issue mapa:** ANX-347 · **Serial:** [PC 08](/notes/anxionos-pc08-knowledge-debate) · [PC 27 Memory](/notes/anxionos-pc27-memory-debate)
-**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP) · spec 002
+**Issue mapa:** ANX-347 · **Serial:** [PC 08](/notes/anxionos-pc08-knowledge-debate.md) · [PC 27 Memory](/notes/anxionos-pc27-memory-debate.md)
+**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules.md) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP.md) · spec 002
 
 ## Responsabilidade
 

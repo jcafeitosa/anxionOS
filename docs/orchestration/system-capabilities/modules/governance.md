@@ -64,4 +64,4 @@ Grants, delegação, mandatos, aprovações, ChangeProposal, `authorityEpoch` �
 
 ## Gap código
 
-**Parcial (ANX-346, 2026-09-10)** — `backend/modules/governance/src/index.ts` presente (commands, events, UoW). Debate R01–R10 em [modules/governance/](../../modules/governance/). **Não** G7 desta ficha. Approvals/Policies **não** são pastas; ver [M01](/notes/anxionos-pc01-governance-debate).
+**Parcial (ANX-346, 2026-09-10)** — `backend/modules/governance/src/index.ts` presente (commands, events, UoW). Debate R01–R10 em [modules/governance/](../../modules/governance/). **Não** G7 desta ficha. Approvals/Policies **não** são pastas; ver [M01](/notes/anxionos-pc01-governance-debate.md).

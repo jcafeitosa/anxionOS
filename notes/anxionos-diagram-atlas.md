@@ -30,8 +30,8 @@ tags:
 | Storage / autoridade | Archify dataflow | `.archify/artifacts/anxionos-storage-authority.dataflow.html` |
 | Plataforma visual-check | Archify HTML + PNG | `.archify/artifacts/anxionos-platform.architecture.visual-check.html` |
 | Ciclo PC (Mermaid) | [lifecycle](./anxionos-ai-product-company-lifecycle.md) | abaixo |
-| 23 módulos | Mermaid + fichas | [atlas módulos](./anxionos-diagram-atlas-modules.md) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP) |
-| Briefing Owner | Ingest OK | [briefing 2026-09-10](/external-sources/owner-briefing-product-company-2026-09-10) |
+| 23 módulos | Mermaid + fichas | [atlas módulos](./anxionos-diagram-atlas-modules.md) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP.md) |
+| Briefing Owner | Ingest OK | [briefing 2026-09-10](/external-sources/owner-briefing-product-company-2026-09-10.md) |
 
 ## 1. Visão da plataforma
 
@@ -323,5 +323,5 @@ Mermaid complementar: [atlas módulos](./anxionos-diagram-atlas-modules.md). Sem
 - [governance R02](./../docs/orchestration/modules/governance/R02-boundaries.md)
 - [atlas 23 módulos](./anxionos-diagram-atlas-modules.md)
 - `.archify/specs/` (5 plataforma + 23 módulos; validate 28/28 showcase PASS)
-- [briefing Owner](/external-sources/owner-briefing-product-company-2026-09-10) (ANX-344)
-- [CAPABILITY-MAP e fichas](/docs/orchestration/system-capabilities/CAPABILITY-MAP) (ANX-346/347)
+- [briefing Owner](/external-sources/owner-briefing-product-company-2026-09-10.md) (ANX-344)
+- [CAPABILITY-MAP e fichas](/docs/orchestration/system-capabilities/CAPABILITY-MAP.md) (ANX-346/347)

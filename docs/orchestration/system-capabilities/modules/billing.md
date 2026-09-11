@@ -5,7 +5,7 @@ title: Funcionalidades — modules/billing
 # Funcionalidades — `modules/billing` (P07)
 
 **Issue mapa:** ANX-347
-**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP)
+**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules.md) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP.md)
 
 ## Responsabilidade
 

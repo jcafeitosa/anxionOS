@@ -4,8 +4,8 @@ title: Funcionalidades — modules/strategies
 ---
 # Funcionalidades — `modules/strategies` (P06)
 
-**Issue mapa:** ANX-347 · **Serial:** [PC 10 Products](/notes/anxionos-pc10-products-debate) (composto; sem pasta products)
-**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP) · spec 003
+**Issue mapa:** ANX-347 · **Serial:** [PC 10 Products](/notes/anxionos-pc10-products-debate.md) (composto; sem pasta products)
+**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules.md) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP.md) · spec 003
 
 ## Responsabilidade
 

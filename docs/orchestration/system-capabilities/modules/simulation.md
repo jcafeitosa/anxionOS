@@ -4,8 +4,8 @@ title: Funcionalidades — modules/simulation
 ---
 # Funcionalidades — `modules/simulation` (P08)
 
-**Issue mapa:** ANX-347 · **Serial:** [PC 21](/notes/anxionos-pc21-experiments-debate)
-**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP) · spec 004
+**Issue mapa:** ANX-347 · **Serial:** [PC 21](/notes/anxionos-pc21-experiments-debate.md)
+**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules.md) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP.md) · spec 004
 
 ## Responsabilidade
 

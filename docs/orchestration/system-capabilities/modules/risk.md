@@ -4,8 +4,8 @@ title: Funcionalidades — modules/risk
 ---
 # Funcionalidades — `modules/risk` (P06)
 
-**Issue mapa:** ANX-347 · **Serial:** [PC 16 Security](/notes/anxionos-pc16-security-debate) · [PC 25 Policies](/notes/anxionos-pc25-policies-debate)
-**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules) · [alinhamento](/notes/anxionos-product-company-module-alignment) · spec 003 · D-GOV-002
+**Issue mapa:** ANX-347 · **Serial:** [PC 16 Security](/notes/anxionos-pc16-security-debate.md) · [PC 25 Policies](/notes/anxionos-pc25-policies-debate.md)
+**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules.md) · [alinhamento](/notes/anxionos-product-company-module-alignment.md) · spec 003 · D-GOV-002
 
 ## Responsabilidade
 

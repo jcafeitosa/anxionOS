@@ -4,8 +4,8 @@ title: Funcionalidades — modules/decisions
 ---
 # Funcionalidades — `modules/decisions` (P06)
 
-**Issue mapa:** ANX-347 · **Serial:** [PC 23](/notes/anxionos-pc23-decisions-debate)
-**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP) · spec 003
+**Issue mapa:** ANX-347 · **Serial:** [PC 23](/notes/anxionos-pc23-decisions-debate.md)
+**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules.md) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP.md) · spec 003
 
 ## Responsabilidade
 

@@ -4,8 +4,8 @@ title: Funcionalidades — modules/operations
 ---
 # Funcionalidades — `modules/operations` (P09)
 
-**Issue mapa:** ANX-347 · **Serial:** [PC 14](/notes/anxionos-pc14-code-debate) · [PC 17](/notes/anxionos-pc17-deployments-debate) · [PC 18](/notes/anxionos-pc18-infrastructure-debate) · [PC 20](/notes/anxionos-pc20-incidents-debate)
-**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP) · spec 004 OP01–OP08
+**Issue mapa:** ANX-347 · **Serial:** [PC 14](/notes/anxionos-pc14-code-debate.md) · [PC 17](/notes/anxionos-pc17-deployments-debate.md) · [PC 18](/notes/anxionos-pc18-infrastructure-debate.md) · [PC 20](/notes/anxionos-pc20-incidents-debate.md)
+**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules.md) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP.md) · spec 004 OP01–OP08
 
 ## Responsabilidade
 

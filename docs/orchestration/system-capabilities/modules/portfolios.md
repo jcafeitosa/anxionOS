@@ -5,7 +5,7 @@ title: Funcionalidades — modules/portfolios
 # Funcionalidades — `modules/portfolios` (P06)
 
 **Issue mapa:** ANX-347
-**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP) · spec 003
+**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules.md) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP.md) · spec 003
 
 ## Responsabilidade
 

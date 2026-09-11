@@ -4,8 +4,8 @@ title: Funcionalidades — modules/performance
 ---
 # Funcionalidades — `modules/performance` (P06)
 
-**Issue mapa:** ANX-347 · **Serial:** [PC 19](/notes/anxionos-pc19-observability-debate) · [PC 22](/notes/anxionos-pc22-analytics-debate)
-**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP) · spec 003
+**Issue mapa:** ANX-347 · **Serial:** [PC 19](/notes/anxionos-pc19-observability-debate.md) · [PC 22](/notes/anxionos-pc22-analytics-debate.md)
+**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules.md) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP.md) · spec 003
 
 ## Responsabilidade
 

@@ -4,8 +4,8 @@ title: Funcionalidades — modules/evaluation
 ---
 # Funcionalidades — `modules/evaluation` (P08)
 
-**Issue mapa:** ANX-347 · **Serial:** [PC 15 Testing](/notes/anxionos-pc15-testing-debate) · [PC 21](/notes/anxionos-pc21-experiments-debate) · [PC 28 Learning](/notes/anxionos-pc28-learning-debate)
-**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP) · spec 004
+**Issue mapa:** ANX-347 · **Serial:** [PC 15 Testing](/notes/anxionos-pc15-testing-debate.md) · [PC 21](/notes/anxionos-pc21-experiments-debate.md) · [PC 28 Learning](/notes/anxionos-pc28-learning-debate.md)
+**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules.md) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP.md) · spec 004
 
 ## Responsabilidade
 

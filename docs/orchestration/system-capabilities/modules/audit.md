@@ -4,8 +4,8 @@ title: Funcionalidades — modules/audit
 ---
 # Funcionalidades — `modules/audit` (P06)
 
-**Issue mapa:** ANX-347 · **Serial:** [PC 26](/notes/anxionos-pc26-audit-debate)
-**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP) · spec 003
+**Issue mapa:** ANX-347 · **Serial:** [PC 26](/notes/anxionos-pc26-audit-debate.md)
+**Fontes:** [atlas módulos](/notes/anxionos-diagram-atlas-modules.md) · [CAPABILITY-MAP](/docs/orchestration/system-capabilities/CAPABILITY-MAP.md) · spec 003
 
 ## Responsabilidade
 
