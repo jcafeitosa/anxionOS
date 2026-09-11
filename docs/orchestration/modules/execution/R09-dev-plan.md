@@ -1,11 +1,32 @@
 ---
-type: debate
 status: draft
+type: debate
 ---
-
 # R09 — Plano de implementação: `modules/execution`
 
-**Issue:** ANX-101 · impl: **ANX-102** · gate: ANX-58
+**Rodada:** R9  
+**Data:** 2026-09-11  
+**Issue:** ANX-101 · impl: **ANX-102** · gate: ANX-58 · pack ANX-389  
+**Callers:** [R08-decision-log.md](./R08-decision-log.md) · [R10-g0-handoff.md](./R10-g0-handoff.md). Plano **draft**. Sem migration neste artefato.
+
+## In / Out (R9)
+
+**In:** slices P06-S1–S6; matriz G3-EX-S2-*; fixtures SimulatedVenueAdapter.
+
+**Out:** ordem de slices. **Não** declara ST08. **Não** `done` em ANX-389. Go protocol S5 defer. Graph S6 defer.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`. Não REAL venue. Não G7 ANX-102 neste pack.
+
+## Ownership (plano)
+
+| Superfície | Dono |
+| --- | --- |
+| schema + submitOrder SIMULATED | **execution** (ANX-102) |
+| TradeIntent fixture | **decisions** |
+| permit fixtures | **risk** / **governance** |
+| adapter-gateway | **KEEP** |
 
 ## Slices P06
 
@@ -35,6 +56,6 @@ status: draft
 - TradeIntent + permits fixture em `backend/tests/fixtures/execution/`
 - Zero REAL_EXECUTION / LIVE_TRADING flags
 
-**ANX-102** — blocked_by ANX-101 G7
+**ANX-102** — blocked_by ANX-101 G7. Pack ANX-389 **não** `done`.
 
 → **R10** ([R10-g0-handoff.md](./R10-g0-handoff.md))

@@ -1,10 +1,31 @@
 ---
 type: debate
 ---
-
 # R07 — Riscos: `modules/execution`
 
-**Issue:** ANX-101
+**Rodada:** R7  
+**Data:** 2026-09-11  
+**Issue:** ANX-101 · pack ANX-389  
+**Callers:** [R06-dependencies.md](./R06-dependencies.md) · [R08-decision-log.md](./R08-decision-log.md).
+
+## In / Out (R7)
+
+**In:** permit bypass, duplicate fill, cross-tenant, stale epoch, secret leak, fill overflow, SQLite, REAL, double clientOrderId, accounting sync no hot path.
+
+**Out:** tabela R-EX-* + G5. **Não** Red Team em venue real. Sem ST08 live.
+
+## Non-goals
+
+Não mitigar com stub de permit. Não REAL v1. Não spec `accepted`. Não ANX-342/389 `done`.
+
+## Ownership (riscos)
+
+| Superfície | Dono |
+| --- | --- |
+| EX_* rejects / order uniqueness | **execution** |
+| Permit forge | **governance** / **risk** |
+| Venue secret | **connections** |
+| adapter-gateway | **KEEP** |
 
 | ID | Risco | Sev | Mitigação |
 | --- | --- | ---: | --- |

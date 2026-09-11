@@ -1,14 +1,40 @@
 ---
 type: debate
 ---
-
 # R04 — Contratos e eventos: `modules/execution`
 
-**Issues:** ANX-101 · ANX-58
+**Rodada:** R4  
+**Data:** 2026-09-11  
+**Issues:** ANX-101 · ANX-58 · pack ANX-389  
+**Callers:** [R03-domain-sketch.md](./R03-domain-sketch.md) · [R05-storage-pg.md](./R05-storage-pg.md). API esboço interno apenas.
 
 ## Convenções
 
-`ownerDomain: execution` · SIMULATED|PAPER only · envelopes spec 001
+`ownerDomain: execution` · `execution.<aggregate>.<action>.v1` · SIMULATED|PAPER only · envelopes spec 001 · payloads sem secrets venue
+
+**KEEP adapter-gateway** se já exportado.
+
+## In / Out (R4)
+
+**In:** `POST /execution/sessions` (intentHash + permits + reservation); `POST /execution/orders` (session OPEN + idempotencyKey); `POST /execution/fills` (simulator/adapter callback only); `POST /execution/reconciliation` (operator grant). Consumers: `decisions.intent.submitted.v1`, `risk.permit.issued.v1`, `governance.permit.granted.v1`, `capital.reservation.created.v1`, `risk.epoch.bumped.v1`, `risk.kill_switch.activated.v1`, `connections.binding.revoked.v1`.
+
+**Out:** eventos `execution.*` abaixo. **Não** ledger (`accounting`). **Não** Position mutate síncrono (`portfolios` via evento). Sem api_key/secret/token em payload.
+
+## Non-goals
+
+Não REAL/LIVE_TRADING v1. Não SQLite order queue. Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`. Não Go wire S1–S2.
+
+## Ownership (contratos)
+
+| Superfície | Dono |
+| --- | --- |
+| ExecutionSession / Order / Fill / VenueAdapterRef / ReconciliationCase | **execution** |
+| TradeIntent | **decisions** |
+| RiskPermit | **risk** |
+| ExecutionPermit | **governance** |
+| Reservation | **capital** |
+| secretRef | **connections** |
+| adapter-gateway | **KEEP** |
 
 ## Eventos emitidos v1
 

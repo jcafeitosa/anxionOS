@@ -1,10 +1,31 @@
 ---
 type: debate
 ---
-
 # R05 — Armazenamento: `modules/execution`
 
-**Issue:** ANX-101
+**Rodada:** R5  
+**Data:** 2026-09-11  
+**Issue:** ANX-101 · pack ANX-389  
+**Callers:** [R04-contracts-events.md](./R04-contracts-events.md) · [R06-dependencies.md](./R06-dependencies.md). ADR0004 PG. **Sem migration.** ST08 **0/23**.
+
+## In / Out (R5)
+
+**In:** tabelas `execution_*` + outbox mesma UoW; índices intentHash / UNIQUE client_order_id.
+
+**Out:** modelo documental. **Não** colunas secret. **Não** Neo4j writer no módulo. Sem SQLite autoritativo.
+
+## Non-goals
+
+Não RLS P09. Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`.
+
+## Ownership (storage)
+
+| Superfície | Dono |
+| --- | --- |
+| execution_session/order/fill/adapter_ref/reconciliation | **execution** |
+| Position node | **portfolios** (projector) |
+| secret store | **connections** |
+| adapter-gateway | **KEEP** |
 
 ## PostgreSQL (autoritativo)
 

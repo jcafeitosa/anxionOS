@@ -1,10 +1,33 @@
 ---
 type: debate
 ---
-
 # R06 — Dependências: `modules/execution`
 
-**Issues:** ANX-101 · ANX-97 · ANX-99 · ANX-91 · ANX-93 · ANX-58 · ANX-83
+**Rodada:** R6  
+**Data:** 2026-09-11  
+**Issues:** ANX-101 · ANX-97 · ANX-99 · ANX-91 · ANX-93 · ANX-58 · ANX-83 · pack ANX-389  
+**Callers:** [R05-storage-pg.md](./R05-storage-pg.md) · [R07-risks.md](./R07-risks.md).
+
+## In / Out (R6)
+
+**In:** TradeIntent (decisions); RiskPermit consume; ExecutionPermit; CapitalReservation; Venue binding SIMULATED/PAPER; instrumentId; Agency scope.
+
+**Out:** `execution.fill.confirmed.v1` → accounting/portfolios/capital; todos `execution.*` → audit; projector graph. Sem mutate Grant, Permit storage, Reservation rows alheias, ou Neo4j driver.
+
+## Non-goals
+
+Não D-GOV-010. Não import `connections/infrastructure` secrets. Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`.
+
+## Ownership (dependências)
+
+| Superfície | Dono |
+| --- | --- |
+| Order / Fill / Session | **execution** |
+| TradeIntent | **decisions** |
+| RiskPermit | **risk** |
+| ExecutionPermit | **governance** |
+| Reservation | **capital** |
+| adapter-gateway | **KEEP** |
 
 ## Upstream (obrigatório G1)
 
