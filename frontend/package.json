@@ -11,7 +11,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "test:e2e": "playwright test",
-    "test:unit": "node --experimental-strip-types --test src/lib/console-access.test.ts src/lib/owner-dashboard.test.ts src/lib/archify-platform.test.ts src/lib/partner-console.test.ts src/lib/agency-agents-catalog.test.ts src/lib/owner-memberships.test.ts src/lib/owner-grants.test.ts src/lib/owner-agent-autonomy.test.ts src/lib/owner-approvals.test.ts src/lib/owner-finance.test.ts src/lib/operator-incidents.test.ts src/lib/operator-recovery-tasks.test.ts src/lib/operator-recovery-mutations.test.ts src/lib/operator-orders.test.ts",
+    "test:unit": "node --experimental-strip-types --test src/lib/console-access.test.ts src/lib/owner-dashboard.test.ts src/lib/archify-platform.test.ts src/lib/partner-console.test.ts src/lib/agency-agents-catalog.test.ts src/lib/owner-memberships.test.ts src/lib/owner-grants.test.ts src/lib/owner-agent-autonomy.test.ts src/lib/owner-approvals.test.ts src/lib/owner-finance.test.ts src/lib/operator-incidents.test.ts src/lib/operator-recovery-tasks.test.ts src/lib/operator-recovery-mutations.test.ts src/lib/operator-orders.test.ts src/lib/operator-takeover.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
