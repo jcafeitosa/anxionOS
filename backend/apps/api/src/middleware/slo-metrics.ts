@@ -54,6 +54,11 @@ function recordRequestMetrics(
 	}
 }
 
+interface SloMetricsStore {
+	sloRequestStartMs?: number;
+	sloMetricsRecorded?: boolean;
+}
+
 export interface SloMetricsPluginDeps {
 	metrics: MetricsCollector;
 }
@@ -63,29 +68,32 @@ export function createSloMetricsPlugin(deps: SloMetricsPluginDeps) {
 	return (app: Elysia) =>
 		app
 			.onRequest(({ store }) => {
-				store.sloRequestStartMs = performance.now();
-				store.sloMetricsRecorded = false;
+				const sloStore = store as SloMetricsStore;
+				sloStore.sloRequestStartMs = performance.now();
+				sloStore.sloMetricsRecorded = false;
 			})
 			.onAfterHandle(({ request, set, store }) => {
-				if (store.sloMetricsRecorded) return;
-				store.sloMetricsRecorded = true;
+				const sloStore = store as SloMetricsStore;
+				if (sloStore.sloMetricsRecorded) return;
+				sloStore.sloMetricsRecorded = true;
 				const pathname = new URL(request.url).pathname;
 				recordRequestMetrics(
 					deps.metrics,
 					pathname,
 					resolveResponseStatus(set),
-					store.sloRequestStartMs as number | undefined,
+					sloStore.sloRequestStartMs,
 				);
 			})
 			.onError(({ request, set, store }) => {
-				if (store.sloMetricsRecorded) return;
-				store.sloMetricsRecorded = true;
+				const sloStore = store as SloMetricsStore;
+				if (sloStore.sloMetricsRecorded) return;
+				sloStore.sloMetricsRecorded = true;
 				const pathname = new URL(request.url).pathname;
 				recordRequestMetrics(
 					deps.metrics,
 					pathname,
 					resolveResponseStatus(set),
-					store.sloRequestStartMs as number | undefined,
+					sloStore.sloRequestStartMs,
 				);
 			});
 }

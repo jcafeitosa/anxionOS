@@ -29,7 +29,7 @@ function parseIntervalMs(): number {
 function createLoggingLagAlertHook(): LagAlertHook {
 	return {
 		onLagAlert(alert) {
-			logger.warn("Eventing lag SLI threshold breached", alert);
+			logger.warn("Eventing lag SLI threshold breached", { ...alert });
 		},
 	};
 }
