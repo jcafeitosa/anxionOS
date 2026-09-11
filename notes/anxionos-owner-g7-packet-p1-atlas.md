@@ -39,22 +39,22 @@ stateDiagram-v2
 
 Só o Owner (G7) muda `status:` nestes arquivos:
 
-| Spec | Path |
+| Spec | Path (brain/, sem carimbo neste pacote) |
 | --- | --- |
-| 001 institucional | [[brain/project-docs/specs/001-institutional-contract/spec]] |
-| 002 agents/knowledge | [[brain/project-docs/specs/002-agents-knowledge/spec]] |
-| 003 investimento | [[brain/project-docs/specs/003-investment-lifecycle/spec]] |
-| 004 evolução | [[brain/project-docs/specs/004-institutional-evolution/spec]] |
-| 005 connections | [[brain/project-docs/specs/005-connections-integration/spec]] |
+| 001 institucional | `brain/project-docs/specs/001-institutional-contract/spec.md` |
+| 002 agents/knowledge | `brain/project-docs/specs/002-agents-knowledge/spec.md` |
+| 003 investimento | `brain/project-docs/specs/003-investment-lifecycle/spec.md` |
+| 004 evolução | `brain/project-docs/specs/004-institutional-evolution/spec.md` |
+| 005 connections | `brain/project-docs/specs/005-connections-integration/spec.md` |
 
-Checklist P1 (sem carimbo): [[brain/notes/anxionos-p1-spec-promotion-checklist]].
+Checklist P1 (sem carimbo): `brain/notes/anxionos-p1-spec-promotion-checklist.md`.
 
 **Ressalva obrigatória no aceite:** ST08 (storage homologado 23/23) continua **0/23**. Aceitar spec ≠ homologar engines reais / REAL_EXECUTION.
 
 ### 2. ANX-342 — atlas visual + serial PC 01–30
 
 - Status atual: **`todo`** (não hijack; não `done` por agente).
-- Evidência documental: hub [[brain/notes/anxionos-pc-serial-hub]] e [[notes/anxionos-pc-serial-index]]; Archify 23 workflows de módulo + platform + product-company.
+- Evidência documental: hub `brain/notes/anxionos-pc-serial-hub.md` e [índice serial](./anxionos-pc-serial-index.md); Archify 23 workflows de módulo + platform + product-company.
 - Aceite Owner: mover ANX-342 para `done` **somente** se o atlas (PC + diagramas) for aceito como entrega visual.
 
 ### 3. ANX-389 — programa P1 documental DEV_READY

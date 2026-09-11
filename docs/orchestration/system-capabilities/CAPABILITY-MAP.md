@@ -71,7 +71,7 @@ type: guide
 
 ## Ponteiros P1 (ANX-389)
 
-Hub P1 (índice serial): Debates seriais: [índice PC](../../../notes/anxionos-pc-serial-index.md). Thin spec 003: [índice](../../../notes/anxionos-pc-serial-index.md). Packs R01–R10 canônicos em `docs/orchestration/modules/<modulo>/` para os **23** (inclui graph). Histórico: [structure-debate/graph](../structure-debate/graph/R10-g0-handoff.md). Specs 001–005 permanecem **draft** (ST08 0/23). Sem pasta `approvals/`, `policies/` ou `adapter-gateway`.
+Hub P1 (índice serial): Debates seriais: [índice PC](../../../notes/anxionos-pc-serial-index.md). Thin spec 003: [índice](../../../notes/anxionos-pc-serial-index.md). Packs R01–R10 canônicos em `docs/orchestration/modules/<modulo>/` para os **23** (inclui graph). Histórico: [structure-debate/graph](../structure-debate/graph/R10-g0-handoff.md). Specs 001–005 permanecem **draft** (ST08 0/23). Sem pasta de domínio `approvals/` ou `policies/`. `backend/modules/adapter-gateway` existe como biblioteca de conformidade (ADR0006) — não é o 24º dono e não tem ficha/R10/Archify de módulo. Pacote G7 Owner (draft): [notes/anxionos-owner-g7-packet-p1-atlas.md](../../../notes/anxionos-owner-g7-packet-p1-atlas.md).
 
 | Módulo | Debate PC | Pack canônico |
 | --- | --- | --- |
@@ -84,4 +84,5 @@ Hub P1 (índice serial): Debates seriais: [índice PC](../../../notes/anxionos-p
 - [SLACK-TRANSCRIPTS.md](./SLACK-TRANSCRIPTS.md)
 - [MODULE-STRUCTURE-CHECKLIST.md](./MODULE-STRUCTURE-CHECKLIST.md)
 - [Modos de execução e classes de ativos](./execution-modes-and-asset-classes.md)
-- [modules/](./modules/) — 23 fichas (ANX-347); sem `approvals`, `policies` ou `adapter-gateway`
+- [modules/](./modules/) — 23 fichas (ANX-347); sem ficha `approvals`, `policies` ou `adapter-gateway`
+- [Alinhamento 23 vs taxonomia PC / adapter-gateway KEEP](../../../notes/anxionos-product-company-module-alignment.md)
