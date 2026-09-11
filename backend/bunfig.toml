@@ -3,3 +3,8 @@ peer = true
 
 [test]
 preload = ["./tests/setup.ts"]
+# `dist/` guarda artefatos de build (gitignored) que incluem `.test.js` compilados.
+# Sem isto, `bun test` executa 43 arquivos obsoletos: o baseline local fica
+# inflado e NAO e' reproduzivel de um clone limpo (achado F4 do G5 — 1739 no
+# working tree contra 1585 no clone). Teste roda a partir de `src`/`tests`.
+pathIgnorePatterns = ["**/dist/**"]

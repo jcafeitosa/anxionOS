@@ -140,9 +140,14 @@ export async function recordSessionRevoked(
 			return { sessionRef: toSessionRefDto(existing), transitioned: false };
 		}
 		if (!existing && !command.externalRefHash) {
+			// Mensagem IDENTICA a do caminho de referencia de terceiro (abaixo): a
+			// distincao permitia inferir a EXISTENCIA de sessionRef alheia a partir
+			// do texto (achado F3 da revalidacao G5). A dica acionavel
+			// (`externalRefHash` obrigatorio para referencia desconhecida) esta na
+			// descricao do contrato, nao no erro.
 			throwIdentityError(
 				"IDN_SESSION_NOT_FOUND",
-				"Unknown session reference requires externalRefHash",
+				"Session reference not found",
 			);
 		}
 		// ANX-467 (2o caminho): a referencia desconhecida por id e' resolvida por
