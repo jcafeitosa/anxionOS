@@ -8,10 +8,6 @@ export type {
 	IdentityTransactionContext,
 	IdentityUnitOfWork,
 } from "./identity-unit-of-work";
-export type {
-	PrincipalLookup,
-	PrincipalLookupResult,
-} from "./principal-lookup";
 export type { PrincipalRepository } from "./principal-repository";
 export type {
 	GeneratedServiceCredential,

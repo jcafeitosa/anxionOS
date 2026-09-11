@@ -4,7 +4,6 @@ import type {
 	IdentityTransactionContext,
 	IdentityUnitOfWork,
 	PrincipalRepository,
-	ServiceCredentialCrypto,
 	ServiceCredentialRepository,
 	ServiceIdentityRepository,
 	SessionRefRepository,
@@ -34,7 +33,6 @@ export interface IdentityPluginDeps {
 	identityUnitOfWork: IdentityUnitOfWork;
 	grantRepository: GrantRepository;
 	agencyScope: AgencyScopePort;
-	credentialCrypto: ServiceCredentialCrypto;
 	/** Inline revocation so a disabled consumer cannot leave a session open. */
 	sessionRevoker?: SessionRevocationPort;
 }

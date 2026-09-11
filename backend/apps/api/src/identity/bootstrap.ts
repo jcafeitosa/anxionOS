@@ -1,10 +1,4 @@
-import {
-	createIdentityDb,
-	createPgPrincipalLookup,
-	createServiceCredentialCrypto,
-	type PrincipalLookup,
-	type ServiceCredentialCrypto,
-} from "@anxionos/identity";
+import { createIdentityDb } from "@anxionos/identity";
 import type { Pool } from "pg";
 import { createBetterAuthSessionRevoker } from "./better-auth-session-revoker";
 import type { IdentityPluginDeps } from "./deps";
@@ -12,10 +6,7 @@ import type { IdentityPluginDeps } from "./deps";
 export type IdentityApiRuntime = Omit<
 	IdentityPluginDeps,
 	"auth" | "grantRepository" | "agencyScope"
-> & {
-	principalLookup: PrincipalLookup;
-	credentialCrypto: ServiceCredentialCrypto;
-};
+>;
 
 /**
  * Composition root for the identity module in `apps/api`: builds repositories,
@@ -29,8 +20,6 @@ export function createIdentityApiRuntime(pool: Pool): IdentityApiRuntime {
 		serviceCredentialRepository: db.serviceCredentialRepository,
 		sessionRefRepository: db.sessionRefRepository,
 		identityUnitOfWork: db.unitOfWork,
-		principalLookup: createPgPrincipalLookup(pool),
-		credentialCrypto: createServiceCredentialCrypto(),
 		sessionRevoker: createBetterAuthSessionRevoker(pool),
 	};
 }

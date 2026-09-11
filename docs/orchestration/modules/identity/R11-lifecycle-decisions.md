@@ -51,6 +51,12 @@ Registro das decisões tomadas durante a implementação do slice R03/R04 que **
 
 **Verificação.** `tests/identity/recovery-revocation-lifecycle.test.ts` ("revoked principal fails closed for consumers").
 
+## D-IDN-029 — A lookup pública de Principal fica em `organizations`
+
+**Decisão.** O identity **não** publica porta+adapter próprios de leitura de Principal. O contrato público (`PrincipalLookup`) é servido pelo adapter de `organizations` (D-IDN-009), que já existe e é consumido pelo boundary. A porta `PrincipalLookup` e o `createPgPrincipalLookup` criados no S2 foram **removidos** por serem superfície morta duplicada (achado do G1, MEDIUM #4).
+
+**Motivo.** Duas implementações do mesmo contrato divergem: uma passa a filtrar status de um jeito, a outra de outro. Como a decisão aceita já atribui o adapter a `organizations`, manter a cópia no identity era risco sem função.
+
 ## Conflito aberto — R04 vs D-IDN-023 (`organizationId` em Principal)
 
 R04 descreve o payload de `identity.principal.registered.v1` com `organizationId` e uma idempotência `(organizationId, subjectKey)`. D-IDN-023 (aceito) define Principal **global**, com tenancy via Membership em `organizations`, e D-IDN-006 fixa idempotência por `authUserId`.

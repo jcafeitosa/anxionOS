@@ -1,10 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { IDENTITY_ERROR_CODES } from "@anxionos/contracts/identity";
-import {
-	createServiceCredentialCrypto,
-	IdentityCommandError,
-	type Principal,
-} from "@anxionos/identity";
+import { IdentityCommandError, type Principal } from "@anxionos/identity";
 import { createAgencyScope } from "../../apps/api/src/identity/agency-scope";
 import {
 	requireIdentityGrant,
@@ -86,7 +82,6 @@ function deps(
 				return overrides.memberships ?? [];
 			},
 		},
-		credentialCrypto: createServiceCredentialCrypto(),
 	};
 }
 

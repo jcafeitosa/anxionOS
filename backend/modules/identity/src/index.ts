@@ -126,10 +126,6 @@ export type {
 	IdentityTransactionContext,
 	IdentityUnitOfWork,
 } from "./domain/ports/identity-unit-of-work";
-export type {
-	PrincipalLookup,
-	PrincipalLookupResult,
-} from "./domain/ports/principal-lookup";
 export type { PrincipalRepository } from "./domain/ports/principal-repository";
 export type {
 	GeneratedServiceCredential,
@@ -152,7 +148,6 @@ export {
 	toIdentityUserProjectionNode,
 } from "./graph/projection-contract";
 export { hashSessionRef } from "./infrastructure/adapters/credential-crypto";
-export { createPgPrincipalLookup } from "./infrastructure/adapters/principal-lookup";
 export { createServiceCredentialCrypto } from "./infrastructure/adapters/service-credential-crypto";
 export { createIdentityDb } from "./infrastructure/create-db";
 export { createIdentityUnitOfWork } from "./infrastructure/identity-unit-of-work";
