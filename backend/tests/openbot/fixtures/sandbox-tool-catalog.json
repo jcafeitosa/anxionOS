@@ -1,0 +1,17 @@
+{
+  "catalogId": "anxionos-sandbox-tools-v1",
+  "entries": [
+    {
+      "toolName": "sandbox.echo",
+      "schemaVersion": "1.0.0",
+      "description": "Echo input hash for gateway contract tests — no external side effects",
+      "sandboxOnly": true
+    },
+    {
+      "toolName": "sandbox.health_probe",
+      "schemaVersion": "1.0.0",
+      "description": "Read-only health probe fixture for homologation harness",
+      "sandboxOnly": true
+    }
+  ]
+}

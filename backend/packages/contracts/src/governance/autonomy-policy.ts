@@ -62,6 +62,7 @@ export const AUTONOMY_NORMATIVE_MATRIX: readonly AutonomyLevelDefinition[] = [
 			"strategy.research",
 			"intent.propose",
 			"decision.propose",
+			"agents.tools.invoke",
 		],
 		runtimeEnabled: true,
 		requiresApprovalToAssign: false,

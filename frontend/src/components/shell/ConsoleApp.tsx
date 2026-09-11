@@ -118,8 +118,9 @@ function RoleArchifyDashboard({
 					<div data-testid={`${testPrefix}-operational-empty`}>
 						<HonestState
 							kind="empty"
-							title="Agentes e portfólio ainda não alimentam este console"
-							description="O vazio é o estado autoritativo. ANX-143 e ANX-153 continuam abertos; nenhum tenant demo ou número financeiro é inventado aqui."
+							titleAs="h3"
+							title="Este console não lista Owner capabilities"
+							description="Operator/Platform não consomem GET /v1/agencies/:agencyId/agents. ANX-153 (portfólio) permanece aberto; nenhum tenant demo ou número financeiro é inventado."
 						/>
 					</div>
 				</section>
@@ -166,7 +167,7 @@ export function ConsoleApp({ kind, agencyId }: ConsoleAppProps) {
 
 	if (mode === "stale") {
 		return (
-			<main className="flex min-h-dvh items-center px-4">
+			<main id="main-content" className="flex min-h-dvh items-center px-4">
 				<HonestState
 					kind="stale"
 					title="Contexto de autorização desatualizado"
@@ -180,7 +181,7 @@ export function ConsoleApp({ kind, agencyId }: ConsoleAppProps) {
 
 	if (mode !== "ready" || !context) {
 		return (
-			<main className="flex min-h-dvh items-center px-4">
+			<main id="main-content" className="flex min-h-dvh items-center px-4">
 				<HonestState
 					kind="loading"
 					title="Abrindo console"
@@ -242,7 +243,7 @@ export function ConsoleApp({ kind, agencyId }: ConsoleAppProps) {
 								aria-label="Fechar menu"
 								onClick={() => setMobileNavOpen(false)}
 							>
-								<X className="size-5" />
+								<X className="size-5" aria-hidden="true" />
 							</button>
 						</div>
 						<nav className="flex flex-col gap-1 p-4" aria-label="Menu mobile">
@@ -272,7 +273,7 @@ export function ConsoleApp({ kind, agencyId }: ConsoleAppProps) {
 							aria-expanded={mobileNavOpen}
 							onClick={() => setMobileNavOpen(true)}
 						>
-							<Menu className="size-5" />
+							<Menu className="size-5" aria-hidden="true" />
 						</button>
 						<div>
 							<h1 className="text-lg font-semibold text-foreground">{titles[kind]}</h1>

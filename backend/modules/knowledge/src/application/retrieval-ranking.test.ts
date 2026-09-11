@@ -20,7 +20,7 @@ describe("retrieval ranking", () => {
 				score: 0.9,
 				provenance: {
 					sourceTitle: "A",
-					classification: "INTERNAL",
+					classification: "INTERNAL" as const,
 					aclId: "11111111-1111-4111-8111-111111111111",
 					aclEpoch: 1,
 				},

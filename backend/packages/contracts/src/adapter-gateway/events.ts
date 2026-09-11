@@ -36,7 +36,7 @@ export const adapterEventV1Schema = z.object({
 	outcome: adapterEventOutcomeSchema,
 	errorCode: z.string().optional(),
 	errorMessage: z.string().optional(),
-	payload: z.record(z.string(), z.unknown()).default({}),
+	payload: z.record(z.string(), z.unknown()).default(() => ({})),
 	sourceRef: z.string().optional(),
 });
 export const commandDispatchedPayloadSchema = z.object({

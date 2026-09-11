@@ -168,7 +168,7 @@ export function ArchifyCanvas({
 					>
 						<svg
 							viewBox={`0 0 ${ARCHIFY_VIEWBOX.width} ${ARCHIFY_VIEWBOX.height}`}
-							role="img"
+							role="group"
 							aria-labelledby="archify-canvas-title archify-canvas-desc"
 							className="h-auto w-full"
 							data-testid="archify-canvas"

@@ -1,0 +1,164 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "anxionOS — módulo partners",
+    "quality_profile": "showcase",
+    "output": "anxionos-module-partners.workflow.html",
+    "views": [
+      {
+        "id": "hot",
+        "label": "Hot path",
+        "focus": [
+          "actor",
+          "cmd",
+          "store"
+        ],
+        "note": "Comando humano até persistência"
+      },
+      {
+        "id": "emit",
+        "label": "Emit + project",
+        "focus": [
+          "store",
+          "ev",
+          "proj",
+          "sink"
+        ],
+        "note": "Evento versionado e consumidores"
+      }
+    ]
+  },
+  "lanes": [
+    {
+      "id": "intake",
+      "label": "Intake"
+    },
+    {
+      "id": "emit",
+      "label": "Emit + project"
+    }
+  ],
+  "phases": [
+    {
+      "id": "write",
+      "label": "Write",
+      "fromCol": 0,
+      "toCol": 2
+    },
+    {
+      "id": "project",
+      "label": "Project",
+      "fromCol": 3,
+      "toCol": 5,
+      "variant": "emphasis"
+    }
+  ],
+  "mainPath": [
+    "actor",
+    "cmd",
+    "store",
+    "ev",
+    "proj",
+    "sink"
+  ],
+  "nodes": [
+    {
+      "id": "actor",
+      "lane": "intake",
+      "col": 0,
+      "type": "frontend",
+      "label": "Owner",
+      "sublabel": "console",
+      "width": 120
+    },
+    {
+      "id": "cmd",
+      "lane": "intake",
+      "col": 1,
+      "type": "backend",
+      "label": "AccrueCommission",
+      "sublabel": "partners",
+      "width": 150
+    },
+    {
+      "id": "store",
+      "lane": "intake",
+      "col": 2,
+      "type": "database",
+      "label": "PostgreSQL",
+      "sublabel": "Referral",
+      "width": 130
+    },
+    {
+      "id": "ev",
+      "lane": "emit",
+      "col": 3,
+      "type": "messagebus",
+      "label": "Evento v1",
+      "sublabel": "partners.commission.accrued.v1",
+      "width": 160
+    },
+    {
+      "id": "proj",
+      "lane": "emit",
+      "col": 4,
+      "type": "cloud",
+      "label": "graph",
+      "sublabel": "projeção",
+      "width": 120
+    },
+    {
+      "id": "sink",
+      "lane": "emit",
+      "col": 5,
+      "type": "security",
+      "label": "Consumidor",
+      "sublabel": "payout",
+      "width": 130
+    }
+  ],
+  "edges": [
+    {
+      "from": "actor",
+      "to": "cmd"
+    },
+    {
+      "from": "cmd",
+      "to": "store"
+    },
+    {
+      "from": "store",
+      "to": "ev",
+      "variant": "emphasis"
+    },
+    {
+      "from": "ev",
+      "to": "proj"
+    },
+    {
+      "from": "proj",
+      "to": "sink"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Módulo partners",
+      "items": [
+        "Command: AccrueCommission",
+        "Evento: partners.commission.accrued.v1",
+        "ADR0002 — sem 24º módulo"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Fronteira",
+      "items": [
+        "Store: Referral",
+        "Downstream: payout",
+        "Sem pasta approvals/policies"
+      ]
+    }
+  ]
+}

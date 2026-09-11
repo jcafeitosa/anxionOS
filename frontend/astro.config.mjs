@@ -18,6 +18,18 @@ export default defineConfig({
 			},
 			dedupe: ["react", "react-dom"],
 		},
+		optimizeDeps: {
+			// Prebundle island deps so Vite does not 504 "Outdated Optimize Dep"
+			// (lucide-react / better-auth/react / zod) after the first crawl.
+			holdUntilCrawlEnd: true,
+			include: ["lucide-react", "better-auth", "better-auth/react", "zod"],
+			entries: [
+				"src/components/auth/LoginForm.tsx",
+				"src/components/auth/RegisterForm.tsx",
+				"src/components/auth/AuthPanels.tsx",
+				"src/components/PostLoginRouter.tsx",
+			],
+		},
 		ssr: {
 			noExternal: ["better-auth"],
 		},

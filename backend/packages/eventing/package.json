@@ -20,7 +20,7 @@
 	},
 	"dependencies": {
 		"@anxionos/contracts": "workspace:*",
-		"nats": "^2.29.3",
-		"pg": "^8.23.0"
+		"nats": "2.29.3",
+		"pg": "8.23.0"
 	}
 }

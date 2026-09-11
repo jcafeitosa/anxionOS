@@ -8,6 +8,10 @@ import {
 	type IdentityBetterAuthDeps,
 	createIdentityBetterAuthDatabaseHooks,
 } from "./identity-better-auth-hooks";
+import {
+	isSmtpVerificationEnabled,
+	queueVerificationEmail,
+} from "./smtp-mailer";
 
 export interface BetterAuthConfig {
 	secret: string;
@@ -47,6 +51,7 @@ export async function createBetterAuthRuntime(
 	}
 	await ensureBetterAuthSchema(pool);
 	const db = drizzle(pool, { schema: betterAuthDrizzleSchema });
+	const smtpEnabled = isSmtpVerificationEnabled();
 	return {
 		auth: betterAuth({
 			secret: config.secret,
@@ -59,6 +64,25 @@ export async function createBetterAuthRuntime(
 			emailAndPassword: {
 				enabled: true,
 			},
+			...(smtpEnabled
+				? {
+						emailVerification: {
+							sendOnSignUp: true,
+							sendOnSignIn: true,
+							autoSignInAfterVerification: true,
+							expiresIn: 3600,
+							sendVerificationEmail: async ({
+								user,
+								url,
+							}: {
+								user: { email: string };
+								url: string;
+							}) => {
+								queueVerificationEmail({ to: user.email, url });
+							},
+						},
+					}
+				: {}),
 			databaseHooks: createIdentityBetterAuthDatabaseHooks(identityDeps),
 		}) as unknown as ReturnType<typeof betterAuth>,
 	};

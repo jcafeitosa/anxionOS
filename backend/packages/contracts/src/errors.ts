@@ -127,6 +127,9 @@ function extractValidationDetails(error: unknown) {
 	if ("all" in error && Array.isArray(error.all)) {
 		return error.all;
 	}
+	if ("issues" in error && Array.isArray(error.issues)) {
+		return error.issues;
+	}
 	if ("errors" in error) {
 		return error.errors;
 	}

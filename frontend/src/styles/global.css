@@ -117,6 +117,12 @@
 	}
 }
 
+.archify-grid {
+	background-image: linear-gradient(var(--color-primary) 1px, transparent 1px),
+		linear-gradient(90deg, var(--color-primary) 1px, transparent 1px);
+	background-size: 40px 40px;
+}
+
 .motion-enter {
 	animation: fade-up 220ms var(--ease-ui) both;
 }

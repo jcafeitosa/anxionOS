@@ -55,14 +55,31 @@ function createHarness(run: Run, task: TaskWithLease, lease: TaskLease | null) {
 							aggregateType: "Run",
 							revision: run.revision,
 							responseSnapshot: row,
+							createdAt: NOW,
 						}
 					: null;
 			},
 			async record(entry) {
 				commandJournal.set(entry.commandId, entry.responseSnapshot ?? {});
+				return { ...entry, createdAt: NOW };
 			},
 		} as OrchestrationTransactionContext["commandJournal"],
 		runHeartbeatRepository: {
+			async save(heartbeat) {
+				return heartbeat;
+			},
+			async findById() {
+				return null;
+			},
+			async findPendingByCoalesceKey() {
+				return null;
+			},
+			async countPendingByOrganization() {
+				return 0;
+			},
+			async findDuePending() {
+				return [];
+			},
 			async cancelPendingForRun() {
 				cancelledHeartbeats += 1;
 				return 1;
@@ -118,7 +135,9 @@ describe("cancelTaskRun", () => {
 			runId,
 			agentId: "agent-1",
 			leaseToken,
+			leasedAt: NOW,
 			expiresAt: new Date(NOW.getTime() + 60_000),
+			heartbeatDueAt: null,
 			releasedAt: null,
 			createdAt: NOW,
 		};

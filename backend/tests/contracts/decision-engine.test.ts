@@ -13,7 +13,7 @@ const ISO_GRANTED = "2026-09-01T00:00:00.000Z";
 
 function buildValidRecord(overrides: Record<string, unknown> = {}) {
 	return {
-		recordId: "d1234567-89ab-cdef-0123-456789abcdef",
+		recordId: "d1234567-89ab-4def-8123-456789abcdef",
 		schemaVersion: "decision-record.v1",
 		scope: "engineering",
 		status: "PROPOSED",
@@ -25,7 +25,7 @@ function buildValidRecord(overrides: Record<string, unknown> = {}) {
 		},
 		evidence: [
 			{
-				id: "a1234567-89ab-cdef-0123-456789abcdef",
+				id: "a1234567-89ab-4def-8123-456789abcdef",
 				source: "on_chain",
 				uri: "https://chain.example.com/tx/abc123",
 				checksum: "sha256:abc123def456",
@@ -111,7 +111,7 @@ describe("Decision Record envelope schemas", () => {
 				buildValidRecord({
 					evidence: [
 						{
-							id: "a1234567-89ab-cdef-0123-456789abcdef",
+							id: "a1234567-89ab-4def-8123-456789abcdef",
 							source: "on_chain",
 							claim: "Missing uri and checksum",
 						},
@@ -127,7 +127,7 @@ describe("Decision Record envelope schemas", () => {
 				buildValidRecord({
 					evidence: [
 						{
-							id: "a1234567-89ab-cdef-0123-456789abcdef",
+							id: "a1234567-89ab-4def-8123-456789abcdef",
 							source: "on_chain",
 							uri: "https://chain.example.com/tx/abc123",
 							checksum: "sha256:abc123def456",
@@ -145,7 +145,7 @@ describe("Decision Record envelope schemas", () => {
 				buildValidRecord({
 					evidence: [
 						{
-							id: "a1234567-89ab-cdef-0123-456789abcdef",
+							id: "a1234567-89ab-4def-8123-456789abcdef",
 							source: "on_chain",
 							uri: "https://chain.example.com/tx/abc123?api_key=leaked-secret-value",
 							checksum: "sha256:abc123def456",
@@ -163,7 +163,7 @@ describe("Decision Record envelope schemas", () => {
 				buildValidRecord({
 					evidence: [
 						{
-							id: "a1234567-89ab-cdef-0123-456789abcdef",
+							id: "a1234567-89ab-4def-8123-456789abcdef",
 							source: "on_chain",
 							uri: "https://chain.example.com/tx/abc123",
 							checksum: "sha256:token=leaked-secret-value",

@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { isPermitStale } from "../decisions/execution-permit";
+import {
+	executionPermitSchema,
+	isPermitStale,
+} from "../decisions/execution-permit";
 export const orderLifecycleStateSchema = z.enum([
 	"PROPOSED",
 	"AUTHORIZED",
@@ -27,7 +30,7 @@ export const killSwitchScopeSchema = z.enum([
 	"VENUE",
 ]);
 export const effectGateContextSchema = z.object({
-	permit: z.custom(),
+	permit: executionPermitSchema,
 	currentAuthorityEpoch: z.number().int().nonnegative(),
 	currentRiskEpoch: z.number().int().nonnegative(),
 	killSwitchActive: z.boolean(),

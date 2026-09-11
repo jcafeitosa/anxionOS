@@ -10,7 +10,7 @@ import type { GovernancePluginDeps } from "./plugin";
 
 export type GovernanceApiRuntime = Omit<
 	GovernancePluginDeps,
-	"auth" | "membershipRepository"
+	"auth" | "membershipRepository" | "scopedPool"
 >;
 
 export function createGovernanceApiRuntime(pool: Pool): GovernanceApiRuntime {
@@ -24,7 +24,7 @@ export function createGovernanceApiRuntime(pool: Pool): GovernanceApiRuntime {
 			},
 		},
 	});
-	return {
+	const runtime = {
 		grantRepository: governanceDb.grantRepository,
 		autonomyAssignmentRepository: governanceDb.autonomyAssignmentRepository,
 		commandJournal: governanceDb.commandJournal,
@@ -33,4 +33,5 @@ export function createGovernanceApiRuntime(pool: Pool): GovernanceApiRuntime {
 		identityRepository: identity.repository,
 		traversalEvaluator,
 	};
+	return runtime;
 }

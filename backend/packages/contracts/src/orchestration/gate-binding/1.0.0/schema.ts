@@ -33,7 +33,7 @@ export function refineGateBindingDigestRules(
 	if (val.disposition === "NOT_APPLICABLE") {
 		if (!val.notApplicableReason) {
 			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
+				code: "custom",
 				message: "notApplicableReason required for NOT_APPLICABLE",
 				path: ["notApplicableReason"],
 			});
@@ -42,7 +42,7 @@ export function refineGateBindingDigestRules(
 	}
 	if (!val.artifactDigest) {
 		ctx.addIssue({
-			code: z.ZodIssueCode.custom,
+			code: "custom",
 			message: "artifactDigest required unless NOT_APPLICABLE",
 			path: ["artifactDigest"],
 		});

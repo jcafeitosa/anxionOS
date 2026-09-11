@@ -2,6 +2,7 @@ import type { PostLoginAuthContext } from "../../lib/auth";
 import { ownerDashboardModel } from "../../lib/owner-dashboard";
 import { ArchifyCanvas } from "./ArchifyCanvas";
 import { HonestState } from "./HonestState";
+import { OwnerAgentsCatalog } from "./OwnerAgentsCatalog";
 
 interface OwnerDashboardProps {
 	context: PostLoginAuthContext;
@@ -84,11 +85,13 @@ export function OwnerDashboard({
 							</h2>
 							<HonestState
 								kind="pending"
+								titleAs="h3"
 								title={`${model.pendingCount} convite(s) pendente(s)`}
 								description="membershipsPending do loader para esta agência. Nenhum teammate é inventado."
 							/>
 						</section>
 					) : null}
+					<OwnerAgentsCatalog agencyId={agencyId} />
 					<section
 						aria-labelledby="empty-heading"
 						id={model.pendingCount > 0 ? "activity" : "team"}
@@ -97,13 +100,14 @@ export function OwnerDashboard({
 							id="empty-heading"
 							className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground"
 						>
-							Dados operacionais
+							Portfólio
 						</h2>
 						<div data-testid="owner-operational-empty">
 							<HonestState
 								kind="empty"
-								title="Agentes e portfólio ainda não alimentam este console"
-								description="ANX-143 (teammates) e ANX-153 (posições/valuation) continuam abertos no board. O vazio é o estado autoritativo."
+								titleAs="h3"
+								title="Portfólio ainda não alimenta este console"
+								description="ANX-153 (posições/valuation) continua aberto. Nenhum número financeiro é inventado. ANX-143 está done no board; agentes usam GET /v1/agencies/:agencyId/agents acima."
 							/>
 						</div>
 					</section>

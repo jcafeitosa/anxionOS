@@ -1,8 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import { readdirSync, readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { assertDevSeedAllowed } from "../../apps/api/src/auth/seed-dev";
+import {
+	assertDevSeedAllowed,
+	resolvePersonalOwnerSeed,
+	shouldMarkSeedEmailVerified,
+} from "../../apps/api/src/auth/seed-dev";
 
 describe("seed:dev gate", () => {
 	test("refuses production", () => {
@@ -21,6 +25,39 @@ describe("seed:dev gate", () => {
 		expect(() =>
 			assertDevSeedAllowed({ NODE_ENV: "development", ALLOW_DEV_SEED: "true" }),
 		).not.toThrow();
+	});
+});
+
+describe("seed:dev personal owner env", () => {
+	test("skips when env unset", () => {
+		expect(resolvePersonalOwnerSeed({})).toBeNull();
+	});
+
+	test("requires both email and password", () => {
+		expect(() =>
+			resolvePersonalOwnerSeed({ SEED_OWNER_EMAIL: "owner@example.test" }),
+		).toThrow(/SEED_OWNER_PASSWORD/);
+		expect(() =>
+			resolvePersonalOwnerSeed({ SEED_OWNER_PASSWORD: "x" }),
+		).toThrow(/SEED_OWNER_EMAIL/);
+	});
+
+	test("returns email without leaking other env keys", () => {
+		const resolved = resolvePersonalOwnerSeed({
+			SEED_OWNER_EMAIL: "Owner@Example.TEST",
+			SEED_OWNER_PASSWORD: "fixture-only",
+		});
+		expect(resolved?.email).toBe("owner@example.test");
+		expect(resolved?.password).toBe("fixture-only");
+	});
+});
+
+describe("seed:dev emailVerified policy", () => {
+	test("marks only @anxionos.local fixtures verified", () => {
+		expect(shouldMarkSeedEmailVerified("owner@anxionos.local")).toBe(true);
+		expect(
+			shouldMarkSeedEmailVerified("juliocezaraquinofeitosa@gmail.com"),
+		).toBe(false);
 	});
 });
 

@@ -27,6 +27,7 @@ export function RegisterForm() {
 			name,
 			email,
 			password,
+			callbackURL: "/",
 		});
 		if (result.error) {
 			setSubmitting(false);

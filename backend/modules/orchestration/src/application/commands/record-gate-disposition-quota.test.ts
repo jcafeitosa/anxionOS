@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { GATE_DISPOSITION_QUOTA_PER_ORG_PER_WINDOW } from "../../domain/constants";
+import type { OrchestrationTransactionContext } from "../../domain/ports/orchestration-unit-of-work";
 import { recordGateDisposition } from "./record-gate-disposition";
 
 const ORG = "00000000-0000-4000-8000-000000000001";
@@ -8,7 +9,7 @@ describe("recordGateDisposition gate quota", () => {
 	test("rejects when organization quota exceeded", async () => {
 		const deps = {
 			unitOfWork: {
-				async runInTransaction(work) {
+				async runInTransaction(work: (ctx: OrchestrationTransactionContext) => unknown) {
 					return work({
 						gateBindingRepository: {
 							async countByOrganizationSince() {

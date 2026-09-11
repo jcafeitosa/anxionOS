@@ -129,7 +129,7 @@ export const decisionRecordSchema = z.object({
 }).superRefine((record, context) => {
 	for (const evidence of record.evidence) {
 		if (!evidence.uri && !evidence.checksum) {
-			context.addIssue({ code: z.ZodIssueCode.custom, path: ["evidence"], message: "Evidence requires uri or checksum" });
+			context.addIssue({ code: "custom", path: ["evidence"], message: "Evidence requires uri or checksum" });
 		}
 	}
 });

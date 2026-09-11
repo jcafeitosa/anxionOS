@@ -72,7 +72,10 @@ export const createSkillVersionCommandSchema = z.object({
 		.array(skillPermissionRequirementSchema)
 		.max(32)
 		.default([]),
-	sandboxPolicy: skillSandboxPolicySchema.default({}),
+	sandboxPolicy: skillSandboxPolicySchema.default(() => ({
+		allowedSideEffects: [],
+		requiresApproval: false,
+	})),
 });
 
 export const submitSkillVersionCommandSchema = z.object({
@@ -97,7 +100,7 @@ export const bindAgentSkillCommandSchema = z.object({
 	agentVersionId: z.string().uuid(),
 	skillVersionId: z.string().uuid(),
 	expectedAgentRevision: z.number().int().nonnegative(),
-	bindingConfig: skillBindingConfigSchema.default({}),
+	bindingConfig: skillBindingConfigSchema.default(() => ({})),
 });
 
 export const publishAgentVersionCommandSchema = z.object({
@@ -148,7 +151,7 @@ export const registerAgentRoutineCommandSchema = z.object({
 		.regex(/^[a-z][a-z0-9-]*$/),
 	displayName: z.string().min(1).max(256),
 	triggerKind: routineTriggerKindSchema,
-	triggerConfig: routineTriggerConfigSchema.default({}),
+	triggerConfig: routineTriggerConfigSchema.default(() => ({})),
 	cooldownSeconds: z.number().int().nonnegative().default(0),
 });
 

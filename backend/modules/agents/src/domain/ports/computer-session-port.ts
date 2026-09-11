@@ -10,4 +10,25 @@ export interface ComputerSessionPort {
 		sessionId: string;
 		organizationId: string;
 	}): Promise<ComputerSessionRef>;
+	takeoverSession(input: {
+		sessionId: string;
+		organizationId: string;
+		operatorId: string;
+	}): Promise<{
+		session: ComputerSessionRef;
+		revokedAuthorityToken: string;
+		previousController: "bot" | "human";
+	}>;
+	resumeBotControl(input: {
+		sessionId: string;
+		organizationId: string;
+	}): Promise<{
+		session: ComputerSessionRef;
+		revokedAuthorityToken: string;
+	}>;
+	getSession(input: {
+		sessionId: string;
+		organizationId: string;
+	}): Promise<ComputerSessionRef | null>;
+	isAuthorityRevoked(authorityToken: string): boolean;
 }

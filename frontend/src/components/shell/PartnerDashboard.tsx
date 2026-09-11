@@ -135,6 +135,7 @@ export function PartnerDashboard({ context }: PartnerDashboardProps) {
 				{model.accrualCount === 0 ? (
 					<HonestState
 						kind="empty"
+						titleAs="h3"
 						title="Nenhum accrual registrado"
 						description="GET /commission-accruals retornou lista vazia — estado autoritativo, não placeholder."
 					/>
@@ -162,7 +163,7 @@ export function PartnerDashboard({ context }: PartnerDashboardProps) {
 							<div className="flex items-center gap-3">
 								<button
 									type="button"
-									className="min-h-11 rounded-lg border border-border px-3 text-sm disabled:opacity-50"
+									className="min-h-11 min-w-11 rounded-lg border border-border px-3 text-sm disabled:opacity-50"
 									disabled={accrualPage <= 1}
 									onClick={() => setAccrualPage((page) => Math.max(1, page - 1))}
 								>
@@ -173,7 +174,7 @@ export function PartnerDashboard({ context }: PartnerDashboardProps) {
 								</span>
 								<button
 									type="button"
-									className="min-h-11 rounded-lg border border-border px-3 text-sm disabled:opacity-50"
+									className="min-h-11 min-w-11 rounded-lg border border-border px-3 text-sm disabled:opacity-50"
 									disabled={!accrualPageData?.hasMore}
 									onClick={() => setAccrualPage((page) => page + 1)}
 								>
@@ -195,6 +196,7 @@ export function PartnerDashboard({ context }: PartnerDashboardProps) {
 				{model.payoutCount === 0 ? (
 					<HonestState
 						kind="empty"
+						titleAs="h3"
 						title="Nenhum payout registrado"
 						description="GET /payouts retornou lista vazia."
 					/>
@@ -222,7 +224,7 @@ export function PartnerDashboard({ context }: PartnerDashboardProps) {
 							<div className="flex items-center gap-3">
 								<button
 									type="button"
-									className="min-h-11 rounded-lg border border-border px-3 text-sm disabled:opacity-50"
+									className="min-h-11 min-w-11 rounded-lg border border-border px-3 text-sm disabled:opacity-50"
 									disabled={payoutPage <= 1}
 									onClick={() => setPayoutPage((page) => Math.max(1, page - 1))}
 								>
@@ -231,7 +233,7 @@ export function PartnerDashboard({ context }: PartnerDashboardProps) {
 								<span className="text-xs text-muted-foreground">Página {payoutPage}</span>
 								<button
 									type="button"
-									className="min-h-11 rounded-lg border border-border px-3 text-sm disabled:opacity-50"
+									className="min-h-11 min-w-11 rounded-lg border border-border px-3 text-sm disabled:opacity-50"
 									disabled={!payoutPageData?.hasMore}
 									onClick={() => setPayoutPage((page) => page + 1)}
 								>
@@ -254,6 +256,7 @@ export function PartnerDashboard({ context }: PartnerDashboardProps) {
 					<div data-testid="partner-operational-empty">
 						<HonestState
 							kind="empty"
+							titleAs="h3"
 							title="Parceiro registrado sem movimentação"
 							description="Perfil carregado da API; accruals e payouts vazios. Nenhum valor financeiro inventado."
 						/>

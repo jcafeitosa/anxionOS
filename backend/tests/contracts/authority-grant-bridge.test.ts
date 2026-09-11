@@ -10,7 +10,7 @@ import type {
 	DecisionAggregateReferences,
 } from "@anxionos/contracts/decisions";
 
-const GRANT_ID = "a1234567-89ab-cdef-0123-456789abcdef";
+const GRANT_ID = "a1234567-89ab-4def-8123-456789abcdef";
 const references: DecisionAggregateReferences = {
 	decisionId: "dc_dec_123e4567-e89b-12d3-a456-426614174000",
 	proposalId: "dc_prp_123e4567-e89b-12d3-a456-426614174000",
@@ -141,7 +141,7 @@ describe("AuthorityReference → Grant bridge", () => {
 		)!;
 		const mismatchedSnapshot: GovernanceGrantSnapshot = {
 			...activeSnapshot,
-			grantId: "c1234567-89ab-cdef-0123-456789abcdef",
+			grantId: "c1234567-89ab-4def-8123-456789abcdef",
 		};
 		expect(() =>
 			validateAuthorityAgainstGrantSnapshot(

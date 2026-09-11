@@ -60,6 +60,9 @@ export interface PostLoginAuthContext {
 		generatedAt: string;
 		expiresAt?: string;
 	};
+	emailDelivery?: {
+		verificationConfigured: boolean;
+	};
 }
 
 export interface PostLoginDecisionInput {

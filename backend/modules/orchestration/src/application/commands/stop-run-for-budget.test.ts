@@ -7,6 +7,7 @@ import type {
 	OrchestrationTransactionContext,
 	OrchestrationUnitOfWork,
 } from "../../domain/ports/orchestration-unit-of-work";
+import type { StopRunForBudgetDeps } from "./stop-run-for-budget";
 import { stopRunForBudget } from "./stop-run-for-budget";
 
 const ORG = "00000000-0000-4000-8000-000000000001";
@@ -58,14 +59,31 @@ function createHarness(run: Run, task: TaskWithLease, lease: TaskLease | null) {
 							aggregateType: "Run",
 							revision: run.revision,
 							responseSnapshot: row,
+							createdAt: NOW,
 						}
 					: null;
 			},
 			async record(entry) {
 				commandJournal.set(entry.commandId, entry.responseSnapshot ?? {});
+				return { ...entry, createdAt: NOW };
 			},
 		} as OrchestrationTransactionContext["commandJournal"],
 		runHeartbeatRepository: {
+			async save(heartbeat) {
+				return heartbeat;
+			},
+			async findById() {
+				return null;
+			},
+			async findPendingByCoalesceKey() {
+				return null;
+			},
+			async countPendingByOrganization() {
+				return 0;
+			},
+			async findDuePending() {
+				return [];
+			},
 			async cancelPendingForRun() {
 				cancelledHeartbeats += 1;
 				return 1;
@@ -142,12 +160,12 @@ describe("stopRunForBudget", () => {
 						)) as never;
 					},
 					async record(entry) {
-						await unitOfWork.runInTransaction(async (ctx) =>
+						return unitOfWork.runInTransaction(async (ctx) =>
 							ctx.commandJournal.record(entry),
 						);
 					},
 				},
-				leaseClock: { now: () => NOW },
+				leaseClock: { now: () => NOW, expiresIn: (ttlMs: number) => new Date(NOW.getTime() + ttlMs) },
 			},
 			{
 				organizationId: ORG,
@@ -199,7 +217,7 @@ describe("stopRunForBudget", () => {
 			lease: null,
 		};
 		const { unitOfWork } = createHarness(run, task, null);
-		const deps = {
+		const deps: StopRunForBudgetDeps = {
 			unitOfWork,
 			commandJournal: {
 				async findByCommandId(id) {
@@ -208,12 +226,12 @@ describe("stopRunForBudget", () => {
 					)) as never;
 				},
 				async record(entry) {
-					await unitOfWork.runInTransaction(async (ctx) =>
+					return unitOfWork.runInTransaction(async (ctx) =>
 						ctx.commandJournal.record(entry),
 					);
 				},
 			},
-			leaseClock: { now: () => NOW },
+			leaseClock: { now: () => NOW, expiresIn: (ttlMs: number) => new Date(NOW.getTime() + ttlMs) },
 		};
 		const result = await stopRunForBudget(deps, {
 			organizationId: ORG,

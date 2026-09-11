@@ -27,8 +27,16 @@ test.describe("post-login routing (live Better Auth)", () => {
 			"platformAccess=false",
 		);
 		await expect(page.getByTestId("owner-operational-empty")).toContainText(
-			"Agentes e portfólio ainda não alimentam este console",
+			"Portfólio ainda não alimenta este console",
 		);
+		await expect(page.getByTestId("owner-operational-empty")).toContainText("ANX-153");
+		const agentsCatalog = page.getByTestId("owner-agents-catalog");
+		await expect(agentsCatalog).toBeVisible();
+		await expect(agentsCatalog.getByTestId("honest-state-empty")).toBeVisible({
+			timeout: 20_000,
+		});
+		await expect(agentsCatalog).toContainText("GET /v1/agencies/:agencyId/agents");
+		await expect(page.getByTestId("owner-agents-list")).toHaveCount(0);
 		await expect(page.getByText("tn_demo_001")).toHaveCount(0);
 		await expect(page.getByText("C-level")).toHaveCount(0);
 	});
@@ -50,8 +58,11 @@ test.describe("post-login routing (live Better Auth)", () => {
 			"platformAccess=false",
 		);
 		await expect(page.getByTestId("operator-operational-empty")).toContainText(
-			"Agentes e portfólio ainda não alimentam este console",
+			"Este console não lista Owner capabilities",
 		);
+		await expect(page.getByTestId("owner-agents-catalog")).toHaveCount(0);
+		await expect(page.getByTestId("owner-dashboard")).toHaveCount(0);
+		await expect(page.getByRole("heading", { name: "Owner Console" })).toHaveCount(0);
 		await expect(page.getByText("tn_demo_001")).toHaveCount(0);
 		await expect(page.getByText("C-level")).toHaveCount(0);
 	});

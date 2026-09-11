@@ -1,5 +1,6 @@
 import { openapi } from "@elysia/openapi";
 import { Elysia } from "elysia";
+import * as z from "zod";
 import {
 	OPENAPI_MODULE_TAG_GROUPS,
 	OPENAPI_TAGS,
@@ -61,6 +62,9 @@ export function createOpenApiPlugin() {
 	return openapi({
 		path: "/openapi",
 		provider: "scalar",
+		mapJsonSchema: {
+			zod: z.toJSONSchema,
+		},
 		exclude: {
 			methods: ["options", "head", "trace"],
 		},

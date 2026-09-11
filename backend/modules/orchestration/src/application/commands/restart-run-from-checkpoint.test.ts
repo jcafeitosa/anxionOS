@@ -85,13 +85,15 @@ function createHarness(input: {
 							aggregateType: "Run",
 							revision: input.run.revision,
 							responseSnapshot: row,
+							createdAt: NOW,
 						}
 					: null;
 			},
 			async record(entry) {
 				commandJournal.set(entry.commandId, entry.responseSnapshot ?? {});
+				return { ...entry, createdAt: NOW };
 			},
-		} as OrchestrationTransactionContext["commandJournal"],
+		},
 		runHeartbeatRepository: {} as OrchestrationTransactionContext["runHeartbeatRepository"],
 		taskboardMirrorRepository: {} as OrchestrationTransactionContext["taskboardMirrorRepository"],
 		async publishEvents(envelopes) {

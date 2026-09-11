@@ -65,6 +65,11 @@ export const postLoginAuthContextSchema = z.object({
 			expiresAt: z.string().optional(),
 		})
 		.optional(),
+	emailDelivery: z
+		.object({
+			verificationConfigured: z.boolean(),
+		})
+		.optional(),
 });
 
 export type PostLoginAuthContext = z.infer<typeof postLoginAuthContextSchema>;

@@ -24,6 +24,7 @@ export function LoginForm() {
 		const result = await authClient.signIn.email({
 			email,
 			password,
+			callbackURL: "/",
 		});
 		if (result.error) {
 			setSubmitting(false);
@@ -88,9 +89,11 @@ export function LoginForm() {
 					/>
 					<button
 						type="button"
-						className="min-h-11 min-w-11 cursor-pointer rounded-lg border border-border px-3 text-sm text-muted-foreground"
+						className="min-h-11 min-w-11 cursor-pointer rounded-lg border border-border px-3 text-sm text-foreground"
 						onClick={() => setShowPassword((value) => !value)}
 						aria-pressed={showPassword}
+						aria-controls={passwordId}
+						aria-label={showPassword ? "Ocultar caracteres" : "Mostrar caracteres"}
 					>
 						{showPassword ? "Ocultar" : "Mostrar"}
 					</button>
@@ -113,7 +116,7 @@ export function LoginForm() {
 				<a href="/register" className="inline-flex min-h-11 items-center text-foreground">
 					Criar conta
 				</a>
-				<a href="/forgot-password" className="inline-flex min-h-11 items-center text-muted-foreground">
+				<a href="/forgot-password" className="inline-flex min-h-11 items-center text-foreground">
 					Esqueci a senha
 				</a>
 			</div>

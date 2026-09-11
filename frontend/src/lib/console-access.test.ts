@@ -107,4 +107,12 @@ describe("canAccessConsole", () => {
 		});
 		assert.equal(canAccessConsole(loaded, "partner"), false);
 	});
+
+	it("rejects partner even if partnerAccess is true but decision is not partner", () => {
+		const loaded = context({
+			partnerAccess: true,
+			decision: { kind: "owner", reason: "MEMBERSHIP_OWNER" },
+		});
+		assert.equal(canAccessConsole(loaded, "partner"), false);
+	});
 });

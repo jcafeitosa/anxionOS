@@ -6,7 +6,18 @@ import type {
 	OrchestrationTransactionContext,
 	OrchestrationUnitOfWork,
 } from "../../domain/ports/orchestration-unit-of-work";
-import { createFixtureOperationalBudget } from "../../infrastructure/adapters/fixture-operational-budget";
+import type { OperationalBudgetPort } from "../../domain/ports/operational-budget";
+
+function createZeroCapBudget(): OperationalBudgetPort {
+	return {
+		async reserveWakeupUnit() {
+			return false;
+		},
+		async remainingWakeupUnits() {
+			return 0;
+		},
+	};
+}
 import { dequeueRunHeartbeats } from "./dequeue-run-heartbeats";
 
 const ORG = "00000000-0000-4000-8000-000000000001";
@@ -63,15 +74,24 @@ describe("dequeueRunHeartbeats budget pre-check", () => {
 			gateBindingRepository: {} as OrchestrationTransactionContext["gateBindingRepository"],
 			commandJournal: {} as OrchestrationTransactionContext["commandJournal"],
 			runHeartbeatRepository: {
+				async save(next) {
+					Object.assign(heartbeat, next);
+					return next;
+				},
+				async findById() {
+					return null;
+				},
+				async findPendingByCoalesceKey() {
+					return null;
+				},
+				async countPendingByOrganization() {
+					return 0;
+				},
 				async findDuePending() {
 					return [heartbeat];
 				},
 				async cancelPendingForRun() {
 					return 1;
-				},
-				async save(next) {
-					Object.assign(heartbeat, next);
-					return next;
 				},
 			} as OrchestrationTransactionContext["runHeartbeatRepository"],
 			taskboardMirrorRepository: {} as OrchestrationTransactionContext["taskboardMirrorRepository"],
@@ -84,11 +104,11 @@ describe("dequeueRunHeartbeats budget pre-check", () => {
 				return work(ctx);
 			},
 		};
-		const budget = createFixtureOperationalBudget(0);
+		const budget = createZeroCapBudget();
 		const result = await dequeueRunHeartbeats(
 			{
 				unitOfWork,
-				leaseClock: { now: () => NOW },
+				leaseClock: { now: () => NOW, expiresIn: (ttlMs: number) => new Date(NOW.getTime() + ttlMs) },
 				operationalBudget: budget,
 			},
 			{ limit: 10 },

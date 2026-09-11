@@ -12,6 +12,8 @@ export const nodeTypeDefSchema = z.object({
 	payloadSchemaRef: z.string().min(1),
 	checksum: z.string().min(1),
 });
+export type GraphSchemaStatus = z.infer<typeof graphSchemaStatusSchema>;
+export type NodeTypeDef = z.infer<typeof nodeTypeDefSchema>;
 /** F0 seed refs — Agency, User, Membership, Grant (R09 fixture registry). */
 export const GRAPH_F0_NODE_TYPES = [
 	{
@@ -46,8 +48,5 @@ export const GRAPH_F0_NODE_TYPES = [
 		payloadSchemaRef: "graph/schema/v1/Grant.json",
 		checksum: "sha256:f0-grant-v1",
 	},
-];
+] satisfies readonly NodeTypeDef[];
 
-export type GraphSchemaStatus = z.infer<typeof graphSchemaStatusSchema>;
-export type NodeTypeDef = z.infer<typeof nodeTypeDefSchema>;
-/** F0 seed refs — Agency, User, Membership, Grant (R09 fixture registry). */

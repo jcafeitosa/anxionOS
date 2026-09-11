@@ -6,15 +6,16 @@ import {
 	ensureOrganizationsSchema,
 	inviteMember,
 } from "@anxionos/organizations";
+import { hashPassword } from "better-auth/crypto";
+import {
+	assertOrganizationsStartupEnv,
+	createOrganizationsRuntime,
+} from "../organizations/bootstrap";
 import {
 	createBetterAuthRuntime,
 	resolveBetterAuthConfig,
 } from "./create-better-auth";
 import { ensureBetterAuthSchema } from "./ensure-better-auth-schema";
-import {
-	assertOrganizationsStartupEnv,
-	createOrganizationsRuntime,
-} from "../organizations/bootstrap";
 
 export const DEV_SEED_PASSWORD = "anxionos-dev-pass";
 
@@ -25,12 +26,40 @@ export const DEV_SEED_ACCOUNTS = {
 	multi: "multi@anxionos.local",
 } as const;
 
+export interface PersonalOwnerSeed {
+	email: string;
+	password: string;
+}
+
+/** Optional second Owner (ANX-297). Password never belongs in source — only env. */
+export function resolvePersonalOwnerSeed(
+	env: NodeJS.ProcessEnv = process.env,
+): PersonalOwnerSeed | null {
+	const email = env.SEED_OWNER_EMAIL?.trim().toLowerCase() ?? "";
+	const password = env.SEED_OWNER_PASSWORD ?? "";
+	if (!email && !password) {
+		return null;
+	}
+	if (!email || !password) {
+		throw new Error(
+			"seed:dev personal owner requires both SEED_OWNER_EMAIL and SEED_OWNER_PASSWORD",
+		);
+	}
+	return { email, password };
+}
+
+/** E2E fixtures stay verified. Personal Owner emails confirm via SMTP, not seed. */
+export function shouldMarkSeedEmailVerified(email: string): boolean {
+	return email.trim().toLowerCase().endsWith("@anxionos.local");
+}
+
 const COMMAND_IDS = {
 	ownerAgency: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
 	multiAgencyA: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
 	multiAgencyB: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
 	inviteOperator: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
 	acceptOperator: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+	personalOwnerAgency: "f1f1f1f1-f1f1-41f1-81f1-f1f1f1f1f1f1",
 } as const;
 
 export function assertDevSeedAllowed(
@@ -48,9 +77,10 @@ async function markEmailVerified(
 	pool: ReturnType<typeof createPgPool>,
 	email: string,
 ): Promise<void> {
-	await pool.query('UPDATE "user" SET "emailVerified" = TRUE WHERE email = $1', [
-		email,
-	]);
+	await pool.query(
+		'UPDATE "user" SET "emailVerified" = TRUE WHERE email = $1',
+		[email],
+	);
 }
 
 async function findUserId(
@@ -64,32 +94,53 @@ async function findUserId(
 	return result.rows[0]?.id;
 }
 
+async function setCredentialPassword(
+	pool: ReturnType<typeof createPgPool>,
+	userId: string,
+	password: string,
+): Promise<void> {
+	const hashed = await hashPassword(password);
+	const updated = await pool.query(
+		`UPDATE account SET password = $1, "updatedAt" = NOW()
+		 WHERE "userId" = $2 AND "providerId" = 'credential'`,
+		[hashed, userId],
+	);
+	if ((updated.rowCount ?? 0) === 0) {
+		throw new Error(`credential account missing for user ${userId}`);
+	}
+}
+
 async function ensureUser(
 	auth: Awaited<ReturnType<typeof createBetterAuthRuntime>>["auth"],
 	pool: ReturnType<typeof createPgPool>,
 	email: string,
 	name: string,
+	password: string = DEV_SEED_PASSWORD,
 ): Promise<string> {
 	const existing = await findUserId(pool, email);
 	if (!existing) {
 		const signed = await auth.api.signUpEmail({
 			body: {
 				email,
-				password: DEV_SEED_PASSWORD,
+				password,
 				name,
 			},
 		});
-		if (signed.error) {
+		if (signed && typeof signed === "object" && "error" in signed && signed.error) {
+			const failure = signed.error as { message?: string; status?: number };
 			throw new Error(
-				`signUpEmail failed for ${email}: ${signed.error.message ?? signed.error.status}`,
+				`signUpEmail failed for ${email}: ${failure.message ?? failure.status}`,
 			);
 		}
 	}
-	await markEmailVerified(pool, email);
+	if (shouldMarkSeedEmailVerified(email)) {
+		await markEmailVerified(pool, email);
+	}
 	const userId = await findUserId(pool, email);
 	if (!userId) {
 		throw new Error(`user ${email} missing after seed`);
 	}
+	await setCredentialPassword(pool, userId, password);
 	return userId;
 }
 
@@ -101,7 +152,7 @@ async function findAgencyByCommandId(
 	commandId: string,
 ): Promise<string | undefined> {
 	const result = await pool.query<{ aggregate_id: string }>(
-		`SELECT aggregate_id FROM organizations_command_journal WHERE command_id = $1`,
+		"SELECT aggregate_id FROM organizations_command_journal WHERE command_id = $1",
 		[commandId],
 	);
 	return result.rows[0]?.aggregate_id;
@@ -148,12 +199,10 @@ async function insertAdditionalOwnedAgency(
 }
 
 function isUniqueViolation(error: unknown): boolean {
-	return (
-		Boolean(error) &&
-		typeof error === "object" &&
-		"code" in error &&
-		error.code === "23505"
-	);
+	if (!error || typeof error !== "object" || !("code" in error)) {
+		return false;
+	}
+	return error.code === "23505";
 }
 
 async function ensureSeedAgency(
@@ -187,7 +236,7 @@ async function ensureSeedAgency(
 			return insertAdditionalOwnedAgency(pool, input);
 		}
 		const fallback = await pool.query<{ id: string }>(
-			`SELECT id FROM organizations_agencies WHERE owner_principal_id = $1 LIMIT 1`,
+			"SELECT id FROM organizations_agencies WHERE owner_principal_id = $1 LIMIT 1",
 			[input.ownerPrincipalId],
 		);
 		if (fallback.rows[0]) {
@@ -200,6 +249,8 @@ async function ensureSeedAgency(
 export async function seedDevAccounts(): Promise<{
 	ownerAgencyId: string;
 	operatorAgencyId: string;
+	personalOwnerEmail?: string;
+	personalOwnerAgencyId?: string;
 }> {
 	assertDevSeedAllowed();
 	const databaseUrl = process.env.DATABASE_URL?.trim();
@@ -242,10 +293,12 @@ export async function seedDevAccounts(): Promise<{
 			"Multi Dev",
 		);
 
-		const ownerPrincipal = await identity.repository.findByAuthUserId(ownerAuthId);
+		const ownerPrincipal =
+			await identity.repository.findByAuthUserId(ownerAuthId);
 		const operatorPrincipal =
 			await identity.repository.findByAuthUserId(operatorAuthId);
-		const multiPrincipal = await identity.repository.findByAuthUserId(multiAuthId);
+		const multiPrincipal =
+			await identity.repository.findByAuthUserId(multiAuthId);
 		if (!ownerPrincipal || !operatorPrincipal || !multiPrincipal) {
 			throw new Error("seed:dev missing principals after Better Auth signup");
 		}
@@ -311,9 +364,43 @@ export async function seedDevAccounts(): Promise<{
 			}
 		}
 
+		const personal = resolvePersonalOwnerSeed();
+		let personalOwnerAgencyId: string | undefined;
+		if (personal) {
+			const personalAuthId = await ensureUser(
+				auth,
+				pool,
+				personal.email,
+				"Owner",
+				personal.password,
+			);
+			const personalPrincipal =
+				await identity.repository.findByAuthUserId(personalAuthId);
+			if (!personalPrincipal) {
+				throw new Error("seed:dev missing principal for SEED_OWNER_EMAIL");
+			}
+			if (personal.email.toLowerCase() === DEV_SEED_ACCOUNTS.owner) {
+				personalOwnerAgencyId = ownerAgency.aggregateId;
+			} else {
+				const personalAgency = await ensureSeedAgency(pool, org, {
+					commandId: COMMAND_IDS.personalOwnerAgency,
+					displayName: "Agência Owner (seed)",
+					marketScope: "both",
+					ownerPrincipalId: personalPrincipal.id,
+				});
+				personalOwnerAgencyId = personalAgency.aggregateId;
+			}
+		}
+
 		return {
 			ownerAgencyId: ownerAgency.aggregateId,
 			operatorAgencyId: ownerAgency.aggregateId,
+			...(personal
+				? {
+						personalOwnerEmail: personal.email,
+						personalOwnerAgencyId,
+					}
+				: {}),
 		};
 	} finally {
 		await pool.end();
@@ -326,8 +413,17 @@ if (import.meta.main) {
 			console.log(
 				JSON.stringify({
 					ok: true,
-					accounts: DEV_SEED_ACCOUNTS,
-					...result,
+					accounts: {
+						...DEV_SEED_ACCOUNTS,
+						...(result.personalOwnerEmail
+							? { personalOwner: result.personalOwnerEmail }
+							: {}),
+					},
+					ownerAgencyId: result.ownerAgencyId,
+					operatorAgencyId: result.operatorAgencyId,
+					...(result.personalOwnerAgencyId
+						? { personalOwnerAgencyId: result.personalOwnerAgencyId }
+						: {}),
 				}),
 			);
 		})

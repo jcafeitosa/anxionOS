@@ -23,6 +23,7 @@ export type {
 	ToolAuditPort,
 	ToolAuditAfterInput,
 	ToolAuditBeforeInput,
+	ToolAuditTrailQuery,
 } from "./domain/ports";
 export { createAgentRegistryAdapter } from "./infrastructure/adapters/agent-registry-adapter";
 export type { AgentRegistryAdapter } from "./infrastructure/adapters/agent-registry-adapter";
@@ -47,7 +48,23 @@ export { listAgentVersions } from "./application/queries/list-agent-versions";
 export { AgentsCommandError } from "./application/errors";
 export { buildOrganizationTenantContext } from "./application/services/tenant-context";
 export { createEvaluationRefPromotionGate } from "./application/services/create-evaluation-ref-promotion-gate";
+export { createAppendOnlyToolAuditAdapter } from "./infrastructure/adapters/append-only-tool-audit-adapter";
+export { createSandboxComputerSessionAdapter } from "./infrastructure/adapters/sandbox-computer-session-adapter";
+export {
+	buildWorkspacePath,
+	assertWorkspacePathReadable,
+	assertSessionTenant,
+	OPENBOT_SANDBOX_WORKSPACE_ROOT,
+} from "./application/services/workspace-path-jail";
+export {
+	toolRequiresComputerSession,
+	evaluateComputerSessionAuthority,
+} from "./application/services/computer-session-policy";
 export { createGovernanceToolGateway } from "./application/services/create-governance-tool-gateway";
+export { acquireComputerSession } from "./application/commands/acquire-computer-session";
+export { releaseComputerSession } from "./application/commands/release-computer-session";
+export { takeoverComputerSession } from "./application/commands/takeover-computer-session";
+export { resumeBotControl } from "./application/commands/resume-bot-control";
 export { executeGovernedToolCall } from "./application/commands/execute-governed-tool-call";
 export { createAgentsDb } from "./infrastructure/create-db";
 export { ensureAgentsSchema } from "./infrastructure/migrate";

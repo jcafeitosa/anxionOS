@@ -26,6 +26,7 @@
 		"./inference": "./src/inference/index.ts",
 		"./knowledge": "./src/knowledge/index.ts",
 		"./market-data": "./src/market-data/index.ts",
+		"./openbot": "./src/openbot/index.ts",
 		"./operations": "./src/operations/index.ts",
 		"./orchestration": "./src/orchestration/index.ts",
 		"./organizations": "./src/organizations/index.ts",
@@ -41,6 +42,6 @@
 		"typecheck": "tsc --project tsconfig.json --noEmit"
 	},
 	"dependencies": {
-		"zod": "^3.24.1"
+		"zod": "4.6.2"
 	}
 }

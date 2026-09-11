@@ -1,0 +1,24 @@
+{
+  "entries": [
+    {
+      "auditId": "d4000004-0004-4004-8004-000000000004",
+      "requestId": "e5000005-0005-4005-8005-000000000005",
+      "phase": "before",
+      "organizationId": "b2000002-0002-4002-8002-000000000002",
+      "agentId": "c3000003-0003-4003-8003-000000000003",
+      "toolName": "sandbox.echo",
+      "decision": "ALLOW",
+      "recordedAt": "2026-09-10T23:00:00.000Z"
+    },
+    {
+      "auditId": "f6000006-0006-4006-8006-000000000006",
+      "requestId": "e5000005-0005-4005-8005-000000000005",
+      "phase": "after",
+      "organizationId": "b2000002-0002-4002-8002-000000000002",
+      "agentId": "c3000003-0003-4003-8003-000000000003",
+      "toolName": "sandbox.echo",
+      "outcomeHash": "sha256:sandbox-outcome-v1",
+      "recordedAt": "2026-09-10T23:00:01.000Z"
+    }
+  ]
+}

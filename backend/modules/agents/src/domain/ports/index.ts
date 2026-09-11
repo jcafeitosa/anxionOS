@@ -27,4 +27,5 @@ export type {
 	ToolAuditPort,
 	ToolAuditAfterInput,
 	ToolAuditBeforeInput,
+	ToolAuditTrailQuery,
 } from "./tool-audit-port";

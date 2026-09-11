@@ -4,7 +4,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { SelectOrganizationPanel } from "../components/auth/AuthPanels";
 ---
 <BaseLayout title="Escolher organização | anxionOS" description="Selecione a agência autorizada para continuar.">
-	<main class="flex min-h-dvh items-center px-4 py-12">
+	<main id="main-content" class="flex min-h-dvh items-center px-4 py-12">
 		<SelectOrganizationPanel client:load />
 	</main>
 </BaseLayout>

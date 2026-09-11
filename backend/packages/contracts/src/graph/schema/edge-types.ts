@@ -12,6 +12,7 @@ export const edgeTypeDefSchema = z.object({
 	crossScopePolicy: z.enum(["same-scope", "cross-scope-allowed", "forbidden"]),
 	status: graphSchemaStatusSchema,
 });
+export type EdgeTypeDef = z.infer<typeof edgeTypeDefSchema>;
 export const GRAPH_F0_EDGE_TYPES = [
 	{
 		edgeTypeId: "membership.user",
@@ -49,6 +50,5 @@ export const GRAPH_F0_EDGE_TYPES = [
 		crossScopePolicy: "cross-scope-allowed",
 		status: "active",
 	},
-];
+] satisfies readonly EdgeTypeDef[];
 
-export type EdgeTypeDef = z.infer<typeof edgeTypeDefSchema>;

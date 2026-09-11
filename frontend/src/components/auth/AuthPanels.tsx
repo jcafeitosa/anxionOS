@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+	authClient,
 	consolePathForMembership,
 	fetchPostLoginContext,
 	pathForPostLogin,
@@ -222,16 +223,139 @@ export function MfaPendingPanel() {
 }
 
 export function VerifyEmailPanel() {
+	const [mode, setMode] = useState<"loading" | "stale" | "ready">("loading");
+	const [smtpEnabled, setSmtpEnabled] = useState(false);
+	const [email, setEmail] = useState<string | null>(null);
+	const [resendState, setResendState] = useState<
+		"idle" | "sending" | "sent" | "error"
+	>("idle");
+
+	useEffect(() => {
+		let cancelled = false;
+		fetchPostLoginContext()
+			.then((loaded) => {
+				if (cancelled) {
+					return;
+				}
+				if (!loaded.authenticated) {
+					window.location.replace("/login");
+					return;
+				}
+				if (!loaded.onboardingState.needsEmailVerification) {
+					window.location.replace(pathForPostLogin(loaded));
+					return;
+				}
+				setEmail(loaded.principal?.email ?? null);
+				setSmtpEnabled(loaded.emailDelivery?.verificationConfigured === true);
+				setMode("ready");
+			})
+			.catch((cause: unknown) => {
+				if (cancelled) {
+					return;
+				}
+				if (cause instanceof PostLoginContextUnavailableError) {
+					setMode("stale");
+					return;
+				}
+				window.location.replace("/login");
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, []);
+
+	async function onResend() {
+		if (!email) {
+			return;
+		}
+		setResendState("sending");
+		const result = await authClient.sendVerificationEmail({
+			email,
+			callbackURL: "/",
+		});
+		if (result.error) {
+			setResendState("error");
+			return;
+		}
+		setResendState("sent");
+	}
+
+	if (mode === "stale") {
+		return (
+			<HonestState
+				kind="stale"
+				title="Não foi possível confirmar o e-mail"
+				description="O loader pós-login não respondeu. Nenhum clique nesta página confirma o cadastro."
+				actionHref="/login"
+				actionLabel="Voltar ao login"
+			/>
+		);
+	}
+
+	if (mode !== "ready") {
+		return (
+			<HonestState
+				kind="loading"
+				title="Verificando e-mail"
+				description="Consultando se o SMTP de verificação está habilitado neste servidor."
+			/>
+		);
+	}
+
+	if (!smtpEnabled) {
+		return (
+			<AuthShell
+				eyebrow="E-mail"
+				title="E-mail não verificado"
+				description="SMTP/desafio de verificação não está habilitado. Esta página não simula confirmação."
+			>
+				<p className="text-sm text-muted-foreground">
+					O destino do dashboard está bloqueado até a verificação de e-mail. O envio
+					SMTP/desafio não está habilitado neste servidor.
+				</p>
+				<a
+					href="/login"
+					className="mt-6 inline-flex min-h-11 cursor-pointer items-center text-sm font-semibold text-foreground"
+				>
+					Voltar ao login
+				</a>
+			</AuthShell>
+		);
+	}
+
 	return (
 		<AuthShell
 			eyebrow="E-mail"
-			title="E-mail não verificado"
-			description="SMTP/desafio de verificação não está habilitado. Esta página não simula confirmação."
+			title="Aguardando confirmação"
+			description="Enviamos um link real para o seu e-mail. Esta página não confirma o cadastro — só o clique no link."
 		>
-			<p className="text-sm text-muted-foreground">
-				O destino do dashboard está bloqueado até a verificação de e-mail. O envio
-				SMTP/desafio não está habilitado neste servidor.
+			<p className="text-sm text-muted-foreground" role="status">
+				Abra a mensagem de verificação e use o link. Depois disso o dashboard
+				destrava (EMAIL_UNVERIFIED some no loader).
 			</p>
+			{email ? (
+				<p className="mt-3 text-sm text-foreground">Destino: {email}</p>
+			) : null}
+			<button
+				type="button"
+				onClick={() => {
+					void onResend();
+				}}
+				disabled={resendState === "sending"}
+				className="mt-6 inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg bg-accent px-4 font-semibold text-on-accent disabled:cursor-not-allowed disabled:opacity-60"
+			>
+				{resendState === "sending" ? "Reenviando…" : "Reenviar e-mail"}
+			</button>
+			{resendState === "sent" ? (
+				<p className="mt-3 text-sm text-foreground" role="status">
+					Pedido de reenvio aceito. Confira a caixa de entrada (e o spam).
+				</p>
+			) : null}
+			{resendState === "error" ? (
+				<p className="mt-3 text-sm text-destructive" role="alert">
+					Não foi possível reenviar. Tente de novo ou peça SMTP_PASS ao operador.
+				</p>
+			) : null}
 			<a
 				href="/login"
 				className="mt-6 inline-flex min-h-11 cursor-pointer items-center text-sm font-semibold text-foreground"

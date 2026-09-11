@@ -56,3 +56,48 @@ describe("better auth config", () => {
 		}
 	});
 });
+
+describe("smtp mail config", () => {
+	test("resolveSmtpMailConfig is fail-closed without pass", async () => {
+		const { resolveSmtpMailConfig } = await import(
+			"../../apps/api/src/auth/smtp-mailer"
+		);
+		expect(
+			resolveSmtpMailConfig({
+				SMTP_USER: "juliocezaraquinofeitosa@gmail.com",
+			}),
+		).toBeNull();
+	});
+
+	test("resolveSmtpMailConfig accepts SMTP_PASS and Gmail defaults", async () => {
+		const { resolveSmtpMailConfig } = await import(
+			"../../apps/api/src/auth/smtp-mailer"
+		);
+		const resolved = resolveSmtpMailConfig({
+			SMTP_USER: "juliocezaraquinofeitosa@gmail.com",
+			SMTP_PASS: "fixture-app-password",
+		});
+		expect(resolved).toEqual({
+			host: "smtp.gmail.com",
+			port: 587,
+			secure: false,
+			user: "juliocezaraquinofeitosa@gmail.com",
+			pass: "fixture-app-password",
+			from: "juliocezaraquinofeitosa@gmail.com",
+		});
+	});
+
+	test("SMTP_PASSWORD alias works", async () => {
+		const { resolveSmtpMailConfig } = await import(
+			"../../apps/api/src/auth/smtp-mailer"
+		);
+		const resolved = resolveSmtpMailConfig({
+			SMTP_HOST: "smtp.gmail.com",
+			SMTP_USER: "sender@example.test",
+			SMTP_PASSWORD: "alias-only",
+			SMTP_FROM: "noreply@example.test",
+		});
+		expect(resolved?.pass).toBe("alias-only");
+		expect(resolved?.from).toBe("noreply@example.test");
+	});
+});

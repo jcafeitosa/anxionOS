@@ -16,10 +16,10 @@
 		"@anxionos/contracts": "workspace:*",
 		"@anxionos/database": "workspace:*",
 		"@anxionos/eventing": "workspace:*",
-		"drizzle-orm": "^0.38.3",
-		"pg": "^8.23.0"
+		"drizzle-orm": "0.45.2",
+		"pg": "8.23.0"
 	},
 	"devDependencies": {
-		"@types/pg": "^8.23.1"
+		"@types/pg": "8.23.1"
 	}
 }
