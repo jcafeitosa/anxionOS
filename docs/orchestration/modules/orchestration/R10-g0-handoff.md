@@ -13,7 +13,7 @@ Goal, Task, Run, TaskLease, RunHeartbeat, GateBinding, PlanRevision, eventos v1,
 
 ## Out of scope
 
-AgentVersion (agents), Neo4j (graph), secrets (connections), D-GOV-010 (risk P06), pastas projects/tasks/agent-teams, G7 código.
+AgentVersion (agents), Neo4j (graph), secrets (connections), D-GOV-010 (risk P06), pastas projects/tasks/agent-teams, G7 código, spec accepted, ST08.
 
 **Ownership:** Goal, Task, Run, TaskLease, RunHeartbeat, GateBinding, PlanRevision. Dashi `in_review` ≠ gate PASS.
 

@@ -18,4 +18,4 @@ Não scaffoldar 23 módulos. P1 só pack documental.
 
 ## Saída R9
 
-Para R10.
+Não scaffoldar 23 módulos. P1 só pack documental. Para [R10](./R10-g0-handoff.md).

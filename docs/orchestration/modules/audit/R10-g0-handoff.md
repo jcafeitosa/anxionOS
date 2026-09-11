@@ -9,7 +9,7 @@ status: draft
 
 ### In scope
 
-Flight Recorder, DeltaRef, tap redacted, replay read-only, oráculos G3/G5.
+Flight Recorder, DeltaRef, tap redacted, replay read-only, oráculos G3-AUD-01 replay sem mutação · G5-AUD-01 payload redacted sem secrets.
 
 ### Out of scope
 
