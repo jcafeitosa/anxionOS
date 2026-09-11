@@ -12,6 +12,7 @@ import {
 	hashCommandPayload,
 	loadIdempotentCommandResult,
 	recordOrganizationCommand,
+	saveWithRevisionConflictMapping,
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwOrganizationError } from "../errors";
@@ -90,12 +91,14 @@ export async function advanceOnboarding(
 			const now = new Date();
 			const revision = agency.revision + 1;
 			const previousStatus = agency.status;
-			const updated = await context.agencyRepository.save({
-				...agency,
-				onboardingStep: command.step,
-				revision,
-				updatedAt: now,
-			});
+			const updated = await saveWithRevisionConflictMapping(() =>
+				context.agencyRepository.save({
+					...agency,
+					onboardingStep: command.step,
+					revision,
+					updatedAt: now,
+				}),
+			);
 			const result = commandResultSchema.parse({
 				aggregateId: updated.id,
 				revision: updated.revision,

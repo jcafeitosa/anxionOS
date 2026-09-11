@@ -25,6 +25,7 @@ export {
 	countActiveOwners,
 	wouldViolateOwnerRequired,
 } from "./domain/entities";
+export { AgencyRevisionConflictError } from "./domain/errors/agency-errors";
 export { MembershipRevisionConflictError } from "./domain/errors/membership-errors";
 export {
 	createAgencyCreatedEvent,

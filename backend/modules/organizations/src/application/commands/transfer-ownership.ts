@@ -13,6 +13,7 @@ import {
 	hashCommandPayload,
 	loadIdempotentCommandResult,
 	recordOrganizationCommand,
+	saveWithRevisionConflictMapping,
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwOrganizationError } from "../errors";
@@ -109,24 +110,30 @@ export async function transferOwnership(
 			}
 			const now = new Date();
 			const agencyRevision = agency.revision + 1;
-			const updatedAgency = await context.agencyRepository.save({
-				...agency,
-				ownerPrincipalId: command.newOwnerPrincipalId,
-				revision: agencyRevision,
-				updatedAt: now,
-			});
-			await context.membershipRepository.save({
-				...actorMembership,
-				role: "admin",
-				revision: actorMembership.revision + 1,
-				updatedAt: now,
-			});
-			await context.membershipRepository.save({
-				...successorMembership,
-				role: "owner",
-				revision: successorMembership.revision + 1,
-				updatedAt: now,
-			});
+			const updatedAgency = await saveWithRevisionConflictMapping(() =>
+				context.agencyRepository.save({
+					...agency,
+					ownerPrincipalId: command.newOwnerPrincipalId,
+					revision: agencyRevision,
+					updatedAt: now,
+				}),
+			);
+			await saveWithRevisionConflictMapping(() =>
+				context.membershipRepository.save({
+					...actorMembership,
+					role: "admin",
+					revision: actorMembership.revision + 1,
+					updatedAt: now,
+				}),
+			);
+			await saveWithRevisionConflictMapping(() =>
+				context.membershipRepository.save({
+					...successorMembership,
+					role: "owner",
+					revision: successorMembership.revision + 1,
+					updatedAt: now,
+				}),
+			);
 			const existingOwner = await context.ownerRepository.findByPrincipalId(
 				command.newOwnerPrincipalId,
 			);

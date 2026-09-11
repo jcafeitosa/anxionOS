@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 import type { CommandResult } from "@anxionos/contracts/organizations";
+import { AgencyRevisionConflictError } from "../domain/errors/agency-errors";
+import { MembershipRevisionConflictError } from "../domain/errors/membership-errors";
 import {
 	CommandJournalConflictError,
 	type CommandJournalRepository,
@@ -112,6 +114,37 @@ export async function loadIdempotentCommandResult(
 	}
 	await assertIntentMatches(existing, intent, commandId);
 	return parseCommandResultSnapshot(existing.responseSnapshot);
+}
+
+/**
+ * Executa uma gravacao de agregado traduzindo **corrida de revisao** no codigo
+ * institucional `ORG_REVISION_CONFLICT` (409). Sem isto o erro cru de dominio
+ * vazava ate' o boundary e o perdedor de uma corrida recebia **500** — os 8
+ * modulos que ja' tem `<MOD>_REVISION_CONFLICT` (identity, agents, capital,
+ * strategies, operations, connections, knowledge, market-data) sempre
+ * responderam 409 (S4a/S4c, ANX-460).
+ *
+ * Nao use em `accept-invite-by-token`: ali o conflito e' mapeado para um 404
+ * opaco de proposito, para nao confirmar a existencia/consumo de um token.
+ */
+export async function saveWithRevisionConflictMapping<T>(
+	operation: () => Promise<T>,
+): Promise<T> {
+	try {
+		return await operation();
+	} catch (error) {
+		if (
+			error instanceof MembershipRevisionConflictError ||
+			error instanceof AgencyRevisionConflictError
+		) {
+			throwOrganizationError(
+				"ORG_REVISION_CONFLICT",
+				"Resource was modified concurrently; reload and retry",
+				{ cause: error },
+			);
+		}
+		throw error;
+	}
 }
 
 /**

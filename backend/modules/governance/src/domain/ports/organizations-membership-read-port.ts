@@ -7,7 +7,13 @@ import type { PoolClient } from "pg";
 export interface OrganizationsMembershipSnapshot {
 	agencyId: string;
 	membershipId: string;
-	principalId: string;
+	/**
+	 * `null` enquanto a membership nunca foi ativada (convite pendente). O read
+	 * model precisa **expor** essa linha — e nao esconde-la atras de um `null` de
+	 * "nao encontrada" — para que `membership.revoked.v1` de um convite pendente
+	 * possa ser revalidado contra o fato persistido (S4b/ANX-460).
+	 */
+	principalId: string | null;
 	role: MembershipRole;
 	status: MembershipStatus;
 }

@@ -13,6 +13,7 @@ import {
 	hashCommandPayload,
 	loadIdempotentCommandResult,
 	recordOrganizationCommand,
+	saveWithRevisionConflictMapping,
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwOrganizationError } from "../errors";
@@ -96,16 +97,18 @@ export async function activateMembership(
 			}
 			const now = new Date();
 			const revision = membership.revision + 1;
-			const updated = await context.membershipRepository.save({
-				...membership,
-				principalId: input.targetPrincipalId,
-				status: "active",
-				inviteTokenHash: null,
-				inviteExpiresAt: null,
-				joinedAt: now,
-				revision,
-				updatedAt: now,
-			});
+			const updated = await saveWithRevisionConflictMapping(() =>
+				context.membershipRepository.save({
+					...membership,
+					principalId: input.targetPrincipalId,
+					status: "active",
+					inviteTokenHash: null,
+					inviteExpiresAt: null,
+					joinedAt: now,
+					revision,
+					updatedAt: now,
+				}),
+			);
 			const result = commandResultSchema.parse({
 				aggregateId: updated.id,
 				revision: updated.revision,

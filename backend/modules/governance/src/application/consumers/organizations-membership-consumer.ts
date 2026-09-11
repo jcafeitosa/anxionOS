@@ -95,6 +95,13 @@ async function assertMembershipMatchesActivatedPayload(
 	}
 }
 
+/**
+ * Revalida o fato contra o read-model. `payload.principalId` pode ser `null`
+ * quando a membership revogada nunca foi ativada (convite pendente): o
+ * read-model tambem tem `principalId = null` e a comparacao direta e' a
+ * verificacao correta — nao ha' principal a confirmar nem grant derivado a
+ * encerrar (S4b/ANX-460).
+ */
 async function assertMembershipMatchesRevokedPayload(
 	membershipRead: OrganizationsMembershipReadPort,
 	payload: MembershipRevokedPayload,
@@ -243,6 +250,11 @@ async function closeDerivedGrants(
 	revokedPayload?: MembershipRevokedPayload,
 	ownershipPayload?: OwnershipTransferredPayload,
 ): Promise<void> {
+	// `revokedPayload.principalId === null` significa que a membership revogada
+	// nunca foi ativada (convite pendente cancelado): nao houve principal e,
+	// portanto, nenhum grant derivado — `findActiveByDerivedFromMembershipId`
+	// devolve vazio e a transacao encerra antes de precisar de escopo de
+	// principal. Nao preencher com o ator: seria inventar um fato (S4b/ANX-460).
 	const tenantContext: TenantContext = {
 		tenantId:
 			revokedPayload?.agencyId ?? ownershipPayload?.agencyId ?? membershipId,

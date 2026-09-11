@@ -25,10 +25,13 @@ type MembershipRow = {
 	status: MembershipStatus;
 };
 
+/**
+ * Mapeia a linha sem esconder membership sem principal. Devolver `null` quando
+ * `principal_id` e' nulo fazia o consumer tratar "convite pendente" como
+ * "membership inexistente" e rejeitar `membership.revoked.v1` de convite
+ * cancelado para sempre (S4b/ANX-460). `principalId: null` e' o fato.
+ */
 function mapMembershipRow(row: MembershipRow) {
-	if (!row.principal_id) {
-		return null;
-	}
 	return {
 		agencyId: row.agency_id,
 		membershipId: row.id,
@@ -60,7 +63,7 @@ export function createOrganizationsMembershipReadAdapter(
 				agencyId,
 				membershipId,
 			);
-			if (!membership?.principalId) {
+			if (!membership) {
 				return null;
 			}
 			return {

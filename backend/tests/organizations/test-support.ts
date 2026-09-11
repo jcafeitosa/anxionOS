@@ -7,6 +7,7 @@ import {
 import type { Agency } from "../../modules/organizations/src/domain/entities/agency";
 import type { Membership } from "../../modules/organizations/src/domain/entities/membership";
 import type { Owner } from "../../modules/organizations/src/domain/entities/owner";
+import { AgencyRevisionConflictError } from "../../modules/organizations/src/domain/errors/agency-errors";
 import { MembershipRevisionConflictError } from "../../modules/organizations/src/domain/errors/membership-errors";
 import type { AgencyRepository } from "../../modules/organizations/src/domain/ports/agency-repository";
 import {
@@ -37,6 +38,13 @@ export function createInMemoryAgencyRepository(
 	const agencies = new Map(seed.map((agency) => [agency.id, { ...agency }]));
 	return {
 		async save(agency) {
+			// Espelha a guarda otimista do repositorio Drizzle (`agency-repository.ts`):
+			// gravar so' quando a revisao em memoria ainda for a anterior. Sem isso o
+			// fixture mascarava o lost update que o PG real protege (S4c/ANX-460).
+			const existing = agencies.get(agency.id);
+			if (existing && existing.revision !== agency.revision - 1) {
+				throw new AgencyRevisionConflictError();
+			}
 			agencies.set(agency.id, { ...agency });
 			return { ...agency };
 		},

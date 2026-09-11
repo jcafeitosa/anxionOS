@@ -15,6 +15,7 @@ import {
 	hashCommandPayload,
 	loadIdempotentCommandResult,
 	recordOrganizationCommand,
+	saveWithRevisionConflictMapping,
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwOrganizationError } from "../errors";
@@ -102,15 +103,17 @@ export async function revokeMembership(
 			}
 			const now = new Date();
 			const revision = membership.revision + 1;
-			const updated = await context.membershipRepository.save({
-				...membership,
-				status: "revoked",
-				inviteTokenHash: null,
-				inviteExpiresAt: null,
-				revokedAt: now,
-				revision,
-				updatedAt: now,
-			});
+			const updated = await saveWithRevisionConflictMapping(() =>
+				context.membershipRepository.save({
+					...membership,
+					status: "revoked",
+					inviteTokenHash: null,
+					inviteExpiresAt: null,
+					revokedAt: now,
+					revision,
+					updatedAt: now,
+				}),
+			);
 			const result = commandResultSchema.parse({
 				aggregateId: updated.id,
 				revision: updated.revision,
@@ -118,7 +121,13 @@ export async function revokeMembership(
 			const event = createMembershipRevokedEvent({
 				membershipId: updated.id,
 				agencyId: updated.agencyId,
-				principalId: updated.principalId ?? input.actorPrincipalId,
+				// Fato exatamente como persistido. Um convite pendente nunca teve
+				// principal: publicar o id do ATOR aqui afirmava que a membership
+				// dele foi revogada, e o consumer de governance revalida contra o
+				// read-model (`membership.principalId !== payload.principalId`) —
+				// o evento era rejeitado para sempre (S4b/ANX-460). `null` e' o
+				// fato; nao ha' grant derivado a encerrar nesse caso.
+				principalId: updated.principalId,
 				revision: updated.revision,
 			});
 			await recordOrganizationCommand(context, {

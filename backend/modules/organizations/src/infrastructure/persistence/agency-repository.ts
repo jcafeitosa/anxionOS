@@ -1,6 +1,7 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Agency } from "../../domain/entities/agency";
+import { AgencyRevisionConflictError } from "../../domain/errors/agency-errors";
 import type { AgencyRepository } from "../../domain/ports/agency-repository";
 import { type AgencyRow, agencies } from "./schema";
 
@@ -29,6 +30,12 @@ export function createDrizzleAgencyRepository(
 				.where(eq(agencies.id, agency.id))
 				.limit(1);
 			if (existing[0]) {
+				// Guarda otimista: grava apenas se a revisao em banco ainda for a
+				// anterior a' que este agregado carrega. Sem ela, `UPDATE` cego
+				// sobrescrevia alteracao concorrente (lost update) e o evento saia
+				// com `previous*` obsoleto (S4c/ANX-460). Mesmo desenho de
+				// `membership-repository.save`.
+				const expectedRevision = agency.revision - 1;
 				const rows = await db
 					.update(agencies)
 					.set({
@@ -40,10 +47,15 @@ export function createDrizzleAgencyRepository(
 						revision: agency.revision,
 						updatedAt: agency.updatedAt,
 					})
-					.where(eq(agencies.id, agency.id))
+					.where(
+						and(
+							eq(agencies.id, agency.id),
+							eq(agencies.revision, expectedRevision),
+						),
+					)
 					.returning();
 				const row = rows[0];
-				if (!row) throw new Error("Failed to update agency");
+				if (!row) throw new AgencyRevisionConflictError();
 				return toAgency(row);
 			}
 			const rows = await db

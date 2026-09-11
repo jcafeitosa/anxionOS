@@ -11,6 +11,7 @@ import {
 	hashCommandPayload,
 	loadIdempotentCommandResult,
 	recordOrganizationCommand,
+	saveWithRevisionConflictMapping,
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwOrganizationError } from "../errors";
@@ -86,13 +87,15 @@ export async function updateAgencyMarkets(
 				agency.onboardingStep === "created"
 					? "markets_set"
 					: agency.onboardingStep;
-			const updated = await context.agencyRepository.save({
-				...agency,
-				marketScope: command.marketScope,
-				onboardingStep,
-				revision,
-				updatedAt: now,
-			});
+			const updated = await saveWithRevisionConflictMapping(() =>
+				context.agencyRepository.save({
+					...agency,
+					marketScope: command.marketScope,
+					onboardingStep,
+					revision,
+					updatedAt: now,
+				}),
+			);
 			const result = commandResultSchema.parse({
 				aggregateId: updated.id,
 				revision: updated.revision,

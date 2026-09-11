@@ -55,7 +55,15 @@ export const membershipActivatedPayloadSchema = z.object({
 export const membershipRevokedPayloadSchema = z.object({
 	membershipId: institutionalUuidSchema,
 	agencyId: institutionalUuidSchema,
-	principalId: institutionalUuidSchema,
+	/**
+	 * Principal cuja membership foi revogada. **`null` quando a membership nunca
+	 * foi ativada** (convite pendente cancelado antes de existir principal):
+	 * nesse caso nao ha' principal a quem atribuir o fato e nenhum grant derivado
+	 * a encerrar. Preencher com o id do ATOR seria afirmar um fato falso — o
+	 * consumer de governance revalida contra o read-model e rejeita para sempre
+	 * (S4b/ANX-460).
+	 */
+	principalId: institutionalUuidSchema.nullable(),
 	revision: z.number().int().nonnegative(),
 });
 export const ownershipTransferredPayloadSchema = z.object({

@@ -85,7 +85,7 @@ function createStubMembershipRead(
 		{
 			agencyId: string;
 			membershipId: string;
-			principalId: string;
+			principalId: string | null;
 			role: "owner" | "admin" | "viewer";
 			status: "active" | "revoked" | "invited";
 		}
@@ -264,6 +264,45 @@ describe("organizationsMembershipConsumer", () => {
 				(event) => event.eventType === GOVERNANCE_EVENT_TYPES.GRANT_REVOKED,
 			),
 		).toHaveLength(OWNER_BASELINE_CAPABILITIES.length);
+	});
+
+	test("aceita membership.revoked de convite pendente com principalId null", async () => {
+		// S4b/ANX-460: a membership nunca foi ativada, entao nao ha' principal nem
+		// grant derivado. O payload honesto tem `principalId: null` e a revalidacao
+		// contra o read-model precisa passar. Antes: o produtor publicava o id do
+		// ATOR, o read-model (que escondia linhas sem principal) devolvia null e o
+		// consumer rejeitava o evento para sempre.
+		const membershipRead = createStubMembershipRead({
+			[`${agencyId}:${membershipId}`]: {
+				agencyId,
+				membershipId,
+				principalId: null,
+				role: "admin",
+				status: "revoked",
+			},
+		});
+		const { deps, grantRepository, published } =
+			createConsumerDeps(membershipRead);
+
+		await handleOrganizationsMembershipEvent(
+			deps,
+			createMembershipRevokedEnvelope({
+				membershipId,
+				agencyId,
+				principalId: null,
+				revision: 1,
+			}),
+		);
+
+		// Nada a encerrar: nenhum grant derivado existe nem foi revogado.
+		const derived =
+			await grantRepository.findActiveByDerivedFromMembershipId(membershipId);
+		expect(derived).toHaveLength(0);
+		expect(
+			published.filter(
+				(event) => event.eventType === GOVERNANCE_EVENT_TYPES.GRANT_REVOKED,
+			),
+		).toHaveLength(0);
 	});
 
 	test("rejects baseline grants when membership revoked inside grant TX (TOCTOU race)", async () => {
