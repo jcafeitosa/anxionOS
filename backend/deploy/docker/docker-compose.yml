@@ -1,50 +1,106 @@
+# ANX-162 — local engine/storage sandbox (ADR0004 + gateway spec §Isolamento Docker)
+# Profiles: default (postgres+nats), graph-sandbox, graph-staging, engines-sandbox (S3+)
+# Oracles: anx162:engine-isolation-homologation (S2), anx162:s3-engines-homologation (S3),
+#          anx162:s4-egress-auth-audit-homologation (S4)
+
+networks:
+  anxion-control:
+    driver: bridge
+  anxion-data:
+    driver: bridge
+    internal: true
+  anxion-observability:
+    driver: bridge
+
 services:
   postgres:
-    image: postgres:16-alpine
+    image: timescale/timescaledb:2.30.0-pg16
     environment:
-      POSTGRES_USER: anxionos
-      POSTGRES_PASSWORD: anxionos
-      POSTGRES_DB: anxionos
+      POSTGRES_USER: ${POSTGRES_USER:-anxionos}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-anxionos}
+      POSTGRES_DB: ${POSTGRES_DB:-anxionos}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    networks:
+      - anxion-data
+      - anxion-control
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U anxionos"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-anxionos} -d ${POSTGRES_DB:-anxionos}",
+        ]
       interval: 5s
       timeout: 5s
       retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          memory: 256M
+    restart: unless-stopped
 
   nats:
-    image: nats:2.10-alpine
+    image: nats:2.10.12-alpine
     command: ["-js", "-m", "8222"]
     ports:
       - "4222:4222"
       - "8222:8222"
+    networks:
+      - anxion-control
+      - anxion-observability
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
       interval: 5s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 64M
+    restart: unless-stopped
 
   neo4j:
     image: neo4j:5.26.2-community
     profiles:
       - graph-sandbox
     environment:
-      NEO4J_AUTH: neo4j/anxionos
+      NEO4J_AUTH: ${NEO4J_AUTH:-neo4j/anxionos}
       NEO4J_PLUGINS: '["apoc"]'
     ports:
       - "7474:7474"
       - "7687:7687"
     volumes:
       - neo4jdata:/data
+    networks:
+      - anxion-data
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1",
+        ]
       interval: 10s
       timeout: 10s
       retries: 10
       start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          memory: 512M
+    restart: unless-stopped
 
   neo4j-staging:
     image: neo4j:5.26.2-community
@@ -58,14 +114,224 @@ services:
       - "7688:7687"
     volumes:
       - neo4jstaging:/data
+    networks:
+      - anxion-data
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1",
+        ]
       interval: 10s
       timeout: 10s
       retries: 10
       start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          memory: 512M
+    restart: unless-stopped
+
+  gocryptotrader-sandbox:
+    build:
+      context: ./engines
+      dockerfile: gocryptotrader/Dockerfile
+    image: anxionos/gocryptotrader-sandbox:0.1.0-anx162-s4
+    profiles:
+      - engines-sandbox
+    environment:
+      ENGINE_MODE: ${ENGINE_MODE:-SIMULATED}
+      ENGINE_SANDBOX_AUTH_TOKEN: ${ENGINE_SANDBOX_AUTH_TOKEN:?ENGINE_SANDBOX_AUTH_TOKEN required for engines-sandbox}
+      GCT_SANDBOX_PORT: ${GCT_SANDBOX_PORT:-9053}
+      GCT_SANDBOX_VERSION: 0.1.0-anx162-s4
+    ports:
+      - "${GCT_SANDBOX_PORT:-9053}:9053"
+    volumes:
+      - gct-sandbox-data:/data
+    networks:
+      - anxion-data
+    read_only: true
+    tmpfs:
+      - /tmp:size=16M,mode=1777
+    user: "10001:10001"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--spider",
+          "-q",
+          "http://localhost:9053/health",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 64M
+    restart: unless-stopped
+
+  hummingbot-sandbox:
+    build:
+      context: ./engines
+      dockerfile: hummingbot/Dockerfile
+    image: anxionos/hummingbot-sandbox:0.1.0-anx162-s4
+    profiles:
+      - engines-sandbox
+    environment:
+      ENGINE_MODE: ${ENGINE_MODE:-SIMULATED}
+      ENGINE_SANDBOX_AUTH_TOKEN: ${ENGINE_SANDBOX_AUTH_TOKEN:?ENGINE_SANDBOX_AUTH_TOKEN required for engines-sandbox}
+      HUMMINGBOT_SANDBOX_PORT: ${HUMMINGBOT_SANDBOX_PORT:-9054}
+      HUMMINGBOT_SANDBOX_VERSION: 0.1.0-anx162-s4
+    ports:
+      - "${HUMMINGBOT_SANDBOX_PORT:-9054}:9054"
+    volumes:
+      - hmb-sandbox-data:/data
+    networks:
+      - anxion-data
+    read_only: true
+    tmpfs:
+      - /tmp:size=16M,mode=1777
+    user: "10001:10001"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--spider",
+          "-q",
+          "http://localhost:9054/health",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 64M
+    restart: unless-stopped
+
+  freqtrade-sandbox:
+    build:
+      context: ./engines
+      dockerfile: freqtrade/Dockerfile
+    image: anxionos/freqtrade-sandbox:0.1.0-anx162-s4
+    profiles:
+      - engines-sandbox
+    environment:
+      ENGINE_MODE: ${ENGINE_MODE:-SIMULATED}
+      ENGINE_SANDBOX_AUTH_TOKEN: ${ENGINE_SANDBOX_AUTH_TOKEN:?ENGINE_SANDBOX_AUTH_TOKEN required for engines-sandbox}
+      FREQTRADE_SANDBOX_PORT: ${FREQTRADE_SANDBOX_PORT:-9055}
+      FREQTRADE_SANDBOX_VERSION: 0.1.0-anx162-s4
+    ports:
+      - "${FREQTRADE_SANDBOX_PORT:-9055}:9055"
+    volumes:
+      - fqt-sandbox-data:/data
+    networks:
+      - anxion-data
+    read_only: true
+    tmpfs:
+      - /tmp:size=16M,mode=1777
+    user: "10001:10001"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--spider",
+          "-q",
+          "http://localhost:9055/health",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 64M
+    restart: unless-stopped
+
+  xchange-sandbox:
+    build:
+      context: ./engines
+      dockerfile: xchange/Dockerfile
+    image: anxionos/xchange-sandbox:0.1.0-anx162-s4
+    profiles:
+      - engines-sandbox
+    environment:
+      ENGINE_MODE: ${ENGINE_MODE:-SIMULATED}
+      ENGINE_SANDBOX_AUTH_TOKEN: ${ENGINE_SANDBOX_AUTH_TOKEN:?ENGINE_SANDBOX_AUTH_TOKEN required for engines-sandbox}
+      XCHANGE_SANDBOX_PORT: ${XCHANGE_SANDBOX_PORT:-9056}
+      XCHANGE_SANDBOX_VERSION: 0.1.0-anx162-s4
+    ports:
+      - "${XCHANGE_SANDBOX_PORT:-9056}:9056"
+    volumes:
+      - xch-sandbox-data:/data
+    networks:
+      - anxion-data
+    read_only: true
+    tmpfs:
+      - /tmp:size=16M,mode=1777
+    user: "10001:10001"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--spider",
+          "-q",
+          "http://localhost:9056/health",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 64M
+    restart: unless-stopped
 
 volumes:
   pgdata:
   neo4jdata:
   neo4jstaging:
+  gct-sandbox-data:
+  hmb-sandbox-data:
+  fqt-sandbox-data:
+  xch-sandbox-data:
