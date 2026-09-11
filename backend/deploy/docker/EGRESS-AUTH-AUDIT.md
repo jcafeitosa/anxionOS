@@ -17,7 +17,7 @@ anxion-engines-sandbox → quartet engines (internal: true — sem egress)
 anxion-observability   → NATS metrics
 ```
 
-Engines ficam **somente** em `anxion-engines-sandbox` (rede interna). Oráculos S3/S4 provam `/health` via `docker exec` dentro do container — portas não são publicadas no host quando a rede é exclusivamente interna.
+Engines ficam **somente** em `anxion-engines-sandbox` (`internal: true` — sem egress à internet). Para homologação local, o compose **publica** portas no host (`9053`–`9056`); isso é distinto do isolamento de rede. Oráculos S3/S4 provam `/health` via `docker exec` (loopback dentro do container); o oracle S4 também valida egress deny com probe HTTPS bloqueado.
 
 ## Service auth
 
