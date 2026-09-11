@@ -89,10 +89,18 @@ Resposta esperada:
 Subir Postgres, NATS (JetStream) e Neo4j:
 
 ```bash
+cp backend/deploy/docker/.env.example backend/deploy/docker/.env
 docker-compose -f backend/deploy/docker/docker-compose.yml up -d
 docker-compose -f backend/deploy/docker/docker-compose.yml --profile graph-sandbox up -d
 npm run anx162:engine-isolation-homologation
 ```
+
+> **Migração Timescale (ADR0004):** se o volume `pgdata` foi criado com imagem Postgres plain (pré-ANX-162), remova o volume antes de subir `timescale/timescaledb` — extensões `timescaledb` e `vector` são aplicadas via `initdb/001-adr0004-extensions.sql` apenas em cluster novo:
+>
+> ```bash
+> docker-compose -f backend/deploy/docker/docker-compose.yml down -v
+> docker-compose -f backend/deploy/docker/docker-compose.yml up -d postgres nats
+> ```
 
 | Serviço   | Porta(s)     | Imagem (pin)                        | Uso                                      |
 | --------- | ------------ | ----------------------------------- | ---------------------------------------- |
