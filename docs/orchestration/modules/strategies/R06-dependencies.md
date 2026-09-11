@@ -8,6 +8,23 @@ type: debate
 **Issue pack:** ANX-389 · histórico ANX-89 · ANX-87 · ANX-82 · ANX-58  
 **Callers:** [R05-storage-pg.md](./R05-storage-pg.md) · [R07-risks.md](./R07-risks.md) · [ROUNDS.md](./ROUNDS.md). Sem API runtime neste artefato.
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R6)
+
+**In:** MarketDataPort, AgencyScopePort. **Out:** consumers decisions/evaluation. Sem FK cross-schema.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Wiring strategies | **strategies** |
+| adapter-gateway | **KEEP** |
+
 ## Decisões-chave
 
 | ID | Decisão |

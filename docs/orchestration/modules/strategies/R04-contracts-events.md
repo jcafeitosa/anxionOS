@@ -9,6 +9,23 @@ type: debate
 **Pré-requisito:** [R03-domain-sketch.md](./R03-domain-sketch.md)  
 **Callers:** [R05-storage-pg.md](./R05-storage-pg.md) · [ROUNDS.md](./ROUNDS.md). Sem schema de dados de produção neste artefato.
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R4)
+
+**In:** superfície pública Strategy/Version/Deployment/Signal. **Out:** `strategies.*.v1`. Signal ≠ TradeIntent.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Contratos strategies | **strategies** |
+| adapter-gateway | **KEEP** |
+
 ## Convenções
 
 | Aspecto | Decisão |

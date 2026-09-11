@@ -8,6 +8,23 @@ type: debate
 **Issue pack:** ANX-389 · histórico ANX-89  
 **Callers:** [R06-dependencies.md](./R06-dependencies.md) · [R08-decision-log.md](./R08-decision-log.md) · [ROUNDS.md](./ROUNDS.md).
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R7)
+
+**In:** leak cross-tenant, signal stale. **Out:** controles G3–G5. **Não** D-GOV-010.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Riscos strategy/signal | **strategies** |
+| adapter-gateway | **KEEP** |
+
 ## Registro
 
 | ID | Risco | L | I | Sev | Mitigação | Gate |

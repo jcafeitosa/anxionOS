@@ -8,6 +8,24 @@ type: debate
 **Issue programa:** ANX-389  
 **Normativo histórico:** [structure R02](../../structure-debate/graph/R02-boundaries.md) (GK-R02-01..05)
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R2)
+
+**In:** projector, query plane, dispatcher. **Out:** Neo4j reconstruível. Grafo stale nunca ALLOW. Sem Cypher ad hoc.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Kernel / Txx dispatcher | **graph** |
+| adapter-gateway | **KEEP** |
+| PG autoritativo dos agregados | **módulo dono** |
+
 ## Debate R2
 
 **Arquiteto:** Kernel = projetor + query plane + dispatcher. Neo4j reconstruível. PostgreSQL dos donos permanece autoritativo.

@@ -9,6 +9,23 @@ status: draft
 **Issue debate:** ANX-389 / ANX-89 · impl futura **ANX-90** (não neste pack)  
 **Callers:** [R08-decision-log.md](./R08-decision-log.md) · [R10-g0-handoff.md](./R10-g0-handoff.md).
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R9)
+
+**In:** plano G1 futuro (ANX-90). **Out:** slices documentais. Zero código neste pack.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Plano strategies | **strategies** |
+| adapter-gateway | **KEEP** |
+
 ## Pré-requisitos G1 futuro
 
 | # | Gate | Evidência |

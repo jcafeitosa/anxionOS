@@ -7,6 +7,24 @@ type: debate
 **Callers:** [R05-storage.md](./R05-storage.md) · [R07-risks.md](./R07-risks.md).  
 **Fonte:** `brain/notes/anxionos-backend-structure.md` · ADR0002 regras 1-12 · AR01/AR04.
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R6)
+
+**In:** inbox de eventos dos 22 donos. **Out:** GraphQuery. Journal **não** muda de owner.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Inbox / dispatcher | **graph** |
+| adapter-gateway | **KEEP** |
+| Journal | **módulo dono** |
+
 ## In scope (este modulo)
 
 | Direcao | Artefato | Contrato |

@@ -10,6 +10,24 @@ type: debate
 **Data:** 2026-09-08  
 **Issue debate estrutura:** ANX-42 · debate módulo: **ANX-89** · contrato P06: **ANX-58**
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R2)
+
+**In:** StrategyVersion, Deployment, Signal, BacktestRun. **Out:** não decisions TradeIntent, não execution, não REAL/live v1.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem promoção automática.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Strategy lifecycle | **strategies** |
+| adapter-gateway | **KEEP** |
+| TradeIntent | **decisions** |
+
 ## Objetivo da rodada
 
 Fechar fronteiras **possui / não possui** entre strategies e vizinhos (**market-data**, **agents**, **decisions**, **evaluation**, **simulation**, **execution**, **portfolios**, **risk**, **graph**); ratificar ciclo de vida StrategyVersion vs Deployment vs Signal; proibir promoção automática e paths **REAL/live** em v1.

@@ -7,6 +7,23 @@ type: debate
 **Callers:** [R06-dependencies.md](./R06-dependencies.md) · [R08-decision-log.md](./R08-decision-log.md) · [ROUNDS.md](./ROUNDS.md)  
 **Histórico:** [poison pill](../../structure-debate/graph/R07-poison-pill-quarantine.md)
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R7)
+
+**In:** poison pill, DLQ, replay. **Out:** quarentena ack+DLQ. **Não** D-GOV-010.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Partial rebuild operacional não é v1.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Quarentena / DLQ graph | **graph** |
+| adapter-gateway | **KEEP** |
+
 ## Debate R7
 
 **Arquiteto:** Poison pill = falha determinística fora do hot path após N tentativas. Quarentena **ack + DLQ** preserva ordem; nak infinito é anti-padrão.

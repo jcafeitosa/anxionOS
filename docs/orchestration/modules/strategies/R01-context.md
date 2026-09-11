@@ -10,6 +10,24 @@ type: debate
 **Data:** 2026-09-07  
 **Issue debate estrutura:** ANX-42 · **debate módulo:** ANX-89
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R1)
+
+**In:** Strategy, versões, backtest, deployments. **Out:** contexto R2. **Não** TradeIntent, ordens, CERTIFIED automático.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem pasta `products/`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Strategy / Version / Deployment | **strategies** |
+| adapter-gateway | **KEEP** |
+| Certification | **evaluation** |
+
 ## Propósito
 
 Estratégias, backtests e deployments — versões parametrizadas e estado de backtest.

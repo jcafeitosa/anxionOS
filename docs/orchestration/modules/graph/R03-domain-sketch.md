@@ -7,6 +7,23 @@ type: debate
 **Callers:** [R02-boundaries.md](./R02-boundaries.md) · [R04-contracts.md](./R04-contracts.md) · [ROUNDS.md](./ROUNDS.md)  
 **Histórico:** [schema registry](../../structure-debate/graph/R03-schema-registry.md)
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R3)
+
+**In:** agregados operacionais T01–T20. **Out:** registry híbrido. `User` Neo4j ≠ Principal identity.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem ledger neste módulo.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Domain sketch kernel | **graph** |
+| adapter-gateway | **KEEP** |
+
 ## Objetivo
 
 Fechar agregados **operacionais** (não ledger), classificação T01–T20, ports e invariantes. Registry híbrido: contracts + PG + runtime fail-fast. `User` no Neo4j ≠ `Principal` em identity PG.

@@ -9,6 +9,23 @@ status: draft
 **Issue pack:** ANX-389 · histórico ANX-89 · gate ANX-58  
 **Callers:** [R07-risks.md](./R07-risks.md) · [R09-dev-plan.md](./R09-dev-plan.md) · [ROUNDS.md](./ROUNDS.md).
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R8)
+
+**In:** síntese D-ST-*. **Out:** decision log. **Não** fechar spec accepted nem ANX done.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Decisões D-ST-* | **strategies** |
+| adapter-gateway | **KEEP** |
+
 | ID | Decisão | Rodada | Status |
 | --- | --- | --- | --- |
 | D-ST-001 | Dono Strategy/StrategyVersion/Deployment/Signal/BacktestRun | R1–R3 | fechada |

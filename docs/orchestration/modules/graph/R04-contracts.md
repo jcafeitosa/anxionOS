@@ -8,6 +8,23 @@ type: debate
 **Histórico:** [GraphQuery contracts](../../structure-debate/graph/R04-graphquery-contracts.md)  
 **ownerDomain:** `graph` só para eventos de rebuild/inbox/quarentena — **não** substitui eventos dos donos.
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R4)
+
+**In:** GraphQuery envelope T01–T20. **Out:** `/v1/graph/query`. Sem substituir eventos dos donos.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Contratos graph | **graph** |
+| adapter-gateway | **KEEP** |
+
 ## Superfície de leitura (GraphQuery)
 
 Envelope: `traversalId`, `actorPrincipalId` da sessão, `authorityEpoch`, budgets, `queryVersion`.  

@@ -13,6 +13,24 @@ type: debate
 **Ficha:** [graph.md](../../system-capabilities/modules/graph.md)  
 **Callers:** [ROUNDS.md](./ROUNDS.md) · [R02-boundaries.md](./R02-boundaries.md)
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R1)
+
+**In:** inventário Graph Kernel (projetor + query). **Out:** contexto R2. **Não** ledger, D-GOV-010, specs accepted.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Projector / GraphQuery | **graph** |
+| adapter-gateway | **KEEP** |
+| Journal dos agregados | **módulo dono** |
+
 ## Objetivo
 
 Graph Kernel **projeta e consulta**. Não é ledger. Journal permanece nos donos. ADR0004: Neo4j = kernel operacional; PostgreSQL = catálogo Txx, inbox, rebuild, DLQ. Specs 001–005 permanecem **draft** (ST08 0/23). D-GOV-010 **não** é deste módulo (risk P06). ANX-342 **não** done.

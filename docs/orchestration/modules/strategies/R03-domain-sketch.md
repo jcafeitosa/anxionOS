@@ -10,6 +10,23 @@ type: debate
 **Mapeamento ADR0002:** dono físico `backend/modules/strategies/` — **não** criar pasta `products/` (PC 10).  
 **Callers:** [R02-boundaries.md](./R02-boundaries.md) (próxima rodada) · [R04-contracts-events.md](./R04-contracts-events.md) · [ROUNDS.md](./ROUNDS.md).
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R3)
+
+**In:** cinco agregados v1. **Out:** eventos `strategies.*.v1`. CERTIFIED/PAPER não nasce aqui.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem pasta `products/` (PC 10).
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Domain sketch | **strategies** |
+| adapter-gateway | **KEEP** |
+
 ## Debate R3 (síntese atribuída)
 
 **Arquiteto:** Cinco agregados v1 — `Strategy`, `StrategyVersion`, `BacktestRun`, `Deployment`, `Signal`. Promoção CERTIFIED/PAPER não nasce neste módulo.

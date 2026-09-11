@@ -11,6 +11,24 @@ type: debate
 **Fonte:** `brain/notes/anxionos-storage-ownership.md` (**draft**; ST08 **0/23**).  
 Instrução do Owner: fatten R05–R07 (e thin R) ao padrão governance/agents; spec 001–005 permanecem draft.
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R5)
+
+**In:** PG autoritativo. **Out:** projector Neo4j. Sem Timescale/pgvector neste módulo.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| strategies_* | **strategies** |
+| adapter-gateway | **KEEP** |
+| Neo4j | **graph** |
+
 ## Princípios
 
 | Princípio | Decisão |

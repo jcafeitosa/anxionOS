@@ -8,6 +8,20 @@ type: debate
 **Histórico:** [cache/projection](../../structure-debate/graph/R05-cache-projection.md)  
 **ADR0004:** Neo4j = kernel de grafo; PostgreSQL = catálogo Txx, inbox, rebuild, DLQ. **Não** Timescale. **Não** pgvector neste módulo (embeddings em knowledge). ST08 0/23. **Sem migration neste pack.**
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R5)
+
+**In:** PG `graph_*` (catálogo/inbox/DLQ) + Neo4j projetado. **Out:** sem ledger, secrets ou embeddings.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem migration neste pack.
+
+## Ownership
+
+Ver tabela **Ownership de stores** abaixo. adapter-gateway **KEEP**.
+
 ## Ownership de stores
 
 | Store | Uso | Não uso |
