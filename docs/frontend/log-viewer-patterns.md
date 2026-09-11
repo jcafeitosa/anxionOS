@@ -1,3 +1,7 @@
+---
+type: guide
+---
+
 # Padrões de visualização de logs (ANX-26)
 
 Página de comparação para escolha do padrão de UI do log viewer no console Owner/Operator.

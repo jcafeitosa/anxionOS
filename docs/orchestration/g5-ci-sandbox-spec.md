@@ -1,3 +1,7 @@
+---
+type: spec
+---
+
 # G5 CI sandbox spec — orchestration (S8 / D-ORC-056)
 
 **Issue:** ANX-75 · **Pacote:** P04 `modules/orchestration`  
