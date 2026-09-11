@@ -1,14 +1,38 @@
 ---
 type: debate
 ---
-
 # R04 — Contratos e eventos: `modules/performance`
 
-**Issues:** ANX-105 · **ANX-106**
+**Rodada:** R4  
+**Data:** 2026-09-11  
+**Issues:** ANX-105 · **ANX-106** · pack ANX-389  
+**Callers:** [R03-domain-sketch.md](./R03-domain-sketch.md) · [R05-storage-pg.md](./R05-storage-pg.md).
 
 ## Convenções
 
-`ownerDomain: performance` · `performance.<aggregate>.<action>.v1`
+`ownerDomain: performance` · `performance.<aggregate>.<action>.v1` · payloads sem secrets
+
+**KEEP adapter-gateway** se já exportado.
+
+## In / Out (R4)
+
+**In:** GET `/v1/performance`, GET `/:id`, POST `/` (Idempotency-Key). Consumers: `accounting.ledger.posted.v1`, `portfolios.position.updated.v1`.
+
+**Out:** `performance.outcome.recorded.v1` / `metric.snapshot.v1` / `attribution.computed.v1`. **Não** muta ledger. **Não** muta Position. Fill só reconciliação (não cash oficial).
+
+## Non-goals
+
+Não Timescale como saldo. Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`. Não pasta `analytics/`.
+
+## Ownership (contratos)
+
+| Superfície | Dono |
+| --- | --- |
+| OutcomeSnapshot / MetricSeries / AttributionRun | **performance** |
+| JournalEntry | **accounting** |
+| Position | **portfolios** |
+| Fill | **execution** |
+| adapter-gateway | **KEEP** |
 
 ## Fonte canônica P&L
 

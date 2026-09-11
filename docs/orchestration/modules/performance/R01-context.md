@@ -1,14 +1,34 @@
 ---
 type: debate
 ---
-
 # R01 — Contexto: `modules/performance`
 
 **Componente:** modules/performance  
 **Rodada:** R1 — Inventário documental e de código  
 **Pacote SDD:** P06  
-**Data:** 2026-09-07  
-**Issue debate estrutura:** ANX-42
+**Data:** 2026-09-11  
+**Issue debate estrutura:** ANX-42 · pack ANX-389 · debate módulo ANX-105 · impl futura ANX-106 (não neste pack)  
+**Callers:** [R02-boundaries.md](./R02-boundaries.md) · [ROUNDS.md](./ROUNDS.md). Sem API runtime.
+
+## In / Out (R1)
+
+**In:** inventário de P&L, métricas oficiais, atribuição, séries Timescale derivadas.
+
+**Out:** este contexto. **Não** ledger (`accounting`). **Não** Position (`portfolios`). **Não** Decision (`decisions`). Sem código de produto.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`. Não pasta `analytics/` (PC 22). D-GOV-010 = **risk P06**.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| OfficialMetricDefinition / OutcomeSnapshot / AttributionRun / MetricSeries | **performance** |
+| JournalEntry | **accounting** |
+| Position | **portfolios** |
+| TradeIntent | **decisions** |
+| adapter-gateway | **KEEP** |
 
 ## Propósito
 
@@ -38,13 +58,13 @@ P&L, métricas e atribuição — snapshots e séries derivadas, sem reescrever 
 
 ## Armazenamento
 
-PG + TimescaleDB: outcomes/atribuição. Neo4j: resultado→fill→decisão→estratégia. SQLite: análise experimental local.
+PG + TimescaleDB: outcomes/atribuição. Neo4j: resultado→fill→decisão→estratégia. SQLite: análise experimental local **non-auth**.
 
 Fonte: `brain/notes/anxionos-storage-ownership.md`.
 
 ## Estado do código atual
 
-**Ausente.**
+**Ausente** neste pack G0 (não implementar agora).
 
 ## Perguntas abertas para debate
 
