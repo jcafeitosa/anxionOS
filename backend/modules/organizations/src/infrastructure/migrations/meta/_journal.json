@@ -50,6 +50,13 @@
 			"when": 1788863000006,
 			"tag": "0006_organizations_command_journal_intent",
 			"breakpoints": true
+		},
+		{
+			"idx": 7,
+			"version": "7",
+			"when": 1788863000007,
+			"tag": "0007_organizations_owners_tenant_principal_unique",
+			"breakpoints": true
 		}
 	]
 }

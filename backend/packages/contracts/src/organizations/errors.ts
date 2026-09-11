@@ -12,6 +12,7 @@ export const ORGANIZATION_ERROR_CODES = [
 	"ORG_INVITE_EMAIL_MISMATCH",
 	"ORG_DUPLICATE_IDEMPOTENCY",
 	"ORG_REVISION_CONFLICT",
+	"ORG_INVITEE_CONSENT_REQUIRED",
 ] as const;
 export const organizationErrorCodeSchema = z.enum(ORGANIZATION_ERROR_CODES);
 export const ORGANIZATION_ERROR_STATUS_MAP = {
@@ -27,6 +28,7 @@ export const ORGANIZATION_ERROR_STATUS_MAP = {
 	ORG_INVITE_EMAIL_MISMATCH: 403,
 	ORG_DUPLICATE_IDEMPOTENCY: 409,
 	ORG_REVISION_CONFLICT: 409,
+	ORG_INVITEE_CONSENT_REQUIRED: 403,
 };
 export const organizationErrorDetailsSchema = z.object({
 	code: organizationErrorCodeSchema,

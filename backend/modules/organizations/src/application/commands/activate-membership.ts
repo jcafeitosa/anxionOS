@@ -74,13 +74,36 @@ export async function activateMembership(
 					`Membership ${command.membershipId} not found in agency ${command.agencyId}`,
 				);
 			}
-			if (membership.status !== "invited") {
+			if (membership.status !== "invited" && membership.status !== "revoked") {
 				throwOrganizationError(
 					"ORG_MEMBERSHIP_NOT_INVITED",
 					`Membership ${command.membershipId} is not invited`,
 				);
 			}
+			// D-ORG-046 (G5-F2) — consentimento na PRIMEIRA vinculacao. A ativacao
+			// assistida nao pode criar vinculo novo: sem `principalId` ja' gravado,
+			// quem ativa e' o proprio convidado (`acceptInviteByToken`, que exige o
+			// token e a sessao dele). Sem este gate, qualquer owner/admin de uma
+			// agency self-serve vinculava o principal de um terceiro sem
+			// consentimento — e o 404 "e-mail sem principal" enumerava os e-mails
+			// registrados na plataforma. O recusso e' o mesmo codigo exista ou nao
+			// principal para o e-mail, entao nao sobra oraculo.
+			if (!membership.principalId) {
+				throwOrganizationError(
+					"ORG_INVITEE_CONSENT_REQUIRED",
+					"Assisted activation cannot bind a principal for the first time; the invitee must accept the invite",
+				);
+			}
+			// Reativacao nao pode REVINCULAR a membership a outro principal: o
+			// principal resolvido do e-mail do convite tem de ser o ja' vinculado.
+			if (membership.principalId !== input.targetPrincipalId) {
+				throwOrganizationError(
+					"ORG_INVITE_EMAIL_MISMATCH",
+					`Membership ${command.membershipId} is bound to another principal`,
+				);
+			}
 			if (
+				membership.status === "invited" &&
 				membership.inviteExpiresAt &&
 				membership.inviteExpiresAt.getTime() <= Date.now()
 			) {
@@ -100,11 +123,13 @@ export async function activateMembership(
 			const updated = await saveWithRevisionConflictMapping(() =>
 				context.membershipRepository.save({
 					...membership,
-					principalId: input.targetPrincipalId,
 					status: "active",
 					inviteTokenHash: null,
 					inviteExpiresAt: null,
-					joinedAt: now,
+					// Reativacao limpa a marca de revogacao; o principal permanece o
+					// mesmo (nunca `input.targetPrincipalId`, que veio do cliente).
+					revokedAt: null,
+					joinedAt: membership.joinedAt ?? now,
 					revision,
 					updatedAt: now,
 				}),

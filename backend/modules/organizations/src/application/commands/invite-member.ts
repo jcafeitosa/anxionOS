@@ -28,9 +28,15 @@ export async function inviteMember(
 	// O comando CRIA o agregado (a membership). O `requestHash` fixa a intencao
 	// (agencia + e-mail + papel + ator) para que reusar a key com outro payload
 	// seja 409, e nao um 200 sem aplicar.
+	//
+	// G2 (ANX-460): o e-mail entra NORMALIZADO em minusculas. A busca de convite
+	// (`findInvitedByAgencyAndEmail`) e o indice unico parcial comparam
+	// `lower(invite_email)`, entao `Ana@x.com` e `ana@x.com` sao o MESMO convite;
+	// hashear o texto cru fazia um retry legitimo com outra caixa virar 409 em vez
+	// de replay. Mesma normalizacao usada por `acceptInviteByToken` na sessao.
 	const requestHash = hashCommandPayload({
 		agencyId: command.agencyId,
-		email: command.email,
+		email: command.email.toLowerCase(),
 		role: command.role,
 		actorPrincipalId: input.actorPrincipalId,
 	});

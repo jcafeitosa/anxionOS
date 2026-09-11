@@ -6,6 +6,7 @@ import {
 	pgTable,
 	text,
 	timestamp,
+	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
 export const agencyStatusEnum = pgEnum("organizations_agency_status", [
@@ -81,11 +82,19 @@ export const owners = pgTable(
 			.defaultNow(),
 	},
 	(table) => [
-		// D-ORG-035: nao e' UNIQUE — um Owner pode ter N Agencies. A unicidade
-		// correta e' "1 owner ativo por AGENCY", nos membros ativos.
+		// D-ORG-035: nao e' UNIQUE por `principal_id` sozinho — um Owner pode ter N
+		// Agencies. D-ORG-046 (ANX-460): a unicidade correta e' por
+		// (tenant_id, principal_id) — uma linha de owner por agency — o que
+		// preserva "N Agencies por Owner" (tenants distintos) e devolve integridade
+		// de banco a' tabela, que ficou sem nenhuma unicidade na migration 0005. A
+		// regra de negocio que permanece e' "1 owner ativo por AGENCY".
 		index("organizations_owners_principal_id_idx").on(table.principalId),
 		index("organizations_owners_tenant_id_idx").on(table.tenantId),
 		index("organizations_owners_agency_id_idx").on(table.agencyId),
+		uniqueIndex("organizations_owners_tenant_principal_uidx").on(
+			table.tenantId,
+			table.principalId,
+		),
 	],
 );
 export const memberships = pgTable(

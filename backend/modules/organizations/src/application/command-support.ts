@@ -27,8 +27,12 @@ export interface OrganizationCommandIntent {
 	 * distingue dois payloads no MESMO agencyId) e para que o replay continue
 	 * valido depois de o agregado mudar de estado (comparar estado quebraria o
 	 * retry legitimo).
+	 *
+	 * **Obrigatorio** (G4-F4/ANX-460): era opcional e um comando futuro que o
+	 * omitisse perderia o binding de intencao em silencio, voltando a permitir
+	 * replay com payload divergente. Todos os 8 comandos o fornecem.
 	 */
-	requestHash?: string;
+	requestHash: string;
 }
 
 async function assertIntentMatches(
@@ -64,10 +68,11 @@ async function assertIntentMatches(
 			);
 		}
 	}
-	if (
-		intent.requestHash !== undefined &&
-		existing.requestHash !== intent.requestHash
-	) {
+	// `requestHash` e' obrigatorio na intencao, entao a comparacao e' sempre feita
+	// (o antigo curto-circuito `!== undefined` era inalcancavel e mascararia um
+	// comando que omitisse o hash — G4-F4/ANX-460). Linha pre'-migration 0006 tem
+	// `requestHash = null` e falha aqui de proposito: fail-closed.
+	if (existing.requestHash !== intent.requestHash) {
 		throwOrganizationError(
 			"ORG_DUPLICATE_IDEMPOTENCY",
 			`Idempotency key ${commandId} was already applied with a different payload`,

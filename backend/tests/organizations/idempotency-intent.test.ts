@@ -253,14 +253,24 @@ describe("organizations idempotency intent (S2/ANX-460)", () => {
 	});
 
 	test("activateMembership: divergent target is 409 and does not re-apply", async () => {
+		// D-ORG-046: a ativacao assistida so' REATIVA membership ja' vinculada
+		// (aqui `revoked` com principal). Convite novo sem principal e' recusado
+		// (`ORG_INVITEE_CONSENT_REQUIRED`) e quem ativa pela primeira vez e' o
+		// proprio convidado via accept-invite.
 		const harness = createHarness({
 			agencies: [buildAgency(AGENCY_ID, OWNER)],
 			memberships: [
 				buildMembership(OWNER_MEMBERSHIP, AGENCY_ID, OWNER, "owner", "active"),
-				buildMembership(MEMBERSHIP_ID, AGENCY_ID, null, "operator", "invited", {
-					inviteEmail: "target@example.com",
-					inviteExpiresAt: FUTURE,
-				}),
+				buildMembership(
+					MEMBERSHIP_ID,
+					AGENCY_ID,
+					SUCCESSOR,
+					"operator",
+					"revoked",
+					{
+						inviteEmail: "target@example.com",
+					},
+				),
 			],
 			principals: [OWNER, SUCCESSOR, OTHER],
 		});
@@ -295,14 +305,21 @@ describe("organizations idempotency intent (S2/ANX-460)", () => {
 	});
 
 	test("activateMembership: same intent replays the same aggregateId", async () => {
+		// Reativacao de membership previamente vinculada (D-ORG-046).
 		const harness = createHarness({
 			agencies: [buildAgency(AGENCY_ID, OWNER)],
 			memberships: [
 				buildMembership(OWNER_MEMBERSHIP, AGENCY_ID, OWNER, "owner", "active"),
-				buildMembership(MEMBERSHIP_ID, AGENCY_ID, null, "operator", "invited", {
-					inviteEmail: "target@example.com",
-					inviteExpiresAt: FUTURE,
-				}),
+				buildMembership(
+					MEMBERSHIP_ID,
+					AGENCY_ID,
+					SUCCESSOR,
+					"operator",
+					"revoked",
+					{
+						inviteEmail: "target@example.com",
+					},
+				),
 			],
 			principals: [OWNER, SUCCESSOR],
 		});

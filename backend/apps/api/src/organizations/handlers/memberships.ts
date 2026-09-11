@@ -108,19 +108,23 @@ export async function handleActivateMembership(
 		(repos) =>
 			repos.membershipRepository.findById(input.agencyId, input.membershipId),
 	);
-	if (!membership?.inviteEmail) {
+	if (!membership) {
 		throw new OrganizationCommandError(
 			"ORG_AGENCY_NOT_FOUND",
 			`Membership ${input.membershipId} not found in agency ${input.agencyId}`,
 		);
 	}
-	const targetPrincipal = await deps.identityRepository.findByEmail(
-		membership.inviteEmail,
-	);
-	if (!targetPrincipal) {
+	// G5-F2 — o handler NAO consulta mais `identityRepository.findByEmail` do
+	// convite. Essa consulta devolvia 404 para e-mail sem principal e 200 para
+	// e-mail registrado, o que (a) enumerava os e-mails da plataforma e (b)
+	// vinculava o principal de um terceiro sem consentimento. O alvo agora e' o
+	// principal JA' vinculado a' membership; sem vinculo previo, quem ativa e' o
+	// proprio convidado via `acceptInviteByToken`. O recusso usa o mesmo codigo
+	// exista ou nao principal para o e-mail, entao nao sobra oraculo.
+	if (!membership.principalId) {
 		throw new OrganizationCommandError(
-			"ORG_PRINCIPAL_NOT_FOUND",
-			`No principal registered for invite email ${membership.inviteEmail}`,
+			"ORG_INVITEE_CONSENT_REQUIRED",
+			"Assisted activation cannot bind a principal for the first time; the invitee must accept the invite",
 		);
 	}
 	const command = activateMembershipCommandSchema.parse({
@@ -137,7 +141,7 @@ export async function handleActivateMembership(
 		{
 			...command,
 			actorPrincipalId: input.principalId,
-			targetPrincipalId: targetPrincipal.id,
+			targetPrincipalId: membership.principalId,
 		},
 	);
 }

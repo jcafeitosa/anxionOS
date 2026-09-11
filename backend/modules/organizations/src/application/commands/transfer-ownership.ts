@@ -8,7 +8,6 @@ import {
 import { createOwnershipTransferredEvent } from "../../domain/events/organization-events";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { OrganizationUnitOfWork } from "../../domain/ports/organization-unit-of-work";
-import type { PrincipalLookup } from "../../domain/ports/principal-lookup";
 import {
 	hashCommandPayload,
 	loadIdempotentCommandResult,
@@ -17,7 +16,6 @@ import {
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwOrganizationError } from "../errors";
-import { assertPrincipalExists } from "../services/principal-guard";
 import { buildAgencyTenantContext } from "../services/tenant-context";
 export async function transferOwnership(
 	deps: TransferOwnershipDeps,
@@ -41,10 +39,14 @@ export async function transferOwnership(
 	if (replay) {
 		return replay;
 	}
-	await assertPrincipalExists(
-		deps.principalLookup,
-		command.newOwnerPrincipalId,
-	);
+	// G5-F1/G4-F1 — a existencia do SUCESSOR nao e' verificada aqui, fora da
+	// transacao: `newOwnerPrincipalId` e' 100% controlado pelo cliente e
+	// `identity_principals` nao tem RLS, entao um 404 de "principal inexistente"
+	// ANTES da checagem de autoridade virava oraculo de existencia global de
+	// principal (404 = nao existe, 403/409 = existe) para qualquer owner/admin de
+	// qualquer agency self-serve. A verificacao agora acontece DENTRO da
+	// transacao, depois da autoridade, e colapsa no mesmo codigo opaco de
+	// "sucessor invalido".
 	return deps.unitOfWork.runInTransaction(
 		buildAgencyTenantContext(command.agencyId, input.actorPrincipalId),
 		async (context) => {
@@ -102,6 +104,11 @@ export async function transferOwnership(
 					command.agencyId,
 					command.newOwnerPrincipalId,
 				);
+			// Unico gate do sucessor: membership ATIVA na agency. E' mais forte que
+			// consultar existencia global de principal (membership ativa pressupoe
+			// principal vinculado) e nao distingue "principal nao existe" de "sem
+			// membership ativa" — os dois casos caem no MESMO codigo, entao nao ha'
+			// oraculo de existencia cross-tenant (G5-F1/G4-F1).
 			if (!successorMembership || successorMembership.status !== "active") {
 				throwOrganizationError(
 					"ORG_OWNER_REQUIRED",
@@ -179,5 +186,4 @@ export interface TransferOwnershipInput extends TransferOwnershipCommand {
 export interface TransferOwnershipDeps {
 	unitOfWork: OrganizationUnitOfWork;
 	commandJournal: CommandJournalRepository;
-	principalLookup: PrincipalLookup;
 }

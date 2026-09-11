@@ -9,7 +9,12 @@ const MEMBERSHIP_STATUS_TRANSITIONS: Record<
 > = {
 	invited: ["active", "revoked"],
 	active: ["revoked"],
-	revoked: [],
+	// D-ORG-046 (ANX-460): `revoked -> active` existe para REATIVACAO assistida de
+	// quem ja' consentiu antes (o principal ja' esta' vinculado a' membership).
+	// Nao e' caminho de primeira vinculacao: `activateMembership` recusa quando
+	// `principalId` e' nulo, e quem ativa pela primeira vez e' o proprio
+	// convidado via `acceptInviteByToken` (G5-F2).
+	revoked: ["active"],
 };
 
 export function canTransitionMembershipStatus(

@@ -355,8 +355,15 @@ describe("organizations G3 oracles (fixture orgs-two-agencies)", () => {
 		).rejects.toMatchObject({ organizationCode: "ORG_INVITE_EMAIL_MISMATCH" });
 	});
 
-	test("G3-09 admin activates invited membership by membershipId", async () => {
-		const { inviteDeps, commandDeps } = createFixtureHarness(fixture);
+	// D-ORG-046 (achado G5-F2/ANX-460) — este oraculo afirmava o comportamento
+	// ANTIGO: admin ativava um convite novo (sem principal vinculado) informando
+	// um `targetPrincipalId` qualquer. Era exatamente o vetor explorado pelo G5:
+	// o 404 de "e-mail sem principal" enumerava os e-mails cadastrados e a
+	// ativacao vinculava o principal de um terceiro sem consentimento. A regra
+	// agora e' a oposta, e o oraculo passa a provar a RECUSA.
+	test("G3-09 admin activation of a never-bound invite is refused (consent)", async () => {
+		const { inviteDeps, commandDeps, membershipRepository } =
+			createFixtureHarness(fixture);
 		const invited = await inviteMember(inviteDeps, {
 			commandId: "88888888-8888-4888-8888-888888888801",
 			agencyId: fixture.agencyX,
@@ -364,15 +371,88 @@ describe("organizations G3 oracles (fixture orgs-two-agencies)", () => {
 			role: "operator",
 			actorPrincipalId: fixture.principalA,
 		});
-		const activated = await activateMembership(commandDeps, {
-			commandId: "88888888-8888-4888-8888-888888888802",
+		await expect(
+			activateMembership(commandDeps, {
+				commandId: "88888888-8888-4888-8888-888888888802",
+				agencyId: fixture.agencyX,
+				membershipId: invited.result.aggregateId,
+				actorPrincipalId: fixture.principalA,
+				targetPrincipalId: fixture.inviteePrincipalC,
+			}),
+		).rejects.toMatchObject({
+			organizationCode: "ORG_INVITEE_CONSENT_REQUIRED",
+			statusCode: 403,
+		});
+		// Nenhum vinculo foi criado: a membership continua pendente e sem principal.
+		const persisted = await membershipRepository.findById(
+			fixture.agencyX,
+			invited.result.aggregateId,
+		);
+		expect(persisted?.status).toBe("invited");
+		expect(persisted?.principalId).toBeNull();
+	});
+
+	test("G3-09b reactivation of an already-bound membership still works", async () => {
+		// O caminho legitimo da ativacao assistida (D-ORG-046): quem JA' consentiu
+		// antes (membership vinculada) pode ser reativado por owner/admin.
+		const { commandDeps, membershipRepository } = createFixtureHarness(fixture);
+		await revokeMembership(commandDeps, {
+			commandId: "99999999-9999-4999-8999-999999999901",
 			agencyId: fixture.agencyX,
-			membershipId: invited.result.aggregateId,
+			membershipId: fixture.membershipAdminX,
+			actorPrincipalId: fixture.principalA,
+		});
+		const revoked = await membershipRepository.findById(
+			fixture.agencyX,
+			fixture.membershipAdminX,
+		);
+		expect(revoked?.status).toBe("revoked");
+		expect(revoked?.principalId).toBe(fixture.inviteePrincipalC);
+
+		const reactivated = await activateMembership(commandDeps, {
+			commandId: "99999999-9999-4999-8999-999999999902",
+			agencyId: fixture.agencyX,
+			membershipId: fixture.membershipAdminX,
 			actorPrincipalId: fixture.principalA,
 			targetPrincipalId: fixture.inviteePrincipalC,
 		});
-		expect(activated.aggregateId).toBe(invited.result.aggregateId);
-		expect(activated.revision).toBeGreaterThan(1);
+		expect(reactivated.aggregateId).toBe(fixture.membershipAdminX);
+		const persisted = await membershipRepository.findById(
+			fixture.agencyX,
+			fixture.membershipAdminX,
+		);
+		expect(persisted?.status).toBe("active");
+		expect(persisted?.revokedAt).toBeNull();
+		expect(persisted?.principalId).toBe(fixture.inviteePrincipalC);
+	});
+
+	test("G3-09c reactivation cannot rebind the membership to another principal", async () => {
+		const { commandDeps, membershipRepository } = createFixtureHarness(fixture);
+		await revokeMembership(commandDeps, {
+			commandId: "99999999-9999-4999-8999-999999999903",
+			agencyId: fixture.agencyX,
+			membershipId: fixture.membershipAdminX,
+			actorPrincipalId: fixture.principalA,
+		});
+		await expect(
+			activateMembership(commandDeps, {
+				commandId: "99999999-9999-4999-8999-999999999904",
+				agencyId: fixture.agencyX,
+				membershipId: fixture.membershipAdminX,
+				actorPrincipalId: fixture.principalA,
+				// Principal diferente do vinculado.
+				targetPrincipalId: fixture.principalB,
+			}),
+		).rejects.toMatchObject({
+			organizationCode: "ORG_INVITE_EMAIL_MISMATCH",
+			statusCode: 403,
+		});
+		const persisted = await membershipRepository.findById(
+			fixture.agencyX,
+			fixture.membershipAdminX,
+		);
+		expect(persisted?.principalId).toBe(fixture.inviteePrincipalC);
+		expect(persisted?.status).toBe("revoked");
 	});
 
 	test("G3-10 two distinct commandIds create two agencies for same owner", async () => {

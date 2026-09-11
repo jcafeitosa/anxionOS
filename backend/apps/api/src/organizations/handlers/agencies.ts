@@ -129,7 +129,6 @@ export async function handleTransferOwnership(
 		{
 			unitOfWork: deps.unitOfWork,
 			commandJournal: deps.commandJournal,
-			principalLookup: deps.principalLookup,
 		},
 		{
 			...command,

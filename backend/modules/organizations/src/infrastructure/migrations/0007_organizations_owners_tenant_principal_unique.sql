@@ -1,0 +1,23 @@
+-- D-ORG-046 / achados G2-7 e G4-F6 da ANX-460 — unicidade real de
+-- `organizations_owners` por (tenant, principal).
+--
+-- A migration 0005 removeu `organizations_owners_principal_id_unique` porque ele
+-- tornava o principal unico na PLATAFORMA inteira e fazia a 2a `createAgency` do
+-- mesmo Owner estourar `23505` cru -> 500. A remocao, porem, deixou a tabela SEM
+-- NENHUMA unicidade: a integridade passou a depender so' do find-then-insert de
+-- `createAgency`/`transferOwnership` — e esse check e' justamente cego entre
+-- tenants, porque a policy de RLS de `organizations_owners`
+-- (0003_organizations_rls_policies_part2.sql) exige
+-- `tenant_id = app.tenant_id AND agency_id = app.agency_id`. Ou seja: para uma
+-- agency NOVA o SELECT nao enxerga a linha de outra agency, o check devolve
+-- "nao existe" e a insercao prosssegue.
+--
+-- A cardinalidade correta e' "uma linha de owner por (principal, agency)": cada
+-- agency e' um tenant, e um Owner pode legitimamente possuir N Agencies
+-- (D-ORG-035). Unicidade por `principal_id` sozinho esta' errada; por
+-- `(tenant_id, principal_id)` descreve exatamente a tabela e continua permitindo
+-- N Agencies por Owner (tenants distintos).
+--
+-- Idempotente e nao-destrutiva: apenas cria o indice.
+CREATE UNIQUE INDEX IF NOT EXISTS organizations_owners_tenant_principal_uidx
+  ON organizations_owners (tenant_id, principal_id);

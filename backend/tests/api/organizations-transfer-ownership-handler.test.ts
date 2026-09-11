@@ -213,8 +213,8 @@ describe("handleTransferOwnership", () => {
 	});
 
 	test("sucessor sem membership ativa e' rejeitado com ORG_OWNER_REQUIRED", async () => {
-		// Principal existe (passa `assertPrincipalExists`), mas nao tem membership
-		// ativa na agency: a posse nao pode ir para quem nao esta no quadro.
+		// Principal existe, mas nao tem membership ativa na agency: a posse nao
+		// pode ir para quem nao esta no quadro.
 		const { deps } = buildDeps();
 		const error = await captureError(() =>
 			handleTransferOwnership(deps, {
@@ -229,9 +229,15 @@ describe("handleTransferOwnership", () => {
 		);
 	});
 
-	test("sucessor que nao existe como principal e' ORG_PRINCIPAL_NOT_FOUND", async () => {
+	test("sucessor inexistente responde o MESMO codigo que sucessor sem membership (sem oraculo)", async () => {
+		// G5-F1/G4-F1: antes, principal inexistente devolvia 404
+		// `ORG_PRINCIPAL_NOT_FOUND` e principal existente sem membership devolvia
+		// 409 `ORG_OWNER_REQUIRED` — a diferenca enumerava a existencia de
+		// principal na plataforma inteira, porque `identity_principals` nao tem
+		// RLS e `newOwnerPrincipalId` e' do cliente. Os dois casos agora colapsam
+		// no mesmo codigo e na mesma mensagem.
 		const { deps } = buildDeps();
-		const error = await captureError(() =>
+		const missingPrincipal = await captureError(() =>
 			handleTransferOwnership(deps, {
 				commandId: randomUUID(),
 				agencyId: AGENCY_ID,
@@ -239,8 +245,48 @@ describe("handleTransferOwnership", () => {
 				body: { newOwnerPrincipalId: OUTSIDER_PRINCIPAL },
 			}),
 		);
-		expect((error as OrganizationCommandError).organizationCode).toBe(
-			"ORG_PRINCIPAL_NOT_FOUND",
+		const withoutMembership = await captureError(() =>
+			handleTransferOwnership(deps, {
+				commandId: randomUUID(),
+				agencyId: AGENCY_ID,
+				principalId: OWNER_PRINCIPAL,
+				body: { newOwnerPrincipalId: PRINCIPAL_WITHOUT_MEMBERSHIP },
+			}),
 		);
+
+		const missing = missingPrincipal as OrganizationCommandError;
+		const noMembership = withoutMembership as OrganizationCommandError;
+		expect(missing.organizationCode).toBe("ORG_OWNER_REQUIRED");
+		expect(noMembership.organizationCode).toBe("ORG_OWNER_REQUIRED");
+		expect(missing.statusCode).toBe(noMembership.statusCode);
+		expect(missing.message).toBe(noMembership.message);
+	});
+
+	test("ator que nao e' o owner NAO revela se o sucessor existe (sem oraculo)", async () => {
+		// A autoridade e' checada ANTES de qualquer consulta ao alvo, entao um
+		// nao-owner recebe a mesma resposta para sucessor existente e inexistente.
+		const { deps } = buildDeps();
+		const existingTarget = await captureError(() =>
+			handleTransferOwnership(deps, {
+				commandId: randomUUID(),
+				agencyId: AGENCY_ID,
+				principalId: OUTSIDER_PRINCIPAL,
+				body: { newOwnerPrincipalId: PRINCIPAL_WITHOUT_MEMBERSHIP },
+			}),
+		);
+		const missingTarget = await captureError(() =>
+			handleTransferOwnership(deps, {
+				commandId: randomUUID(),
+				agencyId: AGENCY_ID,
+				principalId: OUTSIDER_PRINCIPAL,
+				body: { newOwnerPrincipalId: OUTSIDER_PRINCIPAL },
+			}),
+		);
+		for (const error of [existingTarget, missingTarget]) {
+			expect((error as OrganizationCommandError).organizationCode).toBe(
+				"ORG_CROSS_TENANT",
+			);
+			expect((error as OrganizationCommandError).statusCode).toBe(403);
+		}
 	});
 });
