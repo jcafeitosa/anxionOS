@@ -16,6 +16,7 @@ import type { GovernanceUnitOfWork } from "../../domain/ports/governance-unit-of
 import type { PrincipalLookup } from "../../domain/ports/principal-lookup";
 import type { TenantContext } from "../../domain/ports/tenant-context";
 import {
+	hashCommandPayload,
 	loadIdempotentCommandResult,
 	recordGovernanceCommand,
 	toCommandResultSnapshot,
@@ -61,6 +62,19 @@ export async function activateBreakGlass(
 
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
 		const incidentRef = command.incidentRef ?? command.commandId;
+		// ANX-476/F1 (G5): o `reason` vai para o EVENTO (auditoria) e nao existe no
+		// grant, entao o `matchesAggregate` nao o alcanca — sem o fingerprint,
+		// reusar a key com motivo divergente devolvia 200 replay mantendo o motivo
+		// antigo. O hash e' gravado JUNTO com a intencao (senao a releitura
+		// compararia hash novo contra `null`).
+		const requestHash = hashCommandPayload({
+			scopeId: command.scopeId,
+			granteePrincipalId: command.granteePrincipalId,
+			capability: command.capability,
+			reason: command.reason ?? null,
+			expiresAt: command.expiresAt,
+			incidentRef,
+		});
 		// ANX-476/FURO 4 — mesma key so' repete para a MESMA elevacao (alvo,
 		// capability, escopo, incidente e janela de validade).
 		const raced = await loadIdempotentCommandResult(
@@ -68,6 +82,12 @@ export async function activateBreakGlass(
 			command.commandId,
 			{
 				commandName: "ActivateBreakGlass",
+				// ANX-476/F1 (achado LOW/MEDIUM do G5): o `reason` vai para o EVENTO
+				// (auditoria) e nao existe no grant, entao o `matchesAggregate` nao o
+				// alcanca — sem o fingerprint, reusar a key com motivo divergente
+				// devolvia 200 replay e mantinha o motivo antigo. O hash cobre o
+				// payload inteiro de uma vez.
+				requestHash,
 				matchesAggregate: async (aggregateId) => {
 					const existing = await context.grantRepository.findById(aggregateId);
 					if (!existing) {
@@ -153,6 +173,7 @@ export async function activateBreakGlass(
 			aggregateId: saved.id,
 			aggregateType: "Grant",
 			revision: saved.revision,
+			requestHash,
 			responseSnapshot: toCommandResultSnapshot(result),
 		});
 		await context.publishEvents([

@@ -16,6 +16,7 @@ import type { CommandJournalRepository } from "../../domain/ports/command-journa
 import type { GovernanceUnitOfWork } from "../../domain/ports/governance-unit-of-work";
 import type { TenantContext } from "../../domain/ports/tenant-context";
 import {
+	hashCommandPayload,
 	loadIdempotentCommandResult,
 	recordGovernanceCommand,
 	toCommandResultSnapshot,
@@ -52,6 +53,16 @@ export async function resolveApproval(
 		agencyId: proposal.agencyId,
 		principalId: input.resolverPrincipalId,
 	};
+	// ANX-476/F1 (G5): `reason` E' persistido em `governance_approvals`, mas o
+	// `matchesAggregate` so' compara `decision` — reuso da key com motivo
+	// divergente devolvia 200 replay mantendo o antigo. Hash no payload inteiro,
+	// gravado junto com a intencao.
+	const requestHash = hashCommandPayload({
+		changeProposalId: command.changeProposalId,
+		decision: command.decision,
+		reason: command.reason ?? null,
+	});
+
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
 		// ANX-476/FURO 4 — o journal guarda o id da Approval; a intencao e'
 		// resolvida pela proposta (uma Approval por proposta) + decisao.
@@ -60,6 +71,10 @@ export async function resolveApproval(
 			command.commandId,
 			{
 				commandName: "ResolveApproval",
+				// ANX-476/F1 (G5): `reason` E' persistido em `governance_approvals`
+				// (`:119`) mas o `matchesAggregate` so' comparava `decision` — reuso
+				// da key com motivo divergente devolvia 200 replay mantendo o antigo.
+				requestHash,
 				matchesAggregate: async (aggregateId) => {
 					const existing =
 						await context.approvalRepository.findByChangeProposalId(
@@ -145,6 +160,7 @@ export async function resolveApproval(
 			aggregateId: savedApproval.id,
 			aggregateType: "Approval",
 			revision: savedApproval.revision,
+			requestHash,
 			responseSnapshot: toCommandResultSnapshot(result),
 		});
 		await context.publishEvents(events);

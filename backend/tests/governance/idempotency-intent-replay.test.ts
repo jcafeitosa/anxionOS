@@ -473,4 +473,42 @@ describe("ANX-476/D — intencao de CreateDelegation insensivel a ordem", () => 
 		} satisfies Partial<GovernanceCommandError>);
 		expect(harness.published).toHaveLength(writesAfterFirst);
 	});
+
+	/**
+	 * ANX-476/F1 (LOW/MEDIUM do G5): o `reason` vai para o EVENTO (auditoria),
+	 * nao existe no grant, e ficava FORA da intencao — reusar a key com motivo
+	 * divergente devolvia 200 replay mantendo o motivo antigo. Fechado com o
+	 * `requestHash` gravado junto da intencao.
+	 */
+	test("ActivateBreakGlass recusa reuso da key com motivo divergente", async () => {
+		// A janela do break-glass e' limitada a 24h: fixa o relogio para que o
+		// `expiresAt` de 2030 seja uma janela valida (como o teste irmao faz).
+		setSystemTime(new Date("2030-01-01T00:00:00.000Z"));
+		const harness = createHarness();
+		const deps = {
+			unitOfWork: harness.unitOfWork,
+			commandJournal: harness.commandJournal,
+			principalLookup: harness.principalLookup,
+		};
+		const commandId = "cccc2222-2222-4222-8222-222222222222";
+		const input = {
+			commandId,
+			scopeId,
+			granteePrincipalId: delegatePrincipalId,
+			capability: "owner.manage",
+			reason: "incident INC-C",
+			expiresAt: "2030-01-01T01:00:00.000Z",
+			incidentRef: "INC-C",
+		};
+		await activateBreakGlass(deps, input);
+		const writesAfterFirst = harness.published.length;
+
+		await expect(
+			activateBreakGlass(deps, { ...input, reason: "incident OUTRO" }),
+		).rejects.toMatchObject({
+			governanceCode: "GOV_DUPLICATE_IDEMPOTENCY",
+		});
+		// Nada novo foi publicado: o reuso divergente nao aplica efeito.
+		expect(harness.published.length).toBe(writesAfterFirst);
+	});
 });

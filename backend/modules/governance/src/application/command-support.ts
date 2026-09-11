@@ -76,9 +76,11 @@ async function assertIntentMatches(
 
 /**
  * Fingerprint canonico de um payload de comando: SHA-256 de um JSON com chaves
- * ordenadas, onde uma entrada `undefined` e' OMITIDA (ausente e `undefined` sao
- * a mesma coisa — `null` continua distinto). Duas coisas que o `JSON.stringify`
- * cru nao garante: (a) a mesma intencao com chaves em ordem diferente produz o
+ * ordenadas, onde `undefined` e `null` produzem o MESMO resultado (`"null"`,
+ * ver `canonicalJson`) — ou seja, "ausente", `undefined` e `null` sao a mesma
+ * intencao para efeito de idempotencia. Quem precisar distingui-los tem de
+ * normalizar ANTES (ex.: `?? null` no call-site, como os comandos fazem).
+ * Duas coisas que o `JSON.stringify` cru nao garante: (a) a mesma intencao com chaves em ordem diferente produz o
  * mesmo hash; (b) a ordem de insercao das chaves nao altera o resultado. Arrays
  * sao hasheados NA ORDEM dada: se a ordem nao for semantica (ex.: o
  * `capabilitySubset` da delegacao), o comando precisa normalizar antes de
