@@ -6,6 +6,19 @@ type: debate
 **Pacote SDD:** P06 · **Issue:** ANX-105 · pack P1 **ANX-389**  
 **Callers:** [R01-context.md](./R01-context.md) · [R03-domain-sketch.md](./R03-domain-sketch.md) · [ROUNDS.md](./ROUNDS.md).
 
+## In / Out (R2)
+
+**In:** OutcomeSnapshot, MetricSeries, AttributionRun, OfficialMetricDefinition.
+
+**Out:** Ledger (`accounting`). Position (`portfolios`). Pasta `analytics/`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Outcome / MetricSeries / Attribution | **performance** |
+| adapter-gateway | **KEEP** |
+
 ## Debate R2
 
 **Arquiteto:** performance é dono de métricas **oficiais** (OutcomeSnapshot, MetricSeries, AttributionRun, OfficialMetricDefinition). Rebuild a partir de ledger + posição; nunca reescreve saldo.

@@ -7,6 +7,23 @@ type: debate
 **Rodada:** R3 · **Issues:** ANX-42 · **ANX-99**  
 **Pré-requisito:** [R02-boundaries.md](./R02-boundaries.md)
 
+## In / Out (R3)
+
+**In:** esboço LimitPolicy, RiskCheckResult, ExposureSnapshot, RiskPermit.
+
+**Out:** TradeIntent. Grant. Reservation. Order.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Agregados de risco | **risk** |
+| adapter-gateway | **KEEP** |
+
 ## Agregados
 
 ### LimitPolicy

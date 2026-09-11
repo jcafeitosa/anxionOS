@@ -6,6 +6,19 @@ type: debate
 **Rodada:** R7 · 2026-09-11 · ANX-389 · ANX-115  
 **Callers:** [R06-dependencies.md](./R06-dependencies.md) · [R08-decision-log.md](./R08-decision-log.md).
 
+## In / Out (R7)
+
+**In:** riscos de escape de sandbox, SQLite-as-ledger, leak, completed≠CERTIFIED.
+
+**Out:** Venue real (`execution`). Certificação (`evaluation`). PolicyVersion (`risk`).
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Registro de riscos de sandbox | **simulation** |
+| adapter-gateway | **KEEP** |
+
 ## In scope
 
 Escape de sandbox, SQLite como ledger, leak cross-tenant, completed tratado como CERTIFIED, hash ignorado, 24o modulo `experiments/`, D-GOV-010 no pack errado.

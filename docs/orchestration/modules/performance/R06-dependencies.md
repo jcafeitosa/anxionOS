@@ -6,6 +6,23 @@ type: debate
 **Rodada:** R6 · 2026-09-11 · ANX-389 · ANX-105 · **ANX-106** não impl  
 **Callers:** [R05-storage-pg.md](./R05-storage-pg.md) · [R07-risks.md](./R07-risks.md) · [ROUNDS.md](./ROUNDS.md). Sem API runtime. D-GOV-010 = **risk P06**.
 
+## In / Out (R6)
+
+**In:** consumo accounting + portfolios; T01 read; projector no graph.
+
+**Out:** Import `accounting/infrastructure`. Fill como fonte de P&L. Billing usage = P&L trading.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Contratos performance.* | **performance** |
+| adapter-gateway | **KEEP** |
+
 ## Decisões-chave
 
 | ID | Decisão |

@@ -10,6 +10,23 @@ type: debate
 **Data:** 2026-09-08  
 **Issue debate estrutura:** ANX-42 · debate módulo: **ANX-95** · contrato P06: **ANX-58**
 
+## In / Out (R2)
+
+**In:** posição canônica e ValuationSnapshot.
+
+**Out:** Allocation/reserva (`capital`). Ledger (`accounting`). Mandate (`governance`). SQLite posição.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Portfolio / Position / ValuationSnapshot | **portfolios** |
+| adapter-gateway | **KEEP** |
+
 ## Objetivo da rodada
 
 Fechar fronteiras **possui / não possui** entre portfolios e vizinhos (**capital**, **accounting**, **strategies**, **organizations**, **market-data**, **execution**, **decisions**, **risk**, **performance**, **graph**); ratificar **PostgreSQL** como único dono de **posição canônica** e **ValuationSnapshot** autoritativa; separar posição de alocação/reserva, ledger e mandato; proibir SQLite para estado de posição; definir invariantes testáveis para R03/R04.

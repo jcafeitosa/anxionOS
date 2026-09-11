@@ -7,6 +7,19 @@ type: debate
 **Callers:** [R04-contracts-events.md](./R04-contracts-events.md) · [R06-dependencies.md](./R06-dependencies.md).  
 **Fonte:** `brain/notes/anxionos-storage-ownership.md` · ADR0004 · P08 na estrutura.
 
+## In / Out (R5)
+
+**In:** PG run/snapshot/manifest; object store resultRef; SQLite sandbox non-auth; projector isolado.
+
+**Out:** Mutar grafo de produção. SQLite como ledger. Certificação (`evaluation`).
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| SimulationRun / Snapshot / Manifest | **simulation** |
+| adapter-gateway | **KEEP** |
+
 ## In scope
 
 | Engine | O que simulation **possui** |

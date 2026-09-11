@@ -10,6 +10,23 @@ type: debate
 **Data:** 2026-09-07  
 **Issue debate estrutura:** ANX-42
 
+## In / Out (R1)
+
+**In:** inventário portfolios, posições, exposição e valuation.
+
+**Out:** Reservation (`capital`). Ledger (`accounting`). P&L oficial (`performance`).
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Portfolio / Position / ValuationSnapshot | **portfolios** |
+| adapter-gateway | **KEEP** |
+
 ## Propósito
 
 Portfolios, posições, exposição e valuation confirmados.

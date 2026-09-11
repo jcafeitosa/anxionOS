@@ -7,6 +7,23 @@ type: debate
 **Rodada:** R3 · **Issues:** ANX-42 · **ANX-95**  
 **Pré-requisito:** [R02-boundaries.md](./R02-boundaries.md)
 
+## In / Out (R3)
+
+**In:** esboço Portfolio, Position, Holding, ValuationSnapshot.
+
+**Out:** Grant. Reservation. JournalEntry. OfficialMetric.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Agregados de posição | **portfolios** |
+| adapter-gateway | **KEEP** |
+
 ## Agregados
 
 ### Portfolio

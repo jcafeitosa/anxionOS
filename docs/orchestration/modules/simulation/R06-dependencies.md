@@ -7,6 +7,19 @@ type: debate
 **Callers:** [R05-storage-pg.md](./R05-storage-pg.md) · [R07-risks.md](./R07-risks.md).  
 **Fonte:** `brain/notes/anxionos-backend-structure.md`.
 
+## In / Out (R6)
+
+**In:** backtest.requested; fixtures pinadas; grant de experimento; T01 start run.
+
+**Out:** Certificação. Ordens reais. Pasta `experiments/`. D-GOV-010.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Contratos simulation.* | **simulation** |
+| adapter-gateway | **KEEP** |
+
 ## In scope
 
 | Direção | Módulo | Contrato |

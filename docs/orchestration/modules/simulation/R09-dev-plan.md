@@ -8,6 +8,19 @@ status: draft
 **Implementacao:** **ANX-116** — nao neste pack.  
 **Callers:** [R08-decision-log.md](./R08-decision-log.md) · [R10-g0-handoff.md](./R10-g0-handoff.md).
 
+## In / Out (R9)
+
+**In:** plano G1 futuro (`simulation_*`, sandbox, HTTP runs, projector isolado).
+
+**Out:** Migration agora. D-GOV-010. Pasta `experiments/`. Certificação. Ordens reais.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Plano G0 documental | **simulation** |
+| adapter-gateway | **KEEP** |
+
 ## In scope (G1 futuro)
 
 Schema `simulation_*`, contratos, consumer `backtest.requested`, sandbox SQLite + resultRef, HTTP `/v1/simulation/runs`, eventos started/completed/failed, contrato projector isolado.

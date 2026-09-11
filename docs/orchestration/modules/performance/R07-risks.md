@@ -6,6 +6,19 @@ type: debate
 **Rodada:** R7 · 2026-09-11 · ANX-389 · ANX-105  
 **Callers:** [R06-dependencies.md](./R06-dependencies.md) · [R08-decision-log.md](./R08-decision-log.md) · [ROUNDS.md](./ROUNDS.md).
 
+## In / Out (R7)
+
+**In:** riscos de snapshot cross-tenant, P&L stale, Timescale drift.
+
+**Out:** Série como saldo. D-GOV-010. Segundo ledger.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Registro de riscos de métricas | **performance** |
+| adapter-gateway | **KEEP** |
+
 ## Registro
 
 | ID | Risco | L | I | Sev | Mitigação | Gate |

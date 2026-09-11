@@ -10,6 +10,23 @@ type: debate
 **Data:** 2026-09-08  
 **Issue debate estrutura:** ANX-42 · debate módulo: **ANX-99** · contrato P06: **ANX-58**
 
+## In / Out (R2)
+
+**In:** LimitPolicy, RiskCheckResult, ExposureSnapshot, RiskPermit.
+
+**Out:** TradeIntent (`decisions`). Grant (`governance`). Reservation (`capital`). Order (`execution`).
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| LimitPolicy / RiskCheck / RiskPermit / kill switch | **risk** |
+| adapter-gateway | **KEEP** |
+
 ## Objetivo da rodada
 
 Fechar fronteiras **possui / não possui** entre risk e vizinhos (**governance**, **decisions**, **capital**, **portfolios**, **market-data**, **strategies**, **execution**, **operations**, **graph**); ratificar **PostgreSQL** como dono de **LimitPolicy**, **RiskCheckResult**, **ExposureSnapshot** e **RiskPermit**; separar intenção de trade, limites de governança, reservas de capital e gates de execução; definir invariantes testáveis para R03/R04.

@@ -8,6 +8,19 @@ status: draft
 **Callers:** [R07-risks.md](./R07-risks.md) · [R09-dev-plan.md](./R09-dev-plan.md).  
 **Status:** `draft` — nao spec accepted; nao G7.
 
+## In / Out (R8)
+
+**In:** log de ownership Run/Snapshot/Manifest; SQLite non-auth; completed sem cert.
+
+**Out:** ANX-116 G1. ANX-342 done. research-python S3.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Decision log deste pack | **simulation** |
+| adapter-gateway | **KEEP** |
+
 ## In scope
 
 Ownership Run/Snapshot/Manifest/Checkpoint; SQLite non-auth; completed para evaluation **sem** cert; projector isolado; sem `experiments/`.

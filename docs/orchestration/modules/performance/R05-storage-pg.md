@@ -7,6 +7,19 @@ type: debate
 **Callers:** [R04-contracts-events.md](./R04-contracts-events.md) · [R06-dependencies.md](./R06-dependencies.md) · [ROUNDS.md](./ROUNDS.md).  
 ADR0004: PostgreSQL autoritativo; Timescale **derivado**; Neo4j via graph:performance:v1; SQLite **não** oficial. Storage map **draft**; ST08 **0/23**. **Sem migration.** D-GOV-010 = **risk P06**.
 
+## In / Out (R5)
+
+**In:** PG definitions/snapshots/attribution; Timescale séries derivadas; projector ids.
+
+**Out:** Saldo (`capital`/`accounting`). Position (`portfolios`). SQLite oficial. D-GOV-010.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Store `performance_*` + hypertables derivadas | **performance** |
+| adapter-gateway | **KEEP** |
+
 ## In scope (engines nomeados)
 
 | Engine | O que performance **possui** |

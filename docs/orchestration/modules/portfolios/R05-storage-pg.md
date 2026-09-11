@@ -6,6 +6,23 @@ type: debate
 
 **Issue:** ANX-95
 
+## In / Out (R5)
+
+**In:** PG posição/holding/ValuationSnapshot; Neo4j projeção; Timescale NAV derivado opcional.
+
+**Out:** SQLite como confirmação de Position. Ledger (`accounting`). Reservation (`capital`).
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Store `portfolios_*` | **portfolios** |
+| adapter-gateway | **KEEP** |
+
 ## Decisão R05 (núcleo)
 
 **PostgreSQL é o único journal autoritativo de posição, holding e ValuationSnapshot.** Nenhum SQLite, arquivo local ou cache substitui confirmação de Position. Neo4j projeta portfolio→posição→instrumento; Timescale armazena **séries derivadas** de NAV/exposure (opcional) — não substitui snapshot PG.

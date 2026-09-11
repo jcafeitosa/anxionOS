@@ -9,6 +9,23 @@ type: debate
 **Callers:** [R04-contracts-events.md](./R04-contracts-events.md) · [R06-dependencies.md](./R06-dependencies.md).  
 ADR0004: PG autoritativo; Neo4j projector; **sem** Timescale para check/permit; SQLite **não**. ST08 **0/23**. **Sem migration.** Nomes de tabela documentais (alvo G1). D-GOV-010 (corpo PolicyVersion RISK) **deferido P06** — este pack só nomeia `risk_limit_policies` + PolicyReference em governance.
 
+## In / Out (R5)
+
+**In:** PG `risk_*`, journal/outbox, kill switch/epoch neste módulo.
+
+**Out:** Timescale check/permit. SQLite. FK capital/portfolios. D-GOV-010 corpo completo (defer P06).
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Store `risk_*` | **risk** |
+| adapter-gateway | **KEEP** |
+
 ## Princípios
 
 PG `risk_*` verdade; journal/outbox mesma UoW; sem FK capital/portfolios; grafo `graph:risk:v1` só ids. Kill switch e epoch são estado deste módulo, não do board.
