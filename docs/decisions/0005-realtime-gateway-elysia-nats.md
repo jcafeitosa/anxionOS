@@ -1,8 +1,5 @@
 ---
 type: decision
-status: superseded
-superseded_by: brain/project-docs/decisions/0005-agent-hierarchy-modes-triangular-circular.md
-taskboard_issue: ANX-455
 ---
 
 # ADR0005 — Realtime gateway (Elysia + NATS)
