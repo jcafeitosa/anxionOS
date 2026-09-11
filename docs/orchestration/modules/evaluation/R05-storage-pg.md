@@ -5,7 +5,7 @@ type: debate
 
 **Rodada:** R5 · 2026-09-11 · ANX-389 · debate ANX-109 · **não** impl ANX-110  
 **Callers:** [R04-contracts-events.md](./R04-contracts-events.md) · [R06-dependencies.md](./R06-dependencies.md).  
-**Fonte de engines:** [mapa de armazenamento](../../../../brain/notes/anxionos-storage-ownership.md) · [ADR0004](../../../../brain/project-docs/decisions/0004-postgresql-timescaledb-pgvector.md) · [estrutura](../../../../brain/notes/anxionos-backend-structure.md) (P08).
+**Fonte de engines:** `brain/notes/anxionos-storage-ownership.md` · `brain/project-docs/decisions/0004-postgresql-timescaledb-pgvector.md` · `brain/notes/anxionos-backend-structure.md` (P08).
 
 ## In scope (autoridade deste módulo)
 

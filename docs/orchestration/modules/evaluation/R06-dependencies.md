@@ -5,7 +5,7 @@ type: debate
 
 **Rodada:** R6 · 2026-09-11 · ANX-389 · ANX-109  
 **Callers:** [R05-storage-pg.md](./R05-storage-pg.md) · [R07-risks.md](./R07-risks.md).  
-**Fonte:** [estrutura modular](../../../../brain/notes/anxionos-backend-structure.md) · ADR0002.
+**Fonte:** `brain/notes/anxionos-backend-structure.md` · ADR0002.
 
 ## In scope (este módulo consome / emite)
 
