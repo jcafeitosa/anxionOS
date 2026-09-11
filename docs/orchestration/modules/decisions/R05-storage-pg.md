@@ -20,9 +20,9 @@ sequenceDiagram
   participant PG as PostgreSQL
   participant RK as risk
   AG->>DC: propose.v1
-  DC->>PG: Decision + Proposal + outbox COMMIT
-  DC->>RK: check.requested (pre-submit)
-  Note over DC,PG: submit imutável; intentHash estável
+  DC->>PG: Decision Proposal outbox COMMIT
+  DC->>RK: check.requested before submit
+  Note over DC,PG: submit immutable intentHash stable
 ```
 
 ## Tabelas (alvo G1)
