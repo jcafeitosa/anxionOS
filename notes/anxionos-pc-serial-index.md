@@ -50,7 +50,7 @@ Thin debates spec 003 (módulos físicos sem PC serial): [strategies](./anxionos
 
 Atlas: [sistema](./anxionos-diagram-atlas.md) · [23 modulos](./anxionos-diagram-atlas-modules.md) · [alinhamento](./anxionos-product-company-module-alignment.md) · [briefing Owner](/external-sources/owner-briefing-product-company-2026-09-10)
 
-Hub em brain (sem duplicar estes 30 arquivos): [anxionos-pc-serial-hub](../brain/notes/anxionos-pc-serial-hub.md). Programa P1: ANX-389.
+Hub em brain (sem duplicar estes 30 arquivos): [anxionos-pc-serial-hub](../brain/notes/anxionos-pc-serial-hub.md). Programa P1: ANX-389. Pacote G7 Owner (draft): [anxionos-owner-g7-packet-p1-atlas](./anxionos-owner-g7-packet-p1-atlas.md).
 
 Navegação P1: [CAPABILITY-MAP](../docs/orchestration/system-capabilities/CAPABILITY-MAP.md) · [fichas 23](../docs/orchestration/system-capabilities/modules/) · Archify JSON `.archify/specs/anxionos-module-*.workflow.json` + HTML `.archify/artifacts/`.
 

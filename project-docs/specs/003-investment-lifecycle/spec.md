@@ -26,7 +26,7 @@ Os 11 módulos restantes (identity…simulation) não são donos do ciclo financ
 
 ### Eventos
 
-`investment.intent.*`, `risk.check.*`, `execution.order.*`, `execution.fill.*`, `accounting.transaction.*`, `audit.manifest.*`, `strategies.version.created.v1`, `strategies.deployment.activated.v1`, `capital.allocation.reserved.v1`, `market-data.observation.ingested.v1`.
+`investment.intent.submitted.v1`, `investment.intent.approved.v1`, `risk.check.passed.v1`, `risk.check.rejected.v1`, `execution.order.submitted.v1`, `execution.order.filled.v1`, `accounting.transaction.posted.v1`, `audit.manifest.sealed.v1`, `strategies.version.created.v1`, `strategies.deployment.activated.v1`, `capital.allocation.reserved.v1`, `market-data.observation.ingested.v1`.
 
 ### Non-goals
 
