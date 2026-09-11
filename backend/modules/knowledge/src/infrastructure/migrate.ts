@@ -11,7 +11,13 @@ const migrationsFolder = join(
 
 export async function ensureKnowledgeSchema(pool: Pool): Promise<void> {
 	const db = drizzle(pool);
-	await migrate(db, { migrationsFolder });
+	// Per-module journal (ANX-463): the shared drizzle.__drizzle_migrations table
+	// compares only its newest row, so modules silently skip each other's migrations.
+	await migrate(db, {
+		migrationsFolder,
+		migrationsSchema: "knowledge",
+		migrationsTable: "__drizzle_migrations",
+	});
 }
 
 const databaseUrl =

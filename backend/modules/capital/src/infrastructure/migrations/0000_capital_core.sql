@@ -1,6 +1,7 @@
 -- capital module baseline schema (ANX-126 / P06 flow).
--- Tables align with capital-unit-of-work repositories and
--- mirror the fixtures in tests/decisions/fixtures/capital-pg-schema.sql.
+-- Tables align with capital-unit-of-work repositories. Money columns are NUMERIC
+-- because the repositories aggregate them in SQL (SUM(amount) in
+-- repositories.ts) and subtract settled balances (ANX-463).
 
 CREATE TABLE IF NOT EXISTS capital_accounts (
 	id TEXT PRIMARY KEY,
@@ -19,9 +20,9 @@ CREATE INDEX IF NOT EXISTS capital_accounts_organization_id_idx
 CREATE TABLE IF NOT EXISTS capital_balance_lines (
 	account_id TEXT NOT NULL REFERENCES capital_accounts (id),
 	asset TEXT NOT NULL,
-	settled TEXT NOT NULL,
-	encumbered TEXT NOT NULL DEFAULT '0',
-	reserved TEXT NOT NULL DEFAULT '0',
+	settled NUMERIC(24, 8) NOT NULL,
+	encumbered NUMERIC(24, 8) NOT NULL DEFAULT 0,
+	reserved NUMERIC(24, 8) NOT NULL DEFAULT 0,
 	revision INTEGER NOT NULL DEFAULT 1,
 	as_of TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 	PRIMARY KEY (account_id, asset)
@@ -34,7 +35,7 @@ CREATE TABLE IF NOT EXISTS capital_allocations (
 	portfolio_id UUID NOT NULL,
 	grant_id UUID NOT NULL,
 	state TEXT NOT NULL,
-	limit_amount TEXT NOT NULL,
+	limit_amount NUMERIC(24, 8) NOT NULL,
 	limit_currency TEXT NOT NULL,
 	revision INTEGER NOT NULL DEFAULT 1,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -51,7 +52,7 @@ CREATE TABLE IF NOT EXISTS capital_reservations (
 	grant_id UUID NOT NULL,
 	intent_hash TEXT NOT NULL,
 	asset TEXT NOT NULL,
-	amount TEXT NOT NULL,
+	amount NUMERIC(24, 8) NOT NULL,
 	reservation_kind TEXT NOT NULL,
 	status TEXT NOT NULL,
 	expires_at TIMESTAMPTZ,

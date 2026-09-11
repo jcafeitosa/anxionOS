@@ -86,3 +86,40 @@ jobs:
         run: |
           bun run test:boundary
           bun test
+
+  backend-pg-fresh:
+    name: Backend tests (fresh PostgreSQL, ANX-463 oracle)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: timescale/timescaledb:2.30.0-pg16
+        env:
+          POSTGRES_USER: anxionos
+          POSTGRES_PASSWORD: anxionos
+          POSTGRES_DB: anxionos
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U anxionos -d anxionos"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://anxionos:anxionos@localhost:5432/anxionos
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: bun install
+
+      # ANX-463: creates a database from zero, applies every module migration and
+      # runs the full suite. Fails unless the summary is 0 fail AND 0 skip, so the
+      # suite can never go green again only because the dev database drifted.
+      - name: Fresh database oracle
+        working-directory: backend
+        run: bun run test:pg:fresh --json

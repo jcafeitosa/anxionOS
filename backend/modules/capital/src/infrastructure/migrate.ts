@@ -10,7 +10,13 @@ const migrationsFolder = join(
 );
 export async function ensureCapitalSchema(poolOrClient: Pool | PoolClient) {
 	const db = drizzle(poolOrClient);
-	await migrate(db, { migrationsFolder });
+	// Per-module journal (ANX-463): the shared drizzle.__drizzle_migrations table
+	// compares only its newest row, so modules silently skip each other's migrations.
+	await migrate(db, {
+		migrationsFolder,
+		migrationsSchema: "capital",
+		migrationsTable: "__drizzle_migrations",
+	});
 }
 const databaseUrl =
 	process.env.DATABASE_URL ??

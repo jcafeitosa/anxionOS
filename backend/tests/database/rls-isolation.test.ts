@@ -62,6 +62,17 @@ describe("rls policy helpers", () => {
 		expect(sql).toContain("BYPASSRLS");
 		expect(dropRolesSql()).toContain("DROP ROLE IF EXISTS anxion_app");
 	});
+
+	test("role migration SQL grants CONNECT on the connected database (ANX-463)", () => {
+		// Regression: the default used to hardcode `anxionos`, so a fresh database
+		// under any other name silently never received the CONNECT grant.
+		const sql = createRolesSql();
+		expect(sql).toContain("current_database()");
+		expect(sql).not.toContain('CONNECT ON DATABASE "anxionos"');
+		expect(createRolesSql({ databaseName: "anxionos_test" })).toContain(
+			'GRANT CONNECT ON DATABASE "anxionos_test"',
+		);
+	});
 });
 
 describe("postgresql rls integration", () => {

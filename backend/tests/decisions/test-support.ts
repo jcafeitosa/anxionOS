@@ -1,11 +1,9 @@
 import { randomUUID } from "node:crypto";
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import {
 	createPgCommandJournalRepository as createCapitalCommandJournal,
 	createCapitalUnitOfWork,
 	createDefaultGrantValidationPort,
+	ensureCapitalSchema,
 	registerCapitalAccount,
 	reserveForIntent,
 } from "@anxionos/capital";
@@ -47,14 +45,6 @@ const CAPITAL_TRUNCATE_SQL =
 const DECISIONS_TRUNCATE_SQL =
 	"TRUNCATE decisions_consumer_dedup, decisions_evidence_manifest_entries, decisions_evidence_manifests, decisions_submit_preconditions, decisions_dispositions, decisions_approvals, decisions_trade_intents, decisions_proposals, decisions_command_journal, decisions_records, domain_journal, outbox CASCADE";
 
-const CAPITAL_SCHEMA_SQL = readFileSync(
-	join(
-		dirname(fileURLToPath(import.meta.url)),
-		"fixtures/capital-pg-schema.sql",
-	),
-	"utf8",
-);
-
 export async function withDecisionsPgHarness<T>(
 	work: (ctx: { pool: ReturnType<typeof createPgPool> }) => Promise<T>,
 ): Promise<T | undefined> {
@@ -68,7 +58,9 @@ export async function withDecisionsPgHarness<T>(
 		await ensureEventingSchema(pool);
 		await ensureDecisionsSchema(pool);
 		await ensureRiskSchema(pool);
-		await pool.query(CAPITAL_SCHEMA_SQL);
+		// ANX-463: apply the module's own versioned migration instead of a duplicated
+		// fixture — the copy had drifted to TEXT money columns and broke SUM(amount).
+		await ensureCapitalSchema(pool);
 		await pool.query(RISK_TRUNCATE_SQL);
 		await pool.query(CAPITAL_TRUNCATE_SQL);
 		await pool.query(DECISIONS_TRUNCATE_SQL);

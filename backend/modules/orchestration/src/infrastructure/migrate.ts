@@ -11,7 +11,13 @@ export async function ensureOrchestrationSchema(
 	pool: import("pg").Pool,
 ): Promise<void> {
 	const db = drizzle(pool);
-	await migrate(db, { migrationsFolder });
+	// Per-module journal (ANX-463): the shared drizzle.__drizzle_migrations table
+	// compares only its newest row, so modules silently skip each other's migrations.
+	await migrate(db, {
+		migrationsFolder,
+		migrationsSchema: "orchestration",
+		migrationsTable: "__drizzle_migrations",
+	});
 }
 const databaseUrl =
 	process.env.DATABASE_URL ??

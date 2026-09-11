@@ -33,8 +33,20 @@ export interface RoleMigrationOptions {
  */
 export function createRolesSql(options: RoleMigrationOptions = {}): string {
 	const password = resolveRolePassword(options.password);
-	const databaseName = options.databaseName ?? "anxionos";
 	const grantToCurrentUser = options.grantAppRoleToCurrentUser ?? true;
+
+	// ANX-463: without an explicit database name the CONNECT grant used to target
+	// the literal "anxionos", so a scratch or production database under any other
+	// name silently never received it. Default to the connected database.
+	const connectGrants = options.databaseName
+		? `GRANT CONNECT ON DATABASE ${quoteIdentifier(options.databaseName)} TO ${ANXION_APP_ROLE};
+GRANT CONNECT ON DATABASE ${quoteIdentifier(options.databaseName)} TO ${ANXION_SERVICE_ROLE};
+GRANT CONNECT ON DATABASE ${quoteIdentifier(options.databaseName)} TO ${ANXION_MIGRATOR_ROLE};`
+		: `DO $$ BEGIN
+  EXECUTE format('GRANT CONNECT ON DATABASE %I TO ${ANXION_APP_ROLE}', current_database());
+  EXECUTE format('GRANT CONNECT ON DATABASE %I TO ${ANXION_SERVICE_ROLE}', current_database());
+  EXECUTE format('GRANT CONNECT ON DATABASE %I TO ${ANXION_MIGRATOR_ROLE}', current_database());
+END $$;`;
 
 	const grantBlock = grantToCurrentUser
 		? `
@@ -65,9 +77,7 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
-GRANT CONNECT ON DATABASE ${quoteIdentifier(databaseName)} TO ${ANXION_APP_ROLE};
-GRANT CONNECT ON DATABASE ${quoteIdentifier(databaseName)} TO ${ANXION_SERVICE_ROLE};
-GRANT CONNECT ON DATABASE ${quoteIdentifier(databaseName)} TO ${ANXION_MIGRATOR_ROLE};
+${connectGrants}
 
 GRANT USAGE ON SCHEMA public TO ${ANXION_APP_ROLE};
 GRANT USAGE ON SCHEMA public TO ${ANXION_SERVICE_ROLE};

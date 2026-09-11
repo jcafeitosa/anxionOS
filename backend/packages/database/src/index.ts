@@ -3,6 +3,7 @@ import { Pool as PgPool } from "pg";
 
 export { DatabaseMigrationError, TenantContextError } from "./errors";
 export {
+	provisionDatabaseRoles,
 	type RunDatabaseMigrationsOptions,
 	rollbackDatabaseMigrations,
 	runDatabaseMigrations,
@@ -24,6 +25,7 @@ export {
 	ANXION_SERVICE_ROLE,
 	createRolesSql,
 	dropRolesSql,
+	type RoleMigrationOptions,
 } from "./roles";
 export {
 	applyTenantContext,

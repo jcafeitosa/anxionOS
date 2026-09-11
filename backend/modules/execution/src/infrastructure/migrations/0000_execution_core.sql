@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS execution_orders (
 	client_order_id TEXT NOT NULL,
 	instrument_id TEXT NOT NULL,
 	side TEXT NOT NULL CHECK (side IN ('BUY', 'SELL')),
-	quantity TEXT NOT NULL,
-	price TEXT NOT NULL,
+	quantity NUMERIC(24, 8) NOT NULL,
+	price NUMERIC(24, 8) NOT NULL,
 	status TEXT NOT NULL CHECK (
 		status IN ('SUBMITTED', 'FILLED', 'CANCELLED')
 	),
@@ -62,9 +62,9 @@ CREATE TABLE IF NOT EXISTS execution_fills (
 	organization_id UUID NOT NULL,
 	order_id TEXT NOT NULL REFERENCES execution_orders (id),
 	venue_fill_id TEXT NOT NULL,
-	quantity TEXT NOT NULL,
-	price TEXT NOT NULL,
-	notional_amount TEXT NOT NULL,
+	quantity NUMERIC(24, 8) NOT NULL,
+	price NUMERIC(24, 8) NOT NULL,
+	notional_amount NUMERIC(24, 8) NOT NULL,
 	asset TEXT NOT NULL,
 	status TEXT NOT NULL CHECK (status IN ('CONFIRMED', 'REJECTED')),
 	filled_at TIMESTAMPTZ NOT NULL,

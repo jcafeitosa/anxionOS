@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS portfolios_positions (
 	instrument_id TEXT NOT NULL,
 	position_side TEXT NOT NULL CHECK (position_side IN ('LONG', 'SHORT', 'CASH')),
 	book TEXT NOT NULL CHECK (book IN ('TRADING')),
-	quantity NUMERIC NOT NULL DEFAULT 0,
+	quantity NUMERIC(24, 8) NOT NULL DEFAULT 0,
 	revision INTEGER NOT NULL DEFAULT 1,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -48,8 +48,8 @@ CREATE TABLE IF NOT EXISTS portfolios_holdings (
 	position_id TEXT NOT NULL REFERENCES portfolios_positions (id),
 	organization_id UUID NOT NULL,
 	fill_id TEXT NOT NULL,
-	quantity NUMERIC NOT NULL,
-	price NUMERIC NOT NULL,
+	quantity NUMERIC(24, 8) NOT NULL,
+	price NUMERIC(24, 8) NOT NULL,
 	revision INTEGER NOT NULL DEFAULT 1,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

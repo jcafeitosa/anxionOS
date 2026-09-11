@@ -35,6 +35,21 @@ bun run typecheck    # TypeScript project references
 bun run boundaries   # dependency-cruiser (AR01)
 ```
 
+### Banco de dados novo: bootstrap e oráculo (ANX-463)
+
+O verde histórico da suíte dependia do banco `anxionos` de desenvolvimento, migrado quando as migrations ainda funcionavam; um banco criado do zero falhava (journal Drizzle compartilhado entre módulos, colunas monetárias `TEXT` onde o código agrega em SQL, GRANTs ausentes). O caminho suportado para provisionar um banco limpo é:
+
+```bash
+cd backend
+bun run db:bootstrap          # extensões ADR0004 + roles/GRANTs + migrations de todos os módulos
+bun run test:pg:fresh         # oráculo: banco do zero -> bootstrap -> suíte completa (exige 0 fail / 0 skip)
+```
+
+- `db:bootstrap` é idempotente e faz o que o deploy precisa em um banco vazio: `CREATE EXTENSION timescaledb/vector`, provisiona `anxion_app`/`anxion_service`/`anxion_migrator` (com `GRANT CONNECT` no banco conectado) e aplica o journal/DDL de cada módulo. Módulos cujo `ensureXSchema` ainda não tem pasta `migrations/` são reportados como **GAP** (hoje: `audit`, `billing`, `connections`, `knowledge`, `orchestration`) e o script sai com código 1 — nenhum módulo é ignorado em silêncio.
+- `test:pg:fresh` cria um banco descartável (`anxionos_oracle` por padrão, `--database` para trocar), recusa-se a tocar em `anxionos` e nos bancos reservados (`anxionos_g2r`, `_g3r`, `_g3r2`, `_g4r`, `_g5r`, `_g5r2`, `_org`), roda a suíte com `RUN_PG_INTEGRATION_TESTS=true` e falha se a contagem não for **0 fail e 0 skip**. O log completo fica em `$TMPDIR`.
+- O job `backend-pg-fresh` do CI roda exatamente esse oráculo com um Postgres novo, para que o defeito não volte a ficar invisível.
+
+
 ### Desenvolvimento com hotswap
 
 `bun run dev` delega para `apps/api` com `bun --env-file=../../.env --watch src/index.ts` — carrega `backend/.env` (Postgres, NATS, Neo4j, Better Auth) mesmo com cwd em `apps/api`. O runtime Bun recarrega automaticamente ao salvar arquivos `.ts`. Logs de boot incluem `DATABASE_URL loaded — identity and auth schema ready` e `API listening` na porta `3000` (ou `PORT` do `.env`). Better Auth monta em `/api/auth/*` quando `BETTER_AUTH_SECRET` e `BETTER_AUTH_URL` estão definidos.
