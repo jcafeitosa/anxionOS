@@ -1,24 +1,81 @@
 ---
 type: debate
 ---
-
 # R03 — Esboço de domínio: `modules/billing`
 
-**Issue:** ANX-103
+**Rodada:** R3 — Domain model  
+**Data:** 2026-09-11  
+**Issue pack:** ANX-389 · histórico ANX-103  
+**Pré-requisito:** [R02-boundaries.md](./R02-boundaries.md) · thin debate billing  
+**Callers:** [R04-contracts-events.md](./R04-contracts-events.md) · [ROUNDS.md](./ROUNDS.md). Sem schema de produção.
 
-## Agregados
+## Debate R3 (síntese atribuída)
 
-Subscription, BillingPlan, Invoice, InvoiceLine, UsageAggregation, Refund, WebhookReceipt
+**Arquiteto:** Agregados v1 — `BillingPlan`, `Subscription`, `UsageAggregation`, `Invoice` (+ linhas), `Refund`, `WebhookReceipt`.
 
-## Nota
+**Executor:** `BillingUnitOfWork` (estado + journal + outbox). Consumer de usage é application, não domain.
 
-UsageAggregation idempotente por usageRecordId; InvoiceLine referencia usage sem duplicar source
+**Crítico:** UsageAggregation idempotente por `usageRecordId`. Paid **não** escreve accounting internamente.
 
-## Ports
+**Security:** WebhookReceipt chave `(provider, externalId)`; corpo cru não vai para grafo.
 
-| Port | Uso |
+## Agregado: BillingPlan
+
+Catálogo de plano da plataforma (limites lógicos, preço ref). Não é Product Company Product (PC 10).
+
+| Campo | Notas |
 | --- | --- |
-| EventConsumerPort | connections.usage.recorded.v1 → aggregateUsage |
-| EventEmitterPort | billing.invoice.issued.v1, billing.invoice.paid.v1, billing.refund.processed.v1 |
+| id | BillingPlanId |
+| code | estável |
+| revision | optimistic concurrency |
 
-→ **R04** ([R04-contracts-events.md](./R04-contracts-events.md))
+## Agregado: Subscription
+
+Org-scoped. Status: `trial | active | past_due | canceled`. Sync via `organizations.subscription.changed.v1` **e** comandos billing.
+
+**BIL-R03-01:** status paid/past_due deriva de Invoice, não de membership.
+
+## Agregado: UsageAggregation
+
+Rollup `(organizationId, billingPeriod, usageRecordId)`. **BIL-R03-02:** insert idempotente — replay do evento connections não double-invoice.
+
+## Agregado: Invoice
+
+`draft | issued | paid | voided`. Linhas apontam `usageRecordId` (UUID lógico connections — sem FK).
+
+## Agregado: Refund
+
+Só após `paid`. **BIL-R03-03:** `ProcessRefund` + `Idempotency-Key`; emite `billing.refund.processed.v1` na mesma UoW.
+
+## Agregado: WebhookReceipt
+
+Idempotência PSP. **BIL-R03-04:** replay mesmo `external_id` → 200 sem segundo `invoice.paid`.
+
+## Ports (domain/)
+
+| Port | Responsabilidade |
+| --- | --- |
+| SubscriptionRepository | lifecycle |
+| InvoiceRepository | draft/issue/pay/void |
+| RefundRepository | process |
+| WebhookReceiptRepository | dedupe PSP |
+| UsageAggregationRepository | dedupe usageRecordId |
+| BillingUnitOfWork | estado + journal + outbox |
+| AgencyScopePort | organizations |
+| TraversalEvaluator | T01 `billing.*` |
+| EventConsumerPort | usage + org subscription changed |
+| PaymentProviderPort | infra — nunca secret no domain |
+
+## Comandos application
+
+| Comando | Idempotência | Evento |
+| --- | --- | --- |
+| UpsertSubscription | (organizationId, planId) | `billing.subscription.updated.v1` |
+| AggregateUsage | usageRecordId | (interno; pode não emitir) |
+| IssueInvoice | (organizationId, period) | `billing.invoice.issued.v1` |
+| RecordInvoicePaid | webhook receipt | `billing.invoice.paid.v1` |
+| ProcessRefund | Idempotency-Key | `billing.refund.processed.v1` |
+
+## Saída R3
+
+Modelo v1 aprovado para R4.
