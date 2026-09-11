@@ -1,3 +1,7 @@
+---
+type: debate
+---
+
 # Rodadas — debate `modules/risk`
 
 | Rodada | Artefato | Status |
