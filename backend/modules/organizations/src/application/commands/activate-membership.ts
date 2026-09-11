@@ -59,7 +59,7 @@ export async function activateMembership(
 			if (raced) {
 				return raced;
 			}
-			await assertActorIsOwnerOrAdmin(
+			const actorMembership = await assertActorIsOwnerOrAdmin(
 				context.membershipRepository,
 				input.actorPrincipalId,
 				command.agencyId,
@@ -72,6 +72,17 @@ export async function activateMembership(
 				throwOrganizationError(
 					"ORG_AGENCY_NOT_FOUND",
 					`Membership ${command.membershipId} not found in agency ${command.agencyId}`,
+				);
+			}
+			// D-ORG-046 — restaurar autoridade de OWNER e' ato de owner. O convite
+			// nunca aceita `role=owner` (schema exclui), entao um admin NAO consegue
+			// criar owner; sem esta guarda ele conseguiria o mesmo efeito pela porta
+			// dos fundos: reativar uma membership `revoked` de role `owner` e fazer o
+			// governance reemitir a baseline de owner (`membership.activated`).
+			if (membership.role === "owner" && actorMembership.role !== "owner") {
+				throwOrganizationError(
+					"ORG_OWNER_REQUIRED",
+					"Only an owner can reactivate an owner membership",
 				);
 			}
 			if (membership.status !== "invited" && membership.status !== "revoked") {

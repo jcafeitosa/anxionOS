@@ -242,6 +242,7 @@ Os quatro gates independentes sobre o candidato `10015392` encontraram dois veto
 | Erro de recusa | `ORG_INVITEE_CONSENT_REQUIRED` (403) — **o mesmo** exista ou não principal para o e-mail, para não sobrar oráculo |
 | Handler | Deixa de consultar `findByEmail`; usa o `principalId` **já vinculado** (nunca um id do cliente) |
 | Revinculação | `principalId !== targetPrincipalId` → `ORG_INVITE_EMAIL_MISMATCH` (403): a reativação não troca de dono |
+| Reativação de `role=owner` | Só um **owner** pode (um `admin` recebe `ORG_OWNER_REQUIRED`): o convite exclui `owner`, então sem esta guarda o admin restauraria autoridade de owner pela porta dos fundos, e o `governance` reemite a baseline de owner em `membership.activated` |
 | Transição nova | `revoked → active` (antes `revoked` era terminal) |
 | Escopo de privilégio | Sem mudança: o convite nunca aceita `role=owner`, então não há emissão de grant baseline para o vinculado |
 

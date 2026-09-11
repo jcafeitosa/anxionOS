@@ -307,7 +307,7 @@ Prefixo: `/v1/organizations`. Autenticação via Better Auth (sessão). OpenAPI 
 | `GET` | `/agencies/:agencyId/memberships` | `ListMembershipsByAgency` | membership ativo |
 | `GET` | `/agencies/:agencyId/memberships/:membershipId` | `GetMembership` | membership ativo |
 | `POST` | `/agencies/:agencyId/memberships/invite` | `InviteMember` | role `owner` ou `admin` |
-| `POST` | `/agencies/:agencyId/memberships/:membershipId/activate` | `ActivateMembership` | role `owner`/`admin` **e** membership já vinculada (reativação) |
+| `POST` | `/agencies/:agencyId/memberships/:membershipId/activate` | `ActivateMembership` | role `owner`/`admin` **e** membership já vinculada; alvo `role=owner` exige ator `owner` |
 | `POST` | `/agencies/:agencyId/memberships/:membershipId/revoke` | `RevokeMembership` | role `owner` ou `admin` |
 | `POST` | `/invites/accept` | `AcceptInviteByToken` | Principal autenticado com o e-mail do convite |
 
