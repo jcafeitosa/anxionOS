@@ -47,8 +47,20 @@ type: debate
 
 Hypertable `performance_metric_series` — owner **performance**; retention policy via operations (defer P07).
 
-## Erros
+## Oráculos
 
-`PERF_DUPLICATE_IDEMPOTENCY` · `PERF_CROSS_TENANT` · `PERF_GRANT_INVALID` · `PERF_STALE_POSITION`
+| ID | Esperado |
+| --- | --- |
+| G3-PERF-01 | ledger.posted atualiza realized sem mutar accounting |
+| G3-PERF-02 | position stale → PERF_STALE_POSITION |
+| G3-PERF-03 | rebuild (org, snapshotId, revision) idempotente |
+| G5-PERF-01 | replay ledger duplicate no-op |
+| G5-PERF-02 | GET cross-tenant → 403 PERF_CROSS_TENANT |
 
-→ **R05** ([R05-storage-pg.md](./R05-storage-pg.md))
+## Alternativas rejeitadas
+
+Timescale como saldo; fill como cash oficial; pasta `analytics/`.
+
+## Saída R4
+
+Contratos v1 para R5.
