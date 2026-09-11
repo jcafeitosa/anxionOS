@@ -1,3 +1,7 @@
+---
+type: guide
+---
+
 # @anxionos/frontend
 
 Consoles web anxionOS — **Astro 7** + **React 19** + **TypeScript 7** + **Tailwind CSS 4**.

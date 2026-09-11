@@ -1,3 +1,7 @@
+---
+type: guide
+---
+
 # Graphify no anxionOS
 
 [Graphify](https://github.com/Graphify-Labs/graphify) indexa código e documentação em um **grafo de conhecimento** local (`graph.json`), com extração AST (tree-sitter) e opcionalmente semântica via LLM. Complementa **Archify** (diagramas declarativos) e o MCP **code-review-graph** (relações estruturais no código quando indexado).
