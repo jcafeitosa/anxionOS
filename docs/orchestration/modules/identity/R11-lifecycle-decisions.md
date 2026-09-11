@@ -75,6 +75,12 @@ As capacidades foram adicionadas ao catálogo (`capability-manifest/catalog-v1.t
 
 **Nota sobre ids de capacidade:** o schema exige `^[a-z][a-z0-9-]*(\.[a-z][a-zA-Z0-9-]*){1,2}$`, que **não** aceita underscore. Por isso `identity.session.list-revoked` usa hífen; o nome com underscore citado na ficha do módulo não é implementável como `capabilityId`.
 
+## D-IDN-034 — `identity.admin` não implica `identity.read`
+
+R04 lista grants distintos por rota: `identity.read` na leitura, `identity.admin` nos comandos. A implementação respeita isso literalmente, então um operador com **apenas** `identity.admin` recebe `IDN_FORBIDDEN` (403) ao consultar um principal — comportamento descoberto ao escrever os testes HTTP de boundary (`tests/api/identity-http.test.ts`).
+
+**Decisão:** manter como R04 define e exigir os dois grants de quem precisa ler e agir. Não hierarquizar capabilities por conta própria evita uma escalada implícita não declarada no catálogo; se a operação real pedir hierarquia, ela entra como decisão explícita (e como entrada no catálogo), não como conveniência de código.
+
 ## D-IDN-031 — Autorização por grant, sem avaliação T01 (divergência consciente de R04)
 
 R04:64-66 pede `identity.admin + T01` para as rotas de comando. A implementação executa **apenas** a checagem de grant (`hasCapability`, dono: `governance`) e, quando o chamador declara `x-agency-id`, exige membership **e** grant com `scopeId` igual à agência.
