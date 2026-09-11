@@ -97,17 +97,23 @@ npm run anx162:engine-isolation-homologation
 
 #### Profile `engines-sandbox` (ANX-162 S3)
 
-Primeiro container de engine externo (slot GoCryptoTrader para ANX-175). Modo **SIMULATED** apenas — sem credenciais live.
+Containers de engine externo em modo **SIMULATED** — sem credenciais live:
+
+| Serviço | Porta | Issue / slice |
+| --- | --- | --- |
+| `gocryptotrader-sandbox` | `9053` | ANX-175 (GoCryptoTrader REAL) |
+| `hummingbot-sandbox` | `9054` | ANX-176 (Hummingbot REAL) |
 
 ```bash
 cp backend/deploy/docker/.env.example backend/deploy/docker/.env
-docker-compose -f backend/deploy/docker/docker-compose.yml --profile engines-sandbox build gocryptotrader-sandbox
-docker-compose -f backend/deploy/docker/docker-compose.yml --profile engines-sandbox up -d gocryptotrader-sandbox
+docker-compose -f backend/deploy/docker/docker-compose.yml --profile engines-sandbox build
+docker-compose -f backend/deploy/docker/docker-compose.yml --profile engines-sandbox up -d
 curl -s http://127.0.0.1:9053/health | jq .
+curl -s http://127.0.0.1:9054/health | jq .
 npm run anx162:s3-engines-homologation
 ```
 
-Isolamento aplicado ao serviço `gocryptotrader-sandbox`:
+Isolamento aplicado a ambos os serviços (`gocryptotrader-sandbox`, `hummingbot-sandbox`):
 
 | Controle | Valor |
 | --- | --- |
@@ -116,9 +122,10 @@ Isolamento aplicado ao serviço `gocryptotrader-sandbox`:
 | Root FS | `read_only: true` + `tmpfs` em `/tmp` |
 | Capabilities | `cap_drop: [ALL]`, `no-new-privileges` |
 | Docker socket | proibido (verificado pelo oracle S3) |
-| Health | `GET /health` na porta `9053` |
+| Health GCT | `GET /health` na porta `9053` |
+| Health Hummingbot | `GET /health` na porta `9054` |
 
-> O container S3 é um **stub sandbox** com superfície compatível (`/health`, `/v1/getinfo`). ANX-175 substitui pelo terminal GoCryptoTrader real mantendo o mesmo profile e oráculos.
+> Os containers S3 são **stubs sandbox** com superfície compatível (`/health`, `/v1/getinfo` ou `/v1/status`). ANX-175/ANX-176 substituem pelos terminais reais mantendo o mesmo profile e oráculos.
 
 > **Migração Timescale (ADR0004):** se o volume `pgdata` foi criado com imagem Postgres plain (pré-ANX-162), remova o volume antes de subir `timescale/timescaledb` — extensões `timescaledb` e `vector` são aplicadas via `initdb/001-adr0004-extensions.sql` apenas em cluster novo:
 >
@@ -133,6 +140,7 @@ Isolamento aplicado ao serviço `gocryptotrader-sandbox`:
 | NATS      | 4222, 8222   | `nats:2.10.12-alpine`               | Eventos / JetStream                      |
 | Neo4j     | 7474, 7687   | `neo4j:5.26.2-community`            | Grafo institucional (`--profile graph-sandbox`) |
 | GoCryptoTrader (sandbox) | 9053 | `anxionos/gocryptotrader-sandbox:0.1.0-anx162-s3` | Engine SIMULATED (`--profile engines-sandbox`) |
+| Hummingbot (sandbox) | 9054 | `anxionos/hummingbot-sandbox:0.1.0-anx162-s3` | Engine SIMULATED (`--profile engines-sandbox`) |
 | Taskboard | 47823        | (host, não compose)       | Dashi/Codex Taskboard        |
 
 Copie `.env.example` para `.env` e ajuste se necessário:
