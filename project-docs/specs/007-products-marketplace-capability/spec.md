@@ -15,7 +15,7 @@ tags:
 ---
 # Products e Marketplace — capacidade composta
 
-> **Legado isolado (ANX-455).** Não há spec 007 em `brain/`. Este arquivo **não prevalece** sobre o baseline ADR0002 nem sobre specs canônicas numeradas. Registro: [docs/document-precedence.md](../../../docs/document-precedence.md).
+> **Sem contraparte (ANX-455).** Não existe spec 007 em `brain/`; este é o **único** registro desta capacidade. Permanece `draft`/`proposed` e é item do pacote de greenlight ANX-276. Colisão de número não se aplica. Registro: [docs/document-precedence.md](../../../docs/document-precedence.md).
 
 **Issue:** ANX-284 · **Auditoria:** `brain/notes/anxionos-ai-product-company-documentation-audit.md` §lacunas
 

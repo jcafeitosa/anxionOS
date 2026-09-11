@@ -14,6 +14,8 @@ decision_status: proposed
 ---
 # Governance Contract + Decision Engine
 
+> **Legado (ANX-455).** Design sem número 00N em colisão. Canônico quando existir: `brain/project-docs/specs/anx-governance-decision-engine/`. Registro: [docs/document-precedence.md](../../../docs/document-precedence.md).
+
 ## Objetivo
 
 Definir o contrato do Decision Engine do anxionOS/ArcheonOS para dois contextos separados por `scope`:
