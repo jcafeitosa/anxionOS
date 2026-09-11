@@ -58,7 +58,7 @@ Matrizes e playbooks da entrega G0–G7. Vários destes documentos são **fonte 
 
 ## Decisões (ADRs)
 
-> **Precedência:** os ADRs canônicos vivem em `brain/project-docs/decisions/` (local, não versionado). Arquivos em `docs/decisions/` são **legado** e não prevalecem em conflito de numeração ou decisão. Saneamento rastreado em ANX-455.
+> **Numeração colide:** ADRs vivem em `brain/project-docs/decisions/` (local) e em `project-docs/decisions/` + `docs/decisions/` (versionados). O número `0005` existe nos três caminhos com assuntos distintos. Identificar **sempre por caminho + título**. Saneamento rastreado em ANX-455.
 
 | Documento | Descrição |
 | --- | --- |
@@ -81,7 +81,7 @@ Matrizes e playbooks da entrega G0–G7. Vários destes documentos são **fonte 
 
 Specs, ADRs, PRD e notas de arquitetura vivem em `brain/` **somente no workspace local** (gitignored). Com `brain/` presente, comece por `brain/index.md`. Esta pasta não é publicada no GitHub.
 
-**Precedência documental:** `brain/` é a fonte canônica. As pastas versionadas `notes/`, `project-docs/` e `docs/decisions/` contêm material **legado** publicado no GitHub; em conflito de numeração, status decisório ou conteúdo, **prevalece `brain/`**. Ver ANX-455.
+**Duas árvores ativas:** `brain/` é a fonte canônica do domínio institucional (ADRs 0001–0008, SDD 001–005). O material versionado em `project-docs/`, `notes/` e `docs/` **não** é todo duplicado — as specs 006 (product-agent-graph) e 007 (products/marketplace) e o ADR0005 Product Graph existem apenas lá e foram aceitos no greenlight ANX-276. A **numeração colide entre as árvores**; identificar por caminho + título. Ver ANX-455.
 
 ## Templates GitHub
 

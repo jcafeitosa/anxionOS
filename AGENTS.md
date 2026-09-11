@@ -44,7 +44,7 @@ Este retrato é factual e datado; autorizações de escopo continuam regidas pel
 
 A pasta **`brain/`** (Open Knowledge / OKF) é **somente local**: está no `.gitignore` e **não** é enviada ao GitHub. Os caminhos abaixo (`brain/index.md`, specs, ADRs) são fontes de verdade **no workspace local**; links relativos continuam válidos para quem tem `brain/` clonado ou sincronizado fora do git.
 
-Além de [README.md](README.md) e deste arquivo, o remote publica documentação **legada** em `notes/` (70 arquivos), `project-docs/` (12 arquivos, incluindo specs e o ADR0005) e `docs/` (548 arquivos). Esse material **não** é canônico: em conflito de numeração, status decisório ou conteúdo, prevalece `brain/` (ver ANX-455). Obtenham `brain/` pelo canal acordado com o mantenedor.
+Além de [README.md](README.md) e deste arquivo, o remote publica `docs/` (548 arquivos), `notes/` (70) e `project-docs/` (12, incluindo specs e ADRs). Parte desse material **não** está duplicada em `brain/` e é canônica no próprio caminho — por exemplo o ADR0005 Product Graph e as specs 006 (product-agent-graph) e 007 (products/marketplace), aceitos no greenlight ANX-276. A numeração de ADRs e specs **colide entre as árvores**; identificar sempre por caminho + título, nunca só pelo número. Saneamento rastreado em ANX-455. Obtenham `brain/` pelo canal acordado com o mantenedor.
 
 **Não** commitar `brain/` neste repositório.
 
