@@ -4,6 +4,7 @@ import {
 	createDelegationCommandSchema,
 	type GovernanceCommandResult,
 	governanceCommandResultSchema,
+	isKnownGrantCapability,
 } from "@anxionos/contracts/governance";
 import { isGrantActive } from "../../domain/entities/grant";
 import {
@@ -35,6 +36,18 @@ export async function createDelegation(
 	input: CreateDelegationCommand,
 ): Promise<GovernanceCommandResult> {
 	const command = createDelegationCommandSchema.parse(input);
+	// ANX-466/N3 (LOW da revalidacao G4): o filho herda capability do pai; sem
+	// validar o catalogo, um parent legado propaga token que o sistema nao
+	// consome ("lavagem" de capability fora do catalogo). O subset continua
+	// limitado ao parent — isto so' fecha a porta do catalogo.
+	for (const capability of command.capabilitySubset) {
+		if (!isKnownGrantCapability(capability)) {
+			throwGovernanceError(
+				"GOV_CAPABILITY_UNKNOWN",
+				`Capability ${capability} is not in the grant capability catalog`,
+			);
+		}
+	}
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
 		command.commandId,

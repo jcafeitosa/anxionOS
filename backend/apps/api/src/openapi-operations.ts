@@ -812,16 +812,15 @@ export const governanceOpenApi = {
 		operationId: "issueGrant",
 		summary: "Issue a capability grant",
 		description:
-			"Module: governance. Issues a grant to a principal. `scopeId` in the domain command is the agency. `capability` is **validated against the grant capability catalog** (`GRANT_CAPABILITY_CATALOG`, the single source of the tokens the system consumes); a value outside the catalog is rejected with `GOV_CAPABILITY_UNKNOWN` (400) and zero writes, by the HTTP route and by the command (seed/worker included). Issuing is authorized by **role and possession**, not by role alone: `operator` only issues operational capabilities, `owner`/`admin` also issue administrative ones (`identity.*`, `governance.*`, `console.*`, `owner.*`), and the issuer must already hold the capability in the declared agency scope or in PLATFORM scope — otherwise `GOV_INSUFFICIENT_AUTHORITY` (403). `console.platform` stays platform-only: requesting it in agency scope is `GOV_CAPABILITY_SCOPE_MISMATCH` (409). Optional `resourceRef` and `validUntil` (ISO datetime).",
+			"Module: governance. Issues a grant to a principal. The agency is the **path parameter**; the body must NOT carry `scopeId` (the handler builds it from the path and rejects unknown keys — sending it is `400 VALIDATION_ERROR`). `capability` is **validated against the grant capability catalog** (`GRANT_CAPABILITY_CATALOG`, the single source of the tokens the system consumes); a value outside the catalog is rejected with `GOV_CAPABILITY_UNKNOWN` (400) and zero writes, by the HTTP route and by the command (seed/worker included). Issuing is authorized by **role and possession**, not by role alone: `operator` only issues operational capabilities, `owner`/`admin` also issue administrative ones (`identity.*`, `governance.*`, `console.*`, `owner.*`), and the issuer must already hold the capability in the declared agency scope or in PLATFORM scope — otherwise `GOV_INSUFFICIENT_AUTHORITY` (403). `console.platform` stays platform-only: requesting it in agency scope is `GOV_CAPABILITY_SCOPE_MISMATCH` (409). Optional `resourceRef` and `validUntil` (ISO datetime).",
 		security: COOKIE_SECURITY,
 		parameters: commandParams,
 		requestBody: jsonBody(
 			{
 				type: "object",
 				additionalProperties: false,
-				required: ["scopeId", "granteePrincipalId", "capability"],
+				required: ["granteePrincipalId", "capability"],
 				properties: {
-					scopeId: UUID,
 					granteePrincipalId: UUID,
 					capability: {
 						type: "string",

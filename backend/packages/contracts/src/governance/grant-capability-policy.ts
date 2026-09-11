@@ -121,6 +121,14 @@ export const GRANT_ISSUANCE_ROLES: readonly MembershipRole[] = [
  * emissor.
  */
 export const GRANT_REVOCATION_OWNER_ROLES: readonly MembershipRole[] = [
+	// ANX-469 — roles que revogam QUALQUER grant da agencia.
+	//
+	// DIVERGENCIA ABERTA (N4 da revalidacao G4): o manifest publica
+	// `governance.grant.revoke` como "Owner ou issuer", mas aqui `admin` tambem
+	// revoga qualquer grant — inclusive do owner (verificado: 200 + `revoked`).
+	// Estreitar muda politica de autorizacao e alargar muda contrato publicado:
+	// as duas direcoes exigem decisao do dono do modulo (issue rastreada), entao
+	// o comportamento fica como esta' e a divergencia registrada.
 	"owner",
 	"admin",
 ];

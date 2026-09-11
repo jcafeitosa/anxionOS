@@ -4,6 +4,7 @@ import {
 	activateBreakGlassCommandSchema,
 	type GovernanceCommandResult,
 	governanceCommandResultSchema,
+	isKnownGrantCapability,
 } from "@anxionos/contracts/governance";
 import {
 	createAuthorityEpochBumpedEvent,
@@ -33,6 +34,16 @@ export async function activateBreakGlass(
 	input: ActivateBreakGlassCommand,
 ): Promise<GovernanceCommandResult> {
 	const command = activateBreakGlassCommandSchema.parse(input);
+	// ANX-466/N2 (LOW da revalidacao G4): o invariante de catalogo vale para TODO
+	// caminho que grava grant, nao so' a rota HTTP. Break-glass nao tinha a
+	// checagem e gravava capability fora do catalogo (sem ganho de autoridade
+	// hoje, mas perpetuava token que o sistema nao consome).
+	if (!isKnownGrantCapability(command.capability)) {
+		throwGovernanceError(
+			"GOV_CAPABILITY_UNKNOWN",
+			`Capability ${command.capability} is not in the grant capability catalog`,
+		);
+	}
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
 		command.commandId,
