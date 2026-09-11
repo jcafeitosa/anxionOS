@@ -1,7 +1,7 @@
 # ANX-162 — local engine/storage sandbox (ADR0004 + gateway spec §Isolamento Docker)
 # Profiles: default (postgres+nats), graph-sandbox, graph-staging, engines-sandbox (S3+)
 # Oracles: anx162:engine-isolation-homologation (S2), anx162:s3-engines-homologation (S3),
-#          anx162:s4-egress-auth-audit-homologation (S4)
+#          anx162:s4-egress-auth-audit-homologation (S4), anx162:s5-limits-logs-rollback-homologation (S5)
 
 networks:
   anxion-control:
@@ -141,14 +141,14 @@ services:
     build:
       context: ./engines
       dockerfile: gocryptotrader/Dockerfile
-    image: anxionos/gocryptotrader-sandbox:0.1.0-anx162-s4
+    image: anxionos/gocryptotrader-sandbox:0.1.0-anx162-s5
     profiles:
       - engines-sandbox
     environment:
       ENGINE_MODE: ${ENGINE_MODE:-SIMULATED}
       ENGINE_SANDBOX_AUTH_TOKEN: ${ENGINE_SANDBOX_AUTH_TOKEN:?ENGINE_SANDBOX_AUTH_TOKEN required for engines-sandbox}
       GCT_SANDBOX_PORT: ${GCT_SANDBOX_PORT:-9053}
-      GCT_SANDBOX_VERSION: 0.1.0-anx162-s4
+      GCT_SANDBOX_VERSION: 0.1.0-anx162-s5
     ports:
       - "${GCT_SANDBOX_PORT:-9053}:9053"
     volumes:
@@ -176,6 +176,15 @@ services:
       timeout: 3s
       retries: 5
       start_period: 10s
+    labels:
+      anxion.issue: ANX-162
+      anxion.slice: S5
+      anxion.engine: gocryptotrader
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     deploy:
       resources:
         limits:
@@ -189,14 +198,14 @@ services:
     build:
       context: ./engines
       dockerfile: hummingbot/Dockerfile
-    image: anxionos/hummingbot-sandbox:0.1.0-anx162-s4
+    image: anxionos/hummingbot-sandbox:0.1.0-anx162-s5
     profiles:
       - engines-sandbox
     environment:
       ENGINE_MODE: ${ENGINE_MODE:-SIMULATED}
       ENGINE_SANDBOX_AUTH_TOKEN: ${ENGINE_SANDBOX_AUTH_TOKEN:?ENGINE_SANDBOX_AUTH_TOKEN required for engines-sandbox}
       HUMMINGBOT_SANDBOX_PORT: ${HUMMINGBOT_SANDBOX_PORT:-9054}
-      HUMMINGBOT_SANDBOX_VERSION: 0.1.0-anx162-s4
+      HUMMINGBOT_SANDBOX_VERSION: 0.1.0-anx162-s5
     ports:
       - "${HUMMINGBOT_SANDBOX_PORT:-9054}:9054"
     volumes:
@@ -224,6 +233,15 @@ services:
       timeout: 3s
       retries: 5
       start_period: 10s
+    labels:
+      anxion.issue: ANX-162
+      anxion.slice: S5
+      anxion.engine: hummingbot
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     deploy:
       resources:
         limits:
@@ -237,14 +255,14 @@ services:
     build:
       context: ./engines
       dockerfile: freqtrade/Dockerfile
-    image: anxionos/freqtrade-sandbox:0.1.0-anx162-s4
+    image: anxionos/freqtrade-sandbox:0.1.0-anx162-s5
     profiles:
       - engines-sandbox
     environment:
       ENGINE_MODE: ${ENGINE_MODE:-SIMULATED}
       ENGINE_SANDBOX_AUTH_TOKEN: ${ENGINE_SANDBOX_AUTH_TOKEN:?ENGINE_SANDBOX_AUTH_TOKEN required for engines-sandbox}
       FREQTRADE_SANDBOX_PORT: ${FREQTRADE_SANDBOX_PORT:-9055}
-      FREQTRADE_SANDBOX_VERSION: 0.1.0-anx162-s4
+      FREQTRADE_SANDBOX_VERSION: 0.1.0-anx162-s5
     ports:
       - "${FREQTRADE_SANDBOX_PORT:-9055}:9055"
     volumes:
@@ -272,6 +290,15 @@ services:
       timeout: 3s
       retries: 5
       start_period: 10s
+    labels:
+      anxion.issue: ANX-162
+      anxion.slice: S5
+      anxion.engine: freqtrade
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     deploy:
       resources:
         limits:
@@ -285,14 +312,14 @@ services:
     build:
       context: ./engines
       dockerfile: xchange/Dockerfile
-    image: anxionos/xchange-sandbox:0.1.0-anx162-s4
+    image: anxionos/xchange-sandbox:0.1.0-anx162-s5
     profiles:
       - engines-sandbox
     environment:
       ENGINE_MODE: ${ENGINE_MODE:-SIMULATED}
       ENGINE_SANDBOX_AUTH_TOKEN: ${ENGINE_SANDBOX_AUTH_TOKEN:?ENGINE_SANDBOX_AUTH_TOKEN required for engines-sandbox}
       XCHANGE_SANDBOX_PORT: ${XCHANGE_SANDBOX_PORT:-9056}
-      XCHANGE_SANDBOX_VERSION: 0.1.0-anx162-s4
+      XCHANGE_SANDBOX_VERSION: 0.1.0-anx162-s5
     ports:
       - "${XCHANGE_SANDBOX_PORT:-9056}:9056"
     volumes:
@@ -320,6 +347,15 @@ services:
       timeout: 3s
       retries: 5
       start_period: 10s
+    labels:
+      anxion.issue: ANX-162
+      anxion.slice: S5
+      anxion.engine: xchange
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     deploy:
       resources:
         limits:

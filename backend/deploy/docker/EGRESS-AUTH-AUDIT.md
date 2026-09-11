@@ -54,5 +54,8 @@ npm run anx162:s4-egress-auth-audit-homologation
 | S2 storage/rede | `npm run anx162:engine-isolation-homologation` |
 | S3 engines profile | `npm run anx162:s3-engines-homologation` |
 | S4 egress/auth/audit | `npm run anx162:s4-egress-auth-audit-homologation` |
+| S5 limits/logs/rollback | `npm run anx162:s5-limits-logs-rollback-homologation` |
+
+Ver também: [LIMITS-LOGS-ROLLBACK.md](./LIMITS-LOGS-ROLLBACK.md).
 
 Fonte: `docs/orchestration/system-capabilities/p05-p06-external-adapter-gateway-spec.md` §Isolamento Docker.
