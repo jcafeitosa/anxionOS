@@ -6,6 +6,7 @@ import {
 } from "@anxionos/contracts/errors";
 import { resolveIdentityErrorStatus } from "@anxionos/contracts/identity";
 import { IdentityCommandError } from "@anxionos/identity";
+import { ZodError } from "zod";
 
 function identityCodeToAppError(error: IdentityCommandError): AppError {
 	const statusCode = resolveIdentityErrorStatus(error.identityCode);
@@ -44,14 +45,27 @@ export function mapIdentityError(
 	if (error instanceof IdentityCommandError) {
 		const mapped = identityCodeToAppError(error);
 		return {
+			// `details.code` e contrato de R04 e nao e segredo: nao pode sumir em
+			// producao (toErrorResponse omite details por padrao fora de dev).
 			status: mapped.statusCode,
-			body: toErrorResponse(mapped, { requestId }),
+			body: toErrorResponse(mapped, { requestId, exposeDetails: true }),
+		};
+	}
+	if (error instanceof ZodError) {
+		const invalid = AppError.validation(
+			error.issues
+				.map((issue) => `${issue.path.join(".") || "body"}: ${issue.message}`)
+				.join("; "),
+		);
+		return {
+			status: resolveStatusCode(invalid),
+			body: toErrorResponse(invalid, { requestId, exposeDetails: true }),
 		};
 	}
 	if (isAppError(error)) {
 		return {
 			status: resolveStatusCode(error),
-			body: toErrorResponse(error, { requestId }),
+			body: toErrorResponse(error, { requestId, exposeDetails: true }),
 		};
 	}
 	return {

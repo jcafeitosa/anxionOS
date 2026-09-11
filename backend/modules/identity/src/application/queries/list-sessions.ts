@@ -14,7 +14,7 @@ export async function listSessions(
 
 /**
  * Revocation audit trail across principals, optionally bounded by a window.
- * Backs the `identity.session.list_revoked` capability.
+ * Backs the `identity.session.list-revoked` capability.
  */
 export async function listRevokedSessions(
 	deps: { sessionRefRepository: SessionRefRepository },

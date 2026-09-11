@@ -18,11 +18,8 @@ import {
 	type SessionRevocationPort,
 	SessionRevocationUnavailableError,
 } from "../../domain/ports/session-revoker";
-import {
-	isUniqueViolation,
-	parseCommandResultSnapshot,
-	throwIdentityError,
-} from "../errors";
+import { parseCommandResultSnapshot, throwIdentityError } from "../errors";
+import { findIdempotentCommand, recordIdempotentCommand } from "../idempotency";
 
 export type PrincipalTransitionTarget = "suspended" | "revoked";
 
@@ -33,11 +30,13 @@ export interface PrincipalTransitionParams {
 	at: Date;
 	expectedRevision?: number;
 	/**
-	 * Idempotency key of the calling command. Passed in so a concurrent
-	 * execution of the SAME command is classified as a replay instead of a
-	 * lost-update conflict.
+	 * Idempotency key of the calling command plus its name. Passed in so that
+	 * (a) a concurrent execution of the SAME command is classified as a replay
+	 * instead of a lost-update conflict, and (b) reuse of the same key by a
+	 * DIFFERENT command is rejected rather than silently replayed.
 	 */
 	commandId?: string;
+	commandName: string;
 	/**
 	 * ANX-235: when provided, sessions are revoked inline so a disabled NATS
 	 * consumer cannot leave an authenticated window open. A failure aborts the
@@ -102,9 +101,11 @@ export async function transitionPrincipalState(
 		//       visible and the correct outcome is a replay, not a conflict;
 		//   (b) a different command changed the principal — a real conflict.
 		if (params.commandId) {
-			const journaled = await context.commandJournal.findByCommandId(
-				params.commandId,
-			);
+			const journaled = await findIdempotentCommand(context.commandJournal, {
+				commandId: params.commandId,
+				commandName: params.commandName,
+				aggregateId: current.id,
+			});
 			if (journaled) {
 				const applied = await context.principalRepository.findById(current.id);
 				if (applied) {
@@ -244,30 +245,6 @@ export async function recordRevokedSessionRefs(
 	return events;
 }
 
-/**
- * Idempotency pre-check: a repeated `commandId` returns the current principal
- * (the applied state) instead of running the transition again, which also keeps
- * the journal insert from colliding on its primary key.
- *
- * The stored snapshot is parsed to assert it still satisfies
- * `identityCommandResultSchema` — a replay must never return unvalidated state.
- */
-export async function loadTransitionReplay(
-	context: IdentityTransactionContext,
-	commandId: string | undefined,
-	principalId: string,
-): Promise<Principal | null> {
-	if (!commandId) {
-		return null;
-	}
-	const journaled = await context.commandJournal.findByCommandId(commandId);
-	if (!journaled) {
-		return null;
-	}
-	parseCommandResultSnapshot(journaled.responseSnapshot);
-	return context.principalRepository.findById(principalId);
-}
-
 export async function recordTransitionJournal(
 	context: IdentityTransactionContext,
 	input: {
@@ -279,37 +256,43 @@ export async function recordTransitionJournal(
 	if (!input.commandId) {
 		return;
 	}
-	const existing = await context.commandJournal.findByCommandId(
-		input.commandId,
-	);
-	if (existing) {
-		// Replay: the winner of a concurrent execution already recorded it.
-		return;
-	}
 	const result = identityCommandResultSchema.parse({
 		aggregateId: input.principal.id,
 		revision: input.principal.revision,
 		status: input.principal.status,
 	});
-	try {
-		await context.commandJournal.record({
-			commandId: input.commandId,
-			commandName: input.commandName,
-			aggregateId: result.aggregateId,
-			aggregateType: "Principal",
-			revision: result.revision,
-			responseSnapshot: { ...result },
-		});
-	} catch (error) {
-		// A concurrent execution of the same commandId won the primary-key race.
-		// R04 models this explicitly: the loser gets IDN_DUPLICATE_IDEMPOTENCY and
-		// retries, which then finds the journal entry and replays.
-		if (isUniqueViolation(error)) {
-			throwIdentityError(
-				"IDN_DUPLICATE_IDEMPOTENCY",
-				`Command ${input.commandId} is already being processed`,
-			);
-		}
-		throw error;
+	await recordIdempotentCommand(context, {
+		commandId: input.commandId,
+		commandName: input.commandName,
+		aggregateId: result.aggregateId,
+		aggregateType: "Principal",
+		revision: result.revision,
+		responseSnapshot: { ...result },
+	});
+}
+
+/**
+ * Idempotency pre-check: a repeated `commandId` returns the current principal
+ * (the applied state) instead of running the transition again. Reuse of the key
+ * by another command or another principal is rejected by `findIdempotentCommand`.
+ */
+export async function loadTransitionReplay(
+	context: IdentityTransactionContext,
+	commandId: string | undefined,
+	commandName: string,
+	principalId: string,
+): Promise<Principal | null> {
+	if (!commandId) {
+		return null;
 	}
+	const journaled = await findIdempotentCommand(context.commandJournal, {
+		commandId,
+		commandName,
+		aggregateId: principalId,
+	});
+	if (!journaled) {
+		return null;
+	}
+	parseCommandResultSnapshot(journaled.responseSnapshot);
+	return context.principalRepository.findById(principalId);
 }

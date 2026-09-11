@@ -30,9 +30,14 @@ export const identityUserProjectionNodeSchema = z
 		 * é opcional aqui.
 		 */
 		email: emailAddressSchema.optional(),
-		kind: principalKindSchema,
+		/**
+		 * `kind` e `revision` so existem no evento de registro; eventos de status
+		 * sao *patch* (o projector preserva o que ja tem). Default aqui seria
+		 * mentira: rotularia um service principal como `human`.
+		 */
+		kind: principalKindSchema.optional(),
 		status: principalStatusSchema,
-		revision: principalRevisionSchema,
+		revision: principalRevisionSchema.optional(),
 		ownerDomain: z.literal("identity"),
 		eventId: institutionalUuidSchema,
 		checkpoint: z.string().datetime(),
@@ -87,9 +92,11 @@ export function toIdentityUserProjectionNode(
 		// O evento `registered` é o único que carrega e-mail; atualizações de
 		// e-mail não reprojetam (decisão registrada em R11).
 		email: typeof payload.email === "string" ? payload.email : undefined,
-		kind: typeof payload.kind === "string" ? payload.kind : "human",
+		...(typeof payload.kind === "string" ? { kind: payload.kind } : {}),
 		status,
-		revision: typeof payload.revision === "number" ? payload.revision : 1,
+		...(typeof payload.revision === "number"
+			? { revision: payload.revision }
+			: {}),
 		ownerDomain: envelope.ownerDomain,
 		eventId: envelope.eventId,
 		checkpoint: envelope.occurredAt,

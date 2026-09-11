@@ -1,9 +1,12 @@
 import { institutionalUuidSchema } from "@anxionos/contracts";
 import {
+	principalRevisionSchema,
 	recordSessionRevokedCommandSchema,
 	registerPrincipalCommandSchema,
+	revocationReasonCodeSchema,
 	revokePrincipalCommandSchema,
 	suspendPrincipalCommandSchema,
+	suspensionReasonCodeSchema,
 } from "@anxionos/contracts/identity";
 import {
 	getPrincipalById,
@@ -31,12 +34,20 @@ const revokedQuerySchema = z.object({
 const registerBodySchema = registerPrincipalCommandSchema.omit({
 	commandId: true,
 });
-const suspendBodySchema = suspendPrincipalCommandSchema
-	.omit({ commandId: true, principalId: true })
-	.default({ reasonCode: "ops.manual" });
-const revokeBodySchema = revokePrincipalCommandSchema
-	.omit({ commandId: true, principalId: true })
-	.default({ reasonCode: "ops.manual" });
+// Corpo OPCIONAL (R04/OpenAPI): defaults por campo, para que `{}` e ausencia de
+// corpo tenham o mesmo efeito. `.default()` no objeto nao dispara com `{}`.
+const suspendBodySchema = z
+	.object({
+		reasonCode: suspensionReasonCodeSchema.default("ops.manual"),
+		expectedRevision: principalRevisionSchema.optional(),
+	})
+	.strict();
+const revokeBodySchema = z
+	.object({
+		reasonCode: revocationReasonCodeSchema.default("ops.manual"),
+		expectedRevision: principalRevisionSchema.optional(),
+	})
+	.strict();
 const revokeSessionBodySchema = recordSessionRevokedCommandSchema.omit({
 	commandId: true,
 });
@@ -201,7 +212,7 @@ export async function handleRevokeSession(
 	return { sessionRef: result.sessionRef, transitioned: result.transitioned };
 }
 
-/** GET /v1/identity/sessions/revoked — capability `identity.session.list_revoked`. */
+/** GET /v1/identity/sessions/revoked — capability `identity.session.list-revoked`. */
 export async function handleListRevokedSessions(
 	deps: IdentityPluginDeps,
 	input: IdentityRequestContext & { query: unknown },

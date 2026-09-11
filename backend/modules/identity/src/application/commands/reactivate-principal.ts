@@ -33,6 +33,7 @@ export async function reactivatePrincipal(
 		const replay = await loadTransitionReplay(
 			context,
 			command.commandId,
+			"ReactivatePrincipal",
 			command.principalId,
 		);
 		if (replay) {

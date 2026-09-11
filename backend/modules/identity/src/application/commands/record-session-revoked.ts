@@ -5,6 +5,7 @@ import type { IdentityUnitOfWork } from "../../domain/ports/identity-unit-of-wor
 import type { PrincipalRepository } from "../../domain/ports/principal-repository";
 import type { SessionRefRepository } from "../../domain/ports/session-ref-repository";
 import { throwIdentityError } from "../errors";
+import { findIdempotentCommand, recordIdempotentCommand } from "../idempotency";
 import { toSessionRefDto } from "../presenters";
 
 export interface RecordSessionRevokedInput {
@@ -65,12 +66,16 @@ export async function recordSessionRevoked(
 
 	return deps.unitOfWork.runInTransaction(async (context) => {
 		if (command.commandId) {
-			const journaled = await context.commandJournal.findByCommandId(
-				command.commandId,
-			);
+			// The aggregate IS the session reference: reusing the key for another
+			// session must be a conflict, not a replay of the wrong session.
+			const journaled = await findIdempotentCommand(context.commandJournal, {
+				commandId: command.commandId,
+				commandName: "RecordSessionRevoked",
+				aggregateId: command.sessionRefId,
+			});
 			if (journaled) {
 				const replayed = await context.sessionRefRepository.findById(
-					String(journaled.aggregateId),
+					journaled.aggregateId,
 				);
 				if (replayed) {
 					return {
@@ -115,7 +120,7 @@ export async function recordSessionRevoked(
 			}),
 		]);
 		if (command.commandId) {
-			await context.commandJournal.record({
+			await recordIdempotentCommand(context, {
 				commandId: command.commandId,
 				commandName: "RecordSessionRevoked",
 				aggregateId: recorded.id,

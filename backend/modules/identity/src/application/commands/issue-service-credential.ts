@@ -7,6 +7,7 @@ import type { ServiceCredentialCrypto } from "../../domain/ports/service-credent
 import type { ServiceCredentialRepository } from "../../domain/ports/service-credential-repository";
 import type { ServiceIdentityRepository } from "../../domain/ports/service-identity-repository";
 import { throwIdentityError } from "../errors";
+import { findIdempotentCommand, recordIdempotentCommand } from "../idempotency";
 import { toServiceCredentialDto } from "../presenters";
 
 export interface IssueServiceCredentialInput {
@@ -45,12 +46,18 @@ export async function issueServiceCredential(
 	const command = issueServiceCredentialCommandSchema.parse(input);
 
 	if (command.commandId) {
-		const journaled = await deps.commandJournal.findByCommandId(
-			command.commandId,
-		);
+		const journaled = await findIdempotentCommand(deps.commandJournal, {
+			commandId: command.commandId,
+			commandName: "IssueServiceCredential",
+			matchesAggregate: async (aggregateId) => {
+				const existing =
+					await deps.serviceCredentialRepository.findById(aggregateId);
+				return existing?.serviceIdentityId === command.serviceIdentityId;
+			},
+		});
 		if (journaled) {
 			const existing = await deps.serviceCredentialRepository.findById(
-				String(journaled.aggregateId),
+				journaled.aggregateId,
 			);
 			if (existing) {
 				return {
@@ -97,7 +104,7 @@ export async function issueServiceCredential(
 			}),
 		]);
 		if (command.commandId) {
-			await context.commandJournal.record({
+			await recordIdempotentCommand(context, {
 				commandId: command.commandId,
 				commandName: "IssueServiceCredential",
 				aggregateId: created.id,

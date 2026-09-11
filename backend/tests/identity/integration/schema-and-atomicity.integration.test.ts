@@ -206,10 +206,12 @@ describe("identity schema — migrator real contra PostgreSQL", () => {
 				);
 				expect(journal.rows[0]?.count).toBe("1");
 
-				const principalRow = await pool.query<{ status: string; revision: number }>(
-					"SELECT status, revision FROM identity_principals WHERE id = $1",
-					[principal.id],
-				);
+				const principalRow = await pool.query<{
+					status: string;
+					revision: number;
+				}>("SELECT status, revision FROM identity_principals WHERE id = $1", [
+					principal.id,
+				]);
 				expect(principalRow.rows[0]?.status).toBe("suspended");
 				// uma única transição: revision 1 -> 2 (sem dupla aplicação)
 				expect(principalRow.rows[0]?.revision).toBe(2);

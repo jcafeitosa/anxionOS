@@ -1,10 +1,12 @@
 import { rotateServiceCredentialCommandSchema } from "@anxionos/contracts/identity";
 import { createServiceCredentialRotatedEvent } from "../../domain/events/identity-events";
+import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { IdentityUnitOfWork } from "../../domain/ports/identity-unit-of-work";
 import type { ServiceCredentialCrypto } from "../../domain/ports/service-credential-crypto";
 import type { ServiceCredentialRepository } from "../../domain/ports/service-credential-repository";
 import type { ServiceIdentityRepository } from "../../domain/ports/service-identity-repository";
 import { throwIdentityError } from "../errors";
+import { findIdempotentCommand, recordIdempotentCommand } from "../idempotency";
 import { toServiceCredentialDto } from "../presenters";
 
 export interface RotateServiceCredentialInput {
@@ -16,6 +18,7 @@ export interface RotateServiceCredentialInput {
 export interface RotateServiceCredentialDeps {
 	serviceIdentityRepository: ServiceIdentityRepository;
 	serviceCredentialRepository: ServiceCredentialRepository;
+	commandJournal: CommandJournalRepository;
 	unitOfWork: IdentityUnitOfWork;
 	crypto: ServiceCredentialCrypto;
 }
@@ -26,6 +29,8 @@ export interface RotateServiceCredentialResult {
 	secret: string;
 	/** Credentials superseded by this rotation. */
 	replacedCredentialIds: string[];
+	/** True quando o commandId ja havia sido processado (nada e rotacionado de novo). */
+	idempotentReplay: boolean;
 }
 
 /**
@@ -38,6 +43,31 @@ export async function rotateServiceCredential(
 	input: RotateServiceCredentialInput,
 ): Promise<RotateServiceCredentialResult> {
 	const command = rotateServiceCredentialCommandSchema.parse(input);
+
+	if (command.commandId) {
+		const journaled = await findIdempotentCommand(deps.commandJournal, {
+			commandId: command.commandId,
+			commandName: "RotateServiceCredential",
+			matchesAggregate: async (aggregateId) => {
+				const existing =
+					await deps.serviceCredentialRepository.findById(aggregateId);
+				return existing?.serviceIdentityId === command.serviceIdentityId;
+			},
+		});
+		if (journaled) {
+			const existing = await deps.serviceCredentialRepository.findById(
+				journaled.aggregateId,
+			);
+			if (existing) {
+				return {
+					credential: toServiceCredentialDto(existing),
+					secret: "",
+					replacedCredentialIds: [],
+					idempotentReplay: true,
+				};
+			}
+		}
+	}
 
 	const serviceIdentity = await deps.serviceIdentityRepository.findById(
 		command.serviceIdentityId,
@@ -98,6 +128,28 @@ export async function rotateServiceCredential(
 			);
 		}
 		await context.publishEvents(events);
+		if (command.commandId) {
+			const result = await recordIdempotentCommand(context, {
+				commandId: command.commandId,
+				commandName: "RotateServiceCredential",
+				aggregateId: created.id,
+				aggregateType: "ServiceCredential",
+				revision: 1,
+				responseSnapshot: {
+					aggregateId: created.id,
+					revision: 1,
+					status: created.status,
+				},
+			});
+			if (result === "already-recorded") {
+				const applied = await context.serviceCredentialRepository.findById(
+					created.id,
+				);
+				if (applied) {
+					return { created: applied, replaced: [] as string[] };
+				}
+			}
+		}
 		return { created, replaced };
 	});
 
@@ -105,5 +157,6 @@ export async function rotateServiceCredential(
 		credential: toServiceCredentialDto(rotated.created),
 		secret: `${generated.prefix}.${generated.secret}`,
 		replacedCredentialIds: rotated.replaced,
+		idempotentReplay: false,
 	};
 }

@@ -10,6 +10,7 @@ import { mapIdentityError } from "../../apps/api/src/identity/error-handler";
 import {
 	handleGetPrincipal,
 	handleRegisterPrincipal,
+	handleRevokePrincipal,
 	handleRevokeSession,
 	handleSuspendPrincipal,
 } from "../../apps/api/src/identity/handlers";
@@ -40,12 +41,13 @@ const activePrincipal: Principal = {
 	revocationReason: null,
 };
 
-function grantRepository(capabilities: string[] = []) {
+function grantRepository(capabilities: string[] = [], scopeId?: string) {
 	return {
 		async listActiveByPrincipal() {
 			return capabilities.map((capability) => ({
 				id: "66666666-6666-4666-8666-666666666666",
 				capability,
+				scopeId,
 				status: "active",
 				validFrom: new Date("2026-01-01T00:00:00.000Z"),
 				validUntil: null,
@@ -73,7 +75,10 @@ function deps(
 		identityUnitOfWork: recording.unitOfWork,
 		identityRepository,
 		auth: { api: { getSession: async () => null } },
-		grantRepository: grantRepository(overrides.capabilities ?? []),
+		grantRepository: grantRepository(
+			overrides.capabilities ?? [],
+			overrides.grantScopeId,
+		),
 		agencyScope: {
 			async isMember(id: string) {
 				return (overrides.memberships ?? []).includes(id);
@@ -144,9 +149,25 @@ describe("identity authorization", () => {
 			}),
 		).rejects.toMatchObject({ identityCode: "IDN_CROSS_TENANT" });
 
+		// Com membership, o grant precisa cobrir a agencia declarada: um grant
+		// emitido para OUTRA agencia nao autoriza operar sob esta (A5 do G2).
+		const wrongScope = deps({
+			capabilities: ["identity.admin"],
+			memberships: [agencyId],
+			grantScopeId: "99999999-9999-4999-8999-999999999999",
+		});
+		await expect(
+			requireIdentityGrant(wrongScope, {
+				principalId,
+				capability: "identity.admin",
+				agencyId,
+			}),
+		).rejects.toMatchObject({ identityCode: "IDN_FORBIDDEN" });
+
 		const withMembership = deps({
 			capabilities: ["identity.admin"],
 			memberships: [agencyId],
+			grantScopeId: agencyId,
 		});
 		await expect(
 			requireIdentityGrant(withMembership, {
@@ -234,6 +255,115 @@ describe("identity handlers", () => {
 		expect(d.published.some((e) => e.eventType.endsWith("suspended.v1"))).toBe(
 			true,
 		);
+	});
+
+	test("reusing an Idempotency-Key for another principal is a conflict, not a replay", async () => {
+		const d = deps({
+			capabilities: ["identity.admin"],
+			principals: [
+				activePrincipal,
+				{
+					...activePrincipal,
+					id: otherPrincipalId,
+					authUserId: "auth-2",
+					email: "other@example.com",
+				},
+			],
+		});
+		const headers = new Headers({ "idempotency-key": commandId });
+		await handleSuspendPrincipal(d, {
+			params: { principalId },
+			headers,
+			body: { reasonCode: "ops.manual" },
+			actorPrincipalId: principalId,
+		});
+		// mesma key, OUTRO principal: R04 exige conflito, nao replay silencioso
+		await expect(
+			handleSuspendPrincipal(d, {
+				params: { principalId: otherPrincipalId },
+				headers,
+				body: { reasonCode: "ops.manual" },
+				actorPrincipalId: principalId,
+			}),
+		).rejects.toMatchObject({ identityCode: "IDN_DUPLICATE_IDEMPOTENCY" });
+		const untouched = await d.identityRepository.findById(otherPrincipalId);
+		expect(untouched?.status).toBe("active");
+	});
+
+	test("reusing an Idempotency-Key for another authUserId in register is a conflict", async () => {
+		const d = deps({ capabilities: ["identity.admin"] });
+		const headers = new Headers({ "idempotency-key": commandId });
+		await handleRegisterPrincipal(d, {
+			headers,
+			body: { authUserId: "auth-first", email: "first@example.com" },
+			actorPrincipalId: principalId,
+		});
+		await expect(
+			handleRegisterPrincipal(d, {
+				headers,
+				body: { authUserId: "auth-second", email: "second@example.com" },
+				actorPrincipalId: principalId,
+			}),
+		).rejects.toMatchObject({ identityCode: "IDN_DUPLICATE_IDEMPOTENCY" });
+	});
+
+	test("reusing an Idempotency-Key for another session is a conflict", async () => {
+		const d = deps();
+		const headers = new Headers({ "idempotency-key": commandId });
+		await handleRevokeSession(d, {
+			headers,
+			body: { principalId, sessionRefId, externalRefHash: "a".repeat(64) },
+			actorPrincipalId: principalId,
+		});
+		await expect(
+			handleRevokeSession(d, {
+				headers,
+				body: {
+					principalId,
+					sessionRefId: "77777777-7777-4777-8777-777777777777",
+					externalRefHash: "b".repeat(64),
+				},
+				actorPrincipalId: principalId,
+			}),
+		).rejects.toMatchObject({ identityCode: "IDN_DUPLICATE_IDEMPOTENCY" });
+	});
+
+	test("body vazio/ausente em suspend e revoke nao vira 500 (defaults do contrato)", async () => {
+		const d = deps({ capabilities: ["identity.admin"] });
+		const suspended = await handleSuspendPrincipal(d, {
+			params: { principalId },
+			headers: new Headers({ "idempotency-key": commandId }),
+			body: {},
+			actorPrincipalId: principalId,
+		});
+		expect(suspended.principal.status).toBe("suspended");
+		expect(suspended.principal.suspensionReason).toBe("ops.manual");
+
+		const revoked = await handleRevokePrincipal(d, {
+			params: { principalId },
+			headers: new Headers({
+				"idempotency-key": "88888888-8888-4888-8888-888888888888",
+			}),
+			body: undefined,
+			actorPrincipalId: principalId,
+		});
+		expect(revoked.principal.status).toBe("revoked");
+	});
+
+	test("UUID invalido no path vira 400 VALIDATION_ERROR, nao 500", async () => {
+		const d = deps({ capabilities: ["identity.read"] });
+		let thrown: unknown;
+		try {
+			await handleGetPrincipal(d, {
+				params: { principalId: "not-a-uuid" },
+				actorPrincipalId: principalId,
+			});
+		} catch (error) {
+			thrown = error;
+		}
+		const mapped = mapIdentityError(thrown, "req-test");
+		expect(mapped.status).toBe(400);
+		expect(mapped.body.error.code).toBe("VALIDATION_ERROR");
 	});
 
 	test("session revoke allows self and rejects unknown principal", async () => {

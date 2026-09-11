@@ -16,8 +16,6 @@ export function createIdentityApiRuntime(pool: Pool): IdentityApiRuntime {
 	const db = createIdentityDb(pool);
 	return {
 		identityRepository: db.repository,
-		serviceIdentityRepository: db.serviceIdentityRepository,
-		serviceCredentialRepository: db.serviceCredentialRepository,
 		sessionRefRepository: db.sessionRefRepository,
 		identityUnitOfWork: db.unitOfWork,
 		sessionRevoker: createBetterAuthSessionRevoker(pool),

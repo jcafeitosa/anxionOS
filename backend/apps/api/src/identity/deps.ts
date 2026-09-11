@@ -27,8 +27,6 @@ export interface IdentitySessionAuth {
 export interface IdentityPluginDeps {
 	auth: IdentitySessionAuth;
 	identityRepository: PrincipalRepository;
-	serviceIdentityRepository: ServiceIdentityRepository;
-	serviceCredentialRepository: ServiceCredentialRepository;
 	sessionRefRepository: SessionRefRepository;
 	identityUnitOfWork: IdentityUnitOfWork;
 	grantRepository: GrantRepository;
@@ -36,6 +34,3 @@ export interface IdentityPluginDeps {
 	/** Inline revocation so a disabled consumer cannot leave a session open. */
 	sessionRevoker?: SessionRevocationPort;
 }
-
-export type IdentityTransactionRunner = IdentityUnitOfWork;
-export type { IdentityTransactionContext };

@@ -34,6 +34,7 @@ export async function suspendPrincipal(
 		const replay = await loadTransitionReplay(
 			context,
 			command.commandId,
+			"SuspendPrincipal",
 			command.principalId,
 		);
 		if (replay) {
@@ -46,6 +47,7 @@ export async function suspendPrincipal(
 			at: suspendedAt,
 			expectedRevision: command.expectedRevision,
 			commandId: command.commandId,
+			commandName: "SuspendPrincipal",
 			sessionRevocation: deps.sessionRevoker,
 		});
 		await recordTransitionJournal(context, {

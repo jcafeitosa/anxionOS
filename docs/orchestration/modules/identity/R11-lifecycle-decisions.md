@@ -57,6 +57,38 @@ Registro das decisões tomadas durante a implementação do slice R03/R04 que **
 
 **Motivo.** Duas implementações do mesmo contrato divergem: uma passa a filtrar status de um jeito, a outra de outro. Como a decisão aceita já atribui o adapter a `organizations`, manter a cópia no identity era risco sem função.
 
+## D-IDN-030 — Rotas implementadas além da tabela de R04
+
+R04 (`R04-contracts.md:61-66`) descreve quatro rotas. A implementação expõe sete, e as três extras ficam registradas aqui em vez de reescrever o artefato de debate:
+
+| Rota | Capacidade no catálogo | Grant |
+| --- | --- | --- |
+| `GET /v1/identity/principals/:principalId/sessions` | `identity.session.list` | `identity.read` ou self |
+| `POST /v1/identity/sessions/revoke` | `identity.session.revoke` | `identity.admin` ou self |
+| `GET /v1/identity/sessions/revoked` | `identity.session.list-revoked` | `identity.admin` |
+
+As capacidades foram adicionadas ao catálogo (`capability-manifest/catalog-v1.ts`), com `identity.principal.register` corrigido para `requiredGrants: ["identity.admin"]` e `idempotencyPolicy.key: "commandId"` — antes divergia do handler e do OpenAPI.
+
+**Nota sobre ids de capacidade:** o schema exige `^[a-z][a-z0-9-]*(\.[a-z][a-zA-Z0-9-]*){1,2}$`, que **não** aceita underscore. Por isso `identity.session.list-revoked` usa hífen; o nome com underscore citado na ficha do módulo não é implementável como `capabilityId`.
+
+## D-IDN-031 — Autorização por grant, sem avaliação T01 (divergência consciente de R04)
+
+R04:64-66 pede `identity.admin + T01` para as rotas de comando. A implementação executa **apenas** a checagem de grant (`hasCapability`, dono: `governance`) e, quando o chamador declara `x-agency-id`, exige membership **e** grant com `scopeId` igual à agência.
+
+**Motivo.** Principal é global (D-IDN-023); a autoridade agency-scoped de identity se resolve por membership + grant com escopo, não por traversal do grafo. T01 permanece o gate das operações agency-scoped dos módulos financeiros. Manter as duas checagens aqui duplicaria autoridade sem ganho.
+
+**Consequência aceita:** um grant de plataforma (sem `scopeId`) **não** autoriza um chamador que declara agência — ele precisa de grant emitido para aquela agência. Chamadores de plataforma simplesmente não enviam o header.
+
+## D-IDN-032 — Comandos de credencial são API de módulo, sem rota HTTP
+
+`issueServiceCredential`, `rotateServiceCredential`, `revokeServiceCredential` e `verifyServiceCredential` são consumidos pela **camada de autenticação** (fluxo de service principal, P02+), não por rota administrativa. Expor `verify` na borda criaria um oráculo de adivinhação de chave; expor `issue` sem um consumidor de autenticação seria superfície sem uso.
+
+`rotate` passou a honrar `commandId` (antes ignorava, e um retry rotacionava de novo). Os quatro reutilizam o guard unificado de idempotência (`application/idempotency.ts`), que rejeita reuso da chave por outro comando ou outro agregado com `IDN_DUPLICATE_IDEMPOTENCY` — antes um reuso divergente devolvia 200 sem aplicar a operação (achado A1/A2 do G2).
+
+## D-IDN-033 — `.strict()` na projeção é defesa para chamadores futuros
+
+`identityUserProjectionNodeSchema` é `.strict()`: atributo proibido (token, `secretHash`, `externalRefHash`, cookie) **falha**. A factory `toIdentityUserProjectionNode` monta o nó por whitelist, então não consegue emitir atributo proibido — a proteção vale para um projector que construa o nó à mão. O teste de vazamento exercita a factory; o de rejeição exercita o schema direto. A projeção só terá consumidor de produção no P03 (`graph`).
+
 ## Conflito aberto — R04 vs D-IDN-023 (`organizationId` em Principal)
 
 R04 descreve o payload de `identity.principal.registered.v1` com `organizationId` e uma idempotência `(organizationId, subjectKey)`. D-IDN-023 (aceito) define Principal **global**, com tenancy via Membership em `organizations`, e D-IDN-006 fixa idempotência por `authUserId`.

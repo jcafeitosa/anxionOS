@@ -35,9 +35,10 @@ async function resetInboxFixtures(
 		"DELETE FROM graph_projection_inbox WHERE consumer_name = ANY($1)",
 		[consumerNames],
 	);
-	await pool.query("DELETE FROM graph_projection_dlq WHERE consumer_name = ANY($1)", [
-		consumerNames,
-	]);
+	await pool.query(
+		"DELETE FROM graph_projection_dlq WHERE consumer_name = ANY($1)",
+		[consumerNames],
+	);
 }
 
 function shouldRun(): boolean {
@@ -70,9 +71,7 @@ describe("product graph inbox integration (ANX-277)", () => {
 		const pool = createPgPool(process.env.DATABASE_URL!);
 		try {
 			await ensureGraphSchema(pool);
-			await resetInboxFixtures(pool, [
-				productProjectionConsumer.consumerName,
-			]);
+			await resetInboxFixtures(pool, [productProjectionConsumer.consumerName]);
 			const graphStore = createInMemoryGraphStore();
 
 			const first = await processWithInbox({

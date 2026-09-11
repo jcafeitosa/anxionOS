@@ -39,6 +39,7 @@ export async function revokePrincipal(
 		const replay = await loadTransitionReplay(
 			context,
 			command.commandId,
+			"RevokePrincipal",
 			command.principalId,
 		);
 		if (replay) {
@@ -51,6 +52,7 @@ export async function revokePrincipal(
 			at: revokedAt,
 			expectedRevision: command.expectedRevision,
 			commandId: command.commandId,
+			commandName: "RevokePrincipal",
 			sessionRevocation: deps.sessionRevoker,
 		});
 		await recordTransitionJournal(context, {

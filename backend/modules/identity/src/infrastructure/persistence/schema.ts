@@ -54,7 +54,9 @@ export const principals = pgTable("identity_principals", {
 
 export const serviceIdentities = pgTable("identity_service_identities", {
 	id: uuid("id").primaryKey().defaultRandom(),
-	principalId: uuid("principal_id").notNull(),
+	principalId: uuid("principal_id")
+		.notNull()
+		.references(() => principals.id),
 	label: text("label").notNull(),
 	status: serviceIdentityStatusEnum("status").notNull().default("active"),
 	createdAt: timestamp("created_at", { withTimezone: true })

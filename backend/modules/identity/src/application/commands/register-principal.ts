@@ -4,6 +4,7 @@ import { createPrincipalRegisteredEvent } from "../../domain/events/identity-eve
 import type { IdentityUnitOfWork } from "../../domain/ports/identity-unit-of-work";
 import type { PrincipalRepository } from "../../domain/ports/principal-repository";
 import { throwIdentityError } from "../errors";
+import { findIdempotentCommand, recordIdempotentCommand } from "../idempotency";
 
 export interface RegisterPrincipalInput {
 	authUserId: string;
@@ -33,12 +34,20 @@ export async function registerPrincipal(
 	}
 	return deps.unitOfWork.runInTransaction(async (context) => {
 		if (command.commandId) {
-			const journaled = await context.commandJournal.findByCommandId(
-				command.commandId,
-			);
+			// A create has no aggregate id yet: validate the intent against the
+			// principal the journal points to (same authUserId == same command).
+			const journaled = await findIdempotentCommand(context.commandJournal, {
+				commandId: command.commandId,
+				commandName: "RegisterPrincipal",
+				matchesAggregate: async (aggregateId) => {
+					const replayed =
+						await context.principalRepository.findById(aggregateId);
+					return replayed?.authUserId === command.authUserId;
+				},
+			});
 			if (journaled) {
-				const replayed = await context.principalRepository.findByAuthUserId(
-					command.authUserId,
+				const replayed = await context.principalRepository.findById(
+					journaled.aggregateId,
 				);
 				if (replayed) {
 					return replayed;
@@ -74,7 +83,7 @@ export async function registerPrincipal(
 			}),
 		]);
 		if (command.commandId) {
-			await context.commandJournal.record({
+			await recordIdempotentCommand(context, {
 				commandId: command.commandId,
 				commandName: "RegisterPrincipal",
 				aggregateId: principal.id,

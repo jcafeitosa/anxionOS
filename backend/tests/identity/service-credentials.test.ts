@@ -241,6 +241,7 @@ describe("service credentials", () => {
 				{
 					serviceIdentityRepository: h.serviceIdentityRepository,
 					serviceCredentialRepository: h.serviceCredentialRepository,
+					commandJournal: h.commandJournal,
 					unitOfWork: h.unitOfWork,
 					crypto: h.crypto,
 				},

@@ -32,7 +32,13 @@ export async function requireIdentityGrant(
 	}
 	const allowed = await hasCapability(
 		{ grantRepository: deps.grantRepository },
-		{ principalId: input.principalId, capability: input.capability },
+		{
+			principalId: input.principalId,
+			capability: input.capability,
+			// Quando o chamador declara uma agencia, o grant precisa cobrir ESSA
+			// agencia: um grant emitido para A nao autoriza operar sob B.
+			scopeId: input.agencyId,
+		},
 	);
 	if (!allowed) {
 		throwIdentityError(
