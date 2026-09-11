@@ -28,4 +28,19 @@ PostgreSQL manifests + index; object storage chunks (append-only); DeltaRef owne
 | AUD-R05-04 | export referencia `deltaRefId` — operations consumer |
 | AUD-R05-05 | RLS defer P09 |
 
-→ **R06** ([R06-dependencies.md](./R06-dependencies.md))
+```mermaid
+sequenceDiagram
+  participant EV as eventing tap
+  participant AU as audit
+  participant PG as PostgreSQL
+  participant OBJ as object store
+  EV->>AU: domain event redacted
+  AU->>PG: manifest + journal + outbox
+  AU->>OBJ: append chunk SHA-256
+```
+
+ADR0002: dono `modules/audit`. ST08 0/23. D-GOV-010 não é deste módulo.
+
+## Saída R5
+
+Para R6.
