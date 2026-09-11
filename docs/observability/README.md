@@ -1,3 +1,7 @@
+---
+type: guide
+---
+
 # Observabilidade — logging estruturado (P02)
 
 Pacote: `@anxionos/observability` (`backend/packages/observability`).
