@@ -5,6 +5,7 @@ import type {
 import {
 	generateServiceCredential,
 	hashServiceCredentialSecret,
+	parseServiceCredentialKey,
 	verifyServiceCredentialSecret,
 } from "./credential-crypto";
 
@@ -19,6 +20,9 @@ export function createServiceCredentialCrypto(): ServiceCredentialCrypto {
 		},
 		verify(secret: string, secretHash: string): boolean {
 			return verifyServiceCredentialSecret(secret, secretHash);
+		},
+		parseKey(key: string) {
+			return parseServiceCredentialKey(key);
 		},
 	};
 }

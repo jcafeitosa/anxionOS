@@ -1,4 +1,10 @@
 export {
+	type IssueServiceCredentialDeps,
+	type IssueServiceCredentialInput,
+	type IssueServiceCredentialResult,
+	issueServiceCredential,
+} from "./application/commands/issue-service-credential";
+export {
 	type LinkAuthUserIdDeps,
 	type LinkAuthUserIdInput,
 	linkAuthUserId,
@@ -8,6 +14,12 @@ export {
 	type ReactivatePrincipalInput,
 	reactivatePrincipal,
 } from "./application/commands/reactivate-principal";
+export {
+	type RecordSessionRevokedDeps,
+	type RecordSessionRevokedInput,
+	type RecordSessionRevokedResult,
+	recordSessionRevoked,
+} from "./application/commands/record-session-revoked";
 export {
 	type RegisterPrincipalDeps,
 	type RegisterPrincipalInput,
@@ -23,9 +35,20 @@ export {
 	revokePrincipal,
 } from "./application/commands/revoke-principal";
 export {
+	type RevokeServiceCredentialDeps,
+	type RevokeServiceCredentialInput,
+	revokeServiceCredential,
+} from "./application/commands/revoke-service-credential";
+export {
 	type RevokeServiceIdentityDeps,
 	revokeServiceIdentity,
 } from "./application/commands/revoke-service-identity";
+export {
+	type RotateServiceCredentialDeps,
+	type RotateServiceCredentialInput,
+	type RotateServiceCredentialResult,
+	rotateServiceCredential,
+} from "./application/commands/rotate-service-credential";
 export {
 	type SuspendPrincipalDeps,
 	type SuspendPrincipalInput,
@@ -58,6 +81,16 @@ export {
 	getPrincipalByAuthUserId,
 	getPrincipalById,
 } from "./application/queries/get-principal";
+export { listServiceCredentials } from "./application/queries/list-service-credentials";
+export {
+	listRevokedSessions,
+	listSessions,
+} from "./application/queries/list-sessions";
+export {
+	type ServiceCredentialVerification,
+	type VerifyServiceCredentialDeps,
+	verifyServiceCredential,
+} from "./application/queries/verify-service-credential";
 export type {
 	NewPrincipal,
 	Principal,

@@ -9,7 +9,6 @@ import {
 	principalRevisionSchema,
 	revocationReasonCodeSchema,
 	serviceCredentialIdSchema,
-	serviceCredentialPrefixSchema,
 	sessionRefIdSchema,
 	suspensionReasonCodeSchema,
 } from "./types";
@@ -90,18 +89,18 @@ export const recordSessionRevokedCommandSchema = z.object({
 	revokedAt: z.string().datetime().optional(),
 	reasonCode: z.string().min(1).max(64).optional(),
 });
+/**
+ * The caller never supplies the secret: the module generates prefix and hash
+ * internally and returns the plaintext key exactly once (R03).
+ */
 export const issueServiceCredentialCommandSchema = z.object({
 	commandId: commandIdSchema.optional(),
 	serviceIdentityId: serviceCredentialIdSchema,
-	prefix: serviceCredentialPrefixSchema,
-	secretHash: z.string().min(1).max(255),
 	expiresAt: z.string().datetime().optional(),
 });
 export const rotateServiceCredentialCommandSchema = z.object({
 	commandId: commandIdSchema.optional(),
 	serviceIdentityId: serviceCredentialIdSchema,
-	prefix: serviceCredentialPrefixSchema,
-	secretHash: z.string().min(1).max(255),
 	expiresAt: z.string().datetime().optional(),
 });
 export const revokeServiceCredentialCommandSchema = z.object({

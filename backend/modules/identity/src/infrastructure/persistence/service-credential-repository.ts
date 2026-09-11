@@ -55,6 +55,21 @@ export function createDrizzleServiceCredentialRepository(
 				.orderBy(desc(serviceCredentials.issuedAt));
 			return rows.map(toServiceCredential);
 		},
+		async findActiveByServiceIdentityId(
+			serviceIdentityId: string,
+		): Promise<ServiceCredential[]> {
+			const rows = await db
+				.select()
+				.from(serviceCredentials)
+				.where(
+					and(
+						eq(serviceCredentials.serviceIdentityId, serviceIdentityId),
+						eq(serviceCredentials.status, "active"),
+					),
+				)
+				.orderBy(desc(serviceCredentials.issuedAt));
+			return rows.map(toServiceCredential);
+		},
 		async create(input: NewServiceCredential): Promise<ServiceCredential> {
 			const rows = await db
 				.insert(serviceCredentials)

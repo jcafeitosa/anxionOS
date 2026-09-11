@@ -15,4 +15,6 @@ export interface ServiceCredentialCrypto {
 	generate(): GeneratedServiceCredential;
 	hash(secret: string): string;
 	verify(secret: string, secretHash: string): boolean;
+	/** Splits a delivered key (`<prefix>.<secret>`) without trusting its shape. */
+	parseKey(key: string): { prefix: string; secret: string } | null;
 }

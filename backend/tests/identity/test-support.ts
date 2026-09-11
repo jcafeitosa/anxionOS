@@ -329,6 +329,13 @@ export function createInMemoryServiceCredentialRepository(
 				(credential) => credential.serviceIdentityId === serviceIdentityId,
 			);
 		},
+		async findActiveByServiceIdentityId(serviceIdentityId) {
+			return [...credentials.values()].filter(
+				(credential) =>
+					credential.serviceIdentityId === serviceIdentityId &&
+					credential.status === "active",
+			);
+		},
 		async create(input: NewServiceCredential) {
 			const credential: ServiceCredential = {
 				id: crypto.randomUUID(),

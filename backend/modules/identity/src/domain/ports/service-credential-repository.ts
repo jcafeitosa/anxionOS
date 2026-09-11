@@ -9,6 +9,10 @@ export interface ServiceCredentialRepository {
 	listByServiceIdentityId(
 		serviceIdentityId: string,
 	): Promise<ServiceCredential[]>;
+	/** Active credentials only (excludes rotated/revoked/expired rows). */
+	findActiveByServiceIdentityId(
+		serviceIdentityId: string,
+	): Promise<ServiceCredential[]>;
 	create(input: NewServiceCredential): Promise<ServiceCredential>;
 	/** Marks the credential as superseded by `rotatedToId` (idempotent by status). */
 	markRotated(
