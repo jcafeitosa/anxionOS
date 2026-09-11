@@ -4,9 +4,20 @@ type: debate
 
 # R05 — Armazenamento: `modules/capital`
 
-**Issue:** ANX-91
+**Issue:** ANX-91 · pack ANX-389  
+**Callers:** [R04-contracts-events.md](./R04-contracts-events.md) · [R06-dependencies.md](./R06-dependencies.md) · [ROUNDS.md](./ROUNDS.md). ST08 **0/23**. **Sem migration.**
 
-## Matriz de ownership
+## In / Out (R5)
+
+**In:** writes de account/allocation/reservation via UoW; projector **graph**.
+
+**Out:** PG `capital_*` + journal/outbox. Sem SQLite saldo. Sem FK grant/ledger.
+
+## Non-goals
+
+Spec accepted; ST08 live; ANX-342/389 done; REAL executionMode.
+
+## Ownership de engines
 
 | Dado | Engine | Notas |
 | --- | --- | --- |

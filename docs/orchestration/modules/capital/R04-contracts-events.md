@@ -10,6 +10,27 @@ type: debate
 
 `ownerDomain: capital` · `capital.<aggregate>.<action>.v1` · `executionMode` SIMULATED|PAPER only · payloads sem segredos venue
 
+**KEEP adapter-gateway** se já exportado.
+
+## In / Out (R4)
+
+**In:** POST `/v1/capital/accounts`, allocations, reservations, release; GET accounts/available. Idempotency-Key em POST; grant `capital.*` + T01.
+
+**Out:** eventos `capital.*` abaixo; BalanceView. **Não** ledger (`accounting`); **não** Grant (`governance`); **não** Position (`portfolios`). Sem secrets venue.
+
+## Non-goals
+
+Não REAL/live v1. Não SQLite saldo. Não spec accepted. Não ST08 live. Não ANX-342/389 done.
+
+## Ownership (contratos)
+
+| Superfície | Dono |
+| --- | --- |
+| CapitalAccount / Allocation / Reservation | **capital** |
+| Grant | **governance** |
+| JournalEntry | **accounting** |
+| Position | **portfolios** |
+
 ## HTTP `/v1/capital/*` (v1 debate)
 
 | Método | Rota | Comando |
