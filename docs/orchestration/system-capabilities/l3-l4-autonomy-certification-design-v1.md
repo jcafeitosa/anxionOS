@@ -5,6 +5,7 @@ type: design
 status: draft
 owner: governance
 issue: ANX-173
+updated: 2026-09-11
 tags:
   - governance
   - autonomy
