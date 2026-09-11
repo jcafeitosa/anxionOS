@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { assertActorCanMutate } from "@anxionos/organizations";
 import { mapGovernanceError } from "../../apps/api/src/governance/error-handler";
+import { GovernanceCommandError } from "../../modules/governance/src/application/errors";
 import type { Membership } from "../../modules/organizations/src/domain/entities/membership";
 import { createInMemoryMembershipRepository } from "../organizations/test-support";
 
@@ -76,4 +77,19 @@ describe("governance POST RBAC (ANX-443)", () => {
 			expect(membership.role).toBe(role);
 		},
 	);
+
+	test("GOV_CAPABILITY_SCOPE_MISMATCH vira 409 com o codigo preservado (ANX-462)", () => {
+		// O comando rejeita `console.platform` com escopo de agencia; aqui se
+		// prova que a borda HTTP nao degrada isso para 500 nem para 200.
+		const mapped = mapGovernanceError(
+			new GovernanceCommandError(
+				"GOV_CAPABILITY_SCOPE_MISMATCH",
+				"Capability console.platform requires PLATFORM scope",
+			),
+		);
+		expect(mapped.status).toBe(409);
+		expect(mapped.body.error.details.code).toBe(
+			"GOV_CAPABILITY_SCOPE_MISMATCH",
+		);
+	});
 });
