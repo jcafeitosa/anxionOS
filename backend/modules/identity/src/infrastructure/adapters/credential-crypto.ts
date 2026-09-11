@@ -1,9 +1,5 @@
-import {
-	createHash,
-	randomBytes,
-	scryptSync,
-	timingSafeEqual,
-} from "node:crypto";
+import { createHash, randomBytes, scrypt, timingSafeEqual } from "node:crypto";
+import { promisify } from "node:util";
 
 /**
  * Service credential material (R03 ServiceCredentialRef / INV-IDN-03).
@@ -16,6 +12,17 @@ const SECRET_BYTES = 32;
 const SALT_BYTES = 16;
 const SCRYPT_KEYLEN = 32;
 const HASH_ALGORITHM = "scrypt";
+
+/**
+ * `scryptSync` bloqueia o event loop ~16 ms por operacao — aceitavel em um CLI,
+ * nao na camada de autenticacao (vetor de DoS por tentativa). A versao assincrona
+ * roda no pool de threads do libuv.
+ */
+const scryptAsync = promisify(scrypt) as (
+	password: string,
+	salt: Buffer,
+	keylen: number,
+) => Promise<Buffer>;
 
 /** Prefix charset keeps the value inside `serviceCredentialPrefixSchema`. */
 const PREFIX_ALPHABET = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -39,18 +46,18 @@ function randomFromAlphabet(length: number): string {
 	return out;
 }
 
-export function hashServiceCredentialSecret(
+export async function hashServiceCredentialSecret(
 	secret: string,
 	salt: Buffer = randomBytes(SALT_BYTES),
-): string {
-	const derived = scryptSync(secret, salt, SCRYPT_KEYLEN);
+): Promise<string> {
+	const derived = await scryptAsync(secret, salt, SCRYPT_KEYLEN);
 	return `${HASH_ALGORITHM}$${salt.toString("base64url")}$${derived.toString("base64url")}`;
 }
 
-export function verifyServiceCredentialSecret(
+export async function verifyServiceCredentialSecret(
 	secret: string,
 	secretHash: string,
-): boolean {
+): Promise<boolean> {
 	const [algorithm, saltPart, hashPart] = secretHash.split("$");
 	if (algorithm !== HASH_ALGORITHM || !saltPart || !hashPart) {
 		return false;
@@ -58,7 +65,7 @@ export function verifyServiceCredentialSecret(
 	try {
 		const salt = Buffer.from(saltPart, "base64url");
 		const expected = Buffer.from(hashPart, "base64url");
-		const derived = scryptSync(secret, salt, expected.length);
+		const derived = await scryptAsync(secret, salt, expected.length);
 		return timingSafeEqual(derived, expected);
 	} catch {
 		// Malformed persisted material is a verification failure, not a crash.
@@ -66,13 +73,13 @@ export function verifyServiceCredentialSecret(
 	}
 }
 
-export function generateServiceCredential(): GeneratedServiceCredential {
+export async function generateServiceCredential(): Promise<GeneratedServiceCredential> {
 	const prefix = `anx${randomFromAlphabet(PREFIX_LENGTH - 3)}`;
 	const secret = randomBytes(SECRET_BYTES).toString("base64url");
 	return {
 		prefix,
 		secret,
-		secretHash: hashServiceCredentialSecret(secret),
+		secretHash: await hashServiceCredentialSecret(secret),
 	};
 }
 

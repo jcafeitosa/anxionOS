@@ -1,11 +1,14 @@
+import type { PrincipalRepository } from "../../domain/ports/principal-repository";
 import type { ServiceCredentialCrypto } from "../../domain/ports/service-credential-crypto";
 import type { ServiceCredentialRepository } from "../../domain/ports/service-credential-repository";
+import type { ServiceIdentityRepository } from "../../domain/ports/service-identity-repository";
 
 export type ServiceCredentialVerification =
 	| {
 			valid: true;
 			credentialId: string;
 			serviceIdentityId: string;
+			principalId: string;
 			prefix: string;
 	  }
 	| {
@@ -16,11 +19,21 @@ export type ServiceCredentialVerification =
 				| "revoked"
 				| "rotated"
 				| "expired"
-				| "mismatch";
+				| "mismatch"
+				/** The service identity that owns the credential is not active. */
+				| "identity_inactive"
+				/** The principal behind the service identity is not ACTIVE. */
+				| "principal_inactive";
 	  };
 
 export interface VerifyServiceCredentialDeps {
 	serviceCredentialRepository: ServiceCredentialRepository;
+	serviceIdentityRepository: ServiceIdentityRepository;
+	/**
+	 * Optional defense-in-depth: when wired, a principal that is not ACTIVE also
+	 * fails closed, so a credential cannot outlive its principal's suspension.
+	 */
+	principalRepository?: PrincipalRepository;
 	crypto: ServiceCredentialCrypto;
 }
 
@@ -28,9 +41,12 @@ export interface VerifyServiceCredentialDeps {
  * Verifies a delivered key (`<prefix>.<secret>`) against the stored hash.
  *
  * Fail-closed and reason-discriminating: an unknown, revoked, rotated or
- * expired credential never authenticates, and the secret comparison is
- * constant-time inside the crypto adapter. Expiry is evaluated against `asOf`
- * so callers can test windows without freezing the clock.
+ * expired credential never authenticates — and neither does a credential whose
+ * **service identity** or **principal** is no longer active. A cascading
+ * revocation that missed the credential row must not leave a usable key
+ * (INV-IDN-01). The secret comparison is constant-time inside the crypto
+ * adapter, and expiry is evaluated against `asOf` so callers can test windows
+ * without freezing the clock.
  */
 export async function verifyServiceCredential(
 	deps: VerifyServiceCredentialDeps,
@@ -59,13 +75,32 @@ export async function verifyServiceCredential(
 	if (credential.expiresAt && credential.expiresAt <= asOf) {
 		return { valid: false, reason: "expired" };
 	}
-	if (!deps.crypto.verify(parsed.secret, credential.secretHash)) {
+
+	// O status do dono faz parte da verificacao: credencial ativa de service
+	// identity revogada (ou de principal suspenso/revogado) NAO autentica.
+	const serviceIdentity = await deps.serviceIdentityRepository.findById(
+		credential.serviceIdentityId,
+	);
+	if (!serviceIdentity || serviceIdentity.status !== "active") {
+		return { valid: false, reason: "identity_inactive" };
+	}
+	if (deps.principalRepository) {
+		const principal = await deps.principalRepository.findById(
+			serviceIdentity.principalId,
+		);
+		if (!principal || principal.status !== "active") {
+			return { valid: false, reason: "principal_inactive" };
+		}
+	}
+
+	if (!(await deps.crypto.verify(parsed.secret, credential.secretHash))) {
 		return { valid: false, reason: "mismatch" };
 	}
 	return {
 		valid: true,
 		credentialId: credential.id,
 		serviceIdentityId: credential.serviceIdentityId,
+		principalId: serviceIdentity.principalId,
 		prefix: credential.prefix,
 	};
 }

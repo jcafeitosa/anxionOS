@@ -91,6 +91,16 @@ export async function handleListSessions(
 		capability: "identity.read",
 		agencyId: input.agencyId,
 	});
+	// Fail-closed como o irmao GET /principals/:id: sem isto a rota devolveria
+	// 200 com atividade de sessao de principal suspenso/revogado (e 200 vazio
+	// para UUID inexistente).
+	const principal = await getPrincipalById(
+		deps.identityRepository,
+		principalId,
+	);
+	if (!principal) {
+		throwIdentityError("IDN_PRINCIPAL_NOT_FOUND", "Principal not found");
+	}
 	const sessions = await listSessions(
 		{ sessionRefRepository: deps.sessionRefRepository },
 		principalId,

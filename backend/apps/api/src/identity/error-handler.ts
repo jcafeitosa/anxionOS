@@ -5,7 +5,11 @@ import {
 	toErrorResponse,
 } from "@anxionos/contracts/errors";
 import { resolveIdentityErrorStatus } from "@anxionos/contracts/identity";
-import { IdentityCommandError } from "@anxionos/identity";
+import {
+	IdentityCommandError,
+	SessionRevocationUnavailableError,
+	throwIdentityError,
+} from "@anxionos/identity";
 import { ZodError } from "zod";
 
 function identityCodeToAppError(error: IdentityCommandError): AppError {
@@ -50,6 +54,24 @@ export function mapIdentityError(
 			status: mapped.statusCode,
 			body: toErrorResponse(mapped, { requestId, exposeDetails: true }),
 		};
+	}
+	if (error instanceof SessionRevocationUnavailableError) {
+		// A revogacao inline falhou e a transacao foi revertida. O contrato (R04 /
+		// OpenAPI) espera 503 IDN_IDENTITY_UNAVAILABLE — e as sessoes do chamador
+		// podem ja ter sido apagadas pelo efeito externo (D-IDN-026).
+		try {
+			throwIdentityError(
+				"IDN_IDENTITY_UNAVAILABLE",
+				"Session revocation failed; the transition was rolled back",
+				{ cause: error },
+			);
+		} catch (mapped) {
+			const appError = mapped as AppError;
+			return {
+				status: resolveStatusCode(appError),
+				body: toErrorResponse(appError, { requestId, exposeDetails: true }),
+			};
+		}
 	}
 	if (error instanceof ZodError) {
 		const invalid = AppError.validation(

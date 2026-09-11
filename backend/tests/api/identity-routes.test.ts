@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { IDENTITY_ERROR_CODES } from "@anxionos/contracts/identity";
-import { IdentityCommandError, type Principal } from "@anxionos/identity";
+import {
+	IdentityCommandError,
+	type Principal,
+	SessionRevocationUnavailableError,
+} from "@anxionos/identity";
 import { createAgencyScope } from "../../apps/api/src/identity/agency-scope";
 import {
 	requireIdentityGrant,
@@ -9,6 +13,7 @@ import {
 import { mapIdentityError } from "../../apps/api/src/identity/error-handler";
 import {
 	handleGetPrincipal,
+	handleListSessions,
 	handleRegisterPrincipal,
 	handleRevokePrincipal,
 	handleRevokeSession,
@@ -109,6 +114,17 @@ describe("identity API error mapping (R04)", () => {
 			expect(mapped.status).toBe(status);
 			expect(mapped.body.error.details).toEqual({ code });
 		}
+	});
+
+	test("session revoker failure maps to 503 IDN_IDENTITY_UNAVAILABLE, not 500", () => {
+		const mapped = mapIdentityError(
+			new SessionRevocationUnavailableError("revoker down"),
+			"req-x",
+		);
+		expect(mapped.status).toBe(503);
+		expect(mapped.body.error.details).toEqual({
+			code: "IDN_IDENTITY_UNAVAILABLE",
+		});
 	});
 
 	test("keeps the institutional envelope for unknown failures", () => {
@@ -216,6 +232,49 @@ describe("identity handlers", () => {
 		await expect(
 			handleGetPrincipal(suspended, {
 				params: { principalId },
+				actorPrincipalId: otherPrincipalId,
+			}),
+		).rejects.toMatchObject({ identityCode: "IDN_PRINCIPAL_NOT_FOUND" });
+	});
+
+	test("self-access with a foreign agency header is cross-tenant (H2 do G4)", async () => {
+		// actor == target normalmente dispensa grant, mas declarar agencia
+		// estrangeira continua sendo sinal cross-tenant.
+		const d = deps({ memberships: [] });
+		await expect(
+			requireSelfOrGrant(d, {
+				actorPrincipalId: principalId,
+				targetPrincipalId: principalId,
+				capability: "identity.read",
+				agencyId,
+			}),
+		).rejects.toMatchObject({ identityCode: "IDN_CROSS_TENANT" });
+	});
+
+	test("session list fails closed for suspended/revoked and unknown principals (H1 do G4)", async () => {
+		const revoked = deps({
+			capabilities: ["identity.read"],
+			principals: [
+				{
+					...activePrincipal,
+					status: "revoked",
+					revision: 3,
+					revokedAt: new Date(),
+					revocationReason: "security.incident",
+				},
+			],
+		});
+		await expect(
+			handleListSessions(revoked, {
+				params: { principalId },
+				actorPrincipalId: otherPrincipalId,
+			}),
+		).rejects.toMatchObject({ identityCode: "IDN_PRINCIPAL_NOT_FOUND" });
+
+		const unknown = deps({ capabilities: ["identity.read"] });
+		await expect(
+			handleListSessions(unknown, {
+				params: { principalId: "99999999-9999-4999-8999-999999999999" },
 				actorPrincipalId: otherPrincipalId,
 			}),
 		).rejects.toMatchObject({ identityCode: "IDN_PRINCIPAL_NOT_FOUND" });

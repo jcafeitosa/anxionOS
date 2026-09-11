@@ -72,6 +72,15 @@ function harness(
 	};
 }
 
+function verifyDeps(h: ReturnType<typeof harness>) {
+	return {
+		serviceCredentialRepository: h.serviceCredentialRepository,
+		serviceIdentityRepository: h.serviceIdentityRepository,
+		principalRepository: h.principalRepository,
+		crypto: h.crypto,
+	};
+}
+
 describe("service credentials", () => {
 	test("issuing returns the secret once and persists only the hash", async () => {
 		const h = harness();
@@ -173,10 +182,7 @@ describe("service credentials", () => {
 			},
 			{ serviceIdentityId: serviceIdentity.id },
 		);
-		const deps = {
-			serviceCredentialRepository: h.serviceCredentialRepository,
-			crypto: h.crypto,
-		};
+		const deps = verifyDeps(h);
 
 		const ok = await verifyServiceCredential(deps, issued.secret);
 		expect(ok.valid).toBe(true);
@@ -215,16 +221,13 @@ describe("service credentials", () => {
 		expect(rotated.replacedCredentialIds).toEqual([
 			first.credential.credentialId,
 		]);
-		const verifyDeps = {
-			serviceCredentialRepository: h.serviceCredentialRepository,
-			crypto: h.crypto,
-		};
-		expect(await verifyServiceCredential(verifyDeps, first.secret)).toEqual({
+		const verifyDeps0 = verifyDeps(h);
+		expect(await verifyServiceCredential(verifyDeps0, first.secret)).toEqual({
 			valid: false,
 			reason: "rotated",
 		});
 		expect(
-			(await verifyServiceCredential(verifyDeps, rotated.secret)).valid,
+			(await verifyServiceCredential(verifyDeps0, rotated.secret)).valid,
 		).toBe(true);
 		expect(
 			h.published.filter(
@@ -232,6 +235,55 @@ describe("service credentials", () => {
 					event.eventType === IDENTITY_EVENT_TYPES.SERVICE_CREDENTIAL_ROTATED,
 			),
 		).toHaveLength(1);
+	});
+
+	test("a credential of a revoked service identity does not verify (G4 A2)", async () => {
+		const h = harness();
+		const issued = await issueServiceCredential(
+			{
+				serviceIdentityRepository: h.serviceIdentityRepository,
+				serviceCredentialRepository: h.serviceCredentialRepository,
+				commandJournal: h.commandJournal,
+				unitOfWork: h.unitOfWork,
+				crypto: h.crypto,
+			},
+			{ serviceIdentityId: serviceIdentity.id },
+		);
+		// Cascata que falhou em revogar a linha da credencial: a identidade
+		// revogada ainda assim nao pode autenticar.
+		await h.serviceIdentityRepository.revoke(serviceIdentity.id, new Date());
+
+		expect(await verifyServiceCredential(verifyDeps(h), issued.secret)).toEqual(
+			{
+				valid: false,
+				reason: "identity_inactive",
+			},
+		);
+	});
+
+	test("a credential of a suspended principal does not verify (defense in depth)", async () => {
+		const h = harness();
+		const issued = await issueServiceCredential(
+			{
+				serviceIdentityRepository: h.serviceIdentityRepository,
+				serviceCredentialRepository: h.serviceCredentialRepository,
+				commandJournal: h.commandJournal,
+				unitOfWork: h.unitOfWork,
+				crypto: h.crypto,
+			},
+			{ serviceIdentityId: serviceIdentity.id },
+		);
+		await h.principalRepository.markSuspended(
+			activePrincipal.id,
+			"ops.manual",
+			new Date(),
+		);
+		expect(await verifyServiceCredential(verifyDeps(h), issued.secret)).toEqual(
+			{
+				valid: false,
+				reason: "principal_inactive",
+			},
+		);
 	});
 
 	test("rotation fails closed without an active credential", async () => {
@@ -279,15 +331,9 @@ describe("service credentials", () => {
 					event.eventType === IDENTITY_EVENT_TYPES.SERVICE_CREDENTIAL_REVOKED,
 			),
 		).toHaveLength(1);
-		expect(
-			await verifyServiceCredential(
-				{
-					serviceCredentialRepository: h.serviceCredentialRepository,
-					crypto: h.crypto,
-				},
-				issued.secret,
-			),
-		).toEqual({ valid: false, reason: "revoked" });
+		expect(await verifyServiceCredential(verifyDeps(h), issued.secret)).toEqual(
+			{ valid: false, reason: "revoked" },
+		);
 	});
 
 	test("listing never exposes the hash", async () => {

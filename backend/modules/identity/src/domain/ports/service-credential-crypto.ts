@@ -12,9 +12,10 @@ export interface GeneratedServiceCredential {
 }
 
 export interface ServiceCredentialCrypto {
-	generate(): GeneratedServiceCredential;
-	hash(secret: string): string;
-	verify(secret: string, secretHash: string): boolean;
+	/** Async on purpose: scrypt in the libuv pool instead of blocking the loop. */
+	generate(): Promise<GeneratedServiceCredential>;
+	hash(secret: string): Promise<string>;
+	verify(secret: string, secretHash: string): Promise<boolean>;
 	/** Splits a delivered key (`<prefix>.<secret>`) without trusting its shape. */
 	parseKey(key: string): { prefix: string; secret: string } | null;
 }

@@ -2,11 +2,14 @@ import type { ServiceCredentialDto } from "@anxionos/contracts/identity";
 import { issueServiceCredentialCommandSchema } from "@anxionos/contracts/identity";
 import { createServiceCredentialIssuedEvent } from "../../domain/events/identity-events";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
-import type { IdentityUnitOfWork } from "../../domain/ports/identity-unit-of-work";
+import type {
+	IdentityTransactionContext,
+	IdentityUnitOfWork,
+} from "../../domain/ports/identity-unit-of-work";
 import type { ServiceCredentialCrypto } from "../../domain/ports/service-credential-crypto";
 import type { ServiceCredentialRepository } from "../../domain/ports/service-credential-repository";
 import type { ServiceIdentityRepository } from "../../domain/ports/service-identity-repository";
-import { throwIdentityError } from "../errors";
+import { isUniqueViolation, throwIdentityError } from "../errors";
 import { findIdempotentCommand, recordIdempotentCommand } from "../idempotency";
 import { toServiceCredentialDto } from "../presenters";
 
@@ -85,10 +88,14 @@ export async function issueServiceCredential(
 		);
 	}
 
-	const generated = deps.crypto.generate();
+	const generated = await deps.crypto.generate();
 	const issuedAt = new Date();
 	const credential = await deps.unitOfWork.runInTransaction(async (context) => {
-		const created = await context.serviceCredentialRepository.create({
+		// O unico indice unico desta tabela e o prefixo: 23505 aqui significa
+		// colisao de prefixo (probabilidade 36^-9), nao duplicata de idempotencia.
+		// Nao ha retry dentro da transacao (em PG o erro a aborta); o chamador
+		// repete com um commandId novo.
+		const created = await createCredentialOrFail(context, {
 			serviceIdentityId: command.serviceIdentityId,
 			prefix: generated.prefix,
 			secretHash: generated.secretHash,
@@ -125,4 +132,24 @@ export async function issueServiceCredential(
 		secret: `${generated.prefix}.${generated.secret}`,
 		idempotentReplay: false,
 	};
+}
+
+/** Maps a prefix collision (unique index) to a typed, client-actionable error. */
+async function createCredentialOrFail(
+	context: IdentityTransactionContext,
+	input: Parameters<
+		IdentityTransactionContext["serviceCredentialRepository"]["create"]
+	>[0],
+) {
+	try {
+		return await context.serviceCredentialRepository.create(input);
+	} catch (error) {
+		if (isUniqueViolation(error)) {
+			throwIdentityError(
+				"IDN_CREDENTIAL_PREFIX_TAKEN",
+				"Credential prefix collision — retry with a new commandId",
+			);
+		}
+		throw error;
+	}
 }

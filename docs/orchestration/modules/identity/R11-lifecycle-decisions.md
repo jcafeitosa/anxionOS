@@ -31,7 +31,11 @@ Registro das decisões tomadas durante a implementação do slice R03/R04 que **
 
 **Consequência conhecida e aceita.** O `DELETE` acontece em outra conexão (pool), fora do escopo transacional. Se a transação der rollback depois, as sessões **já foram apagadas** e não há `SessionRef` nem evento registrando isso — divergência entre o estado (principal ainda ativo) e a realidade das sessões.
 
-**Mitigação atual.** Registrar a intenção **antes** do efeito externo é o desenho correto e está registrado como pendência (issue a abrir): gravar `SessionRef` em estado `pending_revocation` na mesma transação e confirmar depois. Enquanto não houver essa issue, a lacuna é **documentada no código** (`principal-transition.ts`, bloco do revoker) e nos riscos residuais do handoff.
+**Mitigação e rastreio.** A dívida está rastreada em **ANX-459** (`todo`): gravar `SessionRef` em estado `pending_revocation` na mesma transação, confirmar/expirar depois e incluir a causa na resposta ao operador. Enquanto não for implementada, a lacuna é **documentada no código** (`principal-transition.ts`, bloco do revoker) e nos riscos residuais do handoff.
+
+**Limitação conhecida (G4 / A5).** `reconcileSuspendedPrincipalSessions` filtra `status !== "active"`, então a reconciliação de bootstrap **não repara** esta divergência: no cenário de rollback o principal continua ACTIVE e o que sumiu foram as sessões. O reconciliador por estado `pending_revocation` é parte do escopo de ANX-459.
+
+**Resposta ao cliente.** A falha do revoker é mapeada para **503 `IDN_IDENTITY_UNAVAILABLE`** (contrato de R04/OpenAPI), com mensagem que declara o rollback da transição — antes disso o boundary devolvia 500 genérico.
 
 **Por que não inverter agora.** Registrar depois do efeito não elimina a janela (crash entre efeito e commit), e mudar a ordem sem um estado intermediário apenas desloca o problema — exigiria uma coluna nova e um reconciliador.
 

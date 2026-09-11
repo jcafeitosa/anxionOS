@@ -12,13 +12,13 @@ import {
 /** Production adapter for the `ServiceCredentialCrypto` port (scrypt-based). */
 export function createServiceCredentialCrypto(): ServiceCredentialCrypto {
 	return {
-		generate(): GeneratedServiceCredential {
+		generate(): Promise<GeneratedServiceCredential> {
 			return generateServiceCredential();
 		},
-		hash(secret: string): string {
+		hash(secret: string): Promise<string> {
 			return hashServiceCredentialSecret(secret);
 		},
-		verify(secret: string, secretHash: string): boolean {
+		verify(secret: string, secretHash: string): Promise<boolean> {
 			return verifyServiceCredentialSecret(secret, secretHash);
 		},
 		parseKey(key: string) {
