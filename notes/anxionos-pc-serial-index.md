@@ -52,6 +52,6 @@ Atlas: [sistema](./anxionos-diagram-atlas.md) · [23 modulos](./anxionos-diagram
 
 Hub em brain (sem duplicar estes 30 arquivos): [anxionos-pc-serial-hub](../brain/notes/anxionos-pc-serial-hub.md). Programa P1: ANX-389. Pacote G7 Owner (draft): [anxionos-owner-g7-packet-p1-atlas](./anxionos-owner-g7-packet-p1-atlas.md).
 
-Navegação P1: [CAPABILITY-MAP](../docs/orchestration/system-capabilities/CAPABILITY-MAP.md) · [fichas 23](../docs/orchestration/system-capabilities/modules/) · Archify JSON `.archify/specs/anxionos-module-*.workflow.json` + HTML `.archify/artifacts/`.
+Navegação P1: [CAPABILITY-MAP](../docs/orchestration/system-capabilities/CAPABILITY-MAP.md) · [fichas 23](../docs/orchestration/system-capabilities/modules/) · tabela Archify 23 no [hub brain](../brain/notes/anxionos-pc-serial-hub.md#archify-23-json--html). JSON `.archify/specs/anxionos-module-<m>.workflow.json` + HTML `.archify/artifacts/anxionos-module-<m>.workflow.html` (23 módulos; sem adapter-gateway).
 
 Satélites ANX-342 (docs, **não** done do programa): ANX-343 atlas/Archify · ANX-344 ingest · ANX-345 alignment 30→23 · ANX-346 CAPABILITY-MAP · ANX-347 fichas dos **23** módulos.

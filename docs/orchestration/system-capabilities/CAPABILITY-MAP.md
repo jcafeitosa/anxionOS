@@ -85,4 +85,5 @@ Hub P1 (índice serial): Debates seriais: [índice PC](../../../notes/anxionos-p
 - [MODULE-STRUCTURE-CHECKLIST.md](./MODULE-STRUCTURE-CHECKLIST.md)
 - [Modos de execução e classes de ativos](./execution-modes-and-asset-classes.md)
 - [modules/](./modules/) — 23 fichas (ANX-347); sem ficha `approvals`, `policies` ou `adapter-gateway`
+- Archify 23 json+html: tabela no [hub P1](../../../brain/notes/anxionos-pc-serial-hub.md#archify-23-json--html) (specs `../../../.archify/specs/anxionos-module-*.workflow.json`, html `../../../.archify/artifacts/anxionos-module-*.workflow.html`)
 - [Alinhamento 23 vs taxonomia PC / adapter-gateway KEEP](../../../notes/anxionos-product-company-module-alignment.md)

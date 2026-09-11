@@ -54,7 +54,7 @@ Checklist P1 (sem carimbo): `brain/notes/anxionos-p1-spec-promotion-checklist.md
 ### 2. ANX-342 — atlas visual + serial PC 01–30
 
 - Status atual: **`todo`** (não hijack; não `done` por agente).
-- Evidência documental: hub `brain/notes/anxionos-pc-serial-hub.md` e [índice serial](./anxionos-pc-serial-index.md); Archify 23 workflows de módulo + platform + product-company.
+- Evidência documental: hub [brain/notes/anxionos-pc-serial-hub.md](../brain/notes/anxionos-pc-serial-hub.md) (tabela **Archify 23 json+html**) e [índice serial](./anxionos-pc-serial-index.md); 23 workflows `.archify/specs/anxionos-module-<m>.workflow.json` + `.archify/artifacts/anxionos-module-<m>.workflow.html` (sem adapter-gateway). Platform/product-company extras não contam como 24º módulo.
 - Aceite Owner: mover ANX-342 para `done` **somente** se o atlas (PC + diagramas) for aceito como entrega visual.
 
 ### 3. ANX-389 — programa P1 documental DEV_READY
