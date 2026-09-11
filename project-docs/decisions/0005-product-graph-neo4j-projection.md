@@ -2,10 +2,8 @@
 type: adr
 title: ADR0005 — Product Graph como projeção Neo4j (P3 proposed)
 description: Decisão proposta para projetar Product Graph e Agent Graph no Neo4j como projeções reconstruíveis, distintas do grafo institucional de runtime.
-status: superseded
-decision_status: superseded
-superseded_by: brain/project-docs/decisions/0005-agent-hierarchy-modes-triangular-circular.md
-taskboard_issue: ANX-455
+status: accepted
+decision_status: accepted
 owner: Arquitetura
 created: 2026-09-10
 version: "0.1"
