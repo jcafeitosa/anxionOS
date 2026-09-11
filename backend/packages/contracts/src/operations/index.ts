@@ -80,6 +80,19 @@ export {
 	type OperationsErrorCode,
 } from "./errors";
 export {
+	PLATFORM_SLO_SNAPSHOT_SCHEMA_VERSION,
+	platformSloCapacitySignalSchema,
+	platformSloCostSignalSchema,
+	platformSloEventingLagSchema,
+	platformSloRouteLatencySchema,
+	platformSloSnapshotSchema,
+	type PlatformSloCapacitySignal,
+	type PlatformSloCostSignal,
+	type PlatformSloEventingLag,
+	type PlatformSloRouteLatency,
+	type PlatformSloSnapshot,
+} from "./slo-snapshot";
+export {
 	OPERATIONS_OWNER_DOMAIN,
 	operationsHealthCheckIdSchema,
 	operationsIncidentIdSchema,

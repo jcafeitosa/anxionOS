@@ -47,6 +47,34 @@ export {
 	type GetServiceHealthDeps,
 } from "./application/queries/get-service-health";
 export {
+	getPlatformSloSnapshot,
+	type GetPlatformSloSnapshotDeps,
+} from "./application/queries/get-platform-slo-snapshot";
+export {
+	REDACTED_METRIC_VALUE,
+	isSensitiveMetricTagKey,
+	parseMetricKey,
+	redactMetricTagValue,
+	type ParsedMetricKey,
+} from "./domain/instrumentation/metrics-redaction";
+export {
+	recordEventingLagSli,
+	type LagAlertHook,
+	type RecordEventingLagSliDeps,
+	type RecordEventingLagSliResult,
+} from "./application/instrumentation/record-eventing-lag-sli";
+export {
+	DEFAULT_EVENTING_LAG_THRESHOLDS,
+	computeLagMs,
+	evaluateEventingLagSli,
+	type EventingLagAlert,
+	type EventingLagSliThresholds,
+} from "./domain/instrumentation/eventing-lag-sli";
+export type {
+	EventingLagQueryPort,
+	EventingLagSample,
+} from "./domain/ports/eventing-lag-query";
+export {
 	getIncident,
 	type GetIncidentDeps,
 } from "./application/queries/get-incident";
@@ -106,4 +134,5 @@ export {
 export { ensureOperationsSchema } from "./infrastructure/migrate";
 export { createOperationsDb } from "./infrastructure/create-db";
 export { createOperationsUnitOfWork } from "./infrastructure/operations-unit-of-work";
+export { createPgEventingLagQueryAdapter } from "./infrastructure/adapters/pg-eventing-lag-query-adapter";
 export { createPgCommandJournalRepository } from "./infrastructure/persistence/command-journal-repository";

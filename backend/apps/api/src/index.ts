@@ -55,6 +55,12 @@ import {
 	identityOpenApi,
 } from "./openapi-operations";
 import { createOpenApiPlugin } from "./openapi-plugin";
+import {
+	createSloMetricsPlugin,
+	getApiMetricsCollector,
+} from "./middleware/slo-metrics";
+import { bootstrapEventingLagSli } from "./operations/bootstrap-eventing-lag-sli";
+import { createPlatformSloSnapshotPlugin } from "./operations/platform-slo-snapshot-plugin";
 import { createOrganizationsPlugin } from "./organizations/plugin";
 import { configureInviteAcceptRateLimit } from "./organizations/rate-limit";
 import { createPartnersApiRuntime } from "./partners/bootstrap";
@@ -76,6 +82,7 @@ import {
 
 const logger = createLogger({ service: "api" });
 const port = Number(process.env.PORT ?? "3000");
+const apiMetrics = getApiMetricsCollector();
 
 const databaseUrl = process.env.DATABASE_URL?.trim();
 const pool = databaseUrl ? createPgPool(databaseUrl) : undefined;
@@ -100,6 +107,7 @@ if (pool) {
 	configureInviteAcceptRateLimit(pool);
 	bootstrapIdentitySessionRevocation(pool);
 	bootstrapGovernanceOrganizationsMembership(pool);
+	bootstrapEventingLagSli(pool, apiMetrics);
 	bootstrapPerformanceEventConsumers(pool);
 	bootstrapSimulationEventConsumers(pool);
 	bootstrapEvaluationEventConsumers(pool);
@@ -109,7 +117,10 @@ if (pool) {
 } else {
 	logger.info("DATABASE_URL unset — identity session consumer disabled");
 }
-let app: Elysia = new Elysia().use(createOpenApiPlugin()) as unknown as Elysia;
+let app: Elysia = new Elysia()
+	.use(createSloMetricsPlugin({ metrics: apiMetrics }))
+	.use(createPlatformSloSnapshotPlugin({ metrics: apiMetrics }))
+	.use(createOpenApiPlugin()) as unknown as Elysia;
 logger.info("OpenAPI Scalar mounted at /openapi");
 
 if (pool && resolveBetterAuthConfig()) {
@@ -142,6 +153,7 @@ if (pool && resolveBetterAuthConfig()) {
 			auth,
 			membershipRepository: orgRuntime.membershipRepository,
 			identityRepository: orgRuntime.identityRepository,
+			grantRepository: govRuntime.grantRepository,
 		}),
 	) as unknown as Elysia;
 	logger.info("Post-login context mounted at /v1/auth/post-login-context");
@@ -219,6 +231,8 @@ if (pool && resolveBetterAuthConfig()) {
 			...operationsRuntime,
 			identityRepository: orgRuntime.identityRepository,
 			scopedPool: orgRuntime.scopedPool,
+			grantRepository: govRuntime.grantRepository,
+			probePlatformHealth: () => probeHealthDeps(pool),
 		}),
 	) as unknown as Elysia;
 	logger.info(
