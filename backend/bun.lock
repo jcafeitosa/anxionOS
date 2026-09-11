@@ -53,6 +53,7 @@
         "@anxionos/governance": "workspace:*",
         "@anxionos/identity": "workspace:*",
         "@anxionos/observability": "workspace:*",
+        "@anxionos/operations": "workspace:*",
         "@anxionos/organizations": "workspace:*",
         "@anxionos/partners": "workspace:*",
         "@anxionos/portfolios": "workspace:*",
@@ -405,6 +406,7 @@
       "name": "@anxionos/database",
       "version": "0.1.0",
       "dependencies": {
+        "@anxionos/contracts": "workspace:*",
         "drizzle-kit": "0.31.10",
         "drizzle-orm": "0.45.2",
         "pg": "8.23.0",
