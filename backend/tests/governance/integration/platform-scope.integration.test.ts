@@ -4,13 +4,13 @@ import {
 	PLATFORM_CONSOLE_CAPABILITY,
 	PLATFORM_SCOPE_ID,
 } from "@anxionos/contracts/governance";
+import { createPgPool } from "@anxionos/eventing/postgres";
 import {
 	createGovernanceDb,
 	createGovernanceUnitOfWork,
 	hasPlatformConsoleGrant,
 	issueGrant,
 } from "@anxionos/governance";
-import { createPgPool } from "@anxionos/eventing/postgres";
 import {
 	assertPgIntegrationEnvForCi,
 	getDatabaseUrl,

@@ -144,7 +144,7 @@ export const identityOpenApi = {
 		operationId: "identitySignInEmail",
 		summary: "Sign in with email and password",
 		description:
-			"Module: identity (Better Auth). `POST /api/auth/sign-in/email` with `{ email, password }`. Sets cookie `better-auth.session_token`. Other Better Auth subpaths remain on the hidden catch-all `/api/auth/*`.",
+			"Provider: Better Auth, mounted by the composition root (`apps/api`) — `/api/auth/*` is **not** owned by `modules/identity`, which owns only the principal/session-reference ledger. `POST /api/auth/sign-in/email` with `{ email, password }`. Sets cookie `better-auth.session_token`. Other Better Auth subpaths remain on the hidden catch-all `/api/auth/*`.",
 		requestBody: jsonBody(
 			{
 				type: "object",
@@ -158,7 +158,15 @@ export const identityOpenApi = {
 		),
 		responses: {
 			"200": { description: "Session user payload; Set-Cookie on success." },
+			"400": {
+				description:
+					"Body validation failed — `email` and `password` are required (`VALIDATION_ERROR`).",
+			},
 			"401": { description: "Invalid credentials." },
+			"403": {
+				description:
+					"Untrusted or invalid `Origin` (Better Auth trusted-origin check).",
+			},
 		},
 	}),
 	signUpEmail: op({
@@ -166,25 +174,36 @@ export const identityOpenApi = {
 		operationId: "identitySignUpEmail",
 		summary: "Register with email and password",
 		description:
-			"Module: identity (Better Auth). `POST /api/auth/sign-up/email` with `{ email, password, name? }`. Email verification is sent only when SMTP_USER/SMTP_PASS are configured.",
+			"Provider: Better Auth, mounted by the composition root (`apps/api`) — `/api/auth/*` is **not** owned by `modules/identity`. `POST /api/auth/sign-up/email` with `{ email, password, name }` (all three required). A successful signup registers the institutional principal through the Better Auth `user.create.after` hook. Email verification is sent only when SMTP_USER/SMTP_PASS are configured.",
 		requestBody: jsonBody(
 			{
 				type: "object",
-				required: ["email", "password"],
+				required: ["email", "password", "name"],
 				properties: {
 					email: { type: "string", format: "email" },
 					password: { type: "string", minLength: 1 },
 					name: { type: "string" },
 				},
 			},
-			"Registration payload.",
+			"Registration payload; `name` is required by Better Auth.",
 		),
 		responses: {
 			"200": {
 				description:
 					"Created user and session cookie when auto-sign-in is enabled.",
 			},
-			"400": { description: "Validation or duplicate email." },
+			"400": {
+				description:
+					"Body validation failed — `email`, `password` and `name` are required (`VALIDATION_ERROR`).",
+			},
+			"403": {
+				description:
+					"Untrusted or invalid `Origin` (Better Auth trusted-origin check).",
+			},
+			"422": {
+				description:
+					"Email already registered (`USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL`).",
+			},
 		},
 	}),
 	getSession: op({
@@ -192,7 +211,7 @@ export const identityOpenApi = {
 		operationId: "identityGetSession",
 		summary: "Read current Better Auth session",
 		description:
-			"Module: identity. `GET /api/auth/get-session` returns the session bound to `better-auth.session_token`, or null.",
+			"Provider: Better Auth, mounted by the composition root (`apps/api`). `GET /api/auth/get-session` returns the session bound to `better-auth.session_token`, or `null` when anonymous.",
 		security: COOKIE_SECURITY,
 		responses: {
 			"200": { description: "Session and user, or empty/null when anonymous." },
@@ -203,10 +222,17 @@ export const identityOpenApi = {
 		operationId: "identitySignOut",
 		summary: "Sign out and clear session cookie",
 		description:
-			"Module: identity. `POST /api/auth/sign-out` revokes the current Better Auth session cookie.",
+			"Provider: Better Auth, mounted by the composition root (`apps/api`). `POST /api/auth/sign-out` revokes the current Better Auth session cookie; an anonymous call is a no-op that still returns 200.",
 		security: COOKIE_SECURITY,
 		responses: {
-			"200": { description: "Signed out." },
+			"200": {
+				description:
+					"Signed out (`{ success: true }`), including when anonymous.",
+			},
+			"403": {
+				description:
+					"Cookie present without an `Origin` header, or an untrusted `Origin` (Better Auth trusted-origin check).",
+			},
 		},
 	}),
 } as const;
@@ -227,11 +253,26 @@ export const postLoginContextOpenApiDetail = op({
 	},
 });
 
+/**
+ * Optional agency scope of an identity request. Omitting it makes the request
+ * PLATFORM-scoped and requires a platform-scoped grant (ANX-462); declaring an
+ * agency requires active membership in it and a grant scoped to that agency,
+ * and — on routes with a target principal — that the target belongs to that
+ * agency (ANX-457). Not read by `GET /v1/identity/sessions/revoked`, whose
+ * ledger is global.
+ */
+const AGENCY_SCOPE = header(
+	"X-Agency-Id",
+	"Optional agency scope of the request. When present the caller must be an active member of that agency and the grant must be scoped to it; routes with a target principal also require the target to belong to it (`IDN_CROSS_TENANT` otherwise). When absent the request is platform-scoped and requires a platform-scoped grant. Invalid UUID → `VALIDATION_ERROR`.",
+	{ schema: UUID },
+);
+
 const identityPrincipalParams = [
 	pathUuid(
 		"principalId",
 		"Principal UUID owned by `identity`. This is the institutional principal id, never the Better Auth user id.",
 	),
+	AGENCY_SCOPE,
 	REQUEST_ID,
 ];
 
@@ -243,7 +284,7 @@ export const identityPrincipalsOpenApi = {
 		operationId: "identityGetPrincipal",
 		summary: "Get one principal",
 		description:
-			"Module: identity. Returns the public principal DTO (no `authUserId`, no credential material). Self-access is allowed; otherwise the caller needs the `identity.read` grant (`identity.admin` does not imply it, D-IDN-034). Suspended and revoked principals fail closed with 404. Optional `x-agency-id` requires membership in that agency (otherwise `IDN_CROSS_TENANT`).",
+			"Module: identity. Returns the public principal DTO (no `authUserId`, no credential material). Self-access is allowed; otherwise the caller needs the `identity.read` grant (`identity.admin` does not imply it, D-IDN-034). Suspended and revoked principals fail closed with 404. When `X-Agency-Id` is declared the caller must be a member of that agency **and** the target principal must belong to it (otherwise `IDN_CROSS_TENANT`); without the header the request is platform-scoped.",
 		security: [{ cookieAuth: [] }],
 		parameters: identityPrincipalParams,
 		responses: {
@@ -251,7 +292,8 @@ export const identityPrincipalsOpenApi = {
 				description: "`{ principal }` with id, email, kind, status, revision.",
 			},
 			"400": {
-				description: "Invalid path/query (`VALIDATION_ERROR`).",
+				description:
+					"Invalid `principalId` or `X-Agency-Id` (`VALIDATION_ERROR`).",
 			},
 			"401": { description: "No session." },
 			"403": { description: "`IDN_FORBIDDEN` / `IDN_CROSS_TENANT`." },
@@ -265,12 +307,15 @@ export const identityPrincipalsOpenApi = {
 		operationId: "identityListSessions",
 		summary: "List session references of a principal",
 		description:
-			"Module: identity. Logical session references only — never a token, cookie or raw session id. Self-access allowed; otherwise requires `identity.read`.",
+			"Module: identity. Logical session references only — never a token, cookie or raw session id. Self-access allowed; otherwise requires `identity.read`. Suspended and revoked principals fail closed with 404. When `X-Agency-Id` is declared the caller must be a member of that agency **and** the target principal must belong to it (otherwise `IDN_CROSS_TENANT`).",
 		security: [{ cookieAuth: [] }],
 		parameters: identityPrincipalParams,
 		responses: {
 			"200": { description: "`{ sessions }` newest first." },
-			"400": { description: "Invalid path (`VALIDATION_ERROR`)." },
+			"400": {
+				description:
+					"Invalid `principalId` or `X-Agency-Id` (`VALIDATION_ERROR`).",
+			},
 			"401": { description: "No session." },
 			"403": { description: "`IDN_FORBIDDEN` / `IDN_CROSS_TENANT`." },
 			"404": {
@@ -283,9 +328,9 @@ export const identityPrincipalsOpenApi = {
 		operationId: "identityRegisterPrincipal",
 		summary: "Register a principal",
 		description:
-			"Module: identity. Requires `identity.admin` and an `Idempotency-Key` header (materialized as `commandId`). Idempotent by `authUserId`: a repeated registration returns the existing principal without a second event.",
+			"Module: identity. Requires `identity.admin` and an `Idempotency-Key` header (materialized as `commandId`). Idempotent by `authUserId`: a repeated registration returns the existing principal without a second event; replaying a registration whose principal is suspended or revoked fails closed with 404. When `X-Agency-Id` is declared the caller must be a member of that agency and the grant must be scoped to it.",
 		security: [{ cookieAuth: [] }],
-		parameters: [idempotencyKey(), REQUEST_ID],
+		parameters: [idempotencyKey(), AGENCY_SCOPE, REQUEST_ID],
 		requestBody: {
 			required: true,
 			content: {
@@ -294,9 +339,13 @@ export const identityPrincipalsOpenApi = {
 						type: "object",
 						required: ["authUserId", "email"],
 						properties: {
-							authUserId: { type: "string" },
-							email: { type: "string", format: "email" },
-							kind: { type: "string", enum: ["human", "service"] },
+							authUserId: { type: "string", minLength: 1, maxLength: 128 },
+							email: { type: "string", format: "email", maxLength: 320 },
+							kind: {
+								type: "string",
+								enum: ["human", "service"],
+								default: "human",
+							},
 						},
 					},
 				},
@@ -306,10 +355,14 @@ export const identityPrincipalsOpenApi = {
 			"200": { description: "`{ principal }`." },
 			"400": {
 				description:
-					"Missing/invalid `Idempotency-Key` or body (`VALIDATION_ERROR`).",
+					"Missing/invalid `Idempotency-Key`, invalid `X-Agency-Id` or body (`VALIDATION_ERROR`).",
 			},
 			"401": { description: "No session." },
 			"403": { description: "`IDN_FORBIDDEN` / `IDN_CROSS_TENANT`." },
+			"404": {
+				description:
+					"`IDN_PRINCIPAL_NOT_FOUND` when the `authUserId` being registered is already linked to a suspended or revoked principal (fail-closed replay).",
+			},
 			"409": {
 				description:
 					"`IDN_PRINCIPAL_EMAIL_TAKEN` / `IDN_DUPLICATE_IDEMPOTENCY`.",
@@ -321,7 +374,7 @@ export const identityPrincipalsOpenApi = {
 		operationId: "identitySuspendPrincipal",
 		summary: "Suspend a principal (reversible)",
 		description:
-			"Module: identity. Requires `identity.admin` and `Idempotency-Key`. Revokes every active service credential and inline-revokes Better Auth sessions (fail-closed), but keeps service identities so they can be reissued after reactivation. `expectedRevision` mismatch returns `IDN_REVISION_CONFLICT`.",
+			"Module: identity. Requires `identity.admin` and `Idempotency-Key`. Revokes every active service credential and inline-revokes Better Auth sessions (fail-closed), but keeps service identities so they can be reissued after reactivation. Suspending an already-suspended principal is an idempotent 200. `expectedRevision` mismatch returns `IDN_REVISION_CONFLICT`. When `X-Agency-Id` is declared the caller must be a member of that agency **and** the target principal must belong to it (otherwise `IDN_CROSS_TENANT`).",
 		security: [{ cookieAuth: [] }],
 		parameters: identityCommandParams,
 		requestBody: {
@@ -330,6 +383,7 @@ export const identityPrincipalsOpenApi = {
 				"application/json": {
 					schema: {
 						type: "object",
+						additionalProperties: false,
 						properties: {
 							reasonCode: {
 								type: "string",
@@ -339,6 +393,7 @@ export const identityPrincipalsOpenApi = {
 									"security.incident",
 									"user.requested",
 								],
+								default: "ops.manual",
 							},
 							expectedRevision: { type: "integer", minimum: 0 },
 						},
@@ -350,7 +405,7 @@ export const identityPrincipalsOpenApi = {
 			"200": { description: "`{ principal }` suspended." },
 			"400": {
 				description:
-					"Missing/invalid `Idempotency-Key` or body (`VALIDATION_ERROR`).",
+					"Missing/invalid `Idempotency-Key`, invalid `X-Agency-Id`, unknown body property or invalid body (`VALIDATION_ERROR`).",
 			},
 			"401": { description: "No session." },
 			"403": { description: "`IDN_FORBIDDEN` / `IDN_CROSS_TENANT`." },
@@ -369,7 +424,7 @@ export const identityPrincipalsOpenApi = {
 		operationId: "identityRevokePrincipal",
 		summary: "Revoke a principal (terminal)",
 		description:
-			"Module: identity. Requires `identity.admin` and `Idempotency-Key`. Terminal: also revokes service identities, their credentials and sessions. A revoked principal can never be reactivated.",
+			"Module: identity. Requires `identity.admin` and `Idempotency-Key`. Terminal: also revokes service identities, their credentials and sessions. A revoked principal can never be reactivated; revoking an already-revoked principal is an idempotent 200. When `X-Agency-Id` is declared the caller must be a member of that agency **and** the target principal must belong to it (otherwise `IDN_CROSS_TENANT`).",
 		security: [{ cookieAuth: [] }],
 		parameters: identityCommandParams,
 		requestBody: {
@@ -378,6 +433,7 @@ export const identityPrincipalsOpenApi = {
 				"application/json": {
 					schema: {
 						type: "object",
+						additionalProperties: false,
 						properties: {
 							reasonCode: {
 								type: "string",
@@ -388,6 +444,7 @@ export const identityPrincipalsOpenApi = {
 									"user.requested",
 									"gdpr.erasure",
 								],
+								default: "ops.manual",
 							},
 							expectedRevision: { type: "integer", minimum: 0 },
 						},
@@ -399,7 +456,7 @@ export const identityPrincipalsOpenApi = {
 			"200": { description: "`{ principal }` revoked." },
 			"400": {
 				description:
-					"Missing/invalid `Idempotency-Key` or body (`VALIDATION_ERROR`).",
+					"Missing/invalid `Idempotency-Key`, invalid `X-Agency-Id`, unknown body property or invalid body (`VALIDATION_ERROR`).",
 			},
 			"401": { description: "No session." },
 			"403": { description: "`IDN_FORBIDDEN` / `IDN_CROSS_TENANT`." },
@@ -416,9 +473,9 @@ export const identityPrincipalsOpenApi = {
 		operationId: "identityRevokeSession",
 		summary: "Record a revoked session reference",
 		description:
-			"Module: identity. Requires `Idempotency-Key`. Records a revocation learned from the session owner; `externalRefHash` is required only when the reference is unknown to the module. Emits `identity.session.revoked.v1` carrying the logical sessionRefId — never a token.",
+			"Module: identity. Requires `Idempotency-Key`. Self-access (revoking your own session reference) is allowed; otherwise the caller needs `identity.admin` for the `principalId` in the body. Records a revocation learned from the session owner; `externalRefHash` is required only when the reference is unknown to the module (otherwise `IDN_SESSION_NOT_FOUND`). Emits `identity.session.revoked.v1` carrying the logical sessionRefId — never a token. When `X-Agency-Id` is declared the caller must be a member of that agency **and** the target principal must belong to it (otherwise `IDN_CROSS_TENANT`).",
 		security: [{ cookieAuth: [] }],
-		parameters: [idempotencyKey(), REQUEST_ID],
+		parameters: [idempotencyKey(), AGENCY_SCOPE, REQUEST_ID],
 		requestBody: {
 			required: true,
 			content: {
@@ -429,9 +486,17 @@ export const identityPrincipalsOpenApi = {
 						properties: {
 							principalId: { type: "string", format: "uuid" },
 							sessionRefId: { type: "string", format: "uuid" },
-							externalRefHash: { type: "string", minLength: 16 },
+							externalRefHash: {
+								type: "string",
+								minLength: 16,
+								maxLength: 128,
+							},
 							revokedAt: { type: "string", format: "date-time" },
-							reasonCode: { type: "string" },
+							reasonCode: {
+								type: "string",
+								minLength: 1,
+								maxLength: 64,
+							},
 						},
 					},
 				},
@@ -441,7 +506,7 @@ export const identityPrincipalsOpenApi = {
 			"200": { description: "`{ sessionRef, transitioned }`." },
 			"400": {
 				description:
-					"Missing/invalid `Idempotency-Key` or body (`VALIDATION_ERROR`).",
+					"Missing/invalid `Idempotency-Key`, invalid `X-Agency-Id` or body (`VALIDATION_ERROR`).",
 			},
 			"401": { description: "No session." },
 			"403": { description: "`IDN_FORBIDDEN` / `IDN_CROSS_TENANT`." },
@@ -456,7 +521,7 @@ export const identityPrincipalsOpenApi = {
 		operationId: "identityListRevokedSessions",
 		summary: "List revoked session references",
 		description:
-			"Module: identity. Requires `identity.admin`. Revocation audit trail across principals, optionally bounded by `since` (ISO-8601).",
+			"Module: identity. Requires an `identity.admin` grant with **platform** scope: the revocation ledger is global (session references carry no agency dimension), so an agency-scoped grant is rejected even when `X-Agency-Id` matches one of the caller's memberships. The header is ignored on this route. Optionally bounded by `since` (ISO-8601).",
 		security: [{ cookieAuth: [] }],
 		parameters: [
 			{
@@ -471,7 +536,7 @@ export const identityPrincipalsOpenApi = {
 		responses: {
 			"200": { description: "`{ sessions }` newest first." },
 			"400": {
-				description: "Invalid `since` or `x-agency-id` (`VALIDATION_ERROR`).",
+				description: "Invalid `since` (`VALIDATION_ERROR`).",
 			},
 			"401": { description: "No session." },
 			"403": { description: "`IDN_FORBIDDEN` / `IDN_CROSS_TENANT`." },
