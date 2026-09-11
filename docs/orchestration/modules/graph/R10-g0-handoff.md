@@ -37,7 +37,18 @@ Kernel, catálogo T01–T20, inbox, DLQ, rebuild full-swap, dispatcher, consumer
 | Spec `accepted` / ST08 migrations | Owner |
 | ANX-342 G7 | Owner |
 
-## Critérios de aceite **deste** pack (P1 documental)
+## Oraculos G3 / G5 (fecho do pack)
+
+| ID | Gate | Esperado |
+| --- | --- | --- |
+| G3-GRP-01 | G3 | neo4j-driver so no adapter graph |
+| G3-GRP-02 | G3 | replay inbox nao duplica aresta |
+| G3-GRP-03 | G3 | dispatcher nao persiste negocio |
+| G5-GRP-01 | G5 | T01 DENY se grant revogado apos grafo stale |
+| G5-GRP-02 | G5 | agente sem credencial Neo4j |
+| G5-GRP-03 | G5 | Cypher no body HTTP recusado |
+
+## Criterios de aceite **deste** pack (P1 documental)
 
 | # | Critério |
 | --- | --- |
