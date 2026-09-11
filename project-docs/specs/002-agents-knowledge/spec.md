@@ -1,10 +1,15 @@
 ---
 type: spec
+status: superseded
+superseded_by: brain/project-docs/specs/002-agents-knowledge/spec.md
+taskboard_issue: ANX-455
 ---
+
+> **Legado / superseded (ANX-455).** A spec 002 canônica está em `brain/project-docs/specs/002-agents-knowledge/spec.md` com **status accepted** (G7 Owner, 2026-09-11). Esta cópia versionada **não** declara draft e **não prevalece**. Aceitar a spec canônica ≠ homologar engines reais (ST08). Registro: [docs/document-precedence.md](../../../docs/document-precedence.md).
 
 ## Completude P1 — ownership, eventos, oráculos (ANX-389)
 
-`status:` permanece **draft**. ST08 = 0/23 migrations homologadas. **Não** promover a `accepted` sem G7 Owner + checklist ST01–ST08 evidenciado.
+Notas históricas desta cópia (não alteram o status **accepted** em `brain/`): ST08 = 0/23 engines reais homologados. Homologação de storage real permanece backlog; não reler este arquivo como “spec ainda draft”.
 
 ### Ownership (módulos desta spec vs 23 ADR0002)
 

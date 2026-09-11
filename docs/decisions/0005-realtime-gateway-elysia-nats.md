@@ -1,12 +1,17 @@
 ---
 type: decision
+status: superseded
+superseded_by: brain/project-docs/decisions/0005-agent-hierarchy-modes-triangular-circular.md
+taskboard_issue: ANX-455
 ---
 
 # ADR0005 — Realtime gateway (Elysia + NATS)
 
+> **Legado / superseded (ANX-455).** O número ADR0005 em `brain/` trata de **hierarquia TREE/CIRCULAR**, não deste gateway. Esta cópia em `docs/decisions/` **não prevalece**. Registro: [document-precedence.md](../document-precedence.md).
+
 | Campo | Valor |
 | --- | --- |
-| Status | **proposed** |
+| Status | **superseded** (legado; não prevalece sobre `brain/`) |
 | Data | 2026-09-08 |
 | Issue | ANX-21 |
 
