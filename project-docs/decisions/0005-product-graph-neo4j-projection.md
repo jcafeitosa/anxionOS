@@ -16,11 +16,11 @@ tags:
 ---
 # ADR0005 — Product Graph como projeção Neo4j (P3 proposed)
 
-> **Legado / superseded (ANX-455).** O ADR0005 canônico em `brain/` é *Modos de hierarquia de agentes — TREE e CIRCULAR* (draft). Este arquivo é **outro assunto** (Product Graph / Neo4j) e **não prevalece**. Registro: [docs/document-precedence.md](../docs/document-precedence.md).
-
 ## Status
 
-**Superseded como ADR0005 versionado** — o número 0005 em `brain/` vence. Histórico: greenlight Owner ANX-276; sandbox P2 homologado ANX-290; staging P3 em ANX-292.
+**Accepted** — greenlight Owner ANX-276; sandbox P2 homologado ANX-290; staging P3 em ANX-292.
+
+> **Colisão de número (ANX-455).** Existe um *outro* ADR0005 em `brain/project-docs/decisions/0005-agent-hierarchy-modes-triangular-circular.md`, sobre **hierarquia de agentes** (draft) — assunto distinto. Este documento permanece **accepted** e prevalece para Product Graph / Neo4j. Identificar por caminho + título. Registro: [docs/document-precedence.md](../docs/document-precedence.md).
 
 ## Contexto
 

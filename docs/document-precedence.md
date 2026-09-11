@@ -38,6 +38,7 @@ Identificar ADR/spec por **caminho + título**, não só pelo número. Há colis
 | 006 | `brain/project-docs/specs/006-agent-hierarchy-orchestration/` (draft — hierarquia) | `project-docs/specs/006-product-agent-graph/` (outro assunto: Product/Agent Graph) |
 | 007 | — (não há 007 em `brain/`) | `project-docs/specs/007-products-marketplace-capability/` (legado isolado) |
 | 008 | `brain/project-docs/specs/008-multi-tenant-isolation/` | — |
+| — | `brain/project-docs/specs/anx-governance-decision-engine/` (quando existir) | `project-docs/specs/anx-governance-decision-engine/design.md` (design legado, sem número 00N) |
 
 ## Índice público
 
