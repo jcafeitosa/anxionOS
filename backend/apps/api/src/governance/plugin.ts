@@ -129,21 +129,22 @@ export function createGovernancePlugin(deps: GovernancePluginDeps) {
 				.resolve(async ({ request, params }) => {
 					const { agencyId } = agencyIdParamSchema.parse(params);
 					const { principal } = await resolveSessionPrincipal(deps, request);
-					await requireAgencyMutationRole(
+					const membership = await requireAgencyMutationRole(
 						deps.scopedPool,
 						agencyId,
 						principal.id,
 					);
-					return { principal, agencyId };
+					return { principal, agencyId, actorRole: membership.role };
 				})
 				.post(
 					"/grants",
-					async ({ request, agencyId }) => {
+					async ({ request, agencyId, principal, actorRole }) => {
 						const commandId = parseIdempotencyKey(request.headers);
 						const body = await request.json();
 						return handleIssueGrant(deps, {
 							commandId,
 							agencyId,
+							actor: { principalId: principal.id, role: actorRole },
 							body,
 						});
 					},

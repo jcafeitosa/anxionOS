@@ -15,13 +15,15 @@ export class GovernanceCommandError extends AppError {
 	) {
 		const statusCode = GOVERNANCE_ERROR_STATUS_MAP[governanceCode];
 		const appCode =
-			statusCode === 404
-				? "NOT_FOUND"
-				: statusCode === 403
-					? "FORBIDDEN"
-					: statusCode === 409
-						? "CONFLICT"
-						: "INTERNAL_ERROR";
+			statusCode === 400
+				? "VALIDATION_ERROR"
+				: statusCode === 404
+					? "NOT_FOUND"
+					: statusCode === 403
+						? "FORBIDDEN"
+						: statusCode === 409
+							? "CONFLICT"
+							: "INTERNAL_ERROR";
 		super({
 			code: appCode,
 			message,

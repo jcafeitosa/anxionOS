@@ -176,3 +176,41 @@ describe("issueGrant — coerencia capability x escopo (ANX-462)", () => {
 		});
 	});
 });
+
+/**
+ * ANX-466 — o grant so' aceita token do catalogo declarado. Antes desta regra
+ * `capability` era string livre e qualquer texto entrava no estado de
+ * autorizacao.
+ */
+describe("issueGrant — catalogo de capability (ANX-466)", () => {
+	test("rejects a capability outside the catalog and writes nothing", async () => {
+		const { deps, grantRepository } = createIssueGrantDeps();
+		await expect(
+			issueGrant(deps, {
+				commandId: "abababab-abab-4bab-8bab-abababababab",
+				scopeId,
+				granteePrincipalId,
+				capability: "totally.unknown.capability",
+			}),
+		).rejects.toMatchObject({
+			governanceCode: "GOV_CAPABILITY_UNKNOWN",
+			statusCode: 400,
+		});
+		expect(
+			await grantRepository.listActiveByPrincipal(granteePrincipalId),
+		).toHaveLength(0);
+	});
+
+	test("issues an operational capability from the catalog", async () => {
+		const { deps, grantRepository } = createIssueGrantDeps();
+		await issueGrant(deps, {
+			commandId: "acacacac-acac-4cac-8cac-acacacacacac",
+			scopeId,
+			granteePrincipalId,
+			capability: "agents.publish",
+		});
+		const grants =
+			await grantRepository.listActiveByPrincipal(granteePrincipalId);
+		expect(grants.map((grant) => grant.capability)).toEqual(["agents.publish"]);
+	});
+});

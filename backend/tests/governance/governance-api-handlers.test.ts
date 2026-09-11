@@ -117,15 +117,169 @@ describe("governance API handlers (slice 6)", () => {
 
 	test("handleIssueGrant issues grant for agency scope", async () => {
 		const deps = createGrantHandlerDeps();
+		// ANX-466: o emissor precisa deter a capability que concede. A baseline
+		// de owner (CAP-B01) inclui `owner.manage`, entao um owner pode repassa-la.
+		await deps.grantRepository.save(
+			seedGrant({
+				id: "ffffffff-ffff-4fff-8fff-ffffffffffff",
+				capability: "owner.manage",
+			}),
+		);
 		const result = await handleIssueGrant(deps, {
 			commandId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
 			agencyId: scopeId,
+			actor: { principalId, role: "owner" },
 			body: {
 				granteePrincipalId,
 				capability: "owner.manage",
 			},
 		});
 		expect(result.aggregateId).toBeTruthy();
+	});
+
+	/**
+	 * ANX-466 — o exploit: `operator` da agencia emitia `identity.admin` para si
+	 * e, com esse grant, revogava globalmente o owner. A politica de emissao
+	 * declarada em contrato recusa a capability administrativa pelo papel.
+	 */
+	test("handleIssueGrant rejeita identity.admin emitida por operator", async () => {
+		const deps = createGrantHandlerDeps();
+		await expect(
+			handleIssueGrant(deps, {
+				commandId: "12121212-1212-4212-8212-121212121212",
+				agencyId: scopeId,
+				actor: { principalId: granteePrincipalId, role: "operator" },
+				body: {
+					granteePrincipalId,
+					capability: "identity.admin",
+				},
+			}),
+		).rejects.toMatchObject({ governanceCode: "GOV_INSUFFICIENT_AUTHORITY" });
+		expect(
+			await deps.grantRepository.listActiveByPrincipal(granteePrincipalId),
+		).toHaveLength(0);
+	});
+
+	/**
+	 * ANX-466 — sem auto-elevacao: mesmo owner/admin nao concede a si mesmo uma
+	 * capability que ainda nao detem (aqui, `agents.publish` operacional).
+	 */
+	test("handleIssueGrant rejeita auto-concessao de capability nao detida", async () => {
+		const deps = createGrantHandlerDeps();
+		await expect(
+			handleIssueGrant(deps, {
+				commandId: "13131313-1313-4313-8313-131313131313",
+				agencyId: scopeId,
+				actor: { principalId, role: "admin" },
+				body: {
+					granteePrincipalId: principalId,
+					capability: "agents.publish",
+				},
+			}),
+		).rejects.toMatchObject({ governanceCode: "GOV_INSUFFICIENT_AUTHORITY" });
+	});
+
+	/**
+	 * ANX-466 — capability administrativa so' circula por quem ja' a detem:
+	 * evita lavar `identity.admin` pela mao de um admin/owner que nao a possui.
+	 */
+	test("handleIssueGrant rejeita repasse de identity.admin por quem nao a detem", async () => {
+		const deps = createGrantHandlerDeps();
+		await expect(
+			handleIssueGrant(deps, {
+				commandId: "14141414-1414-4414-8414-141414141414",
+				agencyId: scopeId,
+				actor: { principalId, role: "owner" },
+				body: {
+					granteePrincipalId,
+					capability: "identity.admin",
+				},
+			}),
+		).rejects.toMatchObject({ governanceCode: "GOV_INSUFFICIENT_AUTHORITY" });
+	});
+
+	/**
+	 * G5 FURO 1: `owner.read` sozinho ja' confere autoridade de owner
+	 * (`hasOwnerAuthority` aceita qualquer um de `owner.*`). Enquanto ficou fora
+	 * da classe administrativa, um `operator` emitia `owner.read` a terceiro e o
+	 * terceiro passava a aprovar proposta INSTITUTIONAL/HIERARCHY_MODE.
+	 */
+	test("handleIssueGrant rejeita owner.read emitida por operator a terceiro", async () => {
+		const deps = createGrantHandlerDeps();
+		await expect(
+			handleIssueGrant(deps, {
+				commandId: "16161616-1616-4616-8616-161616161616",
+				agencyId: scopeId,
+				actor: { principalId: granteePrincipalId, role: "operator" },
+				body: {
+					granteePrincipalId: otherPrincipalId,
+					capability: "owner.read",
+				},
+			}),
+		).rejects.toMatchObject({ governanceCode: "GOV_INSUFFICIENT_AUTHORITY" });
+		expect(
+			await deps.grantRepository.listActiveByPrincipal(otherPrincipalId),
+		).toHaveLength(0);
+	});
+
+	/**
+	 * G5 FURO 2: nem capability operacional de outro modulo pode ser concedida a
+	 * terceiro sem posse — o fallback de `governance-guards` a torna efetiva.
+	 */
+	test("handleIssueGrant rejeita agents.skills.evaluate a terceiro sem posse", async () => {
+		const deps = createGrantHandlerDeps();
+		await expect(
+			handleIssueGrant(deps, {
+				commandId: "17171717-1717-4717-8717-171717171717",
+				agencyId: scopeId,
+				actor: { principalId: granteePrincipalId, role: "operator" },
+				body: {
+					granteePrincipalId: otherPrincipalId,
+					capability: "agents.skills.evaluate",
+				},
+			}),
+		).rejects.toMatchObject({ governanceCode: "GOV_INSUFFICIENT_AUTHORITY" });
+	});
+
+	/**
+	 * G5 FURO 4: a existencia da capability e' checada antes da autoridade. Sem
+	 * isso `identity.superadmin` (desconhecida, prefixo administrativo) sairia
+	 * como 403 e vazaria a decisao de autoridade.
+	 */
+	test("handleIssueGrant rejeita capability desconhecida com prefixo administrativo como 400", async () => {
+		const deps = createGrantHandlerDeps();
+		await expect(
+			handleIssueGrant(deps, {
+				commandId: "18181818-1818-4818-8818-181818181818",
+				agencyId: scopeId,
+				actor: { principalId: granteePrincipalId, role: "operator" },
+				body: {
+					granteePrincipalId: otherPrincipalId,
+					capability: "identity.superadmin",
+				},
+			}),
+		).rejects.toMatchObject({
+			governanceCode: "GOV_CAPABILITY_UNKNOWN",
+			statusCode: 400,
+		});
+	});
+
+	test("handleIssueGrant rejeita capability fora do catalogo com 400", async () => {
+		const deps = createGrantHandlerDeps();
+		await expect(
+			handleIssueGrant(deps, {
+				commandId: "15151515-1515-4515-8515-151515151515",
+				agencyId: scopeId,
+				actor: { principalId, role: "owner" },
+				body: {
+					granteePrincipalId,
+					capability: "totally.unknown.capability",
+				},
+			}),
+		).rejects.toMatchObject({
+			governanceCode: "GOV_CAPABILITY_UNKNOWN",
+			statusCode: 400,
+		});
 	});
 
 	test("handleRevokeGrant revokes grant by id", async () => {

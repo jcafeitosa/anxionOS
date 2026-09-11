@@ -71,6 +71,16 @@ export {
 	grantRevokedPayloadSchema,
 	mandateIssuedPayloadSchema,
 } from "./events";
+export type { GrantCapability } from "./grant-capability-policy";
+export {
+	ADMINISTRATIVE_CAPABILITY_PREFIXES,
+	GRANT_CAPABILITY_CATALOG,
+	GRANT_ISSUANCE_ROLES,
+	isAdministrativeGrantCapability,
+	isKnownGrantCapability,
+	OWNER_AUTHORITY_CAPABILITIES,
+	roleMayIssueGrantCapability,
+} from "./grant-capability-policy";
 export type {
 	ApprovalDecision,
 	ChangeProposalKind,

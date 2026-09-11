@@ -4,6 +4,7 @@ import {
 	type GovernanceScopeKind,
 	governanceCommandResultSchema,
 	type IssueGrantCommand,
+	isKnownGrantCapability,
 	isPlatformOnlyCapability,
 	issueGrantCommandSchema,
 	PLATFORM_SCOPE_ID,
@@ -68,11 +69,29 @@ function assertCapabilityScopeCoherence(
 	}
 }
 
+/**
+ * ANX-466 — o grant so' pode carregar um token do catalogo declarado.
+ *
+ * Sem esta checagem, `capability: z.string().min(1)` aceitava qualquer string e
+ * o estado de autorizacao virava texto livre (o ANX-462 fechou apenas a
+ * variante `console.platform`). A validacao vive no comando, nao so' na rota,
+ * para que seed/worker tambem nao gravem capability desconhecida.
+ */
+function assertKnownCapability(capability: string): void {
+	if (!isKnownGrantCapability(capability)) {
+		throwGovernanceError(
+			"GOV_CAPABILITY_UNKNOWN",
+			`Capability ${capability} is not in the grant capability catalog`,
+		);
+	}
+}
+
 export async function issueGrant(
 	deps: IssueGrantDeps,
 	input: IssueGrantInput,
 ): Promise<GovernanceCommandResult> {
 	const command = issueGrantCommandSchema.parse(input);
+	assertKnownCapability(command.capability);
 	const scopeKind: GovernanceScopeKind = input.scopeKind ?? "agency";
 	assertCapabilityScopeCoherence(
 		command.scopeId,

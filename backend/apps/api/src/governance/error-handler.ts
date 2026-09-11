@@ -11,6 +11,26 @@ import {
 } from "@anxionos/organizations";
 import { ZodError } from "zod";
 
+/**
+ * ANX-466 (G5 FURO 3) — corpo JSON malformado nao passa por `ZodError`: o
+ * `request.json()` do boundary lanca `SyntaxError` e o mapeamento caia no 500.
+ * Body invalido e' 400 nas duas formas (malformado e schema-invalido).
+ */
+function isMalformedBodyError(error: unknown): boolean {
+	if (error instanceof SyntaxError) {
+		return true;
+	}
+	if (typeof error !== "object" || error === null) {
+		return false;
+	}
+	const candidate = error as { name?: unknown; code?: unknown };
+	return (
+		candidate.name === "SyntaxError" ||
+		candidate.name === "ParseError" ||
+		candidate.code === "PARSE"
+	);
+}
+
 export function mapGovernanceError(
 	error: unknown,
 	requestId?: string,
@@ -46,6 +66,14 @@ export function mapGovernanceError(
 				}),
 				{ requestId },
 			),
+		};
+	}
+	if (isMalformedBodyError(error)) {
+		return {
+			status: 400,
+			body: toErrorResponse(AppError.validation("Malformed JSON body"), {
+				requestId,
+			}),
 		};
 	}
 	if (error instanceof GovernanceCommandError || isAppError(error)) {
