@@ -8,6 +8,23 @@ type: debate
 **Issue:** ANX-392  
 **Fontes:** [PC 03](../../../../notes/anxionos-pc03-agents-debate.md) · [structure R02](../../structure-debate/agents/R02-boundaries.md) · [governance R02](../governance/R02-boundaries.md)
 
+## In / Out (R2)
+
+**In:** identidade de agente, skills, bindings, BrainFacade.
+
+**Out:** Goal/Task/Run (`orchestration`). Grant/epoch (`governance`). Traverse (`graph`). `inference.invoke` (`connections`). RAG (`knowledge`). TradeIntent (`decisions`).
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Agent / AgentVersion / Skill / AgentBinding / BrainFacade | **agents** |
+| adapter-gateway | **KEEP** |
+
 ## Debate R2 (diálogo atribuído)
 
 **Arquiteto:** agents é dono de identidade de agente (Agent, AgentVersion), skills declarativas, bindings a Agency/Organization e fachada Brain (invocação governada — não execução de Task/Run).

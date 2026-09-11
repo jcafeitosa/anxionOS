@@ -7,6 +7,23 @@ type: debate
 **Rodada:** R3 · **Issues:** ANX-42 · **ANX-97**  
 **Pré-requisito:** [R02-boundaries.md](./R02-boundaries.md)
 
+## In / Out (R3)
+
+**In:** esboço DecisionRecord, Proposal, TradeIntent, Disposition.
+
+**Out:** Order, Grant, Evidence blob, RiskCheck.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Agregados de decisão | **decisions** |
+| adapter-gateway | **KEEP** |
+
 ## Agregados
 
 ### DecisionRecord

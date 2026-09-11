@@ -9,6 +9,23 @@ type: debate
 **Callers:** [R04-contracts-events.md](./R04-contracts-events.md) · [R06-dependencies.md](./R06-dependencies.md).  
 ADR0004: PG autoritativo; Neo4j projector; SQLite rascunho **sem efeito**. ST08 **0/23**. **Sem migration.** Nomes de tabela documentais (alvo G1).
 
+## In / Out (R5)
+
+**In:** PG `decisions_*`, journal/outbox, grafo só ids.
+
+**Out:** pasta `approvals/` (`governance`). SQLite com efeito. Migration live (ST08 0/23).
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Store `decisions_*` | **decisions** |
+| adapter-gateway | **KEEP** |
+
 ## Princípios
 
 PG `decisions_*` verdade; journal/outbox mesma UoW; TradeIntent append-only pós-submit; grafo `graph:decisions:v1` só ids. Approvals institucionais permanecem em **governance** — este módulo não cria pasta `approvals/`.

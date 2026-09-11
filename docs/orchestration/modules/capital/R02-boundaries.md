@@ -10,6 +10,23 @@ type: debate
 **Data:** 2026-09-08  
 **Issue debate estrutura:** ANX-42 · debate módulo: **ANX-91** · contrato P06: **ANX-58**
 
+## In / Out (R2)
+
+**In:** titularidade, alocação (mandato) e reserva transacional.
+
+**Out:** Grant entity (`governance`). Partida dobrada (`accounting`). Position (`portfolios`). REAL/live v1.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| CapitalAccount / Allocation / Reservation | **capital** |
+| adapter-gateway | **KEEP** |
+
 ## Objetivo da rodada
 
 Fechar fronteiras **possui / não possui** entre capital e vizinhos (**accounting**, **governance**, **strategies**, **graph**, **organizations**, **portfolios**, **decisions**, **risk**, **execution**); ratificar **PostgreSQL** como único dono de saldo/reserva autoritativa; proibir paths **REAL/live** em v1; definir invariantes testáveis para R03/R04.

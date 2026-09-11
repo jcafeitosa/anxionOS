@@ -10,6 +10,23 @@ type: debate
 **Data:** 2026-09-07  
 **Issue debate estrutura:** ANX-42 · debate módulo: **ANX-97** · contrato P06: **ANX-58**
 
+## In / Out (R1)
+
+**In:** inventário Decision, TradeIntent, manifesto de evidências e hashes.
+
+**Out:** Order/Fill (`execution`). RiskCheck (`risk`). Evidence storage (`knowledge`).
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Decision / TradeIntent / evidence manifesto | **decisions** |
+| adapter-gateway | **KEEP** |
+
 ## Propósito
 
 Decisões e intenções de investimento — manifesto de evidências e hashes.

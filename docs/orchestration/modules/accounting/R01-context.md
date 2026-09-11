@@ -10,6 +10,23 @@ type: debate
 **Data:** 2026-09-07  
 **Issue debate estrutura:** ANX-42 · debate módulo: **ANX-93**
 
+## In / Out (R1)
+
+**In:** inventário de ledger, taxas, reversões, ajustes e reconciliação financeira.
+
+**Out:** este contexto. **Não** consumo IA (`connections`/`billing`). **Não** posição (`portfolios`). **Não** P&L (`performance`).
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Ledger / taxas / reconciliação financeira | **accounting** |
+| adapter-gateway | **KEEP** |
+
 ## Propósito
 
 Ledger, taxas e ajustes/reconciliação financeira institucional.

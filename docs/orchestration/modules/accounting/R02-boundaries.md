@@ -10,6 +10,23 @@ type: debate
 **Data:** 2026-09-08  
 **Issue debate estrutura:** ANX-42 · debate módulo: **ANX-93** · contrato P06: **ANX-58**
 
+## In / Out (R2)
+
+**In:** fronteira ledger institucional vs invoice, alocação e preço.
+
+**Out:** Invoice (`billing`). Hold de capital. Tick persist (`market-data`). Fill (`execution`).
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| JournalEntry / ReconciliationCase financeiro | **accounting** |
+| adapter-gateway | **KEEP** |
+
 ## Objetivo da rodada
 
 Fechar fronteiras **possui / não possui** entre accounting e vizinhos (**capital**, **billing**, **market-data**, **execution**, **portfolios**, **performance**, **connections**, **partners**); ratificar **PostgreSQL** como único dono do **ledger autoritativo**; separar ledger institucional de invoice de plataforma, alocação de capital e preço de mercado; proibir SQLite para ledger; definir invariantes testáveis para R03/R04.

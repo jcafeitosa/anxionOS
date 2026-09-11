@@ -10,6 +10,23 @@ type: debate
 **Data:** 2026-09-07 (expandido 2026-09-08)  
 **Issue debate estrutura:** ANX-42 · **debate módulo:** **ANX-91**
 
+## In / Out (R1)
+
+**In:** inventário CapitalAccount, Allocation, CapitalReservation, BalanceView.
+
+**Out:** Grant (`governance`). Ledger (`accounting`). Position (`portfolios`). TradeIntent (`decisions`). Order (`execution`).
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| CapitalAccount / Allocation / CapitalReservation / BalanceView | **capital** |
+| adapter-gateway | **KEEP** |
+
 ## Propósito
 
 Contas de capital institucional, alocações (mandato/limite de uso), reservas transacionais e visão autoritativa de saldo disponível — titularidade verificada e reserva sem dupla alocação entre portfolios do mesmo Owner (spec 003, FI02).

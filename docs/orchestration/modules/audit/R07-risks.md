@@ -6,6 +6,19 @@ type: debate
 **Rodada:** R7 · 2026-09-11 · ANX-389 · ANX-107  
 **Callers:** [R06-dependencies.md](./R06-dependencies.md) · [R08-decision-log.md](./R08-decision-log.md) · [ROUNDS.md](./ROUNDS.md).
 
+## In / Out (R7)
+
+**In:** riscos do trail (cross-tenant, tap duplicado, replay mutate, secrets em chunk).
+
+**Out:** D-GOV-010 (`risk` P06). Segundo ledger. Pasta `policies/`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Registro de riscos do trail | **audit** |
+| adapter-gateway | **KEEP** |
+
 ## Registro
 
 | ID | Risco | L | I | Sev | Mitigação | Gate |

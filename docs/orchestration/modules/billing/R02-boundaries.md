@@ -11,6 +11,23 @@ type: debate
 **Issue debate estrutura:** ANX-42 · debate módulo: **ANX-103** · pack: **ANX-389**  
 **Callers:** [R01-context.md](./R01-context.md) · [R03-domain-sketch.md](./R03-domain-sketch.md) · [ROUNDS.md](./ROUNDS.md). Sem API runtime.
 
+## In / Out (R2)
+
+**In:** plano, assinatura, fatura, refund, webhook comercial.
+
+**Out:** ledger de trading (`accounting`). Payout (`partners`). Usage bruto (`connections`). Grant (`governance`).
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Subscription / Invoice / Refund / WebhookReceipt | **billing** |
+| adapter-gateway | **KEEP** |
+
 ## Objetivo da rodada
 
 Fechar **possui / não possui** entre billing e vizinhos (**connections**, **accounting**, **partners**, **organizations**, **governance**); ratificar que invoice paid **não** é lançamento de trading; proibir SQLite autoritativo e pastas 24º módulo.

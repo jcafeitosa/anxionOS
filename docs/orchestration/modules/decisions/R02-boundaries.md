@@ -10,6 +10,23 @@ type: debate
 **Data:** 2026-09-08  
 **Issue debate estrutura:** ANX-42 · debate módulo: **ANX-97** · contrato P06: **ANX-58**
 
+## In / Out (R2)
+
+**In:** DecisionRecord, Proposal, TradeIntent, Disposition.
+
+**Out:** Grant (`governance`). Task/Run (`orchestration`). Order (`execution`). RiskCheck (`risk`). Pasta `approvals/`.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| DecisionRecord / Proposal / TradeIntent / Disposition | **decisions** |
+| adapter-gateway | **KEEP** |
+
 ## Objetivo da rodada
 
 Fechar fronteiras **possui / não possui** entre decisions e vizinhos (**governance**, **orchestration**, **agents**, **knowledge**, **strategies**, **portfolios**, **capital**, **market-data**, **risk**, **execution**, **audit**, **graph**); ratificar **PostgreSQL** como dono de **DecisionRecord**, **Proposal**, **TradeIntent** e **Disposition**; separar proposta de agente, grant de governança, task de orquestração e manifesto de auditoria; definir invariantes testáveis para R03/R04.

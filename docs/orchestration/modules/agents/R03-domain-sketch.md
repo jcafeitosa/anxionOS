@@ -8,6 +8,23 @@ type: debate
 **Issue:** ANX-392  
 **Pré-requisito:** [R02-boundaries.md](./R02-boundaries.md) · spec 002 · [structure R03](../../structure-debate/agents/R03-domain-sketch.md)
 
+## In / Out (R3)
+
+**In:** esboço Agent, AgentVersion, Skill, AgentBinding; BrainFacade como porta.
+
+**Out:** Run persistido. Secrets em eventos. Promote = publish.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Agregados de identidade de agente | **agents** |
+| adapter-gateway | **KEEP** |
+
 ## Debate R3 (síntese atribuída)
 
 **Arquiteto:** Quatro agregados v1 — `Agent`, `AgentVersion`, `Skill`, `AgentBinding`. `BrainFacade` é porta application, não agregado.

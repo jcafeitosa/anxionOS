@@ -7,6 +7,23 @@ type: debate
 **Rodada:** R3 · **Issues:** ANX-42 · **ANX-91**  
 **Pré-requisito:** [R02-boundaries.md](./R02-boundaries.md)
 
+## In / Out (R3)
+
+**In:** esboço CapitalAccount, Allocation, CapitalReservation, BalanceView.
+
+**Out:** Grant, JournalEntry, Order, TradeIntent.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Agregados de capital | **capital** |
+| adapter-gateway | **KEEP** |
+
 ## Agregados
 
 ### CapitalAccount

@@ -7,6 +7,19 @@ type: debate
 **Callers:** [R04-contracts-events.md](./R04-contracts-events.md) · [R06-dependencies.md](./R06-dependencies.md) · [ROUNDS.md](./ROUNDS.md).  
 **Fonte:** brain/notes/anxionos-storage-ownership.md · ADR0004. ST08 **0/23**. **Sem migration.** D-GOV-010 = **risk P06**.
 
+## In / Out (R5)
+
+**In:** PG manifests/journal; object-store chunks WORM; Neo4j projector só ids.
+
+**Out:** ledger/grants/ordens; export job (`operations`); kill switch (`risk` P06); driver Neo4j (`graph`). Sem SQLite trail.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Manifesto / replay session / chunks | **audit** |
+| adapter-gateway | **KEEP** |
+
 ## In scope (engines nomeados)
 
 | Engine | O que audit **possui** |

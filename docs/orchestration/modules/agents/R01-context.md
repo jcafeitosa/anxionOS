@@ -9,6 +9,23 @@ type: debate
 **Issue:** ANX-392 (pack canônico P1) · histórico ANX-42 / ANX-82  
 **PC serial:** [PC 03](../../../../notes/anxionos-pc03-agents-debate.md)
 
+## In / Out (R1)
+
+**In:** inventário Agent, AgentVersion, skills, bindings e fachada Brain neste pack.
+
+**Out:** este contexto. **Não** Goal/Task/Run (`orchestration`). **Não** Grant (`governance`). Personas Cursor ≠ agentes institucionais.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Agent / AgentVersion / Skill / AgentBinding / BrainFacade | **agents** |
+| adapter-gateway | **KEEP** |
+
 ## Participantes
 
 | Papel | Agente |
