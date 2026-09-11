@@ -20,6 +20,7 @@
 	--color-on-accent: #0f172a;
 	--color-border: rgb(255 255 255 / 8%);
 	--color-destructive: #ef4444;
+	--color-on-destructive: #0f172a;
 	--color-ring: #f97316;
 	--color-muted: #1a1e2f;
 	--ease-ui: cubic-bezier(0.16, 1, 0.3, 1);

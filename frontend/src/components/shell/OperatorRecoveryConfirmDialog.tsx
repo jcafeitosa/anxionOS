@@ -124,7 +124,7 @@ export function OperatorRecoveryConfirmDialog({
 						type="submit"
 						className={
 							destructive
-								? "inline-flex min-h-11 cursor-pointer items-center rounded-lg border border-destructive bg-destructive px-4 text-sm font-semibold text-foreground transition-colors duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
+								? "inline-flex min-h-11 cursor-pointer items-center rounded-lg border border-destructive bg-destructive px-4 text-sm font-semibold text-on-destructive transition-colors duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
 								: "inline-flex min-h-11 cursor-pointer items-center rounded-lg bg-accent px-4 text-sm font-semibold text-on-accent transition-colors duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
 						}
 						disabled={busy}

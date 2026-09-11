@@ -225,7 +225,7 @@ export function OperatorKillSwitchPanel({
 					<div className="mt-3 flex flex-wrap gap-2">
 						<button
 							type="button"
-							className="inline-flex min-h-11 cursor-pointer items-center rounded-lg border border-destructive bg-destructive px-3 text-sm font-semibold text-foreground transition-colors duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
+							className="inline-flex min-h-11 cursor-pointer items-center rounded-lg border border-destructive bg-destructive px-3 text-sm font-semibold text-on-destructive transition-colors duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
 							disabled={
 								!mutationsAvailable || !canActivate || mutating
 							}
