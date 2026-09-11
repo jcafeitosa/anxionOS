@@ -11,6 +11,24 @@ type: debate
 **Issues:** ANX-42 (debate estrutura) · **ANX-85** (R02–R10)  
 **Pré-requisito:** [R02-boundaries.md](./R02-boundaries.md) · [R01-context.md](./R01-context.md) · `brain/project-docs/specs/002-agents-knowledge/spec.md`
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R3)
+
+**In:** agregados Document/Chunk/Memory/Evidence. **Out:** `knowledge.*.v1` sem vetores brutos. **Não** duplicar Run nem Brain.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Domain sketch knowledge | **knowledge** |
+| adapter-gateway | **KEEP** |
+| pgvector | **knowledge** (ADR0004) |
+
 ## Objetivo da rodada
 
 Esboçar o modelo de domínio de **knowledge** após [R02-boundaries.md](./R02-boundaries.md): agregados `KnowledgeSource`, `Document`, `Chunk`, `EmbeddingSpace`, `Memory`, `Evidence`, `ContextManifest`; ports `KnowledgeIndexer`, `RetrievalPort`, `EmbeddingPort`; invariantes `KN-R03-INV-*`; sketch de eventos `knowledge.*.v1` sem secrets nem vetores brutos; ownership pgvector conforme ADR0004; respostas às perguntas abertas de R02. Alinhar pipeline Graph RAG spec 002 sem duplicar Run (orchestration), Brain facade (agents) nem invoke MODEL (connections).

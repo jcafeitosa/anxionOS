@@ -11,6 +11,24 @@ type: debate
 **Issues:** ANX-83 · contrato P05: ANX-62 · gate implementação: ANX-36 · graph consumer: ANX-32  
 **Pré-requisito:** [R06-dependencies.md](./R06-dependencies.md) · [R05-storage-pg.md](./R05-storage-pg.md) · `brain/project-docs/specs/005-connections-integration/spec.md`
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R7)
+
+**In:** riscos de leak de secret, bypass de quota, REAL_EXECUTION. **Out:** controles G4/G5; não é D-GOV-010 (risk P06).
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem teste destrutivo em produção.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Riscos de binding/secret | **connections** |
+| adapter-gateway | **KEEP** |
+| Kill switch de risco | **risk** |
+
 ## Participantes
 
 | Papel | Agente |

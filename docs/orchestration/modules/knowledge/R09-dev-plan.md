@@ -9,6 +9,23 @@ status: draft
 **Data:** 2026-09-08  
 **Issue:** ANX-85 · gate: **ANX-36** · impl: **ANX-86** · graph: ANX-32
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R9)
+
+**In:** slices P04-S1–S5. **Out:** plano documental. Zero código até claim ANX-86.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Plano knowledge | **knowledge** |
+| adapter-gateway | **KEEP** |
+
 ## Objetivo
 
 Traduzir D-KN-* em slices P04-S1–S5 com matriz G3/G4/G5. Zero código até claim ANX-86.

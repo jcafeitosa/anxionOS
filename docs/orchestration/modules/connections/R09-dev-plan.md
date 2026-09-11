@@ -9,6 +9,23 @@ status: draft
 **Data:** 2026-09-08  
 **Issue:** ANX-83 (debate) · gate implementação: **ANX-36** (Wave 4 epic) · contrato: **ANX-62** · graph consumer: **ANX-32**
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R9)
+
+**In:** slices S1–S5 do plano P05. **Out:** plano documental. **Não** autoriza G1 até claim de issue de implementação.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Zero código de produto neste pack.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Plano P05 connections | **connections** |
+| adapter-gateway | **KEEP** |
+
 ## Participantes
 
 | Papel | Agente |

@@ -10,6 +10,24 @@ type: debate
 **Data:** 2026-09-08  
 **Issue debate estrutura:** ANX-42 · debate módulo: **ANX-85**
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R2)
+
+**In:** Document/Memory/Evidence/ContextManifest/EmbeddingSpace. **Out:** não dono de Run, Brain, MODEL invoke, nós Neo4j autoritativos.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| RAG / evidências | **knowledge** |
+| adapter-gateway | **KEEP** |
+| Traverse Neo4j | **graph** |
+
 ## Objetivo da rodada
 
 Fechar fronteiras **possui / não possui** entre knowledge e vizinhos (agents, orchestration, graph, connections, decisions, audit); definir ownership de Document/Memory/Evidence/ContextManifest/EmbeddingSpace; proibir vazamento de ACL em retrieval; ratificar ADR0002 e spec 002.

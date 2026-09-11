@@ -10,6 +10,24 @@ type: debate
 **Data:** 2026-09-07  
 **Issue debate estrutura:** ANX-42
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R1)
+
+**In:** inventário Document/Memory/Evidence/Graph RAG. **Out:** contexto autorizado para agentes/decisões. **Não** Run, BrainFacade, inference invoke.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Document / Memory / Evidence | **knowledge** |
+| adapter-gateway | **KEEP** |
+| BrainFacade | **agents** |
+
 ## Propósito
 
 Documentos, memórias, evidências e Graph RAG — contexto autorizado para decisões e agentes.

@@ -11,6 +11,24 @@ type: debate
 **Issues:** ANX-85 · gate: ANX-36 · graph consumer: ANX-32  
 **Pré-requisito:** [R04-contracts-events.md](./R04-contracts-events.md) · ADR0004 · `brain/notes/anxionos-storage-ownership.md`
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R5)
+
+**In:** PG `knowledge_*` + pgvector. **Out:** projeção graph; blob via port. SQLite só cache.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| knowledge_* / embeddings | **knowledge** |
+| adapter-gateway | **KEEP** |
+| Neo4j | **graph** |
+
 ## Princípios
 
 | Princípio | Decisão |

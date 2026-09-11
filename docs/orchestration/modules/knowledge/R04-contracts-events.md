@@ -11,6 +11,23 @@ type: debate
 **Issues:** ANX-85 (debate) · spec 002 · gate implementação: ANX-36  
 **Pré-requisito:** [R03-domain-sketch.md](./R03-domain-sketch.md) · [R02-boundaries.md](./R02-boundaries.md) · `brain/project-docs/specs/002-agents-knowledge/spec.md`
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R4)
+
+**In:** `/v1/knowledge/*` e Zod. **Out:** `knowledge.*.v1`. Sem secrets nem embeddings em evento.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Contratos knowledge | **knowledge** |
+| adapter-gateway | **KEEP** |
+
 ## Objetivo da rodada
 
 Definir schemas Zod `@anxionos/contracts/knowledge/*`, HTTP `/v1/knowledge/*`, catálogo `knowledge.*.v1`, ports `BlobStorePort` e `GraphTraversalPort`, testes contrato KN-R02/KN-R03.

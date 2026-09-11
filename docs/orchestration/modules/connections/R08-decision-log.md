@@ -9,6 +9,23 @@ status: draft
 **Data:** 2026-09-08  
 **Issue:** ANX-83 · contrato P05: ANX-62 (`in_review`) · gate implementação: ANX-36 (Wave 4 epic) · graph consumer: ANX-32
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R8)
+
+**In:** síntese D-CX-* de R01–R07. **Out:** decision log rastreável. **Não** fechar spec como accepted.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Decisões D-CX-* | **connections** |
+| adapter-gateway | **KEEP** |
+
 ## Participantes
 
 | Papel | Agente |

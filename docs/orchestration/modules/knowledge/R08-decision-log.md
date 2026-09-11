@@ -9,6 +9,23 @@ status: draft
 **Data:** 2026-09-08  
 **Issue:** ANX-85 · gate: ANX-36 · graph: ANX-32
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R8)
+
+**In:** síntese D-KN-* de R01–R07. **Out:** decision log. **Não** fechar spec accepted.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Decisões D-KN-* | **knowledge** |
+| adapter-gateway | **KEEP** |
+
 ## Objetivo
 
 Consolidar R01–R07, resolver P-R7, PC-G0 checklist.

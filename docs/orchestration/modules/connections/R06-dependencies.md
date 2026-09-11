@@ -10,6 +10,24 @@ type: debate
 **Data:** 2026-09-08  
 **Issue debate:** ANX-83 · contrato P05: ANX-62 · gate implementação: ANX-36 · graph consumer: ANX-32
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R6)
+
+**In:** ports identity/orgs/governance/secrets/eventing. **Out:** consumers orchestration/agents/knowledge/market-data/billing/graph.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Wiring connections | **connections** |
+| adapter-gateway | **KEEP** |
+| Composition root | **apps/api** (injeta, não dono) |
+
 ## Participantes
 
 | Papel | Agente |
