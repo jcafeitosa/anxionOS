@@ -1,6 +1,7 @@
 ---
 type: debate
 ---
+
 # R06 — Dependências: `modules/risk`
 
 **Rodada:** R6 · 2026-09-11 · ANX-389 · ANX-99  
@@ -10,12 +11,28 @@ type: debate
 
 **In:** PolicyReference (governance); exposição (portfolios); reservas (capital consulta); preços (market-data); StrategyVersion hash (strategies); pré-TradeIntent (decisions).
 
-**Out:** RiskCheckResult → decisions; bloqueio de reserva → capital; RiskPermit → execution; projector graph; audit.
+**Out:** RiskCheckResult → decisions; bloqueio de reserva → capital; RiskPermit → execution; projector graph; audit. **Não** import execution-go / neo4j-driver / secrets de venue.
 
 ## Non-goals
 
 - Não import execution-go / neo4j-driver / secrets de venue.
 - D-GOV-010 **é** deste módulo (P06) — não reenviar para evaluation.
+- Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| LimitPolicy / ExposureSnapshot / RiskCheckResult / RiskPermit | **risk** |
+| MandateVersion declarativo | **governance** |
+| Reserva saldo | **capital** (consulta) |
+| adapter-gateway | **KEEP** |
+
+## Debate R6
+
+**Arquiteto:** corpo RISK executável = LimitPolicy **aqui**. Governance só PolicyReference.
+
+**Crítico:** capital gate on permit.issued — risk não muta reserva.
 
 ## Upstream
 
@@ -48,6 +65,7 @@ flowchart LR
 | ID | Esperado |
 | --- | --- |
 | G3-RK-S2-01 | PASS → permit |
+| G3-RK-S2-02 | CONFIG_REQUIRED deny |
 | G5-RK-01 | cross-tenant reject |
 
 ## Saída R6

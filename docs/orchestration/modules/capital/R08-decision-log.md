@@ -5,7 +5,9 @@ status: draft
 
 # R08 — Decision log: `modules/capital`
 
-**Issue:** ANX-91 · gate: ANX-58 · pack ANX-389
+**Issue:** ANX-91 · gate: ANX-58 · pack ANX-389  
+**Callers:** [R07-risks.md](./R07-risks.md) · [R09-dev-plan.md](./R09-dev-plan.md).  
+**Status:** `draft` — não spec accepted; não G7.
 
 ## In / Out (R8)
 
@@ -15,7 +17,7 @@ status: draft
 
 ## Non-goals
 
-Não stamp `accepted`. Não fake ST08.
+Não stamp `accepted`. Não fake ST08. Não REAL v1.
 
 ## Ownership consolidado
 
@@ -42,5 +44,13 @@ Não stamp `accepted`. Não fake ST08.
 | D-CAP-011 | strategies budget → capital Allocation | ✅ |
 | D-CAP-012 | graph:capital:v1 async | ✅ |
 | D-CAP-015 | RLS defer P09 | ✅ |
+| P1-CAP-01 | Pack G0 canônico; D-GOV-010 = risk P06 | ✅ |
+| P1-CAP-02 | Specs draft; ST08 0/23; ANX-342 não done | ✅ |
+
+## Oráculos exigidos
+
+G3-CAP-01; G5-CAP-01..03. Engine **não verificado** até G1.
+
+## Saída R8
 
 → **R09** ([R09-dev-plan.md](./R09-dev-plan.md))
