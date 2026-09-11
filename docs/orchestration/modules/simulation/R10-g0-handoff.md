@@ -9,4 +9,4 @@ status: draft
 
 In: SimulationRun/Snapshot/Manifest/sandbox. Out: certification; execution REAL; pasta experiments/; D-GOV-010; spec accepted; ANX-342; G1.
 
-**Veredito P1:** G0 documental. Próximo: identity R01–R05 se contexto.
+**Veredito P1:** G0 documental. **Não** autoriza G1. Twin não escreve capital/execution. ANX-342 `todo`.

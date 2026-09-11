@@ -19,6 +19,8 @@ status: draft
 | D-AUD-008 | D-GOV-010 = risk P06 | fechada |
 | P1-AUD-01 | Não é G7 código nem ANX-342 | fechada |
 
+Replay RO; D-GOV-010 ≠ audit.
+
 ## Saída R8
 
 Para R9.

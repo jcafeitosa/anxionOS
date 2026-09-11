@@ -20,4 +20,6 @@ status: draft
 | D-RK-009 | SIMULATED+PAPER only v1 | ✅ |
 | D-RK-010 | Pre-trade obrigatório; post-trade defer S4 | ✅ |
 
+D-GOV-010 vive em risk P06. Spec 003 draft. ST08 0/23. ANX-342 não done.
+
 → **R09** ([R09-dev-plan.md](./R09-dev-plan.md))

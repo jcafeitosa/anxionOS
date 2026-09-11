@@ -15,4 +15,4 @@ Incident, ExportJob, Health, Runbook, Retention; contratos; PG; oráculos.
 
 Audit journal; kill switch; pasta infrastructure/; D-GOV-010; spec accepted; ANX-342; G1 ANX-112.
 
-**Veredito P1:** G0 documental. **Não** G1. Próximo: [evaluation](../evaluation/ROUNDS.md). ANX-342 `todo`.
+**Veredito P1:** G0 documental. **Não** G1. Ownership: Incident/ExportJob/Health — não Flight Recorder. ANX-342 `todo`.

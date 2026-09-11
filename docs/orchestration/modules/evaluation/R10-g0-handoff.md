@@ -9,4 +9,4 @@ status: draft
 
 In: Evaluation/Certification/Reputation/Recommendation. Out: strategies mutate; simulation; pasta testing/; D-GOV-010; spec accepted; ANX-342; G1.
 
-**Veredito P1:** G0 documental. Próximo: [simulation](../simulation/ROUNDS.md).
+**Veredito P1:** G0 documental. **Não** autoriza G1. Spec 004 draft. ANX-342 `todo`. Próximo: [simulation](../simulation/ROUNDS.md).

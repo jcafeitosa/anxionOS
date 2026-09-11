@@ -19,6 +19,6 @@ type: debate
 | R-PF-09 | RebalancePlan executa ordem direto | 16 | PF-R02-INV-11 + decisions gate |
 | R-PF-10 | NAV calculado com price errado | 13 | observationId validation + PROVISIONAL flag |
 
-Top 5 → R08. G5-PF-01 cross-tenant · G5-PF-02 double fill · G5-PF-03 position drift
+Top 5 → R08. G5-PF-01 cross-tenant · G5-PF-02 double fill · G5-PF-03 position drift. Ownership: Position ≠ ledger ≠ reserva. D-GOV-010 = risk P06.
 
 → **R08** ([R08-decision-log.md](./R08-decision-log.md))
