@@ -23,12 +23,25 @@ export interface BetterAuthRuntime {
 	auth: ReturnType<typeof betterAuth>;
 }
 
+/** Reject insecure session cookies when production is configured with plain HTTP (G5 ANX-383). */
+export function assertProductionBetterAuthBaseUrl(baseURL: string): void {
+	if (process.env.NODE_ENV !== "production") {
+		return;
+	}
+	if (baseURL.toLowerCase().startsWith("http://")) {
+		throw new Error(
+			"BETTER_AUTH_URL must use https:// in production (insecure session cookies on http://)",
+		);
+	}
+}
+
 export function resolveBetterAuthConfig(): BetterAuthConfig | null {
 	const secret = process.env.BETTER_AUTH_SECRET?.trim();
 	const baseURL = process.env.BETTER_AUTH_URL?.trim();
 	if (!secret || !baseURL) {
 		return null;
 	}
+	assertProductionBetterAuthBaseUrl(baseURL);
 	const trustedOrigins = process.env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",")
 		.map((origin) => origin.trim())
 		.filter((origin) => origin.length > 0);

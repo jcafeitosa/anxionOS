@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { resolveBetterAuthConfig } from "../../apps/api/src/auth/create-better-auth";
+import {
+	assertProductionBetterAuthBaseUrl,
+	resolveBetterAuthConfig,
+} from "../../apps/api/src/auth/create-better-auth";
 
 describe("better auth config", () => {
 	test("resolveBetterAuthConfig returns null when secret or base URL missing", () => {
@@ -19,6 +22,25 @@ describe("better auth config", () => {
 				delete process.env.BETTER_AUTH_URL;
 			} else {
 				process.env.BETTER_AUTH_URL = previousUrl;
+			}
+		}
+	});
+
+	test("assertProductionBetterAuthBaseUrl rejects http in production", () => {
+		const previousNodeEnv = process.env.NODE_ENV;
+		process.env.NODE_ENV = "production";
+		try {
+			expect(() =>
+				assertProductionBetterAuthBaseUrl("http://api.example.test"),
+			).toThrow(/https:\/\//);
+			expect(() =>
+				assertProductionBetterAuthBaseUrl("https://api.example.test"),
+			).not.toThrow();
+		} finally {
+			if (previousNodeEnv === undefined) {
+				delete process.env.NODE_ENV;
+			} else {
+				process.env.NODE_ENV = previousNodeEnv;
 			}
 		}
 	});

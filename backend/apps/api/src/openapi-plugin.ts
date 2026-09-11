@@ -59,6 +59,8 @@ export function createOpenApiPlugin() {
 			},
 		},
 	};
+	// Zod UUID fields (e.g. authorityToken, abortToken) appear in the public OpenAPI
+	// schema via z.toJSONSchema — intentional for Scalar; values are not exposed.
 	return openapi({
 		path: "/openapi",
 		provider: "scalar",
