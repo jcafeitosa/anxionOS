@@ -157,6 +157,34 @@ Achado LOW do G4 e consequência direta do fix de bypass (D-IDN-035). `matchesSc
 
 **Consequência:** as rotas globais (registro, suspend, revoke, ledger) voltam a ser utilizáveis, mas **exigem** grant no escopo de plataforma — que hoje só o `governance` sabe emitir (ANX-462, em correção). Sem um operador de plataforma provisionado, elas permanecem negando; é o comportamento correto e agora representável.
 
+## D-IDN-043 — A `SessionRef` pertence ao principal declarado (fecha IDOR)
+
+Achado **HIGH** da revalidação G5, reproduzido com PostgreSQL real: `POST /v1/identity/sessions/revoke` autoriza contra o `principalId` **declarado pelo chamador** (self-access não exige grant), mas o comando revogava a `sessionRef` **por id** sem comparar `existing.principalId`. Resultado: qualquer autenticado revogava a sessão de **outro** principal conhecendo o UUID da referência — DoS cross-tenant que contornava o fix de escopo do alvo (D-IDN-039).
+
+**Decisão.** `recordSessionRevoked` exige `existing.principalId === command.principalId` antes de qualquer transição; divergência responde `IDN_SESSION_NOT_FOUND` (404). A resposta é **opaca de propósito**: devolver `IDN_CROSS_TENANT` confirmaria a existência da referência e o vínculo com terceiro. O controle de objeto não pode depender do sigilo do UUID.
+
+## D-IDN-044 — Operação de efeito GLOBAL exige escopo de plataforma (corrige lacuna do D-IDN-042)
+
+Achados convergentes: **N1 (HIGH)** da revalidação G2 e **F-G5-2** do G5. `POST /v1/identity/principals` continuava aceitando grant **de agência**: o principal criado é global (nasce sem vínculo) e o replay devolve o DTO de um principal existente — **inclusive e-mail**. Com `authUserId` de um principal de outra agência, um admin de agência lia PII cross-tenant; e criava principals globais / fazia squatting de e-mail do tenant legítimo (409 no onboarding de terceiros). O D-IDN-042 já nomeava "registro" entre as rotas globais, mas o código só fechava a variante "header omitido".
+
+**Decisão.** `requireIdentityGrant` ganha `requirePlatform`: a capability é checada no escopo **PLATAFORMA** mesmo que o chamador declare agência, e a agência declarada continua validada para membership (sinal de cross-tenant, como em H2). Aplicado a `POST /principals` (registro de principal global) e a `GET /sessions/revoked` (ledger global). Sem a flag, o comportamento agency-scoped permanece (rotas com alvo, que agora também exigem o alvo na agência — D-IDN-039).
+
+## D-IDN-045 — Todo caminho de replay falha fechado, inclusive o do journal
+
+Achado **LOW N2** da revalidação G2: o replay pelo journal devolvia o principal sem `assertReplayable`, os outros três caminhos (pré-checagem, corrida, releitura por e-mail) já passavam. Alcançável só numa corrida estreita, mas contrariava o invariante declarado em D-IDN-041.
+
+**Decisão.** O invariante é literal: **todo** caminho de replay passa por `assertReplayable`. Principal fora de `active` nunca é devolvido por replay.
+
+## D-IDN-046 — `revokeServiceCredential` honra `commandId`
+
+Achado **LOW** do G5: o comando aceitava `commandId` e o ignorava, sem journal — reusar a key de outro comando passava em silêncio. Passa a usar o mesmo guard dos demais (validação de intenção + journal na transação), com o mesmo contrato de conflito (`IDN_DUPLICATE_IDEMPOTENCY`).
+
+## Disposições de achados LOW (com rationale)
+
+- **`externalRefHash` aceita string não-hash** (G5 LOW): o campo é fornecido pelo chamador e persiste verbatim; um valor que não seja hash (ex.: token cru) entraria no banco. **Rastreado em ANX-464** — apertar o schema para hash sha256 exige atualizar fixtures de integração e é mudança de contrato publicada, então não entra como correção silenciosa.
+- **Oráculo de membership pela ordem das checagens** (G5 LOW): um ator sem grants distingue `IDN_FORBIDDEN` (alvo de outra agência na própria agência) de `IDN_CROSS_TENANT` (agência declarada da qual não é membro). **Disposição: aceito e documentado** — a distinção é intencional (R04 usa os dois códigos para causas diferentes), o sinal é intra-tenant (o ator precisa declarar uma agência da qual já é membro) e uniformizar os códigos degradaria o diagnóstico sem ganho de isolamento.
+- **Validação do body de grants devolvia 500** (G5 LOW): **corrigido** — `ZodError` no boundary de governance agora é 400 `VALIDATION_ERROR`.
+
 ## Conflito aberto — R04 vs D-IDN-023 (`organizationId` em Principal)
 
 R04 descreve o payload de `identity.principal.registered.v1` com `organizationId` e uma idempotência `(organizationId, subjectKey)`. D-IDN-023 (aceito) define Principal **global**, com tenancy via Membership em `organizations`, e D-IDN-006 fixa idempotência por `authUserId`.

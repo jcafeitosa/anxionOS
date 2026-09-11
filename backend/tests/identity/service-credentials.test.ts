@@ -357,4 +357,34 @@ describe("service credentials", () => {
 		expect(JSON.stringify(listed)).not.toContain("scrypt$");
 		expect(listed[0]?.credentialId).toBe(issued.credential.credentialId);
 	});
+
+	/**
+	 * LOW do G5: `revokeServiceCredential` aceitava `commandId` e o ignorava, sem
+	 * journal — reusar a key de outro comando passava em silencio.
+	 */
+	test("reusing another command's commandId to revoke is a conflict", async () => {
+		const h = harness();
+		const sharedKey = commandId;
+		const issued = await issueServiceCredential(
+			{
+				serviceIdentityRepository: h.serviceIdentityRepository,
+				serviceCredentialRepository: h.serviceCredentialRepository,
+				commandJournal: h.commandJournal,
+				unitOfWork: h.unitOfWork,
+				crypto: h.crypto,
+			},
+			{ serviceIdentityId: serviceIdentity.id, commandId: sharedKey },
+		);
+
+		await expect(
+			revokeServiceCredential(
+				{
+					serviceCredentialRepository: h.serviceCredentialRepository,
+					commandJournal: h.commandJournal,
+					unitOfWork: h.unitOfWork,
+				},
+				{ credentialId: issued.credential.credentialId, commandId: sharedKey },
+			),
+		).rejects.toMatchObject({ identityCode: "IDN_DUPLICATE_IDEMPOTENCY" });
+	});
 });

@@ -94,6 +94,14 @@ export async function requireIdentityGrant(
 		agencyId?: string;
 		/** Alvo da operacao, quando existe: o escopo declarado precisa cobri-lo. */
 		targetPrincipalId?: string;
+		/**
+		 * A operacao tem efeito GLOBAL (registrar um principal novo — que nasce
+		 * sem vinculo de agencia — ou ler o ledger global de sessoes). Exige grant
+		 * no escopo PLATAFORMA mesmo que o chamador declare uma agencia: uma
+		 * agencia nao pode criar principal global nem ler ledger de terceiros
+		 * (D-IDN-042; achados N1 do G2 e F-G5-2 do G5).
+		 */
+		requirePlatform?: boolean;
 	},
 ): Promise<void> {
 	await assertAgencyMembership(deps, input.agencyId, input.principalId);
@@ -104,7 +112,13 @@ export async function requireIdentityGrant(
 			input.targetPrincipalId,
 		);
 	}
-	await assertCapability(deps, input);
+	await assertCapability(deps, {
+		principalId: input.principalId,
+		capability: input.capability,
+		// Declarar agencia continua sendo validado (sinal de cross-tenant), mas
+		// nao afrouxa o escopo exigido da operacao global.
+		agencyId: input.requirePlatform ? undefined : input.agencyId,
+	});
 }
 
 /** Self-access is allowed without a grant (ficha: `identity.principal.get (self)`). */

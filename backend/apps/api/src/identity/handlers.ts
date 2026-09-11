@@ -118,6 +118,11 @@ export async function handleRegisterPrincipal(
 		principalId: input.actorPrincipalId,
 		capability: "identity.admin",
 		agencyId: input.agencyId,
+		// O principal criado e' GLOBAL (nasce sem vinculo de agencia) e o replay
+		// devolve o DTO de um principal existente — inclusive e-mail. Sem exigir
+		// plataforma, um admin de agencia lia e-mail de outro tenant pelo
+		// `authUserId` e criava principals globais / fazia squatting de e-mail.
+		requirePlatform: true,
 	});
 	const body = registerBodySchema.parse(input.body ?? {});
 	const principal = await registerPrincipal(
@@ -239,6 +244,10 @@ export async function handleListRevokedSessions(
 	await requireIdentityGrant(deps, {
 		principalId: input.actorPrincipalId,
 		capability: "identity.admin",
+		// Declarar agencia continua validado (membership), mas o ledger e' global:
+		// o escopo exigido e' o de plataforma.
+		agencyId: input.agencyId,
+		requirePlatform: true,
 	});
 	const query = revokedQuerySchema.parse(input.query ?? {});
 	const sessions = await listRevokedSessions(

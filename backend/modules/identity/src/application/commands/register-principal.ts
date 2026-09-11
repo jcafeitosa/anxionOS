@@ -64,7 +64,10 @@ export async function registerPrincipal(
 					journaled.aggregateId,
 				);
 				if (replayed) {
-					return replayed;
+					// D-IDN-041: TODO caminho de replay falha fechado para
+					// principal nao-ativo — inclusive o replay pelo journal
+					// (achado N2 da revalidacao G2).
+					return assertReplayable(replayed);
 				}
 			}
 		}

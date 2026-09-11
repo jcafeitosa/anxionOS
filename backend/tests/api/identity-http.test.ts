@@ -523,4 +523,89 @@ describe("identity HTTP boundary (/v1/identity)", () => {
 		);
 		expect(stored?.status).toBe("revoked");
 	});
+
+	/**
+	 * HIGH da revalidacao G5 (IDOR): a autorizacao usa o `principalId` DECLARADO
+	 * pelo chamador, mas o agregado e' a sessionRef. Sem checar a posse, qualquer
+	 * autenticado revogava a sessao de OUTRO principal so conhecendo o UUID.
+	 */
+	test("self-access não revoga sessão de outro principal (IDOR)", async () => {
+		const victimSessionId = "77777777-7777-4777-8777-777777777777";
+		const h = harness({ principals: [activePrincipal, targetPrincipal] });
+		await h.sessionRefRepository.create({
+			id: victimSessionId,
+			principalId: otherPrincipalId,
+			externalRefHash: "a".repeat(64),
+		});
+
+		const response = await h.app.handle(
+			request("/v1/identity/sessions/revoke", {
+				method: "POST",
+				headers: { "idempotency-key": commandId },
+				body: { principalId, sessionRefId: victimSessionId },
+			}),
+		);
+		expect(response.status).toBe(404);
+		expect((await response.json()).error.details.code).toBe(
+			"IDN_SESSION_NOT_FOUND",
+		);
+
+		// a sessão da vítima continua ativa
+		const victim = await h.sessionRefRepository.findById(victimSessionId);
+		expect(victim?.status).toBe("active");
+	});
+
+	/**
+	 * N1 do G2 / F-G5-2 do G5: o principal criado e' GLOBAL e o replay devolve o
+	 * DTO (com e-mail) de um principal existente. Sem exigir plataforma, um admin
+	 * de agencia lia e-mail de outro tenant pelo `authUserId`, criava principals
+	 * globais e fazia squatting de e-mail.
+	 */
+	test("register exige autoridade de plataforma, não basta agência", async () => {
+		const agencyScoped = harness({
+			capabilities: ["identity.admin"],
+			grantScopeId: agencyId,
+			memberships: [agencyId],
+		});
+		const denied = await agencyScoped.app.handle(
+			request("/v1/identity/principals", {
+				method: "POST",
+				headers: {
+					"idempotency-key": commandId,
+					"x-agency-id": agencyId,
+				},
+				body: { authUserId: "auth-new", email: "new@example.com" },
+			}),
+		);
+		expect(denied.status).toBe(403);
+		expect((await denied.json()).error.details.code).toBe("IDN_FORBIDDEN");
+	});
+
+	test("register com autoridade de plataforma cria o principal", async () => {
+		const platform = harness({ capabilities: ["identity.admin"] });
+		const created = await platform.app.handle(
+			request("/v1/identity/principals", {
+				method: "POST",
+				headers: { "idempotency-key": commandId },
+				body: { authUserId: "auth-new", email: "new@example.com" },
+			}),
+		);
+		expect(created.status).toBe(200);
+		expect((await created.json()).principal.email).toBe("new@example.com");
+	});
+
+	/**
+	 * N3 do G2: o ledger e' global (exige plataforma) mas declarar uma agencia
+	 * estrangeira continua sendo sinal de cross-tenant, como em H2.
+	 */
+	test("ledger com agência declarada estrangeira devolve IDN_CROSS_TENANT", async () => {
+		const { app } = harness({ capabilities: ["identity.admin"] });
+		const response = await app.handle(
+			request("/v1/identity/sessions/revoked", {
+				headers: { "x-agency-id": agencyId },
+			}),
+		);
+		expect(response.status).toBe(403);
+		expect((await response.json()).error.details.code).toBe("IDN_CROSS_TENANT");
+	});
 });

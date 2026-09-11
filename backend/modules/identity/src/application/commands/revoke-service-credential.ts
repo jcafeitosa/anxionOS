@@ -1,9 +1,11 @@
 import type { ServiceCredentialDto } from "@anxionos/contracts/identity";
 import { revokeServiceCredentialCommandSchema } from "@anxionos/contracts/identity";
 import { createServiceCredentialRevokedEvent } from "../../domain/events/identity-events";
+import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { IdentityUnitOfWork } from "../../domain/ports/identity-unit-of-work";
 import type { ServiceCredentialRepository } from "../../domain/ports/service-credential-repository";
 import { throwIdentityError } from "../errors";
+import { findIdempotentCommand, recordIdempotentCommand } from "../idempotency";
 import { toServiceCredentialDto } from "../presenters";
 
 export interface RevokeServiceCredentialInput {
@@ -13,6 +15,7 @@ export interface RevokeServiceCredentialInput {
 }
 
 export interface RevokeServiceCredentialDeps {
+	commandJournal: CommandJournalRepository;
 	serviceCredentialRepository: ServiceCredentialRepository;
 	unitOfWork: IdentityUnitOfWork;
 }
@@ -23,6 +26,24 @@ export async function revokeServiceCredential(
 	input: RevokeServiceCredentialInput,
 ): Promise<ServiceCredentialDto> {
 	const command = revokeServiceCredentialCommandSchema.parse(input);
+
+	if (command.commandId) {
+		// O agregado e' a credencial: reusar a key de OUTRO comando/credencial e'
+		// conflito, nao replay (achado LOW do G5: a key era aceita e ignorada).
+		const journaled = await findIdempotentCommand(deps.commandJournal, {
+			commandId: command.commandId,
+			commandName: "RevokeServiceCredential",
+			aggregateId: command.credentialId,
+		});
+		if (journaled) {
+			const replayed = await deps.serviceCredentialRepository.findById(
+				journaled.aggregateId,
+			);
+			if (replayed) {
+				return toServiceCredentialDto(replayed);
+			}
+		}
+	}
 
 	const existing = await deps.serviceCredentialRepository.findById(
 		command.credentialId,
@@ -57,6 +78,20 @@ export async function revokeServiceCredential(
 				revokedAt: revokedAt.toISOString(),
 			}),
 		]);
+		if (command.commandId) {
+			await recordIdempotentCommand(context, {
+				commandId: command.commandId,
+				commandName: "RevokeServiceCredential",
+				aggregateId: revoked.id,
+				aggregateType: "ServiceCredential",
+				revision: 1,
+				responseSnapshot: {
+					aggregateId: revoked.id,
+					revision: 1,
+					status: revoked.status,
+				},
+			});
+		}
 		return toServiceCredentialDto(revoked);
 	});
 }

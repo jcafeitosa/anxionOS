@@ -105,6 +105,18 @@ export async function recordSessionRevoked(
 		const existing = await context.sessionRefRepository.findById(
 			command.sessionRefId,
 		);
+		// IDOR (HIGH da revalidacao G5): a autorizacao da borda e' feita contra o
+		// `principalId` DECLARADO pelo chamador (self-access), mas o agregado e' a
+		// sessionRef. Sem esta checagem, qualquer autenticado revogava a sessao de
+		// OUTRO principal apenas conhecendo o UUID da referencia — o controle de
+		// objeto nao pode depender de sigilo de UUID. Resposta opaca de proposito:
+		// nao revela que a referencia existe e pertence a terceiro.
+		if (existing && existing.principalId !== command.principalId) {
+			throwIdentityError(
+				"IDN_SESSION_NOT_FOUND",
+				"Session reference not found",
+			);
+		}
 		if (existing?.status === "revoked") {
 			await journalNoOp(context, existing.id, existing.status);
 			return { sessionRef: toSessionRefDto(existing), transitioned: false };
