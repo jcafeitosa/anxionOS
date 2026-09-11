@@ -1,3 +1,7 @@
+---
+type: debate
+---
+
 # Rodadas — `modules/audit`
 
 | Rodada | Artefato | Status |
