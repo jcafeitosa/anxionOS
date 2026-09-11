@@ -56,7 +56,7 @@ shell, MCPs, skills, Task filhos, browser/playwright, graphify, serena, open-kno
 npm run taskboard:ensure || exit 1
 npm run orchestration:session -- start --persona ${dispatch.persona} --issue ${dispatch.issueId}
 npm run orchestration:compliance -- --pre-work --scope ${dispatch.scope ?? "auto"} --issue ${dispatch.issueId} --persona ${dispatch.persona}
-npm run orchestration:broadcast -- --from-persona ${dispatch.persona} --type ack --issue ${dispatch.issueId} --body "ack delegação ${dispatch.id}" --evidence "command:dispatch-queue"
+npm run orchestration:broadcast -- --from-persona ${dispatch.persona} --type ack --issue ${dispatch.issueId} --body "ack delegação ${dispatch.id}" --evidence "cmd:dispatch-queue"
 \`\`\`
 
 ### Recursos Cursor (usar TODOS quando aplicável)

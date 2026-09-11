@@ -294,25 +294,6 @@ npm run orchestration:session -- end --persona <slug>
 
 Skills obrigatórias: `manage-taskboard`, `orchestrate-work` (despacho multi-agente G0–G7).
 
-### Orquestração no DeepSeek Harness (DSH) — port Tier 1
-
-O framework acima foi escrito para o Cursor. No DSH, o **plano de controle** (board, issue, claim, lock, sessão, dialogue, hire/dispatch, compliance, monitor) continua sendo `.cursor/orchestration/` — são CLIs Node que rodam via bash, sem alteração. Só o **plano de execução** muda.
-
-| Peça | Como usar no DSH |
-| --- | --- |
-| Skills obrigatórias | `.agents/skills/{manage-taskboard,orchestrate-work,dsh-subagent-delegation}/SKILL.md` — auto-descobertas pelo DSH, sem instalação |
-| Pacote de delegação | skill `dsh-subagent-delegation` — todo prompt de subagente técnico |
-| Despacho de gates | `npm run orchestration:dsh-dispatch -- --issue ANX-N` (adapta o `spawn-plan` do framework) |
-| Execução | `subagent` (crítico/revisores), `subagent_fork` (contexto desta conversa), `workflow` (fan-out), `ralph` só se pedido |
-| Thread id | `export CURSOR_THREAD_ID="dsh-$DSH_SESSION_ID"` (o wrapper exige; DSH não define `CODEX_THREAD_ID`) |
-| Papéis | `subagent_type` **não existe** no DSH — papéis são `persona` (texto livre) + rota escolhida via `list_subagent_models` |
-
-**O que não transfere:** MCPs do Cursor (serena, code-review-graph, playwright, supermemory, context7) não existem aqui; hooks `.cursor/hooks/*` não disparam — enforcement é por CLI (`orchestration:compliance`, `workflow --monitor`) e roda no fechamento do turno. `graphify`/`serena` permanecem opcionais; `grep`/`glob` são o caminho primário.
-
-**Independência:** o slug da persona é rótulo, não prova. Um gate só conta com **subagente de contexto próprio** emitindo parecer com escopo, digest e evidência. Sem agente independente, registrar o gate como pendente — nunca atuar como várias personas fictícias.
-
-Detalhe: [docs/orchestration-dsh/README.md](docs/orchestration-dsh/README.md) · [PIPELINE](.cursor/orchestration/PIPELINE.md) · [ZERO-POLICIES](.cursor/orchestration/ZERO-POLICIES.md).
-
 ### Frontend
 
 **Stack obrigatória:** Astro + React islands (`@astrojs/react`) + TypeScript. **Não** usar Next.js, Vite SPA standalone nem React Native para consoles web. Interatividade via islands; páginas e layout em `.astro`.

@@ -31,8 +31,6 @@
     "orchestration:cto-decide": "node .cursor/orchestration/agent-proactive/cto-decide.mjs",
     "orchestration:delegate-monitor": "node .cursor/orchestration/agent-workflow/delegate-monitor.mjs",
     "orchestration:dispatch": "node .cursor/orchestration/agent-delegation/dispatch.mjs",
-    "orchestration:dsh-dispatch": "node scripts/orchestration/dsh-dispatch.mjs",
-    "orchestration:dsh-test": "node --test scripts/orchestration/tests/*.test.mjs",
     "orchestration:boot": "node .cursor/orchestration/agent-workflow/boot.mjs",
     "orchestration:lifecycle-cleanup": "node .cursor/orchestration/agent-workflow/lifecycle-cleanup.mjs",
     "orchestration:coordination": "node .cursor/orchestration/agent-workflow/coordination.mjs",
