@@ -71,7 +71,7 @@ type: guide
 
 ## Ponteiros P1 (ANX-389)
 
-Hub brain: [anxionos-pc-serial-hub](../../../brain/notes/anxionos-pc-serial-hub.md). Debates seriais: [índice PC](../../../notes/anxionos-pc-serial-index.md). Thin spec 003: [índice](../../../notes/anxionos-pc-serial-index.md). Packs R01–R10 canônicos em `docs/orchestration/modules/<modulo>/` para os **23** (inclui graph). Histórico: [structure-debate/graph](../structure-debate/graph/R10-g0-handoff.md). Specs 001–005 permanecem **draft** (ST08 0/23). Sem pasta `approvals/`, `policies/` ou `adapter-gateway`.
+Hub P1 (índice serial): Debates seriais: [índice PC](../../../notes/anxionos-pc-serial-index.md). Thin spec 003: [índice](../../../notes/anxionos-pc-serial-index.md). Packs R01–R10 canônicos em `docs/orchestration/modules/<modulo>/` para os **23** (inclui graph). Histórico: [structure-debate/graph](../structure-debate/graph/R10-g0-handoff.md). Specs 001–005 permanecem **draft** (ST08 0/23). Sem pasta `approvals/`, `policies/` ou `adapter-gateway`.
 
 | Módulo | Debate PC | Pack canônico |
 | --- | --- | --- |
