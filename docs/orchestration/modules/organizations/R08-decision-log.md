@@ -100,9 +100,10 @@ Consolidar todas as posições aceitas em R1–R7 num **decision log** rastreáv
 | **D-ORG-042** | Tabela `organizations_blueprints` / onboarding blueprint state | R5 | ⏸ Deferido R9 |
 | **D-ORG-043** | Entidade `Organization` + `CONTAINS_AGENCY` (E002) multi-company | R3, R4, R5 | ⏸ Deferido pós-v1 |
 | **D-ORG-044** | Export/listagem global de memberships — sem endpoint v1 | R7 | ⏸ Deferido — revisão G4 antes |
+| **D-ORG-045** | `TransferOwnership` ganha rota `POST /agencies/{agencyId}/ownership/transfer` (owner-only) e `agency.ownership_transferred.v1` entra na lista fechada v1 | ANX-460 | ✅ Aceito — decisão do dono em 2026-09-11 (resolve superfície órfã) |
 
-**Total decisões registradas:** 44 (`D-ORG-001` … `D-ORG-044`)  
-**Aceitas v1:** 37 · **Deferidas:** 7
+**Total decisões registradas:** 45 (`D-ORG-001` … `D-ORG-045`)  
+**Aceitas v1:** 38 · **Deferidas:** 7
 
 ---
 
@@ -190,6 +191,35 @@ Decisões registradas nas sessões Slack ([SLACK-TRANSCRIPTS.md](./SLACK-TRANSCR
 | DEF-10 | Department, Team (E006–E007) | Fora P02 | Escopo organizations baseline |
 | DEF-11 | `@anxionos/secrets` prod pepper | Quando package existir | Env var v1 dev/staging |
 | DEF-12 | Testes integração PG + AR01 boundary | **R9** | Plano de implementação |
+
+---
+
+## Resolução ANX-460 — superfície órfã de `TransferOwnership` (D-ORG-045)
+
+**Achado (G0 revalidado contra o código, ANX-460):** `transferOwnership` e o evento `organizations.agency.ownership_transferred.v1` existiam no módulo implementados e testados, o `governance` já os consumia (`assertOwnershipTransferMatchesReadModel`), mas **nenhuma rota os alcançava** e nenhum artefato os autorizava:
+
+| Artefato | Situação antes | Evidência |
+| --- | --- | --- |
+| Lista fechada de eventos v1 | **6** eventos, sem `ownership_transferred` | `R04-contracts.md:243-250` (AC-R4-01 ✅) |
+| Esboço REST | **8** rotas, sem transferência de posse | `R04-contracts.md:294-303` |
+| "Fora do escopo v1" | não menciona transferência de posse | `R04-contracts.md:307-311` |
+| Código | 7 eventTypes + comando `transferOwnership` exportado | `contracts/src/organizations/events.ts:11-17`; `modules/organizations/src/index.ts` |
+| Consumidor | `governance` revalida o payload contra o read-model | `organizations-membership-consumer.ts:121-152` |
+
+**Decisão do dono (2026-09-11):** expor a rota e documentar — em vez de remover comportamento testado do qual o `governance` depende, ou de manter superfície inalcançável.
+
+**Consequências registradas:**
+
+| Aspecto | Decisão |
+| --- | --- |
+| Rota | `POST /v1/organizations/agencies/{agencyId}/ownership/transfer` — body `{ newOwnerPrincipalId }` |
+| AuthZ mínima | Papel de mutação no boundary + **owner ativo** no domínio (`ORG_CROSS_TENANT` caso contrário) |
+| Evento | `organizations.agency.ownership_transferred.v1` entra na lista fechada v1 |
+| Pré-condição do sucessor | Membership **ativa** na agency (`ORG_OWNER_REQUIRED` caso contrário) |
+| Catálogo | Entrada `organizations.agency.transferOwnership` em `capability-manifest/catalog-v1.ts` |
+| Tokens de grant | Mantido o padrão do catálogo: `requiredGrants` é **descritivo** (não há enforcement em runtime) e `R04` não nomeia tokens de grant neste módulo |
+
+**Rationale:** a operação já era o único produtor do evento consumido pelo `governance`; deixá-la inalcançável significava que a revogação derivada da troca de posse nunca ocorreria em produção. Expor a rota torna o contrato verdadeiro sem descartar o mecanismo.
 
 ---
 

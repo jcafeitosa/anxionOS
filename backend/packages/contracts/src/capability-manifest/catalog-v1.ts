@@ -326,6 +326,33 @@ export const CAPABILITY_MANIFEST_V1_ENTRIES: CapabilityManifestEntry[] = [
 		envelopeVersion: "0.2.0",
 	}),
 	entry({
+		capabilityId: "organizations.agency.transferOwnership",
+		version: 1,
+		ownerModule: "organizations",
+		inputSchemaRef: "transferOwnershipCommandSchema",
+		outputSchemaRef: "commandResultSchema",
+		errorSchemaRef: "organizationErrorDetailsSchema",
+		// Guard real: o comando exige o **owner ativo** da agency
+		// (`ORG_CROSS_TENANT` caso contrario). Mesmo token de aproximacao ja'
+		// usado por `organizations.membership.invite`/`revoke`; R04 nao nomeia
+		// token de grant para este modulo.
+		requiredGrants: ["organizations.owner"],
+		allowedChannels: ["ui", "sdk"],
+		allowedExecutionModes: [...P02_FOUNDATION_MODES],
+		effectClass: "REVERSIBLE",
+		idempotencyPolicy: { key: "commandId", duplicateBehavior: "replay" },
+		approvalPolicy: { kind: "none" },
+		budgetPolicy: { kind: "defer" },
+		timeoutPolicy: defaultApiTimeout,
+		auditPolicy: defaultAuditPolicy,
+		surfaces: {
+			ui: "/owner/agency/ownership",
+			api: "/v1/organizations/agencies/{agencyId}/ownership/transfer",
+			tool: "organizations.agency.transferOwnership",
+		},
+		envelopeVersion: "0.2.0",
+	}),
+	entry({
 		capabilityId: "organizations.membership.invite",
 		version: 1,
 		ownerModule: "organizations",

@@ -15,6 +15,7 @@ import {
 	handleCreateAgency,
 	handleGetAgency,
 	handleListAgencies,
+	handleTransferOwnership,
 	handleUpdateAgencyMarkets,
 } from "./handlers/agencies";
 import { handleAcceptInvite } from "./handlers/invites";
@@ -27,6 +28,7 @@ import {
 } from "./handlers/memberships";
 import { parseIdempotencyKey } from "./middleware/idempotency-key";
 import { requireAgencyMembership } from "./middleware/require-agency-membership";
+import { requireAgencyMutationRole } from "./middleware/require-agency-mutation-role";
 import { assertInviteAcceptRateLimit } from "./rate-limit";
 import { resolvePrincipalFromSession } from "./resolve-principal";
 
@@ -132,6 +134,25 @@ export function createOrganizationsPlugin(deps: OrganizationsPluginDeps) {
 						});
 					},
 					organizationsOpenApi.updateAgencyMarkets,
+				)
+				.post(
+					"/ownership/transfer",
+					async ({ request, params, principal }) => {
+						await requireAgencyMutationRole(
+							deps.scopedPool,
+							params.agencyId,
+							principal.id,
+						);
+						const commandId = parseIdempotencyKey(request.headers);
+						const body = await request.json();
+						return handleTransferOwnership(deps, {
+							commandId,
+							agencyId: params.agencyId,
+							principalId: principal.id,
+							body,
+						});
+					},
+					organizationsOpenApi.transferOwnership,
 				)
 				.get(
 					"/memberships",

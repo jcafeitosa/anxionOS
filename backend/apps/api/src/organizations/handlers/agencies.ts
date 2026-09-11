@@ -1,12 +1,14 @@
 import {
 	createAgencyCommandSchema,
 	marketScopeSchema,
+	transferOwnershipCommandSchema,
 	updateAgencyMarketsCommandSchema,
 } from "@anxionos/contracts/organizations";
 import {
 	createAgency,
 	getAgencyById,
 	listAgenciesForPrincipal,
+	transferOwnership,
 	updateAgencyMarkets,
 } from "@anxionos/organizations";
 import { z } from "zod";
@@ -18,6 +20,9 @@ const createAgencyBodySchema = createAgencyCommandSchema
 	.strict();
 const updateMarketsBodySchema = z
 	.object({ marketScope: marketScopeSchema })
+	.strict();
+const transferOwnershipBodySchema = transferOwnershipCommandSchema
+	.omit({ commandId: true, agencyId: true })
 	.strict();
 
 export async function handleCreateAgency(
@@ -92,6 +97,39 @@ export async function handleUpdateAgencyMarkets(
 		{
 			unitOfWork: deps.unitOfWork,
 			commandJournal: deps.commandJournal,
+		},
+		{
+			...command,
+			actorPrincipalId: input.principalId,
+		},
+	);
+}
+
+/**
+ * `TransferOwnership` e' owner-only: o comando rejeita qualquer ator que nao seja
+ * o owner ativo (`ORG_CROSS_TENANT`). O boundary nao antecipa essa regra de
+ * dominio; a `AuthZ minima` da rota e' membership ativo + papel de mutacao.
+ */
+export async function handleTransferOwnership(
+	deps: OrganizationsPluginDeps,
+	input: {
+		commandId: string;
+		agencyId: string;
+		principalId: string;
+		body: unknown;
+	},
+) {
+	const body = transferOwnershipBodySchema.parse(input.body);
+	const command = transferOwnershipCommandSchema.parse({
+		commandId: input.commandId,
+		agencyId: input.agencyId,
+		newOwnerPrincipalId: body.newOwnerPrincipalId,
+	});
+	return transferOwnership(
+		{
+			unitOfWork: deps.unitOfWork,
+			commandJournal: deps.commandJournal,
+			principalLookup: deps.principalLookup,
 		},
 		{
 			...command,

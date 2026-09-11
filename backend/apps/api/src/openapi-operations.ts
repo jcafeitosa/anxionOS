@@ -667,6 +667,28 @@ export const organizationsOpenApi = {
 			...ERROR_RESPONSES,
 		},
 	}),
+	transferOwnership: op({
+		tag: "Organizations",
+		operationId: "transferOwnership",
+		summary: "Transfer agency ownership",
+		description:
+			"Module: organizations. Hands the agency to another principal. Requires an active membership for the successor; only the current active owner is accepted (`ORG_CROSS_TENANT` otherwise). Body `{ newOwnerPrincipalId }`. `Idempotency-Key` required.",
+		security: COOKIE_SECURITY,
+		parameters: commandParams,
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["newOwnerPrincipalId"],
+				properties: { newOwnerPrincipalId: UUID },
+			},
+			"Principal that becomes the new agency owner.",
+		),
+		responses: {
+			"200": { description: "Command result with new revision." },
+			...ERROR_RESPONSES,
+		},
+	}),
 	listMemberships: op({
 		tag: "Organizations",
 		operationId: "listMemberships",
@@ -743,7 +765,7 @@ export const organizationsOpenApi = {
 		operationId: "revokeMembership",
 		summary: "Revoke membership",
 		description:
-			"Module: organizations. Revokes an active or invited membership. Owner transfer is a separate command (not this route).",
+			"Module: organizations. Revokes an active or invited membership. Revoking a pending invite publishes `principalId: null` (no principal ever existed). Ownership transfer is `POST /agencies/{agencyId}/ownership/transfer`, not this route.",
 		security: COOKIE_SECURITY,
 		parameters: [
 			...commandParams,

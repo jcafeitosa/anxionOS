@@ -247,7 +247,10 @@ Todos encapsulados em `domainEventEnvelopeSchema` com `ownerDomain: "organizatio
 | `organizations.agency.status_changed.v1` | `agencyId`, `status`, `onboardingStep`, `previousStatus`, `revision` | graph, billing (readiness), frontend realtime |
 | `organizations.membership.invited.v1` | `membershipId`, `agencyId`, `email`, `role`, `revision` | graph, identity (lookup), email (apps/api) |
 | `organizations.membership.activated.v1` | `membershipId`, `agencyId`, `principalId`, `role`, `revision` | graph, governance (epoch futuro) |
-| `organizations.membership.revoked.v1` | `membershipId`, `agencyId`, `principalId`, `revision` | graph, governance (revogação derivada) |
+| `organizations.membership.revoked.v1` | `membershipId`, `agencyId`, `principalId` (**`null`** quando o convite pendente é cancelado antes de existir principal), `revision` | graph, governance (revogação derivada) |
+| `organizations.agency.ownership_transferred.v1` | `agencyId`, `previousOwnerPrincipalId`, `previousOwnerMembershipId`, `newOwnerPrincipalId`, `newOwnerMembershipId`, `revision` | graph, governance (encerra grants do owner anterior e emite baseline do novo) |
+
+> **D-ORG-045 (ANX-460):** `agency.ownership_transferred.v1` foi acrescentado à lista fechada v1 em 2026-09-11. O comando `TransferOwnership` já existia e o `governance` já o consumia, mas o evento não constava deste contrato e nenhuma rota o alcançava — superfície órfã. Ver [R08](./R08-decision-log.md#resolução-anx-460--superfície-órfã-de-transferownership-d-org-045).
 
 ### Exemplo de payload (`agency.created.v1`)
 
@@ -297,6 +300,7 @@ Prefixo: `/v1/organizations`. Autenticação via Better Auth (sessão). OpenAPI 
 | `GET` | `/agencies` | `ListAgenciesForPrincipal` | Principal autenticado |
 | `GET` | `/agencies/:agencyId` | `GetAgencyById` | Membership ativo |
 | `PATCH` | `/agencies/:agencyId/markets` | `UpdateAgencyMarkets` | role `owner` ou `admin` |
+| `POST` | `/agencies/:agencyId/ownership/transfer` | `TransferOwnership` | role `owner` (owner ativo da agency) |
 | `GET` | `/agencies/:agencyId/memberships` | `ListMembershipsByAgency` | membership ativo |
 | `POST` | `/agencies/:agencyId/memberships/invite` | `InviteMember` | role `owner` ou `admin` |
 | `POST` | `/agencies/:agencyId/memberships/:membershipId/activate` | `ActivateMembership` | convidado ou admin |
@@ -306,7 +310,7 @@ Headers obrigatórios em mutações: `Idempotency-Key`, `Content-Type: applicati
 
 **Fora do escopo v1 (registrar, não implementar):**
 
-- `POST /agencies/:id/onboarding/advance` — saga coordenada com billing/agents (P04)
+- `POST /agencies/:id/onboarding/advance` — saga coordenada com billing/agents (P04). O comando `AdvanceOnboarding` **existe** no módulo (exportado e testado), sem rota: a saga depende de billing/agents. Decisão registrada para que a superfície não seja lida como órfã (contraste com o caso de `TransferOwnership`, resolvido em D-ORG-045).
 - Rotas `Organization` multi-company
 - Webhooks (billing)
 
@@ -323,6 +327,8 @@ export { updateAgencyMarkets } from "./application/commands/update-agency-market
 export { inviteMember } from "./application/commands/invite-member";
 export { activateMembership } from "./application/commands/activate-membership";
 export { revokeMembership } from "./application/commands/revoke-membership";
+export { transferOwnership } from "./application/commands/transfer-ownership";
+export { advanceOnboarding } from "./application/commands/advance-onboarding";
 
 // Queries
 export { getAgencyById, listAgenciesForPrincipal } from "./application/queries/...";

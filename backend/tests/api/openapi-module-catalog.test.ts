@@ -164,6 +164,13 @@ const DOCUMENTED_OPERATIONS: Array<{
 		tag: "Organizations",
 	},
 	{
+		path: "/v1/organizations/agencies/{agencyId}/ownership/transfer",
+		method: "post",
+		tag: "Organizations",
+		operationId: "transferOwnership",
+		parameters: [AGENCY_ID, REQUEST_ID_HEADER, IDEMPOTENCY_HEADER],
+	},
+	{
 		path: "/v1/organizations/agencies/{agencyId}/memberships",
 		method: "get",
 		tag: "Organizations",
