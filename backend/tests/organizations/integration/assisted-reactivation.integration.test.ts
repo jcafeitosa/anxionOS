@@ -417,6 +417,92 @@ describe("reativacao assistida contra PostgreSQL real (F-01/F-02)", () => {
 		});
 	});
 
+	test("G6-INFO: SEM owner ativo, aceitar convite de owner continua recusado (a guarda e' a unica defesa)", async () => {
+		if (!shouldRunPgIntegrationTests()) {
+			return;
+		}
+
+		await withOrganizationsPgHarness(async ({ pool }) => {
+			const ownerPrincipalId = randomUUID();
+			const orgDb = createOrganizationsDb(pool);
+			const unitOfWork = createOrganizationUnitOfWork(pool);
+			const inviteTokenHasher = createHmacInviteTokenHasher(PEPPER);
+			const deps = {
+				unitOfWork,
+				commandJournal: orgDb.commandJournal,
+				principalLookup: createStubPrincipalLookup([ownerPrincipalId]),
+				inviteTokenHasher,
+				membershipRepository: orgDb.membershipRepository,
+			};
+			const agency = await createAgency(
+				{ ...deps },
+				{
+					commandId: randomUUID(),
+					displayName: "No Active Owner Agency",
+					marketScope: "both",
+					ownerPrincipalId,
+				},
+			);
+
+			// Revoga o owner ATIVO por SQL: a agencia fica com ZERO owners ativos, e
+			// o indice parcial `one_owner_active_uidx` deixa de ser a linha de defesa
+			// (nao ha owner ativo para colidir). Neste estado, SEM a guarda de
+			// `role=owner`, o aceite INSTALA autoridade de owner — o G6 demonstrou
+			// `activeOwnersAfter = 1`. Com a guarda, permanece 0.
+			await pool.query(
+				`UPDATE organizations_memberships SET status = 'revoked', revoked_at = now()
+				 WHERE agency_id = $1 AND role = 'owner'`,
+				[agency.aggregateId],
+			);
+			const before = await pool.query<{ count: number }>(
+				`SELECT count(*)::int AS count FROM organizations_memberships
+				 WHERE agency_id = $1 AND role = 'owner' AND status = 'active'`,
+				[agency.aggregateId],
+			);
+			expect(before.rows[0]?.count).toBe(0);
+
+			const membershipId = randomUUID();
+			const rawToken = "owner-invite-no-active-owner-token";
+			await pool.query(
+				`INSERT INTO organizations_memberships
+				   (id, tenant_id, agency_id, principal_id, invite_email, invite_token_hash,
+				    invite_expires_at, role, status, invited_at, revision, created_at, updated_at)
+				 VALUES ($1, $2, $2, NULL, $3, $4, now() + interval '7 days', 'owner', 'invited',
+				         now(), 1, now(), now())`,
+				[
+					membershipId,
+					agency.aggregateId,
+					"owner-invite-no-owner@example.com",
+					inviteTokenHasher.hash(rawToken),
+				],
+			);
+
+			let caught: unknown;
+			try {
+				await acceptInviteByToken(deps, {
+					commandId: randomUUID(),
+					token: rawToken,
+					sessionPrincipalId: ownerPrincipalId,
+					sessionEmail: "owner-invite-no-owner@example.com",
+				});
+			} catch (error) {
+				caught = error;
+			}
+			expect(caught).toBeInstanceOf(OrganizationCommandError);
+			expect((caught as OrganizationCommandError).organizationCode).toBe(
+				"ORG_INVALID_STATUS_TRANSITION",
+			);
+
+			// NENHUM owner foi instalado: a agencia segue com zero owners ativos.
+			const after = await pool.query<{ count: number }>(
+				`SELECT count(*)::int AS count FROM organizations_memberships
+				 WHERE agency_id = $1 AND role = 'owner' AND status = 'active'`,
+				[agency.aggregateId],
+			);
+			expect(after.rows[0]?.count).toBe(0);
+		});
+	});
+
 	test("G5-LOW-1: as 3 constraints da allowlist existem no banco (o espelho nao pode derivar)", async () => {
 		if (!shouldRunPgIntegrationTests()) {
 			return;

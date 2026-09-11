@@ -103,7 +103,7 @@ Consolidar todas as posições aceitas em R1–R7 num **decision log** rastreáv
 | **D-ORG-045** | `TransferOwnership` ganha rota `POST /agencies/{agencyId}/ownership/transfer` (owner-only) e `agency.ownership_transferred.v1` entra na lista fechada v1 | ANX-460 | ✅ Aceito — decisão do dono em 2026-09-11 (resolve superfície órfã) |
 | **D-ORG-046** | Ativação assistida **não** cria primeira vinculação: exige principal já vinculado (reativação) e erro opaco `ORG_INVITEE_CONSENT_REQUIRED`; `revoked → active` passa a existir | ANX-460 | ✅ Aceito — decisão do dono em 2026-09-11 (achado G5-F2); **restringe D-ORG-036** |
 | **D-ORG-047** | Existência do sucessor na transferência é validada **depois** da autoridade e colapsa em erro opaco único | ANX-460 | ✅ Aceito — achado G5-F1/G4-F1; sem oráculo de existência de principal |
-| **D-ORG-048** | Violação de unicidade de membership (23505) vira **409** — código e mensagem derivados da `constraint`; os saves de membership que podem violar os índices de conflito passam pelo mapeamento (`InviteMember`, `ActivateMembership`, `AcceptInviteByToken`, `RevokeMembership`, `UpdateAgencyMarkets`, `AdvanceOnboarding`, `TransferOwnership`); o `CreateAgency` insere com `agencyId` novo por invocação, então não há colisão alcançável; path param não-UUID é **400**; erro desconhecido é **500 com mensagem genérica** | ANX-460 | ✅ Aceito — achados F-01/F-02/F-03 dos gates G3/G4/G5 (3 gates convergiram no `InviteMember`) |
+| **D-ORG-048** | Violação de unicidade de membership (23505) vira **409** — código e mensagem derivados da `constraint`; os saves que podem violar os índices de conflito passam pelo **mapeamento derivado da constraint** — via `saveWithRevisionConflictMapping` (`InviteMember`, `ActivateMembership`, `RevokeMembership`, `UpdateAgencyMarkets`, `AdvanceOnboarding`, `TransferOwnership` — os dois últimos salvam **Agency**) ou **direto** pelo helper `throwMembershipUniquenessConflict` em `AcceptInviteByToken` (que precisa tratar o conflito de revisão de forma própria, com 404 opaco); o `CreateAgency` insere com `agencyId` novo por invocação, então não há colisão alcançável; path param não-UUID é **400**; erro desconhecido é **500 com mensagem genérica** | ANX-460 | ✅ Aceito — achados F-01/F-02/F-03 dos gates G3/G4/G5 (3 gates convergiram no `InviteMember`) |
 | **D-ORG-049** | Autoridade de `owner` **não** é instalável por ativação: recusada com 409 em `ActivateMembership` **e** em `AcceptInviteByToken` (não há caminho que produza owner revogado e a restauração colidiria com `one_owner_active_uidx`) | ANX-460 | ✅ Aceito — achados F-02/F-03 do G5; corrige o ramo positivo do D-ORG-046 |
 
 **Total decisões registradas:** 49 (`D-ORG-001` … `D-ORG-049`)  
@@ -244,7 +244,7 @@ Os quatro gates independentes sobre o candidato `10015392` encontraram dois veto
 | Erro de recusa | `ORG_INVITEE_CONSENT_REQUIRED` (403) — **o mesmo** exista ou não principal para o e-mail, para não sobrar oráculo |
 | Handler | Deixa de consultar `findByEmail`; usa o `principalId` **já vinculado** (nunca um id do cliente) |
 | Revinculação | `principalId !== targetPrincipalId` → `ORG_INVITE_EMAIL_MISMATCH` (403): a reativação não troca de dono |
-| Reativação de `role=owner` | **Recusada** (409 `ORG_INVALID_STATUS_TRANSITION`) — ver D-ORG-049. O convite exclui `owner`, então a autoridade de owner só nasce em `CreateAgency`/`TransferOwnership` |
+| Reativação de `role=owner` | **Recusada** (409 `ORG_INVALID_STATUS_TRANSITION`) em `ActivateMembership` **e** em `AcceptInviteByToken` — ver D-ORG-049. O convite exclui `owner`, então a autoridade de owner só nasce em `CreateAgency`/`TransferOwnership` |
 | Transição nova | `revoked → active` (antes `revoked` era terminal) |
 | Escopo de privilégio | Sem mudança: o convite nunca aceita `role=owner`, então não há emissão de grant baseline para o vinculado |
 
@@ -294,6 +294,15 @@ Mesma causa em `acceptInviteByToken` (ANX-482): convidar o próprio e-mail e ace
 `assisted-activation.test.ts` afirmava que um owner reativa membership `role=owner` com **200**. O repositório in-memory não tem o índice `organizations_memberships_one_owner_active_uidx`; no PostgreSQL a gravação viola o índice → **500**. Ou seja: o teste passava por não modelar o banco, e o caminho que ele "provia" estava quebrado.
 
 Mais: o estado "owner revogado" é **inalcançável pela API** — o convite exclui `owner`, revogar o único owner ativo é bloqueado e a transferência rebaixa o owner anterior para `admin` (o fuzz de 540 comandos do G5 não produziu nenhum).
+
+**Correção de alcance (G6, digest `5a670f96`):** eu havia registrado a guarda do aceite como *defesa em profundidade*, protegendo um estado inalcançável. O G6 mediu o cenário bruto — **revogar o owner ativo por SQL** (agência com **zero** owners ativos), semear um convite `role=owner` e aceitar — e o resultado inverte a leitura:
+
+| | Com a guarda | Sem a guarda |
+| --- | --- | --- |
+| Aceite | recusado (409) | **aceito** |
+| Owners ativos depois | **0** | **1** |
+
+Sem a guarda, o aceite **instala autoridade de owner** — o índice parcial `one_owner_active_uidx` não protege nesse estado, porque não há owner ativo para colidir. Ou seja: a guarda é **load-bearing**, é a única linha de defesa, e não redundante. O que é inalcançável pela API é o **estado de entrada** (owner revogado), não a consequência. O cenário está agora codificado em `assisted-reactivation.integration.test.ts` ("SEM owner ativo, aceitar convite de owner continua recusado").
 
 **Correção (D-ORG-049):** a reativação de `role=owner` é **recusada** com 409 em vez de mantida como superficie morta e quebrada. A prova de que não há 500 vive no teste PG `integration/assisted-reactivation.integration.test.ts`.
 

@@ -132,7 +132,10 @@ describe("convite concorrente contra PostgreSQL real (F-01)", () => {
 					pool,
 					TEST_POOL_APPLICATION_NAME,
 					CONCURRENCY,
-					10_000,
+					// MENOR que o timeout default do bun (5000 ms): com 10_000 o bun
+					// mata o teste antes de a mensagem "barreira nao formou" aparecer,
+					// e o diagnostico se perde (INFO do G6).
+					4_000,
 				);
 				expect(blocked).toBeGreaterThanOrEqual(CONCURRENCY);
 			} finally {
