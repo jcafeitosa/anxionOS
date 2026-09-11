@@ -2,6 +2,7 @@
 type: debate
 status: draft
 ---
+
 # R09 — Plano de implementação: `modules/partners`
 
 **Rodada:** R9  
@@ -17,17 +18,16 @@ status: draft
 
 ## Non-goals P1
 
-Só G0 documental. Não scaffoldar 23 módulos. Não G7 ANX-114 neste pack.
+Só G0 documental. Não scaffoldar 23 módulos. Não G7 ANX-114 neste pack. Não fake ST08.
 
 ## Ownership (plano)
 
 | Fatia | Dono |
 | --- | --- |
 | partners_* + contracts | **partners** |
-| invoice.paid verdade | **billing** (contrato já fechado) |
+| invoice.paid verdade | **billing** |
 | journal efeito | **accounting** (consumer) |
-
-**KEEP adapter-gateway**.
+| adapter-gateway | **KEEP** |
 
 ## Pré-requisitos G1
 
@@ -41,27 +41,33 @@ backend/modules/partners/src/
   infrastructure/persistence/  api/  index.ts
 ```
 
-Não scaffoldar 23 módulos. Não criar `marketplace/`.
+Não criar `marketplace/`.
 
 ## Fatias P07 (pós-Owner)
 
-| Slice | Entrega |
+| Slice | Entrega | Gates |
+| --- | --- | --- |
+| P07-S1 | schema partners_* + contracts | G2, G4 |
+| P07-S2 | consumer invoice.paid → accrual | G3-PTR-01/02 |
+| P07-S3 | refund reverse + payout lifecycle | G3-PTR-03/04 |
+| P07-S4 | HTTP `/v1/partners` | G5-PTR-01 |
+
+## Matriz oráculos
+
+| ID | Caso |
 | --- | --- |
-| P07-S1 | schema partners_* + contracts |
-| P07-S2 | projector invoice.paid |
-| P07-S3 | refund reverse + payout lifecycle |
-| P07-S4 | HTTP v1 |
-
-## Matriz
-
-G3-PTR-S2-01 commission on paid · G3-PTR-S3-01 refund reversal · G3-PTR-S3-02 payout FAILED retry · G5-PTR-01..05.
+| G3-PTR-01 | invoice.paid.v1 → um único accrual |
+| G3-PTR-02 | paid replay → mesmo accrual_id |
+| G3-PTR-03 | refund → reverse idempotente |
+| G3-PTR-04 | payout FAILED retry não duplica SETTLED |
+| G3-PTR-05 | accrue unpaid → 409 PTR_ACCRUAL_UNPAID |
+| G5-PTR-01 | GET referral outra org → 403 |
+| G5-PTR-04 | T01 DENY → 403 PTR_GRANT_INVALID |
 
 ## Defer
 
-D-GOV-010; RLS P09; ST08 migrations; rails PSP payout live.
-
-P1 só G0 documental.
+D-GOV-010; RLS P09; ST08 migrations; rails PSP payout live; spec `accepted`.
 
 ## Saída R9
 
-Plano para R10.
+Plano para R10. P1 **não** executa S1–S4.
