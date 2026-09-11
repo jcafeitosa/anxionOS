@@ -4,27 +4,51 @@ type: debate
 
 # R02 — Fronteiras: `modules/identity`
 
-**Rodada:** R2  
-**Data:** 2026-09-11  
-**Histórico:** [structure R02](../../structure-debate/identity/R02-boundaries.md)
+**Rodada:** R2 · 2026-09-11 · ANX-389  
+**Callers:** [R01-context.md](./R01-context.md) · [R03-domain-sketch.md](./R03-domain-sketch.md).  
+**Histórico:** [structure R02](../../structure-debate/identity/R02-boundaries.md). Instrução: fatten identity R01–R05.
 
 ## POSSUI
 
-Principal, sessão Better Auth (infra), service principals, estado de revogação, command journal identity.
+Principal, sessão Better Auth (**infra composition**), service principals, estado de revogação, command journal identity.
 
 ## NÃO POSSUI
 
-Agency/membership (organizations), Grant (governance), provider secrets (connections), Agent (agents).
+| Item | Dono |
+| --- | --- |
+| Agency/membership | organizations |
+| Grant | governance |
+| Provider secrets | connections |
+| Agent | agents |
+| D-GOV-010 | risk P06 |
 
 ## Non-goals
 
-Não duplicar authUserId em organizations. Tokens nunca no grafo. SQLite nunca sessão institucional.
+Não duplicar authUserId em organizations. Tokens **nunca** no grafo. SQLite **nunca** sessão institucional. Sem pasta organization única (PC 02). Sem `approvals/`.
 
-## Invariantes
+## Invariantes IDN-R02-INV-*
 
-1. Revogação de Principal invalida sessões derivadas (consumer).
-2. domain/ sem HTTP Better Auth — ports.
-3. Sem FK para organizations.
+01 Revogação de Principal invalida sessões derivadas (consumer BA)  
+02 domain/ sem HTTP Better Auth — ports  
+03 Sem FK para organizations  
+04 ownerDomain=identity  
+05 D-GOV-010 não aqui
+
+```mermaid
+flowchart TB
+  subgraph inn [identity IN]
+    P[Principal]
+    S[SessionRef]
+  end
+  subgraph outt [OUT]
+    O[organizations]
+    G[governance]
+    BA[apps/api Better Auth]
+  end
+  inn --> O
+  inn --> G
+  BA --> inn
+```
 
 ## Saída R2
 
