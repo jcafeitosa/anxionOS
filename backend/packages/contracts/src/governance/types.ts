@@ -1,6 +1,9 @@
 import { z } from "zod";
 export const governanceScopeKindSchema = z.enum(["agency", "organization"]);
 export const grantStatusSchema = z.enum(["active", "revoked", "expired"]);
+
+/** Explicit PLATFORM console grant. Never inferred from agency membership (ANX-166). */
+export const PLATFORM_CONSOLE_CAPABILITY = "console.platform";
 export const mandateKindSchema = z.enum(["ceo", "operator", "audit"]);
 export const mandateStatusSchema = z.enum(["active", "suspended", "revoked"]);
 export const changeProposalKindSchema = z.enum([

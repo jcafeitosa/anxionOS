@@ -63,6 +63,13 @@ export function createInMemoryGrantRepository(
 					grant.status === "active",
 			);
 		},
+		async listActiveByPrincipal(principalId) {
+			return [...grants.values()].filter(
+				(grant) =>
+					grant.granteePrincipalId === principalId &&
+					grant.status === "active",
+			);
+		},
 		async listEffectiveForAgent(scopeId, subjectAgentId) {
 			return [...grants.values()].filter(
 				(grant) =>

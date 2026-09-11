@@ -1,6 +1,7 @@
 export {
 	canRevokeGrant,
 	isGrantActive,
+	isGrantEffectiveAt,
 	isGrantRevoked,
 	type Grant,
 } from "./domain/entities/grant";
@@ -81,6 +82,10 @@ export {
 	type ListEffectiveGrantsDeps,
 	type ListEffectiveGrantsInput,
 } from "./application/queries/list-effective-grants";
+export {
+	hasPlatformConsoleGrant,
+	type HasPlatformConsoleGrantDeps,
+} from "./application/queries/has-platform-console-grant";
 export {
 	assignAutonomyLevel,
 	type AssignAutonomyLevelDeps,

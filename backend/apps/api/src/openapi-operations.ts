@@ -1440,6 +1440,74 @@ const recoveryTaskSnapshotSchema = {
 };
 
 export const operationsOpenApi = {
+	getPlatformHealth: op({
+		tag: "Operations",
+		operationId: "getPlatformHealth",
+		summary: "Platform health probe",
+		description:
+			"Module: operations. PLATFORM-scoped health (postgres/nats/neo4j) with source/checkedAt/stale. Requires active `console.platform` grant. Does not return agency tenant data.",
+		security: COOKIE_SECURITY,
+		responses: {
+			"200": {
+				description: "Platform infrastructure health snapshot.",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							additionalProperties: false,
+							required: ["source", "checkedAt", "stale", "deps"],
+							properties: {
+								source: { type: "string", const: "probeHealthDeps" },
+								checkedAt: { type: "string", format: "date-time" },
+								stale: { type: "boolean" },
+								deps: {
+									type: "object",
+									additionalProperties: false,
+									required: ["postgres", "nats", "neo4j"],
+									properties: {
+										postgres: { type: "string", enum: ["ok", "error"] },
+										nats: { type: "string", enum: ["ok", "error"] },
+										neo4j: { type: "string", enum: ["ok", "error"] },
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
+	listPlatformIncidents: op({
+		tag: "Operations",
+		operationId: "listPlatformIncidents",
+		summary: "List platform incidents",
+		description:
+			"Module: operations. PLATFORM incident collection. Does not list agency incidents (no tenant leak). Requires `console.platform` grant. Empty array is the honest ledger while incidents remain agency-scoped.",
+		security: COOKIE_SECURITY,
+		responses: {
+			"200": {
+				description: "Platform incidents (never agency rows).",
+				content: {
+					"application/json": {
+						schema: {
+							type: "object",
+							additionalProperties: false,
+							required: ["incidents"],
+							properties: {
+								incidents: {
+									type: "array",
+									maxItems: 0,
+									items: incidentSnapshotOpenApiSchema,
+								},
+							},
+						},
+					},
+				},
+			},
+			...ERROR_RESPONSES,
+		},
+	}),
 	listIncidents: op({
 		tag: "Operations",
 		operationId: "listIncidents",

@@ -1,4 +1,6 @@
 import type { TenantScopedQueryable } from "@anxionos/database";
+import type { HealthDeps } from "@anxionos/contracts";
+import type { GrantRepository } from "@anxionos/governance";
 import type { PrincipalRepository } from "@anxionos/identity";
 import type { betterAuth } from "better-auth";
 import { Elysia } from "elysia";
@@ -33,11 +35,18 @@ import {
 	handleStartRecoveryTaskExecution,
 	recoveryTaskIdParamSchema,
 } from "./handlers/recovery-tasks";
+import {
+	handleGetPlatformHealth,
+	handleListPlatformIncidents,
+	requirePlatformConsoleGrant,
+} from "./handlers/platform-queries";
 
 export interface OperationsPluginDeps extends OperationsApiRuntime {
 	auth: ReturnType<typeof betterAuth>;
 	identityRepository: PrincipalRepository;
 	scopedPool: TenantScopedQueryable;
+	grantRepository: GrantRepository;
+	probePlatformHealth: () => Promise<HealthDeps>;
 }
 
 function requestIdFrom(headers: Headers): string | undefined {
@@ -67,6 +76,30 @@ export function createOperationsPlugin(deps: OperationsPluginDeps) {
 			set.status = mapped.status;
 			return mapped.body;
 		})
+		.group("/platform", (platform) =>
+			platform
+				.resolve(async ({ request }) => {
+					const { principal } = await resolveSessionPrincipal(
+						deps,
+						request,
+					);
+					await requirePlatformConsoleGrant(
+						deps.grantRepository,
+						principal.id,
+					);
+					return { principal };
+				})
+				.get(
+					"/health",
+					() => handleGetPlatformHealth(deps.probePlatformHealth),
+					operationsOpenApi.getPlatformHealth,
+				)
+				.get(
+					"/incidents",
+					() => handleListPlatformIncidents(),
+					operationsOpenApi.listPlatformIncidents,
+				),
+		)
 		.group("/agencies/:agencyId", (scoped) =>
 			scoped
 				.group("", (readRoutes) =>

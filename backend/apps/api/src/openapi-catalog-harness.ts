@@ -65,6 +65,7 @@ export function createOpenApiCatalogApp() {
 				auth: stubAuth as never,
 				membershipRepository: unused,
 				identityRepository: unused,
+				grantRepository: unused,
 			}),
 		)
 		.use(
@@ -149,6 +150,8 @@ export function createOpenApiCatalogApp() {
 				recoveryTasks: unused,
 				identityRepository: unused,
 				scopedPool: unused,
+				grantRepository: unused,
+				probePlatformHealth: unused,
 			}),
 		)
 		.use(

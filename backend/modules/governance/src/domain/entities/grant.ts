@@ -27,6 +27,16 @@ export function isGrantActive(grant: Grant): boolean {
 	return grant.status === "active";
 }
 
+export function isGrantEffectiveAt(grant: Grant, asOf: Date): boolean {
+	if (!isGrantActive(grant)) {
+		return false;
+	}
+	if (grant.validUntil && grant.validUntil <= asOf) {
+		return false;
+	}
+	return grant.validFrom <= asOf;
+}
+
 export function isGrantRevoked(grant: Grant): boolean {
 	return grant.status === "revoked";
 }

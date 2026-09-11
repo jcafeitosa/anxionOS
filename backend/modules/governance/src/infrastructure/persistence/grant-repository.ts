@@ -110,6 +110,18 @@ export function createDrizzleGrantRepository(
 				);
 			return rows.map(toGrant);
 		},
+		async listActiveByPrincipal(principalId: string) {
+			const rows = await db
+				.select()
+				.from(grants)
+				.where(
+					and(
+						eq(grants.granteePrincipalId, principalId),
+						eq(grants.status, "active"),
+					),
+				);
+			return rows.map(toGrant);
+		},
 		async listEffectiveForAgent(scopeId: string, subjectAgentId: string) {
 			const rows = await db
 				.select()

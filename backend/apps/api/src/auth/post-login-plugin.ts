@@ -1,3 +1,5 @@
+import type { GrantRepository } from "@anxionos/governance";
+import { hasPlatformConsoleGrant } from "@anxionos/governance";
 import type { PrincipalRepository } from "@anxionos/identity";
 import type { MembershipRepository } from "@anxionos/organizations";
 import {
@@ -17,6 +19,7 @@ export interface PostLoginPluginDeps {
 	auth: ReturnType<typeof betterAuth>;
 	membershipRepository: MembershipRepository;
 	identityRepository: PrincipalRepository;
+	grantRepository: GrantRepository;
 }
 
 function requestIdFrom(headers: Headers): string | undefined {
@@ -99,6 +102,13 @@ export function createPostLoginPlugin(deps: PostLoginPluginDeps) {
 						email,
 					})
 				: [];
+			const platformAccess = principal
+				? await hasPlatformConsoleGrant(
+						{ grantRepository: deps.grantRepository },
+						principal.id,
+						now,
+					)
+				: false;
 
 			return decidePostLoginContext({
 				authenticated: true,
@@ -126,7 +136,7 @@ export function createPostLoginPlugin(deps: PostLoginPluginDeps) {
 					inviteEmail: membership.inviteEmail ?? undefined,
 					inviteExpiresAt: membership.inviteExpiresAt?.toISOString(),
 				})),
-				platformAccess: false,
+				platformAccess,
 				partnerAccess: false,
 				now,
 			});

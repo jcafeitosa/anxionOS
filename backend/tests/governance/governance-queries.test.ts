@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test";
+import { PLATFORM_CONSOLE_CAPABILITY } from "@anxionos/contracts/governance";
 import {
 	getAuthorityEpoch,
+	hasPlatformConsoleGrant,
 	listEffectiveGrants,
 	type Grant,
 } from "@anxionos/governance";
@@ -61,6 +63,24 @@ describe("listEffectiveGrants", () => {
 			},
 		);
 		expect(grants).toHaveLength(0);
+	});
+});
+
+describe("hasPlatformConsoleGrant", () => {
+	test("is false without console.platform capability", async () => {
+		const grantRepository = createInMemoryGrantRepository([seedGrant()]);
+		await expect(
+			hasPlatformConsoleGrant({ grantRepository }, principalId),
+		).resolves.toBe(false);
+	});
+
+	test("is true with an active console.platform grant", async () => {
+		const grantRepository = createInMemoryGrantRepository([
+			seedGrant({ capability: PLATFORM_CONSOLE_CAPABILITY }),
+		]);
+		await expect(
+			hasPlatformConsoleGrant({ grantRepository }, principalId),
+		).resolves.toBe(true);
 	});
 });
 

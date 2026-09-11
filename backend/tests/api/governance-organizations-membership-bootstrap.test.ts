@@ -3,7 +3,7 @@ import { ORGANIZATION_EVENT_TYPES } from "@anxionos/contracts/organizations";
 import { resolveEventSubject } from "@anxionos/eventing/nats-publisher";
 import { GOVERNANCE_ORGANIZATIONS_SUBJECT_FILTER } from "../../apps/api/src/governance/bootstrap-organizations-membership";
 
-/** Minimal NATS filter matcher for unit tests (`.` token, `>` suffix wildcard). */
+/** Minimal NATS filter matcher for unit tests (`.` token, `*` one token, `>` suffix). */
 function natsFilterMatches(filter: string, subject: string): boolean {
 	const parts = filter.split(".");
 	const tokens = subject.split(".");
@@ -11,6 +11,13 @@ function natsFilterMatches(filter: string, subject: string): boolean {
 	for (const part of parts) {
 		if (part === ">") {
 			return i < tokens.length;
+		}
+		if (part === "*") {
+			if (i >= tokens.length) {
+				return false;
+			}
+			i += 1;
+			continue;
 		}
 		if (i >= tokens.length || tokens[i] !== part) {
 			return false;
@@ -37,7 +44,7 @@ describe("governance organizations membership bootstrap", () => {
 		);
 
 		expect(GOVERNANCE_ORGANIZATIONS_SUBJECT_FILTER).toBe(
-			"agency.>.events.organizations.>",
+			"agency.*.events.organizations.>",
 		);
 		expect(
 			natsFilterMatches(

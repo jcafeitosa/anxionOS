@@ -79,6 +79,7 @@ export {
 	grantStatusSchema,
 	mandateKindSchema,
 	mandateStatusSchema,
+	PLATFORM_CONSOLE_CAPABILITY,
 } from "./types";
 export type {
 	ApprovalDecision,
