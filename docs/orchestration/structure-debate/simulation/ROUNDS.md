@@ -1,3 +1,7 @@
+---
+type: debate
+---
+
 # Rodadas — `modules/simulation`
 
 | Rodada | Artefato | Status |
