@@ -2,6 +2,13 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page } from "@playwright/test";
 
 export async function expectAxeClean(page: Page, label: string): Promise<void> {
+	// WCAG audits should target the stable, accessible state. Sidebar transitions
+	// (motion/react width/opacity animation) blend fg colors mid-flight and produce
+	// false-positive contrast violations. Disable animations so axe evaluates the
+	// real, resting contrast (text-foreground #f8fafc on surface #0a0a0c ≈ 15:1).
+	await page.emulateMedia({ reducedMotion: "reduce" });
+	// Give motion/react a tick to settle after the media change.
+	await page.waitForTimeout(250);
 	const results = await new AxeBuilder({ page })
 		.withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
 		.analyze();

@@ -3,6 +3,10 @@ import { ownerDashboardModel } from "../../lib/owner-dashboard";
 import { ArchifyCanvas } from "./ArchifyCanvas";
 import { HonestState } from "./HonestState";
 import { OwnerAgentsCatalog } from "./OwnerAgentsCatalog";
+import { OwnerApprovalsPanel } from "./OwnerApprovalsPanel";
+import { OwnerFinancePanel } from "./OwnerFinancePanel";
+import { OwnerGrantsPanel } from "./OwnerGrantsPanel";
+import { OwnerTeamPanel } from "./OwnerTeamPanel";
 
 interface OwnerDashboardProps {
 	context: PostLoginAuthContext;
@@ -75,8 +79,11 @@ export function OwnerDashboard({
 			)}
 			footer={
 				<>
+					<OwnerTeamPanel agencyId={agencyId} />
+					<OwnerGrantsPanel agencyId={agencyId} />
+					<OwnerApprovalsPanel agencyId={agencyId} />
 					{model.pendingCount > 0 ? (
-						<section aria-labelledby="owner-pending-heading" id="team">
+						<section aria-labelledby="owner-pending-heading" id="pending-invites">
 							<h2
 								id="owner-pending-heading"
 								className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground"
@@ -92,25 +99,7 @@ export function OwnerDashboard({
 						</section>
 					) : null}
 					<OwnerAgentsCatalog agencyId={agencyId} />
-					<section
-						aria-labelledby="empty-heading"
-						id={model.pendingCount > 0 ? "activity" : "team"}
-					>
-						<h2
-							id="empty-heading"
-							className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground"
-						>
-							Portfólio
-						</h2>
-						<div data-testid="owner-operational-empty">
-							<HonestState
-								kind="empty"
-								titleAs="h3"
-								title="Portfólio ainda não alimenta este console"
-								description="ANX-153 (posições/valuation) continua aberto. Nenhum número financeiro é inventado. ANX-143 está done no board; agentes usam GET /v1/agencies/:agencyId/agents acima."
-							/>
-						</div>
-					</section>
+					<OwnerFinancePanel agencyId={agencyId} />
 				</>
 			}
 		/>

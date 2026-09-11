@@ -1,13 +1,4 @@
-import {
-	Activity,
-	Building2,
-	LayoutDashboard,
-	Menu,
-	Settings,
-	Shield,
-	Users,
-	X,
-} from "lucide-react";
+import { Shield } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
 	canAccessConsole,
@@ -19,10 +10,13 @@ import {
 } from "../../lib/auth";
 import { membershipForAgency } from "../../lib/owner-dashboard";
 import { ArchifyCanvas } from "./ArchifyCanvas";
+import { ConsoleSidebar } from "./ConsoleSidebar";
 import { DecisionTrail } from "./DecisionTrail";
 import { HonestState } from "./HonestState";
+import { OperatorDashboard } from "./OperatorDashboard";
 import { OwnerDashboard } from "./OwnerDashboard";
 import { PartnerDashboard } from "./PartnerDashboard";
+import { PlatformDashboard } from "./PlatformDashboard";
 
 interface ConsoleAppProps {
 	kind: ConsoleKind;
@@ -35,23 +29,6 @@ const titles: Record<ConsoleKind, string> = {
 	platform: "Platform Console",
 	partner: "Partner Console",
 };
-
-function navFor(kind: ConsoleKind, agencyId?: string) {
-	const root =
-		kind === "owner" && agencyId
-			? `/agency/${agencyId}`
-			: kind === "operator" && agencyId
-				? `/operator/${agencyId}`
-				: kind === "platform"
-					? "/platform"
-					: "/partner";
-	return [
-		{ label: "Visão geral", href: root, icon: LayoutDashboard, current: true },
-		{ label: "Equipe", href: `${root}#team`, icon: Users, current: false },
-		{ label: "Atividade", href: `${root}#activity`, icon: Activity, current: false },
-		{ label: "Configurações", href: `${root}#settings`, icon: Settings, current: false },
-	];
-}
 
 function RoleArchifyDashboard({
 	kind,
@@ -130,7 +107,6 @@ function RoleArchifyDashboard({
 }
 
 export function ConsoleApp({ kind, agencyId }: ConsoleAppProps) {
-	const [mobileNavOpen, setMobileNavOpen] = useState(false);
 	const [mode, setMode] = useState<"loading" | "ready" | "denied" | "stale">(
 		"loading",
 	);
@@ -191,96 +167,17 @@ export function ConsoleApp({ kind, agencyId }: ConsoleAppProps) {
 		);
 	}
 
-	const navItems = navFor(kind, agencyId);
 	const roleLabel = context.decision.role ?? kind;
 
 	return (
-		<div className="flex min-h-dvh bg-background">
-			<aside
-				className="hidden w-64 shrink-0 flex-col border-r border-border bg-surface lg:flex"
-				aria-label="Navegação principal"
-			>
-				<div className="flex items-center gap-2 border-b border-border px-6 py-5">
-					<Building2 className="size-6 text-accent" aria-hidden="true" />
-					<div>
-						<p className="text-sm font-semibold text-foreground">anxionOS</p>
-						<p className="text-xs text-muted-foreground">{titles[kind]}</p>
-					</div>
-				</div>
-				<nav className="flex flex-1 flex-col gap-1 p-4" aria-label={`Menu ${titles[kind]}`}>
-					{navItems.map((item) => (
-						<a
-							key={item.label}
-							href={item.href}
-							className={`flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200 cursor-pointer ${
-								item.current
-									? "bg-secondary text-foreground"
-									: "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
-							}`}
-							aria-current={item.current ? "page" : undefined}
-						>
-							<item.icon className="size-4 shrink-0" aria-hidden="true" />
-							{item.label}
-						</a>
-					))}
-				</nav>
-			</aside>
-
-			{mobileNavOpen ? (
-				<div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu de navegação">
-					<button
-						type="button"
-						className="absolute inset-0 bg-black/60 cursor-pointer"
-						aria-label="Fechar menu"
-						onClick={() => setMobileNavOpen(false)}
-					/>
-					<aside className="relative z-50 flex h-full w-64 flex-col bg-surface">
-						<div className="flex items-center justify-between border-b border-border px-4 py-4">
-							<span className="text-sm font-semibold">anxionOS</span>
-							<button
-								type="button"
-								className="flex size-11 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary cursor-pointer"
-								aria-label="Fechar menu"
-								onClick={() => setMobileNavOpen(false)}
-							>
-								<X className="size-5" aria-hidden="true" />
-							</button>
-						</div>
-						<nav className="flex flex-col gap-1 p-4" aria-label="Menu mobile">
-							{navItems.map((item) => (
-								<a
-									key={item.label}
-									href={item.href}
-									className="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary cursor-pointer"
-									onClick={() => setMobileNavOpen(false)}
-								>
-									<item.icon className="size-4" aria-hidden="true" />
-									{item.label}
-								</a>
-							))}
-						</nav>
-					</aside>
-				</div>
-			) : null}
-
+		<ConsoleSidebar kind={kind} agencyId={agencyId} context={context}>
 			<div className="flex min-w-0 flex-1 flex-col">
 				<header className="sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-sm lg:px-8">
-					<div className="flex items-center gap-3">
-						<button
-							type="button"
-							className="flex size-11 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary lg:hidden cursor-pointer"
-							aria-label="Abrir menu de navegação"
-							aria-expanded={mobileNavOpen}
-							onClick={() => setMobileNavOpen(true)}
-						>
-							<Menu className="size-5" aria-hidden="true" />
-						</button>
-						<div>
-							<h1 className="text-lg font-semibold text-foreground">{titles[kind]}</h1>
-							<p className="text-sm text-muted-foreground">
-								{agencyId ? `Agência ${agencyId}` : "Escopo institucional"} · {roleLabel}
-							</p>
-						</div>
+					<div>
+						<h1 className="text-lg font-semibold text-foreground">{titles[kind]}</h1>
+						<p className="text-sm text-muted-foreground">
+							{agencyId ? `Agência ${agencyId}` : "Escopo institucional"} · {roleLabel}
+						</p>
 					</div>
 					<div className="hidden items-center gap-2 sm:flex" role="status" aria-label="Sessão">
 						<Shield className="size-4 text-accent" aria-hidden="true" />
@@ -326,9 +223,13 @@ export function ConsoleApp({ kind, agencyId }: ConsoleAppProps) {
 							<PartnerDashboard context={context} />
 						) : kind === "owner" && agencyId ? (
 							<OwnerDashboard context={context} agencyId={agencyId} />
+						) : kind === "operator" && agencyId ? (
+							<OperatorDashboard context={context} agencyId={agencyId} />
+						) : kind === "platform" ? (
+							<PlatformDashboard platformAccess={context.platformAccess === true} />
 						) : (
 							<RoleArchifyDashboard
-								kind={kind === "platform" ? "platform" : "operator"}
+								kind="platform"
 								context={context}
 								agencyId={agencyId}
 							/>
@@ -341,6 +242,6 @@ export function ConsoleApp({ kind, agencyId }: ConsoleAppProps) {
 					{kind === "partner" ? "partner console ANX-167" : "shells honestos ANX-297"}
 				</footer>
 			</div>
-		</div>
+		</ConsoleSidebar>
 	);
 }

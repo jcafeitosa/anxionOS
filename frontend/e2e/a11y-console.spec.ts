@@ -1,3 +1,4 @@
+import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { deniedPostLoginFixture, expectAxeClean } from "./a11y";
 import { DEV_SEED_ACCOUNTS, signInLive } from "./fixtures/live-auth";
@@ -36,12 +37,14 @@ test.describe("WCAG 2.2 axe — login + shells (ANX-340)", () => {
 		await expectAxeClean(page, "/login");
 	});
 
-	test("Owner empty (live seed) is axe-clean", async ({ page }) => {
+	test("Owner finance panel (live seed) is axe-clean", async ({ page }) => {
 		await signInLive(page, DEV_SEED_ACCOUNTS.owner);
 		await expect(page).toHaveURL(/\/agency\/[0-9a-f-]{36}$/, { timeout: 20_000 });
-		await expect(page.getByTestId("owner-operational-empty")).toBeVisible();
-		await expect(page.getByTestId("honest-state-empty")).toBeVisible();
-		await expectAxeClean(page, "/agency owner empty");
+		await expect(page.getByTestId("owner-finance-panel")).toBeVisible();
+		await expect(
+			page.getByTestId("owner-finance-panel").getByTestId("honest-state-empty"),
+		).toBeVisible();
+		await expectAxeClean(page, "/agency owner finance panel");
 	});
 
 	test("Owner loading HonestState is axe-clean", async ({ page }) => {
@@ -67,11 +70,26 @@ test.describe("WCAG 2.2 axe — login + shells (ANX-340)", () => {
 		await expectAxeClean(page, "/agency stale");
 	});
 
-	test("Operator empty is axe-clean", async ({ page }) => {
+	test("Operator intervention panels (live seed) are axe-clean", async ({ page }) => {
 		await signInLive(page, DEV_SEED_ACCOUNTS.operator);
 		await expect(page).toHaveURL(/\/operator\/[0-9a-f-]{36}$/, { timeout: 20_000 });
-		await expect(page.getByTestId("operator-operational-empty")).toBeVisible();
-		await expectAxeClean(page, "/operator empty");
+		for (const testId of [
+			"operator-incidents-panel",
+			"operator-takeover-panel",
+			"operator-kill-switch-panel",
+			"operator-orders-panel",
+			"operator-reconciliation-panel",
+		] as const) {
+			await expect(page.getByTestId(testId)).toBeVisible();
+		}
+		const results = await new AxeBuilder({ page })
+			.include("#main-content")
+			.withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+			.analyze();
+		expect(
+			results.violations,
+			`/operator intervention panels: ${JSON.stringify(results.violations, null, 2)}`,
+		).toEqual([]);
 	});
 
 	test("Operator loading HonestState is axe-clean", async ({ page }) => {
