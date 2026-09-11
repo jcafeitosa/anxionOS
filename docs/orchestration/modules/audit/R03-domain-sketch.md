@@ -1,29 +1,40 @@
 ---
 type: debate
 ---
-
 # R03 — Esboço de domínio: `modules/audit`
 
-**Issue:** ANX-107
+**Issue:** ANX-107 · pack ANX-389  
+**Callers:** [R02-boundaries.md](./R02-boundaries.md) · [R04-contracts-events.md](./R04-contracts-events.md). Arquivo já existe. Sem dados de produção. Instrução: «3. **audit**».
 
 ## Agregados
 
-### DeltaRef (**ownerDomain=audit**)
-- Dono exclusivo de referências delta para replay/export
-- Outros módulos referenciam `deltaRefId` apenas
-
-### FlightRecorderChunk / AuditManifest / ReplaySession / AuditIndex
-- Ver R02; replay governado com grant `audit.replay` read-only
-
-## Nota
-
-DeltaRef aponta payload imutável; replay exige grant audit.replay read-only
+| Agregado | Papel |
+| --- | --- |
+| DeltaRef | ownerDomain=audit; outros módulos só `deltaRefId` |
+| AuditManifest | índice + hash chain |
+| FlightRecorderChunk | blob append-only |
+| ReplaySession | cursor read-only; grant `audit.replay` |
+| AuditIndex | checkpoint (organizationId, consumerName) |
 
 ## Ports
 
-| Port | Uso |
-| --- | --- |
-| EventConsumerPort | tap all events via eventing router |
-| EventEmitterPort | audit.manifest.recorded.v1, audit.replay.requested.v1, audit.replay.completed.v1 |
+AuditUnitOfWork, DomainEventTapPort, ObjectChunkPort, TraversalEvaluator, AgencyScopePort.
 
-→ **R04** ([R04-contracts-events.md](./R04-contracts-events.md))
+## Comandos / eventos
+
+requestReplay → `audit.replay.requested.v1`; completeReplay → `audit.replay.completed.v1`; ingest tap → `audit.manifest.recorded.v1`.
+
+**AUD-R03-01:** replay não chama commands de capital/execution. **AUD-R03-02:** chunk imutável.
+
+```mermaid
+stateDiagram-v2
+  [*] --> INDEXING
+  INDEXING --> READY
+  READY --> REPLAYING: grant audit.replay
+  REPLAYING --> COMPLETED
+  REPLAYING --> FAILED
+```
+
+## Saída R3
+
+Para R4.

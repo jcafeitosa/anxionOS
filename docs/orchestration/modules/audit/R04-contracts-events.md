@@ -39,8 +39,19 @@ Todo evento ingerido preserva: `eventId`, `eventType`, `schemaVersion`, `ownerDo
 | --- | --- |
 | `*` (eventing domain tap) | ingestDomainEventTap — append-only manifest chunk |
 
-## Erros
+## Oráculos
 
-`AUD_DUPLICATE_IDEMPOTENCY` · `AUD_CROSS_TENANT` · `AUD_GRANT_INVALID` · `AUD_REPLAY_FORBIDDEN`
+| ID | Esperado |
+| --- | --- |
+| G3-AUD-01 | tap dedupe por eventId |
+| G3-AUD-02 | replay read-only — zero writes em accounting |
+| G5-AUD-01 | export cross-tenant 403 |
+| G5-AUD-02 | UPDATE chunk rejeitado |
 
-→ **R05** ([R05-storage-pg.md](./R05-storage-pg.md))
+## Alternativas rejeitadas
+
+SQLite como trail único; replay que reexecuta ordens; pasta policies/.
+
+## Saída R4
+
+Para R5.
