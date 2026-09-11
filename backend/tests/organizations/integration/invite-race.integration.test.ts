@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+import { createPgPool } from "@anxionos/eventing/postgres";
 import {
 	createAgency,
 	createHmacInviteTokenHasher,
@@ -10,6 +11,7 @@ import {
 } from "@anxionos/organizations";
 import {
 	createStubPrincipalLookup,
+	getDatabaseUrl,
 	shouldRunPgIntegrationTests,
 	TEST_POOL_APPLICATION_NAME,
 	withOrganizationsPgHarness,
@@ -110,7 +112,18 @@ describe("convite concorrente contra PostgreSQL real (F-01)", () => {
 			// pelo pre-check e param exatamente no INSERT. Sem a barreira a corrida
 			// depende do timing e o teste passava mesmo com o defeito presente
 			// (verificado: `Promise.allSettled` sozinho dava falso verde).
-			const locker = await pool.connect();
+			// O locker usa um POOL DEDICADO: com `pool.connect()` do mesmo pool da
+			// carga, `CONCURRENCY` proximo de `pool.options.max` (default 10) faria o
+			// teste travar por EXAUSTAO DE POOL (o proprio
+			// `waitForBlockedMembershipWrites` precisa de uma conexao), e a falha
+			// apareceria como timeout, nao como bug do produto (INFO de G2/G3/G5).
+			const lockerUrl = new URL(getDatabaseUrl() ?? "");
+			lockerUrl.searchParams.set(
+				"application_name",
+				`${TEST_POOL_APPLICATION_NAME}-locker`,
+			);
+			const lockerPool = createPgPool(lockerUrl.toString());
+			const locker = await lockerPool.connect();
 			let pending: Array<Promise<unknown>> = [];
 			try {
 				await locker.query("BEGIN");
@@ -141,6 +154,7 @@ describe("convite concorrente contra PostgreSQL real (F-01)", () => {
 			} finally {
 				await locker.query("ROLLBACK").catch(() => undefined);
 				locker.release();
+				await lockerPool.end();
 			}
 			const results = await Promise.allSettled(pending);
 

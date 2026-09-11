@@ -106,6 +106,31 @@ describe("resolveClientIp", () => {
 		expect(() => resolveClientIp(request)).toThrow(AppError);
 	});
 
+	/**
+	 * ANX-486 — o codigo do envelope tem de pertencer ao enum canonico
+	 * `ERROR_CODES`. Antes a funcao mutava um `AppError` via `defineProperty` para
+	 * `CLIENT_IP_UNAVAILABLE`, que **nao existe** no catalogo, e o boundary
+	 * devolvia esse codigo cru — envelope invalido contra `errorResponseSchema`.
+	 */
+	test("ANX-486: o 503 usa o codigo canonico e leva o motivo em details", () => {
+		process.env.TRUST_PROXY = "false";
+		const request = new Request(
+			"http://localhost/v1/organizations/invites/accept",
+			{ headers: { "x-forwarded-for": "198.51.100.99" } },
+		);
+		let caught: unknown;
+		try {
+			resolveClientIp(request);
+		} catch (error) {
+			caught = error;
+		}
+		expect(caught).toBeInstanceOf(AppError);
+		const appError = caught as AppError;
+		expect(appError.code).toBe("SERVICE_UNAVAILABLE");
+		expect(appError.statusCode).toBe(503);
+		expect(appError.details).toEqual({ code: "CLIENT_IP_UNAVAILABLE" });
+	});
+
 	test("isTrustProxyEnabled parses common truthy values", () => {
 		process.env.TRUST_PROXY = "1";
 		expect(isTrustProxyEnabled()).toBe(true);

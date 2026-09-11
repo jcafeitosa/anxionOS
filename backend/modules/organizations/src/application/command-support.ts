@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import type { CommandResult } from "@anxionos/contracts/organizations";
 import { AgencyRevisionConflictError } from "../domain/errors/agency-errors";
 import {
+	type MembershipConflictConstraint,
 	MembershipRevisionConflictError,
 	MembershipUniquenessConflictError,
 } from "../domain/errors/membership-errors";
@@ -129,23 +130,6 @@ export async function loadIdempotentCommandResult(
 }
 
 /**
- * Executa uma gravacao de agregado traduzindo os conflitos de dominio em codigos
- * institucionais:
- *
- * - **corrida de revisao** → `ORG_REVISION_CONFLICT` (409). Sem isto o erro cru
- *   vazava ate' o boundary e o perdedor recebia **500** — os 8 modulos que ja'
- *   tem `<MOD>_REVISION_CONFLICT` sempre responderam 409 (S4a/S4c, ANX-460);
- * - **vinculo ativo duplicado** → `ORG_MEMBERSHIP_EXISTS` (409). O repositorio
- *   converte a violacao `23505` dos indices parciais de membership em
- *   `MembershipUniquenessConflictError`; sem este mapeamento o `23505` cru subia
- *   como 500 (F-01 dos gates G3/G4/G5: alcancavel pela transicao
- *   `revoked -> active` e pela corrida de convites duplicados).
- *
- * Nao use em `accept-invite-by-token`: ali o conflito de revisao e' mapeado para
- * um 404 opaco de proposito, para nao confirmar a existencia/consumo de um token.
- * O conflito de vinculo ativo, esse, vale para os dois (ANX-482).
- */
-/**
  * Mensagem unica do conflito de convite pendente. O caminho **sequencial**
  * (pre-check em `invite-member`) e o de **corrida** (indice parcial) precisam
  * dizer a MESMA coisa: antes divergiam (`Pending invite already exists for
@@ -165,31 +149,64 @@ export const PENDING_INVITE_CONFLICT_MESSAGE =
  * ESTE mapeamento para o de **unicidade** (G5 LOW-2). O indice de owner unico e'
  * hoje inalcancavel pela API, mas o mapeamento e' explicito.
  */
+/**
+ * Mapa **exaustivo** de constraint → resposta institucional. Exaustivo de
+ * proposito: com um `if/else` encadeado, uma 4a constraint adicionada a'
+ * allowlist cairia em **silencio** na mensagem de "vinculo ativo" — o mesmo
+ * drift que a mensagem unica combateu (G2 INFO + F-G4-1 do G4 na ANX-460). O
+ * tipo `Record<MembershipConflictConstraint, ...>` garante em compilacao que
+ * toda constraint da allowlist tem resposta propria.
+ */
+const MEMBERSHIP_CONFLICT_RESPONSES: Record<
+	MembershipConflictConstraint,
+	{ code: "ORG_OWNER_REQUIRED" | "ORG_MEMBERSHIP_EXISTS"; message: string }
+> = {
+	organizations_memberships_one_owner_active_uidx: {
+		code: "ORG_OWNER_REQUIRED",
+		message: "This agency already has an active owner",
+	},
+	organizations_memberships_agency_email_invited_uidx: {
+		code: "ORG_MEMBERSHIP_EXISTS",
+		message: PENDING_INVITE_CONFLICT_MESSAGE,
+	},
+	organizations_memberships_agency_principal_active_uidx: {
+		code: "ORG_MEMBERSHIP_EXISTS",
+		message: "Target principal already has an active membership in this agency",
+	},
+};
+
+/**
+ * Traduz o conflito de unicidade de membership no codigo institucional certo,
+ * derivado da CONSTRAINT ("convite pendente", "vinculo ativo" e "outro owner
+ * ativo" sao conflitos diferentes e o cliente precisa saber qual). Compartilhado
+ * entre o wrapper de gravacao e `acceptInviteByToken`, que trata o conflito de
+ * **revisao** de forma propria (404 opaco) mas usa ESTE mapeamento para o de
+ * **unicidade** (G5 LOW-2).
+ */
 export function throwMembershipUniquenessConflict(
 	error: MembershipUniquenessConflictError,
 ): never {
-	if (error.constraint === "organizations_memberships_one_owner_active_uidx") {
-		throwOrganizationError(
-			"ORG_OWNER_REQUIRED",
-			"This agency already has an active owner",
-			{ cause: error },
-		);
-	}
-	if (
-		error.constraint === "organizations_memberships_agency_email_invited_uidx"
-	) {
-		throwOrganizationError(
-			"ORG_MEMBERSHIP_EXISTS",
-			PENDING_INVITE_CONFLICT_MESSAGE,
-			{ cause: error },
-		);
-	}
-	throwOrganizationError(
-		"ORG_MEMBERSHIP_EXISTS",
-		"Target principal already has an active membership in this agency",
-		{ cause: error },
-	);
+	const response = MEMBERSHIP_CONFLICT_RESPONSES[error.constraint];
+	throwOrganizationError(response.code, response.message, { cause: error });
 }
+
+/**
+ * Executa uma gravacao de agregado traduzindo os conflitos de dominio em codigos
+ * institucionais:
+ *
+ * - **corrida de revisao** → `ORG_REVISION_CONFLICT` (409). Sem isto o erro cru
+ *   vazava ate' o boundary e o perdedor recebia **500** — os 8 modulos que ja'
+ *   tem `<MOD>_REVISION_CONFLICT` sempre responderam 409 (S4a/S4c, ANX-460);
+ * - **vinculo ativo duplicado** → `ORG_MEMBERSHIP_EXISTS` (409). O repositorio
+ *   converte a violacao `23505` dos indices parciais de membership em
+ *   `MembershipUniquenessConflictError`; sem este mapeamento o `23505` cru subia
+ *   como 500 (F-01 dos gates G3/G4/G5: alcancavel pela transicao
+ *   `revoked -> active` e pela corrida de convites duplicados).
+ *
+ * Nao use em `accept-invite-by-token`: ali o conflito de revisao e' mapeado para
+ * um 404 opaco de proposito, para nao confirmar a existencia/consumo de um token.
+ * O conflito de vinculo ativo, esse, vale para os dois (ANX-482).
+ */
 
 export async function saveWithRevisionConflictMapping<T>(
 	operation: () => Promise<T>,

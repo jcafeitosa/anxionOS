@@ -33,13 +33,21 @@ function clientIpFromConnection(
 	return address || undefined;
 }
 
+/**
+ * ANX-486 — o codigo tem de pertencer ao enum canonico `ERROR_CODES`. Antes esta
+ * funcao mutava um `AppError` via `Object.defineProperty` para um codigo
+ * `CLIENT_IP_UNAVAILABLE` que **nao existe** no catalogo: como `isAppError()`
+ * curto-circuita em `instanceof`, o boundary emitia esse codigo cru e o envelope
+ * ficava **invalido** contra `errorResponseSchema`/OpenAPI. Agora usa o codigo
+ * canonico de 503 e leva o motivo em `details.code`.
+ */
 function clientIpUnavailable(): never {
-	const error = AppError.validation(
-		"Client IP could not be determined for rate limiting",
-	);
-	Object.defineProperty(error, "statusCode", { value: 503 });
-	Object.defineProperty(error, "code", { value: "CLIENT_IP_UNAVAILABLE" });
-	throw error;
+	throw new AppError({
+		code: "SERVICE_UNAVAILABLE",
+		message: "Client IP could not be determined for rate limiting",
+		details: { code: "CLIENT_IP_UNAVAILABLE" },
+		expose: true,
+	});
 }
 
 export function resolveClientIp(

@@ -230,10 +230,15 @@ describe("reativacao assistida contra PostgreSQL real (F-01/F-02)", () => {
 				caught = error;
 			}
 			expect(caught).toBeInstanceOf(OrganizationCommandError);
-			expect((caught as OrganizationCommandError).organizationCode).toBe(
-				"ORG_MEMBERSHIP_EXISTS",
+			const commandError = caught as OrganizationCommandError;
+			expect(commandError.organizationCode).toBe("ORG_MEMBERSHIP_EXISTS");
+			expect(commandError.statusCode).toBe(409);
+			// G5 LOW: o aceite delega ao mapa por constraint. Sem assertar a
+			// mensagem, trocar a delegacao pela string fixa pre-fix mantinha unit e
+			// PG verdes (drift silencioso).
+			expect(commandError.message).toBe(
+				"Target principal already has an active membership in this agency",
 			);
-			expect((caught as OrganizationCommandError).statusCode).toBe(409);
 
 			const ownerMemberships = await pool.query<{ count: number }>(
 				`SELECT count(*)::int AS count FROM organizations_memberships

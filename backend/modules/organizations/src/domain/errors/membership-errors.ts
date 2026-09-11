@@ -20,7 +20,7 @@ export class MembershipRevisionConflictError extends Error {
  *
  * O nome nao fala em "active membership" de proposito: o mesmo erro cobre o
  * indice de convite pendente, e a mensagem ao cliente e' derivada da `constraint`
- * em `saveWithRevisionConflictMapping` (F-2 do G4 / LOW do G2).
+ * em `throwMembershipUniquenessConflict` (F-2 do G4 / LOW do G2).
  */
 export class MembershipUniquenessConflictError extends Error {
 	readonly constraint: MembershipConflictConstraint;

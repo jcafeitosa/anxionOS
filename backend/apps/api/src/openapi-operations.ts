@@ -781,7 +781,7 @@ export const organizationsOpenApi = {
 		operationId: "acceptInvite",
 		summary: "Accept invite by token",
 		description:
-			"Module: organizations. Accepts an invite for the authenticated session email. Rate-limited per client IP. Body `{ token }`. `Idempotency-Key` required.",
+			"Module: organizations. Accepts an invite for the authenticated session email (must match the invite email). Rate-limited per client IP. Owner authority is never granted here (409) — it is created only by `CreateAgency`/`TransferOwnership`. Body `{ token }`. `Idempotency-Key` required.",
 		security: COOKIE_SECURITY,
 		parameters: [idempotencyKey(), REQUEST_ID],
 		requestBody: jsonBody(

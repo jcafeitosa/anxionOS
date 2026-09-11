@@ -583,6 +583,14 @@ const ORGANIZATIONS_DESCRIPTION_INVARIANTS: Array<{
 		mustContain: ["principalId", "/ownership/transfer"],
 		mustNotContain: [],
 	},
+	{
+		operationId: "acceptInvite",
+		// O aceite recusa instalar autoridade de owner (D-ORG-049) e o contrato
+		// SERVIDO precisa dizer isso, como a descricao do `activateMembership` ja'
+		// dizia (assimetria apontada pelo G2 na ANX-460).
+		mustContain: ["Owner authority is never granted here"],
+		mustNotContain: [],
+	},
 ];
 
 type ServedOperation = { summary?: string; description?: string };
