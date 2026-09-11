@@ -1,32 +1,20 @@
 ---
 type: debate
 ---
-
 # R05 — Armazenamento: `modules/simulation`
 
-**Issue:** ANX-115 · **ANX-116**
-
-## Decisão
-
-PG manifests (autoritativo); Neo4j subgrafos opcional; SQLite sandbox **non-auth** por run
+**Rodada:** R5 · ANX-389 · ANX-115 · ANX-116  
+**Callers:** [R04-contracts-events.md](./R04-contracts-events.md) · [R06-dependencies.md](./R06-dependencies.md).  
+PG autoritativo (run state); Neo4j subgrafo opcional; SQLite sandbox **non-auth**; ST08 0/23; **sem migration**.
 
 ## Sandbox SQLite
 
-| Regra | Detalhe |
-| --- | --- |
-| Path | `{SANDBOX_ROOT}/{organizationId}/{runId}/sandbox.db` |
-| Permissões | 0700; processo worker isolado |
-| Cleanup | `ON COMPLETE` delete tree; TTL 24h failed runs |
-| Escape | sem attach external; sem `file:` URLs em input |
+Path `{SANDBOX_ROOT}/{organizationId}/{runId}/sandbox.db` · 0700 · cleanup ON COMPLETE · TTL 24h failed · sem attach external.
 
-## Invariantes
+Tabelas PG: `simulation_manifests` · `simulation_runs` · `simulation_snapshots` · `simulation_command_journal`
 
-| ID | Regra |
-| --- | --- |
-| SIM-R05-01 | PG autoritativo para run state |
-| SIM-R05-02 | Mutação+outbox mesma transação |
-| SIM-R05-03 | SQLite nunca autoritativo cross-tenant |
-| SIM-R05-04 | dataset hash mismatch → run FAILED |
-| SIM-R05-05 | RLS defer P09 |
+SIM-R05-01 PG run state · SIM-R05-02 UoW+outbox · SIM-R05-03 SQLite nunca verdade cross-tenant · SIM-R05-04 dataset hash · SIM-R05-05 RLS defer P09.
 
-→ **R06** ([R06-dependencies.md](./R06-dependencies.md))
+## Saída R5
+
+Modelo v1. Sem migration.

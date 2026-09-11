@@ -2,20 +2,11 @@
 type: debate
 status: draft
 ---
+# R10 — Pacote G0 (handoff): `modules/simulation`
 
-# R10 — Pacote G0: `modules/simulation`
+**Rodada:** R10 · ANX-389 · ANX-115 · **ANX-116** não executada  
+**Callers:** [R09-dev-plan.md](./R09-dev-plan.md) · [ROUNDS.md](./ROUNDS.md). Sem código.
 
-**Issues:** ANX-115 · **ANX-116**
+In: SimulationRun/Snapshot/Manifest/sandbox. Out: certification; execution REAL; pasta experiments/; D-GOV-010; spec accepted; ANX-342; G1.
 
-## PC-G0 — 10/10 ✅
-
-| Gate | PASS |
-| --- | --- |
-| G2–G6 | R04–R09 |
-| G7 | pendente ANX-115 |
-
-## Handoff
-
-Fila: **g0_ready**. **ANX-116** blocked_by ANX-115 G7.
-
-| G7-ready? | **Sim** |
+**Veredito P1:** G0 documental. Próximo: identity R01–R05 se contexto.

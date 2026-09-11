@@ -1,30 +1,26 @@
 ---
 type: debate
 ---
-
 # R03 — Esboço de domínio: `modules/simulation`
 
-**Issue:** ANX-115
+**Rodada:** R3 · ANX-389 · ANX-115  
+**Callers:** [R02-boundaries.md](./R02-boundaries.md) · [R04-contracts-events.md](./R04-contracts-events.md).
 
 ## Agregados
 
-SimulationRun, ScenarioSnapshot, TwinManifest, SandboxCheckpoint
-
-## Isolamento sandbox (verificável)
-
-| Controle | Limite |
+| Agregado | Notas |
 | --- | --- |
-| CPU/mem | quota por `organizationId` + run |
-| Dataset | proveniência `datasetRef` + hash; somente fixtures autorizados |
-| Network | deny-by-default; sem egress REAL |
-| FS | chroot SQLite path por run; cleanup on `COMPLETED`/`FAILED` |
-| Promoção | `TwinManifest.fidelityTier` — só `TIER_SIMULATED` pode emitir `simulation.run.completed` para evaluation |
+| TwinManifest | fidelityTier; só TIER_SIMULATED completa para evaluation |
+| ScenarioSnapshot | datasetRef + hash |
+| SimulationRun | seed; status; resultRef object store |
+| SandboxCheckpoint | path isolado; cleanup COMPLETED/FAILED |
+
+Isolamento: CPU/mem quota org+run; network deny-by-default; FS chroot SQLite; dataset hash mismatch → FAILED.
 
 ## Ports
 
-| Port | Uso |
-| --- | --- |
-| EventConsumerPort | `strategies.backtest.requested.v1` |
-| EventEmitterPort | simulation.run.started.v1, simulation.run.completed.v1, simulation.snapshot.created.v1 |
+SimulationRunRepository, SnapshotRepository, SimulationUnitOfWork, BacktestRunner (infra sandbox), AgencyScopePort, TraversalEvaluator, EventConsumer (`strategies.backtest.requested.v1`).
 
-→ **R04** ([R04-contracts-events.md](./R04-contracts-events.md))
+## Saída R3
+
+Modelo v1.
