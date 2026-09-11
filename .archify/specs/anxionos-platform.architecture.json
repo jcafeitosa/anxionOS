@@ -216,7 +216,7 @@
       "dot": "emerald",
       "title": "Evidência no repo",
       "items": [
-        "Esqueleto em backend/modules (23 donos + adapter-gateway fora do baseline)",
+        "23 donos ADR0002; adapter-gateway e lib de conformidade (ADR0006), nao 24o modulo — KEEP codigo; sem ficha/R10/Archify de modulo",
         "frontend/ Astro; API Bun+Elysia; eventing/database packages",
         "Implantação de produção não verificada"
       ]
