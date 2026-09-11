@@ -1,0 +1,1544 @@
+{
+  "accounting/R01-context.md": {
+    "mtime": 1788869825.209805,
+    "seen": 1789089069.7231061,
+    "ast_hash": "3e34094f1c031c54c02d592f20e4b064",
+    "semantic_hash": ""
+  },
+  "accounting/R02-boundaries.md": {
+    "mtime": 1788869825.210258,
+    "seen": 1789089069.7231119,
+    "ast_hash": "312fb3b1ad3e7b5bc19e0338b8be158f",
+    "semantic_hash": ""
+  },
+  "accounting/R03-domain-sketch.md": {
+    "mtime": 1788869825.210877,
+    "seen": 1789089069.723114,
+    "ast_hash": "e5bb9eca970e52a0b881d5c1ab0172b9",
+    "semantic_hash": ""
+  },
+  "accounting/R04-contracts-events.md": {
+    "mtime": 1788869825.2115085,
+    "seen": 1789089069.723115,
+    "ast_hash": "2e10db077d1404f927f407c463771330",
+    "semantic_hash": ""
+  },
+  "accounting/R05-storage-pg.md": {
+    "mtime": 1788869825.2121394,
+    "seen": 1789089069.723116,
+    "ast_hash": "8b6dc7757bf73e7411c770047bd6e26e",
+    "semantic_hash": ""
+  },
+  "accounting/R06-dependencies.md": {
+    "mtime": 1788869825.2128277,
+    "seen": 1789089069.723117,
+    "ast_hash": "2a6328094046cf3b381ff6563d2c8fb2",
+    "semantic_hash": ""
+  },
+  "accounting/R07-risks.md": {
+    "mtime": 1788869825.213182,
+    "seen": 1789089069.723118,
+    "ast_hash": "e682e3f384341a848bb8832d7064102d",
+    "semantic_hash": ""
+  },
+  "accounting/R08-decision-log.md": {
+    "mtime": 1788869825.2135916,
+    "seen": 1789089069.723119,
+    "ast_hash": "d75513626d5ecee3b13886c001e01cf9",
+    "semantic_hash": ""
+  },
+  "accounting/R09-dev-plan.md": {
+    "mtime": 1788869825.2140887,
+    "seen": 1789089069.7231202,
+    "ast_hash": "4c2a3263e1d52120826c9efdf179f6b0",
+    "semantic_hash": ""
+  },
+  "accounting/R10-g0-handoff.md": {
+    "mtime": 1788869825.2145047,
+    "seen": 1789089069.7231202,
+    "ast_hash": "cb4bcd90ea5625ec1ecec50814ff156d",
+    "semantic_hash": ""
+  },
+  "accounting/ROUNDS.md": {
+    "mtime": 1788869825.218931,
+    "seen": 1789089069.723121,
+    "ast_hash": "6f46986b0e771dc2c81be15ef58e21b0",
+    "semantic_hash": ""
+  },
+  "agents/R01-context.md": {
+    "mtime": 1789086091.983171,
+    "seen": 1789089069.723122,
+    "ast_hash": "ee9b77f49f9528c627634bb7460927db",
+    "semantic_hash": ""
+  },
+  "agents/R02-boundaries.md": {
+    "mtime": 1789086121.4149327,
+    "seen": 1789089069.7231228,
+    "ast_hash": "c4bb71dfdf585f5609c8a73512d59f23",
+    "semantic_hash": ""
+  },
+  "agents/R03-domain-sketch.md": {
+    "mtime": 1789086127.111599,
+    "seen": 1789089069.7231228,
+    "ast_hash": "e10b8af7fa90d6201c88821a6f41d2a1",
+    "semantic_hash": ""
+  },
+  "agents/R04-contracts.md": {
+    "mtime": 1789086151.0356295,
+    "seen": 1789089069.723124,
+    "ast_hash": "833d91756bfea223478e6b464e35509e",
+    "semantic_hash": ""
+  },
+  "agents/R05-storage.md": {
+    "mtime": 1789086159.117324,
+    "seen": 1789089069.723125,
+    "ast_hash": "3b8162ba60b762e2bad79d779d4b4667",
+    "semantic_hash": ""
+  },
+  "agents/R06-dependencies.md": {
+    "mtime": 1789086159.217852,
+    "seen": 1789089069.723126,
+    "ast_hash": "079428ce3460c882071f1582565b40a8",
+    "semantic_hash": ""
+  },
+  "agents/R07-risks.md": {
+    "mtime": 1789086176.804474,
+    "seen": 1789089069.723126,
+    "ast_hash": "2972babdb7dcdb47dd466d837ece2111",
+    "semantic_hash": ""
+  },
+  "agents/R08-decision-log.md": {
+    "mtime": 1789086184.3723042,
+    "seen": 1789089069.7231271,
+    "ast_hash": "5a93e66dc2423710fad77e9c48f25c4f",
+    "semantic_hash": ""
+  },
+  "agents/R09-dev-plan.md": {
+    "mtime": 1789086192.692566,
+    "seen": 1789089069.723128,
+    "ast_hash": "e3580e29e98775e7b6b017ccf0e29f99",
+    "semantic_hash": ""
+  },
+  "agents/R10-g0-handoff.md": {
+    "mtime": 1789086192.7628677,
+    "seen": 1789089069.723128,
+    "ast_hash": "5f139b544a51bf4ba0cc6234c6047a85",
+    "semantic_hash": ""
+  },
+  "agents/ROUNDS.md": {
+    "mtime": 1789086127.2404273,
+    "seen": 1789089069.723129,
+    "ast_hash": "bb9c0725d65ca024bce6a6da9c1f1708",
+    "semantic_hash": ""
+  },
+  "audit/R01-context.md": {
+    "mtime": 1788869825.298703,
+    "seen": 1789089069.7231302,
+    "ast_hash": "0ae9501e1bbd11d73f182f2f8015a0a2",
+    "semantic_hash": ""
+  },
+  "audit/R02-boundaries.md": {
+    "mtime": 1789087454.793549,
+    "seen": 1789089069.723131,
+    "ast_hash": "c1d93de5a3a2a4647ccc88383e3ef2bd",
+    "semantic_hash": ""
+  },
+  "audit/R03-domain-sketch.md": {
+    "mtime": 1789087485.0140886,
+    "seen": 1789089069.723131,
+    "ast_hash": "c43108d2e6b1dc0bd9e019f19407e87d",
+    "semantic_hash": ""
+  },
+  "audit/R04-contracts-events.md": {
+    "mtime": 1789087509.3851001,
+    "seen": 1789089069.723132,
+    "ast_hash": "b6d18f8785869775e8b56ee376a88a07",
+    "semantic_hash": ""
+  },
+  "audit/R05-storage-pg.md": {
+    "mtime": 1789087555.3615797,
+    "seen": 1789089069.7231328,
+    "ast_hash": "602db52a61782d7d6863fdd3e5b14fef",
+    "semantic_hash": ""
+  },
+  "audit/R06-dependencies.md": {
+    "mtime": 1789087619.8524883,
+    "seen": 1789089069.723134,
+    "ast_hash": "756d011dddf14dc309f6414536540df1",
+    "semantic_hash": ""
+  },
+  "audit/R07-risks.md": {
+    "mtime": 1789087671.207357,
+    "seen": 1789089069.723134,
+    "ast_hash": "de170b39c410f2c3b362c69f22a0a536",
+    "semantic_hash": ""
+  },
+  "audit/R08-decision-log.md": {
+    "mtime": 1789087724.0213778,
+    "seen": 1789089069.723135,
+    "ast_hash": "d0e0ebfdfe2ae9cd501709a8a7ba6db6",
+    "semantic_hash": ""
+  },
+  "audit/R09-dev-plan.md": {
+    "mtime": 1789087782.73994,
+    "seen": 1789089069.723136,
+    "ast_hash": "f626c48ebc39019c41bc7069d11c1c7b",
+    "semantic_hash": ""
+  },
+  "audit/R10-g0-handoff.md": {
+    "mtime": 1789087825.985679,
+    "seen": 1789089069.723136,
+    "ast_hash": "1d3aed72c3300051b0d8277cf669b50e",
+    "semantic_hash": ""
+  },
+  "audit/ROUNDS.md": {
+    "mtime": 1788869825.3077972,
+    "seen": 1789089069.7231371,
+    "ast_hash": "5e261f049bf136c5680a8172a7a3cf31",
+    "semantic_hash": ""
+  },
+  "billing/R01-context.md": {
+    "mtime": 1789088292.0426748,
+    "seen": 1789089069.723138,
+    "ast_hash": "2b7f9d84992a447f6e545c9a161cdaf1",
+    "semantic_hash": ""
+  },
+  "billing/R02-boundaries.md": {
+    "mtime": 1789088329.276066,
+    "seen": 1789089069.723139,
+    "ast_hash": "445ce5b0cd0d221cfc16544f54d57009",
+    "semantic_hash": ""
+  },
+  "billing/R03-domain-sketch.md": {
+    "mtime": 1789088338.0114512,
+    "seen": 1789089069.723139,
+    "ast_hash": "a7cb0c08f2085242fc50769596794620",
+    "semantic_hash": ""
+  },
+  "billing/R04-contracts-events.md": {
+    "mtime": 1789088345.0169146,
+    "seen": 1789089069.72314,
+    "ast_hash": "a44a0e1bbb195d5c766042148383d7d8",
+    "semantic_hash": ""
+  },
+  "billing/R05-storage-pg.md": {
+    "mtime": 1789088351.2676697,
+    "seen": 1789089069.7231412,
+    "ast_hash": "56e3472ca3d864b587e91b8bc786b5d8",
+    "semantic_hash": ""
+  },
+  "billing/R06-dependencies.md": {
+    "mtime": 1789088358.500141,
+    "seen": 1789089069.7231412,
+    "ast_hash": "f5be76ce0fa10bdb9572c33b273ef5c2",
+    "semantic_hash": ""
+  },
+  "billing/R07-risks.md": {
+    "mtime": 1789088363.8041968,
+    "seen": 1789089069.723142,
+    "ast_hash": "b4d48b45562883cc957b757dbdb7a01c",
+    "semantic_hash": ""
+  },
+  "billing/R08-decision-log.md": {
+    "mtime": 1789088368.9542165,
+    "seen": 1789089069.7231429,
+    "ast_hash": "544eb4f8b58e20f0567f9d885cbc0bd9",
+    "semantic_hash": ""
+  },
+  "billing/R09-dev-plan.md": {
+    "mtime": 1789088374.507472,
+    "seen": 1789089069.723144,
+    "ast_hash": "4492c054e3990f17aa1395a9348fc8c4",
+    "semantic_hash": ""
+  },
+  "billing/R10-g0-handoff.md": {
+    "mtime": 1789088375.1108775,
+    "seen": 1789089069.723144,
+    "ast_hash": "6cec34e02dc1d1a68f755879082d8de2",
+    "semantic_hash": ""
+  },
+  "billing/ROUNDS.md": {
+    "mtime": 1789088292.3336248,
+    "seen": 1789089069.723145,
+    "ast_hash": "87e811245208b15f281709fbd06e1967",
+    "semantic_hash": ""
+  },
+  "capital/R01-context.md": {
+    "mtime": 1788869825.196647,
+    "seen": 1789089069.723146,
+    "ast_hash": "653e96a38a4d4a8e6235c8664a657656",
+    "semantic_hash": ""
+  },
+  "capital/R02-boundaries.md": {
+    "mtime": 1788869825.1970918,
+    "seen": 1789089069.723147,
+    "ast_hash": "af4b6d55777306d07fac3ab07494c3ca",
+    "semantic_hash": ""
+  },
+  "capital/R03-domain-sketch.md": {
+    "mtime": 1788869825.1976335,
+    "seen": 1789089069.723148,
+    "ast_hash": "900479187d417113713c0877ac7dd6ba",
+    "semantic_hash": ""
+  },
+  "capital/R04-contracts-events.md": {
+    "mtime": 1788869825.198035,
+    "seen": 1789089069.723148,
+    "ast_hash": "f92355a02b462ebfe22c43bb26655aef",
+    "semantic_hash": ""
+  },
+  "capital/R05-storage-pg.md": {
+    "mtime": 1788869825.198407,
+    "seen": 1789089069.723149,
+    "ast_hash": "367c3280df1af46ded6e3defabe73ea3",
+    "semantic_hash": ""
+  },
+  "capital/R06-dependencies.md": {
+    "mtime": 1788869825.1986816,
+    "seen": 1789089069.72315,
+    "ast_hash": "e1b1f76d844026d23ff19260b2830b5f",
+    "semantic_hash": ""
+  },
+  "capital/R07-risks.md": {
+    "mtime": 1788869825.1991313,
+    "seen": 1789089069.7231512,
+    "ast_hash": "27e4704a78b88f66267cb12ac5b79be4",
+    "semantic_hash": ""
+  },
+  "capital/R08-decision-log.md": {
+    "mtime": 1788869825.1994357,
+    "seen": 1789089069.7231512,
+    "ast_hash": "84e33fc6c1caad28a259f3b42a824cc1",
+    "semantic_hash": ""
+  },
+  "capital/R09-dev-plan.md": {
+    "mtime": 1788882161.7605727,
+    "seen": 1789089069.723152,
+    "ast_hash": "95a28b6cb45ca079ab9a36f6cf38c5a1",
+    "semantic_hash": ""
+  },
+  "capital/R10-g0-handoff.md": {
+    "mtime": 1788869825.2000887,
+    "seen": 1789089069.7231529,
+    "ast_hash": "8a73955f33eff1faaad33a5ba2f8a9ad",
+    "semantic_hash": ""
+  },
+  "capital/ROUNDS.md": {
+    "mtime": 1788869825.2039058,
+    "seen": 1789089069.7231538,
+    "ast_hash": "c36e74da20d8fb1c5e0846a06ea8418f",
+    "semantic_hash": ""
+  },
+  "connections/R01-context.md": {
+    "mtime": 1788848847.6621077,
+    "seen": 1789089069.7231538,
+    "ast_hash": "2d4284a63479f89a0f38199884ebacb4",
+    "semantic_hash": ""
+  },
+  "connections/R02-boundaries.md": {
+    "mtime": 1788848998.2357533,
+    "seen": 1789089069.723155,
+    "ast_hash": "a106778eb2467da19dcade5e59e3c5f1",
+    "semantic_hash": ""
+  },
+  "connections/R03-domain-sketch.md": {
+    "mtime": 1788849407.8560007,
+    "seen": 1789089069.723156,
+    "ast_hash": "ec14b096ff7b8e2f27a754da47ff0313",
+    "semantic_hash": ""
+  },
+  "connections/R04-contracts-events.md": {
+    "mtime": 1788849614.2089486,
+    "seen": 1789089069.723156,
+    "ast_hash": "0b525622f4fb7941f30d7454862a703a",
+    "semantic_hash": ""
+  },
+  "connections/R05-storage-pg.md": {
+    "mtime": 1788849601.4169476,
+    "seen": 1789089069.723157,
+    "ast_hash": "2b41fc9f43aac5d6e7e1558a0c0eb32a",
+    "semantic_hash": ""
+  },
+  "connections/R06-dependencies.md": {
+    "mtime": 1788849841.6852498,
+    "seen": 1789089069.7231581,
+    "ast_hash": "30f1535cd8216e5cb329f86cc87071e5",
+    "semantic_hash": ""
+  },
+  "connections/R07-risks.md": {
+    "mtime": 1788850058.69926,
+    "seen": 1789089069.723159,
+    "ast_hash": "8382d6f1a3d8bc386538b9d181f7c093",
+    "semantic_hash": ""
+  },
+  "connections/R08-decision-log.md": {
+    "mtime": 1788850296.0650547,
+    "seen": 1789089069.723159,
+    "ast_hash": "2531274b481e814313b4f3a2687e0d91",
+    "semantic_hash": ""
+  },
+  "connections/R09-dev-plan.md": {
+    "mtime": 1788850367.5095084,
+    "seen": 1789089069.72316,
+    "ast_hash": "b22d585545491e26994bb95eff55841b",
+    "semantic_hash": ""
+  },
+  "connections/R10-g0-handoff.md": {
+    "mtime": 1788881973.5333693,
+    "seen": 1789089069.723161,
+    "ast_hash": "3197caaf160a1dadf19ea40586ae96f8",
+    "semantic_hash": ""
+  },
+  "connections/ROUNDS.md": {
+    "mtime": 1788850403.882913,
+    "seen": 1789089069.723161,
+    "ast_hash": "9240ff2eeff15af5a8cb3be6bd2d3854",
+    "semantic_hash": ""
+  },
+  "decisions/R01-context.md": {
+    "mtime": 1788869825.2389612,
+    "seen": 1789089069.7231622,
+    "ast_hash": "49243d548d988188987a4b6c3d5b2e7f",
+    "semantic_hash": ""
+  },
+  "decisions/R02-boundaries.md": {
+    "mtime": 1788869825.2392962,
+    "seen": 1789089069.723163,
+    "ast_hash": "37da8acf799b96d7ec1bca0ad84dd0a5",
+    "semantic_hash": ""
+  },
+  "decisions/R03-domain-sketch.md": {
+    "mtime": 1788869825.239635,
+    "seen": 1789089069.723163,
+    "ast_hash": "c9af741112ed60e53ae9398bfbc6fb7a",
+    "semantic_hash": ""
+  },
+  "decisions/R04-contracts-events.md": {
+    "mtime": 1788882161.7632744,
+    "seen": 1789089069.7231638,
+    "ast_hash": "a5d2be8011aab747ebc2358b15b7abcf",
+    "semantic_hash": ""
+  },
+  "decisions/R05-storage-pg.md": {
+    "mtime": 1788869825.240365,
+    "seen": 1789089069.723165,
+    "ast_hash": "3cadc95b97cbddf0a4c45a38dc348b1f",
+    "semantic_hash": ""
+  },
+  "decisions/R06-dependencies.md": {
+    "mtime": 1788869825.2407353,
+    "seen": 1789089069.723165,
+    "ast_hash": "9ec09d2945a7f28b9c30845f2d2feb77",
+    "semantic_hash": ""
+  },
+  "decisions/R07-risks.md": {
+    "mtime": 1788869825.24112,
+    "seen": 1789089069.723166,
+    "ast_hash": "c2b4777d2410ad09255b241310313cc4",
+    "semantic_hash": ""
+  },
+  "decisions/R08-decision-log.md": {
+    "mtime": 1788869825.2415411,
+    "seen": 1789089069.723167,
+    "ast_hash": "cb7251f45e979ea1982d8ddd98f00815",
+    "semantic_hash": ""
+  },
+  "decisions/R09-dev-plan.md": {
+    "mtime": 1788882161.7639823,
+    "seen": 1789089069.723168,
+    "ast_hash": "03b709d16114ad6ae7c631c7af879516",
+    "semantic_hash": ""
+  },
+  "decisions/R10-g0-handoff.md": {
+    "mtime": 1788869825.2422311,
+    "seen": 1789089069.723168,
+    "ast_hash": "e0edb057068e6ed3908988270b16644a",
+    "semantic_hash": ""
+  },
+  "decisions/ROUNDS.md": {
+    "mtime": 1788869825.2459004,
+    "seen": 1789089069.723169,
+    "ast_hash": "4fe084035230b77cacec1577ee0d2689",
+    "semantic_hash": ""
+  },
+  "evaluation/R01-context.md": {
+    "mtime": 1789088778.9967546,
+    "seen": 1789089069.72317,
+    "ast_hash": "53d409d8738c5fef9be8d191bcf96515",
+    "semantic_hash": ""
+  },
+  "evaluation/R02-boundaries.md": {
+    "mtime": 1789088782.002329,
+    "seen": 1789089069.723171,
+    "ast_hash": "97aacd193ce505e5e36f9ee6df9ed78e",
+    "semantic_hash": ""
+  },
+  "evaluation/R03-domain-sketch.md": {
+    "mtime": 1789088787.146842,
+    "seen": 1789089069.723171,
+    "ast_hash": "c1eb9cbab3d8702c7355a9fb40dc3adb",
+    "semantic_hash": ""
+  },
+  "evaluation/R04-contracts-events.md": {
+    "mtime": 1789088788.925487,
+    "seen": 1789089069.7231722,
+    "ast_hash": "16ba4e655511cc921adbc31685ace4fb",
+    "semantic_hash": ""
+  },
+  "evaluation/R05-storage-pg.md": {
+    "mtime": 1789088793.018984,
+    "seen": 1789089069.7231731,
+    "ast_hash": "cddb6e1d5829b2ce5ab1a178dc2e8cc0",
+    "semantic_hash": ""
+  },
+  "evaluation/R06-dependencies.md": {
+    "mtime": 1789088794.7729657,
+    "seen": 1789089069.7231739,
+    "ast_hash": "a9a0291f73ec9295b4c3c41f465b78b0",
+    "semantic_hash": ""
+  },
+  "evaluation/R07-risks.md": {
+    "mtime": 1789088798.5523674,
+    "seen": 1789089069.7231739,
+    "ast_hash": "3cc3bf59baddb1d32c673e86dc81640c",
+    "semantic_hash": ""
+  },
+  "evaluation/R08-decision-log.md": {
+    "mtime": 1789088799.9544425,
+    "seen": 1789089069.7231748,
+    "ast_hash": "a05dd6145b266bb8b434e8f6a0f45349",
+    "semantic_hash": ""
+  },
+  "evaluation/R09-dev-plan.md": {
+    "mtime": 1789088803.9500184,
+    "seen": 1789089069.723176,
+    "ast_hash": "c749c6089b666ec8dd57eda779184d95",
+    "semantic_hash": ""
+  },
+  "evaluation/R10-g0-handoff.md": {
+    "mtime": 1789088804.0799837,
+    "seen": 1789089069.723177,
+    "ast_hash": "a66712109f9e70cc133a1a3c4a6d0047",
+    "semantic_hash": ""
+  },
+  "evaluation/ROUNDS.md": {
+    "mtime": 1789088774.1455631,
+    "seen": 1789089069.723178,
+    "ast_hash": "4fb52b868e423d8bb91ea85fe8c6dc2d",
+    "semantic_hash": ""
+  },
+  "execution/R01-context.md": {
+    "mtime": 1788869825.2638428,
+    "seen": 1789089069.723179,
+    "ast_hash": "b88318e09a9f96dfb1c582acdcc1e5a4",
+    "semantic_hash": ""
+  },
+  "execution/R02-boundaries.md": {
+    "mtime": 1788869825.264252,
+    "seen": 1789089069.72318,
+    "ast_hash": "a24ee233b3d2568179536a4d2cf0b892",
+    "semantic_hash": ""
+  },
+  "execution/R03-domain-sketch.md": {
+    "mtime": 1788869825.264495,
+    "seen": 1789089069.72318,
+    "ast_hash": "ea411d09de79fb610949e76d64cf9fa8",
+    "semantic_hash": ""
+  },
+  "execution/R04-contracts-events.md": {
+    "mtime": 1788869825.2648351,
+    "seen": 1789089069.723181,
+    "ast_hash": "5f0a16757704802a2e180b9582be486e",
+    "semantic_hash": ""
+  },
+  "execution/R05-storage-pg.md": {
+    "mtime": 1788869825.2651572,
+    "seen": 1789089069.723182,
+    "ast_hash": "82de6f907ff471fc8f4d6ead5f5dcd54",
+    "semantic_hash": ""
+  },
+  "execution/R06-dependencies.md": {
+    "mtime": 1788869825.265493,
+    "seen": 1789089069.723182,
+    "ast_hash": "bdf75366f981a2253dc4e2c4c508a69c",
+    "semantic_hash": ""
+  },
+  "execution/R07-risks.md": {
+    "mtime": 1788869825.2659192,
+    "seen": 1789089069.7231832,
+    "ast_hash": "4273741985250c7d7ef102250d7b067a",
+    "semantic_hash": ""
+  },
+  "execution/R08-decision-log.md": {
+    "mtime": 1788869825.2662327,
+    "seen": 1789089069.723184,
+    "ast_hash": "100a289a64ffe68922619dd55ebd6d2a",
+    "semantic_hash": ""
+  },
+  "execution/R09-dev-plan.md": {
+    "mtime": 1788869825.2665448,
+    "seen": 1789089069.7231848,
+    "ast_hash": "ba0d6680e70d845cfaa3fbeabb50caa1",
+    "semantic_hash": ""
+  },
+  "execution/R10-g0-handoff.md": {
+    "mtime": 1788869825.2668302,
+    "seen": 1789089069.723186,
+    "ast_hash": "ddd515f629e3de2044b5106e6dec1583",
+    "semantic_hash": ""
+  },
+  "execution/ROUNDS.md": {
+    "mtime": 1788869825.2703772,
+    "seen": 1789089069.723186,
+    "ast_hash": "26106932ee2263919195cde8028f063a",
+    "semantic_hash": ""
+  },
+  "governance/R01-context.md": {
+    "mtime": 1788840006.587599,
+    "seen": 1789089069.723187,
+    "ast_hash": "7506726b291bfed1a023805c31158e03",
+    "semantic_hash": ""
+  },
+  "governance/R02-boundaries.md": {
+    "mtime": 1788840006.9214466,
+    "seen": 1789089069.723188,
+    "ast_hash": "62ba12228974b51cdec30418a0b5c54c",
+    "semantic_hash": ""
+  },
+  "governance/R03-domain-sketch.md": {
+    "mtime": 1788840007.015787,
+    "seen": 1789089069.7231889,
+    "ast_hash": "5bd1828c53fe1e621c61a2206ff3d001",
+    "semantic_hash": ""
+  },
+  "governance/R04-contracts.md": {
+    "mtime": 1788840006.8676775,
+    "seen": 1789089069.7231889,
+    "ast_hash": "cab0fc29b7a856f379dc5fbc49aec6cc",
+    "semantic_hash": ""
+  },
+  "governance/R05-storage.md": {
+    "mtime": 1788840006.959277,
+    "seen": 1789089069.72319,
+    "ast_hash": "db81772d2617bea6fb27fd24bc40341d",
+    "semantic_hash": ""
+  },
+  "governance/R06-dependencies.md": {
+    "mtime": 1788840007.0553877,
+    "seen": 1789089069.723191,
+    "ast_hash": "4af085fb9b361a975c0aa1f3fccb848f",
+    "semantic_hash": ""
+  },
+  "governance/R07-risks.md": {
+    "mtime": 1788840007.0881584,
+    "seen": 1789089069.723191,
+    "ast_hash": "991078a7dd59d9396ce4c4cbf5ad51d7",
+    "semantic_hash": ""
+  },
+  "governance/R08-decision-log.md": {
+    "mtime": 1788840007.1609383,
+    "seen": 1789089069.723192,
+    "ast_hash": "fbc8797b6f80ecf36c47c330863f8fa2",
+    "semantic_hash": ""
+  },
+  "governance/R09-dev-plan.md": {
+    "mtime": 1788840007.126889,
+    "seen": 1789089069.7231932,
+    "ast_hash": "71d4e2b301748164731697d7878b0af3",
+    "semantic_hash": ""
+  },
+  "governance/R10-g0-handoff.md": {
+    "mtime": 1788854154.6981487,
+    "seen": 1789089069.7231941,
+    "ast_hash": "6ffce65af01c7664528b5617c9c6b29b",
+    "semantic_hash": ""
+  },
+  "governance/ROUNDS.md": {
+    "mtime": 1788840007.2147472,
+    "seen": 1789089069.7231941,
+    "ast_hash": "bd785bd88bb90dfa36e880204fb63b64",
+    "semantic_hash": ""
+  },
+  "governance/SLACK-TRANSCRIPTS.md": {
+    "mtime": 1788840007.2938468,
+    "seen": 1789089069.7231948,
+    "ast_hash": "37b7ff723df7983fc3aa0d9eca9f3cbd",
+    "semantic_hash": ""
+  },
+  "graph/R01-context.md": {
+    "mtime": 1789086298.4348395,
+    "seen": 1789089069.7231958,
+    "ast_hash": "87fbcbc46a825204cc929d72054f91b7",
+    "semantic_hash": ""
+  },
+  "graph/R02-boundaries.md": {
+    "mtime": 1789086329.1113698,
+    "seen": 1789089069.7231958,
+    "ast_hash": "ea1a2ce04d537b3b7e8193615acf2483",
+    "semantic_hash": ""
+  },
+  "graph/R03-domain-sketch.md": {
+    "mtime": 1789086308.98654,
+    "seen": 1789089069.723197,
+    "ast_hash": "8f2570ec5d25635d082205a75c2819ed",
+    "semantic_hash": ""
+  },
+  "graph/R04-contracts.md": {
+    "mtime": 1789086312.4116192,
+    "seen": 1789089069.723198,
+    "ast_hash": "75c753da57bf585d024f0b8fd4be59be",
+    "semantic_hash": ""
+  },
+  "graph/R05-storage.md": {
+    "mtime": 1789086316.6259124,
+    "seen": 1789089069.723198,
+    "ast_hash": "d5938126902005948b598dcc5870fef3",
+    "semantic_hash": ""
+  },
+  "graph/R06-dependencies.md": {
+    "mtime": 1789086333.0134692,
+    "seen": 1789089069.723199,
+    "ast_hash": "fa4822aec16dd40eb4ca1cc56a2984c1",
+    "semantic_hash": ""
+  },
+  "graph/R07-risks.md": {
+    "mtime": 1789086336.572041,
+    "seen": 1789089069.7232,
+    "ast_hash": "2021a61ab75a4602fd4a00e1876279fb",
+    "semantic_hash": ""
+  },
+  "graph/R08-decision-log.md": {
+    "mtime": 1789086339.4457204,
+    "seen": 1789089069.723201,
+    "ast_hash": "fb49b5bbbac60442405869170a3fa39d",
+    "semantic_hash": ""
+  },
+  "graph/R09-dev-plan.md": {
+    "mtime": 1789089043.359631,
+    "seen": 1789089069.723201,
+    "ast_hash": "819bd512a734fd8df405ebac5f9effbc",
+    "semantic_hash": ""
+  },
+  "graph/R10-g0-handoff.md": {
+    "mtime": 1789086347.475152,
+    "seen": 1789089069.723202,
+    "ast_hash": "695fb622f4631e7045f5ce78809cf974",
+    "semantic_hash": ""
+  },
+  "graph/ROUNDS.md": {
+    "mtime": 1789086347.614367,
+    "seen": 1789089069.7232032,
+    "ast_hash": "71cada41ea2e470c7e17156a8e958ce4",
+    "semantic_hash": ""
+  },
+  "graph/node-get-neighbors-api-v1.md": {
+    "mtime": 1788838131.9854283,
+    "seen": 1789089069.7232041,
+    "ast_hash": "0537a911a3cb0821bb5c5e79eef9ee46",
+    "semantic_hash": ""
+  },
+  "graph/t01-t05-fixtures-v1.md": {
+    "mtime": 1788837884.9346704,
+    "seen": 1789089069.7232041,
+    "ast_hash": "d8f9e193e547db57ff88f583dd44cc7a",
+    "semantic_hash": ""
+  },
+  "identity/R01-context.md": {
+    "mtime": 1789089027.9626584,
+    "seen": 1789089069.723205,
+    "ast_hash": "0c983862926e92825420e1c14d27af10",
+    "semantic_hash": ""
+  },
+  "identity/R02-boundaries.md": {
+    "mtime": 1789089033.527349,
+    "seen": 1789089069.7232058,
+    "ast_hash": "fe12ead0c65a49183a7ddaac109ec9cb",
+    "semantic_hash": ""
+  },
+  "identity/R03-domain-sketch.md": {
+    "mtime": 1789089034.5027857,
+    "seen": 1789089069.7232058,
+    "ast_hash": "38d548b9fb6b0b471b3873805eaefb35",
+    "semantic_hash": ""
+  },
+  "identity/R04-contracts.md": {
+    "mtime": 1789089038.4792137,
+    "seen": 1789089069.723207,
+    "ast_hash": "b780de5c46bcc3518de4de551cf954e7",
+    "semantic_hash": ""
+  },
+  "identity/R05-storage.md": {
+    "mtime": 1789089043.3902006,
+    "seen": 1789089069.723208,
+    "ast_hash": "5e0ae40a0516bd3afcc4d980b0ca386f",
+    "semantic_hash": ""
+  },
+  "identity/R06-dependencies.md": {
+    "mtime": 1788844901.3261929,
+    "seen": 1789089069.723208,
+    "ast_hash": "e5753b4d20c9f2ac8da3a8dcbf297d1d",
+    "semantic_hash": ""
+  },
+  "identity/R07-risks.md": {
+    "mtime": 1788844922.096529,
+    "seen": 1789089069.723209,
+    "ast_hash": "48d2022d6c6cfd768c8c4845173ed6e0",
+    "semantic_hash": ""
+  },
+  "identity/R08-decision-log.md": {
+    "mtime": 1788846010.9834876,
+    "seen": 1789089069.72321,
+    "ast_hash": "60a694d99a6185762871f58f3ac35e12",
+    "semantic_hash": ""
+  },
+  "identity/R09-dev-plan.md": {
+    "mtime": 1788844981.4057624,
+    "seen": 1789089069.72321,
+    "ast_hash": "2dd08c08a73744a3278e5db5ecf80819",
+    "semantic_hash": ""
+  },
+  "identity/R10-g0-handoff.md": {
+    "mtime": 1788846009.864065,
+    "seen": 1789089069.723211,
+    "ast_hash": "fe7703be2d096f4618cf23c9fc5c886e",
+    "semantic_hash": ""
+  },
+  "identity/ROUNDS.md": {
+    "mtime": 1789086425.0578327,
+    "seen": 1789089069.723212,
+    "ast_hash": "65fe994a185b65c6be5d27d7ef60e0fe",
+    "semantic_hash": ""
+  },
+  "knowledge/R01-context.md": {
+    "mtime": 1788869825.1596997,
+    "seen": 1789089069.723212,
+    "ast_hash": "91a1533f5af692abb751013a80ba35df",
+    "semantic_hash": ""
+  },
+  "knowledge/R02-boundaries.md": {
+    "mtime": 1788869825.1600974,
+    "seen": 1789089069.723213,
+    "ast_hash": "6b0ed28c5b75864545baa316c78e514f",
+    "semantic_hash": ""
+  },
+  "knowledge/R03-domain-sketch.md": {
+    "mtime": 1788869825.1606057,
+    "seen": 1789089069.7232141,
+    "ast_hash": "8368eda418f4a2ae9438c8ad9798716f",
+    "semantic_hash": ""
+  },
+  "knowledge/R04-contracts-events.md": {
+    "mtime": 1788869825.1609373,
+    "seen": 1789089069.723215,
+    "ast_hash": "feebd01416787b4f55c7f12938bc4303",
+    "semantic_hash": ""
+  },
+  "knowledge/R05-storage-pg.md": {
+    "mtime": 1788869825.1616201,
+    "seen": 1789089069.723215,
+    "ast_hash": "b0b2ebc8a6f9477bb27aa8eab76ca856",
+    "semantic_hash": ""
+  },
+  "knowledge/R06-dependencies.md": {
+    "mtime": 1788869825.1620207,
+    "seen": 1789089069.7232158,
+    "ast_hash": "a335261c088b0745a5048cd51b69f319",
+    "semantic_hash": ""
+  },
+  "knowledge/R07-risks.md": {
+    "mtime": 1788869825.1622832,
+    "seen": 1789089069.723217,
+    "ast_hash": "3ec9503c63afbc7ebc665ddaa1e240a0",
+    "semantic_hash": ""
+  },
+  "knowledge/R08-decision-log.md": {
+    "mtime": 1788869825.1626675,
+    "seen": 1789089069.723217,
+    "ast_hash": "c51e3311068e70cd3deff2462acf752d",
+    "semantic_hash": ""
+  },
+  "knowledge/R09-dev-plan.md": {
+    "mtime": 1788869825.1629925,
+    "seen": 1789089069.723218,
+    "ast_hash": "c8e14558cf87e23d088384008061b911",
+    "semantic_hash": ""
+  },
+  "knowledge/R10-g0-handoff.md": {
+    "mtime": 1788882459.8520255,
+    "seen": 1789089069.723219,
+    "ast_hash": "8c8c16ceb57672905afd2aad16f48a06",
+    "semantic_hash": ""
+  },
+  "knowledge/ROUNDS.md": {
+    "mtime": 1788869825.1662812,
+    "seen": 1789089069.723219,
+    "ast_hash": "d0857d8edfc3e7cdfd58cff78596e625",
+    "semantic_hash": ""
+  },
+  "market-data/R01-context.md": {
+    "mtime": 1788869825.172193,
+    "seen": 1789089069.7232199,
+    "ast_hash": "ae1c2380443ec99ea028c19a097cb842",
+    "semantic_hash": ""
+  },
+  "market-data/R02-boundaries.md": {
+    "mtime": 1788869825.1726696,
+    "seen": 1789089069.723221,
+    "ast_hash": "68038c8c81455ab77d83e89e6bd7b1d1",
+    "semantic_hash": ""
+  },
+  "market-data/R03-domain-sketch.md": {
+    "mtime": 1788869825.1730855,
+    "seen": 1789089069.723222,
+    "ast_hash": "8d356574fc02660ea93cd4709eefd5bb",
+    "semantic_hash": ""
+  },
+  "market-data/R04-contracts-events.md": {
+    "mtime": 1788869825.173419,
+    "seen": 1789089069.723222,
+    "ast_hash": "c66c08a70e5b540552f49abf3af99486",
+    "semantic_hash": ""
+  },
+  "market-data/R05-storage-pg.md": {
+    "mtime": 1788869825.1737607,
+    "seen": 1789089069.723223,
+    "ast_hash": "3525653ce4e845b370d01db353a1726a",
+    "semantic_hash": ""
+  },
+  "market-data/R06-dependencies.md": {
+    "mtime": 1788869825.1740935,
+    "seen": 1789089069.7232242,
+    "ast_hash": "d17839ec61e508b0fd0fbc2dbf38ec21",
+    "semantic_hash": ""
+  },
+  "market-data/R07-risks.md": {
+    "mtime": 1788869825.1744425,
+    "seen": 1789089069.7232242,
+    "ast_hash": "89e0553c8a7cf3d5010caa4ff273acdf",
+    "semantic_hash": ""
+  },
+  "market-data/R08-decision-log.md": {
+    "mtime": 1788869825.1747632,
+    "seen": 1789089069.723225,
+    "ast_hash": "09a20bb554db23638edd8e84ee744c78",
+    "semantic_hash": ""
+  },
+  "market-data/R09-dev-plan.md": {
+    "mtime": 1788869825.1750383,
+    "seen": 1789089069.723226,
+    "ast_hash": "861bfb6707bae21ab89ad4b33dabfff0",
+    "semantic_hash": ""
+  },
+  "market-data/R10-g0-handoff.md": {
+    "mtime": 1788869825.1752856,
+    "seen": 1789089069.7232268,
+    "ast_hash": "fba453bf10606eac2503d7d330c4db90",
+    "semantic_hash": ""
+  },
+  "market-data/ROUNDS.md": {
+    "mtime": 1788869825.177832,
+    "seen": 1789089069.7232268,
+    "ast_hash": "3a7efacf06f1f766885e440909367006",
+    "semantic_hash": ""
+  },
+  "operations/R01-context.md": {
+    "mtime": 1789088660.7970533,
+    "seen": 1789089069.723228,
+    "ast_hash": "e240970582c00e749d8485386f07afa1",
+    "semantic_hash": ""
+  },
+  "operations/R02-boundaries.md": {
+    "mtime": 1789088663.9521658,
+    "seen": 1789089069.723229,
+    "ast_hash": "8d56351dc4037efbb871905e74feb17c",
+    "semantic_hash": ""
+  },
+  "operations/R03-domain-sketch.md": {
+    "mtime": 1789088668.713021,
+    "seen": 1789089069.72323,
+    "ast_hash": "7700631f40e7d08c6b37c5fafca374ea",
+    "semantic_hash": ""
+  },
+  "operations/R04-contracts-events.md": {
+    "mtime": 1789088672.6692965,
+    "seen": 1789089069.72323,
+    "ast_hash": "8efc8c87d4bd81ce2501135f0638b308",
+    "semantic_hash": ""
+  },
+  "operations/R05-storage-pg.md": {
+    "mtime": 1789088674.5180542,
+    "seen": 1789089069.723231,
+    "ast_hash": "ee71996f3d8d288644cbed49a344afe7",
+    "semantic_hash": ""
+  },
+  "operations/R06-dependencies.md": {
+    "mtime": 1789088678.4176767,
+    "seen": 1789089069.723232,
+    "ast_hash": "50383d57597a6f1bb338a5fbb5b1946d",
+    "semantic_hash": ""
+  },
+  "operations/R07-risks.md": {
+    "mtime": 1789088682.5571122,
+    "seen": 1789089069.723233,
+    "ast_hash": "de54bd5ef6a9240240465b23a076d32e",
+    "semantic_hash": ""
+  },
+  "operations/R08-decision-log.md": {
+    "mtime": 1789088683.9677036,
+    "seen": 1789089069.723233,
+    "ast_hash": "c17771523ba6fd6c03b6dd59e7efc227",
+    "semantic_hash": ""
+  },
+  "operations/R09-dev-plan.md": {
+    "mtime": 1789088687.3040376,
+    "seen": 1789089069.723234,
+    "ast_hash": "6b82d2a3810fe3d6942eb7c3766398fa",
+    "semantic_hash": ""
+  },
+  "operations/R10-g0-handoff.md": {
+    "mtime": 1789088687.2280388,
+    "seen": 1789089069.7232351,
+    "ast_hash": "7c62067f6f959e670d7c6435e24ce538",
+    "semantic_hash": ""
+  },
+  "operations/ROUNDS.md": {
+    "mtime": 1789088656.096437,
+    "seen": 1789089069.7232351,
+    "ast_hash": "6e0d509ed07c7bdd6f8e51970dd55e8b",
+    "semantic_hash": ""
+  },
+  "orchestration/R01-context.md": {
+    "mtime": 1789086224.7629042,
+    "seen": 1789089069.723236,
+    "ast_hash": "45cf1d2a8cad24c57d274fb8246638f5",
+    "semantic_hash": ""
+  },
+  "orchestration/R02-boundaries.md": {
+    "mtime": 1789086233.6571264,
+    "seen": 1789089069.723237,
+    "ast_hash": "64b1c0071910a64a4a5d05df13a5a0e0",
+    "semantic_hash": ""
+  },
+  "orchestration/R03-domain-sketch.md": {
+    "mtime": 1789086239.6289523,
+    "seen": 1789089069.723238,
+    "ast_hash": "ecb21486749bc882e8d8cb93677456be",
+    "semantic_hash": ""
+  },
+  "orchestration/R04-contracts.md": {
+    "mtime": 1789086240.0735316,
+    "seen": 1789089069.723239,
+    "ast_hash": "e3eb6b8e110706f366c34a9361db748b",
+    "semantic_hash": ""
+  },
+  "orchestration/R05-storage.md": {
+    "mtime": 1789086251.5748324,
+    "seen": 1789089069.72324,
+    "ast_hash": "d0e79c83f5c989e1a280a1deefcf6ebf",
+    "semantic_hash": ""
+  },
+  "orchestration/R06-dependencies.md": {
+    "mtime": 1789086256.1422143,
+    "seen": 1789089069.7232409,
+    "ast_hash": "0199deb97250e705e6d418f35fc39aea",
+    "semantic_hash": ""
+  },
+  "orchestration/R07-risks.md": {
+    "mtime": 1789086260.3610342,
+    "seen": 1789089069.723242,
+    "ast_hash": "85d8bac791c37635241ff16b03293d2a",
+    "semantic_hash": ""
+  },
+  "orchestration/R08-decision-log.md": {
+    "mtime": 1789086263.3447554,
+    "seen": 1789089069.723243,
+    "ast_hash": "c9263fb76ef9f5715c3a4400f4a261e8",
+    "semantic_hash": ""
+  },
+  "orchestration/R09-dev-plan.md": {
+    "mtime": 1789086266.0927126,
+    "seen": 1789089069.723243,
+    "ast_hash": "8e5a89e666083e62b9a1f6760cbacb44",
+    "semantic_hash": ""
+  },
+  "orchestration/R10-g0-handoff.md": {
+    "mtime": 1789086271.5301988,
+    "seen": 1789089069.723244,
+    "ast_hash": "a431292a7d0e5e75a3b8886cc7ac0355",
+    "semantic_hash": ""
+  },
+  "orchestration/ROUNDS.md": {
+    "mtime": 1789086271.59633,
+    "seen": 1789089069.7232451,
+    "ast_hash": "48f03f4b4361fc3e9eeab0764943ff27",
+    "semantic_hash": ""
+  },
+  "organizations/R01-context.md": {
+    "mtime": 1788839908.169048,
+    "seen": 1789089069.7232451,
+    "ast_hash": "6a6e90bd8496371a55453400d55ae5ef",
+    "semantic_hash": ""
+  },
+  "organizations/R02-boundaries.md": {
+    "mtime": 1788839908.2330396,
+    "seen": 1789089069.723246,
+    "ast_hash": "e8be4cd52a6ca38a997b096120df9ef3",
+    "semantic_hash": ""
+  },
+  "organizations/R03-domain-sketch.md": {
+    "mtime": 1788839908.2993028,
+    "seen": 1789089069.723247,
+    "ast_hash": "418b003ca4c9c6090d69809705eb3c6e",
+    "semantic_hash": ""
+  },
+  "organizations/R04-contracts.md": {
+    "mtime": 1788839939.5293179,
+    "seen": 1789089069.7232482,
+    "ast_hash": "64cd12da6f4921beb4d79a3dbef4d817",
+    "semantic_hash": ""
+  },
+  "organizations/R05-storage.md": {
+    "mtime": 1788839969.152961,
+    "seen": 1789089069.7232482,
+    "ast_hash": "f0728a2ab9a412be8825f51e683e9c24",
+    "semantic_hash": ""
+  },
+  "organizations/R06-dependencies.md": {
+    "mtime": 1788839969.4998384,
+    "seen": 1789089069.723249,
+    "ast_hash": "e729ef10629ffbdd1454bea6bd3c03a4",
+    "semantic_hash": ""
+  },
+  "organizations/R07-risks.md": {
+    "mtime": 1788839970.122937,
+    "seen": 1789089069.72325,
+    "ast_hash": "ac356c27dab156b95406310a3d63d51b",
+    "semantic_hash": ""
+  },
+  "organizations/R08-decision-log.md": {
+    "mtime": 1788839909.594811,
+    "seen": 1789089069.72325,
+    "ast_hash": "cba6e8ba07acc00a3d1e362d396fe18f",
+    "semantic_hash": ""
+  },
+  "organizations/R09-dev-plan.md": {
+    "mtime": 1788839909.9743018,
+    "seen": 1789089069.7232509,
+    "ast_hash": "601488424fb1c7b5a3631a0c2ebabbf5",
+    "semantic_hash": ""
+  },
+  "organizations/R10-g0-handoff.md": {
+    "mtime": 1788854154.69807,
+    "seen": 1789089069.723252,
+    "ast_hash": "e54f6f4f0989d32e453ab0df38b91511",
+    "semantic_hash": ""
+  },
+  "organizations/ROUNDS.md": {
+    "mtime": 1788854154.697984,
+    "seen": 1789089069.723253,
+    "ast_hash": "2e9351d5becaa334fec2e466f9172d33",
+    "semantic_hash": ""
+  },
+  "organizations/SLACK-TRANSCRIPTS.md": {
+    "mtime": 1788839910.5930872,
+    "seen": 1789089069.723253,
+    "ast_hash": "072e30e76db82153d90c59acebba269d",
+    "semantic_hash": ""
+  },
+  "partners/R01-context.md": {
+    "mtime": 1789088503.4283543,
+    "seen": 1789089069.723254,
+    "ast_hash": "bf2fabed1c3bbde82c4d4fb705261cb2",
+    "semantic_hash": ""
+  },
+  "partners/R02-boundaries.md": {
+    "mtime": 1789088507.7611992,
+    "seen": 1789089069.7232552,
+    "ast_hash": "8ce52b0a61e52966b8017d88335a7578",
+    "semantic_hash": ""
+  },
+  "partners/R03-domain-sketch.md": {
+    "mtime": 1789088516.7951071,
+    "seen": 1789089069.723256,
+    "ast_hash": "fe9468579ea2d605bd7e354a378f9b2f",
+    "semantic_hash": ""
+  },
+  "partners/R04-contracts-events.md": {
+    "mtime": 1789088522.2624784,
+    "seen": 1789089069.723256,
+    "ast_hash": "8b3159e26d3797bebecd5dc4cee1dc00",
+    "semantic_hash": ""
+  },
+  "partners/R05-storage-pg.md": {
+    "mtime": 1789088526.4247887,
+    "seen": 1789089069.723257,
+    "ast_hash": "74e9c2fdce6850247249ad1d60228db2",
+    "semantic_hash": ""
+  },
+  "partners/R06-dependencies.md": {
+    "mtime": 1789088531.3943195,
+    "seen": 1789089069.723258,
+    "ast_hash": "6b12ea997506b0f71edd0f4e26f455e2",
+    "semantic_hash": ""
+  },
+  "partners/R07-risks.md": {
+    "mtime": 1789088536.2798977,
+    "seen": 1789089069.723259,
+    "ast_hash": "58115eda8599eef9a67625c731ab301a",
+    "semantic_hash": ""
+  },
+  "partners/R08-decision-log.md": {
+    "mtime": 1789088538.9419544,
+    "seen": 1789089069.723259,
+    "ast_hash": "5c22a5a2c3cd1de59e0c33793c64a2ce",
+    "semantic_hash": ""
+  },
+  "partners/R09-dev-plan.md": {
+    "mtime": 1789088542.5735466,
+    "seen": 1789089069.72326,
+    "ast_hash": "73db9f6ae738a87c86878cd5d4e1850e",
+    "semantic_hash": ""
+  },
+  "partners/R10-g0-handoff.md": {
+    "mtime": 1789088542.4927168,
+    "seen": 1789089069.7232609,
+    "ast_hash": "debc354e56d5a21afc7a7cd3f8becc17",
+    "semantic_hash": ""
+  },
+  "partners/ROUNDS.md": {
+    "mtime": 1789088495.1516094,
+    "seen": 1789089069.7232618,
+    "ast_hash": "ccd169cba297f51a3e68bbead43cbfd0",
+    "semantic_hash": ""
+  },
+  "performance/R01-context.md": {
+    "mtime": 1788869825.2860186,
+    "seen": 1789089069.7232618,
+    "ast_hash": "a26f78d289ad34317005a2ad1adb863e",
+    "semantic_hash": ""
+  },
+  "performance/R02-boundaries.md": {
+    "mtime": 1789087246.0939438,
+    "seen": 1789089069.723263,
+    "ast_hash": "67b4ccbcaae18bc766786a5a6e3a0897",
+    "semantic_hash": ""
+  },
+  "performance/R03-domain-sketch.md": {
+    "mtime": 1789087245.7237406,
+    "seen": 1789089069.723264,
+    "ast_hash": "d46e7616803b463ea69d2632dc593b4a",
+    "semantic_hash": ""
+  },
+  "performance/R04-contracts-events.md": {
+    "mtime": 1789087338.0545328,
+    "seen": 1789089069.723265,
+    "ast_hash": "b364146c7df869e107bed111d7d0bcde",
+    "semantic_hash": ""
+  },
+  "performance/R05-storage-pg.md": {
+    "mtime": 1789087344.4127963,
+    "seen": 1789089069.723265,
+    "ast_hash": "659aacf82465146fab23ad5fd3576b23",
+    "semantic_hash": ""
+  },
+  "performance/R06-dependencies.md": {
+    "mtime": 1789087344.5848355,
+    "seen": 1789089069.7232661,
+    "ast_hash": "aec7d7d4045b3d43a44b5f132a6cbd68",
+    "semantic_hash": ""
+  },
+  "performance/R07-risks.md": {
+    "mtime": 1789087375.8199768,
+    "seen": 1789089069.723267,
+    "ast_hash": "8dc6c5aeb9cc3cc6d5e73a517efae3ae",
+    "semantic_hash": ""
+  },
+  "performance/R08-decision-log.md": {
+    "mtime": 1789087383.3596327,
+    "seen": 1789089069.723267,
+    "ast_hash": "a1921bf1e9d5e5686bf944c32c5d8548",
+    "semantic_hash": ""
+  },
+  "performance/R09-dev-plan.md": {
+    "mtime": 1789087383.6781962,
+    "seen": 1789089069.723268,
+    "ast_hash": "60db6484c611e9e84865b63396198621",
+    "semantic_hash": ""
+  },
+  "performance/R10-g0-handoff.md": {
+    "mtime": 1789087418.9943583,
+    "seen": 1789089069.7232692,
+    "ast_hash": "7ef392f933462c9cb27dbc10c39d3501",
+    "semantic_hash": ""
+  },
+  "performance/ROUNDS.md": {
+    "mtime": 1788869825.2925665,
+    "seen": 1789089069.72327,
+    "ast_hash": "b276591e1bfd79a9a4c09e0107624c07",
+    "semantic_hash": ""
+  },
+  "portfolios/R01-context.md": {
+    "mtime": 1788869825.2258654,
+    "seen": 1789089069.72327,
+    "ast_hash": "76237437c868895ff573678fba3b695d",
+    "semantic_hash": ""
+  },
+  "portfolios/R02-boundaries.md": {
+    "mtime": 1788869825.2265775,
+    "seen": 1789089069.723271,
+    "ast_hash": "21cc9f04ae15fe1786641a76b39031de",
+    "semantic_hash": ""
+  },
+  "portfolios/R03-domain-sketch.md": {
+    "mtime": 1788882161.761761,
+    "seen": 1789089069.7232718,
+    "ast_hash": "114bd4b20f76b681d8edbbe23ba24396",
+    "semantic_hash": ""
+  },
+  "portfolios/R04-contracts-events.md": {
+    "mtime": 1788869825.2274718,
+    "seen": 1789089069.723273,
+    "ast_hash": "664738372f95180e721eca5d1e628895",
+    "semantic_hash": ""
+  },
+  "portfolios/R05-storage-pg.md": {
+    "mtime": 1788869825.2278645,
+    "seen": 1789089069.723273,
+    "ast_hash": "ea42ec9e3913b687d02914063823a5d7",
+    "semantic_hash": ""
+  },
+  "portfolios/R06-dependencies.md": {
+    "mtime": 1788869825.2281556,
+    "seen": 1789089069.723274,
+    "ast_hash": "e0a380d11f6759c5d662edbc3786a8a1",
+    "semantic_hash": ""
+  },
+  "portfolios/R07-risks.md": {
+    "mtime": 1788869825.22854,
+    "seen": 1789089069.723275,
+    "ast_hash": "d3ad6525836c79b298dc05565ca76ab0",
+    "semantic_hash": ""
+  },
+  "portfolios/R08-decision-log.md": {
+    "mtime": 1788869825.229204,
+    "seen": 1789089069.723275,
+    "ast_hash": "9b213931b9a9cc9f779030577107e4cd",
+    "semantic_hash": ""
+  },
+  "portfolios/R09-dev-plan.md": {
+    "mtime": 1788882161.7624743,
+    "seen": 1789089069.7232761,
+    "ast_hash": "d6d7b1d1795b2f43c7b936f22f92e501",
+    "semantic_hash": ""
+  },
+  "portfolios/R10-g0-handoff.md": {
+    "mtime": 1788869825.229779,
+    "seen": 1789089069.723277,
+    "ast_hash": "f07674fae581480ff2e281e2b18b6cfa",
+    "semantic_hash": ""
+  },
+  "portfolios/ROUNDS.md": {
+    "mtime": 1788869825.2330482,
+    "seen": 1789089069.723278,
+    "ast_hash": "f6305a3503c87d0d3a398793b7fb49a8",
+    "semantic_hash": ""
+  },
+  "risk/R01-context.md": {
+    "mtime": 1788869825.2510657,
+    "seen": 1789089069.723278,
+    "ast_hash": "1f3d8db4c245e44e40c52d3701c87ba4",
+    "semantic_hash": ""
+  },
+  "risk/R02-boundaries.md": {
+    "mtime": 1788869825.2514472,
+    "seen": 1789089069.723279,
+    "ast_hash": "c3e69d6782dfcf1502297e3230a5d233",
+    "semantic_hash": ""
+  },
+  "risk/R03-domain-sketch.md": {
+    "mtime": 1788869825.2522392,
+    "seen": 1789089069.72328,
+    "ast_hash": "29b38c364da25bf1e31e1bd47519c427",
+    "semantic_hash": ""
+  },
+  "risk/R04-contracts-events.md": {
+    "mtime": 1788869825.2528028,
+    "seen": 1789089069.723281,
+    "ast_hash": "be47d390a5f027b88275ea0d4948f185",
+    "semantic_hash": ""
+  },
+  "risk/R05-storage-pg.md": {
+    "mtime": 1789086429.5976355,
+    "seen": 1789089069.723281,
+    "ast_hash": "94cc971e680f5a7206c20b4ae7337597",
+    "semantic_hash": ""
+  },
+  "risk/R06-dependencies.md": {
+    "mtime": 1789086446.227546,
+    "seen": 1789089069.7232819,
+    "ast_hash": "55912746754e127444731b489cfcc4b4",
+    "semantic_hash": ""
+  },
+  "risk/R07-risks.md": {
+    "mtime": 1788869825.2538378,
+    "seen": 1789089069.723283,
+    "ast_hash": "bb222590ff38f878fa7203990a0f7cf2",
+    "semantic_hash": ""
+  },
+  "risk/R08-decision-log.md": {
+    "mtime": 1788869825.2542012,
+    "seen": 1789089069.723284,
+    "ast_hash": "0745d1956578880b97a7da0f73b4b06b",
+    "semantic_hash": ""
+  },
+  "risk/R09-dev-plan.md": {
+    "mtime": 1788869825.254539,
+    "seen": 1789089069.723285,
+    "ast_hash": "5bf9301cf544046aed3b672bc548dcbe",
+    "semantic_hash": ""
+  },
+  "risk/R10-g0-handoff.md": {
+    "mtime": 1788869825.2547684,
+    "seen": 1789089069.723285,
+    "ast_hash": "86b85a6b0ae3d7da388917c433dcf6ea",
+    "semantic_hash": ""
+  },
+  "risk/ROUNDS.md": {
+    "mtime": 1788869825.2582371,
+    "seen": 1789089069.723286,
+    "ast_hash": "47ac8615016d493f85c9f5b399da5eb1",
+    "semantic_hash": ""
+  },
+  "simulation/R01-context.md": {
+    "mtime": 1789088865.5353146,
+    "seen": 1789089069.723287,
+    "ast_hash": "be05fe9bb6f5b08e453a3114d48adb76",
+    "semantic_hash": ""
+  },
+  "simulation/R02-boundaries.md": {
+    "mtime": 1789088918.3111107,
+    "seen": 1789089069.723288,
+    "ast_hash": "e0f492aeac6821bfd621848dac06d62b",
+    "semantic_hash": ""
+  },
+  "simulation/R03-domain-sketch.md": {
+    "mtime": 1789088921.0728245,
+    "seen": 1789089069.723288,
+    "ast_hash": "db6435cd36643b069778df4f20e7565e",
+    "semantic_hash": ""
+  },
+  "simulation/R04-contracts-events.md": {
+    "mtime": 1789088924.950827,
+    "seen": 1789089069.723289,
+    "ast_hash": "a33b41e1ea64b0b81d8ef881e052a51f",
+    "semantic_hash": ""
+  },
+  "simulation/R05-storage-pg.md": {
+    "mtime": 1789088927.9400327,
+    "seen": 1789089069.7232902,
+    "ast_hash": "43e826ae1b15bcfa1c0bbe4c3d1fad51",
+    "semantic_hash": ""
+  },
+  "simulation/R06-dependencies.md": {
+    "mtime": 1789088932.2173052,
+    "seen": 1789089069.723291,
+    "ast_hash": "8f24fa9bbd47cbd49eda3382e906362a",
+    "semantic_hash": ""
+  },
+  "simulation/R07-risks.md": {
+    "mtime": 1789088934.8229034,
+    "seen": 1789089069.723291,
+    "ast_hash": "ad1f318b0cb27815857f38043082213d",
+    "semantic_hash": ""
+  },
+  "simulation/R08-decision-log.md": {
+    "mtime": 1789088938.5209098,
+    "seen": 1789089069.7232919,
+    "ast_hash": "c8b46da96a2804baacc93a97f07fe2a4",
+    "semantic_hash": ""
+  },
+  "simulation/R09-dev-plan.md": {
+    "mtime": 1789088940.6946604,
+    "seen": 1789089069.7232928,
+    "ast_hash": "9aad2aeca5d26b854801099a9162c9d0",
+    "semantic_hash": ""
+  },
+  "simulation/R10-g0-handoff.md": {
+    "mtime": 1789088940.7352033,
+    "seen": 1789089069.7232928,
+    "ast_hash": "885fc83fcec1b73fbf97fc2c565c3a27",
+    "semantic_hash": ""
+  },
+  "simulation/ROUNDS.md": {
+    "mtime": 1789088860.8606915,
+    "seen": 1789089069.723294,
+    "ast_hash": "9323c96c6ddc50718088575f28250b9f",
+    "semantic_hash": ""
+  },
+  "strategies/R01-context.md": {
+    "mtime": 1788869825.1841855,
+    "seen": 1789089069.723295,
+    "ast_hash": "33bc6f68eaddb0541ce4efa1083a9e50",
+    "semantic_hash": ""
+  },
+  "strategies/R02-boundaries.md": {
+    "mtime": 1789087161.492715,
+    "seen": 1789089069.723295,
+    "ast_hash": "4b9abf722aa15330a67062003112643c",
+    "semantic_hash": ""
+  },
+  "strategies/R03-domain-sketch.md": {
+    "mtime": 1789086972.6826308,
+    "seen": 1789089069.723296,
+    "ast_hash": "9b92d1cb37031f5340f58d46ce89a758",
+    "semantic_hash": ""
+  },
+  "strategies/R04-contracts-events.md": {
+    "mtime": 1789087020.7791,
+    "seen": 1789089069.723297,
+    "ast_hash": "3f37c7c6cafff1bc154e33a1d1ea9fe5",
+    "semantic_hash": ""
+  },
+  "strategies/R05-storage-pg.md": {
+    "mtime": 1789087031.7179961,
+    "seen": 1789089069.723298,
+    "ast_hash": "ae3152a0488219970bbdca4c06b01ebe",
+    "semantic_hash": ""
+  },
+  "strategies/R06-dependencies.md": {
+    "mtime": 1789087041.4716644,
+    "seen": 1789089069.723298,
+    "ast_hash": "a35f1f3cc3b6b87aa772974f05d53d97",
+    "semantic_hash": ""
+  },
+  "strategies/R07-risks.md": {
+    "mtime": 1789087041.9605193,
+    "seen": 1789089069.723299,
+    "ast_hash": "1cb728e753fd8a03fec33fac7a306335",
+    "semantic_hash": ""
+  },
+  "strategies/R08-decision-log.md": {
+    "mtime": 1789087144.130088,
+    "seen": 1789089069.7233,
+    "ast_hash": "79d8037a3f6c8253b48ade08a4ad771b",
+    "semantic_hash": ""
+  },
+  "strategies/R09-dev-plan.md": {
+    "mtime": 1789087155.047357,
+    "seen": 1789089069.7233012,
+    "ast_hash": "3756b56226a9527479165c3334c7953d",
+    "semantic_hash": ""
+  },
+  "strategies/R10-g0-handoff.md": {
+    "mtime": 1789087161.0644097,
+    "seen": 1789089069.7233012,
+    "ast_hash": "6ca415888cc6caabaab999e9c8363a35",
+    "semantic_hash": ""
+  },
+  "strategies/ROUNDS.md": {
+    "mtime": 1789087238.3280451,
+    "seen": 1789089069.723302,
+    "ast_hash": "a10071fd28b9bb1324aaa5714f7feb00",
+    "semantic_hash": ""
+  }
+}

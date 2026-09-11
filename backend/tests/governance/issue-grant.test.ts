@@ -122,7 +122,9 @@ describe("issueGrant — coerencia capability x escopo (ANX-462)", () => {
 				granteePrincipalId,
 				capability: PLATFORM_CONSOLE_CAPABILITY,
 			}),
-		).rejects.toMatchObject({ governanceCode: "GOV_CAPABILITY_SCOPE_MISMATCH" });
+		).rejects.toMatchObject({
+			governanceCode: "GOV_CAPABILITY_SCOPE_MISMATCH",
+		});
 		expect(
 			await grantRepository.listActiveByPrincipal(granteePrincipalId),
 		).toHaveLength(0);
@@ -138,7 +140,9 @@ describe("issueGrant — coerencia capability x escopo (ANX-462)", () => {
 				granteePrincipalId,
 				capability: PLATFORM_CONSOLE_CAPABILITY,
 			}),
-		).rejects.toMatchObject({ governanceCode: "GOV_CAPABILITY_SCOPE_MISMATCH" });
+		).rejects.toMatchObject({
+			governanceCode: "GOV_CAPABILITY_SCOPE_MISMATCH",
+		});
 	});
 
 	test("issues console.platform with the canonical PLATFORM scope", async () => {
@@ -167,6 +171,8 @@ describe("issueGrant — coerencia capability x escopo (ANX-462)", () => {
 				granteePrincipalId,
 				capability: "identity.admin",
 			}),
-		).rejects.toMatchObject({ governanceCode: "GOV_CAPABILITY_SCOPE_MISMATCH" });
+		).rejects.toMatchObject({
+			governanceCode: "GOV_CAPABILITY_SCOPE_MISMATCH",
+		});
 	});
 });

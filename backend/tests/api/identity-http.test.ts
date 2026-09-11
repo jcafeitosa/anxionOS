@@ -39,19 +39,19 @@ const activePrincipal: Principal = {
 	revocationReason: null,
 };
 
-	const targetPrincipal: Principal = {
-		id: otherPrincipalId,
-		authUserId: "auth-2",
-		email: "member@example.com",
-		kind: "human",
-		status: "active",
-		revision: 1,
-		createdAt: new Date("2026-09-08T12:00:00.000Z"),
-		suspendedAt: null,
-		suspensionReason: null,
-		revokedAt: null,
-		revocationReason: null,
-	};
+const targetPrincipal: Principal = {
+	id: otherPrincipalId,
+	authUserId: "auth-2",
+	email: "member@example.com",
+	kind: "human",
+	status: "active",
+	revision: 1,
+	createdAt: new Date("2026-09-08T12:00:00.000Z"),
+	suspendedAt: null,
+	suspensionReason: null,
+	revokedAt: null,
+	revocationReason: null,
+};
 
 interface HarnessOptions {
 	principals?: Principal[];
@@ -348,7 +348,13 @@ describe("identity HTTP boundary (/v1/identity)", () => {
 		const { app } = harness({
 			principals: [
 				activePrincipal,
-				{ ...activePrincipal, id: otherPrincipalId, authUserId: "auth-susp", status: "suspended", revision: 2 },
+				{
+					...activePrincipal,
+					id: otherPrincipalId,
+					authUserId: "auth-susp",
+					status: "suspended",
+					revision: 2,
+				},
 			],
 			capabilities: ["identity.admin"],
 		});
@@ -360,7 +366,9 @@ describe("identity HTTP boundary (/v1/identity)", () => {
 			}),
 		);
 		expect(response.status).toBe(404);
-		expect((await response.json()).error.details.code).toBe("IDN_PRINCIPAL_NOT_FOUND");
+		expect((await response.json()).error.details.code).toBe(
+			"IDN_PRINCIPAL_NOT_FOUND",
+		);
 	});
 
 	test("suspend exige Idempotency-Key (400) e aplica com a key (200)", async () => {

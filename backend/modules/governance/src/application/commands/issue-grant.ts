@@ -4,8 +4,8 @@ import {
 	type GovernanceScopeKind,
 	governanceCommandResultSchema,
 	type IssueGrantCommand,
-	issueGrantCommandSchema,
 	isPlatformOnlyCapability,
+	issueGrantCommandSchema,
 	PLATFORM_SCOPE_ID,
 } from "@anxionos/contracts/governance";
 import {
@@ -74,7 +74,11 @@ export async function issueGrant(
 ): Promise<GovernanceCommandResult> {
 	const command = issueGrantCommandSchema.parse(input);
 	const scopeKind: GovernanceScopeKind = input.scopeKind ?? "agency";
-	assertCapabilityScopeCoherence(command.scopeId, scopeKind, command.capability);
+	assertCapabilityScopeCoherence(
+		command.scopeId,
+		scopeKind,
+		command.capability,
+	);
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
 		command.commandId,

@@ -127,6 +127,36 @@ Na projeção `:User`, um `kind`/`email`/`revision` opcional corrompido no envel
 
 **Decisão.** Cada atributo opcional é validado isoladamente (`safeParse`): o que valida é projetado, o que não valida é omitido. O `.strict()` continua rejeitando atributo **proibido** (segredo) para quem constrói o nó à mão (D-IDN-033) — esse caso segue falhando, e é o que o teste de rejeição exercita. A factory monta o nó por whitelist, então `secretHash` nunca chega a ser candidato.
 
+## D-IDN-039 — O escopo declarado limita o ALVO, não só o ator
+
+Achado **HIGH** de duas fontes independentes: auditoria própria dos consumidores de `hasCapability` e a revalidação G4 (que reproduziu o exploit ponta-a-ponta com grants reais em PostgreSQL e boundary Elysia real).
+
+`assertAgencyMembership` recebia **sempre o ator**; `targetPrincipalId` aparecia apenas na comparação de self-access. Como Principal é global (D-IDN-023) e identity não guarda FK de agência, o único sinal de tenancy do alvo são as memberships em `organizations` — expostas por `AgencyScopePort.listAgencyIdsForPrincipal`, que até então **não tinha consumidor de produção** (superfície morta apontada pelo G1).
+
+**Exploit:** membro `owner|admin|operator` de qualquer agência emite `identity.admin` no próprio escopo (via ANX-462) e, declarando a própria agência, lê e-mail/status/sessões de qualquer principal e o suspende/revoga — DoS e PII cross-tenant.
+
+**Decisão.** `requireIdentityGrant` (com `targetPrincipalId`) e `requireSelfOrGrant` exigem que o alvo tenha **membership ativa na agência declarada**. Autoridade de plataforma (grant no escopo PLATFORM, D-IDN-042) opera sobre qualquer principal. A verificação do alvo precede a do grant — declarar alvo estrangeiro é `IDN_CROSS_TENANT`, não `IDN_FORBIDDEN`.
+
+## D-IDN-040 — O ledger global de sessões revogadas exige autoridade de plataforma
+
+Achado MEDIUM do G4. `GET /v1/identity/sessions/revoked` devolve o ledger **global** — `sessionRefs` não têm dimensão de agência no estado do identity —, mas exigia apenas `identity.admin` com o escopo declarado, então um admin de agência lia `sessionRefId`/`principalId`/`revokedAt`/`reasonCode` de **todos** os tenants.
+
+**Decisão.** A rota não aceita escopo de agência: resolve para o escopo PLATFORM. Consequência aceita: um operador que apenas administra a própria agência perde acesso ao ledger — correto, porque não existe recorte de agência para esse dado. Se um recorte for necessário no futuro, ele entra como filtro explícito na query, não como afrouxamento da autorização.
+
+## D-IDN-041 — Replay de registro falha fechado para principal não-ativo
+
+Achado LOW do G4. `POST /principals` com o `authUserId` de um principal suspenso/revogado devolvia **200 com o DTO** (inclusive e-mail), enquanto `GET /principals/:id` do mesmo principal devolvia 404 — a assimetria furava o fail-closed de D-IDN-008/INV-IDN-01 por um caminho lateral.
+
+**Decisão.** Todo replay (pré-checagem, corrida, releitura por e-mail) passa por `assertReplayable`: principal fora de `active` responde `IDN_PRINCIPAL_NOT_FOUND` (404), o mesmo código da leitura pública. Continua idempotente por `authUserId` para principal ativo (D-IDN-006).
+
+## D-IDN-042 — Autoridade de plataforma é escopo de plataforma, não escopo nulo
+
+Achado LOW do G4 e consequência direta do fix de bypass (D-IDN-035). `matchesScope(grant, null)` exigia `scopeId` nulo, mas `governance_grants.scope_id` é `NOT NULL`: **nenhum grant real satisfazia** a condição, então as quatro rotas globais ficavam inalcançáveis com dado real (fail-closed, porém produto morto — invisível nos testes porque o fixture usava `scopeId: undefined as unknown as string`, estado impossível em produção).
+
+**Decisão.** O ramo "escopo nulo" foi **removido** de `hasCapability` (contrato enganoso apontado pelo G2). Autoridade de plataforma se declara com `PLATFORM_SCOPE_ID` — escopo de primeira classe criado no `governance` (ANX-462) e usado pelos três significados agora coerentes: `string` = escopo exato; `undefined` = sem filtro, reservado a capability scope-agnóstica por contrato. O boundary de identity envia `agencyId ?? PLATFORM_SCOPE_ID`.
+
+**Consequência:** as rotas globais (registro, suspend, revoke, ledger) voltam a ser utilizáveis, mas **exigem** grant no escopo de plataforma — que hoje só o `governance` sabe emitir (ANX-462, em correção). Sem um operador de plataforma provisionado, elas permanecem negando; é o comportamento correto e agora representável.
+
 ## Conflito aberto — R04 vs D-IDN-023 (`organizationId` em Principal)
 
 R04 descreve o payload de `identity.principal.registered.v1` com `organizationId` e uma idempotência `(organizationId, subjectKey)`. D-IDN-023 (aceito) define Principal **global**, com tenancy via Membership em `organizations`, e D-IDN-006 fixa idempotência por `authUserId`.

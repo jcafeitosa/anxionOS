@@ -86,10 +86,10 @@ export {
 	changeProposalStatusSchema,
 	governanceScopeKindSchema,
 	grantStatusSchema,
+	isPlatformOnlyCapability,
 	mandateKindSchema,
 	mandateStatusSchema,
 	PLATFORM_CONSOLE_CAPABILITY,
 	PLATFORM_ONLY_CAPABILITIES,
 	PLATFORM_SCOPE_ID,
-	isPlatformOnlyCapability,
 } from "./types";

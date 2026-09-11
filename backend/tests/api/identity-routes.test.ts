@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { PLATFORM_SCOPE_ID } from "@anxionos/contracts/governance";
 import { IDENTITY_ERROR_CODES } from "@anxionos/contracts/identity";
 import {
 	IdentityCommandError,
@@ -52,7 +53,8 @@ function grantRepository(capabilities: string[] = [], scopeId?: string) {
 			return capabilities.map((capability) => ({
 				id: "66666666-6666-4666-8666-666666666666",
 				capability,
-				scopeId,
+				// Sem escopo declarado o grant e' de PLATAFORMA (ANX-462).
+				scopeId: scopeId ?? PLATFORM_SCOPE_ID,
 				status: "active",
 				validFrom: new Date("2026-01-01T00:00:00.000Z"),
 				validUntil: null,
