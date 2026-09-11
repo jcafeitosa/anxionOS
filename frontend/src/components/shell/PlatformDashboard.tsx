@@ -9,6 +9,16 @@ import {
 	platformIncidentsEmptyDescription,
 	type PlatformIncidentsView,
 } from "../../lib/platform-incidents";
+import {
+	fetchPlatformRecovery,
+	platformRecoveryEmptyDescription,
+	type PlatformRecoveryView,
+} from "../../lib/platform-recovery";
+import {
+	fetchPlatformRuntimes,
+	platformRuntimesEmptyDescription,
+	type PlatformRuntimesView,
+} from "../../lib/platform-runtimes";
 import { HonestState } from "./HonestState";
 
 interface PlatformDashboardProps {
@@ -46,34 +56,8 @@ export function PlatformDashboard({ platformAccess }: PlatformDashboardProps) {
 		<div className="flex flex-col gap-8" data-testid="platform-dashboard">
 			<PlatformHealthSection />
 			<PlatformIncidentsSection />
-			<section aria-labelledby="platform-runtime-heading" id="runtimes">
-				<h2
-					id="platform-runtime-heading"
-					className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground"
-				>
-					Runtimes e quotas
-				</h2>
-				<HonestState
-					kind="empty"
-					titleAs="h3"
-					title="Runtimes e quotas não publicados"
-					description="GET /v1/operations/platform/runtimes ainda não existe. Nenhuma métrica de Agency é inventada."
-				/>
-			</section>
-			<section aria-labelledby="platform-rollout-heading" id="rollout">
-				<h2
-					id="platform-rollout-heading"
-					className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground"
-				>
-					Rollout e export/recovery
-				</h2>
-				<HonestState
-					kind="empty"
-					titleAs="h3"
-					title="Rollout e recovery sob demanda"
-					description="GET /v1/operations/platform/recovery ainda não existe. Nenhuma operação break-glass é executada neste console."
-				/>
-			</section>
+			<PlatformRuntimesSection />
+			<PlatformRecoverySection />
 		</div>
 	);
 }
@@ -241,6 +225,149 @@ function PlatformIncidentsSection() {
 					data-testid="platform-incidents-count"
 				>
 					{view.count} incidente(s) de plataforma (ledger PLATFORM, sem Agency).
+				</p>
+			) : null}
+		</section>
+	);
+}
+
+function PlatformRuntimesSection() {
+	const [view, setView] = useState<PlatformRuntimesView>({ kind: "loading" });
+
+	useEffect(() => {
+		let cancelled = false;
+		fetchPlatformRuntimes().then((next) => {
+			if (!cancelled) {
+				setView(next);
+			}
+		});
+		return () => {
+			cancelled = true;
+		};
+	}, []);
+
+	return (
+		<section aria-labelledby="platform-runtimes-heading" id="runtimes">
+			<h2
+				id="platform-runtimes-heading"
+				className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground"
+			>
+				Runtimes de plataforma
+			</h2>
+			{view.kind === "loading" ? (
+				<HonestState
+					kind="loading"
+					titleAs="h3"
+					title="Consultando runtimes PLATFORM"
+					description="GET /v1/operations/platform/runtimes. Não copia métricas de Agency."
+				/>
+			) : null}
+			{view.kind === "denied" ? (
+				<HonestState
+					kind="denied"
+					titleAs="h3"
+					title="Runtimes de plataforma negados"
+					description={`HTTP ${String(view.status)}. O console não inventa listagem de runtimes.`}
+				/>
+			) : null}
+			{view.kind === "stale" ? (
+				<HonestState
+					kind="stale"
+					titleAs="h3"
+					title="Runtimes indisponíveis"
+					description="A resposta não pôde ser interpretada como coleção de plataforma."
+				/>
+			) : null}
+			{view.kind === "empty" ? (
+				<HonestState
+					kind="empty"
+					titleAs="h3"
+					title={
+						view.reason === "no_runtimes"
+							? "Nenhum runtime de plataforma"
+							: "Listagem de runtimes ainda não publicada"
+					}
+					description={platformRuntimesEmptyDescription(view.reason)}
+				/>
+			) : null}
+			{view.kind === "ready" ? (
+				<p
+					className="text-sm text-foreground"
+					data-testid="platform-runtimes-count"
+				>
+					{view.count} runtime(s) de plataforma (ledger PLATFORM, sem Agency).
+				</p>
+			) : null}
+		</section>
+	);
+}
+
+function PlatformRecoverySection() {
+	const [view, setView] = useState<PlatformRecoveryView>({ kind: "loading" });
+
+	useEffect(() => {
+		let cancelled = false;
+		fetchPlatformRecovery().then((next) => {
+			if (!cancelled) {
+				setView(next);
+			}
+		});
+		return () => {
+			cancelled = true;
+		};
+	}, []);
+
+	return (
+		<section aria-labelledby="platform-recovery-heading" id="recovery">
+			<h2
+				id="platform-recovery-heading"
+				className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground"
+			>
+				Recovery de plataforma
+			</h2>
+			{view.kind === "loading" ? (
+				<HonestState
+					kind="loading"
+					titleAs="h3"
+					title="Consultando recovery PLATFORM"
+					description="GET /v1/operations/platform/recovery. Não chama recovery-tasks de Agency nem executa break-glass."
+				/>
+			) : null}
+			{view.kind === "denied" ? (
+				<HonestState
+					kind="denied"
+					titleAs="h3"
+					title="Recovery de plataforma negado"
+					description={`HTTP ${String(view.status)}. O console não inventa fila de recovery.`}
+				/>
+			) : null}
+			{view.kind === "stale" ? (
+				<HonestState
+					kind="stale"
+					titleAs="h3"
+					title="Recovery indisponível"
+					description="A resposta não pôde ser interpretada como coleção de plataforma."
+				/>
+			) : null}
+			{view.kind === "empty" ? (
+				<HonestState
+					kind="empty"
+					titleAs="h3"
+					title={
+						view.reason === "no_recovery_tasks"
+							? "Nenhuma tarefa de recovery de plataforma"
+							: "Listagem de recovery ainda não publicada"
+					}
+					description={platformRecoveryEmptyDescription(view.reason)}
+				/>
+			) : null}
+			{view.kind === "ready" ? (
+				<p
+					className="text-sm text-foreground"
+					data-testid="platform-recovery-count"
+				>
+					{view.count} tarefa(s) de recovery de plataforma (ledger PLATFORM, sem
+					Agency).
 				</p>
 			) : null}
 		</section>
