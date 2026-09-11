@@ -7,6 +7,23 @@ type: debate
 **Callers:** [R05-storage-pg.md](./R05-storage-pg.md) · [R07-risks.md](./R07-risks.md).  
 **Fonte:** `brain/notes/anxionos-backend-structure.md` · ADR0002.
 
+## In / Out (R6)
+
+**In:** consumo de ids strategies/agents; eventos simulation/performance; grants para emitir cert.
+
+**Out:** mutate StrategyVersion. Apply grant. Driver Neo4j (`graph`). Auto-promote.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Contratos evaluation.* | **evaluation** |
+| adapter-gateway | **KEEP** |
+
 ## In scope (este módulo consome / emite)
 
 | Direção | Módulo | Contrato |

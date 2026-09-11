@@ -7,6 +7,23 @@ type: debate
 **Callers:** [R04-contracts-events.md](./R04-contracts-events.md) · [R06-dependencies.md](./R06-dependencies.md).  
 **Fonte de engines:** `brain/notes/anxionos-storage-ownership.md` · `brain/project-docs/decisions/0004-postgresql-timescaledb-pgvector.md` · `brain/notes/anxionos-backend-structure.md` (P08).
 
+## In / Out (R5)
+
+**In:** PG scoring/cert/reputação; journal+outbox; ObjectRef; projector `graph:evaluation:v1`.
+
+**Out:** StrategyVersion (`strategies`). SimulationRun (`simulation`). P&L Timescale (`performance`).
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Evaluation / Certification / Reputation | **evaluation** |
+| adapter-gateway | **KEEP** |
+
 ## In scope (autoridade deste módulo)
 
 | Engine | O que evaluation **possui** |
