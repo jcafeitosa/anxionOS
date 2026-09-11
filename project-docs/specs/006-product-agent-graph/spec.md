@@ -2,8 +2,10 @@
 type: spec
 title: Product Graph e Agent Graph — sistema operacional cognitivo
 description: Especificação do Product Graph e Agent Graph como memória organizacional e grafo de agentes do anxionOS, com bridge para módulos runtime e gates G0–G7.
-status: accepted
-decision_status: accepted
+status: superseded
+decision_status: superseded
+superseded_by: brain/project-docs/specs/006-agent-hierarchy-orchestration/spec.md
+taskboard_issue: ANX-455
 owner: Produto e arquitetura
 created: 2026-09-10
 version: "0.1"

@@ -62,7 +62,8 @@ Matrizes e playbooks da entrega G0–G7. Vários destes documentos são **fonte 
 
 | Documento | Descrição |
 | --- | --- |
-| [ADR0005 — Realtime gateway (Elysia + NATS)](decisions/0005-realtime-gateway-elysia-nats.md) | Legado — precedência em `brain/project-docs/decisions/` |
+| [ADR0005 — Realtime gateway (Elysia + NATS)](decisions/0005-realtime-gateway-elysia-nats.md) | Legado / superseded — precedência em `brain/` (ANX-455) |
+| [Registro de precedência ADR/spec](document-precedence.md) | Números duplicados: canônico vs legado |
 
 ## Pesquisa
 
