@@ -21,7 +21,8 @@
 		"boundaries": "depcruise --config .dependency-cruiser.cjs apps packages modules",
 		"seed:dev": "bun run --env-file=.env --filter @anxionos/api seed:dev",
 		"seed:e2e-institutional": "bun run --filter @anxionos/api seed:e2e-institutional",
-		"workers:graph-governance": "bun run --filter @anxionos/workers start"
+		"workers:graph-governance": "WORKER_PROFILE=graph-governance-projection bun run --filter @anxionos/workers start",
+		"workers:outbox-relay": "WORKER_PROFILE=outbox-relay bun run --filter @anxionos/workers start"
 	},
 	"devDependencies": {
 		"@anxionos/accounting": "workspace:*",
