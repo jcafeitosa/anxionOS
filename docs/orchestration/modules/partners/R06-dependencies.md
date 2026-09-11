@@ -1,6 +1,7 @@
 ---
 type: debate
 ---
+
 # R06 — Dependências: `modules/partners`
 
 **Rodada:** R6  
@@ -12,11 +13,11 @@ type: debate
 
 **In:** billing events paid/refund; PrincipalLookup; AgencyScopePort; TraversalEvaluator T01; eventing.
 
-**Out:** `partners.*` para accounting/operations/graph/audit; projector `graph:partners:v1`. Sem mutate de invoice ou journal alheio.
+**Out:** `partners.*` para accounting/operations/graph/audit; projector `graph:partners:v1`. Sem mutate de invoice ou journal alheio. Sem pasta `marketplace/`. Sem spec `accepted`. Sem ST08 live.
 
 ## Non-goals
 
-D-GOV-010 = **risk P06**. Sem pasta marketplace. Sem neo4j-driver neste módulo. Sem import `billing/infrastructure/**`.
+D-GOV-010 = **risk P06**. Sem pasta marketplace. Sem neo4j-driver neste módulo. Sem import `billing/infrastructure/**`. Sem ANX-342/389 `done`. Sem rails PSP no domain.
 
 ## Ownership de ports
 
@@ -26,8 +27,17 @@ D-GOV-010 = **risk P06**. Sem pasta marketplace. Sem neo4j-driver neste módulo.
 | AgencyScopePort | **organizations** |
 | TraversalEvaluator | **governance** |
 | Projector | **graph** |
+| Invoice verdade | **billing** |
+| Journal efeito | **accounting** |
+| adapter-gateway | **KEEP** |
 
-**KEEP adapter-gateway**.
+## Debate R6
+
+**Arquiteto:** partners é projector de eventos billing — nunca chama billing sync para montar accrual.
+
+**Crítico:** PTR-R06-05 — não emite `accounting.journal.*`; accounting consome `partners.commission.*`.
+
+**Security:** T01 fail-closed; Partner console ≠ leak de Agency alheia.
 
 ## Decisões
 
@@ -61,6 +71,14 @@ flowchart TB
   ptr --> ops[operations]
   ptr --> grp[graph]
 ```
+
+## Oráculos de fronteira
+
+| ID | Esperado |
+| --- | --- |
+| G3-PTR-01 | paid → um accrual |
+| G3-PTR-05 | accrue unpaid 409 |
+| G5-PTR-04 | T01 DENY 403 |
 
 ## Saída R6
 
