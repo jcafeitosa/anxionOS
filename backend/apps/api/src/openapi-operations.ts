@@ -328,7 +328,7 @@ export const identityPrincipalsOpenApi = {
 		operationId: "identityRegisterPrincipal",
 		summary: "Register a principal",
 		description:
-			"Module: identity. Requires `identity.admin` and an `Idempotency-Key` header (materialized as `commandId`). Idempotent by `authUserId`: a repeated registration returns the existing principal without a second event; replaying a registration whose principal is suspended or revoked fails closed with 404. When `X-Agency-Id` is declared the caller must be a member of that agency and the grant must be scoped to it.",
+			"Module: identity. Requires `identity.admin` with **platform** scope plus an `Idempotency-Key` header (materialized as `commandId`): the principal created here is global (it is born with no agency binding) and an existing principal replays with its public DTO — including e-mail — so an agency-scoped grant is rejected even when `X-Agency-Id` matches one of the caller's memberships (`IDN_FORBIDDEN`). Declaring `X-Agency-Id` only adds the membership check (a foreign agency is `IDN_CROSS_TENANT`); it never relaxes the platform requirement. Idempotent by `authUserId`: a repeated registration returns the existing principal without a second event; replaying a registration whose principal is suspended or revoked fails closed with 404 (`IDN_PRINCIPAL_NOT_FOUND`).",
 		security: [{ cookieAuth: [] }],
 		parameters: [idempotencyKey(), AGENCY_SCOPE, REQUEST_ID],
 		requestBody: {
@@ -473,7 +473,7 @@ export const identityPrincipalsOpenApi = {
 		operationId: "identityRevokeSession",
 		summary: "Record a revoked session reference",
 		description:
-			"Module: identity. Requires `Idempotency-Key`. Self-access (revoking your own session reference) is allowed; otherwise the caller needs `identity.admin` for the `principalId` in the body. Records a revocation learned from the session owner; `externalRefHash` is required only when the reference is unknown to the module (otherwise `IDN_SESSION_NOT_FOUND`). Emits `identity.session.revoked.v1` carrying the logical sessionRefId — never a token. When `X-Agency-Id` is declared the caller must be a member of that agency **and** the target principal must belong to it (otherwise `IDN_CROSS_TENANT`).",
+			"Module: identity. Requires `Idempotency-Key`. Self-access (revoking your own session reference) is allowed; otherwise the caller needs `identity.admin` for the `principalId` in the body. The reference must belong to the declared `principalId`: revoking a `sessionRefId` owned by another principal is rejected with the same opaque `IDN_SESSION_NOT_FOUND` as an unknown reference (object ownership is enforced on the aggregate, not merely by knowing its id). Records a revocation learned from the session owner; `externalRefHash` is required only when the reference is unknown to the module (otherwise `IDN_SESSION_NOT_FOUND`). Emits `identity.session.revoked.v1` carrying the logical sessionRefId — never a token. When `X-Agency-Id` is declared the caller must be a member of that agency **and** the target principal must belong to it (otherwise `IDN_CROSS_TENANT`).",
 		security: [{ cookieAuth: [] }],
 		parameters: [idempotencyKey(), AGENCY_SCOPE, REQUEST_ID],
 		requestBody: {
@@ -521,7 +521,7 @@ export const identityPrincipalsOpenApi = {
 		operationId: "identityListRevokedSessions",
 		summary: "List revoked session references",
 		description:
-			"Module: identity. Requires an `identity.admin` grant with **platform** scope: the revocation ledger is global (session references carry no agency dimension), so an agency-scoped grant is rejected even when `X-Agency-Id` matches one of the caller's memberships. The header is ignored on this route. Optionally bounded by `since` (ISO-8601).",
+			"Module: identity. Requires an `identity.admin` grant with **platform** scope: the revocation ledger is global (session references carry no agency dimension), so an agency-scoped grant is rejected even when `X-Agency-Id` matches one of the caller's memberships. Declaring `X-Agency-Id` does not change the scope requirement, but an agency the caller is **not** an active member of is still rejected as `IDN_CROSS_TENANT` — declaring a foreign agency is a cross-tenant signal on every route. Optionally bounded by `since` (ISO-8601).",
 		security: [{ cookieAuth: [] }],
 		parameters: [
 			{
