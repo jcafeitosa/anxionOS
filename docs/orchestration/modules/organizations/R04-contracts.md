@@ -85,7 +85,7 @@ Definir a superfície pública do módulo **organizations** antes de armazenamen
 | `ORG_AGENCY_NOT_FOUND` | 404 | Agency inexistente ou fora do scope |
 | `ORG_MEMBERSHIP_NOT_INVITED` | 409 | Ativação assistida com status fora de `invited`/`revoked` (desde D-ORG-046 `revoked` **é** aceito para reativação) |
 | `ORG_OWNER_REQUIRED` | 409 | Revogar o último owner ativo; `TransferOwnership` sem sucessor com membership ativa; agência que já tem outro owner ativo |
-| `ORG_INVALID_STATUS_TRANSITION` | 409 | Viola INV-ORG-01 |
+| `ORG_INVALID_STATUS_TRANSITION` | 409 | Viola INV-ORG-01; ou tentativa de instalar autoridade de `owner` por ativação/aceite (D-ORG-049) |
 | `ORG_CROSS_TENANT` | 403 | agencyId não pertence ao principal da sessão |
 | `ORG_IDENTITY_UNAVAILABLE` | 503 | `PrincipalLookup` indisponível (identity fora) |
 | `ORG_INVITE_EXPIRED` | 410 | Convite vencido no momento da ativação |
@@ -314,7 +314,7 @@ Prefixo: `/v1/organizations`. Autenticação via Better Auth (sessão). OpenAPI 
 | `POST` | `/agencies/:agencyId/memberships/invite` | `InviteMember` | role `owner` ou `admin` |
 | `POST` | `/agencies/:agencyId/memberships/:membershipId/activate` | `ActivateMembership` | role `owner`/`admin` **e** membership já vinculada; alvo `role=owner` é recusado (409) |
 | `POST` | `/agencies/:agencyId/memberships/:membershipId/revoke` | `RevokeMembership` | role `owner` ou `admin` |
-| `POST` | `/invites/accept` | `AcceptInviteByToken` | Principal autenticado com o e-mail do convite |
+| `POST` | `/invites/accept` | `AcceptInviteByToken` | Principal autenticado com o e-mail do convite; alvo `role=owner` é recusado (409) |
 
 Headers obrigatórios em mutações: `Idempotency-Key`, `Content-Type: application/json`.
 
