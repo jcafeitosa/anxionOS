@@ -49,6 +49,14 @@ Relações: `TradeIntent` → `ExecutionSession` → `Order` → `Fill` → `Pos
 - Colunas `api_key`, `secret`, `token` em qualquer tabela execution
 - `executionMode=REAL` em insert/update (trigger ou app guard)
 
+## Oráculos
+
+| ID | Esperado |
+| --- | --- |
+| G3-EX-01 | UNIQUE client_order_id |
+| G5-EX-01 | cross-tenant 403 |
+| G5-EX-02 | coluna secret rejeitada no schema review |
+
 ## RLS / tenancy
 
 Todas as queries filtram `organizationId`; cross-tenant FK rejeitada na aplicação v1 (RLS formal defer P09).

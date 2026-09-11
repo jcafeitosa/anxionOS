@@ -1,6 +1,7 @@
 ---
 type: debate
 ---
+
 # R07 — Riscos: `modules/risk`
 
 **Issue:** ANX-99 · pack ANX-389 · gate ANX-58  
@@ -10,13 +11,27 @@ type: debate
 
 **In scope:** bypass de limites, permit stale, cross-tenant exposure, double consume, SQLite local, REAL bypass, LLM override DENY, kill switch estreito, reserva sem permit.
 
-**Out of scope:** ameaça de venue HTTP (`execution` infra); P&L (`performance`); Twin (`simulation`).
+**Out of scope:** ameaça de venue HTTP (`execution` infra); P&L (`performance`); Twin (`simulation`). Spec accepted. ST08 live.
 
 ## Non-goals
 
-Não “mitigar” com stub de permit PASS. Não REAL v1.
+Não “mitigar” com stub de permit PASS. Não REAL v1. Não pasta `approvals/`/`policies/` (policy executável vive **neste** módulo, sem pasta extra).
 
-## Registro
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Registro de riscos de limite/permit | **risk** |
+| D-GOV-010 | **risk** P06 |
+| adapter-gateway | **KEEP** |
+
+## Debate R7
+
+**Arquiteto:** CONFIG_REQUIRED fail-closed — ordem sem check não existe.
+
+**Crítico:** kill switch bump epoch **sem** apagar histórico. Permit singleUse CONSUMED.
+
+**Security:** G5-RK-01..03 obrigatórios. LLM só explanationRef — nunca override DENY.
 
 | ID | Risco | Sev | Mitigação |
 | --- | --- | ---: | --- |
@@ -31,6 +46,8 @@ Não “mitigar” com stub de permit PASS. Não REAL v1.
 | R-RK-09 | Kill switch scope narrow | 12 | GLOBAL→ORG→PORTFOLIO |
 | R-RK-10 | Capital reserve sem permit | 19 | capital gate on permit.issued |
 
+Top 5 (01, 02, 03, 10, 04) → R08.
+
 ## Oráculos G5
 
 | ID | Cenário | Esperado |
@@ -39,4 +56,6 @@ Não “mitigar” com stub de permit PASS. Não REAL v1.
 | G5-RK-02 | PASS depois kill switch | RK_PERMIT_STALE |
 | G5-RK-03 | policy revogada + epoch bump | RK_POLICY_STALE |
 
-Top 5 → R08.
+## Saída R7
+
+Para R08.

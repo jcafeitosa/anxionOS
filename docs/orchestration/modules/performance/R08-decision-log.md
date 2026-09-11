@@ -42,6 +42,10 @@ Não stamp `accepted`. Não fake ST08. Não ANX-342/389 `done`.
 | P1-PERF-02 | D-GOV-010 não é deste módulo (risk P06) | draft |
 | P1-PERF-03 | Pasta analytics/ não existe (PC 22) | draft |
 
+## Oráculos exigidos
+
+G3-PERF-01 rebuild idempotente · G3-PERF-02 fill ≠ ledger · G5-PERF-01..03. Engine **não verificado** até G1.
+
 ## Saída R8
 
 Ownership: métricas oficiais; PG autoritativo; Timescale derivado. Oráculos G3-PERF-01 rebuild idempotente · G3-PERF-02 fill ≠ ledger. Para [R09](./R09-dev-plan.md).

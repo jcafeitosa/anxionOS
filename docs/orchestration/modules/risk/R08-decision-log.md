@@ -2,21 +2,31 @@
 status: draft
 type: debate
 ---
+
 # R08 — Decision log: `modules/risk`
 
 **Issue:** ANX-99 · pack ANX-389 · gate ANX-58  
 **Callers:** [R07-risks.md](./R07-risks.md) · [R09-dev-plan.md](./R09-dev-plan.md).  
-**Status documental:** `draft` — **não** spec accepted, **não** G7.
+**Status documental:** `draft` — **não** spec accepted, **não** G7, **não** ST08 live.
 
 ## In / Out (R8)
 
-**In scope:** ownership LimitPolicy/Exposure/Check/Permit; SIMULATED+PAPER; D-GOV-010 neste módulo; PG autoritativo.
+**In scope:** ownership LimitPolicy/Exposure/Check/Permit; SIMULATED+PAPER; D-GOV-010 neste módulo; PG autoritativo; KEEP adapter-gateway.
 
-**Out of scope:** aceite spec 003; greenlight ANX-100; ANX-342 done.
+**Out of scope:** aceite spec 003; greenlight ANX-100; ANX-342 done; ANX-389 `done`.
 
 ## Non-goals
 
 Não reabrir REAL v1. Não fake ST08. Não G1 neste pack.
+
+## Ownership consolidado
+
+| Superfície | Dono |
+| --- | --- |
+| LimitPolicy / ExposureSnapshot / RiskCheckResult / RiskPermit | **risk** |
+| TradeIntent | **decisions** |
+| MandateVersion | **governance** |
+| adapter-gateway | **KEEP** |
 
 | ID | Decisão | Status |
 | --- | --- | --- |
@@ -36,5 +46,7 @@ Não reabrir REAL v1. Não fake ST08. Não G1 neste pack.
 ## Oráculos exigidos
 
 G3-RK-S2-01..05 e G5-RK-01..03. Sem evidência de engine = **não verificado** até G1.
+
+## Saída R8
 
 → **R09** ([R09-dev-plan.md](./R09-dev-plan.md))

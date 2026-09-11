@@ -2,6 +2,7 @@
 status: draft
 type: debate
 ---
+
 # R09 — Plano de implementação: `modules/risk`
 
 **Issue:** ANX-99 · impl: **ANX-100** (blocked_by ANX-99 G7) · gate ANX-58 · pack ANX-389  
@@ -11,11 +12,18 @@ type: debate
 
 **In (G1 futuro):** schema policy+check+permit; runPreTradeCheck; kill switch + epoch; projector contract `graph:risk:v1`.
 
-**Out deste pack:** migration agora; REAL; post-trade S4; ST08 live; ANX-342 done.
+**Out deste pack:** migration agora; REAL; post-trade S4; ST08 live; ANX-342 done; spec `accepted`.
 
 ## Non-goals P1
 
-Só G0 documental. Não executar ANX-100 aqui.
+Só G0 documental. Não executar ANX-100 aqui. Não fake ST08. Sem pasta `policies/` extra (LimitPolicy neste módulo).
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Plano G0 / LimitPolicy | **risk** |
+| adapter-gateway | **KEEP** |
 
 ## Slices P06 (pós-Owner)
 
@@ -43,5 +51,7 @@ Só G0 documental. Não executar ANX-100 aqui.
 ## Defer
 
 REAL v1; post-trade S4; RLS P09; ST08; spec `accepted`.
+
+## Saída R9
 
 → **R10** ([R10-g0-handoff.md](./R10-g0-handoff.md))

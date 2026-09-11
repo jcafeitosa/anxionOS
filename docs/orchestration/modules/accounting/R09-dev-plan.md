@@ -48,6 +48,16 @@ G3-ACC-S2-01 balanced entry · G3-ACC-S2-02 duplicate idempotency → same entry
 - `execution.fill.confirmed.v1` SIMULATED fixture até execution G1
 - ChartOfAccounts seed por org em migration S1
 
-**ANX-94** — blocked_by ANX-93 G7. Pack ANX-389 **não** `done`.
+## Oráculos nomeados
+
+| ID | Esperado |
+| --- | --- |
+| G3-ACC-S2-01 | balanced entry |
+| G3-ACC-S2-02 | duplicate idempotency → same entry |
+| G3-ACC-S2-03 | cross-tenant reject |
+| G3-ACC-S2-04 | REAL mode reject |
+| G3-ACC-S2-05 | unbalanced reject |
+
+**ANX-94** — blocked_by ANX-93 G7. Pack ANX-389 **não** `done`. Sem ST08 live. Specs **draft**.
 
 → **R10** ([R10-g0-handoff.md](./R10-g0-handoff.md))

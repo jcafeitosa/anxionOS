@@ -17,7 +17,15 @@ status: draft
 
 Só G0 documental neste pack. Não G7 ANX-92.
 
-**KEEP adapter-gateway**.
+**KEEP adapter-gateway**. Sem pasta `approvals/`. Specs 001–005 **draft**. ST08 0/23.
+
+## Ownership (plano)
+
+| Fatia | Dono |
+| --- | --- |
+| capital_* + reserve/release | **capital** |
+| Grant | **governance** |
+| Ledger efeito | **accounting** |
 
 ## Slices P06
 
