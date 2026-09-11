@@ -2,20 +2,17 @@
 type: debate
 status: draft
 ---
-
 # R10 — Pacote G0: `modules/audit`
 
-**Issues:** ANX-107 · **ANX-108**
+**Issues:** ANX-107 · ANX-108 · pack ANX-389  
+**Callers:** [R09-dev-plan.md](./R09-dev-plan.md) · [ROUNDS.md](./ROUNDS.md).
 
-## PC-G0 — 10/10 ✅
+### In scope
 
-| Gate | PASS |
-| --- | --- |
-| G2–G6 | R04–R09 |
-| G7 | pendente ANX-107 |
+Flight Recorder, DeltaRef, tap redacted, replay read-only, oráculos G3/G5.
 
-## Handoff
+### Out of scope
 
-Fila: **g0_ready**. **ANX-108** blocked_by ANX-107 G7.
+Journal de domínio, ledger, pasta policies/approvals, D-GOV-010, spec accepted, ANX-342 G7, ST08 migrations.
 
-| G7-ready? | **Sim** |
+**Veredito P1:** pack audit documental fat. **Não** autoriza G1. Specs 001–005 `draft`. Próximo serial: [billing](../billing/ROUNDS.md).
