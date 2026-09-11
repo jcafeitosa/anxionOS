@@ -11,6 +11,24 @@ type: debate
 **Issue debate:** ANX-83 · contrato P05: ANX-62 · gate implementação: ANX-36  
 **Pré-requisito:** [R04-contracts-events.md](./R04-contracts-events.md) · [R03-domain-sketch.md](./R03-domain-sketch.md) · [R02-boundaries.md](./R02-boundaries.md) · `brain/project-docs/specs/005-connections-integration/spec.md` · `brain/notes/anxionos-storage-ownership.md`
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R5)
+
+**In:** PG bindings/quotas/usage + journal/outbox. **Out:** projeção Neo4j via eventos. SQLite só cache descartável.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Tabelas connections_* | **connections** |
+| adapter-gateway | **KEEP** |
+| Nós Neo4j | **graph** (projector) |
+
 ## Participantes
 
 | Papel | Agente |

@@ -11,6 +11,23 @@ type: debate
 **Issue debate:** ANX-83 · contrato P05: ANX-62 · gate implementação: ANX-36  
 **Pré-requisito:** [R02-boundaries.md](./R02-boundaries.md) · [R01-context.md](./R01-context.md) · `brain/project-docs/specs/005-connections-integration/spec.md`
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R3)
+
+**In:** agregados Binding/AIAccount/Usage e ports Resolver/Adapter. **Out:** eventos `connections.*.v1` sem secrets. **Não** duplicar Run nem AgentVersion.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Domain sketch connections | **connections** |
+| adapter-gateway | **KEEP** |
+
 ## Objetivo da rodada
 
 Esboçar o modelo de domínio de **connections** após [R02-boundaries.md](./R02-boundaries.md): agregados `ConnectionBinding`, `AIAccount`, `UsageRecord`; ports `ConnectionResolver`, `RuntimeAdapter`, `UsageRecorder`; invariantes de domínio (`CX-R03-INV-*`); sketch de eventos `connections.*.v1` sem secrets; respostas às perguntas abertas de R02. Alinhar com contrato ANX-62 e spec 005 sem duplicar Goal/Task/Run (orchestration) nem AgentVersion (agents).

@@ -11,6 +11,24 @@ type: debate
 **Issue debate:** ANX-83 · contrato P05: ANX-62 · gate implementação: ANX-36  
 **Pré-requisito:** [R03-domain-sketch.md](./R03-domain-sketch.md) · [R02-boundaries.md](./R02-boundaries.md) · [p05-connections-binding-inference-contract.md](../../system-capabilities/p05-connections-binding-inference-contract.md) · `brain/project-docs/specs/005-connections-integration/spec.md`
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R4)
+
+**In:** superfície pública `/v1/connections` e contratos Zod. **Out:** `connections.*.v1`. **Não** Task/Run nem secrets em payload.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Contratos connections | **connections** |
+| adapter-gateway | **KEEP** |
+| Task/Run | **orchestration** |
+
 ## Participantes
 
 | Papel | Agente |

@@ -10,6 +10,24 @@ type: debate
 **Data:** 2026-09-08  
 **Issue debate:** ANX-83 · contrato P05: ANX-62 · gate implementação: ANX-36
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R2)
+
+**In:** Binding, AIAccount, quotas, leases, adapters, usage/health. **Out:** não é dono de Run, AgentVersion, Grant, invoice, ledger, RAG.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto. Sem REAL_EXECUTION nesta fase documental.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Binding / adapter / quota | **connections** |
+| adapter-gateway | **KEEP** |
+| Secrets | **packages/secrets** |
+
 ## Objetivo da rodada
 
 Fechar fronteiras **possui / não possui** entre connections e os módulos vizinhos (agents, governance, billing, accounting, orchestration, graph); tornar **REAL_EXECUTION** invariante testável; proibir secrets em DTOs/eventos/grafo; ratificar ownership ADR0002; registrar alternativas, riscos e perguntas para R03.

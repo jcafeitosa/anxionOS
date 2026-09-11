@@ -9,6 +9,25 @@ type: debate
 **Data:** 2026-09-08  
 **Issue:** ANX-62 (contrato P05) · **ANX-83** (debate R01–R10)
 
+**KEEP adapter-gateway** se já exportado. Pack ANX-389 — não `done`.
+
+## In / Out (R1)
+
+**In:** inventário de bindings, contas, quotas, adapters e catálogo. **Out:** contexto para R2 (fronteiras) e R3 (domínio). **Não** Goal/Task/Run, AgentVersion, grants, ledger, RAG.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto. Sem credenciais REAL.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| ConnectionBinding, AIAccount, quotas, adapters | **connections** |
+| adapter-gateway | **KEEP** |
+| Task/Run | **orchestration** |
+| Secrets | **packages/secrets** |
+
 ## Participantes
 
 | Papel | Agente |
