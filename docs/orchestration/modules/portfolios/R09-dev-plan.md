@@ -1,11 +1,32 @@
 ---
-type: debate
 status: draft
+type: debate
 ---
-
 # R09 — Plano de implementação: `modules/portfolios`
 
-**Issue:** ANX-95 · impl: **ANX-96** · gate: ANX-58
+**Rodada:** R9  
+**Data:** 2026-09-11  
+**Issue:** ANX-95 · impl: **ANX-96** · gate: ANX-58 · pack ANX-389  
+**Callers:** [R08-decision-log.md](./R08-decision-log.md) · [R10-g0-handoff.md](./R10-g0-handoff.md). Plano **draft**.
+
+## In / Out (R9)
+
+**In:** slices P06-S1–S6; matriz G3-PF-*; fixtures fill/capital/instrument.
+
+**Out:** ordem de slices. **Não** ST08. **Não** ANX-389 `done`. Exposure Timescale S6 defer.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`. Não G7 ANX-96 neste pack.
+
+## Ownership (plano)
+
+| Superfície | Dono |
+| --- | --- |
+| schema + fill projector | **portfolios** (ANX-96) |
+| fill fixture | **execution** |
+| CapitalAccount fixture | **capital** |
+| adapter-gateway | **KEEP** |
 
 ## Slices P06
 
@@ -40,6 +61,6 @@ status: draft
 
 **Evidência impl:** `backend/tests/portfolios/` (ANX-96 `in_review`)
 
-**ANX-96** — impl `in_review`; debate G7 pendente **ANX-95**
+**ANX-96** — impl `in_review`; debate G7 pendente **ANX-95**. Pack ANX-389 **não** `done`.
 
 → **R10** ([R10-g0-handoff.md](./R10-g0-handoff.md))

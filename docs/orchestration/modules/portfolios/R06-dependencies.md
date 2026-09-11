@@ -1,10 +1,32 @@
 ---
 type: debate
 ---
-
 # R06 — Dependências: `modules/portfolios`
 
-**Issues:** ANX-95 · ANX-91 · ANX-93 · ANX-89 · ANX-58 · ANX-29
+**Rodada:** R6  
+**Data:** 2026-09-11  
+**Issues:** ANX-95 · ANX-91 · ANX-93 · ANX-89 · ANX-58 · ANX-29 · pack ANX-389  
+**Callers:** [R05-storage-pg.md](./R05-storage-pg.md) · [R07-risks.md](./R07-risks.md).
+
+## In / Out (R6)
+
+**In:** fill.confirmed; ledger.posted; allocation.activated; MarketDataPort; StrategiesQueryPort; grant rebalance.approve; org scope; eventing P02.
+
+**Out:** position.updated / valuation.confirmed / exposure.snapshot → risk/decisions/performance/graph. Sem mutate Allocation, JournalEntry, Deployment ou Neo4j driver.
+
+## Non-goals
+
+D-GOV-010 = **risk P06**. Sem import `execution/infrastructure`. Sem spec `accepted`. Sem ST08 live. Sem ANX-342/389 `done`.
+
+## Ownership (dependências)
+
+| Superfície | Dono |
+| --- | --- |
+| Position / Portfolio | **portfolios** |
+| Fill | **execution** |
+| JournalEntry | **accounting** |
+| Allocation | **capital** |
+| adapter-gateway | **KEEP** |
 
 ## Upstream
 

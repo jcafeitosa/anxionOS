@@ -8,6 +8,25 @@ type: debate
 **Issues:** ANX-389 · ANX-95  
 **Callers:** [R06-dependencies.md](./R06-dependencies.md) · [R08-decision-log.md](./R08-decision-log.md).
 
+## In / Out (R7)
+
+**In:** double fill, position drift, cash drift, SQLite, stale valuation, REAL, FI02, rebalance→ordem, NAV errado, D-GOV-010.
+
+**Out:** R-PF-* + G5. Sem pasta `approvals/` / `policies/`. Sem ST08 live.
+
+## Non-goals
+
+Não spec `accepted`. Não ANX-342/389 `done`. D-GOV-010 = risk P06.
+
+## Ownership (riscos)
+
+| Superfície | Dono |
+| --- | --- |
+| Position / PF_* rejects | **portfolios** |
+| ledger | **accounting** |
+| reserva | **capital** |
+| adapter-gateway | **KEEP** |
+
 ## Registro
 
 | ID | Risco | L | I | Sev | Mitigação | Gate |

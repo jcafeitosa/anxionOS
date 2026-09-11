@@ -1,14 +1,38 @@
 ---
 type: debate
 ---
-
 # R04 — Contratos e eventos: `modules/portfolios`
 
-**Issues:** ANX-95 · ANX-58 · ANX-91 (capital) · ANX-93 (accounting consumer)
+**Rodada:** R4  
+**Data:** 2026-09-11  
+**Issues:** ANX-95 · ANX-58 · ANX-91 · ANX-93 · pack ANX-389  
+**Callers:** [R03-domain-sketch.md](./R03-domain-sketch.md) · [R05-storage-pg.md](./R05-storage-pg.md).
 
 ## Convenções
 
 `ownerDomain: portfolios` · `portfolios.<aggregate>.<action>.v1` · `executionMode` SIMULATED|PAPER only · payloads sem segredos venue
+
+**KEEP adapter-gateway** se já exportado.
+
+## In / Out (R4)
+
+**In:** POST/GET portfolios, positions, valuation, rebalance-plans, reconciliation. Idempotency-Key em POST; grant `portfolios.*` + T01. Consumers: fill.confirmed, ledger.posted, allocation.activated/released, observation.recorded, grant.revoked.
+
+**Out:** `portfolios.position.updated.v1` / valuation.confirmed / rebalance.* → risk, decisions, performance, graph. **Não** JournalEntry. **Não** Allocation. **Não** Order. Sem secrets.
+
+## Non-goals
+
+Não REAL v1. Não SQLite position. Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`. Não executar ordem a partir de RebalancePlan.
+
+## Ownership (contratos)
+
+| Superfície | Dono |
+| --- | --- |
+| Portfolio / Position / Holding / ValuationSnapshot / RebalancePlan | **portfolios** |
+| Allocation / Reservation | **capital** |
+| JournalEntry | **accounting** |
+| Fill | **execution** |
+| adapter-gateway | **KEEP** |
 
 ## HTTP `/v1/portfolios/*` (v1 debate)
 
