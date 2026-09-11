@@ -101,6 +101,18 @@ docker-compose -f backend/deploy/docker/docker-compose.yml --profile graph-sandb
 npm run anx162:engine-isolation-homologation
 ```
 
+#### Profile `app-workers` (ANX-453 — outbox-relay)
+
+O compose ANX-162 sobe só Postgres/NATS/engines. Sem relay, o outbox acumula `pending`. Overlay separado (não edita o sandbox de engines):
+
+```bash
+docker compose -f backend/deploy/docker/docker-compose.yml \
+  -f backend/deploy/docker/docker-compose.workers.yml \
+  --profile app-workers up -d --build outbox-relay
+```
+
+No host, o equivalente continua `cd backend && bun run workers:outbox-relay`. Não rode os dois contra o mesmo banco se quiser um único dispatcher; o lease do outbox tolera corrida, mas o processo Docker é o caminho durável.
+
 #### Profile `engines-sandbox` (ANX-162 S3 + S4)
 
 Containers de engine externo em modo **SIMULATED** — sem credenciais live:

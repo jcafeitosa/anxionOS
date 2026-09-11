@@ -1,0 +1,42 @@
+# ANX-453 — overlay. Do not merge into docker-compose.yml (ANX-162 engine sandbox).
+# Usage:
+#   docker compose -f backend/deploy/docker/docker-compose.yml \
+#     -f backend/deploy/docker/docker-compose.workers.yml \
+#     --profile app-workers up -d --build outbox-relay
+
+services:
+  outbox-relay:
+    profiles:
+      - app-workers
+    build:
+      context: ../..
+      dockerfile: deploy/docker/workers/Dockerfile
+    image: anxionos/outbox-relay:0.1.0-anx453
+    environment:
+      WORKER_PROFILE: outbox-relay
+      DATABASE_URL: postgres://${POSTGRES_USER:-anxionos}:${POSTGRES_PASSWORD:-anxionos}@postgres:5432/${POSTGRES_DB:-anxionos}
+      NATS_URL: nats://nats:4222
+    networks:
+      - anxion-data
+      - anxion-control
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          memory: 64M
+    restart: unless-stopped
+    labels:
+      anxion.issue: ANX-453
+      anxion.worker: outbox-relay
