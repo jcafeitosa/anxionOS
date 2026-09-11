@@ -14,175 +14,29 @@
 ```
 Error: expect(locator).toContainText(expected) failed
 
-Locator: getByTestId('owner-operational-empty')
-Expected substring: "Portfólio ainda não alimenta este console"
+Locator: getByTestId('owner-team-panel')
+Expected substring: "GET /v1/organizations/agencies/:agencyId/memberships"
+Received string:    "Equipeowner · activedda03cf9-8ab9-4f03-9123-3d25a95c9876 · 3e5baade-6c4c-4e75-b90f-ece93944ee59operator · active16b23284-843e-4095-97c6-e507d0d7cc09 · 16894192-21b7-46be-ae23-2c5ddc377b20"
 Timeout: 5000ms
-Error: element(s) not found
 
 Call log:
-  - Expect "toContainText" getByTestId('owner-operational-empty') with timeout 5000ms
-  - waiting for getByTestId('owner-operational-empty')
+  - Expect "toContainText" getByTestId('owner-team-panel') with timeout 5000ms
+  - waiting for getByTestId('owner-team-panel')
+    14 × locator resolved to <section id="team" data-testid="owner-team-panel" aria-labelledby="owner-team-heading">…</section>
+       - unexpected value "Equipeowner · activedda03cf9-8ab9-4f03-9123-3d25a95c9876 · 3e5baade-6c4c-4e75-b90f-ece93944ee59operator · active16b23284-843e-4095-97c6-e507d0d7cc09 · 16894192-21b7-46be-ae23-2c5ddc377b20"
 
 ```
 
 ```yaml
-- link "Pular para o conteúdo principal":
-  - /url: "#main-content"
-- complementary "Navegação principal":
-  - paragraph: anxionOS
-  - paragraph: Owner Console
-  - navigation "Menu Owner Console":
-    - link "Visão geral":
-      - /url: /agency/2f5d7f34-2fd1-41ef-b84a-c3a750871c65
-    - link "Equipe":
-      - /url: /agency/2f5d7f34-2fd1-41ef-b84a-c3a750871c65#team
-    - link "Atividade":
-      - /url: /agency/2f5d7f34-2fd1-41ef-b84a-c3a750871c65#activity
-    - link "Configurações":
-      - /url: /agency/2f5d7f34-2fd1-41ef-b84a-c3a750871c65#settings
-- banner:
-  - heading "Owner Console" [level=1]
-  - paragraph: Agência 2f5d7f34-2fd1-41ef-b84a-c3a750871c65 · owner
-  - status "Sessão": owner@anxionos.local
-- main:
-  - region "Trilha de autorização":
-    - heading "Trilha de autorização" [level=2]
-    - list:
-      - listitem:
-        - paragraph: Sessão
-        - paragraph: frontend · Better Auth
-      - listitem:
-        - paragraph: post-login-context
-        - paragraph: backend · GET /v1/auth/post-login-context
-      - listitem:
-        - paragraph: Owner Console
-        - paragraph: security · owner · MEMBERSHIP_OWNER
-  - toolbar "Ações do diagrama":
-    - button "Show all"
-    - button "Caminho principal" [pressed]
-    - button "Inferência"
-  - heading "anxionOS — visão de plataforma" [level=2]
-  - paragraph: Consoles Astro até domínio, PostgreSQL autoritativo e projeção Neo4j.
-  - complementary:
-    - text: Encontrar nó
-    - searchbox "Encontrar nó"
-    - list "Nós do diagrama":
-      - listitem:
-        - button "brain/ External"
-      - listitem:
-        - button "Humanos External"
-      - listitem:
-        - button "Consoles Frontend"
-      - listitem:
-        - button "API Backend"
-      - listitem:
-        - button "Workers Backend"
-      - listitem:
-        - button "Módulos Backend"
-      - listitem:
-        - button "Neo4j Database"
-      - listitem:
-        - button "PostgreSQL Database"
-      - listitem:
-        - button "Eventing Message bus"
-      - listitem:
-        - button "Connections Backend"
-      - listitem:
-        - button "Providers External"
-  - 'group "anxionOS — visão de plataforma Diagrama institucional Archify classic: consoles Astro, 23 módulos, PostgreSQL autoritativo e Neo4j como projeção."':
-    - text: HTTPS /api commands projections journal
-    - button "brain/, External": brain/ OKF local
-    - button "Humanos, External": Humanos Owner · papéis
-    - button "Consoles, Frontend": Consoles Astro + React
-    - button "API, Backend": API Bun + Elysia
-    - button "Workers, Backend": Workers TypeScript
-    - button "Módulos, Backend": Módulos 23 contexts
-    - button "Neo4j, Database": Neo4j projeção
-    - button "PostgreSQL, Database": PostgreSQL TS · pgvector
-    - button "Eventing, Message bus": Eventing outbox · NATS
-    - button "Connections, Backend": Connections LLM · venues
-    - button "Providers, External": Providers externos
-  - toolbar "Zoom do diagrama":
-    - button "Diminuir zoom"
-    - button "Redefinir zoom": 100%
-    - button "Aumentar zoom"
-  - list "Legenda semântica":
-    - listitem: Frontend
-    - listitem: Backend
-    - listitem: Database
-    - listitem: Message bus
-    - listitem: External
-  - complementary "Consoles":
-    - paragraph: Semantic passport
-    - heading "Consoles" [level=3]
-    - term: tipo
-    - definition: Frontend
-    - term: id
-    - definition: frontend
-    - term: tag
-    - definition: frontend/
-    - paragraph: Relações autoradas
-    - list:
-      - listitem: OUT → API · /api
-      - listitem: IN ← Humanos · HTTPS
-    - paragraph: Dados do loader
-    - term: agencyId
-    - definition: 2f5d7f34-2fd1-41ef-b84a-c3a750871c65
-    - term: role
-    - definition: owner
-    - term: e-mail verificado
-    - definition: "true"
-    - term: TTL
-    - definition: Dentro do TTL
-    - term: policyVersion
-    - definition: post-login.v1
-    - paragraph: platformAccess=false — console /platform permanece negado.
-    - paragraph: partnerAccess=false — console /partner permanece negado.
-  - article:
-    - heading "Fontes OpenKnowledge" [level=3]
-    - list:
-      - listitem: ADR0002 aceito — 23 módulos; tools ainda proposta (ADR0003)
-      - listitem: ADR0004 aceito — Neo4j + PostgreSQL/Timescale/pgvector
-      - listitem: ADR0001 proposto — grafo operacional sem ser ledger
-  - article:
-    - heading "Evidência no repo" [level=3]
-    - list:
-      - listitem: Esqueleto em backend/modules (23 donos + adapter-gateway fora do baseline)
-      - listitem: frontend/ Astro; API Bun+Elysia; eventing/database packages
-      - listitem: Implantação de produção não verificada
-  - region "Equipe":
-    - heading "Equipe" [level=2]
-    - list:
-      - listitem:
-        - paragraph: owner · active
-        - paragraph: dda03cf9-8ab9-4f03-9123-3d25a95c9876 · 3e5baade-6c4c-4e75-b90f-ece93944ee59
-      - listitem:
-        - paragraph: operator · active
-        - paragraph: 16b23284-843e-4095-97c6-e507d0d7cc09 · 16894192-21b7-46be-ae23-2c5ddc377b20
-  - region "Grants e autonomia":
-    - heading "Grants e autonomia" [level=2]
-    - paragraph: Vazio
-    - heading "Nenhum grant efetivo nesta agência" [level=3]
-    - paragraph: "Nenhum grant efetivo para o principal nesta agência. Contrato: GET /v1/agencies/:agencyId/grants (collection). createGovernancePlugin handleListGrants → listEffectiveGrants; DTO em handlers/grants toGrantDto. Autonomia L0–L4 por agente: GET /v1/agencies/:agencyId/agents/:agentId/autonomy. ANX-402 slice 3."
-    - paragraph: GET /v1/agencies/:agencyId/agents/:agentId/autonomy — requer agentId; matriz global em GET /v1/governance/autonomy/matrix. Nível L0–L4 só quando a API devolve; sem atribuição = honesto vazio. ANX-403 slice 4.
-  - region "Fila de aprovações":
-    - heading "Fila de aprovações" [level=2]
-    - paragraph: Vazio
-    - heading "Listagem de aprovações ainda não publicada" [level=3]
-    - paragraph: "Listagem pública ainda não existe. GET /v1/agencies/:agencyId/change-proposals (collection). createGovernancePlugin handleListPendingChangeProposals → findPendingByScope; DTO em handlers/change-proposals toChangeProposalDto. Resolver: POST /v1/governance/approvals/resolve. ANX-404 slice 5."
-    - paragraph: POST /v1/governance/approvals/resolve — resolve aprovação de ChangeProposal (command idempotente). O Owner console lista pendentes; resolver exige commandId e changeProposalId.
-  - region "Agentes da agência":
-    - heading "Agentes da agência" [level=2]
-    - paragraph: Vazio
-    - heading "Listagem de agentes ainda não publicada" [level=3]
-    - paragraph: Listagem pública ainda não existe. GET /v1/agencies/:agencyId/agents (collection). createAgentsPlugin só POST "" + GET /:agentId; AgentRepository.save/findById sem listByOrganization; OpenAPI getAgent/listAgentVersions (por agentId). ANX-143 done não publica listagem. ANX-385.
-  - region "Portfólio e valuation":
-    - heading "Portfólio e valuation" [level=2]
-    - paragraph: Vazio
-    - heading "Listagem de portfólios ainda não publicada" [level=3]
-    - paragraph: Listagem pública ainda não existe. GET /v1/agencies/:agencyId/portfolios (collection). createPortfoliosPlugin handleListAgencyPortfolios → listAgencyPortfolioOverview; DTO em handlers/overview. ANX-153 G7 + ANX-164 slice 6.
-    - paragraph: GET /v1/agencies/:agencyId/portfolios (collection). createPortfoliosPlugin handleListAgencyPortfolios → listAgencyPortfolioOverview; DTO em handlers/overview. ANX-153 G7 + ANX-164 slice 6.
-- contentinfo: anxionOS · Owner Console · shells honestos ANX-297
+- region "Equipe":
+  - heading "Equipe" [level=2]
+  - list:
+    - listitem:
+      - paragraph: owner · active
+      - paragraph: dda03cf9-8ab9-4f03-9123-3d25a95c9876 · 3e5baade-6c4c-4e75-b90f-ece93944ee59
+    - listitem:
+      - paragraph: operator · active
+      - paragraph: 16b23284-843e-4095-97c6-e507d0d7cc09 · 16894192-21b7-46be-ae23-2c5ddc377b20
 ```
 
 # Test source
@@ -216,14 +70,14 @@ Call log:
   26  | 		await expect(page.getByTestId("owner-platform-grant")).toContainText(
   27  | 			"platformAccess=false",
   28  | 		);
-> 29  | 		await expect(page.getByTestId("owner-operational-empty")).toContainText(
-      |                                                             ^ Error: expect(locator).toContainText(expected) failed
-  30  | 			"Portfólio ainda não alimenta este console",
-  31  | 		);
-  32  | 		await expect(page.getByTestId("owner-operational-empty")).toContainText("ANX-153");
+  29  | 		await expect(page.getByTestId("owner-finance-panel")).toBeVisible();
+  30  | 		await expect(page.getByTestId("owner-finance-panel")).toContainText(
+  31  | 			"GET /v1/agencies/:agencyId/portfolios",
+  32  | 		);
   33  | 		const teamPanel = page.getByTestId("owner-team-panel");
   34  | 		await expect(teamPanel).toBeVisible();
-  35  | 		await expect(teamPanel).toContainText(
+> 35  | 		await expect(teamPanel).toContainText(
+      |                           ^ Error: expect(locator).toContainText(expected) failed
   36  | 			"GET /v1/organizations/agencies/:agencyId/memberships",
   37  | 		);
   38  | 		const teamList = page.getByTestId("owner-team-list");
@@ -318,4 +172,10 @@ Call log:
   127 | 		).toBeVisible();
   128 | 	});
   129 | 
+  130 | 	test("without PLATFORM/partner grant does not open those consoles", async ({
+  131 | 		page,
+  132 | 	}) => {
+  133 | 		await signInLive(page, DEV_SEED_ACCOUNTS.owner);
+  134 | 		await expect(page).toHaveURL(/\/agency\//, { timeout: 20_000 });
+  135 | 		await page.goto("/platform");
 ```
