@@ -8,6 +8,7 @@ import {
 	toolCallRequestSchema,
 	toolAuditEntrySchema,
 	toolInvocationDecisionSchema,
+	computerSessionRefSchema,
 } from "@anxionos/contracts/openbot";
 
 describe("openbot cross-module contracts (ANX-144 S1)", () => {
@@ -107,7 +108,6 @@ describe("openbot S4 audit event contracts (ANX-144 S4)", () => {
 
 describe("openbot S5 takeover contracts (ANX-144 S5)", () => {
 	test("computerSessionRefSchema requires authorityToken and controller", () => {
-		const { computerSessionRefSchema } = require("@anxionos/contracts/openbot");
 		const parsed = computerSessionRefSchema.parse({
 			sessionId: "a1000001-0001-4001-8001-000000000001",
 			organizationId: "b2000002-0002-4002-8002-000000000002",
