@@ -55,6 +55,13 @@ PG `partners_*` + journal + outbox. Neo4j `graph:partners:v1` (parceiro→campan
 **In:** billing.invoice.paid / refund.processed; grant T01; agency do parceiro.
 **Out:** partners_referrals / commission_rules / payouts (PG) + eventos partners.payout.requested.v1. **Não** ledger (accounting), **não** invoice verdade (billing). Sem pasta marketplace/.
 
+## Non-goals
+
+- Pasta física `marketplace/` ou 24º módulo (PC 29 = composto spec 007).
+- Invoice paid / webhook PSP (billing) e JournalEntry (accounting).
+- D-GOV-010 / kill switch (risk P06). Pastas `approvals/` ou `policies/`.
+- ST08 live / migrations neste pack. Specs 001–005 permanecem **draft**.
+
 ## Próxima rodada
 
 → **R02** ([R02-boundaries.md](./R02-boundaries.md))

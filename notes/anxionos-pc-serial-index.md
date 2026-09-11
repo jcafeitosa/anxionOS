@@ -48,7 +48,7 @@ Thin debates spec 003 (módulos físicos sem PC serial): [strategies](./anxionos
 | 29 | ANX-379 | [debate](./anxionos-pc29-marketplace-debate.md) | composto spec 007 | fechado |
 | 30 | ANX-380 | [debate](./anxionos-pc30-integrations-debate.md) | connections + adapters donos | fechado |
 
-Atlas: [sistema](./anxionos-diagram-atlas.md) · [23 modulos](./anxionos-diagram-atlas-modules.md) · [alinhamento](./anxionos-product-company-module-alignment.md) · [briefing Owner](/external-sources/owner-briefing-product-company-2026-09-10)
+Atlas: [sistema](./anxionos-diagram-atlas.md) · [23 modulos](./anxionos-diagram-atlas-modules.md) · [alinhamento](./anxionos-product-company-module-alignment.md) · [briefing Owner](../external-sources/owner-briefing-product-company-2026-09-10.md)
 
 Hub em brain (sem duplicar estes 30 arquivos): [anxionos-pc-serial-hub](../brain/notes/anxionos-pc-serial-hub.md). Programa P1: ANX-389. Pacote G7 Owner (draft): [anxionos-owner-g7-packet-p1-atlas](./anxionos-owner-g7-packet-p1-atlas.md).
 
