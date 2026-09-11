@@ -4,8 +4,8 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "bun run --watch src/index.ts",
-		"start": "bun run src/index.ts",
+		"dev": "bun --env-file=../../.env --watch src/index.ts",
+		"start": "bun --env-file=../../.env src/index.ts",
 		"seed:dev": "bun run src/auth/seed-dev.ts",
 		"build": "tsc --project tsconfig.json",
 		"typecheck": "tsc --project tsconfig.json --noEmit"

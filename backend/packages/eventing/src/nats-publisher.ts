@@ -1,14 +1,14 @@
 import {
-	type DomainEventEnvelope,
 	assertTenantScopedEnvelopeAgencyId,
+	type DomainEventEnvelope,
 	domainEventEnvelopeSchema,
 } from "@anxionos/contracts/events";
 import {
-	JSONCodec,
+	connect,
 	type JetStreamManager,
+	JSONCodec,
 	type NatsConnection,
 	StorageType,
-	connect,
 } from "nats";
 import type { OutboxPublisher } from "./relay";
 import { DEFAULT_RETENTION_POLICY } from "./retention";
@@ -17,8 +17,9 @@ const codec = JSONCodec<DomainEventEnvelope>();
 
 export const DEFAULT_NATS_EVENTS_STREAM = "EVENTS";
 
-/** JetStream subjects for platform-wide and agency-scoped domain events. */
-export const NATS_EVENTS_STREAM_SUBJECTS = ["events.>", "agency.>.events.>"];
+/** JetStream subjects for platform-wide and agency-scoped domain events.
+ * `>` must be the last token; agency id is a single token (`*`). */
+export const NATS_EVENTS_STREAM_SUBJECTS = ["events.>", "agency.*.events.>"];
 
 export function resolveEventSubject(
 	eventType: string,
@@ -37,9 +38,7 @@ export async function ensureEventsJetStream(
 	try {
 		const info = await jsm.streams.info(streamName);
 		const existing = info.config.subjects ?? [];
-		const merged = [
-			...new Set([...existing, ...NATS_EVENTS_STREAM_SUBJECTS]),
-		];
+		const merged = [...new Set([...existing, ...NATS_EVENTS_STREAM_SUBJECTS])];
 		if (merged.length !== existing.length) {
 			await jsm.streams.update(streamName, { subjects: merged });
 		}

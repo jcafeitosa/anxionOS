@@ -1,21 +1,21 @@
 import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
-import { createLogger } from "@anxionos/observability";
-import {
-	AckPolicy,
-	DeliverPolicy,
-	JSONCodec,
-	type NatsConnection,
-	connect,
-} from "nats";
-import type { Pool } from "pg";
 import {
 	DEFAULT_NATS_EVENTS_STREAM,
 	ensureEventsJetStream,
 } from "@anxionos/eventing/nats-publisher";
+import { createLogger } from "@anxionos/observability";
 import {
-	GOVERNANCE_ORGANIZATIONS_CONSUMER_NAME,
+	AckPolicy,
+	connect,
+	DeliverPolicy,
+	JSONCodec,
+	type NatsConnection,
+} from "nats";
+import type { Pool } from "pg";
+import {
 	classifyOrganizationsMembershipError,
 	createOrganizationsMembershipConsumerDeps,
+	GOVERNANCE_ORGANIZATIONS_CONSUMER_NAME,
 	processOrganizationsMembershipConsumerEvent,
 } from "./organizations-membership-consumer";
 
@@ -29,7 +29,7 @@ const GOVERNANCE_ORGANIZATIONS_DURABLE =
 	"governance-organizations-membership-v1";
 /** Agency-scoped organization domain events (membership.*, agency.*). */
 export const GOVERNANCE_ORGANIZATIONS_SUBJECT_FILTER =
-	"agency.>.events.organizations.>";
+	"agency.*.events.organizations.>";
 
 export interface GovernanceOrganizationsMembershipHandle {
 	stop: () => Promise<void>;

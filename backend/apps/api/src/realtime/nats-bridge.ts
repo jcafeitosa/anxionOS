@@ -1,11 +1,11 @@
 import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
 import { IDENTITY_EVENT_TYPES } from "@anxionos/contracts/identity";
-import { createLogger } from "@anxionos/observability";
 import {
 	DEFAULT_NATS_EVENTS_STREAM,
 	ensureEventsJetStream,
 } from "@anxionos/eventing/nats-publisher";
-import { JSONCodec, type NatsConnection, connect } from "nats";
+import { createLogger } from "@anxionos/observability";
+import { connect, JSONCodec, type NatsConnection } from "nats";
 import type { SubscriptionManager } from "./subscription-manager";
 
 const logger = createLogger({ service: "realtime-nats-bridge" });
@@ -34,7 +34,7 @@ export async function startRealtimeNatsBridge(
 	await ensureEventsJetStream(jsm, streamName);
 
 	const sub = nc.subscribe("events.>");
-	const agencySub = nc.subscribe("agency.>.events.>");
+	const agencySub = nc.subscribe("agency.*.events.>");
 
 	const onMessage = (subject: string, data: Uint8Array) => {
 		try {

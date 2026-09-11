@@ -32,7 +32,7 @@ describe("nats publisher helpers", () => {
 	test("JetStream subject list covers platform and agency namespaces", () => {
 		expect(NATS_EVENTS_STREAM_SUBJECTS).toEqual([
 			"events.>",
-			"agency.>.events.>",
+			"agency.*.events.>",
 		]);
 	});
 
