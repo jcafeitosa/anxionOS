@@ -24,6 +24,37 @@ Fechar fronteiras **possui / não possui** entre strategies e vizinhos (**market
 | [market-data/R02-boundaries.md](../market-data/R02-boundaries.md) | Preços asOf — strategies não replica catálogo |
 | ANX-58 | Ciclo P06 SIMULATED/PAPER sem REAL |
 
+## Debate R2 (síntese)
+
+**Arquiteto:** strategies é a Strategy Factory (spec 003): versão parametrizada, backtest referenciado, deployment PAPER/SIMULATED, signal com TTL.
+
+**Crítico:** O que não entra? TradeIntent, ordens, certificação, ticks, P&L, pasta products/.
+
+**Security:** T01 em publish/deploy/signal; REAL fail-closed.
+
+## O módulo POSSUI
+
+Strategy, StrategyVersion, BacktestRun, Deployment, Signal.
+
+## O módulo NÃO POSSUI
+
+| Item | Dono correto |
+| --- | --- |
+| TradeIntent, Decision | decisions |
+| Ordens, fills | execution |
+| Certification / promoção auto | evaluation |
+| Preços, instrument registry | market-data |
+| P&L, attribution | performance |
+| Product marketplace | PC 10 composto — **sem pasta** |
+| Approval / D-GOV-010 | governance / risk P06 |
+
+## Non-goals
+
+- Não criar `products/`, `approvals/`, `policies/`.
+- Não emitir `execution.order.*`.
+- Não gravar ticks nem P&L.
+- LIVE/REAL v1 bloqueado.
+
 ## Decisão: possui / não possui
 
 | Dado / comportamento | Dono |
@@ -34,6 +65,25 @@ Fechar fronteiras **possui / não possui** entre strategies e vizinhos (**market
 | Certification, Evaluation | **evaluation** |
 | Preços, instrument registry | **market-data** |
 | P&L, attribution | **performance** |
+
+```mermaid
+flowchart TB
+  subgraph inn [strategies IN]
+    S[Strategy]
+    V[StrategyVersion]
+    B[BacktestRun]
+    D[Deployment]
+    G[Signal]
+  end
+  subgraph outt [OUT]
+    DEC[decisions TradeIntent]
+    EX[execution Order]
+    EVL[evaluation Cert]
+    MD[market-data ticks]
+    PERF[performance P&L]
+  end
+  inn --> outt
+```
 
 ## Invariantes R02 (`ST-R02-INV-*`)
 
