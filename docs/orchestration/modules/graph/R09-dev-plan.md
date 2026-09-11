@@ -28,6 +28,18 @@ P1 **só** pack documental. APIs neste dir permanecem draft até issue impl. Gra
 
 RLS P09; driver em outros módulos; ST08 0/23.
 
+## In / Out (R9 — plano, não G1)
+
+**In (futuro G1):** journal/outbox dos 22 donos (graph não é ledger); eventId para inbox.
+**Out:** catálogo PG + mutação Neo4j + checkpoint; T01–T05 fixtures. **Não** writes de Grant/Order/Position. P1 só este pack.
+
+```mermaid
+flowchart LR
+  j[journal dono] --> inbox[graph_projector_inbox]
+  inbox --> neo[Neo4j]
+  neo --> ck[graph_projection_checkpoints]
+```
+
 ## Saída R9
 
 Para R10.

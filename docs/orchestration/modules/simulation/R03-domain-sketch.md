@@ -21,6 +21,11 @@ Isolamento: CPU/mem quota org+run; network deny-by-default; FS chroot SQLite; da
 
 SimulationRunRepository, SnapshotRepository, SimulationUnitOfWork, BacktestRunner (infra sandbox), AgencyScopePort, TraversalEvaluator, EventConsumer (`strategies.backtest.requested.v1`).
 
+## In / Out (R3)
+
+**In:** TwinManifest + ScenarioSnapshot hash; AgencyScopePort; TraversalEvaluator (somente TIER_SIMULATED).
+**Out:** SimulationRun status; SandboxCheckpoint isolado; FAILED se hash mismatch ou egress REAL. Sem Order, Grant, Certification.
+
 ## Saída R3
 
 Modelo v1.

@@ -50,6 +50,11 @@ PG `partners_*` + journal + outbox. Neo4j `graph:partners:v1` (parceiro→campan
 | spec 003 comercial vs ledger | **draft** |
 | PC 29 | composto — não criar pasta |
 
+## In / Out (R1)
+
+**In:** billing.invoice.paid / refund.processed; grant T01; agency do parceiro.
+**Out:** partners_referrals / commission_rules / payouts (PG) + eventos partners.payout.requested.v1. **Não** ledger (accounting), **não** invoice verdade (billing). Sem pasta marketplace/.
+
 ## Próxima rodada
 
 → **R02** ([R02-boundaries.md](./R02-boundaries.md))

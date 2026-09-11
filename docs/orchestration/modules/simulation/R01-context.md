@@ -27,4 +27,17 @@ SimulationRun, ScenarioSnapshot, TwinManifest, SandboxCheckpoint.
 
 SQLite sandbox **non-auth** por run. PG autoritativo para estado do run. ST08 0/23.
 
+## In / Out (R1)
+
+**In:** `strategies.backtest.requested.v1` ou POST run (grant SIMULATED); datasetRef+hash; seed.
+**Out:** SimulationRun PG + `simulation.run.started.v1` / completed / failed; resultRef object store. **Não** execution.order.*, **não** evaluation.certification.*, **não** mutação de capital.
+
+```mermaid
+flowchart LR
+  bt[strategies.backtest.requested.v1] --> sim[simulation]
+  sim --> pg[simulation_runs]
+  sim --> ev[simulation.run.completed.v1]
+  ev --> evl[evaluation consume]
+```
+
 → **R02** ([R02-boundaries.md](./R02-boundaries.md))

@@ -23,6 +23,11 @@ type: debate
 
 IncidentRepository, ExportJobRepository, HealthSnapshotRepository, OperationsUnitOfWork, AgencyScopePort, TraversalEvaluator, EventConsumer (alerts, heartbeats, audit.manifest), ObjectStorePort (export blob).
 
+## In / Out (R3)
+
+**In:** EventConsumer (alerts, heartbeats, audit.manifest); ObjectStorePort para export.
+**Out:** Incident estados open/mitigated/closed; ExportJob PENDING→COMPLETED|FAILED|CANCELLED; ServiceHealthSnapshot (PG, não Timescale). OPS-R03-01/02.
+
 ## Saída R3
 
 Modelo v1 para R4.

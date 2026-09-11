@@ -34,6 +34,11 @@ Incident, Runbook, RetentionPolicy, ExportJob, ServiceHealthSnapshot.
 
 PG incidents/export/health. Neo4j impact **projeção**. SQLite não autoritativo. ST08 0/23.
 
+## In / Out (R1)
+
+**In:** alerta correlacionado; pedido de export (Idempotency-Key); probe de health; ProcedureVersion a executar.
+**Out:** Incident / ExportJob PG; `operations.incident.opened.v1`; blob de export (object store) com `deltaRefId` de audit — **não** copia journal. Sem kill switch, sem ledger, sem Flight Recorder autoritativo.
+
 ## Próxima rodada
 
 → **R02** ([R02-boundaries.md](./R02-boundaries.md))

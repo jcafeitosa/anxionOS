@@ -21,6 +21,11 @@ G3-IDN-01 getPrincipalById · G3-IDN-02 register idempotente · G5-IDN-01 token 
 
 Tokens no Neo4j; SQLite sessão; identity importa better-auth; pasta organization única.
 
+## In / Out (R4)
+
+**In:** POST /v1/identity/principals (apps/api valida sessão); GET por id com agency header.
+**Out:** envelope SDD; códigos IDN_*; eventos listados; **nunca** accessToken/refresh no payload. Layout alvo `@anxionos/contracts/identity/` (P1 doc).
+
 ## Saída R4
 
 Para R5.

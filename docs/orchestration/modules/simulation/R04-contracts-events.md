@@ -25,6 +25,11 @@ POST `/v1/simulation/runs` · GET `/v1/simulation/runs/:id` · POST `/v1/simulat
 
 G3-SIM-01 backtest requested → started+completed · G3-SIM-02 hash mismatch FAILED · G5-SIM-01 cross-tenant 403 · G5-SIM-02 REAL egress bloqueado.
 
+## In / Out (R4)
+
+**In:** POST /v1/simulation/runs; consumer strategies.backtest.requested.v1.
+**Out:** simulation.run.started.v1, simulation.run.completed.v1, simulation.snapshot.created.v1, simulation.run.failed.v1. Códigos SIM_*. SIM-R04-01: não emite execution.order nem evaluation.certification.
+
 ## Saída R4
 
 Contratos v1.

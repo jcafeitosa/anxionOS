@@ -20,7 +20,7 @@
 
 ### Eventos
 
-`connections.account.connected.v1`, `connections.usage.recorded.v1`, `connections.quota.exceeded.v1`, catálogo versionado (diff), cooldown generation.
+`connections.account.connected.v1`, `connections.usage.recorded.v1`, `connections.quota.exceeded.v1`, `connections.catalog.published.v1`, `connections.cooldown.opened.v1`.
 
 ### Non-goals
 

@@ -39,6 +39,11 @@ flowchart LR
   pr --> gov[governance grant]
 ```
 
+## In / Out (R1)
+
+**In:** Pedido autenticado Better Auth (apps/api) com agencyId; comando Register/Suspend/Revoke Principal; evento de sessão a revogar.
+**Out:** Principal persistido (PG) + `identity.principal.*.v1` / `identity.session.revoked.v1` sem token; consumers organizations/governance. Sem membership, grant, secret de provider.
+
 ## Saída R1
 
 Para R2.
