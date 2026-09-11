@@ -43,8 +43,8 @@ Esboçar o modelo de domínio de **knowledge** após [R02-boundaries.md](./R02-b
 | `brain/project-docs/decisions/0004-postgresql-timescaledb-pgvector.md` | pgvector em PG; Neo4j projeção; Timescale fora de knowledge |
 | `brain/notes/anxionos-storage-ownership.md` | Matriz knowledge: PG+pgvector metadados/embeddings; Neo4j claims |
 | [agents/R03-domain-sketch.md](../agents/R03-domain-sketch.md) | BrainFacade chama ports knowledge; não persiste corpus |
-| [connections/R03-domain-sketch.md](../../modules/connections/R03-domain-sketch.md) | CX-R03-05: EmbeddingSpace dono knowledge; MODEL offering em connections |
-| [graph/R03-schema-registry.md](../graph/R03-schema-registry.md) | Projeção fonte→claim→evidence; traversal T05/T10 consumido via port |
+| [connections/R03-domain-sketch.md](../connections/R03-domain-sketch.md) | CX-R03-05: EmbeddingSpace dono knowledge; MODEL offering em connections |
+| [graph/R03-domain-sketch.md](../graph/R03-domain-sketch.md) | Projeção fonte→claim→evidence; traversal T05/T10 consumido via port |
 
 ## Debate R3 (síntese atribuída)
 

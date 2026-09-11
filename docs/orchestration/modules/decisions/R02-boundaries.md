@@ -40,7 +40,7 @@ Fechar fronteiras **possui / não possui** entre decisions e vizinhos (**governa
 | spec 001 | Envelope institucional, ownerDomain, journal/outbox |
 | ADR0001 | Grafo fundamenta; efeito exige revalidação epoch PG |
 | [governance/R01-context.md](../governance/R01-context.md) | Grants, authorityEpoch, mandatos |
-| [orchestration/R02-paperclip-checkout-heartbeat.md](../orchestration/R02-paperclip-checkout-heartbeat.md) | Task/Run ≠ decisão de investimento |
+| [orchestration/R02-boundaries.md](../orchestration/R02-boundaries.md) | Task/Run ≠ decisão de investimento |
 | [agents/R02-boundaries.md](../agents/R02-boundaries.md) | AgentVersion ≠ Proposal |
 | [knowledge/R02-boundaries.md](../knowledge/R02-boundaries.md) | Evidence storage vs referência |
 | [portfolios/R02-boundaries.md](../portfolios/R02-boundaries.md) | Position/valuation read-only para bounds |
