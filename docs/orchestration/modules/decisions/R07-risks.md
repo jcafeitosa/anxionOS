@@ -1,10 +1,31 @@
 ---
 type: debate
 ---
-
 # R07 — Riscos: `modules/decisions`
 
-**Issue:** ANX-97
+**Rodada:** R7  
+**Data:** 2026-09-11  
+**Issue:** ANX-97 · pack ANX-389  
+**Callers:** [R06-dependencies.md](./R06-dependencies.md) · [R08-decision-log.md](./R08-decision-log.md). Sem código de produto.
+
+## In / Out (R7)
+
+**In:** inventário de abuso (authority bypass, stale epoch, cross-tenant, hash drift, evidence omitida, SQLite, REAL, double submit).
+
+**Out:** tabela R-DC-* + G5. **Não** mitigações em `apps/api` fora do módulo. Sem ST08 live.
+
+## Non-goals
+
+Não Red Team em capital real. Não spec `accepted`. Não ANX-342/389 `done`. Não relaxar FI03/independent approver.
+
+## Ownership (riscos)
+
+| Superfície | Dono |
+| --- | --- |
+| Rejeições DC_* / state machine | **decisions** |
+| Grant forge / revoke | **governance** |
+| Permit stale | **risk** |
+| adapter-gateway | **KEEP** |
 
 | ID | Risco | Sev | Mitigação |
 | --- | --- | ---: | --- |

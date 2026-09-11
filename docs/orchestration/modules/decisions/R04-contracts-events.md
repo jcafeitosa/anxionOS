@@ -1,14 +1,41 @@
 ---
 type: debate
 ---
-
 # R04 — Contratos e eventos: `modules/decisions`
 
-**Issues:** ANX-97 · ANX-58
+**Rodada:** R4  
+**Data:** 2026-09-11  
+**Issues:** ANX-97 · ANX-58 · pack ANX-389  
+**Pré-requisito:** [R03-domain-sketch.md](./R03-domain-sketch.md)  
+**Callers:** [R05-storage-pg.md](./R05-storage-pg.md) · [ROUNDS.md](./ROUNDS.md). Sem schema de produção neste artefato. API esboço `/v1/decisions` apenas.
 
 ## Convenções
 
-`ownerDomain: decisions` · SIMULATED|PAPER only
+`ownerDomain: decisions` · `decisions.<aggregate>.<action>.v1` · `executionMode` SIMULATED|PAPER only · payloads sem segredos venue
+
+**KEEP adapter-gateway** se já exportado.
+
+## In / Out (R4)
+
+**In:** POST `/v1/decisions/proposals`, GET `/decisions/:id`, POST `check-authority`, POST `dispositions`, POST `/intents/:intentId/submit`, POST `cancel`. Idempotency-Key em POST; grant + T01. Consumers: `knowledge.evidence.recorded.v1`, `strategies.signal.emitted.v1`, `portfolios.rebalance.approved.v1`, `risk.check.completed.v1`, `governance.grant.revoked.v1`, `governance.authority_epoch.bumped.v1`, `capital.reservation.created.v1`.
+
+**Out:** eventos `decisions.*` abaixo. **Não** emite `execution.order.*`. **Não** cria Grant (`governance`). **Não** reserva capital (só consome `reservation.created`). Sem secrets, prompts ou peppers.
+
+## Non-goals
+
+Não REAL/live v1. Não SQLite decisão. Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`. Não pasta `approvals/` neste módulo.
+
+## Ownership (contratos)
+
+| Superfície | Dono |
+| --- | --- |
+| DecisionRecord / Proposal / TradeIntent / Disposition / AuthorityRef | **decisions** |
+| Grant / Policy / ChangeProposal | **governance** |
+| RiskCheck / Permit | **risk** |
+| Reservation | **capital** |
+| Order | **execution** |
+| Evidence blob | **knowledge** |
+| adapter-gateway | **KEEP** |
 
 ## State machine TradeIntent
 

@@ -2,10 +2,32 @@
 type: debate
 status: draft
 ---
-
 # R09 — Plano de implementação: `modules/decisions`
 
-**Issue:** ANX-97 · impl: **ANX-98** · gate: ANX-58
+**Rodada:** R9  
+**Data:** 2026-09-11  
+**Issue:** ANX-97 · impl: **ANX-98** · gate: ANX-58 · pack ANX-389  
+**Callers:** [R08-decision-log.md](./R08-decision-log.md) · [R10-g0-handoff.md](./R10-g0-handoff.md). Plano **draft**. Sem migration neste artefato.
+
+## In / Out (R9)
+
+**In:** slices P06-S1–S6; matriz G3-DC-*; evidência `backend/tests/decisions/` (ANX-98 `in_review` — debate G7 pendente ANX-97).
+
+**Out:** ordem de slices. **Não** declara ST08. **Não** `done` em ANX-389. Graph projection S6 defer.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-342/389 `done`. Não REAL venue. Não D-GOV-010 aqui.
+
+## Ownership (plano)
+
+| Superfície | Dono |
+| --- | --- |
+| schema + commands propose/submit | **decisions** (ANX-98) |
+| Grant stub | **governance** |
+| risk consumer | **risk** (S4) |
+| capital reserve | **capital** (S4) |
+| adapter-gateway | **KEEP** |
 
 ## Slices P06
 
@@ -33,6 +55,6 @@ status: draft
 
 **Evidência impl:** `backend/tests/decisions/` (ANX-98 `in_review`)
 
-**ANX-98** — impl `in_review`; debate G7 pendente **ANX-97**
+**ANX-98** — impl `in_review`; debate G7 pendente **ANX-97**. Pack ANX-389 **não** `done`.
 
 → **R10** ([R10-g0-handoff.md](./R10-g0-handoff.md))
