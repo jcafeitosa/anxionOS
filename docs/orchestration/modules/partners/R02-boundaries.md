@@ -10,6 +10,23 @@ type: debate
 **Issues:** ANX-113 · ANX-389  
 **Callers:** [R01-context.md](./R01-context.md) · [R03-domain-sketch.md](./R03-domain-sketch.md) · [ROUNDS.md](./ROUNDS.md). Arquivos já existentes (fatten). Sem API runtime. Instrução: fatten partners thin R*.
 
+## In / Out (R2)
+
+**In:** referral, regra de comissão, acruo, batch de payout.
+
+**Out:** Invoice (`billing`). Ledger (`accounting`). Pasta marketplace PC 29.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Referral / CommissionRule / Accrual / PayoutBatch | **partners** |
+| adapter-gateway | **KEEP** |
+
 ## Objetivo
 
 Fechar possui/não possui; comissão **não** é invoice; payout **não** é ledger; PC 29 sem pasta.

@@ -7,6 +7,23 @@ type: debate
 **Rodada:** R3 · **Issues:** ANX-42 · **ANX-101**  
 **Pré-requisito:** [R02-boundaries.md](./R02-boundaries.md)
 
+## In / Out (R3)
+
+**In:** esboço VenueAdapterRef, Order, Fill, ExecutionSession.
+
+**Out:** secret de venue. TradeIntent. Ledger posting.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Agregados de execução | **execution** |
+| adapter-gateway | **KEEP** |
+
 ## Agregados
 
 ### VenueAdapterRef

@@ -7,6 +7,19 @@ type: debate
 **Implementacao:** issue distinta pos-greenlight Owner — **nao** neste pack.  
 **Callers:** [R08-decision-log.md](./R08-decision-log.md) · [R10-g0-handoff.md](./R10-g0-handoff.md).
 
+## In / Out (R9)
+
+**In:** plano G1 futuro (`orchestration_*`, checkout, heartbeat, HTTP).
+
+**Out:** AgentVersion (`agents`). T01 driver (`graph`). D-GOV-010. Spec accepted.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Plano G0 documental | **orchestration** |
+| adapter-gateway | **KEEP** |
+
 ## In scope (G1 futuro)
 
 Schema PG `orchestration_*` (Goal, Task, Run, TaskLease, RunHeartbeat, GateBinding, PlanRevision, command journal), contratos, checkout UoW+outbox, heartbeat worker, HTTP `/v1/orchestration`, TaskboardMirror (espelho Dashi — **nao** ledger).

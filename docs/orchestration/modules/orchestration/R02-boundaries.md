@@ -8,6 +8,19 @@ type: debate
 **Issue:** ANX-393  
 **Fontes:** PC 04/11/12 · [structure R02](../../structure-debate/orchestration/R02-paperclip-checkout-heartbeat.md)
 
+## In / Out (R2)
+
+**In:** TaskLease, heartbeat, Goal ancestry, Run.
+
+**Out:** AgentVersion (`agents`). Dashi como ledger. Secrets (`connections`).
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Goal / Task / Run / TaskLease | **orchestration** |
+| adapter-gateway | **KEEP** |
+
 ## Debate R2
 
 **Arquiteto:** checkout = TaskLease transacional PG (ORCH-R02-01). Heartbeat recusa lease expirado. Goal ancestry denormalizado em Task/Run (ORCH-R02-03).

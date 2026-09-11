@@ -8,6 +8,19 @@ status: draft
 **Callers:** [R07-risks.md](./R07-risks.md) · [R09-dev-plan.md](./R09-dev-plan.md).  
 **Status documental:** `draft` — **não** spec accepted, **não** G7.
 
+## In / Out (R8)
+
+**In:** log de ownership Evaluation/Certification/Reputation/Recommendation e caminho CERTIFIED.
+
+**Out:** aceite spec 004. Greenlight G1 ANX-110. Fechar ANX-342.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Decision log deste pack | **evaluation** |
+| adapter-gateway | **KEEP** |
+
 ## In scope (decisões deste pack)
 
 Ownership de Evaluation/Certification/Reputation/Recommendation; engines; caminho CERTIFIED; exclusão de `testing/` e D-GOV-010.

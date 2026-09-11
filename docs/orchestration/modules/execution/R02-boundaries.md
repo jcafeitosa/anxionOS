@@ -10,6 +10,23 @@ type: debate
 **Data:** 2026-09-08  
 **Issue debate estrutura:** ANX-42 · debate módulo: **ANX-101** · contrato P06: **ANX-58**
 
+## In / Out (R2)
+
+**In:** Order, Fill, ExecutionSession, VenueAdapterRef.
+
+**Out:** TradeIntent (`decisions`). Permit (`risk`). Reservation (`capital`). Journal (`accounting`). REAL v1.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Order / Fill / ExecutionSession / VenueAdapterRef | **execution** |
+| adapter-gateway | **KEEP** |
+
 ## Objetivo da rodada
 
 Fechar fronteiras **possui / não possui** entre execution e vizinhos (**decisions**, **risk**, **governance**, **capital**, **accounting**, **portfolios**, **connections**, **market-data**, **operations**, **audit**, **execution-go**); ratificar **PostgreSQL** como dono de **Order**, **Fill**, **ExecutionSession** e **VenueAdapterRef**; separar intenção de trade, permits, reservas, dispatch venue e lançamento contábil; definir invariantes testáveis para R03/R04.

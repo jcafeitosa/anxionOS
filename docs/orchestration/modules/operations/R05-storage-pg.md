@@ -7,6 +7,19 @@ type: debate
 **Callers:** [R04-contracts-events.md](./R04-contracts-events.md) · [R06-dependencies.md](./R06-dependencies.md).  
 **Fonte:** `brain/notes/anxionos-storage-ownership.md` · ADR0004 · P07 estrutura · ADR0006 (catalogo tecnico de artefatos).
 
+## In / Out (R5)
+
+**In:** PG incidentes/runbooks/export jobs/health; object store resultRef; projector `graph:operations:v1`.
+
+**Out:** Flight Recorder (`audit`). Kill switch (`risk`). CI/CD pipeline. Pasta `infrastructure/`.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Incident / ExportJob / HealthSnapshot | **operations** |
+| adapter-gateway | **KEEP** |
+
 ## In scope
 
 | Engine | O que operations **possui** |

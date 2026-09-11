@@ -10,6 +10,23 @@ type: debate
 **Data:** 2026-09-07  
 **Issue debate estrutura:** ANX-42 · debate módulo: **ANX-101**
 
+## In / Out (R1)
+
+**In:** inventário Order, Fill e reconciliação com venue.
+
+**Out:** TradeIntent (`decisions`). Ledger (`accounting`). Secrets venue (`connections`).
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Order / Fill / ExecutionSession | **execution** |
+| adapter-gateway | **KEEP** |
+
 ## Propósito
 
 Ordens, fills e reconciliação com venue — protocolo e estado de execução.

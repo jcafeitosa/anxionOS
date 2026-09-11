@@ -8,6 +8,19 @@ status: draft
 **Implementação:** **ANX-110** — **não** neste pack; exige greenlight Owner.  
 **Callers:** [R08-decision-log.md](./R08-decision-log.md) · [R10-g0-handoff.md](./R10-g0-handoff.md).
 
+## In / Out (R9)
+
+**In:** plano G1 futuro (schema, contratos, HTTP, consumers, projector contract).
+
+**Out:** migration agora. Auto-promote. D-GOV-010. Pasta `testing/`. G1 nesta issue.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Plano G0 documental | **evaluation** |
+| adapter-gateway | **KEEP** |
+
 ## In scope (quando G1 for autorizado)
 
 Schema PG `evaluation_*`, contratos `@anxionos/contracts` evaluation, commands score/certify/recommend com UoW+outbox, HTTP `/v1/evaluation/*`, consumer de eventos simulation/performance, projector contract `graph:evaluation:v1` (implementação do driver em `graph`).

@@ -8,6 +8,19 @@ status: draft
 **Implementacao:** **ANX-112** — nao neste pack.  
 **Callers:** [R08-decision-log.md](./R08-decision-log.md) · [R10-g0-handoff.md](./R10-g0-handoff.md).
 
+## In / Out (R9)
+
+**In:** plano G1 futuro (`operations_*`, Incident, ExportJob, HTTP health).
+
+**Out:** migration agora. D-GOV-010. Flight Recorder (`audit`). Kill switch (`risk`).
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Plano G0 documental | **operations** |
+| adapter-gateway | **KEEP** |
+
 ## In scope (G1 futuro)
 
 Schema `operations_*`, contratos, Incident + consumer de health, ExportJob + retention, HTTP health/incidents, projector `graph:operations:v1` (driver em graph).

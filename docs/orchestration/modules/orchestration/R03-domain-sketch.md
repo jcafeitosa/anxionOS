@@ -7,6 +7,23 @@ type: debate
 **Data:** 2026-09-11  
 **Issue:** ANX-393
 
+## In / Out (R3)
+
+**In:** esboço Goal, Task, TaskLease, Run, heartbeat.
+
+**Out:** Agent identity. Graph T01 driver. Pasta `projects/`/`tasks/`.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Agregados de orquestração | **orchestration** |
+| adapter-gateway | **KEEP** |
+
 ## Agregados
 
 **Goal:** parentGoalId, status draft|active|completed|archived, ancestry âncora na org (OH01).

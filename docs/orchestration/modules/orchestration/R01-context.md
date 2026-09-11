@@ -9,6 +9,23 @@ type: debate
 **Issue:** ANX-393  
 **PC:** [04](../../../../notes/anxionos-pc04-agent-teams-debate.md) · [11](../../../../notes/anxionos-pc11-projects-debate.md) · [12](../../../../notes/anxionos-pc12-tasks-debate.md)
 
+## In / Out (R1)
+
+**In:** inventário Goal/Task/Run/lease/heartbeat neste pack G0.
+
+**Out:** AgentVersion (`agents`). Grant (`governance`). Board Dashi como ledger.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Goal / Task / Run / TaskLease | **orchestration** |
+| adapter-gateway | **KEEP** |
+
 ## Participantes
 
 Explorador, Arquiteto, Crítico, Orquestrador.

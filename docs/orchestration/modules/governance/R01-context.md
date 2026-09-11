@@ -9,6 +9,23 @@ type: debate
 **Data:** 2026-09-08  
 **Issue:** ANX-30 (implementação) · ANX-40 (debate)
 
+## In / Out (R1)
+
+**In:** inventário Grant, Delegation, Mandate, Approval, ChangeProposal, authorityEpoch.
+
+**Out:** PolicyVersion RISK (`risk`). Membership (`organizations`). Traverse (`graph`).
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Grant / Delegation / Mandate / Approval / ChangeProposal | **governance** |
+| adapter-gateway | **KEEP** |
+
 ## Participantes
 
 | Papel | Agente |

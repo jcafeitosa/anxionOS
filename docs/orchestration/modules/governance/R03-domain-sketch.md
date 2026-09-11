@@ -8,6 +8,23 @@ type: debate
 **Data:** 2026-09-08  
 **Issue:** ANX-40
 
+## In / Out (R3)
+
+**In:** esboço Grant, Delegation, Mandate, Approval, ChangeProposal.
+
+**Out:** PolicyVersion RISK. Order. Twin snapshot.
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Agregados de autoridade | **governance** |
+| adapter-gateway | **KEEP** |
+
 ## Debate R3 (diálogo atribuído)
 
 **Arquiteto:** Cinco agregados núcleo v1: `Grant`, `Delegation`, `Mandate`, `Approval`, `ChangeProposal`. Value object: `AuthorityEpoch`, `CapabilityScope`, `GrantStatus`.

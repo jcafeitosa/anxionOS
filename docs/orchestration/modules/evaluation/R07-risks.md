@@ -6,6 +6,19 @@ type: debate
 **Rodada:** R7 · 2026-09-11 · ANX-389 · ANX-109  
 **Callers:** [R06-dependencies.md](./R06-dependencies.md) · [R08-decision-log.md](./R08-decision-log.md).
 
+## In / Out (R7)
+
+**In:** ameaças de promoção indevida, leak de score, cert sem evidência.
+
+**Out:** venue (`execution`). Saldo (`capital`). PolicyVersion RISK (`risk`). Twin (`simulation`). D-GOV-010.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Registro de riscos de avaliação | **evaluation** |
+| adapter-gateway | **KEEP** |
+
 ## In scope (ameaças deste bounded context)
 
 Promoção indevida, leak cross-tenant de score, certificação sem evidência de run, recommendation que muta grants, 24º módulo `testing/`, confundir D-GOV-010 com evaluation.

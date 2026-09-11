@@ -8,6 +8,23 @@ type: debate
 **Data:** 2026-09-08  
 **Issue:** ANX-40
 
+## In / Out (R2)
+
+**In:** autoridade institucional (Grant, Delegation, Mandate, Approval, epoch).
+
+**Out:** RiskPolicy/kill switch (`risk`). Ordens (`execution`). Membership (`organizations`). Cypher (`graph`). Twin (`simulation`).
+
+## Non-goals
+
+Não spec `accepted`. Não ST08 live. Não ANX-389 `done`. Sem código de produto.
+
+## Ownership
+
+| Superfície | Dono |
+| --- | --- |
+| Grant / Delegation / Mandate / Approval / ChangeProposal | **governance** |
+| adapter-gateway | **KEEP** |
+
 ## Debate R2 (diálogo atribuído)
 
 **Arquiteto:** governance é dono de **autoridade institucional**: Grant versionado, Delegation com escopo temporal, Mandate para agentes, Approval/ChangeProposal, e o contador monotônico `authorityEpoch` por scope (organization/agency).
