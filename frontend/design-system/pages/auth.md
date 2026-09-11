@@ -1,3 +1,7 @@
+---
+type: reference
+---
+
 # Auth Pages — Design Overrides
 
 > Overrides for `design-system/MASTER.md` on authentication flows.
