@@ -2,10 +2,8 @@
 type: spec
 title: Products e Marketplace — capacidade composta (sem módulo físico)
 description: Especifica como Products e Marketplace da taxonomia de 30 módulos mapeiam ao baseline de 23 módulos sem criar pastas novas.
-status: superseded
-decision_status: superseded
-superseded_by: docs/document-precedence.md
-taskboard_issue: ANX-455
+status: draft
+decision_status: proposed
 owner: Product
 created: 2026-09-10
 version: "0.1"

@@ -2,8 +2,10 @@
 type: spec
 title: Product Graph e Agent Graph — sistema operacional cognitivo
 description: Especificação do Product Graph e Agent Graph como memória organizacional e grafo de agentes do anxionOS, com bridge para módulos runtime e gates G0–G7.
-status: accepted
-decision_status: accepted
+status: superseded
+decision_status: superseded
+superseded_by: brain/project-docs/specs/006-agent-hierarchy-orchestration/spec.md
+taskboard_issue: ANX-455
 owner: Produto e arquitetura
 created: 2026-09-10
 version: "0.1"
@@ -16,9 +18,9 @@ tags:
 ---
 # Product Graph e Agent Graph — sistema operacional cognitivo
 
-## Status e escopo
+> **Legado / superseded (ANX-455).** A spec 006 canônica em `brain/` é *Hierarquia e orquestração de agentes — TREE e CIRCULAR* (draft). Este arquivo é **outro assunto** (Product/Agent Graph) e **não prevalece**. Registro: [docs/document-precedence.md](../../../docs/document-precedence.md).
 
-> **Colisão de número (ANX-455).** Existe uma *outra* spec 006 em `brain/project-docs/specs/006-agent-hierarchy-orchestration/`, sobre **hierarquia de agentes** (draft) — assunto distinto. Esta spec permanece **accepted** e prevalece para Product/Agent Graph. Identificar por caminho + título. Registro: [docs/document-precedence.md](../../../docs/document-precedence.md).
+## Status e escopo
 
 Esta spec é **proposta**. Descreve o modelo cognitivo da AI Product Company Engine sem afirmar implementação runtime completa. Persistência autoritativa em P0 = OKF (`brain/`) + issues `ANX-*`; projeção Neo4j = P3 (proposed). Não substitui o grafo institucional de runtime (`backend/modules/graph/`).
 
