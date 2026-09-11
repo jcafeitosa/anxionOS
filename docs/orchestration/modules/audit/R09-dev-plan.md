@@ -2,24 +2,24 @@
 type: debate
 status: draft
 ---
-
 # R09 — Plano: `modules/audit`
 
-**ANX-107** · impl **ANX-108**
+**ANX-107** · impl **ANX-108** (não neste slice) · pack ANX-389  
+**Callers:** [R08-decision-log.md](./R08-decision-log.md) · [R10-g0-handoff.md](./R10-g0-handoff.md).
 
-| Slice | Entrega | Gates |
-| --- | --- | --- |
-| S1 | schema manifest+replay | G2, G4 |
-| S2 | domain event tap ingest + dedupe | G3, G5 |
-| S3 | replay session + grant audit.replay | G3, G5 |
-| S4 | HTTP v1 + graph stub | G6 parcial |
+Árvore ADR0002: `backend/modules/audit/src/{domain,application,infrastructure,api}`. Sem 24º módulo. Sem approvals/.
 
-## Matriz G3/G5
+| Slice | Entrega |
+| --- | --- |
+| S1 | schema manifest+replay |
+| S2 | domain event tap + dedupe |
+| S3 | replay session + grant |
+| S4 | HTTP v1 + graph stub |
 
-G3-AUD-S2-01 tap dedupe eventId · G3-AUD-S3-01 replay read-only · G5-AUD-01 cross-tenant export · G5-AUD-02 mutable chunk rejected
+G3-AUD-S2-01 tap dedupe · G3-AUD-S3-01 replay read-only · G5-AUD-01..03 R07.
 
-**Evidência impl:** `backend/tests/audit/` (ANX-108 `in_review`)
+P1 só G0 documental. **Sem ST08 migration.**
 
-**ANX-108** — impl `in_review`; debate G7 pendente **ANX-107**
+## Saída R9
 
-→ **R10** ([R10-g0-handoff.md](./R10-g0-handoff.md))
+Para R10.
