@@ -2,8 +2,10 @@ import { and, eq, or, sql } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Membership } from "../../domain/entities/membership";
 import {
-	MembershipAlreadyActiveError,
+	MEMBERSHIP_CONFLICT_CONSTRAINTS,
+	type MembershipConflictConstraint,
 	MembershipRevisionConflictError,
+	MembershipUniquenessConflictError,
 } from "../../domain/errors/membership-errors";
 import type { MembershipRepository } from "../../domain/ports/membership-repository";
 import { type MembershipRow, memberships } from "./schema";
@@ -27,14 +29,23 @@ export function toMembership(row: MembershipRow): Membership {
 	};
 }
 
+function isMembershipConflictConstraint(
+	value: string,
+): value is MembershipConflictConstraint {
+	return (MEMBERSHIP_CONFLICT_CONSTRAINTS as readonly string[]).includes(value);
+}
+
 /**
- * Extrai o nome da constraint de uma violacao `23505`. O driver nao expoe o
- * codigo no topo: drizzle envolve o erro do `pg` em `DrizzleQueryError` com
- * `cause = DatabaseError`, entao a cadeia de `cause` e' percorrida (mesmo
- * cuidado ja' tomado no `identity`, onde ler so' `error.code` deixava os
- * mapeamentos mortos em producao).
+ * Extrai a constraint de uma violacao `23505`, **apenas** se ela for uma das
+ * constraints de conflito de membership. O driver nao expoe o codigo no topo:
+ * drizzle envolve o erro do `pg` em `DrizzleQueryError` com
+ * `cause = DatabaseError`, entao a cadeia de `cause` e' percorrida (mesmo cuidado
+ * ja' tomado no `identity`, onde ler so' `error.code` deixava os mapeamentos
+ * mortos em producao).
  */
-function membershipUniquenessConstraint(error: unknown): string | undefined {
+function membershipConflictConstraint(
+	error: unknown,
+): MembershipConflictConstraint | undefined {
 	let current: unknown = error;
 	for (let depth = 0; depth < 5; depth += 1) {
 		if (typeof current !== "object" || current === null) {
@@ -42,9 +53,10 @@ function membershipUniquenessConstraint(error: unknown): string | undefined {
 		}
 		const candidate = current as { code?: unknown; constraint?: unknown };
 		if (candidate.code === "23505") {
-			return typeof candidate.constraint === "string"
+			return typeof candidate.constraint === "string" &&
+				isMembershipConflictConstraint(candidate.constraint)
 				? candidate.constraint
-				: "unknown";
+				: undefined;
 		}
 		current = (current as { cause?: unknown }).cause;
 	}
@@ -53,8 +65,10 @@ function membershipUniquenessConstraint(error: unknown): string | undefined {
 
 /**
  * Converte violacao de unicidade de membership no erro de dominio. Sem isto o
- * `23505` cru subia ate' o boundary como **500** (a transicao `revoked -> active`
- * tornou a colisao alcancavel pela API — F-01 dos gates G3/G4/G5 da ANX-460).
+ * `23505` cru subia ate' o boundary como **500**: a transicao `revoked -> active`
+ * (D-ORG-046) tornou a colisao de `..._agency_principal_active_uidx` alcancavel
+ * pela API, e a corrida de convites duplicados expoe
+ * `..._agency_email_invited_uidx` (F-01 dos gates G3/G4/G5 da ANX-460).
  */
 async function guardMembershipUniqueness<T>(
 	operation: () => Promise<T>,
@@ -62,9 +76,9 @@ async function guardMembershipUniqueness<T>(
 	try {
 		return await operation();
 	} catch (error) {
-		const constraint = membershipUniquenessConstraint(error);
+		const constraint = membershipConflictConstraint(error);
 		if (constraint) {
-			throw new MembershipAlreadyActiveError(constraint);
+			throw new MembershipUniquenessConflictError(constraint);
 		}
 		throw error;
 	}

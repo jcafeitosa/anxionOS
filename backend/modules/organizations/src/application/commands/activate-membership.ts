@@ -22,6 +22,18 @@ import { buildAgencyTenantContext } from "../services/tenant-context";
 /**
  * Admin/owner assisted activation — bypasses invite email match (D-ORG-036).
  */
+/**
+ * Estreita `principalId` no evento. O gate de consentimento ja' recusou o caso
+ * nulo, entao chegar aqui com `null` seria bug de programacao — nao ha' fallback
+ * silencioso (o `??` anterior era ramo morto, apontado como INFO pelo G2).
+ */
+function requireBoundPrincipal(principalId: string | null): string {
+	if (!principalId) {
+		throw new Error("Activated membership must have a bound principal");
+	}
+	return principalId;
+}
+
 export async function activateMembership(
 	deps: ActivateMembershipDeps,
 	input: ActivateMembershipInput,
@@ -152,9 +164,10 @@ export async function activateMembership(
 			const event = createMembershipActivatedEvent({
 				membershipId: updated.id,
 				agencyId: updated.agencyId,
-				// Fato persistido (o gate de consentimento garante nao-nulo), nunca o
-				// parametro do chamador — mesma licao do S4b.
-				principalId: updated.principalId ?? input.targetPrincipalId,
+				// Fato persistido, nunca o parametro do chamador (mesma licao do S4b).
+				// O gate de consentimento ja' garantiu `principalId` nao-nulo, entao
+				// nao ha' fallback: o tipo estreita aqui.
+				principalId: requireBoundPrincipal(updated.principalId),
 				role: updated.role,
 				revision: updated.revision,
 			});

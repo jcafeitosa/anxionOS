@@ -6,24 +6,38 @@ export class MembershipRevisionConflictError extends Error {
 }
 
 /**
- * O principal ja' tem outro vinculo **ativo** na mesma Agency, ou a Agency ja'
- * tem outro owner ativo. Lancada pelo repositorio quando o `INSERT`/`UPDATE`
- * viola um dos indices parciais de `organizations_memberships`
- * (`0001_organizations_membership_indexes.sql`).
+ * Violacao de um dos indices unicos **de negocio** de
+ * `organizations_memberships` (`0001_organizations_membership_indexes.sql`):
  *
- * Existe porque a violacao crua do Postgres (`23505`) subia ate' o boundary como
- * **500** — a transicao `revoked -> active` (D-ORG-046) tornou isso alcancavel
- * pela API: revogar um membro, reconvida-lo (novo vinculo ativo) e reativar o
- * vinculo antigo colidia com `..._agency_principal_active_uidx`
- * (achado F-01 do G5/G3/G4, ANX-460). A aplicacao converte em
- * `ORG_MEMBERSHIP_EXISTS` (409).
+ * - `..._agency_principal_active_uidx` — o principal ja' tem vinculo ativo;
+ * - `..._agency_email_invited_uidx` — ja' existe convite pendente para o e-mail;
+ * - `..._one_owner_active_uidx` — a Agency ja' tem outro owner ativo.
+ *
+ * Existe porque o `23505` cru subia ate' o boundary como **500**. Dois caminhos o
+ * tornaram alcancavel pela API: a transicao `revoked -> active` (D-ORG-046) na
+ * reativacao do vinculo antigo, e a corrida de convites duplicados para o mesmo
+ * e-mail (F-01 dos gates G3/G4/G5 da ANX-460).
+ *
+ * O nome nao fala em "active membership" de proposito: o mesmo erro cobre o
+ * indice de convite pendente, e a mensagem ao cliente e' derivada da `constraint`
+ * em `saveWithRevisionConflictMapping` (F-2 do G4 / LOW do G2).
  */
-export class MembershipAlreadyActiveError extends Error {
-	readonly constraint: string;
+export class MembershipUniquenessConflictError extends Error {
+	readonly constraint: MembershipConflictConstraint;
 
-	constructor(constraint: string) {
-		super(`Membership conflicts with active membership (${constraint})`);
-		this.name = "MembershipAlreadyActiveError";
+	constructor(constraint: MembershipConflictConstraint) {
+		super(`Membership uniqueness conflict (${constraint})`);
+		this.name = "MembershipUniquenessConflictError";
 		this.constraint = constraint;
 	}
 }
+
+/** Indices unicos de membership cuja violacao e' conflito de negocio. */
+export const MEMBERSHIP_CONFLICT_CONSTRAINTS = [
+	"organizations_memberships_agency_principal_active_uidx",
+	"organizations_memberships_agency_email_invited_uidx",
+	"organizations_memberships_one_owner_active_uidx",
+] as const;
+
+export type MembershipConflictConstraint =
+	(typeof MEMBERSHIP_CONFLICT_CONSTRAINTS)[number];

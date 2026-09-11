@@ -10,18 +10,22 @@ import {
 	createInMemoryMembershipRepository,
 	createInMemoryOwnerRepository,
 	createRecordingOrganizationUnitOfWork,
-	createStubPrincipalLookup,
 } from "./test-support";
 
 /**
- * D-ORG-046 (ANX-460) — ativacao assistida.
+ * D-ORG-046 / D-ORG-049 (ANX-460) — ativacao assistida.
  *
- * A decisao do dono restaurou `revoked -> active` para permitir REATIVACAO de quem
- * ja' consentiu. Isso abriu um caminho que nao existia antes: a membership
- * reativada mantem o `role` original, e o governance reemite a baseline de OWNER
- * em `membership.activated` quando o role e' owner. Como o convite nunca aceita
- * `role=owner`, um admin nao pode criar owner — mas poderia restaurar um owner
- * revogado. A guarda fecha isso: restaurar autoridade de owner e' ato de owner.
+ * D-ORG-046 restaurou `revoked -> active` para permitir REATIVACAO de quem ja'
+ * consentiu, e proibiu a criacao de vinculo novo (a primeira vinculacao e' do
+ * proprio convidado, via `acceptInviteByToken`).
+ *
+ * D-ORG-049 fechou o resto: a membership reativada mantem o `role` original e o
+ * governance reemite a baseline de OWNER em `membership.activated` quando o role
+ * e' owner. Como o convite nunca aceita `role=owner`, um admin nao pode criar
+ * owner — mas poderia restaurar um owner revogado. A autoridade de owner passou a
+ * ser RECUSADA aqui (409) para todos os atores, porque o estado "owner revogado"
+ * e' inalcancavel pela API e a gravacao colidiria com
+ * `organizations_memberships_one_owner_active_uidx`.
  */
 const AGENCY_ID = "11111111-1111-4111-8111-111111111111";
 const OWNER_PRINCIPAL = "22222222-2222-4222-8222-222222222222";
@@ -99,15 +103,7 @@ function buildHarness() {
 		commandJournal,
 	});
 	return {
-		deps: {
-			unitOfWork,
-			commandJournal,
-			principalLookup: createStubPrincipalLookup([
-				OWNER_PRINCIPAL,
-				ADMIN_PRINCIPAL,
-				EX_OWNER_PRINCIPAL,
-			]),
-		},
+		deps: { unitOfWork, commandJournal },
 		membershipRepository,
 		published,
 	};

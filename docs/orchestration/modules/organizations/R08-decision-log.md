@@ -103,8 +103,8 @@ Consolidar todas as posições aceitas em R1–R7 num **decision log** rastreáv
 | **D-ORG-045** | `TransferOwnership` ganha rota `POST /agencies/{agencyId}/ownership/transfer` (owner-only) e `agency.ownership_transferred.v1` entra na lista fechada v1 | ANX-460 | ✅ Aceito — decisão do dono em 2026-09-11 (resolve superfície órfã) |
 | **D-ORG-046** | Ativação assistida **não** cria primeira vinculação: exige principal já vinculado (reativação) e erro opaco `ORG_INVITEE_CONSENT_REQUIRED`; `revoked → active` passa a existir | ANX-460 | ✅ Aceito — decisão do dono em 2026-09-11 (achado G5-F2); **restringe D-ORG-036** |
 | **D-ORG-047** | Existência do sucessor na transferência é validada **depois** da autoridade e colapsa em erro opaco único | ANX-460 | ✅ Aceito — achado G5-F1/G4-F1; sem oráculo de existência de principal |
-| **D-ORG-048** | Violação de unicidade de membership (23505) vira **409 `ORG_MEMBERSHIP_EXISTS`**; path param não-UUID é **400**; erro desconhecido é **500 com mensagem genérica** | ANX-460 | ✅ Aceito — achados F-01/F-02/F-03 dos gates G3/G4/G5 |
-| **D-ORG-049** | Reativação assistida **não** cobre `role=owner`: recusada com 409 (não há caminho que produza owner revogado e a restauração colidiria com `one_owner_active_uidx`) | ANX-460 | ✅ Aceito — achado F-02 do G5; corrige o ramo positivo do D-ORG-046 |
+| **D-ORG-048** | Violação de unicidade de membership (23505) vira **409** — código e mensagem derivados da `constraint`; **todos** os saves de membership passam pelo mapeamento (inclui `InviteMember`); path param não-UUID é **400**; erro desconhecido é **500 com mensagem genérica** | ANX-460 | ✅ Aceito — achados F-01/F-02/F-03 dos gates G3/G4/G5 (3 gates convergiram no `InviteMember`) |
+| **D-ORG-049** | Autoridade de `owner` **não** é instalável por ativação: recusada com 409 em `ActivateMembership` **e** em `AcceptInviteByToken` (não há caminho que produza owner revogado e a restauração colidiria com `one_owner_active_uidx`) | ANX-460 | ✅ Aceito — achados F-02/F-03 do G5; corrige o ramo positivo do D-ORG-046 |
 
 **Total decisões registradas:** 49 (`D-ORG-001` … `D-ORG-049`)  
 **Aceitas v1:** 42 · **Deferidas:** 7
@@ -317,6 +317,40 @@ O default de `toErrorResponse` é `exposeDetails = NODE_ENV !== "production"` **
 | G4 — disposições de fingerprint do token / `request_hash` NULL estavam atribuídas a ANX-480 | registradas em R05, onde pertencem (ANX-480 é o namespace de `Idempotency-Key`) |
 
 **Falsificação executada:** revertendo cada correção central (mapeamento `23505`, recusa de owner, validação de path), o teste correspondente **falha**. Sondas dos gates: `/tmp/g3/c4c-collision.ts`, `/tmp/g4probe/prodmap.ts`, `/tmp/g5rt2`.
+
+---
+
+## Resolução ANX-460 — revalidação 2 (D-ORG-048 ampliado, D-ORG-049 ampliado)
+
+Terceira rodada de pareceres, sobre o digest `144d3be4`. **Três gates independentes** (G3, G4, G5) encontraram o **mesmo** defeito, por métodos diferentes.
+
+### O `InviteMember` ficou de fora do mapeamento de conflito
+
+A correção do F-01 anterior envolveu o `save` de `activate`, `accept`, `revoke`, `update-markets`, `advance-onboarding` e `transfer-ownership` — **mas não o de `invite-member`**. Duas requisições simultâneas para o mesmo e-mail passam pelo `findInvitedByAgencyAndEmail` (read-committed) sem enxergar o `INSERT` não-commitado do vizinho; ambas inserem e a perdedora viola `organizations_memberships_agency_email_invited_uidx`, cujo `23505` subia cru → **500**.
+
+Como cada gate reproduziu:
+
+| Gate | Método | Resultado |
+| --- | --- | --- |
+| G5 | corrida HTTP direta, N=2 × 10 rodadas | `200=10, 500=10` (determinístico); N=8 → até 7/8 perdedores 500 |
+| G3 | barreira `LOCK TABLE … IN SHARE ROW EXCLUSIVE` (conflita com INSERT, não com SELECT) | 1×200 + 1×500 |
+| G4 | 8 POST simultâneos | `[409,200,500,500,409,500,409,409]` |
+
+**Correção:** o `save` do `InviteMember` passa pelo `saveWithRevisionConflictMapping`, e a mensagem/código são derivados da `constraint` — "convite pendente", "vínculo ativo" e "outro owner ativo" são conflitos distintos e o cliente precisa saber qual (LOW do G2 e F-2 do G4).
+
+**Nota de método:** o oráculo que faltava não existia porque o teste de concorrência escrito antes exercitava só `createAgency`, que não toca o índice de e-mail. O novo `integration/invite-race.integration.test.ts` usa a **mesma barreira determinística** do G3 — e a primeira versão, com `Promise.allSettled` puro, dava **falso verde** (a corrida dependia do timing): com o defeito reintroduzido, 1 de 2 execuções passava. Com a barreira, a falsificação falha **3/3**.
+
+### Guarda de `owner` no aceite (F-03 do G5)
+
+`ActivateMembership` recusava `role=owner`, mas `AcceptInviteByToken` não. Semeando um convite `role=owner` e revogando o owner ativo por SQL, o aceite devolvia 200 e instalava owner (o `governance` reemitiria a baseline). Inalcançável pela API — o schema de convite exclui `owner` — mas a autoridade ficava protegida por **um único ponto a montante**. A mesma recusa foi aplicada no aceite (D-ORG-049 ampliado).
+
+### Classificação por `constraint` (LOW do G2 / F-2 do G4)
+
+O classificador convertia **qualquer** `23505` da tabela em conflito de membership. O G2 provou por sonda que uma colisão de **PRIMARY KEY** virava 409 `ORG_MEMBERSHIP_EXISTS` com mensagem falsa — um defeito de programação apareceria como conflito de negócio. Agora só as **três** constraints de conflito de membership viram erro de domínio; qualquer outro `23505` continua subindo como erro interno.
+
+### Disposições
+
+F-3 (reativação de principal suspenso → 200) e F-4 (500 desconhecido não é logado) estão registradas em [R05](./R05-storage.md#disposições-registradas-anx-460). A F-4 tem ressalva explícita: não há logger no boundary nem `onError` global — lacuna de plataforma a resolver antes de operar em produção.
 
 ---
 

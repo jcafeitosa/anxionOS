@@ -13,6 +13,7 @@ import {
 	hashCommandPayload,
 	loadIdempotentCommandResult,
 	recordOrganizationCommand,
+	saveWithRevisionConflictMapping,
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwOrganizationError } from "../errors";
@@ -114,22 +115,29 @@ export async function inviteMember(
 			const now = new Date();
 			const inviteExpiresAt = new Date(now.getTime() + INVITE_TTL_MS);
 			const revision = 1;
-			await context.membershipRepository.save({
-				id: membershipId,
-				agencyId: command.agencyId,
-				principalId: null,
-				inviteEmail: command.email,
-				inviteTokenHash,
-				inviteExpiresAt,
-				role: command.role,
-				status: "invited",
-				invitedAt: now,
-				joinedAt: null,
-				revokedAt: null,
-				revision,
-				createdAt: now,
-				updatedAt: now,
-			});
+			// F-01 (G3/G4/G5): o `save` tem de passar pelo wrapper. Sem ele, a corrida
+			// de convites duplicados para o mesmo e-mail viola
+			// `..._agency_email_invited_uidx` e o dominio sobe cru -> 500. O wrapper
+			// converte em 409 `ORG_MEMBERSHIP_EXISTS` (mesmo codigo do caminho
+			// sequencial, que ja' e' detectado pelo pre-check).
+			await saveWithRevisionConflictMapping(() =>
+				context.membershipRepository.save({
+					id: membershipId,
+					agencyId: command.agencyId,
+					principalId: null,
+					inviteEmail: command.email,
+					inviteTokenHash,
+					inviteExpiresAt,
+					role: command.role,
+					status: "invited",
+					invitedAt: now,
+					joinedAt: null,
+					revokedAt: null,
+					revision,
+					createdAt: now,
+					updatedAt: now,
+				}),
+			);
 			const result = commandResultSchema.parse({
 				aggregateId: membershipId,
 				revision,

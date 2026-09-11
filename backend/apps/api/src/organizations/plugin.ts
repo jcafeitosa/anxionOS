@@ -121,13 +121,15 @@ export function createOrganizationsPlugin(deps: OrganizationsPluginDeps) {
 					// devolvia **500** para qualquer sessao autenticada — body invalido
 					// e' 400, e o mesmo vale para path. `identity/plugin.ts` ja' usava
 					// `institutionalUuidSchema.parse` para o header de escopo.
+					// Validado aqui (400 em vez de 500 no contexto de tenant); os
+					// handlers seguem lendo `params.agencyId`, que e' o mesmo valor.
 					const agencyId = institutionalUuidSchema.parse(params.agencyId);
 					await requireAgencyMembership(
 						deps.scopedPool,
 						agencyId,
 						principal.id,
 					);
-					return { principal, agencyId };
+					return { principal };
 				})
 				.get(
 					"",

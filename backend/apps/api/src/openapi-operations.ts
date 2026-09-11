@@ -722,7 +722,7 @@ export const organizationsOpenApi = {
 		operationId: "inviteMember",
 		summary: "Invite member by email",
 		description:
-			"Module: organizations. Creates an invited membership. Role cannot be `owner`. Body email must match the invitee. Token is hashed with ORG_INVITE_TOKEN_PEPPER; raw token is returned once.",
+			"Module: organizations. Creates a pending invite for `email`. Role cannot be `owner`. A duplicate pending invite for the same email in the agency is `409 ORG_MEMBERSHIP_EXISTS`. The raw token is returned once and only its hash (HMAC with `ORG_INVITE_TOKEN_PEPPER`) is stored; the invitee accepts it via `/invites/accept`. Body `{ email, role }`. `Idempotency-Key` required.",
 		security: COOKIE_SECURITY,
 		parameters: commandParams,
 		requestBody: jsonBody(

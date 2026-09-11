@@ -6,8 +6,8 @@ import {
 } from "@anxionos/contracts/organizations";
 import { canTransitionMembershipStatus } from "../../domain/entities/membership";
 import {
-	MembershipAlreadyActiveError,
 	MembershipRevisionConflictError,
+	MembershipUniquenessConflictError,
 } from "../../domain/errors/membership-errors";
 import { createMembershipActivatedEvent } from "../../domain/events/organization-events";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
@@ -128,6 +128,18 @@ export async function acceptInviteByToken(
 					`Cannot activate membership from status ${membership.status}`,
 				);
 			}
+			// D-ORG-049 (F-03 do G5): a autoridade de OWNER so' nasce em
+			// `CreateAgency`/`TransferOwnership`. Sem esta guarda, um convite
+			// `role=owner` (impossivel pelo schema HTTP, mas possivel por seed/DBA)
+			// instalava owner no aceite e o governance reemitia a baseline. Mesma
+			// recusa de `activateMembership`, para a autoridade nao depender de um
+			// unico ponto a montante.
+			if (membership.role === "owner") {
+				throwOrganizationError(
+					"ORG_INVALID_STATUS_TRANSITION",
+					"Owner authority is granted only by CreateAgency or TransferOwnership and cannot be accepted here",
+				);
+			}
 			const now = new Date();
 			const revision = membership.revision + 1;
 			let updated;
@@ -148,7 +160,7 @@ export async function acceptInviteByToken(
 				// parcial vira 409 institucional — antes subia como 500 com o erro do
 				// driver. Nao usa o 404 opaco do conflito de revisao: aqui nao ha'
 				// nada a esconder (o principal e' o dono da propria sessao).
-				if (error instanceof MembershipAlreadyActiveError) {
+				if (error instanceof MembershipUniquenessConflictError) {
 					throwOrganizationError(
 						"ORG_MEMBERSHIP_EXISTS",
 						"This principal already has an active membership in the agency",

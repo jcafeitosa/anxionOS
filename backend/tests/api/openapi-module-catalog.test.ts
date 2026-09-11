@@ -544,6 +544,72 @@ const DOCUMENTED_OPERATIONS: Array<{
 	},
 ];
 
+/**
+ * G2 (ANX-460) — o catalogo so' verificava TAMANHO de summary/description, entao
+ * uma descricao que passou a mentir sobre o comportamento (o caso do
+ * `activateMembership`, que continuou dizendo "Activates an invited membership"
+ * depois de D-ORG-046) passava despercebida. Estes testes pinam o CONTEUDO das
+ * operacoes cuja semantica mudou — o drift contrato x codigo que os gates
+ * encontraram duas vezes seguidas.
+ */
+const ORGANIZATIONS_DESCRIPTION_INVARIANTS: Array<{
+	operationId: string;
+	mustContain: string[];
+	mustNotContain: string[];
+}> = [
+	{
+		operationId: "activateMembership",
+		mustContain: [
+			"ORG_INVITEE_CONSENT_REQUIRED",
+			"already bound",
+			"/invites/accept",
+		],
+		// A descricao antiga dizia que a rota ativava convite pendente.
+		mustNotContain: ["Activates an invited membership"],
+	},
+	{
+		operationId: "inviteMember",
+		mustContain: ["ORG_INVITE_TOKEN_PEPPER", "ORG_MEMBERSHIP_EXISTS"],
+		// Nao existe checagem de "email must match the invitee".
+		mustNotContain: ["must match the invitee"],
+	},
+	{
+		operationId: "transferOwnership",
+		mustContain: ["active owner", "ORG_CROSS_TENANT"],
+		mustNotContain: [],
+	},
+	{
+		operationId: "revokeMembership",
+		mustContain: ["principalId", "/ownership/transfer"],
+		mustNotContain: [],
+	},
+];
+
+type ServedOperation = { summary?: string; description?: string };
+
+/** Documento OpenAPI **servido** (gerado de verdade), indexado por operationId. */
+async function servedOperationsById(): Promise<Map<string, ServedOperation>> {
+	const app = createOpenApiCatalogApp();
+	const response = await app.handle(
+		new Request("http://127.0.0.1/openapi/json"),
+	);
+	const document = (await response.json()) as {
+		paths: Record<
+			string,
+			Record<string, ServedOperation & { operationId?: string }>
+		>;
+	};
+	const byId = new Map<string, ServedOperation>();
+	for (const methods of Object.values(document.paths)) {
+		for (const operation of Object.values(methods)) {
+			if (operation.operationId) {
+				byId.set(operation.operationId, operation);
+			}
+		}
+	}
+	return byId;
+}
+
 describe("OpenAPI module catalog", () => {
 	test("tag groups cover the 23 baseline modules", () => {
 		expect(OPENAPI_MODULE_TAG_GROUPS.map((group) => group.name)).toEqual([
@@ -902,5 +968,35 @@ describe("OpenAPI module catalog", () => {
 		);
 		expect(agencyScope?.description?.length ?? 0).toBeGreaterThan(40);
 		expect(agencyScope?.schema?.format).toBe("uuid");
+	});
+
+	test("descricoes servidas de organizations nao contradizem o codigo (G2/ANX-460)", async () => {
+		// O catalogo so' verificava TAMANHO de summary/description, entao uma
+		// descricao que passou a mentir sobre o comportamento passava despercebida —
+		// foi o caso do `activateMembership`, que continuou dizendo "Activates an
+		// invited membership" depois de D-ORG-046. Este teste pina o CONTEUDO das
+		// operacoes cuja semantica mudou.
+		const served = await servedOperationsById();
+		const missing = ORGANIZATIONS_DESCRIPTION_INVARIANTS.filter(
+			(invariant) => !served.has(invariant.operationId),
+		).map((invariant) => invariant.operationId);
+		expect(missing).toEqual([]);
+
+		const violations: string[] = [];
+		for (const invariant of ORGANIZATIONS_DESCRIPTION_INVARIANTS) {
+			const operation = served.get(invariant.operationId);
+			const text = `${operation?.summary ?? ""} ${operation?.description ?? ""}`;
+			for (const needle of invariant.mustContain) {
+				if (!text.includes(needle)) {
+					violations.push(`${invariant.operationId} falta "${needle}"`);
+				}
+			}
+			for (const needle of invariant.mustNotContain) {
+				if (text.includes(needle)) {
+					violations.push(`${invariant.operationId} ainda diz "${needle}"`);
+				}
+			}
+		}
+		expect(violations).toEqual([]);
 	});
 });

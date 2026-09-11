@@ -2,8 +2,8 @@ import { createHash } from "node:crypto";
 import type { CommandResult } from "@anxionos/contracts/organizations";
 import { AgencyRevisionConflictError } from "../domain/errors/agency-errors";
 import {
-	MembershipAlreadyActiveError,
 	MembershipRevisionConflictError,
+	MembershipUniquenessConflictError,
 } from "../domain/errors/membership-errors";
 import {
 	CommandJournalConflictError,
@@ -137,8 +137,9 @@ export async function loadIdempotentCommandResult(
  *   tem `<MOD>_REVISION_CONFLICT` sempre responderam 409 (S4a/S4c, ANX-460);
  * - **vinculo ativo duplicado** → `ORG_MEMBERSHIP_EXISTS` (409). O repositorio
  *   converte a violacao `23505` dos indices parciais de membership em
- *   `MembershipAlreadyActiveError`; sem este mapeamento o `23505` cru subia como
- *   500 (F-01 dos gates G3/G4/G5, alcancavel pela transicao `revoked -> active`).
+ *   `MembershipUniquenessConflictError`; sem este mapeamento o `23505` cru subia
+ *   como 500 (F-01 dos gates G3/G4/G5: alcancavel pela transicao
+ *   `revoked -> active` e pela corrida de convites duplicados).
  *
  * Nao use em `accept-invite-by-token`: ali o conflito de revisao e' mapeado para
  * um 404 opaco de proposito, para nao confirmar a existencia/consumo de um token.
@@ -150,7 +151,30 @@ export async function saveWithRevisionConflictMapping<T>(
 	try {
 		return await operation();
 	} catch (error) {
-		if (error instanceof MembershipAlreadyActiveError) {
+		if (error instanceof MembershipUniquenessConflictError) {
+			// Codigo e mensagem derivados da CONSTRAINT: "vinculo ativo", "convite
+			// pendente" e "outro owner ativo" sao conflitos diferentes, e o cliente
+			// precisa saber qual (F-2 do G4 / LOW do G2). O indice de owner unico e'
+			// hoje inalcancavel pela API, mas o mapeamento e' explicito.
+			if (
+				error.constraint === "organizations_memberships_one_owner_active_uidx"
+			) {
+				throwOrganizationError(
+					"ORG_OWNER_REQUIRED",
+					"This agency already has an active owner",
+					{ cause: error },
+				);
+			}
+			if (
+				error.constraint ===
+				"organizations_memberships_agency_email_invited_uidx"
+			) {
+				throwOrganizationError(
+					"ORG_MEMBERSHIP_EXISTS",
+					"There is already a pending invite for this email in this agency",
+					{ cause: error },
+				);
+			}
 			throwOrganizationError(
 				"ORG_MEMBERSHIP_EXISTS",
 				"Target principal already has an active membership in this agency",

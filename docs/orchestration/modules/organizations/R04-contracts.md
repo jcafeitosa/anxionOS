@@ -83,8 +83,8 @@ Definir a superfície pública do módulo **organizations** antes de armazenamen
 | --- | --- | --- |
 | `ORG_PRINCIPAL_NOT_FOUND` | 404 | `PrincipalLookup` falha |
 | `ORG_AGENCY_NOT_FOUND` | 404 | Agency inexistente ou fora do scope |
-| `ORG_MEMBERSHIP_NOT_INVITED` | 409 | Activate sem status `invited` |
-| `ORG_OWNER_REQUIRED` | 409 | Revogar último owner ativo |
+| `ORG_MEMBERSHIP_NOT_INVITED` | 409 | Ativação assistida com status fora de `invited`/`revoked` (desde D-ORG-046 `revoked` **é** aceito para reativação) |
+| `ORG_OWNER_REQUIRED` | 409 | Revogar o último owner ativo; `TransferOwnership` sem sucessor com membership ativa; agência que já tem outro owner ativo |
 | `ORG_INVALID_STATUS_TRANSITION` | 409 | Viola INV-ORG-01 |
 | `ORG_CROSS_TENANT` | 403 | agencyId não pertence ao principal da sessão |
 | `ORG_IDENTITY_UNAVAILABLE` | 503 | `PrincipalLookup` indisponível (identity fora) |
