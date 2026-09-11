@@ -88,6 +88,9 @@ Definir a superfície pública do módulo **organizations** antes de armazenamen
 | `ORG_OWNER_REQUIRED` | 409 | Revogar último owner ativo |
 | `ORG_INVALID_STATUS_TRANSITION` | 409 | Viola INV-ORG-01 |
 | `ORG_CROSS_TENANT` | 403 | agencyId não pertence ao principal da sessão |
+| `ORG_DUPLICATE_IDEMPOTENCY` | 409 | Reuso da `Idempotency-Key` com comando, recurso ou payload divergente (S2) |
+| `ORG_REVISION_CONFLICT` | 409 | Corrida de revisão em `Agency`/`Membership`: outro escritor gravou primeiro (S4a/S4c) |
+| `ORG_INVITEE_CONSENT_REQUIRED` | 403 | Ativação assistida de convite **sem principal vinculado** — a primeira vinculação exige que o próprio convidado aceite (D-ORG-046) |
 
 ---
 
@@ -185,7 +188,7 @@ Inputs validados na borda HTTP e revalidados no application layer.
 | `UpdateAgencyMarkets` | `agencyId`, `marketScope` | Atualiza mercados; pode acionar drain futuro (governance) | `agency.markets_updated.v1` |
 | `AdvanceOnboarding` | `agencyId`, `step` | Avança máquina finita (interno/saga) | `agency.status_changed.v1` |
 | `InviteMember` | `agencyId`, `email`, `role` | Cria membership `invited` | `membership.invited.v1` |
-| `ActivateMembership` | `agencyId`, `membershipId` | `invited` → `active` | `membership.activated.v1` |
+| `ActivateMembership` | `agencyId`, `membershipId` | `revoked` → `active` (reativação assistida); `invited` → `active` só se já houver principal vinculado | `membership.activated.v1` |
 | `RevokeMembership` | `agencyId`, `membershipId` | `active`/`invited` → `revoked` | `membership.revoked.v1` |
 
 ### Schemas de comando (`commands.ts`)
@@ -302,9 +305,11 @@ Prefixo: `/v1/organizations`. Autenticação via Better Auth (sessão). OpenAPI 
 | `PATCH` | `/agencies/:agencyId/markets` | `UpdateAgencyMarkets` | role `owner` ou `admin` |
 | `POST` | `/agencies/:agencyId/ownership/transfer` | `TransferOwnership` | role `owner` (owner ativo da agency) |
 | `GET` | `/agencies/:agencyId/memberships` | `ListMembershipsByAgency` | membership ativo |
+| `GET` | `/agencies/:agencyId/memberships/:membershipId` | `GetMembership` | membership ativo |
 | `POST` | `/agencies/:agencyId/memberships/invite` | `InviteMember` | role `owner` ou `admin` |
-| `POST` | `/agencies/:agencyId/memberships/:membershipId/activate` | `ActivateMembership` | convidado ou admin |
+| `POST` | `/agencies/:agencyId/memberships/:membershipId/activate` | `ActivateMembership` | role `owner`/`admin` **e** membership já vinculada (reativação) |
 | `POST` | `/agencies/:agencyId/memberships/:membershipId/revoke` | `RevokeMembership` | role `owner` ou `admin` |
+| `POST` | `/invites/accept` | `AcceptInviteByToken` | Principal autenticado com o e-mail do convite |
 
 Headers obrigatórios em mutações: `Idempotency-Key`, `Content-Type: application/json`.
 

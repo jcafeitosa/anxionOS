@@ -101,9 +101,11 @@ Consolidar todas as posições aceitas em R1–R7 num **decision log** rastreáv
 | **D-ORG-043** | Entidade `Organization` + `CONTAINS_AGENCY` (E002) multi-company | R3, R4, R5 | ⏸ Deferido pós-v1 |
 | **D-ORG-044** | Export/listagem global de memberships — sem endpoint v1 | R7 | ⏸ Deferido — revisão G4 antes |
 | **D-ORG-045** | `TransferOwnership` ganha rota `POST /agencies/{agencyId}/ownership/transfer` (owner-only) e `agency.ownership_transferred.v1` entra na lista fechada v1 | ANX-460 | ✅ Aceito — decisão do dono em 2026-09-11 (resolve superfície órfã) |
+| **D-ORG-046** | Ativação assistida **não** cria primeira vinculação: exige principal já vinculado (reativação) e erro opaco `ORG_INVITEE_CONSENT_REQUIRED`; `revoked → active` passa a existir | ANX-460 | ✅ Aceito — decisão do dono em 2026-09-11 (achado G5-F2); **restringe D-ORG-036** |
+| **D-ORG-047** | Existência do sucessor na transferência é validada **depois** da autoridade e colapsa em erro opaco único | ANX-460 | ✅ Aceito — achado G5-F1/G4-F1; sem oráculo de existência de principal |
 
-**Total decisões registradas:** 45 (`D-ORG-001` … `D-ORG-045`)  
-**Aceitas v1:** 38 · **Deferidas:** 7
+**Total decisões registradas:** 47 (`D-ORG-001` … `D-ORG-047`)  
+**Aceitas v1:** 40 · **Deferidas:** 7
 
 ---
 
@@ -220,6 +222,55 @@ Decisões registradas nas sessões Slack ([SLACK-TRANSCRIPTS.md](./SLACK-TRANSCR
 | Tokens de grant | Mantido o padrão do catálogo: `requiredGrants` é **descritivo** (não há enforcement em runtime) e `R04` não nomeia tokens de grant neste módulo |
 
 **Rationale:** a operação já era o único produtor do evento consumido pelo `governance`; deixá-la inalcançável significava que a revogação derivada da troca de posse nunca ocorreria em produção. Expor a rota torna o contrato verdadeiro sem descartar o mecanismo.
+
+---
+
+## Resolução ANX-460 — achados dos gates G3/G4/G5 (D-ORG-046, D-ORG-047)
+
+Os quatro gates independentes sobre o candidato `10015392` encontraram dois vetores **MEDIUM** na superfície nova e um **MEDIUM** de contrato HTTP. Ambos os vetores eram oráculos de enumeração, e o segundo tinha um efeito colateral confirmado no banco.
+
+### D-ORG-046 — ativação assistida não cria primeira vinculação (G5-F2)
+
+**Achado:** `handlers/memberships.ts` resolvia o alvo por `identityRepository.findByEmail(membership.inviteEmail)` e devolvia **404 `ORG_PRINCIPAL_NOT_FOUND`** quando o e-mail não tinha principal. Como `CreateAgency` é self-serve, qualquer pessoa criava a própria Agency, convidava qualquer e-mail e chamava `/activate`: **200** para e-mail registrado, **404** para não registrado — oráculo de enumeração de e-mails da plataforma. E o G5 confirmou no banco o efeito: o principal da vítima, **de outro tenant**, passava a ter membership **ativa** `operator` na Agency do atacante, **sem consentimento**.
+
+**Conflito identificado:** D-ORG-036 ("admin/owner pode ativar via `membershipId` sem match de email — fluxo assistido", ✅ aceito) não contemplava essa consequência. O achado **restringe** D-ORG-036; a decisão do dono foi tomada em 2026-09-11.
+
+| Aspecto | Decisão |
+| --- | --- |
+| Primeira vinculação | **Só** pelo próprio convidado, via `acceptInviteByToken` (token + sessão dele) |
+| Ativação assistida | Passa a **reativar** membership já vinculada (`revoked` → `active`); exige `principalId` gravado |
+| Erro de recusa | `ORG_INVITEE_CONSENT_REQUIRED` (403) — **o mesmo** exista ou não principal para o e-mail, para não sobrar oráculo |
+| Handler | Deixa de consultar `findByEmail`; usa o `principalId` **já vinculado** (nunca um id do cliente) |
+| Revinculação | `principalId !== targetPrincipalId` → `ORG_INVITE_EMAIL_MISMATCH` (403): a reativação não troca de dono |
+| Transição nova | `revoked → active` (antes `revoked` era terminal) |
+| Escopo de privilégio | Sem mudança: o convite nunca aceita `role=owner`, então não há emissão de grant baseline para o vinculado |
+
+**Evidência:** oráculo HTTP real (`app.handle` + PostgreSQL) `tests/organizations/integration/http-boundary.integration.test.ts` — verifica que as duas respostas são **idênticas** e que nenhuma membership é vinculada. Falsificação executada: restaurando o fluxo original (com `findByEmail` e sem o gate), o teste **falha**.
+
+### D-ORG-047 — existência do sucessor após a autoridade, com erro opaco (G5-F1/G4-F1)
+
+**Achado:** `transfer-ownership.ts` chamava `assertPrincipalExists(newOwnerPrincipalId)` **fora da transação e antes** da autoridade. `newOwnerPrincipalId` é 100% do cliente e `identity_principals` não tem RLS, então um owner/admin de **qualquer** Agency distinguia **404** (não existe) de **403/409** (existe) para qualquer UUID — oráculo de existência de principal na plataforma.
+
+| Aspecto | Decisão |
+| --- | --- |
+| Ordem | Autoridade (owner ativo) **primeiro**; só depois qualquer avaliação do alvo |
+| Gate do sucessor | Membership **ativa** — mais forte que consultar existência global e não distingue os casos |
+| Código | Um único `ORG_OWNER_REQUIRED` para "não existe" e "sem membership ativa" |
+| Dependência | `assertPrincipalExists` sai do caminho: `TransferOwnershipDeps` deixa de ter `principalLookup` |
+
+**Evidência:** mesmo oráculo HTTP, com **admin** (passa o boundary e falha só na autoridade de domínio — um não-membro é barrado antes e não exercita o oráculo). Falsificação executada: reintroduzindo a checagem antes da transação, o teste **falha**.
+
+### Contrato HTTP — body inválido é 400 (G3)
+
+`mapOrganizationsError` caía no default `500` para `ZodError` e JSON malformado, então **todas** as rotas de organizations respondiam 500 a um body ruim (defeito pré-existente, herdado pela rota nova). Corrigido com o mesmo mapeamento já provado em `governance` (ANX-466): `ZodError`→400 com `issues`, `SyntaxError`/`ParseError`/`PARSE`→400. Coberto por teste de boundary **e** por HTTP real.
+
+### Débitos rastreados (não bloqueiam a ANX-460)
+
+| ID | Assunto |
+| --- | --- |
+| ANX-479 | OpenAPI publica `200` sem `content`/schema em 45 operações enquanto o manifest promete `outputSchemaRef` |
+| ANX-480 | `organizations_command_journal` sem `tenant_id`/RLS — namespace global de `Idempotency-Key` |
+| ANX-481 | `PrincipalLookup` sem escopo de tenant (`identity_principals` sem RLS) — causa-raiz de D-ORG-047 |
 
 ---
 

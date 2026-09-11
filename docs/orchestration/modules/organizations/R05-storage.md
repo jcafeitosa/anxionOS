@@ -94,7 +94,7 @@ sequenceDiagram
   API->>ORG: comando + commandId
   ORG->>PG: BEGIN
   ORG->>PG: upsert agencies/owners/memberships
-  ORG->>PG: INSERT command_journal (ON CONFLICT replay)
+  ORG->>PG: INSERT command_journal (ON CONFLICT DO NOTHING -> conflito = 409)
   ORG->>EVT: appendJournal + enqueueOutbox
   ORG->>PG: COMMIT
   EVT->>NATS: dispatch pending outbox
@@ -151,12 +151,12 @@ Tenant operacional principal. `id` = `agencyId` em rotas e eventos.
 
 ## PostgreSQL — tabela `organizations_owners`
 
-Vínculo titular ↔ perfil Owner (baseline: um Owner por `principal_id`).
+Vínculo titular ↔ perfil Owner. **Uma linha por `(tenant_id, principal_id)`** — como cada Agency é um tenant, um Owner legítimo tem N linhas, uma por Agency que possui (D-ORG-035 / D-ORG-046).
 
 | Coluna | Tipo | Nullable | Descrição |
 | --- | --- | --- | --- |
 | `id` | `uuid` PK | não | |
-| `principal_id` | `uuid` | não | UNIQUE — referência lógica identity |
+| `principal_id` | `uuid` | não | Referência lógica identity. **Não** é UNIQUE sozinho (D-ORG-035) |
 | `default_organization_id` | `uuid` | sim | Reservado v2 multi-company; null em v1 |
 | `created_at` | `timestamptz` | não | |
 
@@ -164,7 +164,8 @@ Vínculo titular ↔ perfil Owner (baseline: um Owner por `principal_id`).
 
 | Nome | Colunas | Propósito |
 | --- | --- | --- |
-| `organizations_owners_principal_id_unique` | `(principal_id)` UNIQUE | Lookup em `CreateAgency` |
+| `organizations_owners_principal_id_idx` | `(principal_id)` | Lookup por principal |
+| `organizations_owners_tenant_principal_uidx` | `(tenant_id, principal_id)` **UNIQUE** | Uma linha de owner por Agency (D-ORG-046) |
 
 ---
 
@@ -218,9 +219,16 @@ Registro de idempotência de **comandos** (distinto de `domain_journal` de event
 | `aggregate_type` | `text` | `agency` \| `membership` \| `owner` |
 | `revision` | `integer` | `revision` retornado ao cliente |
 | `response_snapshot` | `jsonb` | Opcional: `{ aggregateId, revision }` para replay exato |
-| `created_at` | `timestamptz` | |
+| `request_hash` | `text` | Fingerprint canônico (SHA-256 de JSON com chaves ordenadas) do payload do comando — binding de intenção da `Idempotency-Key` (migration 0006). `null` apenas em linhas anteriores à 0006 |
+| `created_at` | `timestamptz` | | |
 
-**Comportamento:** `INSERT ... ON CONFLICT (command_id) DO NOTHING` + leitura prévia; se existir, retornar `response_snapshot` com `idempotentReplay: true` ([R04](./R04-contracts.md)).
+**Comportamento (atualizado por S2/S3, ANX-460):**
+
+1. **Antes da transação:** `findByCommandId` + validação de **intenção** (`commandName`, `aggregateId`/`matchesAggregate`, `request_hash`). Intenção divergente → **409 `ORG_DUPLICATE_IDEMPOTENCY`** (reuso da key com outro payload **não** é replay). Intenção idêntica → replay de `response_snapshot` com `idempotentReplay: true`, **antes** das validações de estado (o retry legítimo continua válido depois de o agregado mudar).
+2. **Dentro da transação:** a mesma checagem roda de novo (o vencedor pode ter commitado no intervalo) e é a **primeira** operação.
+3. **Na gravação:** `INSERT ... ON CONFLICT (command_id) DO NOTHING` + `RETURNING`. Colisão de `command_id` **não** devolve a linha alheia — lança `CommandJournalConflictError`, a transação do perdedor faz **ROLLBACK** e o chamador recebe 409. Devolver a linha alheia era o **double-apply**, corrigido em S2.
+
+> A descrição anterior ("leitura prévia; se existir, retornar `response_snapshot`") descrevia o comportamento com double-apply e foi corrigida. Ver [R04](./R04-contracts.md) e D-ORG-045/D-ORG-046 em [R08](./R08-decision-log.md).
 
 ---
 
@@ -239,8 +247,13 @@ O módulo **não** cria tabelas `domain_journal` / `outbox`. Usa o pacote compar
 
 ```typescript
 async function executeCommand(deps, input) {
+  // 1) Replay ANTES de tudo, validando a INTENCAO (comando + recurso + request_hash).
+  //    Intencao divergente e' 409 ORG_DUPLICATE_IDEMPOTENCY, nao replay.
   const existing = await deps.commandJournal.findByCommandId(input.commandId);
-  if (existing) return { ...existing.responseSnapshot, idempotentReplay: true };
+  if (existing) {
+    assertIntentMatches(existing, input.intent); // lanca se divergir
+    return { ...existing.responseSnapshot, idempotentReplay: true };
+  }
 
   const client = await deps.pool.connect();
   try {
