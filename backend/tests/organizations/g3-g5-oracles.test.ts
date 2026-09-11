@@ -10,7 +10,6 @@ import {
 	createAgencyCommandSchema,
 } from "@anxionos/contracts/organizations";
 import {
-	PrincipalLookupUnavailableError,
 	acceptInviteByToken,
 	activateMembership,
 	createAgency,
@@ -18,6 +17,7 @@ import {
 	inviteMember,
 	listAgenciesForPrincipal,
 	listMembershipsByAgency,
+	PrincipalLookupUnavailableError,
 	revokeMembership,
 } from "@anxionos/organizations";
 import { OrganizationCommandError } from "../../modules/organizations/src/application/errors";

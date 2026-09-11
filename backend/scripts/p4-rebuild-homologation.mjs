@@ -69,7 +69,10 @@ async function main() {
 
 	const graphTests = run(
 		"bun",
-		["test", "backend/tests/graph/neo4j-rebuild-homologation.integration.test.ts"],
+		[
+			"test",
+			"backend/tests/graph/neo4j-rebuild-homologation.integration.test.ts",
+		],
 		{
 			RUN_NEO4J_INTEGRATION_TESTS: "true",
 			NEO4J_URI: process.env.NEO4J_URI ?? "bolt://localhost:7687",

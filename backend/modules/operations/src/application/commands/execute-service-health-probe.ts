@@ -11,12 +11,12 @@ import {
 	deriveHealthStatusFromProbeOutcome,
 	runHealthProbeWithTimeout,
 } from "../../domain/health-lifecycle";
-import type { ServiceHealthProbeFn } from "../../domain/ports/health-probe";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
+import type { ServiceHealthProbeFn } from "../../domain/ports/health-probe";
 import type { OperationsUnitOfWork } from "../../domain/ports/operations-unit-of-work";
 import {
-	registerHealthCheck,
 	type RegisterHealthCheckDeps,
+	registerHealthCheck,
 } from "./register-health-check";
 
 export interface ExecuteServiceHealthProbeDeps extends RegisterHealthCheckDeps {
@@ -34,7 +34,8 @@ export async function executeServiceHealthProbe(
 		deps.runProbe,
 		deps.probeTimeoutMs ?? DEFAULT_HEALTH_PROBE_TIMEOUT_MS,
 	);
-	const checkedAt = command.checkedAt ?? (deps.now?.() ?? new Date().toISOString());
+	const checkedAt =
+		command.checkedAt ?? deps.now?.() ?? new Date().toISOString();
 	const status = deriveHealthStatusFromProbeOutcome(probeResult.outcome);
 	const probeDetails = buildServiceHealthProbeDetails(probeResult);
 	return registerHealthCheck(deps, {

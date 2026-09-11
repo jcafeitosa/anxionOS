@@ -1,6 +1,7 @@
 import type { Pool, PoolClient } from "pg";
 
 type PgQueryable = Pool | PoolClient;
+
 import type {
 	ExecutionFillRecord,
 	ExecutionFillRepository,
@@ -76,8 +77,7 @@ function mapOrderAttempt(
 		adapterKind: String(row.adapter_kind),
 		requestHash: String(row.request_hash),
 		status: String(row.status),
-		responseCode:
-			row.response_code == null ? null : String(row.response_code),
+		responseCode: row.response_code == null ? null : String(row.response_code),
 		errorCode: row.error_code == null ? null : String(row.error_code),
 		sentAt: new Date(String(row.sent_at)).toISOString(),
 	};
@@ -93,8 +93,7 @@ function mapReconciliationCase(
 		orderId: row.order_id == null ? null : String(row.order_id),
 		fillId: row.fill_id == null ? null : String(row.fill_id),
 		venueAdapterRefId: String(row.venue_adapter_ref_id),
-		venueFillId:
-			row.venue_fill_id == null ? null : String(row.venue_fill_id),
+		venueFillId: row.venue_fill_id == null ? null : String(row.venue_fill_id),
 		evidence: row.evidence == null ? null : String(row.evidence),
 		disposition: row.disposition == null ? null : String(row.disposition),
 		dispositionRationale:

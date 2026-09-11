@@ -8,9 +8,9 @@ import {
 
 describe("resolveRoutePrefix", () => {
 	test("collapses deep paths to first two segments", () => {
-		expect(resolveRoutePrefix("/v1/performance/agencies/ag-1/outcome-snapshots")).toBe(
-			"/v1/performance",
-		);
+		expect(
+			resolveRoutePrefix("/v1/performance/agencies/ag-1/outcome-snapshots"),
+		).toBe("/v1/performance");
 		expect(resolveRoutePrefix("/v1/agencies/ag-1/agents")).toBe("/v1/agencies");
 	});
 
@@ -56,9 +56,9 @@ describe("slo-metrics middleware", () => {
 		const snap = metrics.getSnapshot();
 		expect(snap.counters["api.requests:prefix=/v1/organizations"]).toBe(1);
 		expect(snap.counters["api.errors:prefix=/v1/organizations"]).toBe(1);
-		expect(snap.histograms["api.latency:prefix=/v1/organizations"]?.length).toBe(
-			1,
-		);
+		expect(
+			snap.histograms["api.latency:prefix=/v1/organizations"]?.length,
+		).toBe(1);
 	});
 
 	test("records error counter when handler throws", async () => {

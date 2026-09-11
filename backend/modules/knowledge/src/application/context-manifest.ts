@@ -1,5 +1,8 @@
 import { randomUUID } from "node:crypto";
-import type { ContextManifest, RetrievalHit } from "@anxionos/contracts/knowledge";
+import type {
+	ContextManifest,
+	RetrievalHit,
+} from "@anxionos/contracts/knowledge";
 import { contextManifestSchema } from "@anxionos/contracts/knowledge";
 import { hashText } from "./text-chunking";
 

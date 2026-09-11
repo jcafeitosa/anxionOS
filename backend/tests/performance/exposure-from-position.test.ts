@@ -13,13 +13,15 @@ describe("derivePositionExposureMetrics (ANX-154 S2 oracle)", () => {
 		});
 		const byName = new Map(metrics.map((m) => [m.metricName, m.metricValue]));
 
-		expect(byName.get(OFFICIAL_POSITION_EXPOSURE_METRICS.QUANTITY)).toBe("10.5");
+		expect(byName.get(OFFICIAL_POSITION_EXPOSURE_METRICS.QUANTITY)).toBe(
+			"10.5",
+		);
 		expect(byName.get(OFFICIAL_POSITION_EXPOSURE_METRICS.SIGNED_QUANTITY)).toBe(
 			"10.5",
 		);
-		expect(byName.get(OFFICIAL_POSITION_EXPOSURE_METRICS.PROVISIONAL_CASH)).toBe(
-			"0",
-		);
+		expect(
+			byName.get(OFFICIAL_POSITION_EXPOSURE_METRICS.PROVISIONAL_CASH),
+		).toBe("0");
 	});
 
 	test("SHORT position: signed quantity is negated", () => {
@@ -44,8 +46,8 @@ describe("derivePositionExposureMetrics (ANX-154 S2 oracle)", () => {
 		});
 		const byName = new Map(metrics.map((m) => [m.metricName, m.metricValue]));
 
-		expect(byName.get(OFFICIAL_POSITION_EXPOSURE_METRICS.PROVISIONAL_CASH)).toBe(
-			"1",
-		);
+		expect(
+			byName.get(OFFICIAL_POSITION_EXPOSURE_METRICS.PROVISIONAL_CASH),
+		).toBe("1");
 	});
 });

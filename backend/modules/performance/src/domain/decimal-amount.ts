@@ -19,8 +19,7 @@ function fromScaledParts(value: bigint): string {
 	const raw = abs.toString().padStart(SCALE + 1, "0");
 	const whole = raw.slice(0, -SCALE) || "0";
 	const fraction = raw.slice(-SCALE).replace(/0+$/, "");
-	const unsigned =
-		fraction.length > 0 ? `${whole}.${fraction}` : whole;
+	const unsigned = fraction.length > 0 ? `${whole}.${fraction}` : whole;
 	return negative ? `-${unsigned}` : unsigned;
 }
 

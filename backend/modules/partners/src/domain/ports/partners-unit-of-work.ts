@@ -39,9 +39,7 @@ export interface PayoutRecord {
 
 export interface PartnerRepository {
 	findById(id: string, organizationId: string): Promise<PartnerRecord | null>;
-	findByOrganizationId(
-		organizationId: string,
-	): Promise<PartnerRecord | null>;
+	findByOrganizationId(organizationId: string): Promise<PartnerRecord | null>;
 	findByReferralCode(
 		referralCode: string,
 		organizationId: string,

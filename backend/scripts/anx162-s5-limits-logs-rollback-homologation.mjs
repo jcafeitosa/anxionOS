@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { spawnSync } from "node:child_process";
 /**
  * ANX-162 S5 — resource limits, structured logging, rollback homologation.
  *
@@ -8,14 +9,14 @@
  * Importers: package.json `anx162:s5-limits-logs-rollback-homologation`
  */
 import { readFileSync, writeFileSync } from "node:fs";
-import { spawnSync } from "node:child_process";
 import { parseArgs } from "node:util";
 import { parseSandboxLogLine } from "../deploy/docker/engines/shared/sandbox-logger.mjs";
 
 const REPO_ROOT = new URL("../..", import.meta.url).pathname;
 const COMPOSE_FILE = "backend/deploy/docker/docker-compose.yml";
 const COMPOSE_ENV_FILE = "backend/deploy/docker/.env";
-const MANIFEST_FILE = "backend/deploy/docker/audit/engine-sandbox-manifest.json";
+const MANIFEST_FILE =
+	"backend/deploy/docker/audit/engine-sandbox-manifest.json";
 const COMPOSE_ARGS = [
 	"-f",
 	COMPOSE_FILE,
@@ -150,7 +151,9 @@ function extractServiceBlock(raw, service) {
 	const start = match.index;
 	const rest = raw.slice(start);
 	const nextService = rest.slice(service.length + 4).search(/^  [a-z0-9-]+:/m);
-	return nextService === -1 ? rest : rest.slice(0, service.length + 4 + nextService);
+	return nextService === -1
+		? rest
+		: rest.slice(0, service.length + 4 + nextService);
 }
 
 function inspectComposeStatic() {
@@ -222,7 +225,10 @@ function verifyStructuredLogs(service, engineId) {
 		.filter(Boolean);
 	const started = structured.find((entry) => entry.event === "sandbox.started");
 	return {
-		ok: structured.length >= 1 && started?.engine === engineId && started?.slice === "S5",
+		ok:
+			structured.length >= 1 &&
+			started?.engine === engineId &&
+			started?.slice === "S5",
 		count: structured.length,
 		startedEvent: started?.event ?? null,
 	};
@@ -252,9 +258,18 @@ function probeHealthHttp(engine) {
 }
 
 function inspectImageDigest(image) {
-	const inspect = run("docker", ["image", "inspect", image, "--format", "{{json .RepoDigests}}"]);
+	const inspect = run("docker", [
+		"image",
+		"inspect",
+		image,
+		"--format",
+		"{{json .RepoDigests}}",
+	]);
 	if (!inspect.ok) {
-		return { ok: false, error: inspect.stderr.trim() || "image inspect failed" };
+		return {
+			ok: false,
+			error: inspect.stderr.trim() || "image inspect failed",
+		};
 	}
 	let digests = [];
 	try {
@@ -264,7 +279,13 @@ function inspectImageDigest(image) {
 	}
 	const digest =
 		digests.find((entry) => entry.includes("@sha256:")) ??
-		run("docker", ["image", "inspect", image, "--format", "{{.Id}}"]).stdout.trim();
+		run("docker", [
+			"image",
+			"inspect",
+			image,
+			"--format",
+			"{{.Id}}",
+		]).stdout.trim();
 	return { ok: Boolean(digest), digest, image };
 }
 
@@ -301,7 +322,10 @@ function verifyAuditManifest(digestsByService, writeManifest) {
 	}
 	const ok = mismatches.length === 0;
 	if (writeManifest) {
-		writeFileSync(`${REPO_ROOT}/${MANIFEST_FILE}`, `${JSON.stringify(manifest, null, 2)}\n`);
+		writeFileSync(
+			`${REPO_ROOT}/${MANIFEST_FILE}`,
+			`${JSON.stringify(manifest, null, 2)}\n`,
+		);
 	}
 	return { ok, mismatches, manifest };
 }
@@ -443,7 +467,10 @@ async function main() {
 			},
 		]),
 	);
-	report.auditManifest = verifyAuditManifest(digestsByService, opts["write-manifest"]);
+	report.auditManifest = verifyAuditManifest(
+		digestsByService,
+		opts["write-manifest"],
+	);
 	report.overallOk =
 		report.results.every((r) => r.overallOk) && report.auditManifest.ok;
 
@@ -459,12 +486,18 @@ function emit(report, asJson) {
 	console.log(`ANX-162 S5 homologation — ${report.issue} (${report.slice})`);
 	console.log(`Sandbox version: ${report.sandboxVersion}`);
 	console.log(`Compose config: ${report.compose.ok ? "ok" : "fail"}`);
-	console.log(`Static (limits/logging/tags): ${report.static.enginesOk ? "ok" : "fail"}`);
+	console.log(
+		`Static (limits/logging/tags): ${report.static.enginesOk ? "ok" : "fail"}`,
+	);
 	for (const result of report.results) {
 		console.log(`--- ${result.service} ---`);
-		console.log(`  Build: ${result.build?.skipped ? "skipped" : result.build?.ok ? "ok" : "fail"}`);
+		console.log(
+			`  Build: ${result.build?.skipped ? "skipped" : result.build?.ok ? "ok" : "fail"}`,
+		);
 		console.log(`  Up: ${result.up?.ok ? "ok" : "fail"}`);
-		console.log(`  Health: ${result.health?.ok && result.health?.http?.ok ? "ok" : "fail"}`);
+		console.log(
+			`  Health: ${result.health?.ok && result.health?.http?.ok ? "ok" : "fail"}`,
+		);
 		console.log(
 			`  Limits (static/runtime): ${
 				result.limits?.static?.cpuLimit &&
@@ -474,13 +507,19 @@ function emit(report, asJson) {
 					: "fail"
 			}`,
 		);
-		console.log(`  Structured logs: ${result.logs?.ok ? `ok (${result.logs.count})` : "fail"}`);
+		console.log(
+			`  Structured logs: ${result.logs?.ok ? `ok (${result.logs.count})` : "fail"}`,
+		);
 		if (result.rollback?.skipped) {
 			console.log("  Rollback: skipped");
 		} else {
-			console.log(`  Rollback (down/up --no-build): ${result.rollback?.ok ? "ok" : "fail"}`);
+			console.log(
+				`  Rollback (down/up --no-build): ${result.rollback?.ok ? "ok" : "fail"}`,
+			);
 		}
-		console.log(`  Image digest: ${result.digest?.ok ? result.digest.digest : "fail"}`);
+		console.log(
+			`  Image digest: ${result.digest?.ok ? result.digest.digest : "fail"}`,
+		);
 		console.log(`  Engine overall: ${result.overallOk ? "PASS" : "FAIL"}`);
 	}
 	console.log(

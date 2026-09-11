@@ -1,11 +1,11 @@
 import type { EvaluationCertificationIssuedBridge } from "@anxionos/contracts/evaluation";
-import type { StrategiesCommandResult } from "@anxionos/contracts/strategies";
 import { mapCertificationIssuedToPromotionInput } from "@anxionos/contracts/evaluation";
+import type { StrategiesCommandResult } from "@anxionos/contracts/strategies";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { StrategiesUnitOfWork } from "../../domain/ports/strategies-unit-of-work";
 import {
-	promoteStrategyVersionCertified,
 	type PromoteStrategyVersionCertifiedDeps,
+	promoteStrategyVersionCertified,
 } from "../commands/promote-strategy-version-certified";
 
 /**

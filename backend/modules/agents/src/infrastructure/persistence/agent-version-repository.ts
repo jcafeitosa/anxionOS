@@ -1,14 +1,14 @@
-import { and, eq } from "drizzle-orm";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type {
 	AutonomyLevel,
 	ModelSlotBinding,
 	ObjectRef,
 	SkillRef,
 } from "@anxionos/contracts/agents";
+import { and, eq } from "drizzle-orm";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { AgentVersion } from "../../domain/entities/agent-version";
 import type { AgentVersionRepository } from "../../domain/ports/agent-version-repository";
-import { agentVersions, agents, type AgentVersionRow } from "./schema";
+import { type AgentVersionRow, agents, agentVersions } from "./schema";
 
 function readObjectRef(value: unknown): ObjectRef {
 	if (typeof value !== "object" || value === null) {
@@ -42,7 +42,10 @@ export function toAgentVersion(row: AgentVersionRow): AgentVersion {
 }
 
 export function createDrizzleAgentVersionRepository(
-	db: NodePgDatabase<{ agentVersions: typeof agentVersions; agents: typeof agents }>,
+	db: NodePgDatabase<{
+		agentVersions: typeof agentVersions;
+		agents: typeof agents;
+	}>,
 ): AgentVersionRepository {
 	return {
 		async save(version: AgentVersion) {
@@ -80,7 +83,9 @@ export function createDrizzleAgentVersionRepository(
 				.limit(1);
 			const organizationId = agentRows[0]?.organizationId;
 			if (!organizationId) {
-				throw new Error(`Agent not found for version insert: ${version.agentId}`);
+				throw new Error(
+					`Agent not found for version insert: ${version.agentId}`,
+				);
 			}
 
 			const rows = await db

@@ -12,5 +12,8 @@ export async function listPayouts(
 	partnerOrganizationId: string,
 	partnerId?: string,
 ): Promise<PayoutRecord[]> {
-	return deps.payouts.listByPartnerOrganization(partnerOrganizationId, partnerId);
+	return deps.payouts.listByPartnerOrganization(
+		partnerOrganizationId,
+		partnerId,
+	);
 }

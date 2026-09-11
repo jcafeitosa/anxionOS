@@ -166,8 +166,7 @@ export class GoCryptoTraderAdapter implements RiskPermitValidationPort {
 		this.sandboxUrl = resolveGctSandboxUrl(options.sandboxUrl);
 		this.engineMode = resolveGctEngineMode(options.engineMode);
 		this.fetchFn = options.fetchFn ?? fetch;
-		this.healthTimeoutMs =
-			options.healthTimeoutMs ?? DEFAULT_HEALTH_TIMEOUT_MS;
+		this.healthTimeoutMs = options.healthTimeoutMs ?? DEFAULT_HEALTH_TIMEOUT_MS;
 		this.options = options;
 	}
 

@@ -1,7 +1,13 @@
 import type { Pool, PoolClient } from "pg";
-import type { VenueCalendarRecord, TradingSessionRecord, MarketCalendarRepository } from "../../domain/ports/market-calendar-repository";
+import type {
+	MarketCalendarRepository,
+	TradingSessionRecord,
+	VenueCalendarRecord,
+} from "../../domain/ports/market-calendar-repository";
 
-export function createPgMarketCalendarRepository(client: Pool | PoolClient): MarketCalendarRepository {
+export function createPgMarketCalendarRepository(
+	client: Pool | PoolClient,
+): MarketCalendarRepository {
 	return {
 		async findVenueCalendar(venueId: string) {
 			const result = await client.query(
@@ -15,8 +21,14 @@ export function createPgMarketCalendarRepository(client: Pool | PoolClient): Mar
 				iana_timezone: String(row.iana_timezone),
 				scope: String(row.scope) as "stocks" | "crypto" | "both",
 				is_24x7: Boolean(row.is_24x7),
-				created_at: row.created_at instanceof Date ? row.created_at : new Date(String(row.created_at)),
-				updated_at: row.updated_at instanceof Date ? row.updated_at : new Date(String(row.updated_at)),
+				created_at:
+					row.created_at instanceof Date
+						? row.created_at
+						: new Date(String(row.created_at)),
+				updated_at:
+					row.updated_at instanceof Date
+						? row.updated_at
+						: new Date(String(row.updated_at)),
 			};
 		},
 
@@ -29,13 +41,28 @@ export function createPgMarketCalendarRepository(client: Pool | PoolClient): Mar
 			const row = result.rows[0];
 			return {
 				venue_calendar_id: String(row.venue_calendar_id),
-				session_date: row.session_date instanceof Date ? row.session_date : new Date(String(row.session_date)),
-				open_at: row.open_at instanceof Date ? row.open_at : new Date(String(row.open_at)),
-				close_at: row.close_at instanceof Date ? row.close_at : new Date(String(row.close_at)),
+				session_date:
+					row.session_date instanceof Date
+						? row.session_date
+						: new Date(String(row.session_date)),
+				open_at:
+					row.open_at instanceof Date
+						? row.open_at
+						: new Date(String(row.open_at)),
+				close_at:
+					row.close_at instanceof Date
+						? row.close_at
+						: new Date(String(row.close_at)),
 				is_holiday: Boolean(row.is_holiday),
 				is_24x7: Boolean(row.is_24x7),
-				created_at: row.created_at instanceof Date ? row.created_at : new Date(String(row.created_at)),
-				updated_at: row.updated_at instanceof Date ? row.updated_at : new Date(String(row.updated_at)),
+				created_at:
+					row.created_at instanceof Date
+						? row.created_at
+						: new Date(String(row.created_at)),
+				updated_at:
+					row.updated_at instanceof Date
+						? row.updated_at
+						: new Date(String(row.updated_at)),
 			};
 		},
 
@@ -54,8 +81,12 @@ export function createPgMarketCalendarRepository(client: Pool | PoolClient): Mar
 					record.iana_timezone,
 					record.scope,
 					record.is_24x7,
-					record.created_at instanceof Date ? record.created_at : new Date(String(record.created_at)),
-					record.updated_at instanceof Date ? record.updated_at : new Date(String(record.updated_at)),
+					record.created_at instanceof Date
+						? record.created_at
+						: new Date(String(record.created_at)),
+					record.updated_at instanceof Date
+						? record.updated_at
+						: new Date(String(record.updated_at)),
 				],
 			);
 			const row = result.rows[0];
@@ -64,8 +95,14 @@ export function createPgMarketCalendarRepository(client: Pool | PoolClient): Mar
 				iana_timezone: String(row.iana_timezone),
 				scope: String(row.scope) as "stocks" | "crypto" | "both",
 				is_24x7: Boolean(row.is_24x7),
-				created_at: row.created_at instanceof Date ? row.created_at : new Date(String(row.created_at)),
-				updated_at: row.updated_at instanceof Date ? row.updated_at : new Date(String(row.updated_at)),
+				created_at:
+					row.created_at instanceof Date
+						? row.created_at
+						: new Date(String(row.created_at)),
+				updated_at:
+					row.updated_at instanceof Date
+						? row.updated_at
+						: new Date(String(row.updated_at)),
 			};
 		},
 
@@ -82,25 +119,50 @@ export function createPgMarketCalendarRepository(client: Pool | PoolClient): Mar
 				 RETURNING venue_calendar_id, session_date, open_at, close_at, is_holiday, is_24x7, created_at, updated_at`,
 				[
 					record.venue_calendar_id,
-					record.session_date instanceof Date ? record.session_date : new Date(String(record.session_date)),
-					record.open_at instanceof Date ? record.open_at : new Date(String(record.open_at)),
-					record.close_at instanceof Date ? record.close_at : new Date(String(record.close_at)),
+					record.session_date instanceof Date
+						? record.session_date
+						: new Date(String(record.session_date)),
+					record.open_at instanceof Date
+						? record.open_at
+						: new Date(String(record.open_at)),
+					record.close_at instanceof Date
+						? record.close_at
+						: new Date(String(record.close_at)),
 					record.is_holiday,
 					record.is_24x7,
-					record.created_at instanceof Date ? record.created_at : new Date(String(record.created_at)),
-					record.updated_at instanceof Date ? record.updated_at : new Date(String(record.updated_at)),
+					record.created_at instanceof Date
+						? record.created_at
+						: new Date(String(record.created_at)),
+					record.updated_at instanceof Date
+						? record.updated_at
+						: new Date(String(record.updated_at)),
 				],
 			);
 			const row = result.rows[0];
 			return {
 				venue_calendar_id: String(row.venue_calendar_id),
-				session_date: row.session_date instanceof Date ? row.session_date : new Date(String(row.session_date)),
-				open_at: row.open_at instanceof Date ? row.open_at : new Date(String(row.open_at)),
-				close_at: row.close_at instanceof Date ? row.close_at : new Date(String(row.close_at)),
+				session_date:
+					row.session_date instanceof Date
+						? row.session_date
+						: new Date(String(row.session_date)),
+				open_at:
+					row.open_at instanceof Date
+						? row.open_at
+						: new Date(String(row.open_at)),
+				close_at:
+					row.close_at instanceof Date
+						? row.close_at
+						: new Date(String(row.close_at)),
 				is_holiday: Boolean(row.is_holiday),
 				is_24x7: Boolean(row.is_24x7),
-				created_at: row.created_at instanceof Date ? row.created_at : new Date(String(row.created_at)),
-				updated_at: row.updated_at instanceof Date ? row.updated_at : new Date(String(row.updated_at)),
+				created_at:
+					row.created_at instanceof Date
+						? row.created_at
+						: new Date(String(row.created_at)),
+				updated_at:
+					row.updated_at instanceof Date
+						? row.updated_at
+						: new Date(String(row.updated_at)),
 			};
 		},
 	};

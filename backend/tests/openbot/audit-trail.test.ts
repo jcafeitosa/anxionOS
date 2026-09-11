@@ -21,8 +21,8 @@ import {
 	createRecordingGovernanceUnitOfWork,
 } from "../governance/test-support";
 import {
-	createInMemoryToolGatewayPort,
 	createInMemoryToolAuditPort,
+	createInMemoryToolGatewayPort,
 } from "./test-support";
 
 const organizationId = "b2000002-0002-4002-8002-000000000002";
@@ -109,9 +109,7 @@ describe("executeGovernedToolCall audit events (ANX-144 S4)", () => {
 			deps: {
 				toolGateway,
 				toolAudit,
-				publishEvents: async (
-					published: { eventType: string }[],
-				) => {
+				publishEvents: async (published: { eventType: string }[]) => {
 					for (const event of published) {
 						events.push(event.eventType);
 					}
@@ -142,7 +140,9 @@ describe("executeGovernedToolCall audit events (ANX-144 S4)", () => {
 
 		expect(setup.events).toContain(OPENBOT_EVENT_TYPES.AUDIT_BEFORE_RECORDED);
 		expect(setup.events).toContain(OPENBOT_EVENT_TYPES.TOOL_CALL_DENIED);
-		expect(setup.events).not.toContain(OPENBOT_EVENT_TYPES.AUDIT_AFTER_RECORDED);
+		expect(setup.events).not.toContain(
+			OPENBOT_EVENT_TYPES.AUDIT_AFTER_RECORDED,
+		);
 
 		const trail = await setup.toolAudit.listTrail({ requestId });
 		expect(trail).toHaveLength(1);

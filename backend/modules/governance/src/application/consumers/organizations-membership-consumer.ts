@@ -1,13 +1,12 @@
 import { randomUUID } from "node:crypto";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
-import type { TenantContext } from "../../domain/ports/tenant-context";
 import {
 	type MembershipActivatedPayload,
 	type MembershipRevokedPayload,
-	ORGANIZATION_EVENT_TYPES,
-	type OwnershipTransferredPayload,
 	membershipActivatedPayloadSchema,
 	membershipRevokedPayloadSchema,
+	ORGANIZATION_EVENT_TYPES,
+	type OwnershipTransferredPayload,
 	ownershipTransferredPayloadSchema,
 } from "@anxionos/contracts/organizations";
 import { isGrantRevoked } from "../../domain/entities/grant";
@@ -25,6 +24,7 @@ import type {
 	InboxProcessorPort,
 } from "../../domain/ports/inbox-processor-port";
 import type { OrganizationsMembershipReadPort } from "../../domain/ports/organizations-membership-read-port";
+import type { TenantContext } from "../../domain/ports/tenant-context";
 import {
 	GOVERNANCE_ORGANIZATIONS_CONSUMER_NAME,
 	OWNER_BASELINE_CAPABILITIES,
@@ -241,9 +241,12 @@ async function closeDerivedGrants(
 	ownershipPayload?: OwnershipTransferredPayload,
 ): Promise<void> {
 	const tenantContext: TenantContext = {
-		tenantId: revokedPayload?.agencyId ?? ownershipPayload?.agencyId ?? membershipId,
-		agencyId: revokedPayload?.agencyId ?? ownershipPayload?.agencyId ?? membershipId,
-		principalId: revokedPayload?.principalId ?? ownershipPayload?.newOwnerPrincipalId,
+		tenantId:
+			revokedPayload?.agencyId ?? ownershipPayload?.agencyId ?? membershipId,
+		agencyId:
+			revokedPayload?.agencyId ?? ownershipPayload?.agencyId ?? membershipId,
+		principalId:
+			revokedPayload?.principalId ?? ownershipPayload?.newOwnerPrincipalId,
 	};
 	await unitOfWork.runInTransaction(tenantContext, async (context) => {
 		if (membershipRead && revokedPayload) {

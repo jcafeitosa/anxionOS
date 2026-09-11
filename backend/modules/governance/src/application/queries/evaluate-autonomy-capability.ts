@@ -3,8 +3,8 @@ import {
 	isAutonomyLevelRuntimeEnabled,
 	isCapabilityEligibleAtLevel,
 } from "../../domain/policies/autonomy-normative-matrix";
-import type { GrantRepository } from "../../domain/ports/grant-repository";
 import type { AutonomyAssignmentRepository } from "../../domain/ports/autonomy-assignment-repository";
+import type { GrantRepository } from "../../domain/ports/grant-repository";
 import { getEffectiveAutonomy } from "./get-effective-autonomy";
 
 export interface EvaluateAutonomyCapabilityInput {

@@ -1,3 +1,4 @@
+import { resolveSequenceRejectAnomalies } from "../../domain/realtime-ingest-limits";
 import type { BackpressureRejectReason } from "./backpressure-handler";
 import { RealtimeIngestBackpressureHandler } from "./backpressure-handler";
 import type { ReconnectSkipReason } from "./reconnect-handler";
@@ -7,7 +8,6 @@ import {
 	RealtimeIngestSequenceGuard,
 	type SequenceQualityFlag,
 } from "./sequence-guard";
-import { resolveSequenceRejectAnomalies } from "../../domain/realtime-ingest-limits";
 
 export interface RealtimeIngestGateDeps {
 	backpressure: RealtimeIngestBackpressureHandler;
@@ -41,20 +41,28 @@ export function evaluateRealtimeIngestGate(
 	deps: RealtimeIngestGateDeps,
 	input: RealtimeIngestGateInput,
 ): RealtimeIngestGateDecision {
-	const reconnect = deps.reconnect.admitEvent(input.organizationId, input.streamId, {
-		eventId: input.eventId,
-		sourceEventId: input.sourceEventId,
-	});
+	const reconnect = deps.reconnect.admitEvent(
+		input.organizationId,
+		input.streamId,
+		{
+			eventId: input.eventId,
+			sourceEventId: input.sourceEventId,
+		},
+	);
 	if (reconnect.action === "skip") {
 		if (reconnect.reason === "DUPLICATE_SOURCE_EVENT_ID") {
 			return { action: "proceed", qualityFlag: "OK" };
 		}
 		return { action: "skip", reason: reconnect.reason };
 	}
-	const sequence = deps.sequence.admitEvent(input.organizationId, input.streamId, {
-		eventTime: input.eventTime,
-		streamSequence: input.streamSequence,
-	});
+	const sequence = deps.sequence.admitEvent(
+		input.organizationId,
+		input.streamId,
+		{
+			eventTime: input.eventTime,
+			streamSequence: input.streamSequence,
+		},
+	);
 	if (sequence.action === "reject") {
 		return { action: "reject", reason: sequence.reason };
 	}

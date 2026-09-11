@@ -1,8 +1,8 @@
 import {
-	capitalCommandResultSchema,
-	releaseReservationCommandSchema,
 	type CapitalCommandResult,
+	capitalCommandResultSchema,
 	type ReleaseReservationCommand,
+	releaseReservationCommandSchema,
 } from "@anxionos/contracts/capital";
 import {
 	compareDecimalAmounts,
@@ -108,14 +108,18 @@ export async function releaseReservation(
 				);
 			}
 			if (command.reason === "expired") {
-				if (compareDecimalAmounts(command.releaseAmount, reservation.amount) !== 0) {
+				if (
+					compareDecimalAmounts(command.releaseAmount, reservation.amount) !== 0
+				) {
 					throwCapitalError(
 						"CAP_INVALID_RESERVATION_STATE",
 						"Expired release must match full held amount",
 					);
 				}
 			}
-			if (compareDecimalAmounts(command.releaseAmount, reservation.amount) > 0) {
+			if (
+				compareDecimalAmounts(command.releaseAmount, reservation.amount) > 0
+			) {
 				throwCapitalError(
 					"CAP_RELEASE_EXCEEDS_RESERVED",
 					`Cannot release ${command.releaseAmount} from held ${reservation.amount}`,

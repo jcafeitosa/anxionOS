@@ -1,6 +1,12 @@
-import type { MembershipRole, MembershipStatus } from "@anxionos/contracts/organizations";
+import type {
+	MembershipRole,
+	MembershipStatus,
+} from "@anxionos/contracts/organizations";
 
-const MEMBERSHIP_STATUS_TRANSITIONS: Record<MembershipStatus, MembershipStatus[]> = {
+const MEMBERSHIP_STATUS_TRANSITIONS: Record<
+	MembershipStatus,
+	MembershipStatus[]
+> = {
 	invited: ["active", "revoked"],
 	active: ["revoked"],
 	revoked: [],
@@ -21,19 +27,23 @@ export function wouldViolateOwnerRequired(
 	memberships: readonly Membership[],
 	targetMembershipId: string,
 ): boolean {
-	const target = memberships.find((membership) => membership.id === targetMembershipId);
+	const target = memberships.find(
+		(membership) => membership.id === targetMembershipId,
+	);
 	if (!target || target.role !== "owner" || target.status !== "active") {
 		return false;
 	}
 	const activeOwners = memberships.filter(
-		(membership) => membership.role === "owner" && membership.status === "active",
+		(membership) =>
+			membership.role === "owner" && membership.status === "active",
 	);
 	return activeOwners.length <= 1;
 }
 
 export function countActiveOwners(memberships: readonly Membership[]): number {
 	return memberships.filter(
-		(membership) => membership.role === "owner" && membership.status === "active",
+		(membership) =>
+			membership.role === "owner" && membership.status === "active",
 	).length;
 }
 

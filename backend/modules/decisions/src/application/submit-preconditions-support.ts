@@ -1,6 +1,6 @@
+import type { CapitalReservationQueryPort } from "../domain/ports/capital-reservation-query-port";
 import type { DecisionRecord } from "../domain/ports/decisions-unit-of-work";
 import type { SubmitPreconditionsRepository } from "../domain/ports/submit-preconditions";
-import type { CapitalReservationQueryPort } from "../domain/ports/capital-reservation-query-port";
 import { throwDecisionsError } from "./errors";
 
 export async function armSubmitPreconditions(
@@ -49,8 +49,7 @@ export async function assertSubmitPreconditionsMet(
 	intentHash: string,
 	capitalReservationQuery?: CapitalReservationQueryPort,
 ): Promise<void> {
-	const preconditions =
-		await submitPreconditions.findByDecisionId(decisionId);
+	const preconditions = await submitPreconditions.findByDecisionId(decisionId);
 	if (!preconditions || preconditions.organizationId !== organizationId) {
 		throwDecisionsError(
 			"DC_SUBMIT_PRECONDITION",
@@ -83,10 +82,7 @@ export async function assertSubmitPreconditionsMet(
 			organizationId,
 			intentHash,
 		);
-		if (
-			!held ||
-			held.reservationId !== preconditions.capitalReservationId
-		) {
+		if (!held || held.reservationId !== preconditions.capitalReservationId) {
 			throwDecisionsError(
 				"DC_SUBMIT_PRECONDITION",
 				"capital reservation is not HELD",

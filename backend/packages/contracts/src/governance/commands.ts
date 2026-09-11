@@ -6,14 +6,14 @@ import {
 } from "./autonomy-policy";
 import { changeProposalKindSchema, mandateKindSchema } from "./types";
 
-export {
-	assignAutonomyLevelCommandSchema,
-	transitionAutonomyLevelCommandSchema,
-};
 export type {
 	AssignAutonomyLevelCommand,
 	TransitionAutonomyLevelCommand,
 } from "./autonomy-policy";
+export {
+	assignAutonomyLevelCommandSchema,
+	transitionAutonomyLevelCommandSchema,
+};
 export const governanceCommandResultSchema = z.object({
 	aggregateId: institutionalUuidSchema,
 	revision: z.number().int().nonnegative(),

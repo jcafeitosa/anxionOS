@@ -8,21 +8,21 @@ import {
 	shutdownOutboxRelayWorker,
 } from "./bootstrap";
 import {
+	loadGraphGovernanceWorkerConfig,
+	loadGraphProductWorkerConfig,
+	loadOrchestrationS5WorkerConfig,
+	loadOutboxRelayWorkerConfig,
 	WORKER_PROFILE_GRAPH_GOVERNANCE,
 	WORKER_PROFILE_GRAPH_PRODUCT,
 	WORKER_PROFILE_ORCHESTRATION_S5,
 	WORKER_PROFILE_OUTBOX_RELAY,
-	loadGraphGovernanceWorkerConfig,
-	loadOrchestrationS5WorkerConfig,
-	loadGraphProductWorkerConfig,
-	loadOutboxRelayWorkerConfig,
 } from "./config";
 import { startAppOutboxRelayWorker } from "./eventing/outbox-relay-worker";
-import { startOrchestrationHeartbeatDequeue } from "./orchestration/heartbeat-dequeue";
-import { startOrchestrationLeaseSweeper } from "./orchestration/lease-sweeper";
 import { startGovernanceProjectionConsumer } from "./graph/governance-projection-worker";
 import { startOrganizationsProjectionConsumer } from "./graph/organizations-graph-projection-worker";
 import { startProductGraphProjectionConsumers } from "./graph/product-graph-projection-worker";
+import { startOrchestrationHeartbeatDequeue } from "./orchestration/heartbeat-dequeue";
+import { startOrchestrationLeaseSweeper } from "./orchestration/lease-sweeper";
 
 const logger = createLogger({ service: "workers-root" });
 
@@ -96,7 +96,6 @@ async function main(): Promise<void> {
 		logger.info("Workers running", { profile: config.profile });
 		return;
 	}
-
 
 	if (profile === WORKER_PROFILE_ORCHESTRATION_S5) {
 		const config = loadOrchestrationS5WorkerConfig();

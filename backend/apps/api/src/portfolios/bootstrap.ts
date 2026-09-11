@@ -4,7 +4,9 @@ import type { Pool } from "pg";
 export interface PortfoliosApiRuntime {
 	portfolios: ReturnType<typeof createPortfoliosDb>["portfolios"];
 	positions: ReturnType<typeof createPortfoliosDb>["positions"];
-	valuationSnapshots: ReturnType<typeof createPortfoliosDb>["valuationSnapshots"];
+	valuationSnapshots: ReturnType<
+		typeof createPortfoliosDb
+	>["valuationSnapshots"];
 }
 
 export function createPortfoliosApiRuntime(pool: Pool): PortfoliosApiRuntime {

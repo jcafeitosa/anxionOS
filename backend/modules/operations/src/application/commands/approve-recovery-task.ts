@@ -10,12 +10,12 @@ import {
 } from "@anxionos/contracts/operations";
 import { RecoveryTaskRevisionConflictError } from "../../domain/errors/recovery-errors";
 import { createRecoveryTaskApprovedEvent } from "../../domain/events/operations-events";
+import type { CommandJournalRepository } from "../../domain/ports/command-journal";
+import type { OperationsUnitOfWork } from "../../domain/ports/operations-unit-of-work";
 import {
 	canTransitionRecoveryTaskStatus,
 	isTerminalRecoveryTaskStatus,
 } from "../../domain/recovery-lifecycle";
-import type { CommandJournalRepository } from "../../domain/ports/command-journal";
-import type { OperationsUnitOfWork } from "../../domain/ports/operations-unit-of-work";
 import {
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,

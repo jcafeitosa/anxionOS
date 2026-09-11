@@ -413,9 +413,9 @@ describe("execution lifecycle commands (ANX-151 S2)", () => {
 				 ORDER BY occurred_at`,
 			);
 			expect(outboxRows.rowCount).toBe(3);
-			expect(
-				outboxRows.rows.every((row) => row.status === "pending"),
-			).toBe(true);
+			expect(outboxRows.rows.every((row) => row.status === "pending")).toBe(
+				true,
+			);
 			expect(outboxRows.rows.map((row) => row.event_type)).toEqual([
 				EXECUTION_MODULE_EVENT_TYPES.SESSION_OPENED,
 				EXECUTION_MODULE_EVENT_TYPES.ORDER_SUBMITTED,

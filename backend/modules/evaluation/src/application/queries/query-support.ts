@@ -63,7 +63,9 @@ export function toEvaluationRecordView(
 	};
 }
 
-export function toEvaluationScoreView(row: EvaluationScoreRow): EvaluationScoreView {
+export function toEvaluationScoreView(
+	row: EvaluationScoreRow,
+): EvaluationScoreView {
 	return {
 		evaluationScoreId: row.id,
 		organizationId: row.organizationId,

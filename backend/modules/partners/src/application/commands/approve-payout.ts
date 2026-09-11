@@ -7,8 +7,8 @@ import {
 	partnersCommandResultSchema,
 } from "@anxionos/contracts/partners";
 import { createPayoutApprovedEvent } from "../../domain/events/partners-events";
-import type { PartnersUnitOfWork } from "../../domain/ports/partners-unit-of-work";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
+import type { PartnersUnitOfWork } from "../../domain/ports/partners-unit-of-work";
 import {
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,

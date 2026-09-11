@@ -8,7 +8,9 @@ export interface GetRecoveryTaskDeps {
 }
 
 function toRecoveryTaskSnapshot(
-	record: Awaited<ReturnType<RecoveryTaskRepository["findByOrganizationAndId"]>>,
+	record: Awaited<
+		ReturnType<RecoveryTaskRepository["findByOrganizationAndId"]>
+	>,
 ): RecoveryTaskSnapshot {
 	if (!record) {
 		throwOperationsError(

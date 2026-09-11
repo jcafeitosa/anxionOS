@@ -1,20 +1,11 @@
+import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-	createPgPool,
-	ensureEventingSchema,
-} from "@anxionos/eventing/postgres";
-import {
-	activateLimitPolicy,
-	createRiskUnitOfWork,
-	createPgCommandJournalRepository as createRiskCommandJournal,
-	runPreTradeCheck,
-} from "@anxionos/risk";
-import {
+	createPgCommandJournalRepository as createCapitalCommandJournal,
 	createCapitalUnitOfWork,
 	createDefaultGrantValidationPort,
-	createPgCommandJournalRepository as createCapitalCommandJournal,
 	registerCapitalAccount,
 	reserveForIntent,
 } from "@anxionos/capital";
@@ -24,7 +15,16 @@ import {
 	createPgCapitalReservationQueryAdapter,
 	createRiskCheckCompletedConsumer,
 } from "@anxionos/decisions";
-import { randomUUID } from "node:crypto";
+import {
+	createPgPool,
+	ensureEventingSchema,
+} from "@anxionos/eventing/postgres";
+import {
+	activateLimitPolicy,
+	createPgCommandJournalRepository as createRiskCommandJournal,
+	createRiskUnitOfWork,
+	runPreTradeCheck,
+} from "@anxionos/risk";
 
 import { ensureDecisionsSchema } from "../../modules/decisions/src/infrastructure/migrate";
 import { ensureRiskSchema } from "../../modules/risk/src/infrastructure/migrate";
@@ -38,7 +38,6 @@ export function shouldRunPgIntegrationTests(): boolean {
 		process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl())
 	);
 }
-
 
 const RISK_TRUNCATE_SQL =
 	"TRUNCATE risk_command_journal, risk_permits, risk_check_results, risk_limit_policies, risk_epoch_registry CASCADE";
@@ -84,8 +83,10 @@ export const DECISIONS_TEST_GRANT_ID = "00000000-0000-4000-8000-000000000003";
 export const DECISIONS_TEST_CORRELATION_ID =
 	"00000000-0000-4000-8000-000000000004";
 
-export const DECISIONS_TEST_PORTFOLIO_ID = "00000000-0000-4000-8000-000000000040";
-export const DECISIONS_TEST_OWNER_USER_ID = "00000000-0000-4000-8000-000000000030";
+export const DECISIONS_TEST_PORTFOLIO_ID =
+	"00000000-0000-4000-8000-000000000040";
+export const DECISIONS_TEST_OWNER_USER_ID =
+	"00000000-0000-4000-8000-000000000030";
 export const DECISIONS_TEST_RISK_EPOCH = 1;
 
 export async function seedRiskPolicyForTests(
@@ -207,4 +208,3 @@ export async function fulfillSubmitPreconditions(
 		capitalReservationQuery: createPgCapitalReservationQueryAdapter(pool),
 	};
 }
-

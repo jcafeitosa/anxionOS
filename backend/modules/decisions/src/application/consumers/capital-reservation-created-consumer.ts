@@ -1,7 +1,10 @@
 import { reservationCreatedPayloadSchema } from "@anxionos/contracts/capital";
 import type { z } from "zod";
 
-type ReservationCreatedPayload = z.infer<typeof reservationCreatedPayloadSchema>;
+type ReservationCreatedPayload = z.infer<
+	typeof reservationCreatedPayloadSchema
+>;
+
 import type { DecisionsUnitOfWork } from "../../domain/ports/decisions-unit-of-work";
 import { throwDecisionsError } from "../errors";
 
@@ -15,10 +18,9 @@ export function createCapitalReservationCreatedConsumer(
 	return {
 		async handle(payload: ReservationCreatedPayload, eventId: string) {
 			const event = reservationCreatedPayloadSchema.parse(payload);
-			const replayed =
-				await deps.unitOfWork.runInTransaction(async (ctx) =>
-					ctx.submitPreconditions.findByCapitalEventId(eventId),
-				);
+			const replayed = await deps.unitOfWork.runInTransaction(async (ctx) =>
+				ctx.submitPreconditions.findByCapitalEventId(eventId),
+			);
 			if (replayed) {
 				return {
 					decisionId: replayed.decisionId,
@@ -40,9 +42,7 @@ export function createCapitalReservationCreatedConsumer(
 						"capital event organization mismatch",
 					);
 				}
-				const decision = await ctx.decisions.findById(
-					preconditions.decisionId,
-				);
+				const decision = await ctx.decisions.findById(preconditions.decisionId);
 				if (!decision || decision.organizationId !== event.organizationId) {
 					throwDecisionsError("DC_DECISION_NOT_FOUND", "decision not found");
 				}

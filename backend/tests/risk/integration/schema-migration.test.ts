@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { shouldRunPgIntegrationTests, withRiskPgHarness } from "../test-support";
+import {
+	shouldRunPgIntegrationTests,
+	withRiskPgHarness,
+} from "../test-support";
 
 describe("risk schema migration (ANX-150 S1)", () => {
 	test("core risk tables exist after ensureRiskSchema", async () => {

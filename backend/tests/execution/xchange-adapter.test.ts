@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import {
-	XChangeAdapter,
-	XCHANGE_REAL_WIRING_BLOCKERS,
 	mountXChangeAdapter,
 	resolveXchEngineMode,
 	resolveXchSandboxUrl,
+	XCHANGE_REAL_WIRING_BLOCKERS,
+	XChangeAdapter,
 } from "@anxionos/execution";
 
 const permitInput = {
@@ -211,13 +211,14 @@ describe("XChangeAdapter (ANX-178)", () => {
 
 	test("mount helper returns stable venueAdapterRefId prefix", () => {
 		expect(
-			mountXChangeAdapter("org_1", validLicense, "demo-xch")
-				.venueAdapterRefId,
+			mountXChangeAdapter("org_1", validLicense, "demo-xch").venueAdapterRefId,
 		).toBe("ex_vad_xch_org_1");
 	});
 
 	test("XCHANGE_REAL_WIRING_BLOCKERS documents upstream constraints", () => {
-		expect(XCHANGE_REAL_WIRING_BLOCKERS.upstreamRepo).toContain("knowm/XChange");
+		expect(XCHANGE_REAL_WIRING_BLOCKERS.upstreamRepo).toContain(
+			"knowm/XChange",
+		);
 		expect(XCHANGE_REAL_WIRING_BLOCKERS.javaBridgeRuntime).toBeTruthy();
 		expect(XCHANGE_REAL_WIRING_BLOCKERS.multiExchangeSemantics).toBeTruthy();
 	});

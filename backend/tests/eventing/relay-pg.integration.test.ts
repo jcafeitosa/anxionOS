@@ -6,8 +6,8 @@ import {
 	processWithInbox,
 } from "@anxionos/eventing/postgres";
 import {
-	type OutboxPublisher,
 	moveToDeadLetter,
+	type OutboxPublisher,
 	relayPendingOutbox,
 } from "@anxionos/eventing/relay";
 import { DEFAULT_RETRY_POLICY } from "@anxionos/eventing/retry";

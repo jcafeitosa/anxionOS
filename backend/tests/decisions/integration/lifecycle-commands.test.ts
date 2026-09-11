@@ -71,7 +71,6 @@ async function fulfillForSubmit(
 	});
 }
 
-
 describe("decisions lifecycle commands (ANX-149 S2)", () => {
 	test("G3-DC-S2-01: propose → checkAuthority → submitIntent happy path", async () => {
 		if (!shouldRunPgIntegrationTests()) return;

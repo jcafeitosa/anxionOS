@@ -41,10 +41,7 @@ export async function releaseKillSwitch(
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			return replayIdempotentCommandJournalEntry(
-				raced,
-				command.organizationId,
-			);
+			return replayIdempotentCommandJournalEntry(raced, command.organizationId);
 		}
 		const released = await ctx.killSwitch.deactivate({
 			organizationId: command.organizationId,
@@ -60,7 +57,8 @@ export async function releaseKillSwitch(
 		const epoch = await ctx.epochRegistry.findByOrganization(
 			command.organizationId,
 		);
-		const currentRiskEpoch = epoch?.currentRiskEpoch ?? released.riskEpochAtActivation;
+		const currentRiskEpoch =
+			epoch?.currentRiskEpoch ?? released.riskEpochAtActivation;
 		await ctx.publishEvents([
 			createKillSwitchReleasedEvent({
 				killSwitchId: released.id,

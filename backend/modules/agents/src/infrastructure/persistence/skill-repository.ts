@@ -2,7 +2,7 @@ import { and, eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Skill } from "../../domain/entities/skill";
 import type { SkillRepository } from "../../domain/ports/skill-repository";
-import { skills, type SkillRow } from "./schema";
+import { type SkillRow, skills } from "./schema";
 
 export function toSkill(row: SkillRow): Skill {
 	return {
@@ -63,14 +63,20 @@ export function createDrizzleSkillRepository(
 			return toSkill(row);
 		},
 		async findById(skillId: string) {
-			const rows = await db.select().from(skills).where(eq(skills.id, skillId)).limit(1);
+			const rows = await db
+				.select()
+				.from(skills)
+				.where(eq(skills.id, skillId))
+				.limit(1);
 			return rows[0] ? toSkill(rows[0]) : null;
 		},
 		async findByOrganizationAndSlug(organizationId: string, slug: string) {
 			const rows = await db
 				.select()
 				.from(skills)
-				.where(and(eq(skills.organizationId, organizationId), eq(skills.slug, slug)))
+				.where(
+					and(eq(skills.organizationId, organizationId), eq(skills.slug, slug)),
+				)
 				.limit(1);
 			return rows[0] ? toSkill(rows[0]) : null;
 		},

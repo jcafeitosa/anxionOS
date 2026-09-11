@@ -52,8 +52,10 @@ function createDeps(run: Run) {
 				return next;
 			},
 		} as OrchestrationTransactionContext["runRepository"],
-		taskLeaseRepository: {} as OrchestrationTransactionContext["taskLeaseRepository"],
-		gateBindingRepository: {} as OrchestrationTransactionContext["gateBindingRepository"],
+		taskLeaseRepository:
+			{} as OrchestrationTransactionContext["taskLeaseRepository"],
+		gateBindingRepository:
+			{} as OrchestrationTransactionContext["gateBindingRepository"],
 		commandJournal: {
 			async findByCommandId() {
 				return null;
@@ -63,8 +65,10 @@ function createDeps(run: Run) {
 				return { ...entry, createdAt: NOW };
 			},
 		},
-		runHeartbeatRepository: {} as OrchestrationTransactionContext["runHeartbeatRepository"],
-		taskboardMirrorRepository: {} as OrchestrationTransactionContext["taskboardMirrorRepository"],
+		runHeartbeatRepository:
+			{} as OrchestrationTransactionContext["runHeartbeatRepository"],
+		taskboardMirrorRepository:
+			{} as OrchestrationTransactionContext["taskboardMirrorRepository"],
 		async publishEvents() {},
 	};
 	const unitOfWork: OrchestrationUnitOfWork = {
@@ -76,7 +80,10 @@ function createDeps(run: Run) {
 		deps: {
 			unitOfWork,
 			commandJournal: ctx.commandJournal,
-			leaseClock: { now: () => NOW, expiresIn: (ttlMs: number) => new Date(NOW.getTime() + ttlMs) },
+			leaseClock: {
+				now: () => NOW,
+				expiresIn: (ttlMs: number) => new Date(NOW.getTime() + ttlMs),
+			},
 		},
 		getSaved: () => saved,
 		getJournal: () => journal,

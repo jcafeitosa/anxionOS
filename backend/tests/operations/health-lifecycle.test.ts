@@ -1,7 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import {
-	DEFAULT_HEALTH_STALE_THRESHOLD_MS,
-} from "@anxionos/contracts/operations";
+import { DEFAULT_HEALTH_STALE_THRESHOLD_MS } from "@anxionos/contracts/operations";
 import {
 	deriveHealthStatusFromProbeOutcome,
 	isCheckedAtMonotonic,
@@ -36,10 +34,18 @@ describe("health lifecycle domain (ANX-310 S1)", () => {
 		const freshNow = "2026-09-10T12:00:30.000Z";
 		const staleNow = "2026-09-10T12:02:00.000Z";
 		expect(
-			isHealthCheckStale(checkedAt, freshNow, DEFAULT_HEALTH_STALE_THRESHOLD_MS),
+			isHealthCheckStale(
+				checkedAt,
+				freshNow,
+				DEFAULT_HEALTH_STALE_THRESHOLD_MS,
+			),
 		).toBe(false);
 		expect(
-			isHealthCheckStale(checkedAt, staleNow, DEFAULT_HEALTH_STALE_THRESHOLD_MS),
+			isHealthCheckStale(
+				checkedAt,
+				staleNow,
+				DEFAULT_HEALTH_STALE_THRESHOLD_MS,
+			),
 		).toBe(true);
 	});
 

@@ -16,8 +16,8 @@ import {
 	startRecoveryTaskExecution,
 } from "@anxionos/operations";
 import { z } from "zod";
-import { incidentIdParamSchema } from "./incidents";
 import type { OperationsPluginDeps } from "../plugin";
+import { incidentIdParamSchema } from "./incidents";
 
 export { incidentIdParamSchema };
 

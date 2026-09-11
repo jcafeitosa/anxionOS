@@ -1,19 +1,19 @@
 import { z } from "zod";
 import { institutionalUuidSchema } from "../institutional-uuid";
 import {
+	agentBudgetCapsSchema,
 	agentKindSchema,
 	agentLifecycleStatusSchema,
 	autonomyLevelSchema,
 	evaluationRefSchema,
 	modelSlotBindingSchema,
 	objectRefSchema,
+	routineTriggerConfigSchema,
+	routineTriggerKindSchema,
 	skillBindingConfigSchema,
 	skillPermissionRequirementSchema,
 	skillRefSchema,
 	skillSandboxPolicySchema,
-	routineTriggerKindSchema,
-	routineTriggerConfigSchema,
-	agentBudgetCapsSchema,
 } from "./types";
 
 export const commandResultSchema = z.object({
@@ -141,7 +141,6 @@ export type RecordSkillVersionEvaluationCommand = z.infer<
 	typeof recordSkillVersionEvaluationCommandSchema
 >;
 
-
 export const registerAgentRoutineCommandSchema = z.object({
 	commandId: institutionalUuidSchema,
 	agentId: institutionalUuidSchema,
@@ -207,11 +206,27 @@ export const consumeAgentBudgetResultSchema = z.object({
 
 export type BindAgentSkillCommand = z.infer<typeof bindAgentSkillCommandSchema>;
 
-export type RegisterAgentRoutineCommand = z.infer<typeof registerAgentRoutineCommandSchema>;
-export type PauseAgentRoutineCommand = z.infer<typeof pauseAgentRoutineCommandSchema>;
-export type ResumeAgentRoutineCommand = z.infer<typeof resumeAgentRoutineCommandSchema>;
-export type TriggerAgentRoutineCommand = z.infer<typeof triggerAgentRoutineCommandSchema>;
-export type TriggerAgentRoutineResult = z.infer<typeof triggerAgentRoutineResultSchema>;
-export type SetAgentBudgetPolicyCommand = z.infer<typeof setAgentBudgetPolicyCommandSchema>;
-export type ConsumeAgentBudgetCommand = z.infer<typeof consumeAgentBudgetCommandSchema>;
-export type ConsumeAgentBudgetResult = z.infer<typeof consumeAgentBudgetResultSchema>;
+export type RegisterAgentRoutineCommand = z.infer<
+	typeof registerAgentRoutineCommandSchema
+>;
+export type PauseAgentRoutineCommand = z.infer<
+	typeof pauseAgentRoutineCommandSchema
+>;
+export type ResumeAgentRoutineCommand = z.infer<
+	typeof resumeAgentRoutineCommandSchema
+>;
+export type TriggerAgentRoutineCommand = z.infer<
+	typeof triggerAgentRoutineCommandSchema
+>;
+export type TriggerAgentRoutineResult = z.infer<
+	typeof triggerAgentRoutineResultSchema
+>;
+export type SetAgentBudgetPolicyCommand = z.infer<
+	typeof setAgentBudgetPolicyCommandSchema
+>;
+export type ConsumeAgentBudgetCommand = z.infer<
+	typeof consumeAgentBudgetCommandSchema
+>;
+export type ConsumeAgentBudgetResult = z.infer<
+	typeof consumeAgentBudgetResultSchema
+>;

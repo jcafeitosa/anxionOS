@@ -1,4 +1,7 @@
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
+import { HealthCheckRevisionConflictError } from "../../modules/operations/src/domain/errors/health-check-errors";
+import { IncidentRevisionConflictError } from "../../modules/operations/src/domain/errors/incident-errors";
+import { RecoveryTaskRevisionConflictError } from "../../modules/operations/src/domain/errors/recovery-errors";
 import type {
 	CommandJournalEntry,
 	CommandJournalRepository,
@@ -14,17 +17,14 @@ import type {
 	IncidentRecord,
 	IncidentRepository,
 	IncidentUpdateInput,
+	OperationsTransactionContext,
+	OperationsUnitOfWork,
 	RecoveryTaskRecord,
 	RecoveryTaskRepository,
 	RecoveryTaskUpdateInput,
 	RetentionPolicyRecord,
 	RetentionPolicyRepository,
-	OperationsTransactionContext,
-	OperationsUnitOfWork,
 } from "../../modules/operations/src/domain/ports/operations-unit-of-work";
-import { HealthCheckRevisionConflictError } from "../../modules/operations/src/domain/errors/health-check-errors";
-import { IncidentRevisionConflictError } from "../../modules/operations/src/domain/errors/incident-errors";
-import { RecoveryTaskRevisionConflictError } from "../../modules/operations/src/domain/errors/recovery-errors";
 
 export function createInMemoryCommandJournalRepository(
 	seed: CommandJournalEntry[] = [],
@@ -161,14 +161,12 @@ export function createRecordingOperationsUnitOfWork(deps: {
 	deletionRequests?: DeletionRequestRepository;
 }): { unitOfWork: OperationsUnitOfWork; published: DomainEventEnvelope[] } {
 	const published: DomainEventEnvelope[] = [];
-	const incidents =
-		deps.incidents ?? createInMemoryIncidentRepository();
+	const incidents = deps.incidents ?? createInMemoryIncidentRepository();
 	const recoveryTasks =
 		deps.recoveryTasks ?? createInMemoryRecoveryTaskRepository();
 	const retentionPolicies =
 		deps.retentionPolicies ?? createInMemoryRetentionPolicyRepository();
-	const exportJobs =
-		deps.exportJobs ?? createInMemoryExportJobRepository();
+	const exportJobs = deps.exportJobs ?? createInMemoryExportJobRepository();
 	const deletionRequests =
 		deps.deletionRequests ?? createInMemoryDeletionRequestRepository();
 	const unitOfWork: OperationsUnitOfWork = {
@@ -200,7 +198,11 @@ export function createInMemoryRetentionPolicyRepository() {
 		},
 		async findByOrganizationAndScope(organizationId, scope) {
 			for (const row of rows.values()) {
-				if (row.organizationId === organizationId && row.scope === scope && row.status === "ACTIVE") {
+				if (
+					row.organizationId === organizationId &&
+					row.scope === scope &&
+					row.status === "ACTIVE"
+				) {
 					return row;
 				}
 			}
@@ -240,7 +242,10 @@ export function createInMemoryDeletionRequestRepository() {
 		},
 		async findByOrganizationAndSubject(organizationId, subjectId) {
 			for (const row of rows.values()) {
-				if (row.organizationId === organizationId && row.subjectId === subjectId) {
+				if (
+					row.organizationId === organizationId &&
+					row.subjectId === subjectId
+				) {
 					return row;
 				}
 			}

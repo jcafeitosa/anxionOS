@@ -47,7 +47,9 @@ export function toPositionExposureSnapshot(
 	});
 }
 
-export function toMetricSeriesItem(record: MetricSeriesRecord): MetricSeriesItem {
+export function toMetricSeriesItem(
+	record: MetricSeriesRecord,
+): MetricSeriesItem {
 	return metricSeriesItemSchema.parse({
 		metricSeriesId: record.id,
 		organizationId: record.organizationId,

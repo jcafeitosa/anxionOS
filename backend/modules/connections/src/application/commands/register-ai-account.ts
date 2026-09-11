@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import {
 	type ConnectionsCommandResult,
-	type RegisterAIAccountCommand,
 	connectionsCommandResultSchema,
+	type RegisterAIAccountCommand,
 	registerAIAccountCommandSchema,
 } from "@anxionos/contracts/connections";
 import { createAiAccountRegisteredEvent } from "../../domain/events/connections-events";

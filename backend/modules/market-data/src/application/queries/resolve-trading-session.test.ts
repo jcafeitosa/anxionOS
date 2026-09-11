@@ -34,7 +34,9 @@ function createMockPool() {
 			if (text.includes("market_data_trading_sessions")) {
 				const [venueCalId, dateStr] = params || [];
 				const dateIso =
-					dateStr instanceof Date ? dateStr.toISOString() : String(dateStr ?? "");
+					dateStr instanceof Date
+						? dateStr.toISOString()
+						: String(dateStr ?? "");
 				if (venueCalId === "binance" && dateIso.startsWith("2025-01-15")) {
 					return {
 						rows: [
@@ -174,6 +176,8 @@ describe("resolveTradingSession (ANX-146 slice B)", () => {
 		const result = await resolveTradingSession(deps, input);
 
 		// Should not crash; should return a disposition (OUTSIDE_SESSION since 2020-01-01 has no session data)
-		expect(["OUTSIDE_SESSION", "VENUE_NOT_FOUND", "HOLIDAY"]).toContain(result.status);
+		expect(["OUTSIDE_SESSION", "VENUE_NOT_FOUND", "HOLIDAY"]).toContain(
+			result.status,
+		);
 	});
 });

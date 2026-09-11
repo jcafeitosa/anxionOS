@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import {
 	assignAutonomyLevelCommandSchema,
-	grantIssuedPayloadSchema,
 	GOVERNANCE_EVENT_TYPES,
+	grantIssuedPayloadSchema,
 	issueGrantCommandSchema,
 	mandateIssuedPayloadSchema,
 	resolveApprovalCommandSchema,

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-	nautilusSimulatedAdapterManifest,
 	NAUTILUS_ADAPTER_ID,
+	nautilusSimulatedAdapterManifest,
 	runAdapterConformanceSuite,
 } from "@anxionos/adapter-gateway";
 

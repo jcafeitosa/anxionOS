@@ -9,9 +9,9 @@ import {
 	invokeToolCallCommandSchema,
 	OPENBOT_EVENT_TYPES,
 	OPENBOT_TOOL_INVOKE_CAPABILITY,
+	toolAuditEntrySchema,
 	toolCallDecisionSchema,
 	toolCallRequestSchema,
-	toolAuditEntrySchema,
 	toolInvocationDecisionSchema,
 } from "@anxionos/contracts/openbot";
 
@@ -87,7 +87,6 @@ describe("openbot S2 command/event contracts (ANX-144 S2)", () => {
 	});
 });
 
-
 describe("openbot S4 audit event contracts (ANX-144 S4)", () => {
 	test("OPENBOT_EVENT_TYPES includes audit before/after recorded", () => {
 		expect(OPENBOT_EVENT_TYPES.AUDIT_BEFORE_RECORDED).toBe(
@@ -114,7 +113,6 @@ describe("openbot S4 audit event contracts (ANX-144 S4)", () => {
 	});
 });
 
-
 describe("openbot S5 takeover contracts (ANX-144 S5)", () => {
 	test("computerSessionRefSchema requires authorityToken and controller", () => {
 		const parsed = computerSessionRefSchema.parse({
@@ -129,7 +127,6 @@ describe("openbot S5 takeover contracts (ANX-144 S5)", () => {
 		expect(parsed.controller).toBe("bot");
 	});
 });
-
 
 describe("openbot S6 generation fencing contracts (ANX-144 S6)", () => {
 	test("botRunGenerationRefSchema requires runRevision fence fields", () => {

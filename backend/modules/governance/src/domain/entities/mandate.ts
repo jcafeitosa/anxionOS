@@ -1,4 +1,7 @@
-import type { MandateKind, MandateStatus } from "@anxionos/contracts/governance";
+import type {
+	MandateKind,
+	MandateStatus,
+} from "@anxionos/contracts/governance";
 
 export interface Mandate {
 	id: string;

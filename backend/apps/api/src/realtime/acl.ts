@@ -16,7 +16,9 @@ export function resolveRealtimeMaxConnectionsPerUser(): number {
 	const raw = process.env.REALTIME_MAX_CONNECTIONS_PER_USER?.trim();
 	if (!raw) return DEFAULT_MAX_CONNECTIONS;
 	const parsed = Number.parseInt(raw, 10);
-	return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_MAX_CONNECTIONS;
+	return Number.isFinite(parsed) && parsed > 0
+		? parsed
+		: DEFAULT_MAX_CONNECTIONS;
 }
 
 export function resolveRealtimeMaxPendingEvents(): number {
@@ -47,6 +49,8 @@ export function filterAllowedChannels(
 	channels: RealtimeChannel[],
 ): RealtimeChannel[] {
 	const max = resolveRealtimeMaxChannelsPerConnection();
-	const allowed = channels.filter((channel) => canSubscribeChannel(ctx, channel));
+	const allowed = channels.filter((channel) =>
+		canSubscribeChannel(ctx, channel),
+	);
 	return [...new Set(allowed)].slice(0, max);
 }

@@ -1,10 +1,6 @@
 import { z } from "zod";
 import { ledgerLineSummarySchema } from "../accounting/events";
 import { journalEntryIdSchema } from "../accounting/types";
-import {
-	performanceOutcomeSnapshotIdSchema,
-	performancePositionExposureSnapshotIdSchema,
-} from "./types";
 import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	fillSideSchema,
@@ -12,6 +8,10 @@ import {
 	positionIdSchema,
 	positionSideSchema,
 } from "../portfolios/types";
+import {
+	performanceOutcomeSnapshotIdSchema,
+	performancePositionExposureSnapshotIdSchema,
+} from "./types";
 export const performanceCommandResultSchema = z.object({
 	aggregateId: z.string().min(1),
 	revision: z.number().int().nonnegative(),

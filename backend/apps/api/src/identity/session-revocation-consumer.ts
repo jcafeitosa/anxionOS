@@ -6,11 +6,11 @@ import {
 	processWithInbox,
 } from "@anxionos/eventing/postgres";
 import {
+	createIdentityDb,
+	handlePrincipalSuspended,
 	type PrincipalRepository,
 	SessionRevocationUnavailableError,
 	type SessionRevoker,
-	createIdentityDb,
-	handlePrincipalSuspended,
 } from "@anxionos/identity";
 import type { Pool } from "pg";
 import { ZodError } from "zod";

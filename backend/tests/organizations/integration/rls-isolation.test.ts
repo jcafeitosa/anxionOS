@@ -4,8 +4,8 @@ import { createScopedPool, runDatabaseMigrations } from "@anxionos/database";
 import { ensureEventingSchema } from "@anxionos/eventing/postgres";
 import {
 	createAgency,
-	createOrganizationUnitOfWork,
 	createOrganizationsDb,
+	createOrganizationUnitOfWork,
 } from "@anxionos/organizations";
 import {
 	createStubPrincipalLookup,
@@ -35,7 +35,9 @@ describe("organizations RLS integration (ANX-256)", () => {
 					process.env.DATABASE_ROLE_PASSWORD ?? "change-me-in-production",
 			});
 			await ensureEventingSchema(scoped.pool);
-			const { ensureOrganizationsSchema } = await import("@anxionos/organizations");
+			const { ensureOrganizationsSchema } = await import(
+				"@anxionos/organizations"
+			);
 			await ensureOrganizationsSchema(scoped.pool);
 			await scoped.pool.query(ORGANIZATIONS_TRUNCATE_SQL);
 
@@ -107,7 +109,9 @@ describe("organizations RLS integration (ANX-256)", () => {
 					process.env.DATABASE_ROLE_PASSWORD ?? "change-me-in-production",
 			});
 			await ensureEventingSchema(scoped.pool);
-			const { ensureOrganizationsSchema } = await import("@anxionos/organizations");
+			const { ensureOrganizationsSchema } = await import(
+				"@anxionos/organizations"
+			);
 			await ensureOrganizationsSchema(scoped.pool);
 			await scoped.pool.query(ORGANIZATIONS_TRUNCATE_SQL);
 

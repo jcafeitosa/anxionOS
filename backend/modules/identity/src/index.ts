@@ -1,66 +1,66 @@
+export {
+	type LinkAuthUserIdDeps,
+	type LinkAuthUserIdInput,
+	linkAuthUserId,
+} from "./application/commands/link-auth-user-id";
+export {
+	type ReactivatePrincipalDeps,
+	type ReactivatePrincipalInput,
+	reactivatePrincipal,
+} from "./application/commands/reactivate-principal";
+export {
+	type RegisterPrincipalDeps,
+	type RegisterPrincipalInput,
+	registerPrincipal,
+} from "./application/commands/register-principal";
+export {
+	type RegisterServiceIdentityDeps,
+	registerServiceIdentity,
+} from "./application/commands/register-service-identity";
+export {
+	type RevokeServiceIdentityDeps,
+	revokeServiceIdentity,
+} from "./application/commands/revoke-service-identity";
+export {
+	type SuspendPrincipalDeps,
+	type SuspendPrincipalInput,
+	suspendPrincipal,
+} from "./application/commands/suspend-principal";
+export {
+	type SyncPrincipalEmailDeps,
+	type SyncPrincipalEmailInput,
+	syncPrincipalEmail,
+} from "./application/commands/sync-principal-email";
+export {
+	type HandlePrincipalSuspendedDeps,
+	handlePrincipalSuspended,
+} from "./application/consumers/handle-principal-suspended";
+export {
+	type ReconcileSuspendedPrincipalSessionsResult,
+	reconcileSuspendedPrincipalSessions,
+} from "./application/consumers/reconcile-suspended-principal-sessions";
+export {
+	getPrincipalByAuthUserId,
+	getPrincipalById,
+} from "./application/queries/get-principal";
 export type {
+	NewPrincipal,
 	Principal,
 	PrincipalStatus,
-	NewPrincipal,
 } from "./domain/entities/principal";
 export type {
+	NewServiceIdentity,
 	ServiceIdentity,
 	ServiceIdentityStatus,
-	NewServiceIdentity,
 } from "./domain/entities/service-identity";
-export type { PrincipalRepository } from "./domain/ports/principal-repository";
 export type {
-	IdentityUnitOfWork,
 	IdentityTransactionContext,
+	IdentityUnitOfWork,
 } from "./domain/ports/identity-unit-of-work";
+export type { PrincipalRepository } from "./domain/ports/principal-repository";
 export type { ServiceIdentityRepository } from "./domain/ports/service-identity-repository";
 export type { SessionRevoker } from "./domain/ports/session-revoker";
 export { SessionRevocationUnavailableError } from "./domain/ports/session-revoker";
-export {
-	registerPrincipal,
-	type RegisterPrincipalInput,
-	type RegisterPrincipalDeps,
-} from "./application/commands/register-principal";
-export {
-	suspendPrincipal,
-	type SuspendPrincipalInput,
-	type SuspendPrincipalDeps,
-} from "./application/commands/suspend-principal";
-export {
-	reactivatePrincipal,
-	type ReactivatePrincipalInput,
-	type ReactivatePrincipalDeps,
-} from "./application/commands/reactivate-principal";
-export {
-	syncPrincipalEmail,
-	type SyncPrincipalEmailInput,
-	type SyncPrincipalEmailDeps,
-} from "./application/commands/sync-principal-email";
-export {
-	linkAuthUserId,
-	type LinkAuthUserIdInput,
-	type LinkAuthUserIdDeps,
-} from "./application/commands/link-auth-user-id";
-export {
-	registerServiceIdentity,
-	type RegisterServiceIdentityDeps,
-} from "./application/commands/register-service-identity";
-export {
-	revokeServiceIdentity,
-	type RevokeServiceIdentityDeps,
-} from "./application/commands/revoke-service-identity";
-export {
-	handlePrincipalSuspended,
-	type HandlePrincipalSuspendedDeps,
-} from "./application/consumers/handle-principal-suspended";
-export {
-	reconcileSuspendedPrincipalSessions,
-	type ReconcileSuspendedPrincipalSessionsResult,
-} from "./application/consumers/reconcile-suspended-principal-sessions";
-export {
-	getPrincipalById,
-	getPrincipalByAuthUserId,
-} from "./application/queries/get-principal";
 export { createIdentityDb } from "./infrastructure/create-db";
 export { createIdentityUnitOfWork } from "./infrastructure/identity-unit-of-work";
 export { ensureIdentitySchema } from "./infrastructure/migrate";

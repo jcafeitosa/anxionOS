@@ -40,10 +40,7 @@ export async function reconcileUnknownDispatch(
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			return replayIdempotentCommandJournalEntry(
-				raced,
-				command.organizationId,
-			);
+			return replayIdempotentCommandJournalEntry(raced, command.organizationId);
 		}
 
 		const order = await ctx.orders.findByIdForUpdate(command.orderId);
@@ -120,11 +117,14 @@ export async function reconcileUnknownDispatch(
 					venueFillId: command.venueFillId,
 					evidence: command.rationale,
 				});
-				const resolved = await resolveVenueReconciliationCaseInTransaction(ctx, {
-					case: opened,
-					disposition: "CONFIRMED_EXISTING",
-					rationale: command.rationale,
-				});
+				const resolved = await resolveVenueReconciliationCaseInTransaction(
+					ctx,
+					{
+						case: opened,
+						disposition: "CONFIRMED_EXISTING",
+						rationale: command.rationale,
+					},
+				);
 				reconciliationCaseId = resolved.id;
 			}
 		} else {

@@ -1,25 +1,25 @@
 import { describe, expect, test } from "bun:test";
 import {
-	accountRegisteredPayloadSchema,
-	proposeAllocationCommandSchema,
-	registerCapitalAccountCommandSchema,
-} from "@anxionos/contracts/capital";
-import {
 	executionFillConfirmedV1Schema,
 	ledgerPostedPayloadSchema,
 	postLedgerEntryCommandSchema,
 } from "@anxionos/contracts/accounting";
 import {
-	connectionsMarketDataObservedSchema,
-	registerInstrumentCommandSchema,
-	recordObservationCommandSchema,
-} from "@anxionos/contracts/market-data";
+	accountRegisteredPayloadSchema,
+	proposeAllocationCommandSchema,
+	registerCapitalAccountCommandSchema,
+} from "@anxionos/contracts/capital";
 import {
 	aclRefSchema,
 	contextManifestSchema,
 	evidenceRecordedPayloadSchema,
 	registerKnowledgeSourceCommandSchema,
 } from "@anxionos/contracts/knowledge";
+import {
+	connectionsMarketDataObservedSchema,
+	recordObservationCommandSchema,
+	registerInstrumentCommandSchema,
+} from "@anxionos/contracts/market-data";
 
 const VALID_UUID = "a1234567-89ab-4def-8123-456789abcdef";
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";

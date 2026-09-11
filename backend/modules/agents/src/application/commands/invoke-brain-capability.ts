@@ -1,17 +1,20 @@
 import { randomUUID } from "node:crypto";
 import {
-	commandResultSchema,
-	invokeBrainCapabilityCommandSchema,
 	type CommandResult,
+	commandResultSchema,
 	type InvokeBrainCapabilityCommand,
+	invokeBrainCapabilityCommandSchema,
 } from "@anxionos/contracts/agents";
 import { createBrainInvocationRequestedEvent } from "../../domain/events/agent-events";
 import type { AgentRepository } from "../../domain/ports/agent-repository";
 import type { AgentVersionRepository } from "../../domain/ports/agent-version-repository";
+import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
 import type { BrainInvocationGuardPort } from "../../domain/ports/brain-invocation-guard";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
-import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
-import { readSnapshotString, toCommandResultSnapshot } from "../command-support";
+import {
+	readSnapshotString,
+	toCommandResultSnapshot,
+} from "../command-support";
 import { parseCommandResultSnapshot, throwAgentsError } from "../errors";
 import { buildOrganizationTenantContext } from "../services/tenant-context";
 
@@ -22,7 +25,10 @@ export async function invokeBrainCapability(
 	const command = invokeBrainCapabilityCommandSchema.parse(input);
 	const preflightAgent = await deps.agentRepository.findById(command.agentId);
 	if (!preflightAgent) {
-		throwAgentsError("AGT_AGENT_NOT_FOUND", `Agent not found: ${command.agentId}`);
+		throwAgentsError(
+			"AGT_AGENT_NOT_FOUND",
+			`Agent not found: ${command.agentId}`,
+		);
 	}
 	const existingJournal = await deps.commandJournal.findByCommandId(
 		preflightAgent.organizationId,
@@ -50,7 +56,10 @@ export async function invokeBrainCapability(
 	}
 	const version = await deps.agentVersionRepository.findById(agentVersionId);
 	if (!version || version.agentId !== command.agentId) {
-		throwAgentsError("AGT_VERSION_NOT_FOUND", `Agent version not found: ${agentVersionId}`);
+		throwAgentsError(
+			"AGT_VERSION_NOT_FOUND",
+			`Agent version not found: ${agentVersionId}`,
+		);
 	}
 	if (version.status !== "published") {
 		throwAgentsError(
@@ -83,7 +92,8 @@ export async function invokeBrainCapability(
 			if (raced) {
 				const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
 				const racedAgentVersionId =
-					readSnapshotString(raced.responseSnapshot, "agentVersionId") ?? agentVersionId;
+					readSnapshotString(raced.responseSnapshot, "agentVersionId") ??
+					agentVersionId;
 				return {
 					...parsed,
 					invocationId: parsed.aggregateId,
@@ -123,7 +133,8 @@ export async function invokeBrainCapability(
 	);
 }
 
-export interface InvokeBrainCapabilityInput extends InvokeBrainCapabilityCommand {
+export interface InvokeBrainCapabilityInput
+	extends InvokeBrainCapabilityCommand {
 	actorPrincipalId?: string;
 }
 

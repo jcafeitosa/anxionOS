@@ -35,10 +35,7 @@ export async function proposeDecision(
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			return replayIdempotentCommandJournalEntry(
-				raced,
-				command.organizationId,
-			);
+			return replayIdempotentCommandJournalEntry(raced, command.organizationId);
 		}
 		const decisionId = `dc_dec_${randomUUID()}`;
 		const proposalId = `dc_prp_${randomUUID()}`;

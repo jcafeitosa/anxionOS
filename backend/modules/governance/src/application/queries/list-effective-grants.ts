@@ -1,5 +1,5 @@
-import { isGrantEffectiveAt } from "../../domain/entities/grant";
 import type { Grant } from "../../domain/entities/grant";
+import { isGrantEffectiveAt } from "../../domain/entities/grant";
 import type { GrantRepository } from "../../domain/ports/grant-repository";
 
 export interface ListEffectiveGrantsInput {

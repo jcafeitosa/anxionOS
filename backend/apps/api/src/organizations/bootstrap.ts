@@ -1,11 +1,14 @@
-import { createScopedPool, type TenantScopedQueryable } from "@anxionos/database";
+import {
+	createScopedPool,
+	type TenantScopedQueryable,
+} from "@anxionos/database";
 import type { PrincipalRepository } from "@anxionos/identity";
 import { createIdentityDb } from "@anxionos/identity";
 import {
 	createHmacInviteTokenHasherFromEnv,
 	createIdentityPrincipalLookup,
-	createOrganizationUnitOfWork,
 	createOrganizationsDb,
+	createOrganizationUnitOfWork,
 } from "@anxionos/organizations";
 import type { Pool } from "pg";
 import type { OrganizationsPluginDeps } from "./plugin";

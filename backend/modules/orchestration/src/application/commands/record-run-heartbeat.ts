@@ -3,8 +3,8 @@ import type { RecordRunHeartbeatCommand } from "@anxionos/contracts/orchestratio
 import { recordRunHeartbeatCommandSchema } from "@anxionos/contracts/orchestration";
 import { HEARTBEAT_QUEUE_CAP_PER_ORG } from "../../domain/constants";
 import {
-	HEARTBEAT_COALESCE_WINDOW_MS,
 	buildHeartbeatCoalesceKey,
+	HEARTBEAT_COALESCE_WINDOW_MS,
 } from "../../domain/entities/run-heartbeat";
 import { isLeaseActive } from "../../domain/entities/task-lease";
 import type { LeaseClock } from "../../domain/ports/lease-clock";

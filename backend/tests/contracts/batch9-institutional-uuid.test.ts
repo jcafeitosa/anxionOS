@@ -4,14 +4,17 @@ import {
 	domainEventTapBridgeSchema,
 	ingestDomainEventTapCommandSchema,
 } from "@anxionos/contracts/audit";
+import { createSubscriptionCommandSchema } from "@anxionos/contracts/billing";
 import { domainEventEnvelopeV02Schema } from "@anxionos/contracts/envelope-v02";
-import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
 import { recordEvaluationScoreCommandSchema } from "@anxionos/contracts/evaluation";
+import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
 import { createIncidentCommandSchema } from "@anxionos/contracts/operations";
-import { renewTaskLeaseCommandSchema, taskIdSchema } from "@anxionos/contracts/orchestration";
+import {
+	renewTaskLeaseCommandSchema,
+	taskIdSchema,
+} from "@anxionos/contracts/orchestration";
 import { registerPartnerCommandSchema } from "@anxionos/contracts/partners";
 import { recordOutcomeSnapshotCommandSchema } from "@anxionos/contracts/performance";
-import { createSubscriptionCommandSchema } from "@anxionos/contracts/billing";
 import { createSimulationRunCommandSchema } from "@anxionos/contracts/simulation";
 
 const VALID_UUID = "a1234567-89ab-4def-8123-456789abcdef";

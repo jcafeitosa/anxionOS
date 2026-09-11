@@ -1,11 +1,11 @@
+import type { DecisionsCommandResult } from "@anxionos/contracts/decisions";
 import type { KnowledgeEvidenceRecordedBridge } from "@anxionos/contracts/knowledge";
 import { mapEvidenceRecordedToAttachInput } from "@anxionos/contracts/knowledge";
-import type { DecisionsCommandResult } from "@anxionos/contracts/decisions";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { DecisionsUnitOfWork } from "../../domain/ports/decisions-unit-of-work";
 import {
-	recordEvidenceManifest,
 	type RecordEvidenceManifestDeps,
+	recordEvidenceManifest,
 } from "../commands/record-evidence-manifest";
 import { throwDecisionsError } from "../errors";
 
@@ -32,10 +32,9 @@ export function createKnowledgeEvidenceRecordedConsumer(
 			if (!attachInput) {
 				return { decisionId: null, ignored: true };
 			}
-			const replayed =
-				await deps.unitOfWork.runInTransaction(async (ctx) =>
-					ctx.evidenceManifests.findEntryByKnowledgeEventId(eventId),
-				);
+			const replayed = await deps.unitOfWork.runInTransaction(async (ctx) =>
+				ctx.evidenceManifests.findEntryByKnowledgeEventId(eventId),
+			);
 			if (replayed) {
 				return {
 					decisionId: replayed.decisionId,

@@ -8,11 +8,11 @@ import type {
 import { createPgCommandJournalRepository } from "./persistence/command-journal-repository";
 import {
 	createPgCheckResultRepository,
-	createPgEpochRegistryRepository,
-	createPgLimitPolicyRepository,
-	createPgKillSwitchRepository,
-	createPgPermitRepository,
 	createPgConsumerDedupRepository,
+	createPgEpochRegistryRepository,
+	createPgKillSwitchRepository,
+	createPgLimitPolicyRepository,
+	createPgPermitRepository,
 } from "./persistence/repositories";
 
 function createTransactionContext(client: PoolClient): RiskTransactionContext {

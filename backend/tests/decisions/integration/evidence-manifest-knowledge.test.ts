@@ -151,9 +151,7 @@ describe("decisions evidence manifest + knowledge consumer (ANX-149 S5)", () => 
 					organizationId: ORG_A,
 					claimTextHash: CLAIM_HASH,
 					provenanceKind: "RETRIEVAL",
-					sourceRefs: [
-						{ kind: "decision", refId: proposed.decisionId! },
-					],
+					sourceRefs: [{ kind: "decision", refId: proposed.decisionId! }],
 					recordedAt: new Date().toISOString(),
 				},
 				eventId,
@@ -184,12 +182,16 @@ describe("decisions evidence manifest + knowledge consumer (ANX-149 S5)", () => 
 				organizationId: ORG_A,
 				claimTextHash: CLAIM_HASH,
 				provenanceKind: "MANUAL" as const,
-				sourceRefs: [{ kind: "decision" as const, refId: proposed.decisionId! }],
+				sourceRefs: [
+					{ kind: "decision" as const, refId: proposed.decisionId! },
+				],
 				recordedAt: new Date().toISOString(),
 			};
 
 			const first = await consumer.handle(payload, eventId);
-			expect(first).toMatchObject({ evidenceManifestId: expect.stringMatching(/^dc_emf_/) });
+			expect(first).toMatchObject({
+				evidenceManifestId: expect.stringMatching(/^dc_emf_/),
+			});
 
 			const second = await consumer.handle(payload, eventId);
 			expect(second).toMatchObject({
@@ -221,9 +223,7 @@ describe("decisions evidence manifest + knowledge consumer (ANX-149 S5)", () => 
 						organizationId: ORG_B,
 						claimTextHash: CLAIM_HASH,
 						provenanceKind: "DOCUMENT",
-						sourceRefs: [
-							{ kind: "decision", refId: proposed.decisionId! },
-						],
+						sourceRefs: [{ kind: "decision", refId: proposed.decisionId! }],
 						recordedAt: new Date().toISOString(),
 					},
 					randomUUID(),

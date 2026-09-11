@@ -10,8 +10,10 @@ import {
 } from "@anxionos/contracts/execution";
 import { createSessionOpenedEvent } from "../../domain/events/execution-events";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
-import type { ExecutionUnitOfWork } from "../../domain/ports/execution-unit-of-work";
-import type { ExecutionTransactionContext } from "../../domain/ports/execution-unit-of-work";
+import type {
+	ExecutionTransactionContext,
+	ExecutionUnitOfWork,
+} from "../../domain/ports/execution-unit-of-work";
 import type {
 	RiskPermitValidationFailure,
 	RiskPermitValidationPort,
@@ -84,10 +86,7 @@ export async function openExecutionSession(
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			return replayIdempotentCommandJournalEntry(
-				raced,
-				command.organizationId,
-			);
+			return replayIdempotentCommandJournalEntry(raced, command.organizationId);
 		}
 		const venueAdapterRefId = await ensureSimulatedVenueAdapter(
 			ctx,

@@ -1,17 +1,14 @@
 import type { SimulationCommandResult } from "@anxionos/contracts/simulation";
 import { runStartedPayloadSchema } from "@anxionos/contracts/simulation";
 import {
-	executeSimulationRun,
 	type ExecuteSimulationRunDeps,
+	executeSimulationRun,
 } from "../commands/execute-simulation-run";
 
 export interface RunStartedConsumerDeps extends ExecuteSimulationRunDeps {}
 
 export function createRunStartedConsumer(deps: RunStartedConsumerDeps): {
-	handle(
-		payload: unknown,
-		eventId: string,
-	): Promise<SimulationCommandResult>;
+	handle(payload: unknown, eventId: string): Promise<SimulationCommandResult>;
 } {
 	return {
 		async handle(payload, eventId) {

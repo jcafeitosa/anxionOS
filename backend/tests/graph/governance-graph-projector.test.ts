@@ -9,9 +9,9 @@ import {
 	GOVERNANCE_OWNER_DOMAIN,
 } from "@anxionos/contracts/governance";
 import {
-	GRAPH_T01_DENY_REASONS,
 	createInMemoryGraphStore,
 	evaluateT01Grants,
+	GRAPH_T01_DENY_REASONS,
 	projectGovernanceEvent,
 } from "@anxionos/graph";
 
@@ -65,7 +65,10 @@ describe("governance-graph-projector (ANX-302)", () => {
 	test("skips stale revision without overwriting newer grant node", async () => {
 		const graphStore = createInMemoryGraphStore();
 		await projectGovernanceEvent({
-			envelope: grantIssuedEnvelope({ revision: 2, capability: "graph.node.write" }),
+			envelope: grantIssuedEnvelope({
+				revision: 2,
+				capability: "graph.node.write",
+			}),
 			graphStore,
 			projectionGeneration: 1,
 		});

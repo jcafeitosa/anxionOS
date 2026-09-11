@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import {
+	aiAccountRegisteredPayloadSchema,
 	grantRefSchema,
 	inferenceRequestIdSchema,
-	registerAIAccountCommandSchema,
 	invokeInferenceCommandSchema,
-	aiAccountRegisteredPayloadSchema,
+	registerAIAccountCommandSchema,
 } from "@anxionos/contracts/connections";
 
 const VALID_UUID = "a1234567-89ab-4def-8123-456789abcdef";

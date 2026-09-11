@@ -1,7 +1,7 @@
 import {
-	operationsRecoveryStepKindSchema,
 	type OperationsRecoveryStepKind,
 	type OperationsRecoveryTaskStatus,
+	operationsRecoveryStepKindSchema,
 } from "@anxionos/contracts/operations";
 
 const ALLOWED_TRANSITIONS: Record<

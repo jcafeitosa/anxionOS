@@ -2,16 +2,16 @@ import { randomUUID } from "node:crypto";
 import {
 	ADAPTER_CONFORMANCE_CHECK_IDS,
 	ADAPTER_CONFORMANCE_SUITE_VERSION,
+	type AdapterCapabilityKey,
+	type AdapterConformanceCheckResult,
+	type AdapterConformanceReport,
 	AdapterGatewayError,
+	type AdapterManifest,
 	adapterCapabilityKeySchema,
 	adapterConformanceReportSchema,
 	adapterManifestSchema,
 	assertAdapterCapabilitiesExplicit,
 	assertAdapterPortVersionCompatible,
-	type AdapterCapabilityKey,
-	type AdapterConformanceCheckResult,
-	type AdapterConformanceReport,
-	type AdapterManifest,
 } from "@anxionos/contracts/adapter-gateway";
 
 export interface RunAdapterConformanceSuiteInput {
@@ -139,7 +139,9 @@ function finalizeReport(
 	capabilityResults: RunAdapterConformanceSuiteResult["report"]["capabilityResults"],
 	manifest?: AdapterManifest,
 ): RunAdapterConformanceSuiteResult {
-	const overallOutcome = checks.every((check) => check.passed) ? "PASS" : "FAIL";
+	const overallOutcome = checks.every((check) => check.passed)
+		? "PASS"
+		: "FAIL";
 	const report = adapterConformanceReportSchema.parse({
 		reportId: randomUUID(),
 		suiteVersion: ADAPTER_CONFORMANCE_SUITE_VERSION,

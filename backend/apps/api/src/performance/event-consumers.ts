@@ -11,11 +11,11 @@ import {
 	processWithInbox,
 } from "@anxionos/eventing/postgres";
 import {
-	PerformanceCommandError,
 	createLedgerPostedConsumer,
 	createPerformanceUnitOfWork,
 	createPgCommandJournalRepository,
 	createPositionUpdatedConsumer,
+	PerformanceCommandError,
 } from "@anxionos/performance";
 import type { Pool } from "pg";
 import { ZodError } from "zod";

@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
-import {
-	releaseBotRunGenerationCommandSchema,
-	botRunGenerationCommandResultSchema,
-	OPENBOT_EVENT_TYPES,
-	botRunGenerationReleasedPayloadSchema,
-	type ReleaseBotRunGenerationCommand,
-	type BotRunGenerationCommandResult,
-} from "@anxionos/contracts/openbot";
 import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
+import {
+	type BotRunGenerationCommandResult,
+	botRunGenerationCommandResultSchema,
+	botRunGenerationReleasedPayloadSchema,
+	OPENBOT_EVENT_TYPES,
+	type ReleaseBotRunGenerationCommand,
+	releaseBotRunGenerationCommandSchema,
+} from "@anxionos/contracts/openbot";
 import type { BotRunGenerationPort } from "../../domain/ports/bot-run-generation-port";
 
 export interface ReleaseBotRunGenerationDeps {

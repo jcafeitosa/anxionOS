@@ -25,10 +25,7 @@ export async function handleGetKillSwitchStatus(
 	deps: RiskPluginDeps,
 	input: { agencyId: string },
 ) {
-	return getKillSwitchStatus(
-		{ killSwitch: deps.killSwitch },
-		input.agencyId,
-	);
+	return getKillSwitchStatus({ killSwitch: deps.killSwitch }, input.agencyId);
 }
 
 export async function handleActivateKillSwitch(

@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { registerVenueCalendar } from "./register-venue-calendar";
 import type {
 	MarketCalendarRepository,
 	TradingSessionRecord,
 	VenueCalendarRecord,
 } from "../../domain/ports/market-calendar-repository";
+import { registerVenueCalendar } from "./register-venue-calendar";
 
 // We need a calendar repository mock that uses the in-memory approach.
 // Since we're testing the application command, we'll create a simple
@@ -13,26 +13,37 @@ import type {
 class InMemoryMarketCalendarRepository implements MarketCalendarRepository {
 	private calendars: Map<string, VenueCalendarRecord> = new Map();
 
-	async findVenueCalendar(venueId: string): Promise<VenueCalendarRecord | null> {
+	async findVenueCalendar(
+		venueId: string,
+	): Promise<VenueCalendarRecord | null> {
 		return this.calendars.get(venueId) ?? null;
 	}
 
-	async findSession(venueCalendarId: string, date: Date): Promise<TradingSessionRecord | null> {
+	async findSession(
+		venueCalendarId: string,
+		date: Date,
+	): Promise<TradingSessionRecord | null> {
 		// Not used in these tests, but required by interface
 		return null;
 	}
 
-	async saveVenueCalendar(record: VenueCalendarRecord): Promise<VenueCalendarRecord> {
+	async saveVenueCalendar(
+		record: VenueCalendarRecord,
+	): Promise<VenueCalendarRecord> {
 		this.calendars.set(record.venue_id, record);
 		return record;
 	}
 
-	async saveSession(record: TradingSessionRecord): Promise<TradingSessionRecord> {
+	async saveSession(
+		record: TradingSessionRecord,
+	): Promise<TradingSessionRecord> {
 		return record;
 	}
 }
 
-function makeDeps(repo: MarketCalendarRepository = new InMemoryMarketCalendarRepository()) {
+function makeDeps(
+	repo: MarketCalendarRepository = new InMemoryMarketCalendarRepository(),
+) {
 	return {
 		calendarRepository: repo,
 		unitOfWork: {
@@ -118,8 +129,10 @@ describe("registerVenueCalendar (ANX-146 slice B)", () => {
 		await registerVenueCalendar(deps, input2);
 
 		// Both should be stored separately
-		const calendar1 = await deps.calendarRepository.findVenueCalendar("binance");
-		const calendar2 = await deps.calendarRepository.findVenueCalendar("coinbase");
+		const calendar1 =
+			await deps.calendarRepository.findVenueCalendar("binance");
+		const calendar2 =
+			await deps.calendarRepository.findVenueCalendar("coinbase");
 
 		expect(calendar1).not.toBeNull();
 		expect(calendar2).not.toBeNull();

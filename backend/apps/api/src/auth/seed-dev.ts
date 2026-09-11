@@ -1,4 +1,6 @@
+import { PLATFORM_CONSOLE_CAPABILITY } from "@anxionos/contracts/governance";
 import { createPgPool } from "@anxionos/eventing/postgres";
+import { ensureGovernanceSchema, issueGrant } from "@anxionos/governance";
 import { createIdentityDb } from "@anxionos/identity";
 import {
 	acceptInviteByToken,
@@ -7,6 +9,7 @@ import {
 	inviteMember,
 } from "@anxionos/organizations";
 import { hashPassword } from "better-auth/crypto";
+import { createGovernanceApiRuntime } from "../governance/bootstrap";
 import {
 	assertOrganizationsStartupEnv,
 	createOrganizationsRuntime,
@@ -22,6 +25,7 @@ export const DEV_SEED_PASSWORD = "anxionos-dev-pass";
 export const DEV_SEED_ACCOUNTS = {
 	owner: "owner@anxionos.local",
 	operator: "operator@anxionos.local",
+	platform: "platform@anxionos.local",
 	none: "none@anxionos.local",
 	multi: "multi@anxionos.local",
 } as const;
@@ -60,6 +64,8 @@ const COMMAND_IDS = {
 	inviteOperator: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
 	acceptOperator: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
 	personalOwnerAgency: "f1f1f1f1-f1f1-41f1-81f1-f1f1f1f1f1f1",
+	platformScope: "abababab-abab-4aba-8aba-abababababab",
+	issuePlatformGrant: "acacacac-acac-4aca-8aca-acacacacacac",
 } as const;
 
 export function assertDevSeedAllowed(
@@ -126,7 +132,12 @@ async function ensureUser(
 				name,
 			},
 		});
-		if (signed && typeof signed === "object" && "error" in signed && signed.error) {
+		if (
+			signed &&
+			typeof signed === "object" &&
+			"error" in signed &&
+			signed.error
+		) {
 			const failure = signed.error as { message?: string; status?: number };
 			throw new Error(
 				`signUpEmail failed for ${email}: ${failure.message ?? failure.status}`,
@@ -286,6 +297,12 @@ export async function seedDevAccounts(): Promise<{
 			"Operator Dev",
 		);
 		await ensureUser(auth, pool, DEV_SEED_ACCOUNTS.none, "None Dev");
+		const platformAuthId = await ensureUser(
+			auth,
+			pool,
+			DEV_SEED_ACCOUNTS.platform,
+			"Platform Dev",
+		);
 		const multiAuthId = await ensureUser(
 			auth,
 			pool,
@@ -299,9 +316,32 @@ export async function seedDevAccounts(): Promise<{
 			await identity.repository.findByAuthUserId(operatorAuthId);
 		const multiPrincipal =
 			await identity.repository.findByAuthUserId(multiAuthId);
-		if (!ownerPrincipal || !operatorPrincipal || !multiPrincipal) {
+		const platformPrincipal =
+			await identity.repository.findByAuthUserId(platformAuthId);
+		if (
+			!ownerPrincipal ||
+			!operatorPrincipal ||
+			!multiPrincipal ||
+			!platformPrincipal
+		) {
 			throw new Error("seed:dev missing principals after Better Auth signup");
 		}
+
+		await ensureGovernanceSchema(pool);
+		const gov = createGovernanceApiRuntime(pool);
+		await issueGrant(
+			{
+				unitOfWork: gov.unitOfWork,
+				commandJournal: gov.commandJournal,
+				principalLookup: gov.principalLookup,
+			},
+			{
+				commandId: COMMAND_IDS.issuePlatformGrant,
+				scopeId: COMMAND_IDS.platformScope,
+				granteePrincipalId: platformPrincipal.id,
+				capability: PLATFORM_CONSOLE_CAPABILITY,
+			},
+		);
 
 		const ownerAgency = await ensureSeedAgency(pool, org, {
 			commandId: COMMAND_IDS.ownerAgency,

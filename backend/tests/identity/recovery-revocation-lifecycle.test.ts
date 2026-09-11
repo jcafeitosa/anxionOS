@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { IDENTITY_EVENT_TYPES } from "@anxionos/contracts/identity";
 import {
-	type Principal,
 	getPrincipalById,
+	type Principal,
 	reactivatePrincipal,
 	registerServiceIdentity,
 	suspendPrincipal,

@@ -4,9 +4,9 @@ import {
 	sandboxToolCatalogSchema,
 	toolAuditEntrySchema,
 } from "@anxionos/contracts/openbot";
-import catalogFixture from "./fixtures/sandbox-tool-catalog.json";
-import sessionFixture from "./fixtures/sandbox-computer-session.json";
 import auditFixture from "./fixtures/sandbox-audit-trail.json";
+import sessionFixture from "./fixtures/sandbox-computer-session.json";
+import catalogFixture from "./fixtures/sandbox-tool-catalog.json";
 
 describe("openbot sandbox fixtures (ANX-144 S1 / R144-06)", () => {
 	test("sandbox-tool-catalog.json validates and has no credential fields", () => {
@@ -20,9 +20,9 @@ describe("openbot sandbox fixtures (ANX-144 S1 / R144-06)", () => {
 
 	test("sandbox-computer-session.json validates workspace jail path", () => {
 		const parsed = computerSessionRefSchema.parse(sessionFixture);
-		expect(parsed.workspacePath.startsWith("/tmp/anxionos-openbot-sandbox/")).toBe(
-			true,
-		);
+		expect(
+			parsed.workspacePath.startsWith("/tmp/anxionos-openbot-sandbox/"),
+		).toBe(true);
 	});
 
 	test("sandbox-audit-trail.json entries validate before/after phases", () => {

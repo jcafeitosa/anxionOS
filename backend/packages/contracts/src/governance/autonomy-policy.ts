@@ -47,11 +47,7 @@ export const AUTONOMY_NORMATIVE_MATRIX: readonly AutonomyLevelDefinition[] = [
 		level: "L0",
 		label: "observe",
 		effectClass: "observe",
-		eligibleCapabilities: [
-			"market.observe",
-			"portfolio.read",
-			"audit.read",
-		],
+		eligibleCapabilities: ["market.observe", "portfolio.read", "audit.read"],
 		runtimeEnabled: true,
 		requiresApprovalToAssign: false,
 	},

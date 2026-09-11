@@ -24,7 +24,9 @@ export const portfolioOverviewItemSchema = z.object({
 	latestValuation: portfolioOverviewValuationSchema.nullable(),
 });
 
-export type PortfolioOverviewItemDto = z.infer<typeof portfolioOverviewItemSchema>;
+export type PortfolioOverviewItemDto = z.infer<
+	typeof portfolioOverviewItemSchema
+>;
 
 function toValuationDto(
 	valuation: PortfolioOverviewValuation | null,

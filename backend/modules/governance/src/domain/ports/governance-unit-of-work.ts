@@ -1,14 +1,14 @@
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import type { PoolClient } from "pg";
-import type { TenantContext } from "./tenant-context";
 import type { ApprovalRepository } from "./approval-repository";
 import type { AuthorityEpochStore } from "./authority-epoch-store";
+import type { AutonomyAssignmentRepository } from "./autonomy-assignment-repository";
 import type { ChangeProposalRepository } from "./change-proposal-repository";
 import type { CommandJournalRepository } from "./command-journal";
 import type { DelegationRepository } from "./delegation-repository";
 import type { GrantRepository } from "./grant-repository";
 import type { MandateRepository } from "./mandate-repository";
-import type { AutonomyAssignmentRepository } from "./autonomy-assignment-repository";
+import type { TenantContext } from "./tenant-context";
 
 export interface GovernanceTransactionContext {
 	client: PoolClient;

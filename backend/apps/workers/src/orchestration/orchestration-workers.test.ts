@@ -1,10 +1,4 @@
-import {
-	afterEach,
-	describe,
-	expect,
-	mock,
-	test,
-} from "bun:test";
+import { afterEach, describe, expect, mock, test } from "bun:test";
 
 const sweepExpiredLeases = mock(async () => ({
 	processedCount: 0,
@@ -17,10 +11,12 @@ const dequeueRunHeartbeats = mock(async () => ({
 	budgetStoppedRunIds: [],
 }));
 
-const acknowledgeRunHeartbeat = mock(async (deps: unknown, input: { heartbeatId: string }) => ({
-	heartbeatId: input.heartbeatId,
-	processedAt: new Date().toISOString(),
-}));
+const acknowledgeRunHeartbeat = mock(
+	async (deps: unknown, input: { heartbeatId: string }) => ({
+		heartbeatId: input.heartbeatId,
+		processedAt: new Date().toISOString(),
+	}),
+);
 
 mock.module("@anxionos/orchestration", () => ({
 	sweepExpiredLeases,
@@ -30,7 +26,9 @@ mock.module("@anxionos/orchestration", () => ({
 }));
 
 const { startOrchestrationLeaseSweeper } = await import("./lease-sweeper");
-const { startOrchestrationHeartbeatDequeue } = await import("./heartbeat-dequeue");
+const { startOrchestrationHeartbeatDequeue } = await import(
+	"./heartbeat-dequeue"
+);
 const { loadOrchestrationS5WorkerConfig, WORKER_PROFILE_ORCHESTRATION_S5 } =
 	await import("../config");
 
@@ -43,7 +41,8 @@ describe("orchestration S5 workers", () => {
 
 	test("loadOrchestrationS5WorkerConfig reads orchestration-s5 profile", () => {
 		process.env.WORKER_PROFILE = WORKER_PROFILE_ORCHESTRATION_S5;
-		process.env.DATABASE_URL = "postgres://anxionos:anxionos@localhost:5432/anxionos";
+		process.env.DATABASE_URL =
+			"postgres://anxionos:anxionos@localhost:5432/anxionos";
 		delete process.env.ORCHESTRATION_LEASE_SWEEPER_POLL_INTERVAL_MS;
 		delete process.env.ORCHESTRATION_HEARTBEAT_DEQUEUE_POLL_INTERVAL_MS;
 

@@ -28,16 +28,8 @@ function sumLineField(
 export function deriveLedgerPnlMetrics(
 	linesSummary: LedgerLine[],
 ): DerivedLedgerPnlMetric[] {
-	const cashDebits = sumLineField(
-		linesSummary,
-		"trading.cash",
-		"debit",
-	);
-	const cashCredits = sumLineField(
-		linesSummary,
-		"trading.cash",
-		"credit",
-	);
+	const cashDebits = sumLineField(linesSummary, "trading.cash", "debit");
+	const cashCredits = sumLineField(linesSummary, "trading.cash", "credit");
 	const feesTotal = sumLineField(linesSummary, "trading.fees", "debit");
 	const notionalTotal = sumLineField(
 		linesSummary,

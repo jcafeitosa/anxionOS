@@ -8,14 +8,20 @@ export async function assertPrincipalExists(
 ): Promise<void> {
 	try {
 		const exists = await principalLookup.exists(principalId);
-        if (!exists) {
-            throwOrganizationError("ORG_PRINCIPAL_NOT_FOUND", `Principal ${principalId} not found`);
-        }
-    }
-    catch (error) {
-        if (error instanceof PrincipalLookupUnavailableError) {
-            throwOrganizationError("ORG_IDENTITY_UNAVAILABLE", "Identity service unavailable", { cause: error });
-        }
-        throw error;
-    }
+		if (!exists) {
+			throwOrganizationError(
+				"ORG_PRINCIPAL_NOT_FOUND",
+				`Principal ${principalId} not found`,
+			);
+		}
+	} catch (error) {
+		if (error instanceof PrincipalLookupUnavailableError) {
+			throwOrganizationError(
+				"ORG_IDENTITY_UNAVAILABLE",
+				"Identity service unavailable",
+				{ cause: error },
+			);
+		}
+		throw error;
+	}
 }

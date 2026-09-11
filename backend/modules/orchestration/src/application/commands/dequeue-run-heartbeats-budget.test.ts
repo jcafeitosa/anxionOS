@@ -2,11 +2,11 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { Run } from "../../domain/entities/run";
 import type { RunHeartbeat } from "../../domain/entities/run-heartbeat";
+import type { OperationalBudgetPort } from "../../domain/ports/operational-budget";
 import type {
 	OrchestrationTransactionContext,
 	OrchestrationUnitOfWork,
 } from "../../domain/ports/orchestration-unit-of-work";
-import type { OperationalBudgetPort } from "../../domain/ports/operational-budget";
 
 function createZeroCapBudget(): OperationalBudgetPort {
 	return {
@@ -18,6 +18,7 @@ function createZeroCapBudget(): OperationalBudgetPort {
 		},
 	};
 }
+
 import { dequeueRunHeartbeats } from "./dequeue-run-heartbeats";
 
 const ORG = "00000000-0000-4000-8000-000000000001";
@@ -70,8 +71,10 @@ describe("dequeueRunHeartbeats budget pre-check", () => {
 					return next;
 				},
 			} as OrchestrationTransactionContext["runRepository"],
-			taskLeaseRepository: {} as OrchestrationTransactionContext["taskLeaseRepository"],
-			gateBindingRepository: {} as OrchestrationTransactionContext["gateBindingRepository"],
+			taskLeaseRepository:
+				{} as OrchestrationTransactionContext["taskLeaseRepository"],
+			gateBindingRepository:
+				{} as OrchestrationTransactionContext["gateBindingRepository"],
 			commandJournal: {} as OrchestrationTransactionContext["commandJournal"],
 			runHeartbeatRepository: {
 				async save(next) {
@@ -94,7 +97,8 @@ describe("dequeueRunHeartbeats budget pre-check", () => {
 					return 1;
 				},
 			} as OrchestrationTransactionContext["runHeartbeatRepository"],
-			taskboardMirrorRepository: {} as OrchestrationTransactionContext["taskboardMirrorRepository"],
+			taskboardMirrorRepository:
+				{} as OrchestrationTransactionContext["taskboardMirrorRepository"],
 			async publishEvents(envelopes) {
 				events.push(...envelopes);
 			},
@@ -108,7 +112,10 @@ describe("dequeueRunHeartbeats budget pre-check", () => {
 		const result = await dequeueRunHeartbeats(
 			{
 				unitOfWork,
-				leaseClock: { now: () => NOW, expiresIn: (ttlMs: number) => new Date(NOW.getTime() + ttlMs) },
+				leaseClock: {
+					now: () => NOW,
+					expiresIn: (ttlMs: number) => new Date(NOW.getTime() + ttlMs),
+				},
 				operationalBudget: budget,
 			},
 			{ limit: 10 },

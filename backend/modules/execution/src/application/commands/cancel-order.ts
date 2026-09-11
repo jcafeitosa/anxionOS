@@ -45,10 +45,7 @@ export async function cancelOrder(
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			return replayIdempotentCommandJournalEntry(
-				raced,
-				command.organizationId,
-			);
+			return replayIdempotentCommandJournalEntry(raced, command.organizationId);
 		}
 
 		const order = await ctx.orders.findByIdForUpdate(command.orderId);

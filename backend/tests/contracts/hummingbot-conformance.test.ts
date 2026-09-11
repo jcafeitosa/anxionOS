@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-	hummingbotSimulatedAdapterManifest,
 	HUMMINGBOT_ADAPTER_ID,
+	hummingbotSimulatedAdapterManifest,
 	runAdapterConformanceSuite,
 } from "@anxionos/adapter-gateway";
 

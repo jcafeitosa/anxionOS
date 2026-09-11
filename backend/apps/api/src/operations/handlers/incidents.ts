@@ -19,14 +19,13 @@ const openIncidentBodySchema = createIncidentCommandSchema
 	})
 	.strict();
 
-const transitionIncidentStatusBodySchema =
-	transitionIncidentStatusCommandSchema
-		.omit({
-			commandId: true,
-			organizationId: true,
-			incidentId: true,
-		})
-		.strict();
+const transitionIncidentStatusBodySchema = transitionIncidentStatusCommandSchema
+	.omit({
+		commandId: true,
+		organizationId: true,
+		incidentId: true,
+	})
+	.strict();
 
 const attachIncidentRunbookBodySchema = attachIncidentRunbookCommandSchema
 	.omit({

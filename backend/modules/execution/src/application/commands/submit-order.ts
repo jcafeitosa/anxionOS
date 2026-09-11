@@ -34,14 +34,14 @@ import {
 	toCommandResultSnapshot,
 } from "../command-support";
 import {
-	assertNoBlindRetryOnUnknownDispatch,
-	handleDuplicateVenueFill,
-} from "../reconciliation-support";
-import {
 	DuplicateVenueFillSignal,
 	parseCommandResultSnapshot,
 	throwExecutionError,
 } from "../errors";
+import {
+	assertNoBlindRetryOnUnknownDispatch,
+	handleDuplicateVenueFill,
+} from "../reconciliation-support";
 
 export interface SubmitOrderDeps {
 	unitOfWork: ExecutionUnitOfWork;
@@ -114,261 +114,264 @@ export async function submitOrder(
 
 	try {
 		return await deps.unitOfWork.runInTransaction(async (ctx) => {
-		const racedByCommand = await ctx.commandJournal.findByCommandId(
-			command.commandId,
-		);
-		if (racedByCommand) {
-			return replayIdempotentCommandJournalEntry(
-				racedByCommand,
+			const racedByCommand = await ctx.commandJournal.findByCommandId(
+				command.commandId,
+			);
+			if (racedByCommand) {
+				return replayIdempotentCommandJournalEntry(
+					racedByCommand,
+					command.organizationId,
+				);
+			}
+			const racedByClientOrder = await ctx.commandJournal.findByClientOrderId(
 				command.organizationId,
+				command.clientOrderId,
 			);
-		}
-		const racedByClientOrder = await ctx.commandJournal.findByClientOrderId(
-			command.organizationId,
-			command.clientOrderId,
-		);
-		if (racedByClientOrder) {
-			assertMatchingSubmitOrderFingerprint(
-				typeof racedByClientOrder.responseSnapshot.requestFingerprint ===
-					"string"
-					? racedByClientOrder.responseSnapshot.requestFingerprint
-					: undefined,
-				command,
-			);
-			const parsed = parseCommandResultSnapshot(
-				racedByClientOrder.responseSnapshot,
-			);
-			return executionCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
-		}
+			if (racedByClientOrder) {
+				assertMatchingSubmitOrderFingerprint(
+					typeof racedByClientOrder.responseSnapshot.requestFingerprint ===
+						"string"
+						? racedByClientOrder.responseSnapshot.requestFingerprint
+						: undefined,
+					command,
+				);
+				const parsed = parseCommandResultSnapshot(
+					racedByClientOrder.responseSnapshot,
+				);
+				return executionCommandResultSchema.parse({
+					...parsed,
+					idempotentReplay: true,
+				});
+			}
 
-		const session = await ctx.sessions.findById(command.sessionId);
-		if (!session || session.organizationId !== command.organizationId) {
-			throwExecutionError(
-				"EX_SESSION_NOT_FOUND",
-				"execution session not found",
-			);
-		}
-		if (session.status !== "OPEN") {
-			throwExecutionError("EX_SESSION_NOT_FOUND", "execution session not open");
-		}
-		assertExecutionModuleModeSupported(session.executionMode);
+			const session = await ctx.sessions.findById(command.sessionId);
+			if (!session || session.organizationId !== command.organizationId) {
+				throwExecutionError(
+					"EX_SESSION_NOT_FOUND",
+					"execution session not found",
+				);
+			}
+			if (session.status !== "OPEN") {
+				throwExecutionError(
+					"EX_SESSION_NOT_FOUND",
+					"execution session not open",
+				);
+			}
+			assertExecutionModuleModeSupported(session.executionMode);
 
-		const permitCheck = await deps.riskPermitValidation.validatePermit({
-			organizationId: command.organizationId,
-			riskPermitId: session.riskPermitId,
-			intentHash: session.intentHash,
-			authorityEpoch: session.authorityEpoch,
-			riskEpoch: session.riskEpoch,
-		});
-		if (!permitCheck.valid) {
-			mapPermitFailure(permitCheck.failure);
-		}
-
-		const existingOrder = await ctx.orders.findByClientOrderId(
-			command.organizationId,
-			command.clientOrderId,
-		);
-		if (existingOrder) {
-			assertOrderMatchesSubmitCommand(existingOrder, command);
-			assertNoBlindRetryOnUnknownDispatch(existingOrder.venueDispatchStatus);
-			throwExecutionError(
-				"EX_DUPLICATE_CLIENT_ORDER",
-				"client order already exists",
-			);
-		}
-
-		const orderId = `ex_ord_${randomUUID()}`;
-		const initialFilledQuantity = deferFill ? "0" : fillQuantity;
-		const initialStatus = resolveSubmitOrderStatus(
-			command.quantity,
-			initialFilledQuantity,
-			deferFill,
-		);
-		const initialDispatchStatus = simulateDispatchTimeout
-			? "UNKNOWN"
-			: deferFill
-				? "DISPATCHED"
-				: "ACK";
-
-		const savedOrder = await ctx.orders.save({
-			id: orderId,
-			organizationId: command.organizationId,
-			sessionId: command.sessionId,
-			clientOrderId: command.clientOrderId,
-			instrumentId: command.instrumentId,
-			side: command.side,
-			quantity: command.quantity,
-			price: command.price,
-			filledQuantity: initialFilledQuantity,
-			status: initialStatus,
-			venueDispatchStatus: initialDispatchStatus,
-		});
-
-		const attemptNo =
-			(await ctx.orderAttempts.countByOrderId(savedOrder.id)) + 1;
-		await ctx.orderAttempts.save({
-			id: `ex_att_${randomUUID()}`,
-			organizationId: command.organizationId,
-			orderId: savedOrder.id,
-			attemptNo,
-			adapterKind: "SIMULATED",
-			requestHash: createHash("sha256")
-				.update(
-					`${savedOrder.id}:${command.clientOrderId}:${command.quantity}:${command.price}`,
-				)
-				.digest("hex"),
-			status: simulateDispatchTimeout ? "TIMEOUT" : "ACK",
-			responseCode: simulateDispatchTimeout ? "TIMEOUT" : "200",
-			errorCode: simulateDispatchTimeout ? "VENUE_TIMEOUT" : null,
-			sentAt: new Date().toISOString(),
-		});
-
-		const events = [
-			createOrderSubmittedEvent({
-				orderId: savedOrder.id,
-				sessionId: command.sessionId,
+			const permitCheck = await deps.riskPermitValidation.validatePermit({
 				organizationId: command.organizationId,
+				riskPermitId: session.riskPermitId,
+				intentHash: session.intentHash,
+				authorityEpoch: session.authorityEpoch,
+				riskEpoch: session.riskEpoch,
+			});
+			if (!permitCheck.valid) {
+				mapPermitFailure(permitCheck.failure);
+			}
+
+			const existingOrder = await ctx.orders.findByClientOrderId(
+				command.organizationId,
+				command.clientOrderId,
+			);
+			if (existingOrder) {
+				assertOrderMatchesSubmitCommand(existingOrder, command);
+				assertNoBlindRetryOnUnknownDispatch(existingOrder.venueDispatchStatus);
+				throwExecutionError(
+					"EX_DUPLICATE_CLIENT_ORDER",
+					"client order already exists",
+				);
+			}
+
+			const orderId = `ex_ord_${randomUUID()}`;
+			const initialFilledQuantity = deferFill ? "0" : fillQuantity;
+			const initialStatus = resolveSubmitOrderStatus(
+				command.quantity,
+				initialFilledQuantity,
+				deferFill,
+			);
+			const initialDispatchStatus = simulateDispatchTimeout
+				? "UNKNOWN"
+				: deferFill
+					? "DISPATCHED"
+					: "ACK";
+
+			const savedOrder = await ctx.orders.save({
+				id: orderId,
+				organizationId: command.organizationId,
+				sessionId: command.sessionId,
 				clientOrderId: command.clientOrderId,
 				instrumentId: command.instrumentId,
 				side: command.side,
 				quantity: command.quantity,
 				price: command.price,
-				executionMode: session.executionMode,
-			}),
-		];
+				filledQuantity: initialFilledQuantity,
+				status: initialStatus,
+				venueDispatchStatus: initialDispatchStatus,
+			});
 
-		let fillId: string | undefined;
-		let venueFillId: string | undefined;
-
-		if (!deferFill && !simulateDispatchTimeout) {
-			const notionalAmount = multiplyDecimalAmounts(
-				fillQuantity,
-				command.price,
-			);
-			const simulated = adapter.fill(
-				{
-					orderId: savedOrder.id,
-					clientOrderId: command.clientOrderId,
-					quantity: command.quantity,
-					fillQuantity,
-					price: command.price,
-					asset: command.asset,
-				},
-				notionalAmount,
-			);
-			const existingFill = await ctx.fills.findByVenueFillId(
-				simulated.venueFillId,
-			);
-			if (existingFill) {
-				throw new DuplicateVenueFillSignal({
-					organizationId: command.organizationId,
-					orderId: savedOrder.id,
-					existingFillId: existingFill.id,
-					venueFillId: simulated.venueFillId,
-					venueAdapterRefId: session.venueAdapterRefId,
-				});
-			}
-			fillId = `ex_fill_${randomUUID()}`;
-			venueFillId = simulated.venueFillId;
-			const fillEventId = randomUUID();
-			await ctx.fills.save({
-				id: fillId,
+			const attemptNo =
+				(await ctx.orderAttempts.countByOrderId(savedOrder.id)) + 1;
+			await ctx.orderAttempts.save({
+				id: `ex_att_${randomUUID()}`,
 				organizationId: command.organizationId,
 				orderId: savedOrder.id,
-				venueFillId: simulated.venueFillId,
-				quantity: simulated.quantity,
-				price: simulated.price,
-				notionalAmount: simulated.notionalAmount,
-				asset: simulated.asset,
-				status: "CONFIRMED",
-				filledAt: simulated.filledAt,
+				attemptNo,
+				adapterKind: "SIMULATED",
+				requestHash: createHash("sha256")
+					.update(
+						`${savedOrder.id}:${command.clientOrderId}:${command.quantity}:${command.price}`,
+					)
+					.digest("hex"),
+				status: simulateDispatchTimeout ? "TIMEOUT" : "ACK",
+				responseCode: simulateDispatchTimeout ? "TIMEOUT" : "200",
+				errorCode: simulateDispatchTimeout ? "VENUE_TIMEOUT" : null,
+				sentAt: new Date().toISOString(),
 			});
-			events.push(
-				createFillConfirmedEvent({
-					eventId: fillEventId,
-					organizationId: command.organizationId,
-					fillId,
+
+			const events = [
+				createOrderSubmittedEvent({
 					orderId: savedOrder.id,
-					side: command.side,
+					sessionId: command.sessionId,
+					organizationId: command.organizationId,
+					clientOrderId: command.clientOrderId,
 					instrumentId: command.instrumentId,
+					side: command.side,
+					quantity: command.quantity,
+					price: command.price,
+					executionMode: session.executionMode,
+				}),
+			];
+
+			let fillId: string | undefined;
+			let venueFillId: string | undefined;
+
+			if (!deferFill && !simulateDispatchTimeout) {
+				const notionalAmount = multiplyDecimalAmounts(
+					fillQuantity,
+					command.price,
+				);
+				const simulated = adapter.fill(
+					{
+						orderId: savedOrder.id,
+						clientOrderId: command.clientOrderId,
+						quantity: command.quantity,
+						fillQuantity,
+						price: command.price,
+						asset: command.asset,
+					},
+					notionalAmount,
+				);
+				const existingFill = await ctx.fills.findByVenueFillId(
+					simulated.venueFillId,
+				);
+				if (existingFill) {
+					throw new DuplicateVenueFillSignal({
+						organizationId: command.organizationId,
+						orderId: savedOrder.id,
+						existingFillId: existingFill.id,
+						venueFillId: simulated.venueFillId,
+						venueAdapterRefId: session.venueAdapterRefId,
+					});
+				}
+				fillId = `ex_fill_${randomUUID()}`;
+				venueFillId = simulated.venueFillId;
+				const fillEventId = randomUUID();
+				await ctx.fills.save({
+					id: fillId,
+					organizationId: command.organizationId,
+					orderId: savedOrder.id,
+					venueFillId: simulated.venueFillId,
 					quantity: simulated.quantity,
 					price: simulated.price,
 					notionalAmount: simulated.notionalAmount,
 					asset: simulated.asset,
+					status: "CONFIRMED",
 					filledAt: simulated.filledAt,
-					executionMode: session.executionMode,
+				});
+				events.push(
+					createFillConfirmedEvent({
+						eventId: fillEventId,
+						organizationId: command.organizationId,
+						fillId,
+						orderId: savedOrder.id,
+						side: command.side,
+						instrumentId: command.instrumentId,
+						quantity: simulated.quantity,
+						price: simulated.price,
+						notionalAmount: simulated.notionalAmount,
+						asset: simulated.asset,
+						filledAt: simulated.filledAt,
+						executionMode: session.executionMode,
+						capitalAccountId: command.capitalAccountId,
+						portfolioId: command.portfolioId,
+					}),
+				);
+				capitalNotify.onFillConfirmed({
+					organizationId: command.organizationId,
+					fillId,
+					orderId: savedOrder.id,
+					notionalAmount: simulated.notionalAmount,
+					asset: simulated.asset,
 					capitalAccountId: command.capitalAccountId,
 					portfolioId: command.portfolioId,
-				}),
-			);
-			capitalNotify.onFillConfirmed({
-				organizationId: command.organizationId,
-				fillId,
-				orderId: savedOrder.id,
-				notionalAmount: simulated.notionalAmount,
-				asset: simulated.asset,
-				capitalAccountId: command.capitalAccountId,
-				portfolioId: command.portfolioId,
-			});
-		}
+				});
+			}
 
-		if (simulateDispatchTimeout) {
+			if (simulateDispatchTimeout) {
+				await ctx.publishEvents(events);
+				const timeoutResult = executionCommandResultSchema.parse({
+					aggregateId: savedOrder.id,
+					revision: 1,
+					sessionId: command.sessionId,
+					orderId: savedOrder.id,
+					orderStatus: initialStatus,
+					remainingQuantity: subtractDecimalAmounts(
+						command.quantity,
+						initialFilledQuantity,
+					),
+					venueDispatchStatus: "UNKNOWN",
+				});
+				await ctx.commandJournal.save({
+					commandId: command.commandId,
+					organizationId: command.organizationId,
+					commandName: "submitOrder",
+					clientOrderId: command.clientOrderId,
+					responseSnapshot: toCommandResultSnapshot(timeoutResult, {
+						requestFingerprint,
+					}),
+				});
+				return timeoutResult;
+			}
+
 			await ctx.publishEvents(events);
-			const timeoutResult = executionCommandResultSchema.parse({
+
+			const result = executionCommandResultSchema.parse({
 				aggregateId: savedOrder.id,
 				revision: 1,
 				sessionId: command.sessionId,
 				orderId: savedOrder.id,
+				fillId,
+				venueFillId,
 				orderStatus: initialStatus,
 				remainingQuantity: subtractDecimalAmounts(
 					command.quantity,
 					initialFilledQuantity,
 				),
-				venueDispatchStatus: "UNKNOWN",
+				venueDispatchStatus: initialDispatchStatus,
 			});
+
 			await ctx.commandJournal.save({
 				commandId: command.commandId,
 				organizationId: command.organizationId,
 				commandName: "submitOrder",
 				clientOrderId: command.clientOrderId,
-				responseSnapshot: toCommandResultSnapshot(timeoutResult, {
+				responseSnapshot: toCommandResultSnapshot(result, {
 					requestFingerprint,
 				}),
 			});
-			return timeoutResult;
-		}
 
-		await ctx.publishEvents(events);
-
-		const result = executionCommandResultSchema.parse({
-			aggregateId: savedOrder.id,
-			revision: 1,
-			sessionId: command.sessionId,
-			orderId: savedOrder.id,
-			fillId,
-			venueFillId,
-			orderStatus: initialStatus,
-			remainingQuantity: subtractDecimalAmounts(
-				command.quantity,
-				initialFilledQuantity,
-			),
-			venueDispatchStatus: initialDispatchStatus,
-		});
-
-		await ctx.commandJournal.save({
-			commandId: command.commandId,
-			organizationId: command.organizationId,
-			commandName: "submitOrder",
-			clientOrderId: command.clientOrderId,
-			responseSnapshot: toCommandResultSnapshot(result, {
-				requestFingerprint,
-			}),
-		});
-
-		return result;
+			return result;
 		});
 	} catch (error) {
 		if (error instanceof DuplicateVenueFillSignal) {
@@ -382,14 +385,10 @@ export async function submitOrder(
 					venueAdapterRefId: error.venueAdapterRefId,
 				},
 			);
-			throwExecutionError(
-				"EX_DUPLICATE_FILL",
-				"venue fill id already exists",
-				{
-					reconciliationCaseId: reconciliationCase.id,
-					disposition: "LINKED_EXISTING_FILL",
-				},
-			);
+			throwExecutionError("EX_DUPLICATE_FILL", "venue fill id already exists", {
+				reconciliationCaseId: reconciliationCase.id,
+				disposition: "LINKED_EXISTING_FILL",
+			});
 		}
 		throw error;
 	}

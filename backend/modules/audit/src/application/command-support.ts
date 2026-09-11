@@ -87,8 +87,6 @@ export function toCommandResultSnapshot(
 		idempotentReplay: result.idempotentReplay ?? false,
 		manifestId: result.manifestId,
 		flightRecordId: result.flightRecordId,
-		...(requestHash
-			? { [COMMAND_JOURNAL_REQUEST_HASH_KEY]: requestHash }
-			: {}),
+		...(requestHash ? { [COMMAND_JOURNAL_REQUEST_HASH_KEY]: requestHash } : {}),
 	};
 }

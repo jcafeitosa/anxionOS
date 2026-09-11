@@ -1,13 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { BILLING_EVENT_TYPES } from "@anxionos/contracts/billing";
-import { cancelSubscription } from "./cancel-subscription";
 import { BillingCommandError } from "../errors";
 import {
 	createBillingTestUow,
 	TEST_ORG,
 	testSubscriptionId,
 } from "./billing-test-support";
+import { cancelSubscription } from "./cancel-subscription";
 
 const SUBSCRIPTION_ID = testSubscriptionId();
 

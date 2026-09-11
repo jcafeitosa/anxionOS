@@ -93,9 +93,7 @@ export const operationsDeletionRequestStatusSchema = z.enum([
 export type OperationsRetentionPolicyId = z.infer<
 	typeof operationsRetentionPolicyIdSchema
 >;
-export type OperationsExportJobId = z.infer<
-	typeof operationsExportJobIdSchema
->;
+export type OperationsExportJobId = z.infer<typeof operationsExportJobIdSchema>;
 export type OperationsDeletionRequestId = z.infer<
 	typeof operationsDeletionRequestIdSchema
 >;

@@ -26,10 +26,7 @@ function requestIdFrom(headers: Headers): string | undefined {
 	return headers.get("x-request-id") ?? undefined;
 }
 
-async function resolveSessionPrincipal(
-	deps: RiskPluginDeps,
-	request: Request,
-) {
+async function resolveSessionPrincipal(deps: RiskPluginDeps, request: Request) {
 	const session = await deps.auth.api.getSession({ headers: request.headers });
 	if (!session?.user?.id) {
 		const { AppError } = await import("@anxionos/contracts/errors");
@@ -68,8 +65,7 @@ export function createRiskPlugin(deps: RiskPluginDeps) {
 						})
 						.get(
 							"/kill-switch",
-							({ agencyId }) =>
-								handleGetKillSwitchStatus(deps, { agencyId }),
+							({ agencyId }) => handleGetKillSwitchStatus(deps, { agencyId }),
 							riskOpenApi.getKillSwitchStatus,
 						),
 				)

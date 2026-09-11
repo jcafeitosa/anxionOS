@@ -24,7 +24,8 @@ const organizationId = "b2000002-0002-4002-8002-000000000002";
 const agentId = "c3000003-0003-4003-8003-000000000003";
 
 function createGovernedDeps(grantRepository = createInMemoryGrantRepository()) {
-	const autonomyAssignmentRepository = createInMemoryAutonomyAssignmentRepository();
+	const autonomyAssignmentRepository =
+		createInMemoryAutonomyAssignmentRepository();
 	const commandJournal = createInMemoryCommandJournalRepository();
 	const { unitOfWork } = createRecordingGovernanceUnitOfWork({
 		grantRepository,

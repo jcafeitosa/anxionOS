@@ -1,19 +1,20 @@
 import type { Pool, PoolClient } from "pg";
 
 type PgQueryable = Pool | PoolClient;
+
 import type {
-	KillSwitchRecord,
-	KillSwitchRepository,
 	CheckResultRecord,
 	CheckResultRepository,
+	ConsumerDedupRecord,
+	ConsumerDedupRepository,
 	EpochRegistryRecord,
 	EpochRegistryRepository,
+	KillSwitchRecord,
+	KillSwitchRepository,
 	LimitPolicyRecord,
 	LimitPolicyRepository,
 	PermitRecord,
 	PermitRepository,
-	ConsumerDedupRecord,
-	ConsumerDedupRepository,
 } from "../../domain/ports/risk-unit-of-work";
 
 function mapPolicy(row: Record<string, unknown>): LimitPolicyRecord {
@@ -240,7 +241,6 @@ export function createPgConsumerDedupRepository(
 		},
 	};
 }
-
 
 function mapKillSwitch(row: Record<string, unknown>): KillSwitchRecord {
 	return {

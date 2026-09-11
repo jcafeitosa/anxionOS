@@ -8,7 +8,10 @@ import {
 	assertAccountingExecutionModeSupported,
 	reverseLedgerEntryCommandSchema,
 } from "@anxionos/contracts/accounting";
-import { createLedgerPostedEvent, createReversalPostedEvent } from "../../domain/events/accounting-events";
+import {
+	createLedgerPostedEvent,
+	createReversalPostedEvent,
+} from "../../domain/events/accounting-events";
 import type {
 	AccountingTransactionContext,
 	AccountingUnitOfWork,
@@ -84,7 +87,10 @@ export async function reverseLedgerEntry(
 			throwAccountingError("ACC_ENTRY_NOT_FOUND", "journal entry not found");
 		}
 		if (original.organizationId !== command.organizationId) {
-			throwAccountingError("ACC_CROSS_TENANT", "journal entry organization mismatch");
+			throwAccountingError(
+				"ACC_CROSS_TENANT",
+				"journal entry organization mismatch",
+			);
 		}
 
 		const reversalKey = reversalIdempotencyKey(command.entryId);
@@ -93,7 +99,11 @@ export async function reverseLedgerEntry(
 			reversalKey,
 		);
 		if (existingReversal) {
-			const result = entryResult(existingReversal.id, existingReversal.revision, true);
+			const result = entryResult(
+				existingReversal.id,
+				existingReversal.revision,
+				true,
+			);
 			await ctx.commandJournal.save({
 				commandId: command.commandId,
 				organizationId: command.organizationId,

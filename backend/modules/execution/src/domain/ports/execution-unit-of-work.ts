@@ -104,9 +104,13 @@ export interface ExecutionFillRepository {
 	save(record: ExecutionFillRecord): Promise<ExecutionFillRecord>;
 }
 export interface ExecutionOrderAttemptRepository {
-	findLatestByOrderId(orderId: string): Promise<ExecutionOrderAttemptRecord | null>;
+	findLatestByOrderId(
+		orderId: string,
+	): Promise<ExecutionOrderAttemptRecord | null>;
 	countByOrderId(orderId: string): Promise<number>;
-	save(record: ExecutionOrderAttemptRecord): Promise<ExecutionOrderAttemptRecord>;
+	save(
+		record: ExecutionOrderAttemptRecord,
+	): Promise<ExecutionOrderAttemptRecord>;
 }
 export interface ExecutionReconciliationCaseRepository {
 	findById(id: string): Promise<ExecutionReconciliationCaseRecord | null>;

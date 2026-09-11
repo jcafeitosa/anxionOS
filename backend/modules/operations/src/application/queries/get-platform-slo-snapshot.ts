@@ -1,9 +1,9 @@
 import {
 	PLATFORM_SLO_SNAPSHOT_SCHEMA_VERSION,
-	platformSloSnapshotSchema,
 	type PlatformSloEventingLag,
 	type PlatformSloRouteLatency,
 	type PlatformSloSnapshot,
+	platformSloSnapshotSchema,
 } from "@anxionos/contracts/operations";
 import type { MetricsCollector } from "@anxionos/observability";
 import { percentile } from "@anxionos/observability";
@@ -76,20 +76,18 @@ function buildApiRoutes(
 		...latencyByPrefix.keys(),
 	]);
 
-	return [...prefixes]
-		.sort()
-		.map((prefix) => {
-			const requestCount = requestsByPrefix.get(prefix) ?? 0;
-			const errorCount = errorsByPrefix.get(prefix) ?? 0;
-			const latencies = latencyPercentiles(latencyByPrefix.get(prefix) ?? []);
-			return {
-				prefix,
-				requestCount,
-				errorCount,
-				errorRatePercent: errorRatePercent(errorCount, requestCount),
-				...latencies,
-			};
-		});
+	return [...prefixes].sort().map((prefix) => {
+		const requestCount = requestsByPrefix.get(prefix) ?? 0;
+		const errorCount = errorsByPrefix.get(prefix) ?? 0;
+		const latencies = latencyPercentiles(latencyByPrefix.get(prefix) ?? []);
+		return {
+			prefix,
+			requestCount,
+			errorCount,
+			errorRatePercent: errorRatePercent(errorCount, requestCount),
+			...latencies,
+		};
+	});
 }
 
 function eventingChannelKey(tags: Record<string, string>): string {
@@ -116,7 +114,10 @@ function buildEventingChannels(
 		const parsed = parseMetricKey(rawKey);
 		if (parsed.name !== EVENTING_LAG_ALERT_METRIC) continue;
 		const channelKey = eventingChannelKey(parsed.tags);
-		alertsByChannel.set(channelKey, (alertsByChannel.get(channelKey) ?? 0) + count);
+		alertsByChannel.set(
+			channelKey,
+			(alertsByChannel.get(channelKey) ?? 0) + count,
+		);
 	}
 
 	const channelKeys = new Set([
@@ -124,21 +125,19 @@ function buildEventingChannels(
 		...alertsByChannel.keys(),
 	]);
 
-	return [...channelKeys]
-		.sort()
-		.map((channelKey) => {
-			const [channel, ownerDomain, consumer] = channelKey.split("/");
-			const latencies = latencyPercentiles(lagByChannel.get(channelKey) ?? []);
-			const sampleCount = lagByChannel.get(channelKey)?.length ?? 0;
-			return {
-				channel,
-				ownerDomain: ownerDomain || undefined,
-				consumer: consumer || undefined,
-				sampleCount,
-				alertCount: alertsByChannel.get(channelKey) ?? 0,
-				...latencies,
-			};
-		});
+	return [...channelKeys].sort().map((channelKey) => {
+		const [channel, ownerDomain, consumer] = channelKey.split("/");
+		const latencies = latencyPercentiles(lagByChannel.get(channelKey) ?? []);
+		const sampleCount = lagByChannel.get(channelKey)?.length ?? 0;
+		return {
+			channel,
+			ownerDomain: ownerDomain || undefined,
+			consumer: consumer || undefined,
+			sampleCount,
+			alertCount: alertsByChannel.get(channelKey) ?? 0,
+			...latencies,
+		};
+	});
 }
 
 function sumCounterMetric(
@@ -177,14 +176,12 @@ export function getPlatformSloSnapshot(
 		capacity: {
 			signalsAvailable: false,
 			signals: [],
-			note:
-				"Pool, queue and storage utilization require platform control-plane metrics; not wired in this slice.",
+			note: "Pool, queue and storage utilization require platform control-plane metrics; not wired in this slice.",
 		},
 		cost: {
 			signalsAvailable: false,
 			signals: [],
-			note:
-				"Provider cost metrics require connections billing bridge; not wired in this slice.",
+			note: "Provider cost metrics require connections billing bridge; not wired in this slice.",
 		},
 	};
 

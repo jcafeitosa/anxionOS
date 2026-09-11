@@ -11,7 +11,9 @@ import type {
 	ExecutionReconciliationCaseRecord,
 } from "../../domain/ports/execution-unit-of-work";
 
-export function toOrderSnapshot(record: ExecutionOrderListRow): ExecutionOrderSnapshot {
+export function toOrderSnapshot(
+	record: ExecutionOrderListRow,
+): ExecutionOrderSnapshot {
 	return executionOrderSnapshotSchema.parse({
 		orderId: record.id,
 		organizationId: record.organizationId,

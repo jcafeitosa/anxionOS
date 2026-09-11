@@ -1,7 +1,7 @@
 import type { Pool } from "pg";
 import {
-	type InviteAcceptRateLimitStore,
 	createInviteAcceptRateLimitStore,
+	type InviteAcceptRateLimitStore,
 } from "./invite-accept-rate-limit-store";
 
 let activeStore: InviteAcceptRateLimitStore | null = null;

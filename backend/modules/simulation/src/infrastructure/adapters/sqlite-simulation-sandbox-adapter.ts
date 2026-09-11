@@ -1,7 +1,7 @@
+import { Database } from "bun:sqlite";
 import { createHash, randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { Database } from "bun:sqlite";
 import { SIMULATION_ERROR_CODES } from "@anxionos/contracts/simulation";
 import {
 	computeFixtureDatasetHash,
@@ -50,7 +50,9 @@ export function createSqliteSimulationSandboxAdapter(
 	options: SqliteSimulationSandboxOptions,
 ): SimulationSandboxPort {
 	return {
-		async execute(input: SimulationSandboxInput): Promise<SimulationSandboxResult> {
+		async execute(
+			input: SimulationSandboxInput,
+		): Promise<SimulationSandboxResult> {
 			if (options.forceFailure) {
 				return {
 					status: "FAILED",
@@ -126,7 +128,9 @@ export function createSqliteSimulationSandboxAdapter(
 				).run(tickCount, metricsHash);
 
 				const tickRows = db
-					.prepare("SELECT tick_index, price FROM simulation_ticks ORDER BY tick_index")
+					.prepare(
+						"SELECT tick_index, price FROM simulation_ticks ORDER BY tick_index",
+					)
 					.all() as Array<{ tick_index: number; price: number }>;
 
 				return {

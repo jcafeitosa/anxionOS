@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import {
-	STRATEGIES_EVENT_TYPES,
 	emitSignalCommandSchema,
+	STRATEGIES_EVENT_TYPES,
 } from "@anxionos/contracts/strategies";
 import {
 	activateDeployment,
@@ -178,7 +178,9 @@ describe("strategies deployment + signals (ANX-147 S4)", () => {
 						}),
 					],
 				),
-			).rejects.toMatchObject({ message: expect.stringContaining("ST_BINDING_IMMUTABLE") });
+			).rejects.toMatchObject({
+				message: expect.stringContaining("ST_BINDING_IMMUTABLE"),
+			});
 		});
 	});
 
@@ -244,7 +246,9 @@ describe("strategies deployment + signals (ANX-147 S4)", () => {
 				 FROM strategies_signals WHERE id = $1`,
 				[emitted.signalId],
 			);
-			expect(row.rows[0]?.instrument_refs).toEqual(BINDING_SNAPSHOT.instrumentRefs);
+			expect(row.rows[0]?.instrument_refs).toEqual(
+				BINDING_SNAPSHOT.instrumentRefs,
+			);
 			expect(row.rows[0]?.value_ref).toBe("sandbox://signal/momentum-long");
 			expect(row.rows[0]?.deployment_id).toBe(activated.deploymentId);
 

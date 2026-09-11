@@ -122,8 +122,7 @@ export class HummingbotAdapter implements RiskPermitValidationPort {
 		this.sandboxUrl = resolveHmbSandboxUrl(options.sandboxUrl);
 		this.engineMode = resolveHmbEngineMode(options.engineMode);
 		this.fetchFn = options.fetchFn ?? fetch;
-		this.healthTimeoutMs =
-			options.healthTimeoutMs ?? DEFAULT_HEALTH_TIMEOUT_MS;
+		this.healthTimeoutMs = options.healthTimeoutMs ?? DEFAULT_HEALTH_TIMEOUT_MS;
 	}
 
 	private validateLicenseFormat(license: string): boolean {

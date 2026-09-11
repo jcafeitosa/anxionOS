@@ -1,12 +1,3 @@
-export {
-	AUTONOMY_NORMATIVE_MATRIX,
-	RUNTIME_DISABLED_AUTONOMY_LEVELS,
-	assignAutonomyLevelCommandSchema,
-	autonomyAssignmentStatusSchema,
-	autonomyLevelSchema,
-	autonomyTransitionKindSchema,
-	transitionAutonomyLevelCommandSchema,
-} from "./autonomy-policy";
 export type {
 	AssignAutonomyLevelCommand,
 	AutonomyAssignmentStatus,
@@ -16,15 +7,14 @@ export type {
 	TransitionAutonomyLevelCommand,
 } from "./autonomy-policy";
 export {
-	activateBreakGlassCommandSchema,
-	createDelegationCommandSchema,
-	governanceCommandResultSchema,
-	issueGrantCommandSchema,
-	issueMandateCommandSchema,
-	resolveApprovalCommandSchema,
-	revokeGrantCommandSchema,
-	submitChangeProposalCommandSchema,
-} from "./commands";
+	AUTONOMY_NORMATIVE_MATRIX,
+	assignAutonomyLevelCommandSchema,
+	autonomyAssignmentStatusSchema,
+	autonomyLevelSchema,
+	autonomyTransitionKindSchema,
+	RUNTIME_DISABLED_AUTONOMY_LEVELS,
+	transitionAutonomyLevelCommandSchema,
+} from "./autonomy-policy";
 export type {
 	ActivateBreakGlassCommand,
 	CreateDelegationCommand,
@@ -36,28 +26,23 @@ export type {
 	SubmitChangeProposalCommand,
 } from "./commands";
 export {
+	activateBreakGlassCommandSchema,
+	createDelegationCommandSchema,
+	governanceCommandResultSchema,
+	issueGrantCommandSchema,
+	issueMandateCommandSchema,
+	resolveApprovalCommandSchema,
+	revokeGrantCommandSchema,
+	submitChangeProposalCommandSchema,
+} from "./commands";
+export type { GovernanceErrorCode, GovernanceErrorDetails } from "./errors";
+export {
 	GOVERNANCE_ERROR_CODES,
 	GOVERNANCE_ERROR_STATUS_MAP,
 	governanceErrorCodeSchema,
 	governanceErrorDetailsSchema,
 	resolveGovernanceErrorStatus,
 } from "./errors";
-export type { GovernanceErrorCode, GovernanceErrorDetails } from "./errors";
-export {
-	GOVERNANCE_EVENT_TYPES,
-	GOVERNANCE_OWNER_DOMAIN,
-	approvalResolvedPayloadSchema,
-	authorityEpochBumpedPayloadSchema,
-	breakGlassActivatedPayloadSchema,
-	changeProposalSubmittedPayloadSchema,
-	delegationCreatedPayloadSchema,
-	governanceEventPayloadSchema,
-	grantIssuedPayloadSchema,
-	grantRevokedPayloadSchema,
-	mandateIssuedPayloadSchema,
-	autonomyAssignedPayloadSchema,
-	autonomyTransitionedPayloadSchema,
-} from "./events";
 export type {
 	ApprovalResolvedPayload,
 	AuthorityEpochBumpedPayload,
@@ -72,15 +57,20 @@ export type {
 	MandateIssuedPayload,
 } from "./events";
 export {
-	approvalDecisionSchema,
-	changeProposalKindSchema,
-	changeProposalStatusSchema,
-	governanceScopeKindSchema,
-	grantStatusSchema,
-	mandateKindSchema,
-	mandateStatusSchema,
-	PLATFORM_CONSOLE_CAPABILITY,
-} from "./types";
+	approvalResolvedPayloadSchema,
+	authorityEpochBumpedPayloadSchema,
+	autonomyAssignedPayloadSchema,
+	autonomyTransitionedPayloadSchema,
+	breakGlassActivatedPayloadSchema,
+	changeProposalSubmittedPayloadSchema,
+	delegationCreatedPayloadSchema,
+	GOVERNANCE_EVENT_TYPES,
+	GOVERNANCE_OWNER_DOMAIN,
+	governanceEventPayloadSchema,
+	grantIssuedPayloadSchema,
+	grantRevokedPayloadSchema,
+	mandateIssuedPayloadSchema,
+} from "./events";
 export type {
 	ApprovalDecision,
 	ChangeProposalKind,
@@ -89,4 +79,14 @@ export type {
 	GrantStatus,
 	MandateKind,
 	MandateStatus,
+} from "./types";
+export {
+	approvalDecisionSchema,
+	changeProposalKindSchema,
+	changeProposalStatusSchema,
+	governanceScopeKindSchema,
+	grantStatusSchema,
+	mandateKindSchema,
+	mandateStatusSchema,
+	PLATFORM_CONSOLE_CAPABILITY,
 } from "./types";

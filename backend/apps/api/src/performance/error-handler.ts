@@ -5,11 +5,11 @@ import {
 	toErrorResponse,
 } from "@anxionos/contracts/errors";
 import {
-	resolvePerformanceErrorStatus,
 	type PerformanceErrorCode,
+	resolvePerformanceErrorStatus,
 } from "@anxionos/contracts/performance";
-import { PerformanceCommandError } from "@anxionos/performance";
 import { PrincipalLookupUnavailableError } from "@anxionos/organizations";
+import { PerformanceCommandError } from "@anxionos/performance";
 
 function performanceCodeToAppError(error: PerformanceCommandError): AppError {
 	const statusCode = resolvePerformanceErrorStatus(error.code);

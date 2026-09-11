@@ -1,7 +1,6 @@
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import { appendJournal, enqueueOutbox } from "@anxionos/eventing/postgres";
-import type { Pool } from "pg";
-import type { PoolClient } from "pg";
+import type { Pool, PoolClient } from "pg";
 import type {
 	CapitalTransactionContext,
 	CapitalUnitOfWork,

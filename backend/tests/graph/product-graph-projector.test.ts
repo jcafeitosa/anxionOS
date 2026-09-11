@@ -3,13 +3,13 @@
  * User instruction: ANX-277 projection worker — 1 event → 1 node idempotent, stale revision skip.
  */
 import { describe, expect, test } from "bun:test";
+import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import {
 	AGENT_GRAPH_EVENT_TYPES,
 	AGENT_GRAPH_OWNER_DOMAIN,
 	PRODUCT_GRAPH_EVENT_TYPES,
 	PRODUCT_GRAPH_OWNER_DOMAIN,
 } from "@anxionos/contracts/graph";
-import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import {
 	createInMemoryGraphStore,
 	formatNodeKey,

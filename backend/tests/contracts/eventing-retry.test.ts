@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-	DEFAULT_RETRY_POLICY,
 	computeBackoffDelay,
+	DEFAULT_RETRY_POLICY,
 	shouldRetry,
 } from "@anxionos/eventing/retry";
 

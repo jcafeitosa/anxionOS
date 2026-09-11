@@ -3,11 +3,11 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
+	assertNoPlaintextSecrets,
+	createSecretVaultFromEnv,
 	DevVaultNotAllowedError,
 	IdempotentSecretRotation,
 	LocalFileSecretVault,
-	assertNoPlaintextSecrets,
-	createSecretVaultFromEnv,
 	redactString,
 	redactValue,
 	resolveLocalVaultPath,

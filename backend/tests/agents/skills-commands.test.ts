@@ -1,5 +1,4 @@
 import { describe, expect, test } from "bun:test";
-import { AGENTS_EVENT_TYPES } from "@anxionos/contracts/agents";
 import {
 	AgentsCommandError,
 	bindAgentSkill,
@@ -9,6 +8,7 @@ import {
 	registerSkill,
 	submitSkillVersion,
 } from "@anxionos/agents";
+import { AGENTS_EVENT_TYPES } from "@anxionos/contracts/agents";
 import {
 	createInMemoryAgentRepository,
 	createInMemoryAgentVersionRepository,
@@ -184,9 +184,11 @@ describe("skill lifecycle and bindAgentSkill (S10)", () => {
 
 		expect(binding.aggregateId).toMatch(/^[0-9a-f-]{36}$/i);
 		expect(evaluated.revision).toBeGreaterThan(skillVersion.revision);
-		expect(published.some((e) => e.eventType === AGENTS_EVENT_TYPES.AGENT_SKILL_BOUND)).toBe(
-			true,
-		);
+		expect(
+			published.some(
+				(e) => e.eventType === AGENTS_EVENT_TYPES.AGENT_SKILL_BOUND,
+			),
+		).toBe(true);
 	});
 
 	test("bindAgentSkill rejects non-verified skill version", async () => {
@@ -246,7 +248,6 @@ describe("skill lifecycle and bindAgentSkill (S10)", () => {
 		).rejects.toMatchObject({ agentsCode: "AGT_SKILL_VERSION_NOT_VERIFIED" });
 	});
 });
-
 
 describe("bindAgentSkill cross-org guard (G4-M2)", () => {
 	const otherOrganizationId = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
@@ -324,7 +325,6 @@ describe("bindAgentSkill cross-org guard (G4-M2)", () => {
 		).rejects.toMatchObject({ agentsCode: "AGT_TRAVERSAL_DENIED" });
 	});
 });
-
 
 describe("recordSkillVersionEvaluation gate (S13)", () => {
 	async function createCandidateSkillVersion() {

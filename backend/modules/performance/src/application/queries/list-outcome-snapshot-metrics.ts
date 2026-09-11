@@ -22,9 +22,13 @@ export async function listOutcomeSnapshotMetrics(
 		outcomeSnapshotId,
 	);
 	if (!snapshot) {
-		throwPerformanceError("PERF_SNAPSHOT_NOT_FOUND", "outcome snapshot not found");
+		throwPerformanceError(
+			"PERF_SNAPSHOT_NOT_FOUND",
+			"outcome snapshot not found",
+		);
 	}
-	const records = await deps.metricSeries.listByOutcomeSnapshotId(outcomeSnapshotId);
+	const records =
+		await deps.metricSeries.listByOutcomeSnapshotId(outcomeSnapshotId);
 	return listMetricSeriesResponseSchema.parse({
 		metrics: records.map(toMetricSeriesItem),
 	});

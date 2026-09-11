@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-	mt5SimulatedAdapterManifest,
 	MT5_ADAPTER_ID,
+	mt5SimulatedAdapterManifest,
 	runAdapterConformanceSuite,
 } from "@anxionos/adapter-gateway";
 

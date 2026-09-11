@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import {
 	type GovernanceCommandResult,
-	type SubmitChangeProposalCommand,
 	governanceCommandResultSchema,
+	type SubmitChangeProposalCommand,
 	submitChangeProposalCommandSchema,
 } from "@anxionos/contracts/governance";
 import { defaultRequiredApprovals } from "../../domain/entities/change-proposal";

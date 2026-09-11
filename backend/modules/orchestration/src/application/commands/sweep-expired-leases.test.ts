@@ -2,11 +2,11 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { Run } from "../../domain/entities/run";
 import type { Task } from "../../domain/entities/task";
-import type { ExpiredActiveLease } from "../../domain/ports/task-lease-repository";
 import type {
 	OrchestrationTransactionContext,
 	OrchestrationUnitOfWork,
 } from "../../domain/ports/orchestration-unit-of-work";
+import type { ExpiredActiveLease } from "../../domain/ports/task-lease-repository";
 import { sweepExpiredLeases } from "./sweep-expired-leases";
 
 const ORG = "00000000-0000-4000-8000-000000000001";
@@ -48,10 +48,13 @@ function createDeps(run: Run, task: Task, lease: ExpiredActiveLease) {
 				return next;
 			},
 		} as OrchestrationTransactionContext["taskLeaseRepository"],
-		gateBindingRepository: {} as OrchestrationTransactionContext["gateBindingRepository"],
+		gateBindingRepository:
+			{} as OrchestrationTransactionContext["gateBindingRepository"],
 		commandJournal: {} as OrchestrationTransactionContext["commandJournal"],
-		runHeartbeatRepository: {} as OrchestrationTransactionContext["runHeartbeatRepository"],
-		taskboardMirrorRepository: {} as OrchestrationTransactionContext["taskboardMirrorRepository"],
+		runHeartbeatRepository:
+			{} as OrchestrationTransactionContext["runHeartbeatRepository"],
+		taskboardMirrorRepository:
+			{} as OrchestrationTransactionContext["taskboardMirrorRepository"],
 		async publishEvents() {},
 	};
 	const unitOfWork: OrchestrationUnitOfWork = {

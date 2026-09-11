@@ -24,9 +24,7 @@ export function createPartnersTestUow(initial?: {
 	const accruals = new Map(
 		(initial?.accruals ?? []).map((row) => [row.id, row]),
 	);
-	const payouts = new Map(
-		(initial?.payouts ?? []).map((row) => [row.id, row]),
-	);
+	const payouts = new Map((initial?.payouts ?? []).map((row) => [row.id, row]));
 	const journal = new Map<string, CommandJournalEntry>();
 	const invoiceJournal = new Map<string, CommandJournalEntry>();
 	let published: DomainEventEnvelope[] = [];
@@ -53,7 +51,10 @@ export function createPartnersTestUow(initial?: {
 			},
 			async findByOrganizationId(organizationId) {
 				for (const row of partners.values()) {
-					if (row.organizationId === organizationId && row.status === "ACTIVE") {
+					if (
+						row.organizationId === organizationId &&
+						row.status === "ACTIVE"
+					) {
 						return row;
 					}
 				}

@@ -7,7 +7,6 @@ import {
 	executeSimulationRunCommandSchema,
 	simulationCommandResultSchema,
 } from "@anxionos/contracts/simulation";
-import { DEFAULT_DATASET_HASH } from "../dataset-hash-support";
 import { SimulationRunRevisionConflictError } from "../../domain/errors/simulation-run-errors";
 import {
 	createSimulationRunCompletedEvent,
@@ -26,6 +25,7 @@ import {
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
+import { DEFAULT_DATASET_HASH } from "../dataset-hash-support";
 import { parseCommandResultSnapshot, throwSimulationError } from "../errors";
 
 export interface ExecuteSimulationRunDeps {
@@ -52,7 +52,12 @@ async function updateRunOptimistic(
 	run: SimulationRunRecord,
 	updates: Pick<
 		SimulationRunRecord,
-		"status" | "revision" | "resultRef" | "completedAt" | "failedAt" | "failureCode"
+		| "status"
+		| "revision"
+		| "resultRef"
+		| "completedAt"
+		| "failedAt"
+		| "failureCode"
 	>,
 ): Promise<SimulationRunRecord> {
 	try {

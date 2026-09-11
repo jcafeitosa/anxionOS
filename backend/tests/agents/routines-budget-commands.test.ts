@@ -1,5 +1,4 @@
 import { describe, expect, test } from "bun:test";
-import { AGENTS_EVENT_TYPES } from "@anxionos/contracts/agents";
 import {
 	AgentsCommandError,
 	consumeAgentBudget,
@@ -10,6 +9,7 @@ import {
 	setAgentBudgetPolicy,
 	triggerAgentRoutine,
 } from "@anxionos/agents";
+import { AGENTS_EVENT_TYPES } from "@anxionos/contracts/agents";
 import {
 	createInMemoryAgentBudgetRepository,
 	createInMemoryAgentRepository,
@@ -36,7 +36,9 @@ async function seedAgent() {
 	return agentRepository;
 }
 
-function createRoutineDeps(agentRepository: ReturnType<typeof createInMemoryAgentRepository>) {
+function createRoutineDeps(
+	agentRepository: ReturnType<typeof createInMemoryAgentRepository>,
+) {
 	const agentRoutineRepository = createInMemoryAgentRoutineRepository();
 	const agentBudgetRepository = createInMemoryAgentBudgetRepository();
 	const commandJournal = createInMemoryCommandJournalRepository();
@@ -86,7 +88,9 @@ describe("registerAgentRoutine (S11)", () => {
 			organizationId,
 		});
 		expect(result.revision).toBe(1);
-		expect(published[0]?.eventType).toBe(AGENTS_EVENT_TYPES.AGENT_ROUTINE_REGISTERED);
+		expect(published[0]?.eventType).toBe(
+			AGENTS_EVENT_TYPES.AGENT_ROUTINE_REGISTERED,
+		);
 	});
 });
 
@@ -186,7 +190,11 @@ describe("consumeAgentBudget (S11)", () => {
 			wakeupUnits: 1,
 		});
 		expect(consumed.status).toBe("exhausted");
-		expect(published.some((e) => e.eventType === AGENTS_EVENT_TYPES.AGENT_BUDGET_EXHAUSTED)).toBe(true);
+		expect(
+			published.some(
+				(e) => e.eventType === AGENTS_EVENT_TYPES.AGENT_BUDGET_EXHAUSTED,
+			),
+		).toBe(true);
 		const agent = await agentRepository.findById(agentId);
 		expect(agent?.status).toBe("PAUSED");
 	});

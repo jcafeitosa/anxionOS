@@ -1,6 +1,8 @@
+import {
+	OFFICIAL_LEDGER_PNL_METRICS,
+	OFFICIAL_POSITION_EXPOSURE_METRICS,
+} from "@anxionos/performance";
 import { normalizeDecimalAmount } from "../../modules/performance/src/domain/decimal-amount";
-import { OFFICIAL_LEDGER_PNL_METRICS } from "@anxionos/performance";
-import { OFFICIAL_POSITION_EXPOSURE_METRICS } from "@anxionos/performance";
 
 export interface LedgerPositionConvergenceInput {
 	tradeSide: "BUY" | "SELL";
@@ -27,7 +29,9 @@ export function detectLedgerPositionDivergence(
 			reasons.push("BUY ledger expects positive cash_net_delta");
 		}
 		if (!signedPositive) {
-			reasons.push("BUY trade expects positive signed_quantity (LONG exposure)");
+			reasons.push(
+				"BUY trade expects positive signed_quantity (LONG exposure)",
+			);
 		}
 	} else {
 		if (cashPositive) {
@@ -67,7 +71,10 @@ export function assertDerivedMetricsMatch(
 		if (stored === undefined) {
 			throw new Error(`missing metric ${metric.metricName}`);
 		}
-		if (normalizeDecimalAmount(stored) !== normalizeDecimalAmount(metric.metricValue)) {
+		if (
+			normalizeDecimalAmount(stored) !==
+			normalizeDecimalAmount(metric.metricValue)
+		) {
 			throw new Error(
 				`metric ${metric.metricName} mismatch: stored=${stored} expected=${metric.metricValue}`,
 			);

@@ -1,17 +1,13 @@
-import {
-	createPgPool,
-	ensureEventingSchema,
-} from "@anxionos/eventing/postgres";
+import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import {
 	createEvaluationUnitOfWork,
 	createPgCommandJournalRepository,
 	ensureEvaluationSchema,
 } from "@anxionos/evaluation";
-import type { DomainEventEnvelope } from "@anxionos/contracts/events";
-import type {
-	CommandJournalEntry,
-	CommandJournalRepository,
-} from "../../modules/evaluation/src/domain/ports/command-journal";
+import {
+	createPgPool,
+	ensureEventingSchema,
+} from "@anxionos/eventing/postgres";
 import type {
 	CertificationRepository,
 	CertificationRow,
@@ -20,7 +16,10 @@ import type {
 	CertificationSubjectQueryPort,
 	StrategyVersionCertificationSubject,
 } from "../../modules/evaluation/src/domain/ports/certification-subject";
-import type { ScoringPolicyQueryPort } from "../../modules/evaluation/src/domain/ports/scoring-policy";
+import type {
+	CommandJournalEntry,
+	CommandJournalRepository,
+} from "../../modules/evaluation/src/domain/ports/command-journal";
 import type {
 	EvaluationRecordRepository,
 	EvaluationRecordRow,
@@ -29,6 +28,7 @@ import type {
 	EvaluationTransactionContext,
 	EvaluationUnitOfWork,
 } from "../../modules/evaluation/src/domain/ports/evaluation-unit-of-work";
+import type { ScoringPolicyQueryPort } from "../../modules/evaluation/src/domain/ports/scoring-policy";
 
 export function createInMemoryCommandJournalRepository(
 	seed: CommandJournalEntry[] = [],
@@ -97,7 +97,6 @@ export function createInMemoryEvaluationScoreRepository(
 		},
 	};
 }
-
 
 export function createInMemoryCertificationRepository(
 	seed: CertificationRow[] = [],
@@ -194,7 +193,13 @@ export function createRecordingEvaluationUnitOfWork(deps: {
 			return work(context);
 		},
 	};
-	return { unitOfWork, published, evaluationRecords, evaluationScores, certifications };
+	return {
+		unitOfWork,
+		published,
+		evaluationRecords,
+		evaluationScores,
+		certifications,
+	};
 }
 
 export function getDatabaseUrl(): string | undefined {
@@ -236,4 +241,3 @@ export async function withEvaluationPgHarness<T>(
 		await pool.end();
 	}
 }
-

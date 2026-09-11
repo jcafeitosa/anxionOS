@@ -10,7 +10,9 @@ export function parseIdempotencyKey(headers: Headers): string {
 	}
 	const parsed = idempotencyKeySchema.safeParse(raw.trim());
 	if (!parsed.success) {
-		throw AppError.validation("Idempotency-Key must be a valid institutional UUID");
+		throw AppError.validation(
+			"Idempotency-Key must be a valid institutional UUID",
+		);
 	}
 	return parsed.data;
 }

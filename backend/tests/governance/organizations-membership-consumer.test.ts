@@ -1,19 +1,21 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import type { TenantContext } from "@anxionos/database";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import { GOVERNANCE_EVENT_TYPES } from "@anxionos/contracts/governance";
 import {
-	ORGANIZATIONS_OWNER_DOMAIN,
 	ORGANIZATION_EVENT_TYPES,
+	ORGANIZATIONS_OWNER_DOMAIN,
 } from "@anxionos/contracts/organizations";
-import type { OrganizationsMembershipReadPort } from "@anxionos/governance";
-import type { GovernanceUnitOfWork } from "@anxionos/governance";
+import type { TenantContext } from "@anxionos/database";
+import type {
+	GovernanceUnitOfWork,
+	OrganizationsMembershipReadPort,
+} from "@anxionos/governance";
 import {
 	GOVERNANCE_ORGANIZATIONS_CONSUMER_NAME,
-	OWNER_BASELINE_CAPABILITIES,
-	OrganizationsMembershipConsumerError,
 	handleOrganizationsMembershipEvent,
+	OrganizationsMembershipConsumerError,
+	OWNER_BASELINE_CAPABILITIES,
 } from "@anxionos/governance";
 import type { PoolClient } from "pg";
 import {
@@ -296,7 +298,10 @@ describe("organizationsMembershipConsumer", () => {
 			commandJournal: createInMemoryCommandJournalRepository(),
 		});
 		const unitOfWork: typeof base.unitOfWork = {
-			async runInTransaction(ctx: TenantContext, work: (context: GovernanceTransactionContext) => Promise<T>) {
+			async runInTransaction(
+				ctx: TenantContext,
+				work: (context: GovernanceTransactionContext) => Promise<T>,
+			) {
 				insideGrantTx = true;
 				return base.unitOfWork.runInTransaction(ctx, work).finally(() => {
 					insideGrantTx = false;
@@ -351,7 +356,10 @@ describe("organizationsMembershipConsumer", () => {
 			commandJournal: createInMemoryCommandJournalRepository(),
 		});
 		const unitOfWork: GovernanceUnitOfWork = {
-			async runInTransaction(ctx: TenantContext, work: (context: GovernanceTransactionContext) => Promise<T>) {
+			async runInTransaction(
+				ctx: TenantContext,
+				work: (context: GovernanceTransactionContext) => Promise<T>,
+			) {
 				return base.unitOfWork.runInTransaction(ctx, async (context) =>
 					work({ ...context, client: txClientSentinel }),
 				);

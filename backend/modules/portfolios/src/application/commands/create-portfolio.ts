@@ -37,10 +37,7 @@ export async function createPortfolio(
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			return replayIdempotentCommandJournalEntry(
-				raced,
-				command.organizationId,
-			);
+			return replayIdempotentCommandJournalEntry(raced, command.organizationId);
 		}
 		const portfolioId = `pf_prt_${randomUUID()}`;
 		const saved = await ctx.portfolios.save({

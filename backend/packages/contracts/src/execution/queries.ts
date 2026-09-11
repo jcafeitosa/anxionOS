@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { institutionalUuidSchema } from "../institutional-uuid";
 import {
+	executionDecimalAmountSchema,
 	executionModuleModeSchema,
 	executionOrderIdSchema,
 	executionOrderSideSchema,
 	executionOrderStatusSchema,
-	executionDecimalAmountSchema,
 } from "./module-types";
 import {
 	executionReconciliationCaseIdSchema,
@@ -57,7 +57,9 @@ export const listReconciliationCasesResponseSchema = z.object({
 	reconciliationCases: z.array(executionReconciliationCaseSnapshotSchema),
 });
 
-export type ExecutionOrderSnapshot = z.infer<typeof executionOrderSnapshotSchema>;
+export type ExecutionOrderSnapshot = z.infer<
+	typeof executionOrderSnapshotSchema
+>;
 export type ListOrdersResponse = z.infer<typeof listOrdersResponseSchema>;
 export type ExecutionReconciliationCaseSnapshot = z.infer<
 	typeof executionReconciliationCaseSnapshotSchema

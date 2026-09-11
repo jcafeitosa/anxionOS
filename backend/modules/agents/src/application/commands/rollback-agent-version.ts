@@ -1,14 +1,14 @@
 import {
-	commandResultSchema,
-	rollbackAgentVersionCommandSchema,
 	type CommandResult,
+	commandResultSchema,
 	type RollbackAgentVersionCommand,
+	rollbackAgentVersionCommandSchema,
 } from "@anxionos/contracts/agents";
 import { createAgentVersionRolledBackEvent } from "../../domain/events/agent-events";
 import type { AgentRepository } from "../../domain/ports/agent-repository";
 import type { AgentVersionRepository } from "../../domain/ports/agent-version-repository";
-import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
+import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import {
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
@@ -23,7 +23,10 @@ export async function rollbackAgentVersion(
 	const command = rollbackAgentVersionCommandSchema.parse(input);
 	const preflightAgent = await deps.agentRepository.findById(command.agentId);
 	if (!preflightAgent) {
-		throwAgentsError("AGT_AGENT_NOT_FOUND", `Agent not found: ${command.agentId}`);
+		throwAgentsError(
+			"AGT_AGENT_NOT_FOUND",
+			`Agent not found: ${command.agentId}`,
+		);
 	}
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
@@ -34,10 +37,11 @@ export async function rollbackAgentVersion(
 		return replay;
 	}
 
-	const targetVersion = await deps.agentVersionRepository.findByAgentAndVersionNumber(
-		command.agentId,
-		command.targetVersionNumber,
-	);
+	const targetVersion =
+		await deps.agentVersionRepository.findByAgentAndVersionNumber(
+			command.agentId,
+			command.targetVersionNumber,
+		);
 	if (!targetVersion || targetVersion.status !== "published") {
 		throwAgentsError(
 			"AGT_VERSION_NOT_FOUND",
@@ -61,7 +65,10 @@ export async function rollbackAgentVersion(
 
 			const agent = await context.agentRepository.findById(command.agentId);
 			if (!agent) {
-				throwAgentsError("AGT_AGENT_NOT_FOUND", `Agent not found: ${command.agentId}`);
+				throwAgentsError(
+					"AGT_AGENT_NOT_FOUND",
+					`Agent not found: ${command.agentId}`,
+				);
 			}
 			if (agent.revision !== command.expectedRevision) {
 				throwAgentsError(
@@ -70,10 +77,11 @@ export async function rollbackAgentVersion(
 				);
 			}
 
-			const version = await context.agentVersionRepository.findByAgentAndVersionNumber(
-				command.agentId,
-				command.targetVersionNumber,
-			);
+			const version =
+				await context.agentVersionRepository.findByAgentAndVersionNumber(
+					command.agentId,
+					command.targetVersionNumber,
+				);
 			if (!version || version.status !== "published") {
 				throwAgentsError(
 					"AGT_VERSION_NOT_FOUND",

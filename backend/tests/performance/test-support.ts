@@ -1,5 +1,5 @@
-import { randomUUID } from "node:crypto";
 import { expect } from "bun:test";
+import { randomUUID } from "node:crypto";
 import {
 	createPgPool,
 	ensureEventingSchema,
@@ -14,17 +14,17 @@ import {
 } from "@anxionos/performance";
 import { buildTradeFillLines } from "../../modules/accounting/src/application/commands/post-trade-fill";
 import { normalizeDecimalAmount } from "../../modules/performance/src/domain/decimal-amount";
+import type {
+	MetricSeriesRecord,
+	OutcomeSnapshotRecord,
+	PositionExposureSnapshotRecord,
+} from "../../modules/performance/src/domain/ports/performance-unit-of-work";
 import { ensurePerformanceSchema } from "../../modules/performance/src/infrastructure/migrate";
 import {
 	createPgMetricSeriesRepository,
 	createPgOutcomeSnapshotRepository,
 	createPgPositionExposureSnapshotRepository,
 } from "../../modules/performance/src/infrastructure/persistence/repositories";
-import type {
-	MetricSeriesRecord,
-	OutcomeSnapshotRecord,
-	PositionExposureSnapshotRecord,
-} from "../../modules/performance/src/domain/ports/performance-unit-of-work";
 
 export function expectDecimalEqual(
 	actual: string | undefined,
@@ -100,21 +100,17 @@ export async function recordSampleOutcomeSnapshot(
 	});
 }
 
-export function createPerformanceLedgerConsumer(
-	deps: {
-		unitOfWork: ReturnType<typeof createPerformanceUnitOfWork>;
-		commandJournal: ReturnType<typeof createPgCommandJournalRepository>;
-	},
-) {
+export function createPerformanceLedgerConsumer(deps: {
+	unitOfWork: ReturnType<typeof createPerformanceUnitOfWork>;
+	commandJournal: ReturnType<typeof createPgCommandJournalRepository>;
+}) {
 	return createLedgerPostedConsumer(deps);
 }
 
-export function createPerformancePositionConsumer(
-	deps: {
-		unitOfWork: ReturnType<typeof createPerformanceUnitOfWork>;
-		commandJournal: ReturnType<typeof createPgCommandJournalRepository>;
-	},
-) {
+export function createPerformancePositionConsumer(deps: {
+	unitOfWork: ReturnType<typeof createPerformanceUnitOfWork>;
+	commandJournal: ReturnType<typeof createPgCommandJournalRepository>;
+}) {
 	return createPositionUpdatedConsumer(deps);
 }
 
@@ -250,7 +246,10 @@ export function createInMemoryMetricSeriesRepository(
 ) {
 	const records = new Map(seed.map((record) => [record.id, { ...record }]));
 	return {
-		async findByOutcomeAndMetric(outcomeSnapshotId: string, metricName: string) {
+		async findByOutcomeAndMetric(
+			outcomeSnapshotId: string,
+			metricName: string,
+		) {
 			return (
 				[...records.values()].find(
 					(record) =>

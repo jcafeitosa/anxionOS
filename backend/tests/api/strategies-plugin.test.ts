@@ -1,8 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { STRATEGIES_ERROR_CODES } from "@anxionos/contracts/strategies";
-import { StrategiesCommandError } from "@anxionos/strategies";
+import {
+	registerStrategyCommandSchema,
+	STRATEGIES_ERROR_CODES,
+} from "@anxionos/contracts/strategies";
 import { assertActorCanMutate } from "@anxionos/organizations";
-import { registerStrategyCommandSchema } from "@anxionos/contracts/strategies";
+import { StrategiesCommandError } from "@anxionos/strategies";
 import { mapStrategiesError } from "../../apps/api/src/strategies/error-handler";
 import {
 	backtestRunIdParamSchema,
@@ -10,8 +12,8 @@ import {
 	strategyIdParamSchema,
 	strategyVersionIdParamSchema,
 } from "../../apps/api/src/strategies/handlers/commands";
-import { createInMemoryMembershipRepository } from "../organizations/test-support";
 import type { Membership } from "../../modules/organizations/src/domain/entities/membership";
+import { createInMemoryMembershipRepository } from "../organizations/test-support";
 
 const agencyId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
@@ -51,7 +53,9 @@ describe("strategies POST RBAC (ANX-442)", () => {
 			statusCode: 403,
 		});
 		const mapped = mapStrategiesError(
-			await assertActorCanMutate(repo, viewerId, agencyId).catch((error) => error),
+			await assertActorCanMutate(repo, viewerId, agencyId).catch(
+				(error) => error,
+			),
 		);
 		expect(mapped.status).toBe(403);
 	});
@@ -69,13 +73,20 @@ describe("strategies POST RBAC (ANX-442)", () => {
 		["owner", "dddddddd-dddd-4ddd-8ddd-dddddddddd01"],
 		["admin", "dddddddd-dddd-4ddd-8ddd-dddddddddd02"],
 		["operator", "dddddddd-dddd-4ddd-8ddd-dddddddddd03"],
-	] as const)("%s membership passes mutation guard", async (role, principalId) => {
-		const repo = createInMemoryMembershipRepository([
-			activeMembership(role, principalId),
-		]);
-		const membership = await assertActorCanMutate(repo, principalId, agencyId);
-		expect(membership.role).toBe(role);
-	});
+	] as const)(
+		"%s membership passes mutation guard",
+		async (role, principalId) => {
+			const repo = createInMemoryMembershipRepository([
+				activeMembership(role, principalId),
+			]);
+			const membership = await assertActorCanMutate(
+				repo,
+				principalId,
+				agencyId,
+			);
+			expect(membership.role).toBe(role);
+		},
+	);
 });
 
 describe("strategies API boundary", () => {
@@ -118,7 +129,6 @@ describe("strategies API boundary", () => {
 		expect(mapped.status).toBe(403);
 	});
 
-
 	test("mapStrategiesError maps ST_CROSS_TENANT to 403", () => {
 		const error = new StrategiesCommandError(
 			STRATEGIES_ERROR_CODES.CROSS_TENANT,
@@ -145,7 +155,8 @@ describe("strategies API boundary", () => {
 			false,
 		);
 		expect(
-			strategyVersionIdParamSchema.safeParse({ strategyVersionId: "bad" }).success,
+			strategyVersionIdParamSchema.safeParse({ strategyVersionId: "bad" })
+				.success,
 		).toBe(false);
 		expect(
 			backtestRunIdParamSchema.safeParse({ backtestRunId: "bad" }).success,

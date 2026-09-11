@@ -1,8 +1,8 @@
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import { assertTenantScopedEnvelopeAgencyId } from "@anxionos/contracts/events";
 import {
-	ORGANIZATIONS_OWNER_DOMAIN,
 	ORGANIZATION_EVENT_TYPES,
+	ORGANIZATIONS_OWNER_DOMAIN,
 } from "@anxionos/contracts/organizations";
 import { GRAPH_ORGANIZATIONS_CONSUMER_NAME } from "../../../domain/projections/constants";
 import { ProjectionError } from "../../../domain/projections/errors";

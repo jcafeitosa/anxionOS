@@ -1,7 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import {
-	DEFAULT_SANDBOX_ISOLATION_FLAGS,
-} from "@anxionos/contracts/simulation";
+import { DEFAULT_SANDBOX_ISOLATION_FLAGS } from "@anxionos/contracts/simulation";
 import {
 	getSimulationRun,
 	getSimulationRunSnapshot,

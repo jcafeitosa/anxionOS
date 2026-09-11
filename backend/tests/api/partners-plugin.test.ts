@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { PartnersCommandError } from "@anxionos/partners";
 import { partnersPartnerIdSchema } from "@anxionos/contracts/partners";
+import { PartnersCommandError } from "@anxionos/partners";
 import { mapPartnersError } from "../../apps/api/src/partners/error-handler";
 import {
 	toCommissionAccrualDto,
@@ -16,7 +16,9 @@ describe("partners API boundary", () => {
 		);
 		const mapped = mapPartnersError(error);
 		expect(mapped.status).toBe(404);
-		expect(mapped.body.error.details).toEqual({ code: "PTR_PARTNER_NOT_FOUND" });
+		expect(mapped.body.error.details).toEqual({
+			code: "PTR_PARTNER_NOT_FOUND",
+		});
 	});
 
 	test("mapPartnersError maps PTR_CROSS_TENANT to 403", () => {

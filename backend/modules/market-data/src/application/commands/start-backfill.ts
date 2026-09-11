@@ -16,8 +16,8 @@ import {
 import { parseCommandResultSnapshot, throwMarketDataError } from "../errors";
 
 export {
-	startBackfillCommandSchema,
 	type StartBackfillCommand,
+	startBackfillCommandSchema,
 } from "@anxionos/contracts/market-data";
 
 export interface StartBackfillDeps {

@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { T01_INPUT_SCHEMA } from "./T01";
 import { reasonNodeSchema, traversalMetaSchema } from "./common";
+import { T01_INPUT_SCHEMA } from "./T01";
 export const TRAVERSAL_T03_META = traversalMetaSchema.parse({
 	traversalId: "T03",
 	queryVersion: 1,

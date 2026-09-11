@@ -78,11 +78,13 @@ const ERROR_RESPONSES = {
 	},
 	"401": { description: "Missing or invalid Better Auth session cookie." },
 	"403": {
-		description: "Caller is not an active member of the agency, or a grant is missing.",
+		description:
+			"Caller is not an active member of the agency, or a grant is missing.",
 	},
 	"404": { description: "Aggregate not found in the agency scope." },
 	"409": {
-		description: "Revision conflict, duplicate command, or lifecycle guard rejected the transition.",
+		description:
+			"Revision conflict, duplicate command, or lifecycle guard rejected the transition.",
 	},
 	"429": { description: "Rate limit or realtime connection quota exceeded." },
 };
@@ -178,7 +180,10 @@ export const identityOpenApi = {
 			"Registration payload.",
 		),
 		responses: {
-			"200": { description: "Created user and session cookie when auto-sign-in is enabled." },
+			"200": {
+				description:
+					"Created user and session cookie when auto-sign-in is enabled.",
+			},
 			"400": { description: "Validation or duplicate email." },
 		},
 	}),
@@ -244,7 +249,10 @@ export const organizationsOpenApi = {
 			"Agency display name and market scope.",
 		),
 		responses: {
-			"200": { description: "Command result: aggregateId, revision, optional idempotentReplay." },
+			"200": {
+				description:
+					"Command result: aggregateId, revision, optional idempotentReplay.",
+			},
 			...ERROR_RESPONSES,
 		},
 	}),
@@ -318,12 +326,11 @@ export const organizationsOpenApi = {
 		description:
 			"Module: organizations. Returns one membership. Path `membershipId` is the membership UUID, not the principal id.",
 		security: COOKIE_SECURITY,
-		parameters: [
-			...agencyParams,
-			pathUuid("membershipId", "Membership UUID."),
-		],
+		parameters: [...agencyParams, pathUuid("membershipId", "Membership UUID.")],
 		responses: {
-			"200": { description: "Membership record (role, status, invite metadata)." },
+			"200": {
+				description: "Membership record (role, status, invite metadata).",
+			},
 			...ERROR_RESPONSES,
 		},
 	}),
@@ -348,7 +355,9 @@ export const organizationsOpenApi = {
 			"Invitee email and console role.",
 		),
 		responses: {
-			"200": { description: "Invite result including one-time token when issued." },
+			"200": {
+				description: "Invite result including one-time token when issued.",
+			},
 			...ERROR_RESPONSES,
 		},
 	}),
@@ -431,7 +440,9 @@ export const governanceOpenApi = {
 		security: COOKIE_SECURITY,
 		parameters: agencyParams,
 		responses: {
-			"200": { description: "Pending change proposal collection for the agency." },
+			"200": {
+				description: "Pending change proposal collection for the agency.",
+			},
 			...ERROR_RESPONSES,
 		},
 	}),
@@ -498,12 +509,12 @@ export const governanceOpenApi = {
 		description:
 			"Module: governance. Returns the effective autonomy level for an agent in the agency (L0–L4 matrix). L3/L4 remain runtime-disabled until certified.",
 		security: COOKIE_SECURITY,
-		parameters: [
-			...agencyParams,
-			pathUuid("agentId", "Subject agent UUID."),
-		],
+		parameters: [...agencyParams, pathUuid("agentId", "Subject agent UUID.")],
 		responses: {
-			"200": { description: "Autonomy assignment DTO (level, status, evidenceHash, epochs)." },
+			"200": {
+				description:
+					"Autonomy assignment DTO (level, status, evidenceHash, epochs).",
+			},
 			...ERROR_RESPONSES,
 		},
 	}),
@@ -514,10 +525,7 @@ export const governanceOpenApi = {
 		description:
 			"Module: governance. Assigns autonomy level to the path agent. Requires evidence hash and optional approval id. L3/L4 assignment is blocked at runtime.",
 		security: COOKIE_SECURITY,
-		parameters: [
-			...commandParams,
-			pathUuid("agentId", "Subject agent UUID."),
-		],
+		parameters: [...commandParams, pathUuid("agentId", "Subject agent UUID.")],
 		requestBody: jsonBody(
 			{
 				type: "object",
@@ -543,10 +551,7 @@ export const governanceOpenApi = {
 		description:
 			"Module: governance. Transitions autonomy (`promote` | `demote` | `takeover`). Actor is the authenticated principal. Expected revision required for optimistic concurrency.",
 		security: COOKIE_SECURITY,
-		parameters: [
-			...commandParams,
-			pathUuid("agentId", "Subject agent UUID."),
-		],
+		parameters: [...commandParams, pathUuid("agentId", "Subject agent UUID.")],
 		requestBody: jsonBody(
 			{
 				type: "object",
@@ -579,7 +584,13 @@ export const governanceOpenApi = {
 			{
 				type: "object",
 				additionalProperties: false,
-				required: ["agencyId", "actorId", "action", "resourceNodeKey", "validAt"],
+				required: [
+					"agencyId",
+					"actorId",
+					"action",
+					"resourceNodeKey",
+					"validAt",
+				],
 				properties: {
 					agencyId: UUID,
 					actorId: UUID,
@@ -734,7 +745,11 @@ export const agentsOpenApi = {
 							},
 						},
 					},
-					capabilityManifestHash: { type: "string", minLength: 1, maxLength: 128 },
+					capabilityManifestHash: {
+						type: "string",
+						minLength: 1,
+						maxLength: 128,
+					},
 					modelSlots: {
 						type: "array",
 						items: {
@@ -746,7 +761,10 @@ export const agentsOpenApi = {
 							},
 						},
 					},
-					autonomyLevel: { type: "string", enum: ["L0", "L1", "L2", "L3", "L4"] },
+					autonomyLevel: {
+						type: "string",
+						enum: ["L0", "L1", "L2", "L3", "L4"],
+					},
 				},
 			},
 			"Version payload without commandId/agentId (path + header).",
@@ -1024,7 +1042,9 @@ export const partnersOpenApi = {
 			REQUEST_ID,
 		],
 		responses: {
-			"200": { description: "Partner record (referral, commission rate, status)." },
+			"200": {
+				description: "Partner record (referral, commission rate, status).",
+			},
 			...ERROR_RESPONSES,
 		},
 	}),
@@ -1115,7 +1135,10 @@ export const strategiesOpenApi = {
 		description:
 			"Module: strategies. Creates a DRAFT version with immutable content hashes. Versions become immutable after publish.",
 		security: COOKIE_SECURITY,
-		parameters: [...commandParams, pathUuid("strategyId", "Strategy aggregate id.")],
+		parameters: [
+			...commandParams,
+			pathUuid("strategyId", "Strategy aggregate id."),
+		],
 		requestBody: jsonBody(
 			{
 				type: "object",
@@ -1226,7 +1249,10 @@ export const strategiesOpenApi = {
 		description:
 			"Module: strategies. Activates a deployment for a certified/backtested version. PAPER requires certification bridge (EVALUATED→CERTIFIED). Binding snapshot is immutable after activation.",
 		security: COOKIE_SECURITY,
-		parameters: [...commandParams, pathUuid("strategyId", "Strategy aggregate id.")],
+		parameters: [
+			...commandParams,
+			pathUuid("strategyId", "Strategy aggregate id."),
+		],
 		requestBody: jsonBody(
 			{
 				type: "object",
@@ -1300,7 +1326,10 @@ export const strategiesOpenApi = {
 		description:
 			"Module: strategies. Emits a time-bound signal for instruments. Optional deploymentId scopes to an active deployment.",
 		security: COOKIE_SECURITY,
-		parameters: [...commandParams, pathUuid("strategyId", "Strategy aggregate id.")],
+		parameters: [
+			...commandParams,
+			pathUuid("strategyId", "Strategy aggregate id."),
+		],
 		requestBody: jsonBody(
 			{
 				type: "object",
@@ -1560,7 +1589,11 @@ export const operationsOpenApi = {
 							additionalProperties: false,
 							required: ["runtimes"],
 							properties: {
-								runtimes: { type: "array", maxItems: 0, items: { type: "object" } },
+								runtimes: {
+									type: "array",
+									maxItems: 0,
+									items: { type: "object" },
+								},
 							},
 						},
 					},
@@ -1586,7 +1619,11 @@ export const operationsOpenApi = {
 							additionalProperties: false,
 							required: ["recoveryTasks"],
 							properties: {
-								recoveryTasks: { type: "array", maxItems: 0, items: { type: "object" } },
+								recoveryTasks: {
+									type: "array",
+									maxItems: 0,
+									items: { type: "object" },
+								},
 							},
 						},
 					},
@@ -1791,10 +1828,7 @@ export const operationsOpenApi = {
 			"Module: operations. Approves a recovery task awaiting approval. Optimistic revision required.",
 		security: COOKIE_SECURITY,
 		parameters: [...commandParams, recoveryTaskIdPath],
-		requestBody: jsonBody(
-			expectedRevisionBody,
-			"Expected revision.",
-		),
+		requestBody: jsonBody(expectedRevisionBody, "Expected revision."),
 		responses: {
 			"200": { description: "Command result after approval." },
 			...ERROR_RESPONSES,
@@ -1822,10 +1856,7 @@ export const operationsOpenApi = {
 			"Module: operations. Marks an in-progress recovery task as COMPLETED.",
 		security: COOKIE_SECURITY,
 		parameters: [...commandParams, recoveryTaskIdPath],
-		requestBody: jsonBody(
-			expectedRevisionBody,
-			"Expected revision.",
-		),
+		requestBody: jsonBody(expectedRevisionBody, "Expected revision."),
 		responses: {
 			"200": { description: "Command result after completion." },
 			...ERROR_RESPONSES,
@@ -1858,8 +1889,7 @@ export const operationsOpenApi = {
 		tag: "Operations",
 		operationId: "cancelRecoveryTask",
 		summary: "Cancel recovery task",
-		description:
-			"Module: operations. Cancels a non-terminal recovery task.",
+		description: "Module: operations. Cancels a non-terminal recovery task.",
 		security: COOKIE_SECURITY,
 		parameters: [...commandParams, recoveryTaskIdPath],
 		requestBody: jsonBody(
@@ -2152,7 +2182,8 @@ export const performanceOpenApi = {
 		parameters: [...agencyParams, positionExposureSnapshotIdPath],
 		responses: {
 			"200": {
-				description: "Derived metric series for the position exposure snapshot.",
+				description:
+					"Derived metric series for the position exposure snapshot.",
 				content: {
 					"application/json": {
 						schema: {
@@ -2254,12 +2285,7 @@ const simulationRunOpenApiSchema: JsonSchema = {
 const simulationRunSnapshotOpenApiSchema: JsonSchema = {
 	type: "object",
 	additionalProperties: false,
-	required: [
-		"snapshotId",
-		"simulationRunId",
-		"organizationId",
-		"datasetHash",
-	],
+	required: ["snapshotId", "simulationRunId", "organizationId", "datasetHash"],
 	properties: {
 		snapshotId: {
 			type: "string",
@@ -2372,7 +2398,6 @@ export const simulationOpenApi = {
 		},
 	}),
 } as const;
-
 
 export const executionOpenApi = {
 	listOrders: op({
@@ -2529,7 +2554,6 @@ export const riskOpenApi = {
 		},
 	}),
 } as const;
-
 
 export const evaluationOpenApi = {
 	getCertificationBySubject: op({

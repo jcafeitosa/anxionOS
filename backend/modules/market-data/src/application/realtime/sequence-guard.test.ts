@@ -30,27 +30,27 @@ describe("RealtimeIngestSequenceGuard", () => {
 	test("admits first event with OK quality", () => {
 		const guard = new RealtimeIngestSequenceGuard();
 		guard.registerStream(TENANT, STREAM);
-		expect(
-			guard.admitEvent(TENANT, STREAM, { eventTime: iso(1_000) }),
-		).toEqual({ action: "admit", qualityFlag: "OK" });
+		expect(guard.admitEvent(TENANT, STREAM, { eventTime: iso(1_000) })).toEqual(
+			{ action: "admit", qualityFlag: "OK" },
+		);
 	});
 
 	test("flags out-of-order eventTime as ESTIMATED", () => {
 		const guard = new RealtimeIngestSequenceGuard();
 		guard.registerStream(TENANT, STREAM);
 		guard.admitEvent(TENANT, STREAM, { eventTime: iso(2_000) });
-		expect(
-			guard.admitEvent(TENANT, STREAM, { eventTime: iso(1_500) }),
-		).toEqual({ action: "admit", qualityFlag: "ESTIMATED" });
+		expect(guard.admitEvent(TENANT, STREAM, { eventTime: iso(1_500) })).toEqual(
+			{ action: "admit", qualityFlag: "ESTIMATED" },
+		);
 	});
 
 	test("flags eventTime gap as STALE", () => {
 		const guard = new RealtimeIngestSequenceGuard({ gapThresholdMs: 1_000 });
 		guard.registerStream(TENANT, STREAM);
 		guard.admitEvent(TENANT, STREAM, { eventTime: iso(1_000) });
-		expect(
-			guard.admitEvent(TENANT, STREAM, { eventTime: iso(3_000) }),
-		).toEqual({ action: "admit", qualityFlag: "STALE" });
+		expect(guard.admitEvent(TENANT, STREAM, { eventTime: iso(3_000) })).toEqual(
+			{ action: "admit", qualityFlag: "STALE" },
+		);
 	});
 
 	test("flags stream sequence gap and out-of-order sequence", () => {
@@ -78,9 +78,9 @@ describe("RealtimeIngestSequenceGuard", () => {
 		const guard = new RealtimeIngestSequenceGuard({ rejectAnomalies: true });
 		guard.registerStream(TENANT, STREAM);
 		guard.admitEvent(TENANT, STREAM, { eventTime: iso(2_000) });
-		expect(
-			guard.admitEvent(TENANT, STREAM, { eventTime: iso(1_000) }),
-		).toEqual({ action: "reject", reason: "OUT_OF_ORDER_EVENT_TIME" });
+		expect(guard.admitEvent(TENANT, STREAM, { eventTime: iso(1_000) })).toEqual(
+			{ action: "reject", reason: "OUT_OF_ORDER_EVENT_TIME" },
+		);
 	});
 
 	test("onReconnect marks first post-resync event STALE when no baseline", () => {
@@ -88,12 +88,12 @@ describe("RealtimeIngestSequenceGuard", () => {
 		guard.registerStream(TENANT, STREAM);
 		guard.markDisconnected(TENANT, STREAM);
 		guard.onReconnect(TENANT, STREAM);
-		expect(
-			guard.admitEvent(TENANT, STREAM, { eventTime: iso(5_000) }),
-		).toEqual({ action: "admit", qualityFlag: "STALE" });
-		expect(
-			guard.admitEvent(TENANT, STREAM, { eventTime: iso(5_100) }),
-		).toEqual({ action: "admit", qualityFlag: "OK" });
+		expect(guard.admitEvent(TENANT, STREAM, { eventTime: iso(5_000) })).toEqual(
+			{ action: "admit", qualityFlag: "STALE" },
+		);
+		expect(guard.admitEvent(TENANT, STREAM, { eventTime: iso(5_100) })).toEqual(
+			{ action: "admit", qualityFlag: "OK" },
+		);
 	});
 
 	test("releaseStream clears sequence state", () => {
@@ -103,8 +103,8 @@ describe("RealtimeIngestSequenceGuard", () => {
 		guard.releaseStream(TENANT, STREAM);
 		expect(guard.snapshot(TENANT, STREAM)).toBeNull();
 		guard.registerStream(TENANT, STREAM);
-		expect(
-			guard.admitEvent(TENANT, STREAM, { eventTime: iso(1_000) }),
-		).toEqual({ action: "admit", qualityFlag: "OK" });
+		expect(guard.admitEvent(TENANT, STREAM, { eventTime: iso(1_000) })).toEqual(
+			{ action: "admit", qualityFlag: "OK" },
+		);
 	});
 });

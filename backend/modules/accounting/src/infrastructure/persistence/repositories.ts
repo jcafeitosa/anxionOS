@@ -8,6 +8,7 @@ import type {
 	LedgerPostingRecord,
 	LedgerPostingRepository,
 } from "../../domain/ports/accounting-unit-of-work";
+
 const DEFAULT_CHART_ACCOUNTS = [
 	{ code: "trading.cash", kind: "ASSET" },
 	{ code: "trading.clearing", kind: "ASSET" },

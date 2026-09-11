@@ -64,7 +64,8 @@ describe("agents register/publish against real Postgres (ANX-323)", () => {
 		if (!shouldRunPgIntegrationTests()) return;
 
 		await withAgentsPgHarness(async ({ pool }) => {
-			const { unitOfWork, commandJournal, agentRepository } = await createAgentsPgDeps(pool);
+			const { unitOfWork, commandJournal, agentRepository } =
+				await createAgentsPgDeps(pool);
 			const organizationId = randomUUID();
 
 			const registered = await registerAgent(

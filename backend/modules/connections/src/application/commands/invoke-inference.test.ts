@@ -1,8 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import { CONNECTIONS_EVENT_TYPES } from "@anxionos/contracts/connections";
-import { invokeInference } from "./invoke-inference";
+import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import type {
 	ConnectionBindingRecord,
 	ConnectionsTransactionContext,
@@ -14,6 +13,7 @@ import type {
 	InferenceInvokeResult,
 	InferencePort,
 } from "../../domain/ports/inference-port";
+import { invokeInference } from "./invoke-inference";
 
 async function invokeTestSimulatedInference(
 	input: InferenceInvokeInput,
@@ -76,7 +76,10 @@ function createInMemoryUow(binding: ConnectionBindingRecord) {
 		},
 		bindings: {
 			async findActiveById(bindingId, organizationId) {
-				if (bindingId !== binding.id || organizationId !== binding.organizationId) {
+				if (
+					bindingId !== binding.id ||
+					organizationId !== binding.organizationId
+				) {
 					return null;
 				}
 				return binding;
@@ -87,14 +90,22 @@ function createInMemoryUow(binding: ConnectionBindingRecord) {
 		},
 		inferenceRequests: {
 			async findByIdempotencyKey(organizationId, idempotencyKey) {
-				return inferenceByKey.get(`${organizationId}:${idempotencyKey}`) ?? null;
+				return (
+					inferenceByKey.get(`${organizationId}:${idempotencyKey}`) ?? null
+				);
 			},
 			async save(record) {
-				inferenceByKey.set(`${record.organizationId}:${record.idempotencyKey}`, record);
+				inferenceByKey.set(
+					`${record.organizationId}:${record.idempotencyKey}`,
+					record,
+				);
 				return record;
 			},
 			async update(record) {
-				inferenceByKey.set(`${record.organizationId}:${record.idempotencyKey}`, record);
+				inferenceByKey.set(
+					`${record.organizationId}:${record.idempotencyKey}`,
+					record,
+				);
 				return record;
 			},
 		},
@@ -138,7 +149,8 @@ const inferencePort: InferencePort = {
 
 describe("invokeInference waitingHuman (D-CX-049)", () => {
 	test("returns waitingHuman without usage when adapter requests human approval", async () => {
-		const { unitOfWork, getPublished, getInference } = createInMemoryUow(binding);
+		const { unitOfWork, getPublished, getInference } =
+			createInMemoryUow(binding);
 		const idempotencyKey = randomUUID();
 		const result = await invokeInference(
 			{
@@ -153,15 +165,15 @@ describe("invokeInference waitingHuman (D-CX-049)", () => {
 				bindingVersion: 1,
 				operation: "approve-trade",
 				requirements: {
-	schemaVersion: "1.0.0" as const,
-	taskType: "test",
-	operation: "approve-trade",
-	requiredCapabilities: ["text"],
-	requiredPurpose: "ROUTINE" as const,
-	dataClass: "INTERNAL" as const,
-	latencyClass: "INTERACTIVE" as const,
-	complexity: "SMALL" as const,
-},
+					schemaVersion: "1.0.0" as const,
+					taskType: "test",
+					operation: "approve-trade",
+					requiredCapabilities: ["text"],
+					requiredPurpose: "ROUTINE" as const,
+					dataClass: "INTERNAL" as const,
+					latencyClass: "INTERACTIVE" as const,
+					complexity: "SMALL" as const,
+				},
 				typedInput: { awaitHumanApproval: true, operationId: "op-141-1" },
 				deadline: new Date(Date.now() + 60_000).toISOString(),
 				idempotencyKey,
@@ -171,8 +183,16 @@ describe("invokeInference waitingHuman (D-CX-049)", () => {
 		expect(result.waitingHuman?.operationId).toBe("op-141-1");
 		expect(result.waitingHuman?.issueIdentifier).toBe("ANX-141");
 		expect(getInference(idempotencyKey)?.status).toBe("waiting_human");
-		expect(getPublished().some((e) => e.eventType === CONNECTIONS_EVENT_TYPES.INFERENCE_WAITING_HUMAN)).toBe(true);
-		expect(getPublished().some((e) => e.eventType === CONNECTIONS_EVENT_TYPES.USAGE_RECORDED)).toBe(false);
+		expect(
+			getPublished().some(
+				(e) => e.eventType === CONNECTIONS_EVENT_TYPES.INFERENCE_WAITING_HUMAN,
+			),
+		).toBe(true);
+		expect(
+			getPublished().some(
+				(e) => e.eventType === CONNECTIONS_EVENT_TYPES.USAGE_RECORDED,
+			),
+		).toBe(false);
 	});
 
 	test("idempotent replay returns same aggregate without duplicate events", async () => {
@@ -190,15 +210,15 @@ describe("invokeInference waitingHuman (D-CX-049)", () => {
 			bindingVersion: 1,
 			operation: "summarize",
 			requirements: {
-	schemaVersion: "1.0.0" as const,
-	taskType: "test",
-	operation: "approve-trade",
-	requiredCapabilities: ["text"],
-	requiredPurpose: "ROUTINE" as const,
-	dataClass: "INTERNAL" as const,
-	latencyClass: "INTERACTIVE" as const,
-	complexity: "SMALL" as const,
-},
+				schemaVersion: "1.0.0" as const,
+				taskType: "test",
+				operation: "approve-trade",
+				requiredCapabilities: ["text"],
+				requiredPurpose: "ROUTINE" as const,
+				dataClass: "INTERNAL" as const,
+				latencyClass: "INTERACTIVE" as const,
+				complexity: "SMALL" as const,
+			},
 			typedInput: { text: "hello" },
 			deadline: new Date(Date.now() + 60_000).toISOString(),
 			idempotencyKey,

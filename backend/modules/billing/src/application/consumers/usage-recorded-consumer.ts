@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import {
 	type BillingCommandResult,
-	type ConnectionsUsageRecordedBridge,
 	billingCommandResultSchema,
+	type ConnectionsUsageRecordedBridge,
 	mapUsageRecordedToBillingInput,
 } from "@anxionos/contracts/billing";
 import type { BillingUnitOfWork } from "../../domain/ports/billing-unit-of-work";

@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import {
-	TenantContextError,
 	createRolesSql,
 	dropRolesSql,
 	rollbackDatabaseMigrations,
+	TenantContextError,
 	tenantScopedPolicies,
 	validateTenantContext,
 } from "@anxionos/database";

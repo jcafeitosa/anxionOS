@@ -25,7 +25,8 @@ export function resolveOpenBotHomologationPolicy(
 	const skipFlag = readEnv(env, "SKIP_OPENBOT_E2E");
 	const skipE2E = skipFlag !== "0";
 	const intelligenceConfigured = Boolean(
-		readEnv(env, "INTELLIGENCE_API_URL") && readEnv(env, "INTELLIGENCE_API_KEY"),
+		readEnv(env, "INTELLIGENCE_API_URL") &&
+			readEnv(env, "INTELLIGENCE_API_KEY"),
 	);
 
 	let blockReason: string | null = null;

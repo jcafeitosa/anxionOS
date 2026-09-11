@@ -3,7 +3,6 @@ import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { RunHeartbeat } from "../../domain/entities/run-heartbeat";
 import type { RunHeartbeatRepository } from "../../domain/ports/run-heartbeat-repository";
 import type { RunHeartbeatRow } from "./schema";
-import {} from "./schema";
 import { runHeartbeats, runs } from "./schema";
 
 export function toRunHeartbeat(row: RunHeartbeatRow): RunHeartbeat {

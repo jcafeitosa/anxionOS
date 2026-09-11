@@ -11,12 +11,10 @@ import type { CommandJournalEntry } from "../../domain/ports/command-journal";
 export const TEST_ORG = "00000000-0000-4000-8000-000000000001";
 export const TEST_ORG_B = "00000000-0000-4000-8000-000000000002";
 
-export function createBillingTestUow(
-	initial?: {
-		subscriptions?: SubscriptionRecord[];
-		invoices?: InvoiceRecord[];
-	},
-) {
+export function createBillingTestUow(initial?: {
+	subscriptions?: SubscriptionRecord[];
+	invoices?: InvoiceRecord[];
+}) {
 	const subscriptions = new Map(
 		(initial?.subscriptions ?? []).map((row) => [row.id, row]),
 	);

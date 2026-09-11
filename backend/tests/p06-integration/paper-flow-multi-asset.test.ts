@@ -14,38 +14,36 @@
  */
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { createPgPool } from "@anxionos/eventing/postgres";
-
+import {
+	createPgCommandJournalRepository as createAccountingCommandJournal,
+	createAccountingUnitOfWork,
+	ensureAccountingSchema,
+	postTradeFill,
+} from "@anxionos/accounting";
+import { postTradeFillCommandSchema } from "@anxionos/contracts/accounting";
 import { tradeIntentSchema } from "@anxionos/contracts/decisions";
-import { runPreTradeCheckCommandSchema } from "@anxionos/contracts/risk";
 import {
 	assertNoBlindRetry,
-	EffectGateError,
 	EFFECT_GATE_VIOLATION,
+	EffectGateError,
 	executionCommandResultSchema,
 	openExecutionSessionCommandSchema,
-	submitOrderCommandSchema,
 	recordFillCommandSchema,
+	submitOrderCommandSchema,
 } from "@anxionos/contracts/execution";
-import { postTradeFillCommandSchema } from "@anxionos/contracts/accounting";
-
+import { runPreTradeCheckCommandSchema } from "@anxionos/contracts/risk";
+import { createPgPool } from "@anxionos/eventing/postgres";
 import {
-	openExecutionSession,
-	submitOrder,
-	recordFill,
-	createExecutionUnitOfWork,
 	createPgCommandJournalRepository as createExecutionCommandJournal,
-	ensureExecutionSchema,
+	createExecutionUnitOfWork,
 	createPgRiskPermitValidationPort,
+	ensureExecutionSchema,
 	InMemoryExecutionCapitalNotifyAdapter,
+	openExecutionSession,
+	recordFill,
 	SimulatedVenueAdapter,
+	submitOrder,
 } from "@anxionos/execution";
-import {
-	postTradeFill,
-	createAccountingUnitOfWork,
-	createPgCommandJournalRepository as createAccountingCommandJournal,
-	ensureAccountingSchema,
-} from "@anxionos/accounting";
 import { ensurePerformanceSchema } from "@anxionos/performance";
 
 const VALID_UUID = "a1234567-89ab-4def-8123-456789abcdef";
@@ -163,7 +161,8 @@ describe("P06 paper flow — multi-asset STOCK+CRYPTO portfolio (ANX-163 S3)", (
 				organizationId: ORG_ID,
 				portfolioId: PORTFOLIO_ACCOUNT_ID,
 				intentHash,
-				notionalAmount: intentHash === STOCK_INTENT_HASH ? "1500.00" : "25000.00",
+				notionalAmount:
+					intentHash === STOCK_INTENT_HASH ? "1500.00" : "25000.00",
 				authorityEpoch: AUTHORITY_EPOCH,
 				riskEpoch: RISK_EPOCH,
 				executionMode: "PAPER",
@@ -241,7 +240,10 @@ describe("P06 paper flow — multi-asset STOCK+CRYPTO portfolio (ANX-163 S3)", (
 		});
 		expect(stockPartial.fillQuantity).toBe("3");
 		expect(
-			resolveOrderStatusAfterFill(stockPartial.quantity, stockPartial.fillQuantity!),
+			resolveOrderStatusAfterFill(
+				stockPartial.quantity,
+				stockPartial.fillQuantity!,
+			),
 		).toBe("PARTIALLY_FILLED");
 
 		const cryptoPartial = submitOrderCommandSchema.parse({

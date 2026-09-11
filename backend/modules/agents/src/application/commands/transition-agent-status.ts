@@ -1,14 +1,14 @@
 import {
-	commandResultSchema,
-	transitionAgentStatusCommandSchema,
 	type CommandResult,
+	commandResultSchema,
 	type TransitionAgentStatusCommand,
+	transitionAgentStatusCommandSchema,
 } from "@anxionos/contracts/agents";
 import { createAgentStatusChangedEvent } from "../../domain/events/agent-events";
 import { canTransitionAgentStatus } from "../../domain/policies/agent-lifecycle";
 import type { AgentRepository } from "../../domain/ports/agent-repository";
-import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
+import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import {
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
@@ -23,7 +23,10 @@ export async function transitionAgentStatus(
 	const command = transitionAgentStatusCommandSchema.parse(input);
 	const preflightAgent = await deps.agentRepository.findById(command.agentId);
 	if (!preflightAgent) {
-		throwAgentsError("AGT_AGENT_NOT_FOUND", `Agent not found: ${command.agentId}`);
+		throwAgentsError(
+			"AGT_AGENT_NOT_FOUND",
+			`Agent not found: ${command.agentId}`,
+		);
 	}
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
@@ -50,7 +53,10 @@ export async function transitionAgentStatus(
 
 			const agent = await context.agentRepository.findById(command.agentId);
 			if (!agent) {
-				throwAgentsError("AGT_AGENT_NOT_FOUND", `Agent not found: ${command.agentId}`);
+				throwAgentsError(
+					"AGT_AGENT_NOT_FOUND",
+					`Agent not found: ${command.agentId}`,
+				);
 			}
 			if (agent.revision !== command.expectedRevision) {
 				throwAgentsError(
@@ -105,7 +111,8 @@ export async function transitionAgentStatus(
 	);
 }
 
-export interface TransitionAgentStatusInput extends TransitionAgentStatusCommand {
+export interface TransitionAgentStatusInput
+	extends TransitionAgentStatusCommand {
 	actorPrincipalId?: string;
 }
 

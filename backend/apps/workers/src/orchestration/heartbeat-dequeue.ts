@@ -1,3 +1,4 @@
+import { createLogger } from "@anxionos/observability";
 import {
 	acknowledgeRunHeartbeat,
 	dequeueRunHeartbeats,
@@ -5,7 +6,6 @@ import {
 	type OperationalBudgetPort,
 	type OrchestrationUnitOfWork,
 } from "@anxionos/orchestration";
-import { createLogger } from "@anxionos/observability";
 import { sleepWithAbort } from "./poll-utils";
 
 export const ORCHESTRATION_HEARTBEAT_DEQUEUE_WORKER_NAME =

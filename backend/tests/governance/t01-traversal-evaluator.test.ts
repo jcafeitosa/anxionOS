@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import {
+	createGraphT01TraversalEvaluator,
 	GOVERNANCE_T01_DENY_REASONS,
 	GOVERNANCE_T01_TIMEOUT_MS,
-	createGraphT01TraversalEvaluator,
 } from "@anxionos/governance";
 import { createInMemoryAuthorityEpochStore } from "./test-support";
 

@@ -66,9 +66,7 @@ export function resolveXchEngineMode(explicit?: XchEngineMode): XchEngineMode {
 
 function isHealthySimulatedSandbox(body: XchSandboxHealthResponse): boolean {
 	return (
-		body.status === "ok" &&
-		body.engine === "xchange" &&
-		body.simulated === true
+		body.status === "ok" && body.engine === "xchange" && body.simulated === true
 	);
 }
 
@@ -124,8 +122,7 @@ export class XChangeAdapter implements RiskPermitValidationPort {
 		this.sandboxUrl = resolveXchSandboxUrl(options.sandboxUrl);
 		this.engineMode = resolveXchEngineMode(options.engineMode);
 		this.fetchFn = options.fetchFn ?? fetch;
-		this.healthTimeoutMs =
-			options.healthTimeoutMs ?? DEFAULT_HEALTH_TIMEOUT_MS;
+		this.healthTimeoutMs = options.healthTimeoutMs ?? DEFAULT_HEALTH_TIMEOUT_MS;
 	}
 
 	private validateLicenseFormat(license: string): boolean {

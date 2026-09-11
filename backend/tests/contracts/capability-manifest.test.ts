@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import {
+	assertCapabilityOutcomeKnown,
 	CAPABILITY_MANIFEST_V1_CATALOG,
 	CAPABILITY_MANIFEST_V1_ENTRIES,
 	CapabilityManifestError,
-	assertCapabilityOutcomeKnown,
 	capabilityManifestCatalogSchema,
 	createCapabilityManifestClient,
 	getCapabilityManifestEntry,

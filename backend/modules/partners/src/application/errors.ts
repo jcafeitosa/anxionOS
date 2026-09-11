@@ -1,9 +1,9 @@
 import { AppError } from "@anxionos/contracts/errors";
 import {
-	resolvePartnersErrorStatus,
 	type PartnersCommandResult,
 	type PartnersErrorCode,
 	partnersCommandResultSchema,
+	resolvePartnersErrorStatus,
 } from "@anxionos/contracts/partners";
 
 export class PartnersCommandError extends AppError {

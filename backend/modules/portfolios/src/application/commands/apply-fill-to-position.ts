@@ -66,10 +66,7 @@ export async function applyFillToPosition(
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			return replayIdempotentCommandJournalEntry(
-				raced,
-				command.organizationId,
-			);
+			return replayIdempotentCommandJournalEntry(raced, command.organizationId);
 		}
 		const portfolio = await ctx.portfolios.findById(command.portfolioId);
 		if (!portfolio) {
@@ -185,11 +182,16 @@ export async function applyFillToPosition(
 			quantity: command.quantity,
 			price: command.price,
 		});
-		const result = positionResultFromRecord(updatedPosition, holding.id, false, {
-			reconciliationCaseId: provisional.reconciliationCaseId,
-			cashPositionId: provisional.cashPosition.id,
-			provisionalCash: true,
-		});
+		const result = positionResultFromRecord(
+			updatedPosition,
+			holding.id,
+			false,
+			{
+				reconciliationCaseId: provisional.reconciliationCaseId,
+				cashPositionId: provisional.cashPosition.id,
+				provisionalCash: true,
+			},
+		);
 		await ctx.commandJournal.save({
 			commandId: command.commandId,
 			organizationId: command.organizationId,

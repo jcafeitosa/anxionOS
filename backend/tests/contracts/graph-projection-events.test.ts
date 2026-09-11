@@ -5,11 +5,11 @@
 import { describe, expect, test } from "bun:test";
 import {
 	AGENT_GRAPH_EVENT_TYPES,
-	PRODUCT_GRAPH_EVENT_TYPES,
 	agentRoleAssignedPayloadSchema,
 	decisionRecordedPayloadSchema,
 	graphQueryEnvelopeSchema,
 	nodeKeySchema,
+	PRODUCT_GRAPH_EVENT_TYPES,
 	workItemStatusChangedPayloadSchema,
 } from "@anxionos/contracts/graph";
 

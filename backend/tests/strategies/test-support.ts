@@ -1,19 +1,19 @@
 import { randomUUID } from "node:crypto";
-import type { Pool } from "pg";
 import {
 	createPgPool,
 	ensureEventingSchema,
 } from "@anxionos/eventing/postgres";
 import {
+	completeBacktest,
 	createCertificationIssuedConsumer,
 	createPgCommandJournalRepository,
 	createSandboxBacktestRunnerAdapter,
 	createStrategiesUnitOfWork,
 	createStrategyVersion,
-	completeBacktest,
 	registerStrategy,
 	requestBacktest,
 } from "@anxionos/strategies";
+import type { Pool } from "pg";
 import { ensureStrategiesSchema } from "../../modules/strategies/src/infrastructure/migrate";
 
 export function getDatabaseUrl(): string | undefined {
@@ -149,8 +149,7 @@ export async function certifyStrategyVersionViaEvent(
 	const issuedAt = new Date().toISOString();
 	return consumer.handle(
 		{
-			certificationId:
-				input.certificationId ?? `evl_crt_${randomUUID()}`,
+			certificationId: input.certificationId ?? `evl_crt_${randomUUID()}`,
 			organizationId: ORG_ID,
 			subjectType: "strategy_version",
 			strategyId: input.strategyId,

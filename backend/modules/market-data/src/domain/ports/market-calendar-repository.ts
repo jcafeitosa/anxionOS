@@ -28,7 +28,10 @@ export interface MarketCalendarRepository {
 	 * Find a trading session for a venue calendar and date.
 	 * Returns null if no session exists for that date.
 	 */
-	findSession(venueCalendarId: string, date: Date): Promise<TradingSessionRecord | null>;
+	findSession(
+		venueCalendarId: string,
+		date: Date,
+	): Promise<TradingSessionRecord | null>;
 
 	/**
 	 * Save a venue calendar record (idempotent upsert).

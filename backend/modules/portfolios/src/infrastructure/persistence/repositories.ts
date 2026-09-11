@@ -2,6 +2,7 @@ import type { Pool, PoolClient } from "pg";
 import { PortfoliosCommandError } from "../../application/errors";
 
 type PgQueryable = Pool | PoolClient;
+
 import type {
 	HoldingRecord,
 	HoldingRepository,
@@ -9,10 +10,10 @@ import type {
 	LedgerApplicationRepository,
 	PortfolioRecord,
 	PortfolioRepository,
-	PositionRecord,
-	PositionRepository,
 	PositionReconciliationCaseRecord,
 	PositionReconciliationCaseRepository,
+	PositionRecord,
+	PositionRepository,
 	ProvisionalCashRecord,
 	ProvisionalCashRepository,
 	ValuationSnapshotRecord,
@@ -352,12 +353,12 @@ function mapReconciliationCase(
 		organizationId: String(row.organization_id),
 		portfolioId: String(row.portfolio_id),
 		positionId: row.position_id ? String(row.position_id) : null,
-		caseKind: String(row.case_kind) as PositionReconciliationCaseRecord["caseKind"],
+		caseKind: String(
+			row.case_kind,
+		) as PositionReconciliationCaseRecord["caseKind"],
 		status: String(row.status),
 		fillId: row.fill_id ? String(row.fill_id) : null,
-		journalEntryId: row.journal_entry_id
-			? String(row.journal_entry_id)
-			: null,
+		journalEntryId: row.journal_entry_id ? String(row.journal_entry_id) : null,
 		evidence: row.evidence ? String(row.evidence) : null,
 		disposition: row.disposition ? String(row.disposition) : null,
 		dispositionRationale: row.disposition_rationale

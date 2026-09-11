@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-	freqtradeSimulatedAdapterManifest,
 	FREQTRADE_ADAPTER_ID,
+	freqtradeSimulatedAdapterManifest,
 	runAdapterConformanceSuite,
 } from "@anxionos/adapter-gateway";
 

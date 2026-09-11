@@ -46,10 +46,7 @@ export async function openPositionReconciliationCase(
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			return replayIdempotentCommandJournalEntry(
-				raced,
-				command.organizationId,
-			);
+			return replayIdempotentCommandJournalEntry(raced, command.organizationId);
 		}
 
 		const portfolio = await ctx.portfolios.findById(command.portfolioId);
@@ -63,9 +60,8 @@ export async function openPositionReconciliationCase(
 			);
 		}
 
-		const reconciliationCase = await openPositionReconciliationCaseInTransaction(
-			ctx,
-			{
+		const reconciliationCase =
+			await openPositionReconciliationCaseInTransaction(ctx, {
 				organizationId: command.organizationId,
 				portfolioId: command.portfolioId,
 				caseKind: command.caseKind,
@@ -73,8 +69,7 @@ export async function openPositionReconciliationCase(
 				fillId: command.fillId,
 				journalEntryId: command.journalEntryId,
 				evidence: command.evidence,
-			},
-		);
+			});
 
 		const result = portfoliosCommandResultSchema.parse({
 			aggregateId: reconciliationCase.id,
@@ -107,10 +102,7 @@ export async function resolvePositionReconciliationCase(
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			return replayIdempotentCommandJournalEntry(
-				raced,
-				command.organizationId,
-			);
+			return replayIdempotentCommandJournalEntry(raced, command.organizationId);
 		}
 
 		const reconciliationCase = await ctx.reconciliationCases.findById(

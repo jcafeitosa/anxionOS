@@ -1,4 +1,5 @@
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
+import type { CommandJournalEntry } from "../../domain/ports/command-journal";
 import type {
 	ChunkRecord,
 	DocumentRecord,
@@ -10,7 +11,6 @@ import type {
 	KnowledgeUnitOfWork,
 	RetrievalEmbeddingRecord,
 } from "../../domain/ports/knowledge-unit-of-work";
-import type { CommandJournalEntry } from "../../domain/ports/command-journal";
 
 export const TEST_ORG = "00000000-0000-4000-8000-000000000001";
 export const TEST_ACL_ID = "11111111-1111-4111-8111-111111111111";
@@ -27,9 +27,7 @@ export function createKnowledgeTestUow(initial?: {
 	);
 	const versions = new Map<string, DocumentVersionRecord>();
 	const indexes = new Map<string, IndexGenerationRecord>();
-	const chunks = new Map(
-		(initial?.chunks ?? []).map((row) => [row.id, row]),
-	);
+	const chunks = new Map((initial?.chunks ?? []).map((row) => [row.id, row]));
 	const embeddings = new Map(
 		(initial?.embeddings ?? []).map((row) => [row.chunkId, row]),
 	);

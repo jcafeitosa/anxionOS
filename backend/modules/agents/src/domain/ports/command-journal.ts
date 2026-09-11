@@ -20,6 +20,9 @@ export interface NewCommandJournalRecord {
 }
 
 export interface CommandJournalRepository {
-	findByCommandId(tenantId: string, commandId: string): Promise<CommandJournalRecord | null>;
+	findByCommandId(
+		tenantId: string,
+		commandId: string,
+	): Promise<CommandJournalRecord | null>;
 	record(entry: NewCommandJournalRecord): Promise<CommandJournalRecord>;
 }

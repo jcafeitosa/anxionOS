@@ -77,6 +77,9 @@ export type GrantRef = z.infer<typeof grantRefSchema>;
 export const waitingHumanResultSchema = z.object({
 	operationId: z.string().min(1).max(128),
 	inferenceRequestId: inferenceRequestIdSchema,
-	issueIdentifier: z.string().regex(/^ANX-[0-9]+$/).optional(),
+	issueIdentifier: z
+		.string()
+		.regex(/^ANX-[0-9]+$/)
+		.optional(),
 });
 export type WaitingHumanResult = z.infer<typeof waitingHumanResultSchema>;

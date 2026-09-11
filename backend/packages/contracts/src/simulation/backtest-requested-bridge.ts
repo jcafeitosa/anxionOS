@@ -16,7 +16,9 @@ export function mapBacktestRequestedToSimulationInput(
 ): CreateSimulationRunCommand {
 	const parsed = strategiesBacktestRequestedBridgeSchema.parse(backtest);
 	assertSimulationExecutionModeSupported(parsed.executionMode);
-	const executionMode = simulationExecutionModeSchema.parse(parsed.executionMode);
+	const executionMode = simulationExecutionModeSchema.parse(
+		parsed.executionMode,
+	);
 	return {
 		commandId,
 		organizationId: parsed.organizationId,

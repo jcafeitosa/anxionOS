@@ -1,4 +1,7 @@
-import type { FxRateRecord, CorporateActionRecord } from "../fx-corporate-actions-models";
+import type {
+	CorporateActionRecord,
+	FxRateRecord,
+} from "../fx-corporate-actions-models";
 
 // ── FxRateRepository ──────────────────────────────────────────────────────────────
 export interface FxRateRepository {
@@ -6,7 +9,11 @@ export interface FxRateRepository {
 	 * Returns the FX rate with the greatest `as_of` that is <= the given asOf.
 	 * No lookahead: if no row satisfies as_of <= $asOf, returns null.
 	 */
-	findLatestAsOf(base: string, quote: string, asOf: string): Promise<FxRateRecord | null>;
+	findLatestAsOf(
+		base: string,
+		quote: string,
+		asOf: string,
+	): Promise<FxRateRecord | null>;
 
 	/**
 	 * Idempotent save: ON CONFLICT ... DO UPDATE ... RETURNING.

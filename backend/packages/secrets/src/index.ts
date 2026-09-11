@@ -1,3 +1,12 @@
+export {
+	assertDevVaultAllowed,
+	createSecretVaultFromEnv,
+	DevVaultNotAllowedError,
+	isProductionEnvironment,
+	LocalFileSecretVault,
+	resolveLocalVaultPath,
+	resolveRotationJournalPath,
+} from "./local-vault";
 export type {
 	SecretMaterial,
 	SecretReference,
@@ -10,14 +19,5 @@ export {
 	redactString,
 	redactValue,
 } from "./redaction";
-export { IdempotentSecretRotation } from "./rotation";
 export type { IdempotentRotationOptions } from "./rotation";
-export {
-	assertDevVaultAllowed,
-	createSecretVaultFromEnv,
-	DevVaultNotAllowedError,
-	isProductionEnvironment,
-	LocalFileSecretVault,
-	resolveLocalVaultPath,
-	resolveRotationJournalPath,
-} from "./local-vault";
+export { IdempotentSecretRotation } from "./rotation";

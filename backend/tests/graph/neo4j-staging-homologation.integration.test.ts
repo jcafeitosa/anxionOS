@@ -7,26 +7,25 @@
  * Affected API: projectProductGraphEvent, createNeo4jGraphStore, ensureNeo4jGraphConstraints
  * Data schemas: DomainEventEnvelope work_item.status_changed.v1; GraphNode + TRACKED_IN edge
  */
-import { randomUUID } from "node:crypto";
+
 import { afterAll, describe, expect, test } from "bun:test";
+import { randomUUID } from "node:crypto";
+import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import {
 	PRODUCT_GRAPH_EVENT_TYPES,
 	PRODUCT_GRAPH_OWNER_DOMAIN,
 } from "@anxionos/contracts/graph";
-import type { DomainEventEnvelope } from "@anxionos/contracts/events";
-import {
-	formatNodeKey,
-	projectProductGraphEvent,
-} from "@anxionos/graph";
-import neo4j from "neo4j-driver";
+import { formatNodeKey, projectProductGraphEvent } from "@anxionos/graph";
 import {
 	createNeo4jGraphStore,
 	ensureNeo4jGraphConstraints,
 } from "@anxionos/graph/neo4j";
+import neo4j from "neo4j-driver";
 
 const STAGING_URI = process.env.NEO4J_STAGING_URI ?? "bolt://localhost:7688";
 const STAGING_USER = process.env.NEO4J_STAGING_USER ?? "neo4j";
-const STAGING_PASSWORD = process.env.NEO4J_STAGING_PASSWORD ?? "anxionos-staging";
+const STAGING_PASSWORD =
+	process.env.NEO4J_STAGING_PASSWORD ?? "anxionos-staging";
 
 function shouldRunStagingHomologation(): boolean {
 	return (
@@ -37,7 +36,10 @@ function shouldRunStagingHomologation(): boolean {
 }
 
 function createStagingDriver() {
-	return neo4j.driver(STAGING_URI, neo4j.auth.basic(STAGING_USER, STAGING_PASSWORD));
+	return neo4j.driver(
+		STAGING_URI,
+		neo4j.auth.basic(STAGING_USER, STAGING_PASSWORD),
+	);
 }
 
 describe("neo4j staging homologation (ANX-292)", () => {
@@ -108,7 +110,8 @@ describe("neo4j staging homologation (ANX-292)", () => {
 		expect(neighbors.some((edge) => edge.edgeType === "TRACKED_IN")).toBe(true);
 		expect(
 			neighbors.some(
-				(edge) => formatNodeKey(edge.targetNodeKey) === formatNodeKey(workItemKey),
+				(edge) =>
+					formatNodeKey(edge.targetNodeKey) === formatNodeKey(workItemKey),
 			),
 		).toBe(true);
 

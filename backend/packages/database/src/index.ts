@@ -1,24 +1,12 @@
 import type { Pool, PoolConfig } from "pg";
 import { Pool as PgPool } from "pg";
 
-export type { DatabaseRole, TenantContext } from "./tenant-context";
+export { DatabaseMigrationError, TenantContextError } from "./errors";
 export {
-	AGENCY_ID_SETTING,
-	BYPASS_RLS_SETTING,
-	TENANT_ID_SETTING,
-	UUID_PATTERN,
-	assertUuid,
-	requireTenantContext,
-	validateTenantContext,
-} from "./tenant-context";
-export { TenantContextError, DatabaseMigrationError } from "./errors";
-export {
-	ANXION_APP_ROLE,
-	ANXION_MIGRATOR_ROLE,
-	ANXION_SERVICE_ROLE,
-	createRolesSql,
-	dropRolesSql,
-} from "./roles";
+	type RunDatabaseMigrationsOptions,
+	rollbackDatabaseMigrations,
+	runDatabaseMigrations,
+} from "./migrate";
 export {
 	disableRls,
 	dropPolicy,
@@ -31,16 +19,28 @@ export {
 	tenantUpdatePolicy,
 } from "./rls-policy-helpers";
 export {
+	ANXION_APP_ROLE,
+	ANXION_MIGRATOR_ROLE,
+	ANXION_SERVICE_ROLE,
+	createRolesSql,
+	dropRolesSql,
+} from "./roles";
+export {
 	applyTenantContext,
 	createScopedPool,
 	type ScopedPoolConfig,
 	type TenantScopedQueryable,
 } from "./scoped-pool";
+export type { DatabaseRole, TenantContext } from "./tenant-context";
 export {
-	runDatabaseMigrations,
-	rollbackDatabaseMigrations,
-	type RunDatabaseMigrationsOptions,
-} from "./migrate";
+	AGENCY_ID_SETTING,
+	assertUuid,
+	BYPASS_RLS_SETTING,
+	requireTenantContext,
+	TENANT_ID_SETTING,
+	UUID_PATTERN,
+	validateTenantContext,
+} from "./tenant-context";
 
 export interface DatabaseConfig {
 	url: string;

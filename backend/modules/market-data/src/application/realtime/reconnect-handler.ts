@@ -64,7 +64,10 @@ export class RealtimeIngestReconnectHandler {
 		stream.lastDisconnectedAt = this.now();
 	}
 
-	onReconnect(tenantId: string, streamId: string): {
+	onReconnect(
+		tenantId: string,
+		streamId: string,
+	): {
 		connectionGeneration: number;
 	} {
 		const stream = this.ensureStream(tenantId, streamId);

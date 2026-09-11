@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { spawnSync } from "node:child_process";
 /**
  * ANX-162 S3 — engines-sandbox Docker profile homologation.
  *
@@ -11,7 +12,6 @@
  * Importers: package.json `anx162:s3-engines-homologation`
  */
 import { readFileSync } from "node:fs";
-import { spawnSync } from "node:child_process";
 import { parseArgs } from "node:util";
 
 const REPO_ROOT = new URL("../..", import.meta.url).pathname;
@@ -122,13 +122,7 @@ async function waitForHealthy(service, attempts = 40, intervalMs = 2000) {
 function probeHealthHttp(engine) {
 	const container = `docker-${engine.service}-1`;
 	const url = `http://localhost:${engine.port}/health`;
-	const exec = run("docker", [
-		"exec",
-		container,
-		"wget",
-		"-qO-",
-		url,
-	]);
+	const exec = run("docker", ["exec", container, "wget", "-qO-", url]);
 	if (!exec.ok) {
 		return {
 			ok: false,
@@ -158,14 +152,18 @@ function probeHealthHttp(engine) {
 
 function inspectComposeStaticForEngine(raw, engine) {
 	const servicePresent = raw.includes(engine.service);
-	const readOnlyPresent = new RegExp(`${engine.service}:[\\s\\S]*?read_only:\\s*true`).test(
-		raw,
-	);
+	const readOnlyPresent = new RegExp(
+		`${engine.service}:[\\s\\S]*?read_only:\\s*true`,
+	).test(raw);
 	const sandboxNetworkOnly = new RegExp(
 		`${engine.service}:[\\s\\S]*?networks:[\\s\\S]*?- anxion-engines-sandbox`,
 	).test(raw);
-	const notOnControl = !new RegExp(`${engine.service}:[\\s\\S]*?anxion-control`).test(raw);
-	const notOnData = !new RegExp(`${engine.service}:[\\s\\S]*?anxion-data`).test(raw);
+	const notOnControl = !new RegExp(
+		`${engine.service}:[\\s\\S]*?anxion-control`,
+	).test(raw);
+	const notOnData = !new RegExp(`${engine.service}:[\\s\\S]*?anxion-data`).test(
+		raw,
+	);
 	return {
 		servicePresent,
 		readOnlyPresent,
@@ -221,7 +219,9 @@ function inspectRuntimeSecurity(service) {
 	const user = parsed.Config?.User ?? "";
 	const readOnlyRootfs = Boolean(parsed.HostConfig?.ReadonlyRootfs);
 	const mounts = parsed.Mounts ?? [];
-	const dockerSock = mounts.some((m) => String(m.Source ?? "").includes("docker.sock"));
+	const dockerSock = mounts.some((m) =>
+		String(m.Source ?? "").includes("docker.sock"),
+	);
 	const networks = Object.keys(parsed.NetworkSettings?.Networks ?? {});
 	return {
 		ok: true,
@@ -233,9 +233,11 @@ function inspectRuntimeSecurity(service) {
 			networks.includes("docker_anxion-engines-sandbox") ||
 			networks.includes("anxion-engines-sandbox"),
 		notOnControl:
-			!networks.includes("docker_anxion-control") && !networks.includes("anxion-control"),
+			!networks.includes("docker_anxion-control") &&
+			!networks.includes("anxion-control"),
 		notOnData:
-			!networks.includes("docker_anxion-data") && !networks.includes("anxion-data"),
+			!networks.includes("docker_anxion-data") &&
+			!networks.includes("anxion-data"),
 	};
 }
 
@@ -333,7 +335,9 @@ async function main() {
 	};
 
 	const staticOk =
-		staticReport.noDockerSocket && staticReport.profilePresent && staticReport.enginesOk;
+		staticReport.noDockerSocket &&
+		staticReport.profilePresent &&
+		staticReport.enginesOk;
 
 	if (!staticOk || !report.compose.ok) {
 		emit(report, opts.json);
@@ -355,7 +359,9 @@ function emit(report, asJson) {
 		console.log(JSON.stringify(report, null, 2));
 		return;
 	}
-	console.log(`ANX-162 engines homologation — ${report.issue} (${report.slice})`);
+	console.log(
+		`ANX-162 engines homologation — ${report.issue} (${report.slice})`,
+	);
 	console.log(`Engine services: ${report.engines.join(", ")}`);
 	console.log(`Compose config: ${report.compose.ok ? "ok" : "fail"}`);
 	console.log(
@@ -385,7 +391,9 @@ function emit(report, asJson) {
 				}`,
 			);
 		} else {
-			console.log(`  Runtime inspect: fail (${result.runtime?.error ?? "unknown"})`);
+			console.log(
+				`  Runtime inspect: fail (${result.runtime?.error ?? "unknown"})`,
+			);
 		}
 		if (result.restart?.skipped) {
 			console.log("  Restart probe: skipped");

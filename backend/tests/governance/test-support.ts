@@ -1,36 +1,36 @@
-import type { TenantContext } from "@anxionos/database";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
+import type { TenantContext } from "@anxionos/database";
 import {
 	createPgPool,
 	ensureEventingSchema,
 } from "@anxionos/eventing/postgres";
-import { ensureGovernanceSchema } from "../../modules/governance/src/infrastructure/migrate";
 import type { Approval } from "../../modules/governance/src/domain/entities/approval";
+import type { AutonomyAssignment } from "../../modules/governance/src/domain/entities/autonomy-assignment";
 import type { ChangeProposal } from "../../modules/governance/src/domain/entities/change-proposal";
 import type { Delegation } from "../../modules/governance/src/domain/entities/delegation";
 import type { Grant } from "../../modules/governance/src/domain/entities/grant";
-import type { AutonomyAssignment } from "../../modules/governance/src/domain/entities/autonomy-assignment";
 import type { Mandate } from "../../modules/governance/src/domain/entities/mandate";
-import type { DelegationRepository } from "../../modules/governance/src/domain/ports/delegation-repository";
-import type { AutonomyAssignmentRepository } from "../../modules/governance/src/domain/ports/autonomy-assignment-repository";
-import type { MandateRepository } from "../../modules/governance/src/domain/ports/mandate-repository";
 import type { ApprovalRepository } from "../../modules/governance/src/domain/ports/approval-repository";
 import type {
 	AuthorityEpochRecord,
 	AuthorityEpochStore,
 } from "../../modules/governance/src/domain/ports/authority-epoch-store";
+import type { AutonomyAssignmentRepository } from "../../modules/governance/src/domain/ports/autonomy-assignment-repository";
 import type { ChangeProposalRepository } from "../../modules/governance/src/domain/ports/change-proposal-repository";
 import type {
 	CommandJournalRecord,
 	CommandJournalRepository,
 	NewCommandJournalRecord,
 } from "../../modules/governance/src/domain/ports/command-journal";
+import type { DelegationRepository } from "../../modules/governance/src/domain/ports/delegation-repository";
 import type {
 	GovernanceTransactionContext,
 	GovernanceUnitOfWork,
 } from "../../modules/governance/src/domain/ports/governance-unit-of-work";
 import type { GrantRepository } from "../../modules/governance/src/domain/ports/grant-repository";
+import type { MandateRepository } from "../../modules/governance/src/domain/ports/mandate-repository";
 import type { PrincipalLookup } from "../../modules/governance/src/domain/ports/principal-lookup";
+import { ensureGovernanceSchema } from "../../modules/governance/src/infrastructure/migrate";
 
 export function createStubPrincipalLookup(
 	existingPrincipalIds: string[] = [],
@@ -66,8 +66,7 @@ export function createInMemoryGrantRepository(
 		async listActiveByPrincipal(principalId) {
 			return [...grants.values()].filter(
 				(grant) =>
-					grant.granteePrincipalId === principalId &&
-					grant.status === "active",
+					grant.granteePrincipalId === principalId && grant.status === "active",
 			);
 		},
 		async listEffectiveForAgent(scopeId, subjectAgentId) {
@@ -282,7 +281,10 @@ export function createRecordingGovernanceUnitOfWork(deps: {
 		createInMemoryAutonomyAssignmentRepository();
 	let transactionChain: Promise<unknown> = Promise.resolve();
 	const unitOfWork: GovernanceUnitOfWork = {
-		async runInTransaction(ctx: TenantContext, work: (context: GovernanceTransactionContext) => Promise<T>) {
+		async runInTransaction(
+			ctx: TenantContext,
+			work: (context: GovernanceTransactionContext) => Promise<T>,
+		) {
 			const run = transactionChain.then(async () => {
 				const context: GovernanceTransactionContext = {
 					client: null as never,
@@ -311,7 +313,6 @@ export function getDatabaseUrl(): string | undefined {
 	return process.env.DATABASE_URL?.trim() || undefined;
 }
 
-
 export const PG_INTEGRATION_SKIP_MESSAGE =
 	"PG integration tests require RUN_PG_INTEGRATION_TESTS=true and DATABASE_URL";
 
@@ -325,10 +326,7 @@ export function getPgIntegrationTestSkipReason(): string | null {
 
 /** Fail CI when RUN_PG_INTEGRATION_TESTS=true but DATABASE_URL is missing. */
 export function assertPgIntegrationEnvForCi(): void {
-	if (
-		process.env.RUN_PG_INTEGRATION_TESTS === "true" &&
-		!getDatabaseUrl()
-	) {
+	if (process.env.RUN_PG_INTEGRATION_TESTS === "true" && !getDatabaseUrl()) {
 		throw new Error(
 			`${PG_INTEGRATION_SKIP_MESSAGE} — RUN_PG_INTEGRATION_TESTS=true but DATABASE_URL is unset`,
 		);

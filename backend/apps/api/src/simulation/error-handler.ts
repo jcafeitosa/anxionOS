@@ -8,8 +8,8 @@ import {
 	resolveSimulationErrorStatus,
 	type SimulationErrorCode,
 } from "@anxionos/contracts/simulation";
-import { SimulationCommandError } from "@anxionos/simulation";
 import { PrincipalLookupUnavailableError } from "@anxionos/organizations";
+import { SimulationCommandError } from "@anxionos/simulation";
 
 function simulationCodeToAppError(error: SimulationCommandError): AppError {
 	const statusCode = resolveSimulationErrorStatus(error.code);

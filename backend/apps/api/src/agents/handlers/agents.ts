@@ -1,3 +1,14 @@
+import {
+	type Agent,
+	type AgentVersion,
+	getAgent,
+	invokeBrainCapability,
+	listAgentVersions,
+	publishAgentVersion,
+	registerAgent,
+	rollbackAgentVersion,
+	transitionAgentStatus,
+} from "@anxionos/agents";
 import { institutionalUuidSchema } from "@anxionos/contracts";
 import {
 	invokeBrainCapabilityCommandSchema,
@@ -6,17 +17,6 @@ import {
 	rollbackAgentVersionCommandSchema,
 	transitionAgentStatusCommandSchema,
 } from "@anxionos/contracts/agents";
-import {
-	getAgent,
-	invokeBrainCapability,
-	listAgentVersions,
-	publishAgentVersion,
-	registerAgent,
-	rollbackAgentVersion,
-	transitionAgentStatus,
-	type Agent,
-	type AgentVersion,
-} from "@anxionos/agents";
 import { z } from "zod";
 import type { AgentsPluginDeps } from "../plugin";
 

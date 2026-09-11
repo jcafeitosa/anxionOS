@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { AgentsCommandError, publishAgentVersion, registerAgent } from "@anxionos/agents";
 import type { AgentPublishGuardPort } from "@anxionos/agents";
+import {
+	AgentsCommandError,
+	publishAgentVersion,
+	registerAgent,
+} from "@anxionos/agents";
 import {
 	createInMemoryAgentRepository,
 	createInMemoryAgentVersionRepository,
@@ -40,7 +44,10 @@ describe("publishAgentVersion publish guard (G3-AGT-03)", () => {
 	test("denies publish when guard rejects traversal", async () => {
 		const { deps } = createDeps({
 			async assertPublishAllowed() {
-				throw new AgentsCommandError("AGT_TRAVERSAL_DENIED", "No grant for agents.publish");
+				throw new AgentsCommandError(
+					"AGT_TRAVERSAL_DENIED",
+					"No grant for agents.publish",
+				);
 			},
 		});
 		const registered = await registerAgent(deps, {

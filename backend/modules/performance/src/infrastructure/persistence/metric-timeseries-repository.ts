@@ -1,4 +1,5 @@
 import type { Pool, PoolClient } from "pg";
+import { normalizeDecimalAmount } from "../../domain/decimal-amount";
 import { OFFICIAL_LEDGER_PNL_METRICS } from "../../domain/metric-definitions";
 import type {
 	MetricPointFilter,
@@ -7,7 +8,6 @@ import type {
 	PnlSeriesFilter,
 	PnlSeriesPointRecord,
 } from "../../domain/ports/metric-timeseries";
-import { normalizeDecimalAmount } from "../../domain/decimal-amount";
 
 type PgQueryable = Pool | PoolClient;
 

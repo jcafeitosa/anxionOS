@@ -1,8 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { getIncident, listIncidents } from "@anxionos/operations";
-import {
-	createInMemoryIncidentRepository,
-} from "./test-support";
+import { createInMemoryIncidentRepository } from "./test-support";
 
 const organizationId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
@@ -27,7 +25,11 @@ const sampleIncident = {
 describe("incident queries (ANX-158 S2 HTTP)", () => {
 	test("getIncident returns snapshot for agency-scoped incident", async () => {
 		const incidents = createInMemoryIncidentRepository([sampleIncident]);
-		const snapshot = await getIncident({ incidents }, organizationId, sampleIncident.id);
+		const snapshot = await getIncident(
+			{ incidents },
+			organizationId,
+			sampleIncident.id,
+		);
 		expect(snapshot.incidentId).toBe(sampleIncident.id);
 		expect(snapshot.title).toBe(sampleIncident.title);
 		expect(snapshot.severity).toBe("HIGH");

@@ -1,23 +1,23 @@
 import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
 import { IDENTITY_EVENT_TYPES } from "@anxionos/contracts/identity";
-import { createLogger } from "@anxionos/observability";
 import {
 	DEFAULT_NATS_EVENTS_STREAM,
 	ensureEventsJetStream,
 } from "@anxionos/eventing/nats-publisher";
+import { reconcileSuspendedPrincipalSessions } from "@anxionos/identity";
+import { createLogger } from "@anxionos/observability";
 import {
 	AckPolicy,
+	connect,
 	DeliverPolicy,
 	JSONCodec,
 	type NatsConnection,
-	connect,
 } from "nats";
 import type { Pool } from "pg";
-import { reconcileSuspendedPrincipalSessions } from "@anxionos/identity";
 import {
-	IDENTITY_SESSIONS_CONSUMER_NAME,
 	classifyIdentitySessionRevocationError,
 	createSessionRevocationConsumerDeps,
+	IDENTITY_SESSIONS_CONSUMER_NAME,
 	processIdentitySessionEvent,
 } from "./session-revocation-consumer";
 
@@ -61,10 +61,13 @@ export async function startIdentitySessionRevocationConsumer(
 	const deps = createSessionRevocationConsumerDeps(pool);
 
 	const reconciliation = await reconcileSuspendedPrincipalSessions(deps);
-	logger.info("Identity session reconciliation completed for suspended principals", {
-		revokedPrincipalCount: reconciliation.revokedPrincipalCount,
-		deliverPolicy: "New",
-	});
+	logger.info(
+		"Identity session reconciliation completed for suspended principals",
+		{
+			revokedPrincipalCount: reconciliation.revokedPrincipalCount,
+			deliverPolicy: "New",
+		},
+	);
 
 	try {
 		await jsm.consumers.add(streamName, {

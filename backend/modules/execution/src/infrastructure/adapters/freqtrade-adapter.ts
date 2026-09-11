@@ -124,8 +124,7 @@ export class FreqtradeAdapter implements RiskPermitValidationPort {
 		this.sandboxUrl = resolveFqtSandboxUrl(options.sandboxUrl);
 		this.engineMode = resolveFqtEngineMode(options.engineMode);
 		this.fetchFn = options.fetchFn ?? fetch;
-		this.healthTimeoutMs =
-			options.healthTimeoutMs ?? DEFAULT_HEALTH_TIMEOUT_MS;
+		this.healthTimeoutMs = options.healthTimeoutMs ?? DEFAULT_HEALTH_TIMEOUT_MS;
 	}
 
 	private validateLicenseFormat(license: string): boolean {
@@ -225,8 +224,7 @@ export const FREQTRADE_REAL_WIRING_BLOCKERS = {
 	pinnedRef: FQT_PINNED_REF,
 	dockerRuntime:
 		"Freqtrade exige container Python + config versionada; homologação REAL separada.",
-	restApiAuth:
-		"REST API exige JWT/username+password — fora do escopo ANX-177.",
+	restApiAuth: "REST API exige JWT/username+password — fora do escopo ANX-177.",
 	exchangeCredentials:
 		"Contas live exigem exchange API keys — sem capital real neste slice.",
 	dryRunSemantics:

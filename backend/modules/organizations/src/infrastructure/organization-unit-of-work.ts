@@ -1,6 +1,6 @@
 import {
-	type DomainEventEnvelope,
 	assertTenantScopedEnvelopeAgencyId,
+	type DomainEventEnvelope,
 } from "@anxionos/contracts/events";
 import { applyTenantContext } from "@anxionos/database";
 import { appendJournal, enqueueOutbox } from "@anxionos/eventing/postgres";
@@ -17,7 +17,9 @@ import { createDrizzleMembershipRepository } from "./persistence/membership-repo
 import { createDrizzleOwnerRepository } from "./persistence/owner-repository";
 import * as schema from "./persistence/schema";
 
-function createTransactionContext(client: PoolClient): OrganizationTransactionContext {
+function createTransactionContext(
+	client: PoolClient,
+): OrganizationTransactionContext {
 	const db = drizzle(client, { schema });
 	return {
 		client,
@@ -35,7 +37,9 @@ function createTransactionContext(client: PoolClient): OrganizationTransactionCo
 	};
 }
 
-export function createOrganizationUnitOfWork(pool: Pool): OrganizationUnitOfWork {
+export function createOrganizationUnitOfWork(
+	pool: Pool,
+): OrganizationUnitOfWork {
 	return {
 		async runInTransaction<T>(
 			ctx: TenantContext | undefined,

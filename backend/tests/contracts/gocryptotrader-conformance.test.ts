@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-	gocryptotraderSimulatedAdapterManifest,
 	GOCRYPTOTRADER_ADAPTER_ID,
+	gocryptotraderSimulatedAdapterManifest,
 	runAdapterConformanceSuite,
 } from "@anxionos/adapter-gateway";
 

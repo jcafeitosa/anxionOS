@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { cashInstrumentId, PORTFOLIOS_EVENT_TYPES } from "@anxionos/contracts/portfolios";
+import {
+	cashInstrumentId,
+	PORTFOLIOS_EVENT_TYPES,
+} from "@anxionos/contracts/portfolios";
 import {
 	applyTestFill,
 	buildLedgerPostedFixture,

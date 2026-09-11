@@ -8,12 +8,12 @@ import {
 	dispositionIdSchema,
 	dispositionKindSchema,
 	dispositionOutcomeSchema,
+	evidenceManifestEntrySchema,
+	evidenceManifestIdSchema,
 	intentIdSchema,
 	orderSideSchema,
 	proposalIdSchema,
 	proposalKindSchema,
-	evidenceManifestEntrySchema,
-	evidenceManifestIdSchema,
 } from "./types";
 export const decisionsCommandResultSchema = z.object({
 	aggregateId: z.string().min(1),
@@ -106,9 +106,7 @@ export type RequestHumanApprovalCommand = z.infer<
 	typeof requestHumanApprovalCommandSchema
 >;
 
-export type RecordApprovalCommand = z.infer<
-	typeof recordApprovalCommandSchema
->;
+export type RecordApprovalCommand = z.infer<typeof recordApprovalCommandSchema>;
 
 export type RecordDispositionCommand = z.infer<
 	typeof recordDispositionCommandSchema

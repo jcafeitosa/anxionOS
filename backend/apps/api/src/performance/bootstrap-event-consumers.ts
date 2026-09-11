@@ -1,25 +1,25 @@
 import { ACCOUNTING_EVENT_TYPES } from "@anxionos/contracts/accounting";
 import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
 import { PORTFOLIOS_EVENT_TYPES } from "@anxionos/contracts/portfolios";
-import { createLogger } from "@anxionos/observability";
 import {
 	DEFAULT_NATS_EVENTS_STREAM,
 	ensureEventsJetStream,
 	resolveEventSubject,
 } from "@anxionos/eventing/nats-publisher";
+import { createLogger } from "@anxionos/observability";
 import {
 	AckPolicy,
+	connect,
 	DeliverPolicy,
 	JSONCodec,
 	type NatsConnection,
-	connect,
 } from "nats";
 import type { Pool } from "pg";
 import {
-	PERFORMANCE_LEDGER_POSTED_CONSUMER_NAME,
-	PERFORMANCE_POSITION_UPDATED_CONSUMER_NAME,
 	classifyPerformanceEventConsumerError,
 	createPerformanceEventConsumerDeps,
+	PERFORMANCE_LEDGER_POSTED_CONSUMER_NAME,
+	PERFORMANCE_POSITION_UPDATED_CONSUMER_NAME,
 	processPerformanceLedgerPostedEvent,
 	processPerformancePositionUpdatedEvent,
 } from "./event-consumers";
@@ -56,7 +56,10 @@ interface PerformanceConsumerLoopConfig {
 async function createPerformanceJetStreamConsumer(
 	nc: NatsConnection,
 	streamName: string,
-	config: Pick<PerformanceConsumerLoopConfig, "durable" | "subject" | "consumerName">,
+	config: Pick<
+		PerformanceConsumerLoopConfig,
+		"durable" | "subject" | "consumerName"
+	>,
 ) {
 	const jsm = await nc.jetstreamManager();
 	const js = nc.jetstream();

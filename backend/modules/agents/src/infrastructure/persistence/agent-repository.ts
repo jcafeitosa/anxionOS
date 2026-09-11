@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Agent } from "../../domain/entities/agent";
 import type { AgentRepository } from "../../domain/ports/agent-repository";
-import { agents, type AgentRow } from "./schema";
+import { type AgentRow, agents } from "./schema";
 
 export function toAgent(row: AgentRow): Agent {
 	return {
@@ -67,7 +67,11 @@ export function createDrizzleAgentRepository(
 			return toAgent(row);
 		},
 		async findById(agentId: string) {
-			const rows = await db.select().from(agents).where(eq(agents.id, agentId)).limit(1);
+			const rows = await db
+				.select()
+				.from(agents)
+				.where(eq(agents.id, agentId))
+				.limit(1);
 			return rows[0] ? toAgent(rows[0]) : null;
 		},
 	};

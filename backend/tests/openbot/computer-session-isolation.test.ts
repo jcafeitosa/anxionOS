@@ -100,7 +100,10 @@ describe("workspace path jail (ANX-144 S3 / R144-03)", () => {
 			status: "active" as const,
 		};
 		expect(() =>
-			assertWorkspacePathReadable(session, `${session.workspacePath}/../${organizationB}`),
+			assertWorkspacePathReadable(
+				session,
+				`${session.workspacePath}/../${organizationB}`,
+			),
 		).toThrow();
 	});
 
@@ -130,11 +133,14 @@ describe("workspace path jail (ANX-144 S3 / R144-03)", () => {
 describe("acquireComputerSession / releaseComputerSession (ANX-144 S3)", () => {
 	test("acquire returns active session with jailed workspace path", async () => {
 		const { computerSession } = createDeps();
-		const result = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId: organizationA,
-			agentId: agentA,
-		});
+		const result = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId: organizationA,
+				agentId: agentA,
+			},
+		);
 		expect(result.session.status).toBe("active");
 		expect(result.session.workspacePath).toBe(
 			buildWorkspacePath(organizationA, agentA),
@@ -143,99 +149,138 @@ describe("acquireComputerSession / releaseComputerSession (ANX-144 S3)", () => {
 
 	test("acquire is idempotent for same org and agent", async () => {
 		const { computerSession } = createDeps();
-		const first = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId: organizationA,
-			agentId: agentA,
-		});
-		const second = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId: organizationA,
-			agentId: agentA,
-		});
+		const first = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId: organizationA,
+				agentId: agentA,
+			},
+		);
+		const second = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId: organizationA,
+				agentId: agentA,
+			},
+		);
 		expect(second.session.sessionId).toBe(first.session.sessionId);
 	});
 
 	test("release transitions session to released", async () => {
 		const { computerSession } = createDeps();
-		const acquired = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId: organizationA,
-			agentId: agentA,
-		});
-		const released = await releaseComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			sessionId: acquired.session.sessionId,
-			organizationId: organizationA,
-		});
+		const acquired = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId: organizationA,
+				agentId: agentA,
+			},
+		);
+		const released = await releaseComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				sessionId: acquired.session.sessionId,
+				organizationId: organizationA,
+			},
+		);
 		expect(released.session.status).toBe("released");
 	});
 
 	test("release after release is denied", async () => {
 		const { computerSession } = createDeps();
-		const acquired = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId: organizationA,
-			agentId: agentA,
-		});
-		await releaseComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			sessionId: acquired.session.sessionId,
-			organizationId: organizationA,
-		});
-		await expect(
-			releaseComputerSession({ computerSession }, {
+		const acquired = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId: organizationA,
+				agentId: agentA,
+			},
+		);
+		await releaseComputerSession(
+			{ computerSession },
+			{
 				commandId: randomUUID(),
 				sessionId: acquired.session.sessionId,
 				organizationId: organizationA,
-			}),
+			},
+		);
+		await expect(
+			releaseComputerSession(
+				{ computerSession },
+				{
+					commandId: randomUUID(),
+					sessionId: acquired.session.sessionId,
+					organizationId: organizationA,
+				},
+			),
 		).rejects.toThrow();
 	});
 
 	test("cross-tenant release is denied (adversarial)", async () => {
 		const { computerSession } = createDeps();
-		const acquired = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId: organizationA,
-			agentId: agentA,
-		});
-		await expect(
-			releaseComputerSession({ computerSession }, {
+		const acquired = await acquireComputerSession(
+			{ computerSession },
+			{
 				commandId: randomUUID(),
-				sessionId: acquired.session.sessionId,
-				organizationId: organizationB,
-			}),
+				organizationId: organizationA,
+				agentId: agentA,
+			},
+		);
+		await expect(
+			releaseComputerSession(
+				{ computerSession },
+				{
+					commandId: randomUUID(),
+					sessionId: acquired.session.sessionId,
+					organizationId: organizationB,
+				},
+			),
 		).rejects.toThrow();
 	});
 
 	test("release unknown session is denied", async () => {
 		const { computerSession } = createDeps();
 		await expect(
-			releaseComputerSession({ computerSession }, {
-				commandId: randomUUID(),
-				sessionId: randomUUID(),
-				organizationId: organizationA,
-			}),
+			releaseComputerSession(
+				{ computerSession },
+				{
+					commandId: randomUUID(),
+					sessionId: randomUUID(),
+					organizationId: organizationA,
+				},
+			),
 		).rejects.toThrow();
 	});
 
 	test("acquire after release creates new session", async () => {
 		const { computerSession } = createDeps();
-		const first = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId: organizationA,
-			agentId: agentA,
-		});
-		await releaseComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			sessionId: first.session.sessionId,
-			organizationId: organizationA,
-		});
-		const second = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId: organizationA,
-			agentId: agentA,
-		});
+		const first = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId: organizationA,
+				agentId: agentA,
+			},
+		);
+		await releaseComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				sessionId: first.session.sessionId,
+				organizationId: organizationA,
+			},
+		);
+		const second = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId: organizationA,
+				agentId: agentA,
+			},
+		);
 		expect(second.session.sessionId).not.toBe(first.session.sessionId);
 	});
 
@@ -275,7 +320,9 @@ describe("acquireComputerSession / releaseComputerSession (ANX-144 S3)", () => {
 
 describe("computer session tool policy (ANX-144 S3)", () => {
 	test("toolRequiresComputerSession matches sandbox.computer prefix", () => {
-		expect(toolRequiresComputerSession("sandbox.computer.read_file")).toBe(true);
+		expect(toolRequiresComputerSession("sandbox.computer.read_file")).toBe(
+			true,
+		);
 		expect(toolRequiresComputerSession("sandbox.health_probe")).toBe(false);
 	});
 
@@ -301,11 +348,14 @@ describe("computer session tool policy (ANX-144 S3)", () => {
 		const toolGateway = createInMemoryToolGatewayPort();
 		const toolAudit = createInMemoryToolAuditPort();
 		const { computerSession } = createDeps();
-		const acquired = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId: organizationA,
-			agentId: agentA,
-		});
+		const acquired = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId: organizationA,
+				agentId: agentA,
+			},
+		);
 		const result = await executeGovernedToolCall(
 			{
 				toolGateway,
@@ -332,11 +382,14 @@ describe("computer session tool policy (ANX-144 S3)", () => {
 		const toolGateway = createInMemoryToolGatewayPort();
 		const toolAudit = createInMemoryToolAuditPort();
 		const { computerSession } = createDeps();
-		const acquired = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId: organizationA,
-			agentId: agentA,
-		});
+		const acquired = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId: organizationA,
+				agentId: agentA,
+			},
+		);
 		const result = await executeGovernedToolCall(
 			{ toolGateway, toolAudit, computerSession: acquired.session },
 			{
@@ -374,11 +427,14 @@ describe("openbot S3 command contracts (ANX-144 S3)", () => {
 
 	test("computerSessionCommandResultSchema wraps session ref", async () => {
 		const { computerSession } = createDeps();
-		const result = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId: organizationA,
-			agentId: agentA,
-		});
+		const result = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId: organizationA,
+				agentId: agentA,
+			},
+		);
 		const parsed = computerSessionCommandResultSchema.parse(result);
 		expect(parsed.session.status).toBe("active");
 	});

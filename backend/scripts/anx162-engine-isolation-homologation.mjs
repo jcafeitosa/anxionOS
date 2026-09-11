@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { spawnSync } from "node:child_process";
 /**
  * ANX-162 S2 — engine/storage Docker isolation homologation (ADR0004 + gateway §Isolamento Docker).
  *
@@ -9,7 +10,6 @@
  * Data schemas: JSON report { compose, security, networks, storage, restart, overallOk }
  */
 import { readFileSync } from "node:fs";
-import { spawnSync } from "node:child_process";
 import { parseArgs } from "node:util";
 
 const REPO_ROOT = new URL("../..", import.meta.url).pathname;
@@ -59,7 +59,11 @@ async function waitForHealthy(service, attempts = 30, intervalMs = 2000) {
 		if (ps.ok && ps.stdout.includes('"Health":"healthy"')) {
 			return { ok: true, attempts: i + 1 };
 		}
-		if (ps.ok && ps.stdout.includes('"State":"running"') && !ps.stdout.includes('"Health"')) {
+		if (
+			ps.ok &&
+			ps.stdout.includes('"State":"running"') &&
+			!ps.stdout.includes('"Health"')
+		) {
 			return { ok: true, attempts: i + 1, note: "no healthcheck" };
 		}
 		await sleep(intervalMs);
@@ -100,9 +104,11 @@ function inspectComposeSecurity() {
 	const raw = readFileSync(`${REPO_ROOT}/${COMPOSE_FILE}`, "utf8");
 	const dockerSocketMount =
 		/\/var\/run\/docker\.sock/.test(raw) || /docker\.sock:/.test(raw);
-	const networksPresent = ["anxion-control", "anxion-data", "anxion-observability"].every(
-		(name) => raw.includes(name),
-	);
+	const networksPresent = [
+		"anxion-control",
+		"anxion-data",
+		"anxion-observability",
+	].every((name) => raw.includes(name));
 	return {
 		dockerSocketMount,
 		noDockerSocket: !dockerSocketMount,
@@ -119,7 +125,9 @@ async function main() {
 		timestamp: new Date().toISOString(),
 		compose: { ok: false },
 		security: inspectComposeSecurity(),
-		networks: { expected: ["anxion-control", "anxion-data", "anxion-observability"] },
+		networks: {
+			expected: ["anxion-control", "anxion-data", "anxion-observability"],
+		},
 		storage: { postgres: { ok: false }, extensions: { ok: false } },
 		restart: null,
 		overallOk: false,
@@ -186,7 +194,9 @@ function emit(report, asJson) {
 		console.log(JSON.stringify(report, null, 2));
 		return;
 	}
-	console.log(`ANX-162 engine isolation homologation — ${report.issue} (${report.slice})`);
+	console.log(
+		`ANX-162 engine isolation homologation — ${report.issue} (${report.slice})`,
+	);
 	console.log(`Compose config: ${report.compose.ok ? "ok" : "fail"}`);
 	console.log(
 		`Security (no docker.sock): ${report.security.noDockerSocket ? "ok" : "FAIL"}`,

@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import {
 	type ConnectionsCommandResult,
-	type InvokeInferenceCommand,
 	connectionsCommandResultSchema,
+	type InvokeInferenceCommand,
 	invokeInferenceCommandSchema,
 } from "@anxionos/contracts/connections";
 import {

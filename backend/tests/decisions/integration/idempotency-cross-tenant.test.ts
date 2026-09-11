@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import {
-	createPgCommandJournalRepository,
 	createDecisionsUnitOfWork,
+	createPgCommandJournalRepository,
 	proposeDecision,
 } from "@anxionos/decisions";
 import {

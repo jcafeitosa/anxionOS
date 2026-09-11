@@ -1,26 +1,26 @@
+import { randomUUID } from "node:crypto";
+import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
+import type { ComputerSessionRef } from "@anxionos/contracts/openbot";
 import {
+	type GovernedToolCallResult,
 	governedToolCallResultSchema,
+	type InvokeToolCallCommand,
 	invokeToolCallCommandSchema,
 	OPENBOT_EVENT_TYPES,
+	type ToolAuditEntry,
+	type ToolCallDecision,
 	toolAuditAfterRecordedPayloadSchema,
 	toolAuditBeforeRecordedPayloadSchema,
 	toolCallDeniedPayloadSchema,
 	toolCallForwardedPayloadSchema,
-	type GovernedToolCallResult,
-	type InvokeToolCallCommand,
-	type ToolAuditEntry,
-	type ToolCallDecision,
 } from "@anxionos/contracts/openbot";
-import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
-import { randomUUID } from "node:crypto";
+import type { ComputerSessionPort } from "../../domain/ports/computer-session-port";
 import type { ToolAuditPort } from "../../domain/ports/tool-audit-port";
 import type { ToolGatewayPort } from "../../domain/ports/tool-gateway-port";
-import type { ComputerSessionRef } from "@anxionos/contracts/openbot";
 import {
 	evaluateComputerSessionAuthority,
 	toolRequiresComputerSession,
 } from "../services/computer-session-policy";
-import type { ComputerSessionPort } from "../../domain/ports/computer-session-port";
 
 type DomainEvent = ReturnType<typeof domainEventEnvelopeSchema.parse>;
 type PublishEvents = (events: DomainEvent[]) => Promise<void>;

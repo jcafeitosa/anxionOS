@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { AccountingCommandError } from "./errors";
 import { assertBalancedLines } from "./balance-validation";
+import { AccountingCommandError } from "./errors";
 
 describe("assertBalancedLines (ANX-152)", () => {
 	test("accepts balanced entry per single asset", () => {

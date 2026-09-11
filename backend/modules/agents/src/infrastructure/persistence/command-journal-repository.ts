@@ -5,9 +5,11 @@ import type {
 	CommandJournalRepository,
 	NewCommandJournalRecord,
 } from "../../domain/ports/command-journal";
-import { commandJournal, type CommandJournalRow } from "./schema";
+import { type CommandJournalRow, commandJournal } from "./schema";
 
-export function toCommandJournalRecord(row: CommandJournalRow): CommandJournalRecord {
+export function toCommandJournalRecord(
+	row: CommandJournalRow,
+): CommandJournalRecord {
 	return {
 		tenantId: row.tenantId,
 		commandId: row.commandId,
@@ -38,7 +40,10 @@ export function createDrizzleCommandJournalRepository(
 			return rows[0] ? toCommandJournalRecord(rows[0]) : null;
 		},
 		async record(entry: NewCommandJournalRecord) {
-			const existing = await this.findByCommandId(entry.tenantId, entry.commandId);
+			const existing = await this.findByCommandId(
+				entry.tenantId,
+				entry.commandId,
+			);
 			if (existing) {
 				return existing;
 			}

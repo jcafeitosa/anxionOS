@@ -7,6 +7,10 @@ import {
 	capitalCommandResultSchema,
 	reserveForIntentCommandSchema,
 } from "@anxionos/contracts/capital";
+import {
+	addDecimalAmounts,
+	compareDecimalAmounts,
+} from "../../domain/decimal-amount";
 import { createReservationCreatedEvent } from "../../domain/events/capital-events";
 import type {
 	CapitalTransactionContext,
@@ -14,10 +18,6 @@ import type {
 } from "../../domain/ports/capital-unit-of-work";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { GrantValidationPort } from "../../domain/ports/grant-validation-port";
-import {
-	addDecimalAmounts,
-	compareDecimalAmounts,
-} from "../../domain/decimal-amount";
 import {
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
@@ -106,9 +106,7 @@ export async function reserveForIntent(
 					command.asset,
 				);
 				const nextHeld = addDecimalAmounts(heldForGrant, command.amount);
-				if (
-					compareDecimalAmounts(nextHeld, allocation.limitAmount) > 0
-				) {
+				if (compareDecimalAmounts(nextHeld, allocation.limitAmount) > 0) {
 					throwCapitalError(
 						"CAP_INSUFFICIENT_AVAILABLE",
 						`Reservation exceeds allocation limit for ${command.asset}`,

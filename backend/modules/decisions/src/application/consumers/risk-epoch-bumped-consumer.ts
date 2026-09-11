@@ -14,7 +14,9 @@ export interface RiskEpochBumpedConsumerDeps {
 	consumerDedup: DecisionsConsumerDedupRepository;
 }
 
-export function createRiskEpochBumpedConsumer(deps: RiskEpochBumpedConsumerDeps) {
+export function createRiskEpochBumpedConsumer(
+	deps: RiskEpochBumpedConsumerDeps,
+) {
 	return {
 		async handle(payload: RiskEpochBumpedPayload, eventId: string) {
 			const event = riskEpochBumpedPayloadSchema.parse(payload);

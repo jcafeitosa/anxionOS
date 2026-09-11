@@ -35,7 +35,9 @@ export const agentRoleAssignedPayloadSchema = z.object({
 	status: z.string().min(1).default("active"),
 });
 
-export type DecisionRecordedPayload = z.infer<typeof decisionRecordedPayloadSchema>;
+export type DecisionRecordedPayload = z.infer<
+	typeof decisionRecordedPayloadSchema
+>;
 export type AgentRoleAssignedPayload = z.infer<
 	typeof agentRoleAssignedPayloadSchema
 >;

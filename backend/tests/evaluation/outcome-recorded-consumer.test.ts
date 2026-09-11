@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-	EVALUATION_EVENT_TYPES,
 	computeOutcomeNotionalScore,
+	EVALUATION_EVENT_TYPES,
 } from "@anxionos/contracts/evaluation";
 import { createOutcomeRecordedConsumer } from "@anxionos/evaluation";
 import {

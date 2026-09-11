@@ -4,7 +4,10 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import type { Pool } from "pg";
 
-const migrationsFolder = join(dirname(fileURLToPath(import.meta.url)), "migrations");
+const migrationsFolder = join(
+	dirname(fileURLToPath(import.meta.url)),
+	"migrations",
+);
 
 export async function ensureAgentsSchema(pool: Pool): Promise<void> {
 	const db = drizzle(pool);
@@ -16,7 +19,8 @@ export async function ensureAgentsSchema(pool: Pool): Promise<void> {
 }
 
 const databaseUrl =
-	process.env.DATABASE_URL ?? "postgres://anxionos:anxionos@localhost:5432/anxionos";
+	process.env.DATABASE_URL ??
+	"postgres://anxionos:anxionos@localhost:5432/anxionos";
 
 async function main() {
 	const { Pool } = await import("pg");

@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import {
-	OPENBOT_E2E_SKIP_MESSAGE,
-	OPENBOT_INTELLIGENCE_MISSING_MESSAGE,
 	assertOpenBotHomologationEnvForCi,
 	getOpenBotHomologationSkipReason,
+	OPENBOT_E2E_SKIP_MESSAGE,
+	OPENBOT_INTELLIGENCE_MISSING_MESSAGE,
 	resolveOpenBotHomologationPolicy,
 } from "@anxionos/contracts/openbot";
 

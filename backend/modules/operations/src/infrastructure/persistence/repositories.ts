@@ -1,4 +1,7 @@
 import type { Pool, PoolClient } from "pg";
+import { HealthCheckRevisionConflictError } from "../../domain/errors/health-check-errors";
+import { IncidentRevisionConflictError } from "../../domain/errors/incident-errors";
+import { RecoveryTaskRevisionConflictError } from "../../domain/errors/recovery-errors";
 import type {
 	DeletionRequestRecord,
 	DeletionRequestRepository,
@@ -16,9 +19,6 @@ import type {
 	RetentionPolicyRecord,
 	RetentionPolicyRepository,
 } from "../../domain/ports/operations-unit-of-work";
-import { HealthCheckRevisionConflictError } from "../../domain/errors/health-check-errors";
-import { IncidentRevisionConflictError } from "../../domain/errors/incident-errors";
-import { RecoveryTaskRevisionConflictError } from "../../domain/errors/recovery-errors";
 
 type PgQueryable = Pool | PoolClient;
 
@@ -298,18 +298,18 @@ export function createPgRetentionPolicyRepository(
 			const row = result.rows[0];
 			return row
 				? {
-					id: row.id,
-					organizationId: row.organization_id,
-					scope: row.scope,
-					action: row.action,
-					retentionDays: row.retention_days,
-					legalHold: row.legal_hold,
-					exportManifestRequired: row.export_manifest_required,
-					createdBy: row.created_by,
-					status: row.status,
-					createdAt: row.created_at,
-					updatedAt: row.updated_at,
-				}
+						id: row.id,
+						organizationId: row.organization_id,
+						scope: row.scope,
+						action: row.action,
+						retentionDays: row.retention_days,
+						legalHold: row.legal_hold,
+						exportManifestRequired: row.export_manifest_required,
+						createdBy: row.created_by,
+						status: row.status,
+						createdAt: row.created_at,
+						updatedAt: row.updated_at,
+					}
 				: null;
 		},
 		async findByOrganizationAndScope(organizationId, scope) {
@@ -320,18 +320,18 @@ export function createPgRetentionPolicyRepository(
 			const row = result.rows[0];
 			return row
 				? {
-					id: row.id,
-					organizationId: row.organization_id,
-					scope: row.scope,
-					action: row.action,
-					retentionDays: row.retention_days,
-					legalHold: row.legal_hold,
-					exportManifestRequired: row.export_manifest_required,
-					createdBy: row.created_by,
-					status: row.status,
-					createdAt: row.created_at,
-					updatedAt: row.updated_at,
-				}
+						id: row.id,
+						organizationId: row.organization_id,
+						scope: row.scope,
+						action: row.action,
+						retentionDays: row.retention_days,
+						legalHold: row.legal_hold,
+						exportManifestRequired: row.export_manifest_required,
+						createdBy: row.created_by,
+						status: row.status,
+						createdAt: row.created_at,
+						updatedAt: row.updated_at,
+					}
 				: null;
 		},
 		async save(record) {
@@ -376,17 +376,17 @@ export function createPgExportJobRepository(
 			const row = result.rows[0];
 			return row
 				? {
-					id: row.id,
-					organizationId: row.organization_id,
-					scope: row.scope,
-					subjectId: row.subject_id,
-					status: row.status,
-					manifestJson: row.manifest_json,
-					requestedBy: row.requested_by,
-					completedAt: row.completed_at,
-					createdAt: row.created_at,
-					updatedAt: row.updated_at,
-				}
+						id: row.id,
+						organizationId: row.organization_id,
+						scope: row.scope,
+						subjectId: row.subject_id,
+						status: row.status,
+						manifestJson: row.manifest_json,
+						requestedBy: row.requested_by,
+						completedAt: row.completed_at,
+						createdAt: row.created_at,
+						updatedAt: row.updated_at,
+					}
 				: null;
 		},
 		async save(record) {
@@ -410,7 +410,12 @@ export function createPgExportJobRepository(
 		async updateStatus(id, status, manifestJson, completedAt) {
 			await client.query(
 				"UPDATE operations_export_jobs SET status = $2, manifest_json = $3, completed_at = $4, updated_at = NOW() WHERE id = $1",
-				[id, status, manifestJson ? JSON.stringify(manifestJson) : null, completedAt],
+				[
+					id,
+					status,
+					manifestJson ? JSON.stringify(manifestJson) : null,
+					completedAt,
+				],
 			);
 		},
 	};
@@ -429,19 +434,19 @@ export function createPgDeletionRequestRepository(
 			const row = result.rows[0];
 			return row
 				? {
-					id: row.id,
-					organizationId: row.organization_id,
-					scope: row.scope,
-					subjectId: row.subject_id,
-					policyId: row.policy_id,
-					status: row.status,
-					requestedBy: row.requested_by,
-					approvedBy: row.approved_by,
-					approvedAt: row.approved_at,
-					executedAt: row.executed_at,
-					createdAt: row.created_at,
-					updatedAt: row.updated_at,
-				}
+						id: row.id,
+						organizationId: row.organization_id,
+						scope: row.scope,
+						subjectId: row.subject_id,
+						policyId: row.policy_id,
+						status: row.status,
+						requestedBy: row.requested_by,
+						approvedBy: row.approved_by,
+						approvedAt: row.approved_at,
+						executedAt: row.executed_at,
+						createdAt: row.created_at,
+						updatedAt: row.updated_at,
+					}
 				: null;
 		},
 		async findByOrganizationAndSubject(organizationId, subjectId) {
@@ -452,19 +457,19 @@ export function createPgDeletionRequestRepository(
 			const row = result.rows[0];
 			return row
 				? {
-					id: row.id,
-					organizationId: row.organization_id,
-					scope: row.scope,
-					subjectId: row.subject_id,
-					policyId: row.policy_id,
-					status: row.status,
-					requestedBy: row.requested_by,
-					approvedBy: row.approved_by,
-					approvedAt: row.approved_at,
-					executedAt: row.executed_at,
-					createdAt: row.created_at,
-					updatedAt: row.updated_at,
-				}
+						id: row.id,
+						organizationId: row.organization_id,
+						scope: row.scope,
+						subjectId: row.subject_id,
+						policyId: row.policy_id,
+						status: row.status,
+						requestedBy: row.requested_by,
+						approvedBy: row.approved_by,
+						approvedAt: row.approved_at,
+						executedAt: row.executed_at,
+						createdAt: row.created_at,
+						updatedAt: row.updated_at,
+					}
 				: null;
 		},
 		async save(record) {

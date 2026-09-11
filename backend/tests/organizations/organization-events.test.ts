@@ -18,5 +18,4 @@ describe("organization domain events", () => {
 		expect(event.agencyId).toBe(agencyId);
 		expect(event.ownerDomain).toBe("organizations");
 	});
-
 });

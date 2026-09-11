@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { RealtimeIngestReconnectHandler } from "./reconnect-handler";
 import {
 	MARKET_DATA_REALTIME_LIMIT_DEFAULTS,
 	resolveReconnectDedupeWindow,
 } from "../../domain/realtime-ingest-limits";
+import { RealtimeIngestReconnectHandler } from "./reconnect-handler";
 
 const TENANT = "00000000-0000-4000-8000-000000000001";
 const STREAM = "btc-usd@binance";

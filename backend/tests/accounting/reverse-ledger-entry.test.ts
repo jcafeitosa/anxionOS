@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+import { reverseLedgerEntry } from "../../modules/accounting/src/application/commands/reverse-ledger-entry";
+import { AccountingCommandError } from "../../modules/accounting/src/application/errors";
 import type {
 	JournalEntryRecord,
 	LedgerPostingRecord,
 } from "../../modules/accounting/src/domain/ports/accounting-unit-of-work";
 import type { CommandJournalEntry } from "../../modules/accounting/src/domain/ports/command-journal";
-import { reverseLedgerEntry } from "../../modules/accounting/src/application/commands/reverse-ledger-entry";
-import { AccountingCommandError } from "../../modules/accounting/src/application/errors";
 
 const orgId = "11111111-1111-4111-8111-111111111111";
 const entryId = "acc_je_aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
@@ -203,7 +203,7 @@ describe("reverseLedgerEntry", () => {
 		).rejects.toMatchObject({ code: "ACC_CROSS_TENANT" });
 	});
 
-		test("replays same commandId idempotently", async () => {
+	test("replays same commandId idempotently", async () => {
 		const commandId = randomUUID();
 		const harness = createHarness({
 			entry: baseEntry,

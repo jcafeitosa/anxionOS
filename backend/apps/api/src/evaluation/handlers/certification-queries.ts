@@ -1,14 +1,14 @@
 import {
-	getCertificationBySubject,
 	type EvaluationCertificationView,
+	getCertificationBySubject,
 } from "@anxionos/evaluation";
 import { z } from "zod";
+import type { EvaluationPluginDeps } from "../plugin";
 import {
 	getCertificationQuerySchema,
 	strategyIdParamSchema,
 	strategyVersionIdParamSchema,
 } from "./commands";
-import type { EvaluationPluginDeps } from "../plugin";
 
 export const getCertificationBySubjectQuerySchema = getCertificationQuerySchema;
 

@@ -1,13 +1,13 @@
 import { institutionalUuidSchema } from "@anxionos/contracts";
+import { partnersPartnerIdSchema } from "@anxionos/contracts/partners";
 import {
+	type CommissionAccrualRecord,
 	getPartnerByOrganization,
 	listCommissionAccruals,
 	listPayouts,
-	type CommissionAccrualRecord,
 	type PartnerRecord,
 	type PayoutRecord,
 } from "@anxionos/partners";
-import { partnersPartnerIdSchema } from "@anxionos/contracts/partners";
 import { z } from "zod";
 import type { PartnersPluginDeps } from "../plugin";
 

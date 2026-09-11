@@ -66,7 +66,9 @@ describe("risk epoch permit revocation (ANX-150 S4)", () => {
 			).rows[0]?.payload;
 			expect(epochEvent).toBeTruthy();
 
-			const consumer = createRiskEpochBumpedConsumer({ unitOfWork: deps.unitOfWork });
+			const consumer = createRiskEpochBumpedConsumer({
+				unitOfWork: deps.unitOfWork,
+			});
 			const eventId = randomUUID();
 			const result = await consumer.handle(epochEvent, eventId);
 			expect(result.revokedPermitIds).toContain(check.permitId);
@@ -133,7 +135,9 @@ describe("risk epoch permit revocation (ANX-150 S4)", () => {
 
 		await withRiskPgHarness(async ({ pool }) => {
 			const deps = createDeps(pool);
-			const consumer = createRiskEpochBumpedConsumer({ unitOfWork: deps.unitOfWork });
+			const consumer = createRiskEpochBumpedConsumer({
+				unitOfWork: deps.unitOfWork,
+			});
 			const eventId = randomUUID();
 
 			await pool.query(

@@ -10,8 +10,8 @@ import {
 import { canTransitionCheckoutStatus } from "../../domain/entities/task";
 import {
 	DEFAULT_LEASE_TTL_MS,
-	MAX_LEASE_TTL_MS,
 	isLeaseActive,
+	MAX_LEASE_TTL_MS,
 } from "../../domain/entities/task-lease";
 import { createTaskCheckedOutEvent } from "../../domain/events/orchestration-events";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
@@ -21,7 +21,6 @@ import type {
 	OrchestrationUnitOfWork,
 } from "../../domain/ports/orchestration-unit-of-work";
 import type { CheckoutAuthorizationDeps } from "../checkout-authorization";
-import {} from "../checkout-authorization";
 import { assertCheckoutAuthorized } from "../checkout-authorization";
 import {
 	buildCheckoutCommandId,

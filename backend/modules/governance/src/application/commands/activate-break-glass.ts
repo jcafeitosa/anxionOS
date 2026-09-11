@@ -1,11 +1,10 @@
 import { randomUUID } from "node:crypto";
 import {
 	type ActivateBreakGlassCommand,
-	type GovernanceCommandResult,
 	activateBreakGlassCommandSchema,
+	type GovernanceCommandResult,
 	governanceCommandResultSchema,
 } from "@anxionos/contracts/governance";
-import type { TenantContext } from "../../domain/ports/tenant-context";
 import {
 	createAuthorityEpochBumpedEvent,
 	createBreakGlassActivatedEvent,
@@ -14,6 +13,7 @@ import {
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { GovernanceUnitOfWork } from "../../domain/ports/governance-unit-of-work";
 import type { PrincipalLookup } from "../../domain/ports/principal-lookup";
+import type { TenantContext } from "../../domain/ports/tenant-context";
 import {
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
@@ -73,7 +73,9 @@ export async function activateBreakGlass(
 	};
 
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
-		const raced = await context.commandJournal.findByCommandId(command.commandId);
+		const raced = await context.commandJournal.findByCommandId(
+			command.commandId,
+		);
 		if (raced) {
 			return parseCommandResultSnapshot(raced.responseSnapshot);
 		}

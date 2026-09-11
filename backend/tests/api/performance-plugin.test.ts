@@ -35,7 +35,8 @@ describe("performance API boundary (ANX-154 HTTP read)", () => {
 
 	test("path param schemas reject tampered ids", () => {
 		expect(
-			outcomeSnapshotIdParamSchema.safeParse({ outcomeSnapshotId: "bad" }).success,
+			outcomeSnapshotIdParamSchema.safeParse({ outcomeSnapshotId: "bad" })
+				.success,
 		).toBe(false);
 		expect(
 			positionExposureSnapshotIdParamSchema.safeParse({

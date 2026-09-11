@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { createSimulatedEmbeddingPort } from "../../infrastructure/adapters/simulated-embedding-adapter";
-import { retrieveKnowledge } from "./retrieve-knowledge";
 import {
 	createKnowledgeTestUow,
 	TEST_ACL_ID,
 	TEST_ORG,
 } from "./knowledge-test-support";
+import { retrieveKnowledge } from "./retrieve-knowledge";
 
 const SPACE_ID = `kn_espc_${randomUUID()}`;
 const DOC_ALLOWED = `kn_doc_${randomUUID()}`;

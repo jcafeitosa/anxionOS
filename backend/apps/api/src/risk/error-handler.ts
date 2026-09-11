@@ -5,11 +5,11 @@ import {
 	toErrorResponse,
 } from "@anxionos/contracts/errors";
 import {
-	resolveRiskErrorStatus,
 	type RiskErrorCode,
+	resolveRiskErrorStatus,
 } from "@anxionos/contracts/risk";
-import { RiskCommandError } from "@anxionos/risk";
 import { PrincipalLookupUnavailableError } from "@anxionos/organizations";
+import { RiskCommandError } from "@anxionos/risk";
 
 function riskCodeToAppError(error: RiskCommandError): AppError {
 	const statusCode = resolveRiskErrorStatus(error.code);

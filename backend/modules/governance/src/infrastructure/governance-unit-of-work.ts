@@ -1,4 +1,5 @@
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
+import { applyTenantContext } from "@anxionos/database";
 import { appendJournal, enqueueOutbox } from "@anxionos/eventing/postgres";
 import { drizzle } from "drizzle-orm/node-postgres";
 import type { Pool, PoolClient } from "pg";
@@ -6,15 +7,14 @@ import type {
 	GovernanceTransactionContext,
 	GovernanceUnitOfWork,
 } from "../domain/ports/governance-unit-of-work";
-import { applyTenantContext } from "@anxionos/database";
 import type { TenantContext } from "../domain/ports/tenant-context";
 import { createDrizzleApprovalRepository } from "./persistence/approval-repository";
 import { createDrizzleAuthorityEpochStore } from "./persistence/authority-epoch-store";
+import { createDrizzleAutonomyAssignmentRepository } from "./persistence/autonomy-assignment-repository";
 import { createDrizzleChangeProposalRepository } from "./persistence/change-proposal-repository";
 import { createDrizzleCommandJournalRepository } from "./persistence/command-journal-repository";
 import { createDrizzleDelegationRepository } from "./persistence/delegation-repository";
 import { createDrizzleGrantRepository } from "./persistence/grant-repository";
-import { createDrizzleAutonomyAssignmentRepository } from "./persistence/autonomy-assignment-repository";
 import { createDrizzleMandateRepository } from "./persistence/mandate-repository";
 import * as schema from "./persistence/schema";
 

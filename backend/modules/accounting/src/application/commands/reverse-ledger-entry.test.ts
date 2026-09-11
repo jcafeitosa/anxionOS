@@ -12,8 +12,13 @@ import { reverseLedgerEntry } from "./reverse-ledger-entry";
 const ORG = "00000000-0000-4000-8000-000000000001";
 const ENTRY_ID = `acc_je_${randomUUID()}`;
 
-function createDeps(original: JournalEntryRecord, postings: LedgerPostingRecord[]) {
-	const entries = new Map<string, JournalEntryRecord>([[original.id, original]]);
+function createDeps(
+	original: JournalEntryRecord,
+	postings: LedgerPostingRecord[],
+) {
+	const entries = new Map<string, JournalEntryRecord>([
+		[original.id, original],
+	]);
 	const postingStore = [...postings];
 	const journal = new Map<
 		string,
@@ -92,7 +97,12 @@ function createDeps(original: JournalEntryRecord, postings: LedgerPostingRecord[
 			return work(ctx);
 		},
 	};
-	return { unitOfWork, commandJournal: ctx.commandJournal, entries, postingStore };
+	return {
+		unitOfWork,
+		commandJournal: ctx.commandJournal,
+		entries,
+		postingStore,
+	};
 }
 
 const originalEntry: JournalEntryRecord = {
@@ -156,7 +166,10 @@ describe("reverseLedgerEntry (ANX-152)", () => {
 
 	test("rejects reversing already reversed entry", async () => {
 		const reversed = { ...originalEntry, status: "REVERSED" };
-		const { unitOfWork, commandJournal } = createDeps(reversed, originalPostings);
+		const { unitOfWork, commandJournal } = createDeps(
+			reversed,
+			originalPostings,
+		);
 		await expect(
 			reverseLedgerEntry(
 				{ unitOfWork, commandJournal },

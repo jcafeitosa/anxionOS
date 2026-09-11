@@ -4,35 +4,35 @@
  */
 import { randomUUID } from "node:crypto";
 import {
+	createPgCommandJournalRepository as createCapitalCommandJournal,
+	createCapitalUnitOfWork,
+	createDefaultGrantValidationPort,
+	registerCapitalAccount,
+	reserveForIntent,
+} from "@anxionos/capital";
+import {
+	createCapitalReservationCreatedConsumer,
+	createPgCommandJournalRepository as createDecisionsCommandJournal,
+	createDecisionsUnitOfWork,
+	createPgCapitalReservationQueryAdapter,
+	createRiskCheckCompletedConsumer,
+} from "@anxionos/decisions";
+import {
 	createPgPool,
 	ensureEventingSchema,
 } from "@anxionos/eventing/postgres";
 import {
-	createDecisionsUnitOfWork,
-	createPgCapitalReservationQueryAdapter,
-	createPgCommandJournalRepository as createDecisionsCommandJournal,
-	createCapitalReservationCreatedConsumer,
-	createRiskCheckCompletedConsumer,
-} from "@anxionos/decisions";
-import { ensureDecisionsSchema } from "../../modules/decisions/src/infrastructure/migrate";
-import {
 	activateLimitPolicy,
-	createRiskUnitOfWork,
 	createPgCommandJournalRepository as createRiskCommandJournal,
+	createRiskUnitOfWork,
 	runPreTradeCheck,
 } from "@anxionos/risk";
-import { ensureRiskSchema } from "../../modules/risk/src/infrastructure/migrate";
-import {
-	createCapitalUnitOfWork,
-	createDefaultGrantValidationPort,
-	createPgCommandJournalRepository as createCapitalCommandJournal,
-	registerCapitalAccount,
-	reserveForIntent,
-} from "@anxionos/capital";
-import { ensureCapitalSchema } from "../../modules/capital/src/infrastructure/migrate";
-import { ensureExecutionSchema } from "../../modules/execution/src/infrastructure/migrate";
 import { ensureAccountingSchema } from "../../modules/accounting/src/infrastructure/migrate";
+import { ensureCapitalSchema } from "../../modules/capital/src/infrastructure/migrate";
+import { ensureDecisionsSchema } from "../../modules/decisions/src/infrastructure/migrate";
+import { ensureExecutionSchema } from "../../modules/execution/src/infrastructure/migrate";
 import { ensurePerformanceSchema } from "../../modules/performance/src/infrastructure/migrate";
+import { ensureRiskSchema } from "../../modules/risk/src/infrastructure/migrate";
 
 export const P06_TEST_ORG_ID = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
 export const P06_TEST_GRANT_ID = "bbbbbbbb-cccc-4ddd-8eee-ffffffffffff";

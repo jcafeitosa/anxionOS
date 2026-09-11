@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { spawnSync } from "node:child_process";
 /**
  * ANX-162 S4 — egress deny, service auth, audit manifest homologation.
  *
@@ -8,13 +9,13 @@
  * Importers: package.json `anx162:s4-egress-auth-audit-homologation`
  */
 import { readFileSync, writeFileSync } from "node:fs";
-import { spawnSync } from "node:child_process";
 import { parseArgs } from "node:util";
 
 const REPO_ROOT = new URL("../..", import.meta.url).pathname;
 const COMPOSE_FILE = "backend/deploy/docker/docker-compose.yml";
 const COMPOSE_ENV_FILE = "backend/deploy/docker/.env";
-const MANIFEST_FILE = "backend/deploy/docker/audit/engine-sandbox-manifest.json";
+const MANIFEST_FILE =
+	"backend/deploy/docker/audit/engine-sandbox-manifest.json";
 const COMPOSE_ARGS = [
 	"-f",
 	COMPOSE_FILE,
@@ -127,9 +128,8 @@ async function waitForHealthy(service, attempts = 40, intervalMs = 2000) {
 
 function inspectComposeStatic() {
 	const raw = readFileSync(`${REPO_ROOT}/${COMPOSE_FILE}`, "utf8");
-	const enginesSandboxInternal = /anxion-engines-sandbox:[\s\S]*?internal:\s*true/.test(
-		raw,
-	);
+	const enginesSandboxInternal =
+		/anxion-engines-sandbox:[\s\S]*?internal:\s*true/.test(raw);
 	const authTokenInCompose = raw.includes("ENGINE_SANDBOX_AUTH_TOKEN");
 	const engines = ENGINES.map((engine) => ({
 		service: engine.service,
@@ -140,9 +140,9 @@ function inspectComposeStatic() {
 		onSandboxNetwork: new RegExp(
 			`${engine.service}:[\\s\\S]*?anxion-engines-sandbox`,
 		).test(raw),
-		notOnControl: !new RegExp(`${engine.service}:[\\s\\S]*?anxion-control`).test(
-			raw,
-		),
+		notOnControl: !new RegExp(
+			`${engine.service}:[\\s\\S]*?anxion-control`,
+		).test(raw),
 		notOnData: !new RegExp(`${engine.service}:[\\s\\S]*?anxion-data`).test(raw),
 	}));
 	return {
@@ -217,7 +217,13 @@ function probeHttp(service, port, path, headers = {}) {
 		const body = JSON.parse(exec.stdout.trim());
 		return { ok: true, status: 200, body, url, via: "docker-exec" };
 	} catch {
-		return { ok: false, status: 200, url, error: "invalid JSON body", via: "docker-exec" };
+		return {
+			ok: false,
+			status: 200,
+			url,
+			error: "invalid JSON body",
+			via: "docker-exec",
+		};
 	}
 }
 
@@ -238,16 +244,29 @@ function probeHttpStatus(service, port, path, headers = {}) {
 	args.push(url);
 	const exec = run("docker", args);
 	const statusMatch = /HTTP\/\d(?:\.\d)? (\d{3})/.exec(exec.stderr);
-	const status = statusMatch ? Number(statusMatch[1]) : exec.ok ? 200 : exec.status;
+	const status = statusMatch
+		? Number(statusMatch[1])
+		: exec.ok
+			? 200
+			: exec.status;
 	return { ok: exec.ok, status, url, via: "docker-exec" };
 }
 
 function verifyServiceAuth(engine, token) {
 	const health = probeHttp(engine.service, engine.port, "/health");
-	const apiNoAuth = probeHttpStatus(engine.service, engine.port, engine.apiPath);
-	const apiBadAuth = probeHttpStatus(engine.service, engine.port, engine.apiPath, {
-		Authorization: "Bearer invalid-token",
-	});
+	const apiNoAuth = probeHttpStatus(
+		engine.service,
+		engine.port,
+		engine.apiPath,
+	);
+	const apiBadAuth = probeHttpStatus(
+		engine.service,
+		engine.port,
+		engine.apiPath,
+		{
+			Authorization: "Bearer invalid-token",
+		},
+	);
 	const apiGoodAuth = probeHttp(engine.service, engine.port, engine.apiPath, {
 		Authorization: `Bearer ${token}`,
 	});
@@ -279,9 +298,18 @@ function verifyEgressDenied(service) {
 }
 
 function inspectImageDigest(image) {
-	const inspect = run("docker", ["image", "inspect", image, "--format", "{{json .RepoDigests}}"]);
+	const inspect = run("docker", [
+		"image",
+		"inspect",
+		image,
+		"--format",
+		"{{json .RepoDigests}}",
+	]);
 	if (!inspect.ok) {
-		return { ok: false, error: inspect.stderr.trim() || "image inspect failed" };
+		return {
+			ok: false,
+			error: inspect.stderr.trim() || "image inspect failed",
+		};
 	}
 	let digests = [];
 	try {
@@ -291,7 +319,13 @@ function inspectImageDigest(image) {
 	}
 	const digest =
 		digests.find((entry) => entry.includes("@sha256:")) ??
-		run("docker", ["image", "inspect", image, "--format", "{{.Id}}"]).stdout.trim();
+		run("docker", [
+			"image",
+			"inspect",
+			image,
+			"--format",
+			"{{.Id}}",
+		]).stdout.trim();
 	return { ok: Boolean(digest), digest };
 }
 
@@ -319,7 +353,10 @@ function verifyAuditManifest(digestsByService, writeManifest) {
 	manifest.generatedAt = new Date().toISOString();
 	const ok = mismatches.length === 0;
 	if (writeManifest) {
-		writeFileSync(`${REPO_ROOT}/${MANIFEST_FILE}`, `${JSON.stringify(manifest, null, 2)}\n`);
+		writeFileSync(
+			`${REPO_ROOT}/${MANIFEST_FILE}`,
+			`${JSON.stringify(manifest, null, 2)}\n`,
+		);
 	}
 	return { ok, mismatches, manifest };
 }
@@ -420,7 +457,10 @@ async function main() {
 			},
 		]),
 	);
-	report.auditManifest = verifyAuditManifest(digestsByService, opts["write-manifest"]);
+	report.auditManifest = verifyAuditManifest(
+		digestsByService,
+		opts["write-manifest"],
+	);
 	report.overallOk =
 		report.results.every((r) => r.overallOk) && report.auditManifest.ok;
 
@@ -444,7 +484,9 @@ function emit(report, asJson) {
 	);
 	for (const result of report.results) {
 		console.log(`--- ${result.service} ---`);
-		console.log(`  Build: ${result.build?.skipped ? "skipped" : result.build?.ok ? "ok" : "fail"}`);
+		console.log(
+			`  Build: ${result.build?.skipped ? "skipped" : result.build?.ok ? "ok" : "fail"}`,
+		);
 		console.log(`  Up: ${result.up?.ok ? "ok" : "fail"}`);
 		console.log(`  Health: ${result.health?.ok ? "ok" : "fail"}`);
 		console.log(
@@ -461,7 +503,9 @@ function emit(report, asJson) {
 		} else {
 			console.log(`  Egress deny: ${result.egress?.ok ? "ok" : "fail"}`);
 		}
-		console.log(`  Image digest: ${result.digest?.ok ? result.digest.digest : "fail"}`);
+		console.log(
+			`  Image digest: ${result.digest?.ok ? result.digest.digest : "fail"}`,
+		);
 		console.log(`  Engine overall: ${result.overallOk ? "PASS" : "FAIL"}`);
 	}
 	console.log(

@@ -7,9 +7,9 @@
 import {
 	AGENT_GRAPH_EVENT_TYPES,
 	AGENT_GRAPH_OWNER_DOMAIN,
-	PRODUCT_GRAPH_OWNER_DOMAIN,
 	agentRoleAssignedPayloadSchema,
 	decisionRecordedPayloadSchema,
+	PRODUCT_GRAPH_OWNER_DOMAIN,
 } from "@anxionos/contracts/graph";
 import { GRAPH_AGENTS_CONSUMER_NAME } from "../../../domain/projections/constants";
 import { ProjectionError } from "../../../domain/projections/errors";
@@ -76,7 +76,10 @@ function parseAgentRoleAssigned(payload: unknown) {
 	return parsed.data;
 }
 
-function isStaleRevision(incomingRevision: number, existing: { revision: number } | null) {
+function isStaleRevision(
+	incomingRevision: number,
+	existing: { revision: number } | null,
+) {
 	return existing !== null && incomingRevision <= existing.revision;
 }
 
@@ -179,7 +182,9 @@ function toAssignedToEdge(
 }
 
 /** Projects agents domain events into graph nodes (mock-friendly port). */
-export async function projectAgentGraphEvent(context: ProjectionHandlerContext) {
+export async function projectAgentGraphEvent(
+	context: ProjectionHandlerContext,
+) {
 	const coreHandled = await projectAgentsCoreGraphEvent(context);
 	if (coreHandled === false) {
 		// fall through to product-company agent graph events

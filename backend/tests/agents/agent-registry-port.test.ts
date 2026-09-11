@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import type { AgentRegistryPort } from "../../modules/orchestration/src/domain/ports/agent-registry";
 import { createAgentRegistryAdapter } from "@anxionos/agents";
+import type { AgentRegistryPort } from "../../modules/orchestration/src/domain/ports/agent-registry";
 import { createInMemoryAgentRepository } from "./test-support";
 
 const organizationId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
@@ -22,7 +22,9 @@ describe("createAgentRegistryAdapter (G3-AGT-04)", () => {
 				updatedAt: new Date(),
 			},
 		]);
-		const registry: AgentRegistryPort = createAgentRegistryAdapter({ agentRepository });
+		const registry: AgentRegistryPort = createAgentRegistryAdapter({
+			agentRepository,
+		});
 		expect(await registry.isAgentActive(agentId, organizationId)).toBe(true);
 	});
 
@@ -42,7 +44,10 @@ describe("createAgentRegistryAdapter (G3-AGT-04)", () => {
 		const registry = createAgentRegistryAdapter({ agentRepository });
 		expect(await registry.isAgentActive(agentId, organizationId)).toBe(false);
 		expect(
-			await registry.isAgentActive(agentId, "99999999-9999-4999-8999-999999999999"),
+			await registry.isAgentActive(
+				agentId,
+				"99999999-9999-4999-8999-999999999999",
+			),
 		).toBe(false);
 	});
 });

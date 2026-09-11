@@ -35,10 +35,7 @@ export async function recordApproval(
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			return replayIdempotentCommandJournalEntry(
-				raced,
-				command.organizationId,
-			);
+			return replayIdempotentCommandJournalEntry(raced, command.organizationId);
 		}
 		const decision = await ctx.decisions.findById(command.decisionId);
 		if (!decision || decision.organizationId !== command.organizationId) {

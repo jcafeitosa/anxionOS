@@ -2,9 +2,9 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { DECISIONS_EVENT_TYPES } from "@anxionos/contracts/decisions";
 import {
-	createPgCapitalReservationQueryAdapter,
 	checkAuthority,
 	createDecisionsUnitOfWork,
+	createPgCapitalReservationQueryAdapter,
 	createPgCommandJournalRepository,
 	proposeDecision,
 	recordApproval,

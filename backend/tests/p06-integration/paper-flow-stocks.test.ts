@@ -12,58 +12,56 @@
  */
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { createPgPool } from "@anxionos/eventing/postgres";
-
-// Contracts
-import { checkAuthorityCommandSchema } from "@anxionos/contracts/decisions";
-import { runPreTradeCheckCommandSchema } from "@anxionos/contracts/risk";
-import { openExecutionSessionCommandSchema } from "@anxionos/contracts/execution";
-
-// Module commands (imported from each module index)
 import {
-	proposeDecision,
-	checkAuthority,
-	submitIntent,
-	createDecisionsUnitOfWork,
-	createPgCommandJournalRepository as createDecisionsCommandJournal,
-	ensureDecisionsSchema,
-} from "@anxionos/decisions";
-import {
-	runPreTradeCheck,
-	createRiskUnitOfWork,
-	createPgCommandJournalRepository as createRiskCommandJournal,
-	ensureRiskSchema,
-} from "@anxionos/risk";
-import {
-	reserveForIntent,
-	createCapitalUnitOfWork,
-	createPgCommandJournalRepository as createCapitalCommandJournal,
-	ensureCapitalSchema,
-} from "@anxionos/capital";
-import {
-	openExecutionSession,
-	submitOrder,
-	recordFill,
-	createExecutionUnitOfWork,
-	createPgCommandJournalRepository as createExecutionCommandJournal,
-	ensureExecutionSchema,
-	createPgRiskPermitValidationPort,
-	InMemoryExecutionCapitalNotifyAdapter,
-	SimulatedVenueAdapter,
-} from "@anxionos/execution";
-import {
+	createPgCommandJournalRepository as createAccountingCommandJournal,
+	createAccountingUnitOfWork,
+	ensureAccountingSchema,
 	postLedgerEntry,
 	postTradeFill,
-	createAccountingUnitOfWork,
-	createPgCommandJournalRepository as createAccountingCommandJournal,
-	ensureAccountingSchema,
 } from "@anxionos/accounting";
 import {
-	recordOutcomeSnapshot,
-	createPerformanceUnitOfWork,
+	createPgCommandJournalRepository as createCapitalCommandJournal,
+	createCapitalUnitOfWork,
+	ensureCapitalSchema,
+	reserveForIntent,
+} from "@anxionos/capital";
+// Contracts
+import { checkAuthorityCommandSchema } from "@anxionos/contracts/decisions";
+import { openExecutionSessionCommandSchema } from "@anxionos/contracts/execution";
+import { runPreTradeCheckCommandSchema } from "@anxionos/contracts/risk";
+// Module commands (imported from each module index)
+import {
+	checkAuthority,
+	createPgCommandJournalRepository as createDecisionsCommandJournal,
+	createDecisionsUnitOfWork,
+	ensureDecisionsSchema,
+	proposeDecision,
+	submitIntent,
+} from "@anxionos/decisions";
+import { createPgPool } from "@anxionos/eventing/postgres";
+import {
+	createPgCommandJournalRepository as createExecutionCommandJournal,
+	createExecutionUnitOfWork,
+	createPgRiskPermitValidationPort,
+	ensureExecutionSchema,
+	InMemoryExecutionCapitalNotifyAdapter,
+	openExecutionSession,
+	recordFill,
+	SimulatedVenueAdapter,
+	submitOrder,
+} from "@anxionos/execution";
+import {
 	createPgCommandJournalRepository as createPerformanceCommandJournal,
+	createPerformanceUnitOfWork,
 	ensurePerformanceSchema,
+	recordOutcomeSnapshot,
 } from "@anxionos/performance";
+import {
+	createPgCommandJournalRepository as createRiskCommandJournal,
+	createRiskUnitOfWork,
+	ensureRiskSchema,
+	runPreTradeCheck,
+} from "@anxionos/risk";
 
 const ORG_ID = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
 const GRANT_ID = "bbbbbbbb-cccc-4ddd-8eee-ffffffffffff";
@@ -76,7 +74,11 @@ const RISK_EPOCH = 1;
 const EXECUTION_MODES = ["SIMULATED", "PAPER"] as const;
 
 function shouldRunPg(): boolean {
-	return (process.env.RUN_PG_INTEGRATION_TESTS === "true" || !!process.env.RUN_PG_INTEGRATION_TESTS) && !!process.env.DATABASE_URL?.trim();
+	return (
+		(process.env.RUN_PG_INTEGRATION_TESTS === "true" ||
+			!!process.env.RUN_PG_INTEGRATION_TESTS) &&
+		!!process.env.DATABASE_URL?.trim()
+	);
 }
 
 describe("P06 paper flow — cross-module pipeline (ANX-163)", () => {
@@ -135,7 +137,7 @@ describe("P06 paper flow — cross-module pipeline (ANX-163)", () => {
 			return;
 		}
 
-	const pool = createPgPool(process.env.DATABASE_URL);
+		const pool = createPgPool(process.env.DATABASE_URL);
 		try {
 			// 1. Migrate all P06 modules. capital/accounting migrations were
 			// created in this session (ANX-163) — previously missing.

@@ -24,7 +24,9 @@ export const changeProposalItemSchema = z.object({
 
 export type ChangeProposalItemDto = z.infer<typeof changeProposalItemSchema>;
 
-export function toChangeProposalDto(proposal: ChangeProposal): ChangeProposalItemDto {
+export function toChangeProposalDto(
+	proposal: ChangeProposal,
+): ChangeProposalItemDto {
 	return {
 		id: proposal.id,
 		tenantId: proposal.tenantId,

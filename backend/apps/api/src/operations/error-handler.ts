@@ -5,8 +5,8 @@ import {
 	toErrorResponse,
 } from "@anxionos/contracts/errors";
 import {
-	resolveOperationsErrorStatus,
 	type OperationsErrorCode,
+	resolveOperationsErrorStatus,
 } from "@anxionos/contracts/operations";
 import { OperationsCommandError } from "@anxionos/operations";
 import {

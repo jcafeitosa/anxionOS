@@ -11,8 +11,8 @@ import type { RebuildCacheControl } from "../../application/rebuild/full-generat
 import { shouldCacheTraversalResult as shouldCacheTraversalResultPolicy } from "../../domain/cache/should-cache-traversal";
 import type { BuildGraphCacheKeyInput } from "./cache-key-builder";
 import {
-	GRAPH_CACHE_KEY_PREFIX,
 	buildGraphCacheRedisKeyFromInput,
+	GRAPH_CACHE_KEY_PREFIX,
 } from "./cache-key-builder";
 import type { GraphCacheRedisCommandPort } from "./redis-l2-cache";
 import {
@@ -140,6 +140,7 @@ export function resolveGraphCacheMode(
 	return env.GRAPH_CACHE_MODE === "l1-l2" ? "l1-l2" : "local-only";
 }
 export { shouldCacheTraversalResultPolicy as shouldCacheTraversalResult };
+
 const shouldCacheTraversalResult = shouldCacheTraversalResultPolicy;
 export function createGraphReadCache(
 	options: GraphReadCacheOptions = {},

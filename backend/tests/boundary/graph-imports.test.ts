@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import {
 	BACKEND_ROOT,
-	type ForbiddenPattern,
 	collectAllModuleFiles,
 	collectModuleLayerFiles,
+	type ForbiddenPattern,
 	findForbiddenImports,
 	formatViolations,
 } from "./scan-imports";

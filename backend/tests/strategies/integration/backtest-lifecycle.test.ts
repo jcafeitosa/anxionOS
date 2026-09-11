@@ -23,7 +23,11 @@ const DATASET_ID = "ds_momentum_v1";
 const DATASET_REVISION = "rev-2026-09-10";
 const SEED = "seed-deterministic-001";
 
-async function seedDraftVersion(pool: ReturnType<typeof createStrategiesUnitOfWork> extends never ? never : import("pg").Pool) {
+async function seedDraftVersion(
+	pool: ReturnType<typeof createStrategiesUnitOfWork> extends never
+		? never
+		: import("pg").Pool,
+) {
 	const unitOfWork = createStrategiesUnitOfWork(pool);
 	const commandJournal = createPgCommandJournalRepository(pool);
 	const registered = await registerStrategy(

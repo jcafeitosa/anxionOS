@@ -1,10 +1,10 @@
+import { createLogger } from "@anxionos/observability";
 import {
 	LEASE_SWEEPER_BATCH_SIZE,
-	sweepExpiredLeases,
 	type LeaseClock,
 	type OrchestrationUnitOfWork,
+	sweepExpiredLeases,
 } from "@anxionos/orchestration";
-import { createLogger } from "@anxionos/observability";
 import { sleepWithAbort } from "./poll-utils";
 
 export const ORCHESTRATION_LEASE_SWEEPER_WORKER_NAME =

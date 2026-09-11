@@ -1,22 +1,22 @@
 import {
 	activateDeploymentCommandSchema,
-	rollbackDeploymentCommandSchema,
 	completeBacktestCommandSchema,
 	createStrategyVersionCommandSchema,
 	emitSignalCommandSchema,
 	publishStrategyVersionCommandSchema,
 	registerStrategyCommandSchema,
 	requestBacktestCommandSchema,
+	rollbackDeploymentCommandSchema,
 } from "@anxionos/contracts/strategies";
 import {
 	activateDeployment,
-	rollbackDeployment,
 	completeBacktest,
 	createStrategyVersion,
 	emitSignal,
 	publishStrategyVersion,
 	registerStrategy,
 	requestBacktest,
+	rollbackDeployment,
 } from "@anxionos/strategies";
 import { z } from "zod";
 import type { StrategiesPluginDeps } from "../plugin";
@@ -297,4 +297,3 @@ export async function handleRollbackDeployment(
 		},
 	);
 }
-

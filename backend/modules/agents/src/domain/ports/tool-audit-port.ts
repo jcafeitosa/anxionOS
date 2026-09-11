@@ -1,4 +1,7 @@
-import type { ToolAuditEntry, ToolInvocationDecision } from "@anxionos/contracts/openbot";
+import type {
+	ToolAuditEntry,
+	ToolInvocationDecision,
+} from "@anxionos/contracts/openbot";
 
 export type ToolAuditBeforeInput = {
 	requestId: string;

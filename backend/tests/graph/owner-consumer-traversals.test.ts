@@ -5,8 +5,6 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { GraphNodeRecord } from "@anxionos/graph";
 import {
-	GRAPH_OWNER_CONSUMER_TRAVERSAL_ENTRIES,
-	TRAVERSAL_OWNER_CONSUMER_DOMAINS,
 	createF0KernelDomainGraphSchemaRegistry,
 	createInMemoryGraphStore,
 	createKernelAwareTraversalEvaluator,
@@ -25,7 +23,9 @@ import {
 	evaluateT18ReconciliationOpenCases,
 	evaluateT19SimulationAuthorityDiff,
 	evaluateT20CommercialAttribution,
+	GRAPH_OWNER_CONSUMER_TRAVERSAL_ENTRIES,
 	type InMemoryGraphEdge,
+	TRAVERSAL_OWNER_CONSUMER_DOMAINS,
 } from "@anxionos/graph";
 
 const agencyId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
@@ -164,8 +164,6 @@ describe("T16 routing.trace (ANX-305)", () => {
 	});
 });
 
-
-
 describe("T07 capital.underAgent (ANX-305)", () => {
 	test("collects portfolios and capital accounts", async () => {
 		const agentId = randomUUID();
@@ -264,10 +262,7 @@ describe("T11 fill.authorizationChain (ANX-305)", () => {
 		};
 		const graphStore = createInMemoryGraphStore(
 			[fill, order, approval],
-			[
-				edge(fill, order, "FILLED_AS"),
-				edge(order, approval, "CHECKED_BY"),
-			],
+			[edge(fill, order, "FILLED_AS"), edge(order, approval, "CHECKED_BY")],
 		);
 		const result = await evaluateT11FillAuthorizationChain(
 			graphStore,

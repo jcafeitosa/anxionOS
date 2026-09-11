@@ -42,6 +42,28 @@ export async function ensureEventsJetStream(
 		if (merged.length !== existing.length) {
 			await jsm.streams.update(streamName, { subjects: merged });
 		}
+		// #region agent log
+		fetch("http://127.0.0.1:7857/ingest/a6fc5ec4-791b-4921-8e35-5c7ce20619e6", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"X-Debug-Session-Id": "4cc2f6",
+			},
+			body: JSON.stringify({
+				sessionId: "4cc2f6",
+				runId: "monitor",
+				hypothesisId: "H1",
+				location: "nats-publisher.ts:ensureEventsJetStream",
+				message: "jetstream subjects ok",
+				data: {
+					streamName,
+					subjects: NATS_EVENTS_STREAM_SUBJECTS,
+					path: "update-or-existing",
+				},
+				timestamp: Date.now(),
+			}),
+		}).catch(() => {});
+		// #endregion
 		return;
 	} catch {
 		await jsm.streams.add({
@@ -50,6 +72,28 @@ export async function ensureEventsJetStream(
 			storage: StorageType.File,
 			max_age: DEFAULT_RETENTION_POLICY.jetStreamMaxAgeNs,
 		});
+		// #region agent log
+		fetch("http://127.0.0.1:7857/ingest/a6fc5ec4-791b-4921-8e35-5c7ce20619e6", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"X-Debug-Session-Id": "4cc2f6",
+			},
+			body: JSON.stringify({
+				sessionId: "4cc2f6",
+				runId: "monitor",
+				hypothesisId: "H1",
+				location: "nats-publisher.ts:ensureEventsJetStream",
+				message: "jetstream stream created",
+				data: {
+					streamName,
+					subjects: NATS_EVENTS_STREAM_SUBJECTS,
+					path: "add",
+				},
+				timestamp: Date.now(),
+			}),
+		}).catch(() => {});
+		// #endregion
 	}
 }
 

@@ -1,9 +1,9 @@
-import { AppError } from "@anxionos/contracts/errors";
 import {
 	AGENTS_ERROR_STATUS_MAP,
 	type AgentsErrorCode,
 	type CommandResult,
 } from "@anxionos/contracts/agents";
+import { AppError } from "@anxionos/contracts/errors";
 
 export class AgentsCommandError extends AppError {
 	agentsCode: AgentsErrorCode;
@@ -16,14 +16,14 @@ export class AgentsCommandError extends AppError {
 		const statusCode = AGENTS_ERROR_STATUS_MAP[agentsCode];
 		const appCode =
 			statusCode === 404
-					? "NOT_FOUND"
-					: statusCode === 403
-						? "FORBIDDEN"
-						: statusCode === 409
-							? "CONFLICT"
-							: statusCode === 400
-								? "VALIDATION_ERROR"
-								: "INTERNAL_ERROR";
+				? "NOT_FOUND"
+				: statusCode === 403
+					? "FORBIDDEN"
+					: statusCode === 409
+						? "CONFLICT"
+						: statusCode === 400
+							? "VALIDATION_ERROR"
+							: "INTERNAL_ERROR";
 		super({
 			code: appCode,
 			message,

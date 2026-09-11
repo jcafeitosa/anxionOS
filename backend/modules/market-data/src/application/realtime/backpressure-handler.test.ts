@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { RealtimeIngestBackpressureHandler } from "./backpressure-handler";
 import {
 	MARKET_DATA_REALTIME_LIMIT_DEFAULTS,
 	resolveMaxEventsPerStreamPerWindow,
 	resolveMaxStreamsPerTenant,
 } from "../../domain/realtime-ingest-limits";
+import { RealtimeIngestBackpressureHandler } from "./backpressure-handler";
 
 describe("realtime ingest limits (ANX-329 S3a)", () => {
 	test("defaults match documented tenant/stream quotas", () => {

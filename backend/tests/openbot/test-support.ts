@@ -1,3 +1,10 @@
+import type {
+	ComputerSessionRef,
+	ToolAuditEntry,
+	ToolCallDecision,
+	ToolCallEffect,
+	ToolCallRequest,
+} from "@anxionos/contracts/openbot";
 import { buildWorkspacePath } from "../../modules/agents/src/application/services/workspace-path-jail";
 import type { ComputerSessionPort } from "../../modules/agents/src/domain/ports/computer-session-port";
 import type {
@@ -6,13 +13,6 @@ import type {
 	ToolAuditPort,
 } from "../../modules/agents/src/domain/ports/tool-audit-port";
 import type { ToolGatewayPort } from "../../modules/agents/src/domain/ports/tool-gateway-port";
-import type {
-	ComputerSessionRef,
-	ToolAuditEntry,
-	ToolCallDecision,
-	ToolCallEffect,
-	ToolCallRequest,
-} from "@anxionos/contracts/openbot";
 
 export function createInMemoryToolGatewayPort(
 	options: {
@@ -24,7 +24,9 @@ export function createInMemoryToolGatewayPort(
 	const denyTools = new Set(options.denyTools ?? []);
 
 	return {
-		async authorizeToolCall(request: ToolCallRequest): Promise<ToolCallDecision> {
+		async authorizeToolCall(
+			request: ToolCallRequest,
+		): Promise<ToolCallDecision> {
 			if (denyTools.has(request.toolName)) {
 				return {
 					requestId: request.requestId,

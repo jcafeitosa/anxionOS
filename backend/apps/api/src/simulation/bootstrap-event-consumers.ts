@@ -1,34 +1,35 @@
 import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
 import { SIMULATION_EVENT_TYPES } from "@anxionos/contracts/simulation";
 import { STRATEGIES_EVENT_TYPES } from "@anxionos/contracts/strategies";
-import { createLogger } from "@anxionos/observability";
 import {
 	DEFAULT_NATS_EVENTS_STREAM,
 	ensureEventsJetStream,
 	resolveEventSubject,
 } from "@anxionos/eventing/nats-publisher";
+import { createLogger } from "@anxionos/observability";
 import {
 	AckPolicy,
+	connect,
 	DeliverPolicy,
 	JSONCodec,
 	type NatsConnection,
-	connect,
 } from "nats";
 import type { Pool } from "pg";
 import {
-	SIMULATION_BACKTEST_REQUESTED_CONSUMER_NAME,
-	SIMULATION_RUN_STARTED_CONSUMER_NAME,
 	classifySimulationEventConsumerError,
 	createSimulationEventConsumerDeps,
 	processSimulationBacktestRequestedEvent,
 	processSimulationRunStartedEvent,
+	SIMULATION_BACKTEST_REQUESTED_CONSUMER_NAME,
+	SIMULATION_RUN_STARTED_CONSUMER_NAME,
 } from "./event-consumers";
 
 const logger = createLogger({ service: "simulation-event-consumers" });
 
 const codec = JSONCodec<unknown>();
 
-const SIMULATION_BACKTEST_REQUESTED_DURABLE = "simulation-backtest-requested-v1";
+const SIMULATION_BACKTEST_REQUESTED_DURABLE =
+	"simulation-backtest-requested-v1";
 const SIMULATION_RUN_STARTED_DURABLE = "simulation-run-started-v1";
 
 export const SIMULATION_BACKTEST_REQUESTED_SUBJECT = resolveEventSubject(
@@ -56,7 +57,10 @@ interface SimulationConsumerLoopConfig {
 async function createSimulationJetStreamConsumer(
 	nc: NatsConnection,
 	streamName: string,
-	config: Pick<SimulationConsumerLoopConfig, "durable" | "subject" | "consumerName">,
+	config: Pick<
+		SimulationConsumerLoopConfig,
+		"durable" | "subject" | "consumerName"
+	>,
 ) {
 	const jsm = await nc.jetstreamManager();
 	const js = nc.jetstream();

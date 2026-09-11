@@ -48,7 +48,11 @@ describe("recovery lifecycle domain (ANX-158 S4)", () => {
 			}),
 		).toBe(false);
 		expect(
-			canTransitionRecoveryTaskStatus("PENDING", "APPROVED", dangerousStepOptions),
+			canTransitionRecoveryTaskStatus(
+				"PENDING",
+				"APPROVED",
+				dangerousStepOptions,
+			),
 		).toBe(false);
 		expect(
 			canTransitionRecoveryTaskStatus("PENDING", "APPROVED", {
@@ -113,7 +117,11 @@ describe("recovery lifecycle domain (ANX-158 S4)", () => {
 			}),
 		).toBe(true);
 		expect(
-			canTransitionRecoveryTaskStatus("PENDING", "IN_PROGRESS", safeStepOptions),
+			canTransitionRecoveryTaskStatus(
+				"PENDING",
+				"IN_PROGRESS",
+				safeStepOptions,
+			),
 		).toBe(true);
 		expect(canTransitionRecoveryTaskStatus("PENDING", "IN_PROGRESS")).toBe(
 			true,

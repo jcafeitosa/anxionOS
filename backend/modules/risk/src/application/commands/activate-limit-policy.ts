@@ -34,10 +34,7 @@ export async function activateLimitPolicy(
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			return replayIdempotentCommandJournalEntry(
-				raced,
-				command.organizationId,
-			);
+			return replayIdempotentCommandJournalEntry(raced, command.organizationId);
 		}
 		await ctx.limitPolicies.supersedeActive(command.organizationId);
 		const policyId = `rk_pol_${randomUUID()}`;

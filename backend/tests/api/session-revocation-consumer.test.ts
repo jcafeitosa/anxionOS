@@ -6,13 +6,13 @@ import {
 import type { Principal } from "@anxionos/identity";
 
 import {
-	SessionRevocationUnavailableError,
 	reconcileSuspendedPrincipalSessions,
+	SessionRevocationUnavailableError,
 } from "@anxionos/identity";
 import {
-	IDENTITY_SESSIONS_CONSUMER_NAME,
 	classifyIdentitySessionRevocationError,
 	consumeIdentitySuspendedEvent,
+	IDENTITY_SESSIONS_CONSUMER_NAME,
 } from "../../apps/api/src/identity/session-revocation-consumer";
 import { createInMemoryPrincipalRepository } from "../identity/test-support";
 
@@ -136,6 +136,3 @@ describe("session revocation consumer", () => {
 		expect(revoked.sort()).toEqual(["auth-1", "auth-2"]);
 	});
 });
-
-
-	

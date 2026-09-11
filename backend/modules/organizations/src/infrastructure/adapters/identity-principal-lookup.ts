@@ -11,9 +11,12 @@ export function createIdentityPrincipalLookup(pool: Pool): PrincipalLookup {
 				const principal = await getPrincipalById(repository, principalId);
 				return principal !== null;
 			} catch (error) {
-				throw new PrincipalLookupUnavailableError("Identity service unavailable", {
-					cause: error,
-				});
+				throw new PrincipalLookupUnavailableError(
+					"Identity service unavailable",
+					{
+						cause: error,
+					},
+				);
 			}
 		},
 	};

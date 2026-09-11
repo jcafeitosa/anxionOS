@@ -49,4 +49,3 @@ export const GRAPH_F0_NODE_TYPES = [
 		checksum: "sha256:f0-grant-v1",
 	},
 ] satisfies readonly NodeTypeDef[];
-

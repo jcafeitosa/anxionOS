@@ -1,16 +1,16 @@
 import { randomUUID } from "node:crypto";
 import {
 	type GovernanceCommandResult,
-	type IssueMandateCommand,
 	governanceCommandResultSchema,
+	type IssueMandateCommand,
 	issueMandateCommandSchema,
 } from "@anxionos/contracts/governance";
-import type { TenantContext } from "../../domain/ports/tenant-context";
 import { isGrantActive } from "../../domain/entities/grant";
 import { createMandateIssuedEvent } from "../../domain/events/governance-events";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { GovernanceUnitOfWork } from "../../domain/ports/governance-unit-of-work";
 import type { GrantRepository } from "../../domain/ports/grant-repository";
+import type { TenantContext } from "../../domain/ports/tenant-context";
 import {
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
@@ -57,7 +57,9 @@ export async function issueMandate(
 	};
 
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
-		const raced = await context.commandJournal.findByCommandId(command.commandId);
+		const raced = await context.commandJournal.findByCommandId(
+			command.commandId,
+		);
 		if (raced) {
 			return parseCommandResultSnapshot(raced.responseSnapshot);
 		}

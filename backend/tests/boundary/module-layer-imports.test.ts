@@ -3,8 +3,8 @@ import { readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import {
 	BACKEND_ROOT,
-	type ForbiddenPattern,
 	collectModuleLayerFiles,
+	type ForbiddenPattern,
 	findForbiddenImports,
 	formatViolations,
 } from "./scan-imports";

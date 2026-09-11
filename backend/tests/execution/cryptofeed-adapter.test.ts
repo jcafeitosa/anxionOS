@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import {
-	CryptofeedAdapter,
 	CFS_REAL_WIRING_BLOCKERS,
+	CryptofeedAdapter,
 	mountCryptofeedAdapter,
 	resolveCfsEngineMode,
 	resolveCfsSandboxUrl,

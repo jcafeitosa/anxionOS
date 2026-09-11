@@ -9,13 +9,18 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import {
+	createPgCommandJournalRepository as createAccountingCommandJournal,
+	createAccountingUnitOfWork,
+	postTradeFill,
+} from "@anxionos/accounting";
+import {
 	checkAuthority,
 	proposeDecision,
 	submitIntent,
 } from "@anxionos/decisions";
 import {
-	createExecutionUnitOfWork,
 	createPgCommandJournalRepository as createExecutionCommandJournal,
+	createExecutionUnitOfWork,
 	createPgRiskPermitValidationPort,
 	InMemoryExecutionCapitalNotifyAdapter,
 	openExecutionSession,
@@ -23,17 +28,12 @@ import {
 	submitOrder,
 } from "@anxionos/execution";
 import {
-	postTradeFill,
-	createAccountingUnitOfWork,
-	createPgCommandJournalRepository as createAccountingCommandJournal,
-} from "@anxionos/accounting";
-import { buildTradeFillLines } from "../../modules/accounting/src/application/commands/post-trade-fill";
-import {
-	recordOutcomeSnapshot,
-	createPerformanceUnitOfWork,
 	createPgCommandJournalRepository as createPerformanceCommandJournal,
+	createPerformanceUnitOfWork,
 	OFFICIAL_LEDGER_PNL_METRICS,
+	recordOutcomeSnapshot,
 } from "@anxionos/performance";
+import { buildTradeFillLines } from "../../modules/accounting/src/application/commands/post-trade-fill";
 import {
 	createP06DecisionsDeps,
 	fulfillP06SubmitPreconditions,

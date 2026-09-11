@@ -1,39 +1,36 @@
 export {
-	createSubscription,
-	type CreateSubscriptionDeps,
-} from "./application/commands/create-subscription";
-export {
-	issueInvoice,
-	type IssueInvoiceDeps,
-} from "./application/commands/issue-invoice";
-export {
-	cancelSubscription,
 	type CancelSubscriptionDeps,
+	cancelSubscription,
 } from "./application/commands/cancel-subscription";
 export {
-	processRefund,
-	type ProcessRefundDeps,
-} from "./application/commands/process-refund";
+	type CreateSubscriptionDeps,
+	createSubscription,
+} from "./application/commands/create-subscription";
 export {
-	processBillingWebhook,
+	type IssueInvoiceDeps,
+	issueInvoice,
+} from "./application/commands/issue-invoice";
+export {
 	type ProcessBillingWebhookDeps,
+	processBillingWebhook,
 } from "./application/commands/process-billing-webhook";
+export {
+	type ProcessRefundDeps,
+	processRefund,
+} from "./application/commands/process-refund";
 export {
 	createUsageRecordedConsumer,
 	type UsageRecordedConsumerDeps,
 } from "./application/consumers/usage-recorded-consumer";
 export { BillingCommandError, throwBillingError } from "./application/errors";
-export { ensureBillingSchema } from "./infrastructure/migrate";
-export { createBillingUnitOfWork } from "./infrastructure/billing-unit-of-work";
-export { createPgCommandJournalRepository } from "./infrastructure/persistence/command-journal-repository";
 export {
-	ENTITLEMENT_KEYS,
-	PLAN_IDS,
 	checkEntitlement,
 	createPlanCatalog,
-	getEntitlementsForPlan,
+	ENTITLEMENT_KEYS,
 	type EntitlementCheckResult,
 	type EntitlementKey,
+	getEntitlementsForPlan,
+	PLAN_IDS,
 	type PlanCatalog,
 	type PlanCatalogEntry,
 	type PlanEntitlements,
@@ -41,3 +38,6 @@ export {
 	type PlanId,
 	type PlanPricing,
 } from "./domain/plan-catalog";
+export { createBillingUnitOfWork } from "./infrastructure/billing-unit-of-work";
+export { ensureBillingSchema } from "./infrastructure/migrate";
+export { createPgCommandJournalRepository } from "./infrastructure/persistence/command-journal-repository";

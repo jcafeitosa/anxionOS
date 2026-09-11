@@ -111,9 +111,7 @@ export const executionModuleEventPayloadSchema = z.discriminatedUnion(
 			payload: fillConfirmedPayloadSchema,
 		}),
 		z.object({
-			eventType: z.literal(
-				EXECUTION_MODULE_EVENT_TYPES.RECONCILIATION_OPENED,
-			),
+			eventType: z.literal(EXECUTION_MODULE_EVENT_TYPES.RECONCILIATION_OPENED),
 			payload: reconciliationOpenedPayloadSchema,
 		}),
 		z.object({

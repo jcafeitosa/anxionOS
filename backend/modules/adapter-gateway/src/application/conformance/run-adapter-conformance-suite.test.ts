@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { AdapterGatewayError } from "@anxionos/contracts/adapter-gateway";
-import { InMemoryAdapterRegistry } from "../registry/in-memory-adapter-registry";
 import {
 	REFERENCE_SIMULATED_ADAPTER_VERSION,
 	REFERENCE_SIMULATED_PORT_VERSION,
 	referenceSimulatedAdapterManifest,
 } from "../adapters/reference-simulated-manifest";
+import { InMemoryAdapterRegistry } from "../registry/in-memory-adapter-registry";
 import { runAdapterConformanceSuite } from "./run-adapter-conformance-suite";
 
 describe("runAdapterConformanceSuite", () => {
@@ -44,7 +44,9 @@ describe("runAdapterConformanceSuite", () => {
 			});
 		} catch (error) {
 			expect(error).toBeInstanceOf(AdapterGatewayError);
-			expect((error as AdapterGatewayError).code).toBe("AGW_CONFORMANCE_FAILED");
+			expect((error as AdapterGatewayError).code).toBe(
+				"AGW_CONFORMANCE_FAILED",
+			);
 		}
 	});
 

@@ -223,7 +223,10 @@ describe("createMarketDataObservedConsumer realtime wiring (ANX-329 S3c/S3d)", (
 		realtime.reconnect.registerStream(ORG, INSTRUMENT_ID);
 
 		const first = await consumer.handle(event);
-		const replay = await consumer.handle({ ...event, sourceEventId: randomUUID() });
+		const replay = await consumer.handle({
+			...event,
+			sourceEventId: randomUUID(),
+		});
 
 		expect(first).not.toBeNull();
 		expect(replay).toBeNull();
@@ -231,7 +234,9 @@ describe("createMarketDataObservedConsumer realtime wiring (ANX-329 S3c/S3d)", (
 	});
 
 	test("rejects when backpressure quota is exceeded", async () => {
-		const { unitOfWork, commandJournal } = createInMemoryUow(activeInstrument());
+		const { unitOfWork, commandJournal } = createInMemoryUow(
+			activeInstrument(),
+		);
 		const realtime = createRealtimeDeps({
 			backpressure: new RealtimeIngestBackpressureHandler({
 				maxStreamsPerTenant: 4,
@@ -288,7 +293,9 @@ describe("createMarketDataObservedConsumer realtime wiring (ANX-329 S3c/S3d)", (
 	});
 
 	test("keys gate by organizationId and instrument stream", async () => {
-		const { unitOfWork, commandJournal } = createInMemoryUow(activeInstrument());
+		const { unitOfWork, commandJournal } = createInMemoryUow(
+			activeInstrument(),
+		);
 		const consumer = createMarketDataObservedConsumer({
 			unitOfWork,
 			commandJournal,
@@ -311,7 +318,9 @@ describe("createMarketDataObservedConsumer realtime wiring (ANX-329 S3c/S3d)", (
 	});
 
 	test("flags out-of-order ticks with ESTIMATED quality", async () => {
-		const { unitOfWork, commandJournal } = createInMemoryUow(activeInstrument());
+		const { unitOfWork, commandJournal } = createInMemoryUow(
+			activeInstrument(),
+		);
 		const realtime = createRealtimeDeps({
 			sequence: new RealtimeIngestSequenceGuard({ gapThresholdMs: 60_000 }),
 		});
@@ -331,7 +340,9 @@ describe("createMarketDataObservedConsumer realtime wiring (ANX-329 S3c/S3d)", (
 	});
 
 	test("rejects strict sequence anomalies when configured", async () => {
-		const { unitOfWork, commandJournal } = createInMemoryUow(activeInstrument());
+		const { unitOfWork, commandJournal } = createInMemoryUow(
+			activeInstrument(),
+		);
 		const realtime = createRealtimeDeps({
 			sequence: new RealtimeIngestSequenceGuard({ rejectAnomalies: true }),
 		});

@@ -11,6 +11,7 @@ import type { StrategiesApiRuntime } from "./bootstrap";
 import { mapStrategiesError } from "./error-handler";
 import {
 	backtestRunIdParamSchema,
+	deploymentIdParamSchema,
 	handleActivateDeployment,
 	handleCompleteBacktest,
 	handleCreateStrategyVersion,
@@ -21,7 +22,6 @@ import {
 	handleRollbackDeployment,
 	strategyIdParamSchema,
 	strategyVersionIdParamSchema,
-	deploymentIdParamSchema,
 } from "./handlers/commands";
 
 export interface StrategiesPluginDeps extends StrategiesApiRuntime {

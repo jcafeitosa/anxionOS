@@ -134,7 +134,8 @@ describe("performance snapshot queries (ANX-154 HTTP read)", () => {
 		const outcomeSnapshots = createInMemoryOutcomeSnapshotRepository([
 			sampleOutcomeSnapshot,
 		]);
-		const metricSeries = createInMemoryMetricSeriesRepository(sampleOutcomeMetrics);
+		const metricSeries =
+			createInMemoryMetricSeriesRepository(sampleOutcomeMetrics);
 		const result = await listOutcomeSnapshotMetrics(
 			{ outcomeSnapshots, metricSeries },
 			PERFORMANCE_TEST_ORG_ID,

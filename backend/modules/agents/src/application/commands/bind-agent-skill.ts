@@ -1,15 +1,15 @@
 import { randomUUID } from "node:crypto";
 import {
-	bindAgentSkillCommandSchema,
-	commandResultSchema,
 	type BindAgentSkillCommand,
+	bindAgentSkillCommandSchema,
 	type CommandResult,
+	commandResultSchema,
 } from "@anxionos/contracts/agents";
 import { createAgentSkillBoundEvent } from "../../domain/events/agent-events";
 import type { AgentRepository } from "../../domain/ports/agent-repository";
+import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { SkillBindGuardPort } from "../../domain/ports/skill-bind-guard";
-import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
 import {
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
@@ -24,7 +24,10 @@ export async function bindAgentSkill(
 	const command = bindAgentSkillCommandSchema.parse(input);
 	const preflightAgent = await deps.agentRepository.findById(command.agentId);
 	if (!preflightAgent) {
-		throwAgentsError("AGT_AGENT_NOT_FOUND", `Agent not found: ${command.agentId}`);
+		throwAgentsError(
+			"AGT_AGENT_NOT_FOUND",
+			`Agent not found: ${command.agentId}`,
+		);
 	}
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
@@ -60,7 +63,10 @@ export async function bindAgentSkill(
 
 			const agent = await context.agentRepository.findById(command.agentId);
 			if (!agent) {
-				throwAgentsError("AGT_AGENT_NOT_FOUND", `Agent not found: ${command.agentId}`);
+				throwAgentsError(
+					"AGT_AGENT_NOT_FOUND",
+					`Agent not found: ${command.agentId}`,
+				);
 			}
 			if (agent.revision !== command.expectedAgentRevision) {
 				throwAgentsError(
@@ -101,7 +107,9 @@ export async function bindAgentSkill(
 				);
 			}
 
-			const skill = await context.skillRepository.findById(skillVersion.skillId);
+			const skill = await context.skillRepository.findById(
+				skillVersion.skillId,
+			);
 			if (!skill) {
 				throwAgentsError(
 					"AGT_SKILL_NOT_FOUND",

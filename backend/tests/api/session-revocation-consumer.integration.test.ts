@@ -1,16 +1,16 @@
 import { describe, expect, test } from "bun:test";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import { IDENTITY_EVENT_TYPES } from "@anxionos/contracts/identity";
-import { resolveEventSubject } from "@anxionos/eventing/nats-publisher";
-import { AckPolicy, DeliverPolicy, JSONCodec, connect } from "nats";
 import {
 	DEFAULT_NATS_EVENTS_STREAM,
 	ensureEventsJetStream,
+	resolveEventSubject,
 } from "@anxionos/eventing/nats-publisher";
 import { reconcileSuspendedPrincipalSessions } from "@anxionos/identity";
+import { AckPolicy, connect, DeliverPolicy, JSONCodec } from "nats";
 import {
-	IDENTITY_SESSIONS_CONSUMER_NAME,
 	createSessionRevocationConsumerDeps,
+	IDENTITY_SESSIONS_CONSUMER_NAME,
 	processIdentitySessionEvent,
 } from "../../apps/api/src/identity/session-revocation-consumer";
 import {

@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
-import {
-	releaseComputerSessionCommandSchema,
-	computerSessionCommandResultSchema,
-	OPENBOT_EVENT_TYPES,
-	computerSessionReleasedPayloadSchema,
-	type ReleaseComputerSessionCommand,
-	type ComputerSessionCommandResult,
-} from "@anxionos/contracts/openbot";
 import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
+import {
+	type ComputerSessionCommandResult,
+	computerSessionCommandResultSchema,
+	computerSessionReleasedPayloadSchema,
+	OPENBOT_EVENT_TYPES,
+	type ReleaseComputerSessionCommand,
+	releaseComputerSessionCommandSchema,
+} from "@anxionos/contracts/openbot";
 import type { ComputerSessionPort } from "../../domain/ports/computer-session-port";
 
 export interface ReleaseComputerSessionDeps {

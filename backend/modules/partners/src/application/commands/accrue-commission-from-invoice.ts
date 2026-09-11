@@ -9,8 +9,8 @@ import {
 } from "@anxionos/contracts/partners";
 import { calculateCommissionAmount } from "../../domain/commission";
 import { createCommissionAccruedEvent } from "../../domain/events/partners-events";
-import type { PartnersUnitOfWork } from "../../domain/ports/partners-unit-of-work";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
+import type { PartnersUnitOfWork } from "../../domain/ports/partners-unit-of-work";
 import {
 	loadIdempotentByInvoiceId,
 	loadIdempotentCommandResult,
@@ -55,7 +55,9 @@ export async function accrueCommissionFromInvoice(
 			command.commandId,
 		);
 		if (racedByCommand) {
-			const parsed = parseCommandResultSnapshot(racedByCommand.responseSnapshot);
+			const parsed = parseCommandResultSnapshot(
+				racedByCommand.responseSnapshot,
+			);
 			return partnersCommandResultSchema.parse({
 				...parsed,
 				idempotentReplay: true,
@@ -71,7 +73,9 @@ export async function accrueCommissionFromInvoice(
 					"invoice accrual organization mismatch",
 				);
 			}
-			const parsed = parseCommandResultSnapshot(racedByInvoice.responseSnapshot);
+			const parsed = parseCommandResultSnapshot(
+				racedByInvoice.responseSnapshot,
+			);
 			const result = partnersCommandResultSchema.parse({
 				...parsed,
 				idempotentReplay: true,
@@ -90,7 +94,10 @@ export async function accrueCommissionFromInvoice(
 			command.partnerOrganizationId,
 		);
 		if (!partner || partner.status !== "ACTIVE") {
-			throwPartnersError("PTR_PARTNER_NOT_FOUND", "partner not found for referral");
+			throwPartnersError(
+				"PTR_PARTNER_NOT_FOUND",
+				"partner not found for referral",
+			);
 		}
 		const existingAccrual = await ctx.commissionAccruals.findByInvoiceId(
 			command.invoiceId,

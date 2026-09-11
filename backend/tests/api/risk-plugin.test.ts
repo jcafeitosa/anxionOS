@@ -45,8 +45,6 @@ describe("risk plugin routes (ANX-165 kill switch)", () => {
 		expect(routes).toContain(
 			"/v1/risk/agencies/:agencyId/kill-switch/activate",
 		);
-		expect(routes).toContain(
-			"/v1/risk/agencies/:agencyId/kill-switch/release",
-		);
+		expect(routes).toContain("/v1/risk/agencies/:agencyId/kill-switch/release");
 	});
 });

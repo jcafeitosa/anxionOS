@@ -66,7 +66,8 @@ function createHarness(input: {
 				return next;
 			},
 		} as OrchestrationTransactionContext["runRepository"],
-		taskLeaseRepository: {} as OrchestrationTransactionContext["taskLeaseRepository"],
+		taskLeaseRepository:
+			{} as OrchestrationTransactionContext["taskLeaseRepository"],
 		gateBindingRepository: {
 			async listByIssue(_org, issueIdentifier) {
 				return gateBindings.filter(
@@ -94,8 +95,10 @@ function createHarness(input: {
 				return { ...entry, createdAt: NOW };
 			},
 		},
-		runHeartbeatRepository: {} as OrchestrationTransactionContext["runHeartbeatRepository"],
-		taskboardMirrorRepository: {} as OrchestrationTransactionContext["taskboardMirrorRepository"],
+		runHeartbeatRepository:
+			{} as OrchestrationTransactionContext["runHeartbeatRepository"],
+		taskboardMirrorRepository:
+			{} as OrchestrationTransactionContext["taskboardMirrorRepository"],
 		async publishEvents(envelopes) {
 			events.push(...envelopes);
 		},
@@ -239,7 +242,9 @@ describe("restartRunFromCheckpoint", () => {
 				requestHash: "deadbeef",
 			},
 		});
-		await expect(restartRunFromCheckpoint(harness.deps, command)).rejects.toMatchObject({
+		await expect(
+			restartRunFromCheckpoint(harness.deps, command),
+		).rejects.toMatchObject({
 			orchestrationCode: "ORC_COMMAND_HASH_MISMATCH",
 		});
 	});

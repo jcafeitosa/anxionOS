@@ -1,23 +1,23 @@
-import { PERFORMANCE_EVENT_TYPES } from "@anxionos/contracts/performance";
 import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
-import { createLogger } from "@anxionos/observability";
+import { PERFORMANCE_EVENT_TYPES } from "@anxionos/contracts/performance";
 import {
 	DEFAULT_NATS_EVENTS_STREAM,
 	ensureEventsJetStream,
 	resolveEventSubject,
 } from "@anxionos/eventing/nats-publisher";
+import { createLogger } from "@anxionos/observability";
 import {
 	AckPolicy,
+	connect,
 	DeliverPolicy,
 	JSONCodec,
 	type NatsConnection,
-	connect,
 } from "nats";
 import type { Pool } from "pg";
 import {
-	EVALUATION_OUTCOME_RECORDED_CONSUMER_NAME,
 	classifyEvaluationEventConsumerError,
 	createEvaluationEventConsumerDeps,
+	EVALUATION_OUTCOME_RECORDED_CONSUMER_NAME,
 	processEvaluationOutcomeRecordedEvent,
 } from "./event-consumers";
 

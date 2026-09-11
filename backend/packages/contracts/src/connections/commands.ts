@@ -1,7 +1,6 @@
 import { z } from "zod";
-import { institutionalUuidSchema } from "../institutional-uuid";
 import { inferenceRequirementsSchema } from "../inference/requirements";
-import { waitingHumanResultSchema } from "./types";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	aiAccountIdSchema,
 	connectionBindingIdSchema,
@@ -10,6 +9,7 @@ import {
 	connectionKindSchema,
 	connectionsSecretRefSchema,
 	grantRefSchema,
+	waitingHumanResultSchema,
 } from "./types";
 export const connectionsCommandResultSchema = z.object({
 	aggregateId: z.string().min(1),
@@ -88,7 +88,10 @@ export const invokeInferenceCommandSchema = z.object({
 	runId: institutionalUuidSchema.optional(),
 	deadline: z.string().datetime(),
 	idempotencyKey: institutionalUuidSchema,
-	issueIdentifier: z.string().regex(/^ANX-[0-9]+$/).optional(),
+	issueIdentifier: z
+		.string()
+		.regex(/^ANX-[0-9]+$/)
+		.optional(),
 });
 
 export type ConnectionsCommandResult = z.infer<

@@ -4,8 +4,8 @@ import {
 	SIMULATION_OWNER_DOMAIN,
 	SimulationContractError,
 } from "@anxionos/contracts/simulation";
-import { classifySimulationEventConsumerError } from "../../apps/api/src/simulation/event-consumers";
 import { createBacktestRequestedConsumer } from "@anxionos/simulation";
+import { classifySimulationEventConsumerError } from "../../apps/api/src/simulation/event-consumers";
 import {
 	createInMemoryCommandJournalRepository,
 	createRecordingSimulationUnitOfWork,

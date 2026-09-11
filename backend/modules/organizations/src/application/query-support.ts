@@ -1,7 +1,7 @@
 import {
 	type AgencyDto,
-	type MembershipDto,
 	agencyDtoSchema,
+	type MembershipDto,
 	membershipDtoSchema,
 } from "@anxionos/contracts/organizations";
 import type { Agency } from "../domain/entities/agency";

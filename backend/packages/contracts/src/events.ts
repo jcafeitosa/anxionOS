@@ -19,7 +19,11 @@ export type DomainEventEnvelope = z.infer<typeof domainEventEnvelopeSchema>;
 const TENANT_SCOPED_OWNER_DOMAINS = new Set(["organizations"]);
 
 function readPayloadAgencyId(payload: unknown): string | undefined {
-	if (typeof payload !== "object" || payload === null || !("agencyId" in payload)) {
+	if (
+		typeof payload !== "object" ||
+		payload === null ||
+		!("agencyId" in payload)
+	) {
 		return undefined;
 	}
 	const agencyId = (payload as { agencyId: unknown }).agencyId;
@@ -50,4 +54,3 @@ export function assertTenantScopedEnvelopeAgencyId(
 		);
 	}
 }
-

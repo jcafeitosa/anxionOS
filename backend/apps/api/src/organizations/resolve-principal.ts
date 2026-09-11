@@ -1,9 +1,9 @@
 import { AppError } from "@anxionos/contracts/errors";
-import {
-	type PrincipalRepository,
-	getPrincipalByAuthUserId,
-} from "@anxionos/identity";
 import type { Principal } from "@anxionos/identity";
+import {
+	getPrincipalByAuthUserId,
+	type PrincipalRepository,
+} from "@anxionos/identity";
 
 export async function resolvePrincipalFromSession(
 	repository: PrincipalRepository,

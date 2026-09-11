@@ -12,8 +12,8 @@ import {
 	createInMemoryGraphStore,
 	projectProductGraphEvent,
 } from "@anxionos/graph";
-import { resolveStageCode } from "../../.cursor/orchestration/agent-lifecycle/product-company-stages.mjs";
 import { saveLifecycleState } from "../../.cursor/orchestration/agent-lifecycle/phase-check.mjs";
+import { resolveStageCode } from "../../.cursor/orchestration/agent-lifecycle/product-company-stages.mjs";
 
 function parseCli(argv) {
 	const { values } = parseArgs({
@@ -98,7 +98,9 @@ if (values.json) {
 } else {
 	console.log(`Product Intelligence cycle — ${report.issue}`);
 	console.log(`  event: ${report.eventType}`);
-	console.log(`  nodes: ${report.nodesProjected} · edges: ${report.edgesProjected}`);
+	console.log(
+		`  nodes: ${report.nodesProjected} · edges: ${report.edgesProjected}`,
+	);
 	console.log(
 		`  discovery: ${report.discoveryStage} (${report.discoveryStageSlug})`,
 	);

@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { PLATFORM_CONSOLE_CAPABILITY } from "@anxionos/contracts/governance";
 import {
+	type Grant,
 	getAuthorityEpoch,
 	hasPlatformConsoleGrant,
 	listEffectiveGrants,
-	type Grant,
 } from "@anxionos/governance";
 import {
 	createInMemoryAuthorityEpochStore,
@@ -95,10 +95,7 @@ describe("getAuthorityEpoch", () => {
 				updatedAt: new Date(),
 			},
 		]);
-		const record = await getAuthorityEpoch(
-			{ authorityEpochStore },
-			scopeId,
-		);
+		const record = await getAuthorityEpoch({ authorityEpochStore }, scopeId);
 		expect(record.epoch).toBe(7);
 	});
 });

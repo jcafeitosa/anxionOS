@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { institutionalUuidSchema } from "../institutional-uuid";
 import {
+	decisionEngineStatusSchema,
 	decisionIdSchema,
+	decisionScopeSchema,
 	proposalIdSchema,
 	proposalKindSchema,
-	decisionScopeSchema,
-	decisionEngineStatusSchema,
 } from "./types";
 
 const EVIDENCE_SECRET_PATTERN =
@@ -110,30 +110,36 @@ export const decisionEvidenceSchema = evidenceReferenceSchema.extend({
 	claim: secretFreeEvidenceString(1),
 });
 
-export const decisionRecordSchema = z.object({
-	recordId: institutionalUuidSchema,
-	schemaVersion: z.literal("decision-record.v1"),
-	scope: decisionScopeSchema,
-	status: decisionEngineStatusSchema,
-	title: z.string().min(1),
-	rationale: z.string().min(1),
-	references: decisionAggregateReferencesSchema,
-	evidence: z.array(decisionEvidenceSchema).min(1),
-	alternatives: z.array(alternativeProposalSchema),
-	affectedEntities: z.array(affectedEntitySchema).min(1),
-	authorityRequirement: decisionAuthorityRequirementSchema,
-	authorityReferences: z.array(authorityReferenceSchema).min(1),
-	approvals: z.array(approvalSchema),
-	disposition: dispositionSchema.optional(),
-	createdAt: z.string().datetime(),
-	updatedAt: z.string().datetime(),
-}).superRefine((record, context) => {
-	for (const evidence of record.evidence) {
-		if (!evidence.uri && !evidence.checksum) {
-			context.addIssue({ code: "custom", path: ["evidence"], message: "Evidence requires uri or checksum" });
+export const decisionRecordSchema = z
+	.object({
+		recordId: institutionalUuidSchema,
+		schemaVersion: z.literal("decision-record.v1"),
+		scope: decisionScopeSchema,
+		status: decisionEngineStatusSchema,
+		title: z.string().min(1),
+		rationale: z.string().min(1),
+		references: decisionAggregateReferencesSchema,
+		evidence: z.array(decisionEvidenceSchema).min(1),
+		alternatives: z.array(alternativeProposalSchema),
+		affectedEntities: z.array(affectedEntitySchema).min(1),
+		authorityRequirement: decisionAuthorityRequirementSchema,
+		authorityReferences: z.array(authorityReferenceSchema).min(1),
+		approvals: z.array(approvalSchema),
+		disposition: dispositionSchema.optional(),
+		createdAt: z.string().datetime(),
+		updatedAt: z.string().datetime(),
+	})
+	.superRefine((record, context) => {
+		for (const evidence of record.evidence) {
+			if (!evidence.uri && !evidence.checksum) {
+				context.addIssue({
+					code: "custom",
+					path: ["evidence"],
+					message: "Evidence requires uri or checksum",
+				});
+			}
 		}
-	}
-});
+	});
 
 export type EvidenceReference = z.infer<typeof evidenceReferenceSchema>;
 export type AffectedEntity = z.infer<typeof affectedEntitySchema>;
@@ -141,7 +147,11 @@ export type AlternativeProposal = z.infer<typeof alternativeProposalSchema>;
 export type AuthorityReference = z.infer<typeof authorityReferenceSchema>;
 export type Approval = z.infer<typeof approvalSchema>;
 export type Disposition = z.infer<typeof dispositionSchema>;
-export type DecisionAuthorityRequirement = z.infer<typeof decisionAuthorityRequirementSchema>;
-export type DecisionAggregateReferences = z.infer<typeof decisionAggregateReferencesSchema>;
+export type DecisionAuthorityRequirement = z.infer<
+	typeof decisionAuthorityRequirementSchema
+>;
+export type DecisionAggregateReferences = z.infer<
+	typeof decisionAggregateReferencesSchema
+>;
 export type DecisionEvidence = z.infer<typeof decisionEvidenceSchema>;
 export type DecisionRecord = z.infer<typeof decisionRecordSchema>;

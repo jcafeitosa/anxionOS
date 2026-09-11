@@ -1,16 +1,16 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	gateBindingV1ObjectSchema,
 	refineGateBindingDigestRules,
 } from "./gate-binding/1.0.0/schema";
-import { institutionalUuidSchema } from "../institutional-uuid";
 import {
-	runStatusSchema,
 	agentIdSchema,
 	goalIdSchema,
 	issueIdentifierSchema,
 	organizationIdSchema,
 	runIdSchema,
+	runStatusSchema,
 	taskIdSchema,
 } from "./types";
 export const checkoutTaskCommandSchema = z.object({
@@ -28,7 +28,15 @@ export const releaseTaskLeaseCommandSchema = z.object({
 	taskId: taskIdSchema,
 	agentId: agentIdSchema,
 	leaseToken: institutionalUuidSchema,
-	reason: z.enum(["board_in_review", "manual", "gate_blocked", "cancelled", "budget_exceeded"]).optional(),
+	reason: z
+		.enum([
+			"board_in_review",
+			"manual",
+			"gate_blocked",
+			"cancelled",
+			"budget_exceeded",
+		])
+		.optional(),
 });
 export const recordGateDispositionCommandSchema = gateBindingV1ObjectSchema
 	.omit({
@@ -165,7 +173,11 @@ export type RestartRunFromCheckpointCommand = z.infer<
 	typeof restartRunFromCheckpointCommandSchema
 >;
 
-export type StopRunForBudgetCommand = z.infer<typeof stopRunForBudgetCommandSchema>;
-export type StopRunForBudgetResult = z.infer<typeof stopRunForBudgetResultSchema>;
+export type StopRunForBudgetCommand = z.infer<
+	typeof stopRunForBudgetCommandSchema
+>;
+export type StopRunForBudgetResult = z.infer<
+	typeof stopRunForBudgetResultSchema
+>;
 export type CancelTaskRunCommand = z.infer<typeof cancelTaskRunCommandSchema>;
 export type CancelTaskRunResult = z.infer<typeof cancelTaskRunResultSchema>;

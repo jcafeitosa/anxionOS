@@ -1,13 +1,13 @@
 import { describe, expect, test } from "bun:test";
-import {
-	mapAuthorityReferenceToGrantRef,
-	validateAuthorityAgainstGrantSnapshot,
-	AuthorityGrantBridgeError,
-	type GovernanceGrantSnapshot,
-} from "@anxionos/contracts/decisions";
 import type {
 	AuthorityReference,
 	DecisionAggregateReferences,
+} from "@anxionos/contracts/decisions";
+import {
+	AuthorityGrantBridgeError,
+	type GovernanceGrantSnapshot,
+	mapAuthorityReferenceToGrantRef,
+	validateAuthorityAgainstGrantSnapshot,
 } from "@anxionos/contracts/decisions";
 
 const GRANT_ID = "a1234567-89ab-4def-8123-456789abcdef";

@@ -5,12 +5,12 @@
  */
 import { describe, expect, test } from "bun:test";
 import {
+	checkSLOViolation,
+	createLogger,
 	createMetricsCollector,
 	createSLODefinition,
-	checkSLOViolation,
-	percentile,
-	createLogger,
 	type MetricsCollector,
+	percentile,
 } from "@anxionos/observability";
 
 describe("ANX-170 SLO metrics + observability", () => {
@@ -89,13 +89,21 @@ describe("ANX-170 SLO metrics + observability", () => {
 	test("latency histogram end-to-end", () => {
 		const m = createMetricsCollector();
 		for (let i = 0; i < 100; i++) {
-			m.recordHistogram("ingest.latency", Math.random() * 100, { tenant: "t1" });
+			m.recordHistogram("ingest.latency", Math.random() * 100, {
+				tenant: "t1",
+			});
 		}
 		const snap = m.getSnapshot();
 		const latencies = snap.histograms["ingest.latency:tenant=t1"];
 		expect(latencies.length).toBe(100);
-		const p50 = percentile(latencies.sort((a, b) => a - b), 50);
-		const p99 = percentile(latencies.sort((a, b) => a - b), 99);
+		const p50 = percentile(
+			latencies.sort((a, b) => a - b),
+			50,
+		);
+		const p99 = percentile(
+			latencies.sort((a, b) => a - b),
+			99,
+		);
 		expect(p50).toBeGreaterThan(0);
 		expect(p99).toBeGreaterThan(p50);
 	});

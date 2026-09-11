@@ -6,10 +6,8 @@ import {
 	cancelTaskRunCommandSchema,
 	cancelTaskRunResultSchema,
 } from "@anxionos/contracts/orchestration";
+import { canTransitionRunStatus } from "../../domain/entities/run";
 import { canTransitionCheckoutStatus } from "../../domain/entities/task";
-import {
-	canTransitionRunStatus,
-	} from "../../domain/entities/run";
 import {
 	isLeaseActive,
 	leaseTokensMatch,

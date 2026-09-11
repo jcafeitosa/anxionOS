@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { OPERATIONS_EVENT_TYPES } from "@anxionos/contracts/operations";
 import {
-	OperationsCommandError,
 	attachIncidentRunbook,
 	createIncident,
+	OperationsCommandError,
 	transitionIncidentStatus,
 } from "@anxionos/operations";
 import {
@@ -69,9 +69,11 @@ describe("incident lifecycle commands (ANX-311 S2)", () => {
 			evidence: "staging probe failed 3x",
 		});
 		expect(result.revision).toBe(2);
-		expect(published.some(
-			(e) => e.eventType === OPERATIONS_EVENT_TYPES.INCIDENT_RUNBOOK_ATTACHED,
-		)).toBe(true);
+		expect(
+			published.some(
+				(e) => e.eventType === OPERATIONS_EVENT_TYPES.INCIDENT_RUNBOOK_ATTACHED,
+			),
+		).toBe(true);
 	});
 
 	test("full lifecycle OPEN→ACK→INVESTIGATING→MITIGATING→RESOLVED→CLOSED", async () => {

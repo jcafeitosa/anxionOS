@@ -1,4 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { PLATFORM_CONSOLE_CAPABILITY } from "@anxionos/contracts/governance";
+import type { Grant } from "@anxionos/governance";
 import {
 	handleGetPlatformHealth,
 	handleListPlatformIncidents,
@@ -6,8 +8,6 @@ import {
 	handleListPlatformRuntimes,
 	requirePlatformConsoleGrant,
 } from "../../apps/api/src/operations/handlers/platform-queries";
-import { PLATFORM_CONSOLE_CAPABILITY } from "@anxionos/contracts/governance";
-import type { Grant } from "@anxionos/governance";
 import { createInMemoryGrantRepository } from "../governance/test-support";
 
 const principalId = "11111111-1111-4111-8111-111111111111";

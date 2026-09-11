@@ -1,16 +1,16 @@
 import { randomUUID } from "node:crypto";
 import {
-	commandResultSchema,
-	publishAgentVersionCommandSchema,
 	type CommandResult,
+	commandResultSchema,
 	type PublishAgentVersionCommand,
+	publishAgentVersionCommandSchema,
 } from "@anxionos/contracts/agents";
 import { createAgentVersionPublishedEvent } from "../../domain/events/agent-events";
 import { isAutonomyLevelRuntimeEnabled } from "../../domain/policies/autonomy-runtime";
 import type { AgentPublishGuardPort } from "../../domain/ports/agent-publish-guard";
 import type { AgentRepository } from "../../domain/ports/agent-repository";
-import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
+import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import {
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
@@ -31,7 +31,10 @@ export async function publishAgentVersion(
 	}
 	const preflightAgent = await deps.agentRepository.findById(command.agentId);
 	if (!preflightAgent) {
-		throwAgentsError("AGT_AGENT_NOT_FOUND", `Agent not found: ${command.agentId}`);
+		throwAgentsError(
+			"AGT_AGENT_NOT_FOUND",
+			`Agent not found: ${command.agentId}`,
+		);
 	}
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
@@ -68,7 +71,10 @@ export async function publishAgentVersion(
 
 			const agent = await context.agentRepository.findById(command.agentId);
 			if (!agent) {
-				throwAgentsError("AGT_AGENT_NOT_FOUND", `Agent not found: ${command.agentId}`);
+				throwAgentsError(
+					"AGT_AGENT_NOT_FOUND",
+					`Agent not found: ${command.agentId}`,
+				);
 			}
 			if (agent.revision !== command.expectedRevision) {
 				throwAgentsError(
@@ -77,10 +83,11 @@ export async function publishAgentVersion(
 				);
 			}
 
-			const duplicate = await context.agentVersionRepository.findByAgentAndVersionNumber(
-				command.agentId,
-				command.versionNumber,
-			);
+			const duplicate =
+				await context.agentVersionRepository.findByAgentAndVersionNumber(
+					command.agentId,
+					command.versionNumber,
+				);
 			if (duplicate) {
 				if (duplicate.status === "published") {
 					return commandResultSchema.parse({

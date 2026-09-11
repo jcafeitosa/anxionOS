@@ -1,17 +1,17 @@
+import { performanceOutcomeRecordedBridgeSchema } from "@anxionos/contracts/evaluation";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
 import { PERFORMANCE_EVENT_TYPES } from "@anxionos/contracts/performance";
-import { performanceOutcomeRecordedBridgeSchema } from "@anxionos/contracts/evaluation";
+import {
+	createEvaluationUnitOfWork,
+	createOutcomeRecordedConsumer,
+	createPgCommandJournalRepository,
+	EvaluationCommandError,
+} from "@anxionos/evaluation";
 import {
 	type InboxConsumer,
 	processWithInbox,
 } from "@anxionos/eventing/postgres";
-import {
-	EvaluationCommandError,
-	createOutcomeRecordedConsumer,
-	createEvaluationUnitOfWork,
-	createPgCommandJournalRepository,
-} from "@anxionos/evaluation";
 import type { Pool } from "pg";
 import { ZodError } from "zod";
 

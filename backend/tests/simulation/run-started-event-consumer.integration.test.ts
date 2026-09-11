@@ -1,7 +1,7 @@
+import { afterEach, describe, expect, test } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, test } from "bun:test";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import {
 	SIMULATION_EVENT_TYPES,
@@ -9,12 +9,15 @@ import {
 } from "@anxionos/contracts/simulation";
 import { STRATEGIES_EVENT_TYPES } from "@anxionos/contracts/strategies";
 import {
-	SIMULATION_RUN_STARTED_CONSUMER_NAME,
 	createSimulationEventConsumerDeps,
 	processSimulationBacktestRequestedEvent,
 	processSimulationRunStartedEvent,
+	SIMULATION_RUN_STARTED_CONSUMER_NAME,
 } from "../../apps/api/src/simulation/event-consumers";
-import { shouldRunPgIntegrationTests, withSimulationPgHarness } from "./test-support";
+import {
+	shouldRunPgIntegrationTests,
+	withSimulationPgHarness,
+} from "./test-support";
 
 const organizationId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const backtestRequestId = "st_btr_11111111-1111-4111-8111-111111111111";

@@ -10,11 +10,11 @@ import {
 	transitionAutonomyLevel,
 } from "@anxionos/governance";
 import { GovernanceCommandError } from "../../modules/governance/src/application/errors";
+import type { Grant } from "../../modules/governance/src/domain/entities/grant";
 import {
 	validateAutonomyTransition,
 	validateInitialAssignment,
 } from "../../modules/governance/src/domain/policies/autonomy-normative-matrix";
-import type { Grant } from "../../modules/governance/src/domain/entities/grant";
 import {
 	createInMemoryApprovalRepository,
 	createInMemoryAuthorityEpochStore,
@@ -31,7 +31,8 @@ const actorPrincipalId = "33333333-3333-4333-8333-333333333333";
 const approvalId = "44444444-4444-4444-8444-444444444444";
 
 function createAutonomyDeps() {
-	const autonomyAssignmentRepository = createInMemoryAutonomyAssignmentRepository();
+	const autonomyAssignmentRepository =
+		createInMemoryAutonomyAssignmentRepository();
 	const grantRepository = createInMemoryGrantRepository();
 	const commandJournal = createInMemoryCommandJournalRepository();
 	const { unitOfWork, published } = createRecordingGovernanceUnitOfWork({
@@ -98,7 +99,8 @@ describe("autonomy normative matrix", () => {
 
 describe("assignAutonomyLevel", () => {
 	test("assigns L0 and emits autonomy.assigned event", async () => {
-		const { deps, published, autonomyAssignmentRepository } = createAutonomyDeps();
+		const { deps, published, autonomyAssignmentRepository } =
+			createAutonomyDeps();
 		const commandId = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 		const result = await assignAutonomyLevel(deps, {
 			commandId,
@@ -107,7 +109,9 @@ describe("assignAutonomyLevel", () => {
 			level: "L0",
 		});
 		expect(result.revision).toBe(1);
-		const stored = await autonomyAssignmentRepository.findById(result.aggregateId);
+		const stored = await autonomyAssignmentRepository.findById(
+			result.aggregateId,
+		);
 		expect(stored?.level).toBe("L0");
 		expect(stored?.status).toBe("active");
 		expect(published.map((event) => event.eventType)).toContain(
@@ -185,173 +189,174 @@ async function seedAgentAtLevel(
 }
 
 describe("G3-GOV-06 autonomy transitions", () => {
-describe("transitionAutonomyLevel", () => {
-	test("promotes L0→L1 with approval and evidence", async () => {
-		const { deps, published } = createAutonomyDeps();
-		await assignAutonomyLevel(deps, {
-			commandId: "ffffffff-ffff-4fff-8fff-ffffffffffff",
-			scopeId,
-			subjectAgentId: agentId,
-			level: "L0",
-		});
-		const result = await transitionAutonomyLevel(deps, {
-			commandId: "10101010-1010-4101-8101-010101010101",
-			scopeId,
-			subjectAgentId: agentId,
-			targetLevel: "L1",
-			transitionKind: "promote",
-			approvalId,
-			evidenceHash: "sha256:evidence-demo",
-			actorPrincipalId,
-		});
-		expect(result.revision).toBe(1);
-		expect(published.map((event) => event.eventType)).toContain(
-			GOVERNANCE_EVENT_TYPES.AUTONOMY_TRANSITIONED,
-		);
-	});
-
-	test("blocks L3 promotion at runtime", async () => {
-		const { deps } = createAutonomyDeps();
-		await assignAutonomyLevel(deps, {
-			commandId: "12121212-1212-4121-8121-212121212121",
-			scopeId,
-			subjectAgentId: agentId,
-			level: "L0",
-		});
-		await transitionAutonomyLevel(deps, {
-			commandId: "13131313-1313-4131-8131-313131313131",
-			scopeId,
-			subjectAgentId: agentId,
-			targetLevel: "L1",
-			transitionKind: "promote",
-			approvalId,
-			evidenceHash: "sha256:step1",
-			actorPrincipalId,
-		});
-		await transitionAutonomyLevel(deps, {
-			commandId: "14141414-1414-4141-8141-414141414141",
-			scopeId,
-			subjectAgentId: agentId,
-			targetLevel: "L2",
-			transitionKind: "promote",
-			approvalId,
-			evidenceHash: "sha256:step2",
-			actorPrincipalId,
-		});
-		await expect(
-			transitionAutonomyLevel(deps, {
-				commandId: "15151515-1515-4151-8151-515151515151",
+	describe("transitionAutonomyLevel", () => {
+		test("promotes L0→L1 with approval and evidence", async () => {
+			const { deps, published } = createAutonomyDeps();
+			await assignAutonomyLevel(deps, {
+				commandId: "ffffffff-ffff-4fff-8fff-ffffffffffff",
 				scopeId,
 				subjectAgentId: agentId,
-				targetLevel: "L3",
-				transitionKind: "promote",
-				approvalId,
-				evidenceHash: "sha256:step3",
-				actorPrincipalId,
-			}),
-		).rejects.toBeInstanceOf(GovernanceCommandError);
-	});
-
-	test("demotes L2→L1 without approval", async () => {
-		const { deps, autonomyAssignmentRepository } = createAutonomyDeps();
-		await seedAgentAtLevel(deps, "L2");
-
-		const result = await transitionAutonomyLevel(deps, {
-			commandId: "17171717-1717-4171-8171-717171717171",
-			scopeId,
-			subjectAgentId: agentId,
-			targetLevel: "L1",
-			transitionKind: "demote",
-			actorPrincipalId,
-		});
-
-		const active = await autonomyAssignmentRepository.findActiveByAgentAndScope(
-			scopeId,
-			agentId,
-		);
-		expect(active?.level).toBe("L1");
-		expect(active?.id).toBe(result.aggregateId);
-		expect(result.revision).toBe(1);
-	});
-
-	test("takeover sets operator level ≤L2 with approval and audit fields", async () => {
-		const { deps, published, autonomyAssignmentRepository } =
-			createAutonomyDeps();
-
-		const result = await transitionAutonomyLevel(deps, {
-			commandId: "18181818-1818-4181-8181-818181818181",
-			scopeId,
-			subjectAgentId: agentId,
-			targetLevel: "L2",
-			transitionKind: "takeover",
-			approvalId,
-			evidenceHash: "sha256:operator-takeover",
-			actorPrincipalId,
-			reason: "operator emergency takeover",
-		});
-
-		const active = await autonomyAssignmentRepository.findActiveByAgentAndScope(
-			scopeId,
-			agentId,
-		);
-		expect(active?.level).toBe("L2");
-		expect(active?.approvalId).toBe(approvalId);
-		expect(active?.evidenceHash).toBe("sha256:operator-takeover");
-		expect(result.aggregateId).toBe(active?.id);
-		expect(published.map((event) => event.eventType)).toContain(
-			GOVERNANCE_EVENT_TYPES.AUTONOMY_TRANSITIONED,
-		);
-	});
-
-
-	test("takeover without prior assignment emits fromLevel null (not targetLevel)", async () => {
-		const { deps, published } = createAutonomyDeps();
-
-		await transitionAutonomyLevel(deps, {
-			commandId: "20202020-2020-4202-8202-020202020202",
-			scopeId,
-			subjectAgentId: agentId,
-			targetLevel: "L2",
-			transitionKind: "takeover",
-			approvalId,
-			evidenceHash: "sha256:operator-takeover-null-from",
-			actorPrincipalId,
-			reason: "operator emergency takeover",
-		});
-
-		const transitionEvent = published.find(
-			(event) =>
-				event.eventType === GOVERNANCE_EVENT_TYPES.AUTONOMY_TRANSITIONED,
-		);
-		expect(transitionEvent).toBeDefined();
-		const payload = transitionEvent?.payload as {
-			fromLevel: string | null;
-			toLevel: string;
-			transitionKind: string;
-		};
-		expect(payload.fromLevel).toBeNull();
-		expect(payload.toLevel).toBe("L2");
-		expect(payload.transitionKind).toBe("takeover");
-	});
-
-	test("blocks L4 promotion at runtime", async () => {
-		const { deps } = createAutonomyDeps();
-		await seedAgentAtLevel(deps, "L2");
-
-		await expect(
-			transitionAutonomyLevel(deps, {
-				commandId: "19191919-1919-4191-8191-919191919191",
+				level: "L0",
+			});
+			const result = await transitionAutonomyLevel(deps, {
+				commandId: "10101010-1010-4101-8101-010101010101",
 				scopeId,
 				subjectAgentId: agentId,
-				targetLevel: "L4",
+				targetLevel: "L1",
 				transitionKind: "promote",
 				approvalId,
-				evidenceHash: "sha256:l4-attempt",
+				evidenceHash: "sha256:evidence-demo",
 				actorPrincipalId,
-			}),
-		).rejects.toBeInstanceOf(GovernanceCommandError);
+			});
+			expect(result.revision).toBe(1);
+			expect(published.map((event) => event.eventType)).toContain(
+				GOVERNANCE_EVENT_TYPES.AUTONOMY_TRANSITIONED,
+			);
+		});
+
+		test("blocks L3 promotion at runtime", async () => {
+			const { deps } = createAutonomyDeps();
+			await assignAutonomyLevel(deps, {
+				commandId: "12121212-1212-4121-8121-212121212121",
+				scopeId,
+				subjectAgentId: agentId,
+				level: "L0",
+			});
+			await transitionAutonomyLevel(deps, {
+				commandId: "13131313-1313-4131-8131-313131313131",
+				scopeId,
+				subjectAgentId: agentId,
+				targetLevel: "L1",
+				transitionKind: "promote",
+				approvalId,
+				evidenceHash: "sha256:step1",
+				actorPrincipalId,
+			});
+			await transitionAutonomyLevel(deps, {
+				commandId: "14141414-1414-4141-8141-414141414141",
+				scopeId,
+				subjectAgentId: agentId,
+				targetLevel: "L2",
+				transitionKind: "promote",
+				approvalId,
+				evidenceHash: "sha256:step2",
+				actorPrincipalId,
+			});
+			await expect(
+				transitionAutonomyLevel(deps, {
+					commandId: "15151515-1515-4151-8151-515151515151",
+					scopeId,
+					subjectAgentId: agentId,
+					targetLevel: "L3",
+					transitionKind: "promote",
+					approvalId,
+					evidenceHash: "sha256:step3",
+					actorPrincipalId,
+				}),
+			).rejects.toBeInstanceOf(GovernanceCommandError);
+		});
+
+		test("demotes L2→L1 without approval", async () => {
+			const { deps, autonomyAssignmentRepository } = createAutonomyDeps();
+			await seedAgentAtLevel(deps, "L2");
+
+			const result = await transitionAutonomyLevel(deps, {
+				commandId: "17171717-1717-4171-8171-717171717171",
+				scopeId,
+				subjectAgentId: agentId,
+				targetLevel: "L1",
+				transitionKind: "demote",
+				actorPrincipalId,
+			});
+
+			const active =
+				await autonomyAssignmentRepository.findActiveByAgentAndScope(
+					scopeId,
+					agentId,
+				);
+			expect(active?.level).toBe("L1");
+			expect(active?.id).toBe(result.aggregateId);
+			expect(result.revision).toBe(1);
+		});
+
+		test("takeover sets operator level ≤L2 with approval and audit fields", async () => {
+			const { deps, published, autonomyAssignmentRepository } =
+				createAutonomyDeps();
+
+			const result = await transitionAutonomyLevel(deps, {
+				commandId: "18181818-1818-4181-8181-818181818181",
+				scopeId,
+				subjectAgentId: agentId,
+				targetLevel: "L2",
+				transitionKind: "takeover",
+				approvalId,
+				evidenceHash: "sha256:operator-takeover",
+				actorPrincipalId,
+				reason: "operator emergency takeover",
+			});
+
+			const active =
+				await autonomyAssignmentRepository.findActiveByAgentAndScope(
+					scopeId,
+					agentId,
+				);
+			expect(active?.level).toBe("L2");
+			expect(active?.approvalId).toBe(approvalId);
+			expect(active?.evidenceHash).toBe("sha256:operator-takeover");
+			expect(result.aggregateId).toBe(active?.id);
+			expect(published.map((event) => event.eventType)).toContain(
+				GOVERNANCE_EVENT_TYPES.AUTONOMY_TRANSITIONED,
+			);
+		});
+
+		test("takeover without prior assignment emits fromLevel null (not targetLevel)", async () => {
+			const { deps, published } = createAutonomyDeps();
+
+			await transitionAutonomyLevel(deps, {
+				commandId: "20202020-2020-4202-8202-020202020202",
+				scopeId,
+				subjectAgentId: agentId,
+				targetLevel: "L2",
+				transitionKind: "takeover",
+				approvalId,
+				evidenceHash: "sha256:operator-takeover-null-from",
+				actorPrincipalId,
+				reason: "operator emergency takeover",
+			});
+
+			const transitionEvent = published.find(
+				(event) =>
+					event.eventType === GOVERNANCE_EVENT_TYPES.AUTONOMY_TRANSITIONED,
+			);
+			expect(transitionEvent).toBeDefined();
+			const payload = transitionEvent?.payload as {
+				fromLevel: string | null;
+				toLevel: string;
+				transitionKind: string;
+			};
+			expect(payload.fromLevel).toBeNull();
+			expect(payload.toLevel).toBe("L2");
+			expect(payload.transitionKind).toBe("takeover");
+		});
+
+		test("blocks L4 promotion at runtime", async () => {
+			const { deps } = createAutonomyDeps();
+			await seedAgentAtLevel(deps, "L2");
+
+			await expect(
+				transitionAutonomyLevel(deps, {
+					commandId: "19191919-1919-4191-8191-919191919191",
+					scopeId,
+					subjectAgentId: agentId,
+					targetLevel: "L4",
+					transitionKind: "promote",
+					approvalId,
+					evidenceHash: "sha256:l4-attempt",
+					actorPrincipalId,
+				}),
+			).rejects.toBeInstanceOf(GovernanceCommandError);
+		});
 	});
-});
 });
 
 describe("evaluateAutonomyCapability", () => {

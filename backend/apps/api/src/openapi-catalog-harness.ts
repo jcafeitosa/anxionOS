@@ -1,25 +1,25 @@
 import { Elysia } from "elysia";
 import { createAgentsPlugin } from "./agents/plugin";
 import { createPostLoginPlugin } from "./auth/post-login-plugin";
+import { createEvaluationPlugin } from "./evaluation/plugin";
+import { createExecutionPlugin } from "./execution/plugin";
 import { createGovernancePlugin } from "./governance/plugin";
 import {
-	hiddenAuthCatchAllDetail,
 	healthOpenApiDetail,
+	hiddenAuthCatchAllDetail,
 	identityOpenApi,
 } from "./openapi-operations";
 import { createOpenApiPlugin } from "./openapi-plugin";
+import { createOperationsPlugin } from "./operations/plugin";
 import { createOrganizationsPlugin } from "./organizations/plugin";
 import { createPartnersPlugin } from "./partners/plugin";
-import { createOperationsPlugin } from "./operations/plugin";
 import { createPerformancePlugin } from "./performance/plugin";
-import { createSimulationPlugin } from "./simulation/plugin";
-import { createExecutionPlugin } from "./execution/plugin";
-import { createRiskPlugin } from "./risk/plugin";
-import { createEvaluationPlugin } from "./evaluation/plugin";
 import { createPortfoliosPlugin } from "./portfolios/plugin";
-import { createStrategiesPlugin } from "./strategies/plugin";
 import { createRealtimePlugin } from "./realtime/plugin";
 import { SubscriptionManager } from "./realtime/subscription-manager";
+import { createRiskPlugin } from "./risk/plugin";
+import { createSimulationPlugin } from "./simulation/plugin";
+import { createStrategiesPlugin } from "./strategies/plugin";
 
 const stubAuth = {
 	api: {

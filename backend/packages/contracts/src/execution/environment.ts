@@ -1,7 +1,7 @@
 import { z } from "zod";
+import type { ExecutionMode } from "../decisions/types";
 import { executionModeSchema } from "../decisions/types";
 import { institutionalUuidSchema } from "../institutional-uuid";
-import type { ExecutionMode } from "../decisions/types";
 /** Secret/credential scope — REAL scopes never resolve for SIMULATED/PAPER dispatch. */
 export const secretScopeSchema = z.enum([
 	"NONE",

@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import {
-	xchangeSimulatedAdapterManifest,
-	XCHANGE_ADAPTER_ID,
 	runAdapterConformanceSuite,
+	XCHANGE_ADAPTER_ID,
+	xchangeSimulatedAdapterManifest,
 } from "@anxionos/adapter-gateway";
 
 /**

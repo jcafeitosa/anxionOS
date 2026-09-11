@@ -4,8 +4,8 @@ import {
 	reactivatePrincipalCommandSchema,
 } from "@anxionos/contracts/identity";
 import {
-	type Principal,
 	getPrincipalById,
+	type Principal,
 	reactivatePrincipal,
 } from "@anxionos/identity";
 import { IdentityCommandError } from "../../modules/identity/src/application/errors";

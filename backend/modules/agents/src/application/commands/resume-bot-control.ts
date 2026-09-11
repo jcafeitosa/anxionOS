@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
+import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
 import {
-	resumeBotControlCommandSchema,
+	type ComputerSessionCommandResult,
+	computerSessionBotResumedPayloadSchema,
 	computerSessionCommandResultSchema,
 	OPENBOT_EVENT_TYPES,
-	computerSessionBotResumedPayloadSchema,
 	type ResumeBotControlCommand,
-	type ComputerSessionCommandResult,
+	resumeBotControlCommandSchema,
 } from "@anxionos/contracts/openbot";
-import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
 import type { ComputerSessionPort } from "../../domain/ports/computer-session-port";
 
 export interface ResumeBotControlDeps {

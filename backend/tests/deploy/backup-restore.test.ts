@@ -1,14 +1,14 @@
 import { describe, expect, it } from "bun:test";
 import {
-	CUSTOM_DUMP_MAGIC,
-	LEDGER_TABLES,
 	assertSafeDbName,
 	buildDrillReport,
-	dockerCopyArgs,
+	CUSTOM_DUMP_MAGIC,
 	collectSecretNeedles,
+	dockerCopyArgs,
 	dumpContainsSecret,
 	isCustomFormatDump,
 	isForbiddenRestoreTarget,
+	LEDGER_TABLES,
 	parseCliArgs,
 	parseDbUrl,
 	resolveIsolatedTargetDb,
@@ -21,7 +21,14 @@ describe("backup-restore.mjs (ANX-169)", () => {
 			positional: [],
 			flags: { out: "/tmp/b" },
 		});
-		expect(parseCliArgs(["restore", "/tmp/a.dump", "--db-name", "anxionos_restore_drill"])).toEqual({
+		expect(
+			parseCliArgs([
+				"restore",
+				"/tmp/a.dump",
+				"--db-name",
+				"anxionos_restore_drill",
+			]),
+		).toEqual({
 			cmd: "restore",
 			positional: ["/tmp/a.dump"],
 			flags: { dbName: "anxionos_restore_drill" },
@@ -34,7 +41,9 @@ describe("backup-restore.mjs (ANX-169)", () => {
 	});
 
 	it("parses DATABASE_URL without printing secrets", () => {
-		const parsed = parseDbUrl("postgres://anxionos:s3cret@localhost:5432/anxionos");
+		const parsed = parseDbUrl(
+			"postgres://anxionos:s3cret@localhost:5432/anxionos",
+		);
 		expect(parsed.db).toBe("anxionos");
 		expect(parsed.user).toBe("anxionos");
 		expect(parsed.password).toBe("s3cret");
@@ -44,8 +53,12 @@ describe("backup-restore.mjs (ANX-169)", () => {
 		expect(isForbiddenRestoreTarget("production")).toBe(true);
 		expect(isForbiddenRestoreTarget("prod")).toBe(true);
 		expect(isForbiddenRestoreTarget("anxionos_production")).toBe(true);
-		expect(() => resolveIsolatedTargetDb("anxionos", "anxionos")).toThrow(/differ from source/);
-		expect(() => resolveIsolatedTargetDb("anxionos", "production")).toThrow(/forbidden/);
+		expect(() => resolveIsolatedTargetDb("anxionos", "anxionos")).toThrow(
+			/differ from source/,
+		);
+		expect(() => resolveIsolatedTargetDb("anxionos", "production")).toThrow(
+			/forbidden/,
+		);
 		expect(resolveIsolatedTargetDb("anxionos")).toBe("anxionos_restore_drill");
 	});
 
@@ -55,15 +68,21 @@ describe("backup-restore.mjs (ANX-169)", () => {
 	});
 
 	it("detects custom-format dump magic and secret leakage", () => {
-		expect(isCustomFormatDump(Buffer.from(`${CUSTOM_DUMP_MAGIC}\x01`))).toBe(true);
+		expect(isCustomFormatDump(Buffer.from(`${CUSTOM_DUMP_MAGIC}\x01`))).toBe(
+			true,
+		);
 		expect(isCustomFormatDump(Buffer.from("SQL dump"))).toBe(false);
-		expect(dumpContainsSecret("TOC entry 1 TABLE public foo", ["s3cret"])).toBe(false);
+		expect(dumpContainsSecret("TOC entry 1 TABLE public foo", ["s3cret"])).toBe(
+			false,
+		);
 		expect(dumpContainsSecret("password=s3cret", ["s3cret"])).toBe(true);
 		const needles = collectSecretNeedles(
 			{ user: "anxionos", password: "anxionos", db: "anxionos" },
 			{ DATABASE_URL: "postgres://anxionos:anxionos@localhost:5432/anxionos" },
 		);
-		expect(needles.some((n) => n.includes("postgres://anxionos:anxionos@"))).toBe(true);
+		expect(
+			needles.some((n) => n.includes("postgres://anxionos:anxionos@")),
+		).toBe(true);
 		expect(needles.includes("anxionos")).toBe(false);
 	});
 
@@ -99,15 +118,11 @@ describe("backup-restore.mjs (ANX-169)", () => {
 	});
 
 	it("builds docker cp args instead of a broken host-path dump", () => {
-		expect(dockerCopyArgs("from", "docker-postgres-1", "/tmp/a.dump", "/tmp/b.dump")).toEqual([
-			"cp",
-			"docker-postgres-1:/tmp/a.dump",
-			"/tmp/b.dump",
-		]);
-		expect(dockerCopyArgs("to", "docker-postgres-1", "/tmp/a.dump", "/tmp/b.dump")).toEqual([
-			"cp",
-			"/tmp/b.dump",
-			"docker-postgres-1:/tmp/a.dump",
-		]);
+		expect(
+			dockerCopyArgs("from", "docker-postgres-1", "/tmp/a.dump", "/tmp/b.dump"),
+		).toEqual(["cp", "docker-postgres-1:/tmp/a.dump", "/tmp/b.dump"]);
+		expect(
+			dockerCopyArgs("to", "docker-postgres-1", "/tmp/a.dump", "/tmp/b.dump"),
+		).toEqual(["cp", "/tmp/b.dump", "docker-postgres-1:/tmp/a.dump"]);
 	});
 });

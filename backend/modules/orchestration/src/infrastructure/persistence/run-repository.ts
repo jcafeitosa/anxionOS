@@ -4,7 +4,6 @@ import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Run } from "../../domain/entities/run";
 import type { RunRepository } from "../../domain/ports/run-repository";
 import type { RunRow } from "./schema";
-import {} from "./schema";
 import { runs } from "./schema";
 
 const TERMINAL_RUN_STATUSES: RunStatus[] = [

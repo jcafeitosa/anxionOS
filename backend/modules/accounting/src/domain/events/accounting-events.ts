@@ -31,7 +31,6 @@ export function createLedgerPostedEvent(input: {
 	};
 }
 
-
 export function createReversalPostedEvent(input: {
 	reversalEntryId: string;
 	reversesEntryId: string;

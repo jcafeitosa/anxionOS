@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import {
+	mapPositionUpdatedToPerformanceInput,
 	type PerformanceCommandResult,
 	type PortfoliosPositionUpdatedBridge,
-	mapPositionUpdatedToPerformanceInput,
 } from "@anxionos/contracts/performance";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { PerformanceUnitOfWork } from "../../domain/ports/performance-unit-of-work";
@@ -13,7 +13,9 @@ export interface PositionUpdatedConsumerDeps {
 	commandJournal: CommandJournalRepository;
 }
 
-export function createPositionUpdatedConsumer(deps: PositionUpdatedConsumerDeps): {
+export function createPositionUpdatedConsumer(
+	deps: PositionUpdatedConsumerDeps,
+): {
 	handle(
 		position: PortfoliosPositionUpdatedBridge,
 	): Promise<PerformanceCommandResult>;

@@ -1,90 +1,88 @@
 {
-  "schemaVersion": "1.0.0",
-  "issue": "ANX-162",
-  "slice": "S5-limits-logs-rollback",
-  "generatedAt": "2026-09-11T09:16:06.271Z",
-  "policy": {
-    "egressDeny": {
-      "network": "anxion-engines-sandbox",
-      "internal": true,
-      "description": "Engines stay on internal anxion-engines-sandbox only — no public internet egress and no anxion-control attachment."
-    },
-    "serviceAuth": {
-      "header": "Authorization",
-      "scheme": "Bearer",
-      "envVar": "ENGINE_SANDBOX_AUTH_TOKEN",
-      "publicPaths": [
-        "/health"
-      ]
-    },
-    "resourceLimits": {
-      "cpu": "1.0",
-      "memory": "512M",
-      "loggingDriver": "json-file"
-    },
-    "rollback": {
-      "strategy": "manifest-pinned-image",
-      "description": "compose rm -sf <service> → up -d --no-build restores manifest digest"
-    },
-    "dockerSocket": "forbidden",
-    "enginesNotOnControlPlane": true
-  },
-  "engines": [
-    {
-      "service": "gocryptotrader-sandbox",
-      "engineId": "gocryptotrader",
-      "image": "anxionos/gocryptotrader-sandbox:0.1.0-anx162-s5",
-      "port": 9053,
-      "apiProbePath": "/v1/getinfo",
-      "digest": "anxionos/gocryptotrader-sandbox@sha256:1b6899b0920a4bcd4eac1227bf814ce3902f2bd21e5088a8615c6f2d898584fa"
-    },
-    {
-      "service": "hummingbot-sandbox",
-      "engineId": "hummingbot",
-      "image": "anxionos/hummingbot-sandbox:0.1.0-anx162-s5",
-      "port": 9054,
-      "apiProbePath": "/v1/status",
-      "digest": "anxionos/hummingbot-sandbox@sha256:b5c0f27bfc9cb9b0ed94716fb1f1c040fe2d314f02d4172d349327b9896c42c0"
-    },
-    {
-      "service": "freqtrade-sandbox",
-      "engineId": "freqtrade",
-      "image": "anxionos/freqtrade-sandbox:0.1.0-anx162-s5",
-      "port": 9055,
-      "apiProbePath": "/api/v1/ping",
-      "digest": "anxionos/freqtrade-sandbox@sha256:93952180c0f49e78b66a7c81fa45a800ce706f36c7facffe847f2176821a086e"
-    },
-    {
-      "service": "xchange-sandbox",
-      "engineId": "xchange",
-      "image": "anxionos/xchange-sandbox:0.1.0-anx162-s5",
-      "port": 9056,
-      "apiProbePath": "/api/v1/health",
-      "digest": "anxionos/xchange-sandbox@sha256:d2b25b4c929389bade812fa1bf334d7b84310feedb07a02c78535229a9673572"
-    },
-    {
-      "service": "nautilus-sandbox",
-      "engineId": "nautilus",
-      "image": "anxionos/nautilus-sandbox:0.1.0-anx174-s1",
-      "port": 9057,
-      "apiProbePath": "/v1/system/status",
-      "digest": "anxionos/nautilus-sandbox@sha256:763c3bbdca6ea36027e1bdfe1189b54e0f2640263640a667f2d4715c715ec01d"
-    },
-    {
-      "service": "cryptofeed-sandbox",
-      "engineId": "cryptofeed",
-      "image": "anxionos/cryptofeed-sandbox:0.1.0-anx179-s1",
-      "port": 9058,
-      "apiProbePath": "/v1/feeds/status",
-      "digest": "anxionos/cryptofeed-sandbox@sha256:8563a0419c8ebfed59523c8cc5156e23dca3982741b045f8d2c168abe867dbc1"
-    },
-    {
-      "service": "mt5-sandbox",
-      "engineId": "mt5",
-      "image": "anxionos/mt5-sandbox:0.1.0-anx180-s1",
-      "port": 9059,
-      "apiProbePath": "/v1/terminal/status",
-      "digest": "anxionos/mt5-sandbox@sha256:4b8138a86c77eb18529562fb5379c07b443fe754a90645aca773f9eadab10e53"
-    }
-  ]
+	"schemaVersion": "1.0.0",
+	"issue": "ANX-162",
+	"slice": "S5-limits-logs-rollback",
+	"generatedAt": "2026-09-11T09:16:06.271Z",
+	"policy": {
+		"egressDeny": {
+			"network": "anxion-engines-sandbox",
+			"internal": true,
+			"description": "Engines stay on internal anxion-engines-sandbox only — no public internet egress and no anxion-control attachment."
+		},
+		"serviceAuth": {
+			"header": "Authorization",
+			"scheme": "Bearer",
+			"envVar": "ENGINE_SANDBOX_AUTH_TOKEN",
+			"publicPaths": ["/health"]
+		},
+		"resourceLimits": {
+			"cpu": "1.0",
+			"memory": "512M",
+			"loggingDriver": "json-file"
+		},
+		"rollback": {
+			"strategy": "manifest-pinned-image",
+			"description": "compose rm -sf <service> → up -d --no-build restores manifest digest"
+		},
+		"dockerSocket": "forbidden",
+		"enginesNotOnControlPlane": true
+	},
+	"engines": [
+		{
+			"service": "gocryptotrader-sandbox",
+			"engineId": "gocryptotrader",
+			"image": "anxionos/gocryptotrader-sandbox:0.1.0-anx162-s5",
+			"port": 9053,
+			"apiProbePath": "/v1/getinfo",
+			"digest": "anxionos/gocryptotrader-sandbox@sha256:1b6899b0920a4bcd4eac1227bf814ce3902f2bd21e5088a8615c6f2d898584fa"
+		},
+		{
+			"service": "hummingbot-sandbox",
+			"engineId": "hummingbot",
+			"image": "anxionos/hummingbot-sandbox:0.1.0-anx162-s5",
+			"port": 9054,
+			"apiProbePath": "/v1/status",
+			"digest": "anxionos/hummingbot-sandbox@sha256:b5c0f27bfc9cb9b0ed94716fb1f1c040fe2d314f02d4172d349327b9896c42c0"
+		},
+		{
+			"service": "freqtrade-sandbox",
+			"engineId": "freqtrade",
+			"image": "anxionos/freqtrade-sandbox:0.1.0-anx162-s5",
+			"port": 9055,
+			"apiProbePath": "/api/v1/ping",
+			"digest": "anxionos/freqtrade-sandbox@sha256:93952180c0f49e78b66a7c81fa45a800ce706f36c7facffe847f2176821a086e"
+		},
+		{
+			"service": "xchange-sandbox",
+			"engineId": "xchange",
+			"image": "anxionos/xchange-sandbox:0.1.0-anx162-s5",
+			"port": 9056,
+			"apiProbePath": "/api/v1/health",
+			"digest": "anxionos/xchange-sandbox@sha256:d2b25b4c929389bade812fa1bf334d7b84310feedb07a02c78535229a9673572"
+		},
+		{
+			"service": "nautilus-sandbox",
+			"engineId": "nautilus",
+			"image": "anxionos/nautilus-sandbox:0.1.0-anx174-s1",
+			"port": 9057,
+			"apiProbePath": "/v1/system/status",
+			"digest": "anxionos/nautilus-sandbox@sha256:763c3bbdca6ea36027e1bdfe1189b54e0f2640263640a667f2d4715c715ec01d"
+		},
+		{
+			"service": "cryptofeed-sandbox",
+			"engineId": "cryptofeed",
+			"image": "anxionos/cryptofeed-sandbox:0.1.0-anx179-s1",
+			"port": 9058,
+			"apiProbePath": "/v1/feeds/status",
+			"digest": "anxionos/cryptofeed-sandbox@sha256:8563a0419c8ebfed59523c8cc5156e23dca3982741b045f8d2c168abe867dbc1"
+		},
+		{
+			"service": "mt5-sandbox",
+			"engineId": "mt5",
+			"image": "anxionos/mt5-sandbox:0.1.0-anx180-s1",
+			"port": 9059,
+			"apiProbePath": "/v1/terminal/status",
+			"digest": "anxionos/mt5-sandbox@sha256:4b8138a86c77eb18529562fb5379c07b443fe754a90645aca773f9eadab10e53"
+		}
+	]
 }

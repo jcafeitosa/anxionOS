@@ -17,7 +17,10 @@ export async function getOutcomeSnapshot(
 		outcomeSnapshotId,
 	);
 	if (!record) {
-		throwPerformanceError("PERF_SNAPSHOT_NOT_FOUND", "outcome snapshot not found");
+		throwPerformanceError(
+			"PERF_SNAPSHOT_NOT_FOUND",
+			"outcome snapshot not found",
+		);
 	}
 	return toOutcomeSnapshot(record);
 }

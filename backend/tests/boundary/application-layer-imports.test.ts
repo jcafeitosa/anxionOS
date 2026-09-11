@@ -1,15 +1,21 @@
 import { describe, expect, test } from "bun:test";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import { readdirSync, statSync } from "node:fs";
+import {
+	mkdirSync,
+	mkdtempSync,
+	readdirSync,
+	rmSync,
+	statSync,
+	writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
 	BACKEND_ROOT,
-	type ForbiddenPattern,
-	type ImportViolation,
 	collectModuleLayerFiles,
+	type ForbiddenPattern,
 	findForbiddenImports,
 	formatViolations,
+	type ImportViolation,
 } from "./scan-imports";
 
 /**

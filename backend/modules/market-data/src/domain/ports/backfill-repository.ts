@@ -17,8 +17,10 @@ export type BackfillJobStatus =
 	| "FAILED";
 
 /** Statuses a job can still be advanced from (D-MD-146-A). */
-export const ADVANCEABLE_BACKFILL_JOB_STATUSES: readonly BackfillJobStatus[] =
-	["PENDING", "RUNNING"];
+export const ADVANCEABLE_BACKFILL_JOB_STATUSES: readonly BackfillJobStatus[] = [
+	"PENDING",
+	"RUNNING",
+];
 
 /** Statuses that count as "an active backfill is already in flight". */
 export const ACTIVE_BACKFILL_JOB_STATUSES: readonly BackfillJobStatus[] = [

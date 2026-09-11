@@ -1,6 +1,6 @@
-import { z } from "zod";
 import type { StrategiesCommandResult } from "@anxionos/contracts/strategies";
 import { strategiesCommandResultSchema } from "@anxionos/contracts/strategies";
+import { z } from "zod";
 import { createVersionCertifiedEvent } from "../../domain/events/strategies-events";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { StrategiesUnitOfWork } from "../../domain/ports/strategies-unit-of-work";
@@ -14,9 +14,7 @@ import { throwStrategiesError } from "../errors";
 export const promoteStrategyVersionCertifiedCommandSchema = z.object({
 	commandId: z.string().uuid(),
 	organizationId: z.string().uuid(),
-	certificationId: z
-		.string()
-		.regex(/^evl_crt_[0-9a-f-]{36}$/i),
+	certificationId: z.string().regex(/^evl_crt_[0-9a-f-]{36}$/i),
 	strategyId: z.string().regex(/^st_str_[0-9a-f-]{36}$/i),
 	strategyVersionId: z.string().regex(/^st_ver_[0-9a-f-]{36}$/i),
 	issuedAt: z.string().datetime(),
@@ -45,10 +43,7 @@ export async function promoteStrategyVersionCertified(
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			return replayIdempotentCommandJournalEntry(
-				raced,
-				command.organizationId,
-			);
+			return replayIdempotentCommandJournalEntry(raced, command.organizationId);
 		}
 		const strategy = await ctx.strategies.findById(
 			command.strategyId,

@@ -119,7 +119,9 @@ export interface EmbeddingRepository {
 		vector: number[];
 	}): Promise<void>;
 	countByIndexGeneration(indexGenerationId: string): Promise<number>;
-	listByOrganization(organizationId: string): Promise<RetrievalEmbeddingRecord[]>;
+	listByOrganization(
+		organizationId: string,
+	): Promise<RetrievalEmbeddingRecord[]>;
 	purgeByChunkIds(chunkIds: string[]): Promise<number>;
 }
 export interface EmbeddingSpaceRepository {

@@ -2,11 +2,11 @@ import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
 import { ORGANIZATION_EVENT_TYPES } from "@anxionos/contracts/organizations";
 import {
+	createGovernanceInboxProcessor,
+	createGovernanceUnitOfWork,
 	GOVERNANCE_ORGANIZATIONS_CONSUMER_NAME,
 	type OrganizationsMembershipConsumerDeps,
 	OrganizationsMembershipConsumerError,
-	createGovernanceInboxProcessor,
-	createGovernanceUnitOfWork,
 	processOrganizationsMembershipEvent,
 } from "@anxionos/governance";
 import { createOrganizationsDb } from "@anxionos/organizations";

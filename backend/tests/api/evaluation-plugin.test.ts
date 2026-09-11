@@ -54,7 +54,9 @@ describe("evaluation plugin routes (ANX-160 S4)", () => {
 			subjectQuery: {} as never,
 			scoringPolicyQuery: {} as never,
 		});
-		const routes = plugin.routes.map((route) => `${route.method} ${route.path}`);
+		const routes = plugin.routes.map(
+			(route) => `${route.method} ${route.path}`,
+		);
 		expect(routes).toContain(
 			"GET /v1/evaluation/agencies/:agencyId/certifications",
 		);

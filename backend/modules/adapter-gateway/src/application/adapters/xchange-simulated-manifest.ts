@@ -3,8 +3,7 @@ import type { AdapterManifest } from "@anxionos/contracts/adapter-gateway";
 export const XCHANGE_ADAPTER_ID = "adapter-xchange";
 export const XCHANGE_SIMULATED_ADAPTER_VERSION = "0.1.0-anx162-s5";
 export const XCHANGE_PORT_VERSION = "1.0.0";
-export const XCHANGE_SIMULATED_IMAGE_DIGEST =
-	"sha256:" + "d".repeat(64);
+export const XCHANGE_SIMULATED_IMAGE_DIGEST = "sha256:" + "d".repeat(64);
 
 /**
  * XChange manifest for SIMULATED conformance (ANX-161 scaffold / ANX-178).

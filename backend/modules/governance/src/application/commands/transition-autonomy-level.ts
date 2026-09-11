@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
 import {
 	type GovernanceCommandResult,
-	type TransitionAutonomyLevelCommand,
 	governanceCommandResultSchema,
+	type TransitionAutonomyLevelCommand,
 	transitionAutonomyLevelCommandSchema,
 } from "@anxionos/contracts/governance";
 import {
-	createAutonomyTransitionedEvent,
 	createAuthorityEpochBumpedEvent,
+	createAutonomyTransitionedEvent,
 } from "../../domain/events/governance-events";
 import { validateAutonomyTransition } from "../../domain/policies/autonomy-normative-matrix";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";

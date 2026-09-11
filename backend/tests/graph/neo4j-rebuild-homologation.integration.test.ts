@@ -1,8 +1,9 @@
 /**
  * ANX-304 — Neo4j rebuild homologation: replay reproduces authorized grant facts.
  */
-import { randomUUID } from "node:crypto";
+
 import { afterAll, describe, expect, test } from "bun:test";
+import { randomUUID } from "node:crypto";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import {
 	GOVERNANCE_EVENT_TYPES,
@@ -158,7 +159,9 @@ describe("governance rebuild replay idempotence (in-memory, ANX-304)", () => {
 });
 
 describe("neo4j rebuild homologation (ANX-304)", () => {
-	const driver = shouldRunNeo4jHomologation() ? createNeo4jDriverFromEnv() : null;
+	const driver = shouldRunNeo4jHomologation()
+		? createNeo4jDriverFromEnv()
+		: null;
 
 	afterAll(async () => {
 		if (driver) {

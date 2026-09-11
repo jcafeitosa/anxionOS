@@ -2,14 +2,15 @@ import { z } from "zod";
 import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	assertStrategiesExecutionModeSupported,
-	bindingSnapshotSchema,
 	backtestRunIdSchema,
+	bindingSnapshotSchema,
 	deploymentIdSchema,
 	signalIdSchema,
 	strategiesExecutionModeSchema,
 	strategyIdSchema,
 	strategyVersionIdSchema,
 } from "./types";
+
 const contentHashSchema = z.string().regex(/^[a-f0-9]{64}$/i);
 export const strategiesCommandResultSchema = z.object({
 	aggregateId: z.string().min(1),
@@ -132,4 +133,3 @@ export const rollbackDeploymentCommandSchema = z.object({
 export type RollbackDeploymentCommand = z.infer<
 	typeof rollbackDeploymentCommandSchema
 >;
-

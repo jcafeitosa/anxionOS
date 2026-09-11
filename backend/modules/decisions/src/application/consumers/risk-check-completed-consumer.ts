@@ -2,6 +2,7 @@ import { checkCompletedPayloadSchema } from "@anxionos/contracts/risk";
 import type { z } from "zod";
 
 type CheckCompletedPayload = z.infer<typeof checkCompletedPayloadSchema>;
+
 import type { DecisionsUnitOfWork } from "../../domain/ports/decisions-unit-of-work";
 import { throwDecisionsError } from "../errors";
 
@@ -15,10 +16,9 @@ export function createRiskCheckCompletedConsumer(
 	return {
 		async handle(payload: CheckCompletedPayload, eventId: string) {
 			const event = checkCompletedPayloadSchema.parse(payload);
-			const replayed =
-				await deps.unitOfWork.runInTransaction(async (ctx) =>
-					ctx.submitPreconditions.findByRiskEventId(eventId),
-				);
+			const replayed = await deps.unitOfWork.runInTransaction(async (ctx) =>
+				ctx.submitPreconditions.findByRiskEventId(eventId),
+			);
 			if (replayed) {
 				if (replayed.organizationId !== event.organizationId) {
 					throwDecisionsError(
@@ -43,9 +43,7 @@ export function createRiskCheckCompletedConsumer(
 						"risk event organization mismatch",
 					);
 				}
-				const decision = await ctx.decisions.findById(
-					preconditions.decisionId,
-				);
+				const decision = await ctx.decisions.findById(preconditions.decisionId);
 				if (!decision || decision.organizationId !== event.organizationId) {
 					throwDecisionsError("DC_DECISION_NOT_FOUND", "decision not found");
 				}

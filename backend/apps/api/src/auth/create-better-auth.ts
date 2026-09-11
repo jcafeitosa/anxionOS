@@ -5,8 +5,8 @@ import type { Pool } from "pg";
 import { betterAuthDrizzleSchema } from "./better-auth-drizzle-schema";
 import { ensureBetterAuthSchema } from "./ensure-better-auth-schema";
 import {
-	type IdentityBetterAuthDeps,
 	createIdentityBetterAuthDatabaseHooks,
+	type IdentityBetterAuthDeps,
 } from "./identity-better-auth-hooks";
 import {
 	isSmtpVerificationEnabled,

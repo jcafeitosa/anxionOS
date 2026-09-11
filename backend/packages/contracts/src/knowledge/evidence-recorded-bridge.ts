@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { evidenceRecordedPayloadSchema } from "./events";
 
-export const knowledgeEvidenceRecordedBridgeSchema = evidenceRecordedPayloadSchema;
+export const knowledgeEvidenceRecordedBridgeSchema =
+	evidenceRecordedPayloadSchema;
 
 export type KnowledgeEvidenceRecordedBridge = z.infer<
 	typeof knowledgeEvidenceRecordedBridgeSchema

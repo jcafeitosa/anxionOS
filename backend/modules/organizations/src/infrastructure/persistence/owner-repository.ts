@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Owner } from "../../domain/entities/owner";
 import type { OwnerRepository } from "../../domain/ports/owner-repository";
-import { owners, type OwnerRow } from "./schema";
+import { type OwnerRow, owners } from "./schema";
 
 export function toOwner(row: OwnerRow): Owner {
 	return {
@@ -18,7 +18,11 @@ export function createDrizzleOwnerRepository(
 ): OwnerRepository {
 	return {
 		async save(owner: Owner) {
-			const existing = await db.select().from(owners).where(eq(owners.id, owner.id)).limit(1);
+			const existing = await db
+				.select()
+				.from(owners)
+				.where(eq(owners.id, owner.id))
+				.limit(1);
 			if (existing[0]) {
 				const rows = await db
 					.update(owners)
@@ -34,7 +38,9 @@ export function createDrizzleOwnerRepository(
 			}
 			const scopeAgencyId = owner.defaultOrganizationId;
 			if (!scopeAgencyId) {
-				throw new Error("Owner insert requires defaultOrganizationId for tenant scope");
+				throw new Error(
+					"Owner insert requires defaultOrganizationId for tenant scope",
+				);
 			}
 			const rows = await db
 				.insert(owners)

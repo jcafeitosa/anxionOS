@@ -1,12 +1,12 @@
-import { OPENBOT_TOOL_INVOKE_CAPABILITY } from "@anxionos/contracts/openbot";
 import type {
 	ToolCallDecision,
 	ToolCallEffect,
 	ToolCallRequest,
 } from "@anxionos/contracts/openbot";
+import { OPENBOT_TOOL_INVOKE_CAPABILITY } from "@anxionos/contracts/openbot";
 import {
-	evaluateAutonomyCapability,
 	type AutonomyAssignmentRepository,
+	evaluateAutonomyCapability,
 	type GrantRepository,
 } from "@anxionos/governance";
 import type { ToolGatewayPort } from "../../domain/ports/tool-gateway-port";
@@ -51,7 +51,9 @@ export function createGovernanceToolGateway(
 	const { deps, forwarder } = options;
 
 	return {
-		async authorizeToolCall(request: ToolCallRequest): Promise<ToolCallDecision> {
+		async authorizeToolCall(
+			request: ToolCallRequest,
+		): Promise<ToolCallDecision> {
 			const scopeId = request.organizationId;
 			const result = await evaluateAutonomyCapability(deps, {
 				scopeId,

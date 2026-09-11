@@ -106,7 +106,7 @@ export class RealtimeIngestSequenceGuard {
 			}
 			if (
 				sequenceAnomaly !== "OUT_OF_ORDER_STREAM_SEQUENCE" &&
-				(event.streamSequence > (stream.lastStreamSequence ?? -1))
+				event.streamSequence > (stream.lastStreamSequence ?? -1)
 			) {
 				stream.lastStreamSequence = event.streamSequence;
 			}

@@ -38,6 +38,8 @@ describe("incident lifecycle domain (ANX-311 S2)", () => {
 
 	test("rejects invalid transitions", () => {
 		expect(canTransitionIncidentStatus("CLOSED", "OPEN")).toBe(false);
-		expect(canTransitionIncidentStatus("RESOLVED", "INVESTIGATING")).toBe(false);
+		expect(canTransitionIncidentStatus("RESOLVED", "INVESTIGATING")).toBe(
+			false,
+		);
 	});
 });

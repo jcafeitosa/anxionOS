@@ -3,11 +3,12 @@ import type { PrincipalRepository } from "@anxionos/identity";
 import type {
 	createHmacInviteTokenHasherFromEnv,
 	createIdentityPrincipalLookup,
-	createOrganizationUnitOfWork,
 	createOrganizationsDb,
+	createOrganizationUnitOfWork,
 } from "@anxionos/organizations";
 import type { betterAuth } from "better-auth";
 import { Elysia } from "elysia";
+import { organizationsOpenApi } from "../openapi-operations";
 import { resolveClientIp } from "./client-ip";
 import { mapOrganizationsError } from "./error-handler";
 import {
@@ -24,7 +25,6 @@ import {
 	handleListMemberships,
 	handleRevokeMembership,
 } from "./handlers/memberships";
-import { organizationsOpenApi } from "../openapi-operations";
 import { parseIdempotencyKey } from "./middleware/idempotency-key";
 import { requireAgencyMembership } from "./middleware/require-agency-membership";
 import { assertInviteAcceptRateLimit } from "./rate-limit";

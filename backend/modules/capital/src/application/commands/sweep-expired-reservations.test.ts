@@ -12,7 +12,9 @@ const ACCOUNT = `cap_acc_${randomUUID()}`;
 const RESERVATION_ID = `cap_res_${randomUUID()}`;
 
 function createSweepDeps(reservation: ReservationRecord) {
-	const store = new Map<string, ReservationRecord>([[reservation.id, reservation]]);
+	const store = new Map<string, ReservationRecord>([
+		[reservation.id, reservation],
+	]);
 	const journal = new Map<
 		string,
 		{ organizationId: string; responseSnapshot: Record<string, unknown> }

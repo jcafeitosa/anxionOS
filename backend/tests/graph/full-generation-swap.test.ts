@@ -4,9 +4,9 @@
 import { describe, expect, test } from "bun:test";
 import type { RebuildJob } from "@anxionos/graph";
 import {
+	executeFullGenerationSwap,
 	GRAPH_REBUILD_OWNER_DOMAIN_ORDER,
 	RebuildError,
-	executeFullGenerationSwap,
 	runRebuildWorker,
 	startFullGenerationSwap,
 } from "@anxionos/graph";
@@ -26,8 +26,10 @@ function createRebuildJob(overrides: Partial<RebuildJob> = {}): RebuildJob {
 describe("executeFullGenerationSwap (ANX-304)", () => {
 	test("runs drain → pause → replay → verify → swap → resume phases", async () => {
 		const phases: string[] = [];
-		const replayCalls: Array<{ ownerDomain: string; targetGeneration: number }> =
-			[];
+		const replayCalls: Array<{
+			ownerDomain: string;
+			targetGeneration: number;
+		}> = [];
 		const statusLog: string[] = [];
 		let cacheWritesEnabled = true;
 		const job = createRebuildJob();
@@ -250,7 +252,11 @@ describe("startFullGenerationSwap + runRebuildWorker (ANX-304)", () => {
 					async swapToGeneration() {},
 				},
 				f0Oracle: { async verifyGeneration() {} },
-				replay: { async replayOwnerDomain() { return 0; } },
+				replay: {
+					async replayOwnerDomain() {
+						return 0;
+					},
+				},
 			}),
 		).rejects.toBeInstanceOf(RebuildError);
 	});

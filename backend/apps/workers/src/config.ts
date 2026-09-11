@@ -9,7 +9,8 @@ export const DEFAULT_NATS_GRAPH_GOVERNANCE_SUBJECT = "events.governance.>";
 export const DEFAULT_NATS_GRAPH_GOVERNANCE_DURABLE = "graph-governance-v1";
 export const DEFAULT_NATS_GRAPH_ORGANIZATIONS_SUBJECT =
 	"agency.*.events.organizations.>";
-export const DEFAULT_NATS_GRAPH_ORGANIZATIONS_DURABLE = "graph-organizations-v1";
+export const DEFAULT_NATS_GRAPH_ORGANIZATIONS_DURABLE =
+	"graph-organizations-v1";
 export const DEFAULT_NATS_GRAPH_PRODUCT_SUBJECT = "events.product.>";
 export const DEFAULT_NATS_GRAPH_PRODUCT_DURABLE = "graph-product-v1";
 export const DEFAULT_NATS_GRAPH_AGENTS_SUBJECT = "events.agents.>";
@@ -62,7 +63,6 @@ export interface OrchestrationS5WorkerConfig {
 	heartbeatDequeuePollIntervalMs: number;
 	heartbeatDequeueBatchLimit: number;
 }
-
 
 function requireEnv(name: string): string {
 	const value = process.env[name]?.trim();
@@ -121,7 +121,8 @@ export function loadGraphProductWorkerConfig(): GraphProductWorkerConfig {
 			`Unsupported WORKER_PROFILE "${profile}" — expected ${WORKER_PROFILE_GRAPH_PRODUCT}`,
 		);
 	}
-	const enabled = process.env.ENABLE_PRODUCT_GRAPH_PROJECTION?.trim() === "true";
+	const enabled =
+		process.env.ENABLE_PRODUCT_GRAPH_PROJECTION?.trim() === "true";
 	if (!enabled) {
 		throw new Error(
 			"ENABLE_PRODUCT_GRAPH_PROJECTION=true is required for graph-product-projection worker profile",
@@ -206,4 +207,3 @@ export function loadOrchestrationS5WorkerConfig(): OrchestrationS5WorkerConfig {
 		),
 	};
 }
-

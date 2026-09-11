@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import {
-	STRATEGIES_EVENT_TYPES,
 	deploymentStatusSchema,
+	STRATEGIES_EVENT_TYPES,
 } from "@anxionos/contracts/strategies";
 import {
 	activateDeployment,
@@ -12,10 +12,10 @@ import {
 	StrategiesCommandError,
 } from "@anxionos/strategies";
 import {
+	seedBacktestedStrategyVersion,
 	shouldRunPgIntegrationTests,
 	withStrategiesPgHarness,
 } from "../test-support";
-import { seedBacktestedStrategyVersion } from "../test-support";
 
 const ORG_ID = "00000000-0000-4000-8000-000000000001";
 const ROLLBACK_BY = "00000000-0000-4000-8000-000000000099";

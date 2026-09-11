@@ -56,8 +56,7 @@ export function resolveMt5SandboxUrl(explicit?: string): string {
 	if (fromEnv) {
 		return trimTrailingSlash(fromEnv);
 	}
-	const port =
-		process.env.MT5_SANDBOX_PORT?.trim() ?? DEFAULT_MT5_SANDBOX_PORT;
+	const port = process.env.MT5_SANDBOX_PORT?.trim() ?? DEFAULT_MT5_SANDBOX_PORT;
 	return `http://127.0.0.1:${port}`;
 }
 
@@ -68,9 +67,7 @@ export function resolveMt5EngineMode(explicit?: Mt5EngineMode): Mt5EngineMode {
 
 function isHealthySimulatedSandbox(body: Mt5SandboxHealthResponse): boolean {
 	return (
-		body.status === "ok" &&
-		body.engine === "mt5" &&
-		body.simulated === true
+		body.status === "ok" && body.engine === "mt5" && body.simulated === true
 	);
 }
 
@@ -119,8 +116,7 @@ export class Mt5Adapter implements RiskPermitValidationPort {
 		this.sandboxUrl = resolveMt5SandboxUrl(options.sandboxUrl);
 		this.engineMode = resolveMt5EngineMode(options.engineMode);
 		this.fetchFn = options.fetchFn ?? fetch;
-		this.healthTimeoutMs =
-			options.healthTimeoutMs ?? DEFAULT_HEALTH_TIMEOUT_MS;
+		this.healthTimeoutMs = options.healthTimeoutMs ?? DEFAULT_HEALTH_TIMEOUT_MS;
 	}
 
 	private validateLicenseFormat(license: string): boolean {

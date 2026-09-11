@@ -73,12 +73,18 @@ export const recordCorporateActionCommandSchema = z.object({
 	organizationId: institutionalUuidSchema,
 	instrumentId: z.string().regex(/^md_ins_[0-9a-f-]{36}$/i),
 	actionKind: z.enum(["SPLIT", "DIVIDEND", "MERGER", "SPINOFF"]),
-	effectiveDate: z.string().datetime().refine(
-		(d) => !isNaN(Date.parse(d)),
-		"effectiveDate must be a valid ISO date string",
-	),
+	effectiveDate: z
+		.string()
+		.datetime()
+		.refine(
+			(d) => !isNaN(Date.parse(d)),
+			"effectiveDate must be a valid ISO date string",
+		),
 	rawPayload: z.record(z.string(), z.unknown()),
-	adjustmentFactor: z.string().regex(/^\d+(\.\d+)?$/).optional(),
+	adjustmentFactor: z
+		.string()
+		.regex(/^\d+(\.\d+)?$/)
+		.optional(),
 	source: z.string().min(1),
 });
 export const registerVenueCalendarCommandSchema = z.object({

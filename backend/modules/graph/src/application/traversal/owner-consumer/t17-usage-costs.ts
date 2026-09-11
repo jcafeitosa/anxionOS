@@ -53,10 +53,7 @@ export async function evaluateT17UsageCosts(
 			continue;
 		}
 		const occurredAt = String(record.payload.occurredAt ?? "");
-		if (
-			occurredAt < input.intervalStart ||
-			occurredAt > input.intervalEnd
-		) {
+		if (occurredAt < input.intervalStart || occurredAt > input.intervalEnd) {
 			continue;
 		}
 		usageRecordIds.push(edge.targetNodeKey.id);

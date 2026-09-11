@@ -59,8 +59,12 @@ export function createAppendOnlyToolAuditAdapter(): ToolAuditPort & {
 				recordedAt: new Date().toISOString(),
 			});
 		},
-		async listTrail(query: ToolAuditTrailQuery): Promise<readonly ToolAuditEntry[]> {
-			const matches = entries.filter((entry) => entry.requestId === query.requestId);
+		async listTrail(
+			query: ToolAuditTrailQuery,
+		): Promise<readonly ToolAuditEntry[]> {
+			const matches = entries.filter(
+				(entry) => entry.requestId === query.requestId,
+			);
 			return [...matches];
 		},
 	};

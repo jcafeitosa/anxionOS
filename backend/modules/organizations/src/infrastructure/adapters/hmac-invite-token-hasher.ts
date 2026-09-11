@@ -10,11 +10,16 @@ export function createHmacInviteTokenHasher(pepper: string): InviteTokenHasher {
 			return createHmac("sha256", pepper).update(plaintextToken).digest("hex");
 		},
 		verify(plaintextToken: string, storedHash: string) {
-			const computed = createHmac("sha256", pepper).update(plaintextToken).digest("hex");
+			const computed = createHmac("sha256", pepper)
+				.update(plaintextToken)
+				.digest("hex");
 			if (computed.length !== storedHash.length) {
 				return false;
 			}
-			return timingSafeEqual(Buffer.from(computed, "utf8"), Buffer.from(storedHash, "utf8"));
+			return timingSafeEqual(
+				Buffer.from(computed, "utf8"),
+				Buffer.from(storedHash, "utf8"),
+			);
 		},
 	};
 }

@@ -1,8 +1,8 @@
-import type { Pool } from "pg";
 import type {
 	CertificationSubjectQueryPort,
 	StrategyVersionCertificationSubject,
 } from "@anxionos/evaluation";
+import type { Pool } from "pg";
 
 export function createPgCertificationSubjectQueryAdapter(
 	pool: Pool,

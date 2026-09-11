@@ -2,6 +2,7 @@
 // See brain/system-capabilities/p08-operations-slos-recovery-contract.md
 
 type LogLevel = "debug" | "info" | "warn" | "error";
+
 export type { LogLevel };
 
 export interface Logger {
@@ -25,8 +26,15 @@ function shouldLog(current: LogLevel, messageLevel: LogLevel): boolean {
 /** ANX-170 — Metrics counter for SLO tracking (in-memory, per-service). */
 export interface MetricsCollector {
 	incrementCounter(name: string, tags?: Record<string, string>): void;
-	recordHistogram(name: string, valueMs: number, tags?: Record<string, string>): void;
-	getSnapshot(): { counters: Record<string, number>; histograms: Record<string, number[]> };
+	recordHistogram(
+		name: string,
+		valueMs: number,
+		tags?: Record<string, string>,
+	): void;
+	getSnapshot(): {
+		counters: Record<string, number>;
+		histograms: Record<string, number[]>;
+	};
 }
 
 export function createMetricsCollector(): MetricsCollector {
@@ -34,11 +42,23 @@ export function createMetricsCollector(): MetricsCollector {
 	const histograms = new Map<string, number[]>();
 	return {
 		incrementCounter(name, tags) {
-			const key = tags ? name + ":" + Object.entries(tags).map(([k, v]) => k + "=" + v).join(",") : name;
+			const key = tags
+				? name +
+					":" +
+					Object.entries(tags)
+						.map(([k, v]) => k + "=" + v)
+						.join(",")
+				: name;
 			counters.set(key, (counters.get(key) ?? 0) + 1);
 		},
 		recordHistogram(name, valueMs, tags) {
-			const key = tags ? name + ":" + Object.entries(tags).map(([k, v]) => k + "=" + v).join(",") : name;
+			const key = tags
+				? name +
+					":" +
+					Object.entries(tags)
+						.map(([k, v]) => k + "=" + v)
+						.join(",")
+				: name;
 			const arr = histograms.get(key) ?? [];
 			arr.push(valueMs);
 			histograms.set(key, arr);
@@ -86,25 +106,41 @@ export function createSLODefinition(
 export function checkSLOViolation(
 	slo: SLODefinition,
 	snapshot: MetricsCollector,
-): { violation: boolean; errorBudgetRemainingPercent: number; details: string } {
+): {
+	violation: boolean;
+	errorBudgetRemainingPercent: number;
+	details: string;
+} {
 	const errorKey = slo.service + ".errors:" + slo.capability;
 	const totalKey = slo.service + ".requests:" + slo.capability;
 	const errors = snapshot.getSnapshot().counters[errorKey] ?? 0;
 	const total = snapshot.getSnapshot().counters[totalKey] ?? 0;
-	if (total === 0) return { violation: false, errorBudgetRemainingPercent: 100, details: "no requests yet" };
+	if (total === 0)
+		return {
+			violation: false,
+			errorBudgetRemainingPercent: 100,
+			details: "no requests yet",
+		};
 	const errorRate = (errors / total) * 100;
 	const budgetRemaining = slo.budgetPercent - errorRate;
 	return {
 		violation: errorRate > slo.budgetPercent,
 		errorBudgetRemainingPercent: Math.round(budgetRemaining * 100) / 100,
-		details: errorRate.toFixed(2) + "% errors (" + slo.budgetPercent + "% budget allowed)",
+		details:
+			errorRate.toFixed(2) +
+			"% errors (" +
+			slo.budgetPercent +
+			"% budget allowed)",
 	};
 }
 
 /** ANX-170 — Latency percentile calculator for histogram. */
 export function percentile(sortedMs: number[], p: number): number {
 	if (sortedMs.length === 0) return 0;
-	const idx = Math.max(0, Math.min(Math.ceil((p / 100) * sortedMs.length) - 1, sortedMs.length - 1));
+	const idx = Math.max(
+		0,
+		Math.min(Math.ceil((p / 100) * sortedMs.length) - 1, sortedMs.length - 1),
+	);
 	return sortedMs[idx];
 }
 

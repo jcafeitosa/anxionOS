@@ -257,7 +257,9 @@ describe("agents API handlers", () => {
 			},
 		});
 
-		const agentRow = await deps.agentRepository.findById(registeredAgent.agentId);
+		const agentRow = await deps.agentRepository.findById(
+			registeredAgent.agentId,
+		);
 		if (!agentRow) throw new Error("agent missing");
 
 		const binding = await handleBindAgentSkill(deps, {

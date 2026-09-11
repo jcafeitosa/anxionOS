@@ -1,19 +1,19 @@
 {
-  "name": "anxionos-gct-real-health-only",
-  "enabled": true,
-  "verbose": false,
-  "runmode": 0,
-  "remoteControl": {
-    "username": "anxion",
-    "password": "change-me-via-secret-store",
-    "gRPC": {
-      "enabled": true,
-      "listenAddress": "0.0.0.0:9052",
-      "grpcProxyEnabled": true,
-      "grpcProxyListenAddress": "0.0.0.0:9053",
-      "grpcAllowBotShutdown": false,
-      "timeInNanoSeconds": false
-    }
-  },
-  "exchanges": []
+	"name": "anxionos-gct-real-health-only",
+	"enabled": true,
+	"verbose": false,
+	"runmode": 0,
+	"remoteControl": {
+		"username": "anxion",
+		"password": "change-me-via-secret-store",
+		"gRPC": {
+			"enabled": true,
+			"listenAddress": "0.0.0.0:9052",
+			"grpcProxyEnabled": true,
+			"grpcProxyListenAddress": "0.0.0.0:9053",
+			"grpcAllowBotShutdown": false,
+			"timeInNanoSeconds": false
+		}
+	},
+	"exchanges": []
 }

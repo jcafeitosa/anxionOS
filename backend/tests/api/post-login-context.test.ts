@@ -56,7 +56,10 @@ describe("decidePostLoginContext", () => {
 			emailVerified: false,
 			membershipsActive: [{ agencyId: agencyA, role: "owner" }],
 		});
-		expect(ctx.decision).toEqual({ kind: "onboarding", reason: "MFA_REQUIRED" });
+		expect(ctx.decision).toEqual({
+			kind: "onboarding",
+			reason: "MFA_REQUIRED",
+		});
 	});
 
 	test("unverified email precedes memberships", () => {
@@ -106,7 +109,10 @@ describe("decidePostLoginContext", () => {
 			platformAccess: true,
 			membershipsActive: [{ agencyId: agencyA, role: "owner" }],
 		});
-		expect(ctx.decision).toEqual({ kind: "platform", reason: "PLATFORM_GRANT" });
+		expect(ctx.decision).toEqual({
+			kind: "platform",
+			reason: "PLATFORM_GRANT",
+		});
 	});
 
 	test("partner access when no platform grant", () => {

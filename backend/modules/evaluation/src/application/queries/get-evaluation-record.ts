@@ -1,6 +1,9 @@
 import type { EvaluationRecordRepository } from "../../domain/ports/evaluation-unit-of-work";
 import { throwEvaluationError } from "../errors";
-import { toEvaluationRecordView, type EvaluationRecordView } from "./query-support";
+import {
+	type EvaluationRecordView,
+	toEvaluationRecordView,
+} from "./query-support";
 
 export interface GetEvaluationRecordDeps {
 	evaluationRecords: EvaluationRecordRepository;

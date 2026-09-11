@@ -2,23 +2,23 @@ import { randomUUID } from "node:crypto";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
 import {
-	ORGANIZATION_EVENT_TYPES,
-	ORGANIZATIONS_OWNER_DOMAIN,
-	agencyCreatedPayloadSchema,
-	agencyMarketsUpdatedPayloadSchema,
-	agencyStatusChangedPayloadSchema,
-	membershipActivatedPayloadSchema,
-	membershipInvitedPayloadSchema,
-	membershipRevokedPayloadSchema,
-	ownershipTransferredPayloadSchema,
 	type AgencyCreatedPayload,
 	type AgencyMarketsUpdatedPayload,
 	type AgencyStatusChangedPayload,
+	agencyCreatedPayloadSchema,
+	agencyMarketsUpdatedPayloadSchema,
+	agencyStatusChangedPayloadSchema,
 	type MembershipActivatedPayload,
 	type MembershipInvitedPayload,
 	type MembershipRevokedPayload,
+	membershipActivatedPayloadSchema,
+	membershipInvitedPayloadSchema,
+	membershipRevokedPayloadSchema,
+	ORGANIZATION_EVENT_TYPES,
+	ORGANIZATIONS_OWNER_DOMAIN,
 	type OrganizationEventType,
 	type OwnershipTransferredPayload,
+	ownershipTransferredPayloadSchema,
 } from "@anxionos/contracts/organizations";
 
 function extractAgencyIdFromPayload(

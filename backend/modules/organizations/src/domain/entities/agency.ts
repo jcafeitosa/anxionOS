@@ -1,4 +1,8 @@
-import type { AgencyStatus, MarketScope, OnboardingStep } from "@anxionos/contracts/organizations";
+import type {
+	AgencyStatus,
+	MarketScope,
+	OnboardingStep,
+} from "@anxionos/contracts/organizations";
 
 const AGENCY_STATUS_ORDER = [
 	"draft",
@@ -9,7 +13,10 @@ const AGENCY_STATUS_ORDER = [
 ] as const satisfies readonly AgencyStatus[];
 
 /** INV-ORG-01: status advances one step forward in the lifecycle order. */
-export function canTransitionAgencyStatus(from: AgencyStatus, to: AgencyStatus): boolean {
+export function canTransitionAgencyStatus(
+	from: AgencyStatus,
+	to: AgencyStatus,
+): boolean {
 	if (from === to) {
 		return true;
 	}
@@ -30,7 +37,10 @@ const ONBOARDING_STEP_ORDER = [
 ] as const satisfies readonly OnboardingStep[];
 
 /** Onboarding step advances one step forward in the lifecycle order. */
-export function canTransitionOnboardingStep(from: OnboardingStep, to: OnboardingStep): boolean {
+export function canTransitionOnboardingStep(
+	from: OnboardingStep,
+	to: OnboardingStep,
+): boolean {
 	if (from === to) {
 		return true;
 	}

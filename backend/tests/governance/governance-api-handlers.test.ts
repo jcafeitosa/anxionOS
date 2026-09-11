@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { AppError } from "@anxionos/contracts/errors";
-import { GovernanceCommandError } from "@anxionos/governance";
 import {
-	GOVERNANCE_T01_DENY_REASONS,
 	createGraphT01TraversalEvaluator,
+	GOVERNANCE_T01_DENY_REASONS,
+	GovernanceCommandError,
 } from "@anxionos/governance";
 import { handleAuthorizationCan } from "../../apps/api/src/governance/handlers/authorization-can";
 import {
@@ -61,7 +61,9 @@ function seedGrant(overrides: Partial<Grant> = {}): Grant {
 
 const proposalId = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
 
-function seedPendingProposal(overrides: Partial<ChangeProposal> = {}): ChangeProposal {
+function seedPendingProposal(
+	overrides: Partial<ChangeProposal> = {},
+): ChangeProposal {
 	const now = new Date("2026-09-10T12:00:00.000Z");
 	return {
 		id: proposalId,
@@ -237,5 +239,4 @@ describe("governance API handlers (slice 6)", () => {
 		expect(dto.createdAt).toMatch(/2026-09-10/);
 		expect(dto.kind).toBe("INSTITUTIONAL");
 	});
-
 });

@@ -1,13 +1,13 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
+import { AdapterGatewayError } from "./errors";
 import {
+	type AdapterCapabilityKey,
+	type AdapterManifest,
 	adapterCapabilityKeySchema,
 	adapterGatewayEnvironmentSchema,
 	adapterManifestSchema,
-	type AdapterCapabilityKey,
-	type AdapterManifest,
 } from "./types";
-import { AdapterGatewayError } from "./errors";
-import { institutionalUuidSchema } from "../institutional-uuid";
 
 export const ADAPTER_CONFORMANCE_SUITE_VERSION = 1;
 
@@ -65,7 +65,9 @@ export const ADAPTER_CONFORMANCE_CHECK_IDS = {
 	REFERENCE_CAPABILITIES: "reference.capabilities",
 } as const;
 
-export type AdapterLifecycleStatus = z.infer<typeof adapterLifecycleStatusSchema>;
+export type AdapterLifecycleStatus = z.infer<
+	typeof adapterLifecycleStatusSchema
+>;
 export type AdapterRegistryEntry = z.infer<typeof adapterRegistryEntrySchema>;
 export type AdapterConformanceCheckResult = z.infer<
 	typeof adapterConformanceCheckResultSchema

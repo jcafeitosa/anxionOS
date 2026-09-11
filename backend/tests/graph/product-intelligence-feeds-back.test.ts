@@ -6,7 +6,10 @@ import {
 	PRODUCT_GRAPH_EVENT_TYPES,
 	PRODUCT_GRAPH_OWNER_DOMAIN,
 } from "@anxionos/contracts/graph";
-import { createInMemoryGraphStore, projectProductGraphEvent } from "@anxionos/graph";
+import {
+	createInMemoryGraphStore,
+	projectProductGraphEvent,
+} from "@anxionos/graph";
 
 const companyId = "11111111-1111-4111-8111-111111111111";
 const monitorId = "77777777-7777-4777-8777-777777777777";

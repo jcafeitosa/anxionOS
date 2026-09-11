@@ -1,11 +1,14 @@
 import { institutionalUuidSchema } from "@anxionos/contracts";
-import { issueGrantCommandSchema, revokeGrantCommandSchema } from "@anxionos/contracts/governance";
+import {
+	issueGrantCommandSchema,
+	revokeGrantCommandSchema,
+} from "@anxionos/contracts/governance";
 import {
 	GovernanceCommandError,
+	type Grant,
 	issueGrant,
 	listEffectiveGrants,
 	revokeGrant,
-	type Grant,
 } from "@anxionos/governance";
 import { z } from "zod";
 import type { GovernancePluginDeps } from "../plugin";

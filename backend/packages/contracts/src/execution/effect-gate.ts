@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	executionPermitSchema,
 	isPermitStale,
 } from "../decisions/execution-permit";
+import { institutionalUuidSchema } from "../institutional-uuid";
 export const orderLifecycleStateSchema = z.enum([
 	"PROPOSED",
 	"AUTHORIZED",

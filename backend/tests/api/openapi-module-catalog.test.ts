@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { createOpenApiCatalogApp } from "../../apps/api/src/openapi-catalog-harness";
 import { OPENAPI_MODULE_TAG_GROUPS } from "../../apps/api/src/openapi-baseline";
+import { createOpenApiCatalogApp } from "../../apps/api/src/openapi-catalog-harness";
 
 const DOCUMENTED_OPERATIONS: Array<{
 	path: string;
@@ -309,6 +309,26 @@ const DOCUMENTED_OPERATIONS: Array<{
 	},
 	{ path: "/v1/audit", method: "get", tag: "Audit" },
 	{ path: "/v1/billing", method: "get", tag: "Billing" },
+	{
+		path: "/v1/operations/platform/health",
+		method: "get",
+		tag: "Operations",
+	},
+	{
+		path: "/v1/operations/platform/incidents",
+		method: "get",
+		tag: "Operations",
+	},
+	{
+		path: "/v1/operations/platform/runtimes",
+		method: "get",
+		tag: "Operations",
+	},
+	{
+		path: "/v1/operations/platform/recovery",
+		method: "get",
+		tag: "Operations",
+	},
 	{
 		path: "/v1/operations/agencies/{agencyId}/incidents/{incidentId}/recovery-tasks",
 		method: "post",

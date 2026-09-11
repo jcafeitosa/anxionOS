@@ -9,7 +9,9 @@ describe("recordGateDisposition gate quota", () => {
 	test("rejects when organization quota exceeded", async () => {
 		const deps = {
 			unitOfWork: {
-				async runInTransaction(work: (ctx: OrchestrationTransactionContext) => unknown) {
+				async runInTransaction(
+					work: (ctx: OrchestrationTransactionContext) => unknown,
+				) {
 					return work({
 						gateBindingRepository: {
 							async countByOrganizationSince() {
@@ -54,7 +56,8 @@ describe("recordGateDisposition gate quota", () => {
 				issueIdentifier: "ANX-308",
 				disposition: "PASS",
 				reviewerId: "reviewer-1",
-				artifactDigest: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				artifactDigest:
+					"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
 			}),
 		).rejects.toMatchObject({ orchestrationCode: "ORC_GATE_QUOTA_EXCEEDED" });
 	});

@@ -3,8 +3,8 @@ import {
 	resolveStatusCode,
 	toErrorResponse,
 } from "@anxionos/contracts/errors";
-import { PartnersCommandError } from "@anxionos/partners";
 import { PrincipalLookupUnavailableError } from "@anxionos/organizations";
+import { PartnersCommandError } from "@anxionos/partners";
 
 export function mapPartnersError(
 	error: unknown,

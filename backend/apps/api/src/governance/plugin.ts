@@ -1,19 +1,24 @@
 import type { TenantScopedQueryable } from "@anxionos/database";
-import type { PrincipalRepository } from "@anxionos/identity";
 import type {
 	AutonomyAssignmentRepository,
 	ChangeProposalRepository,
 	CommandJournalRepository,
-	GrantRepository,
 	GovernanceUnitOfWork,
+	GrantRepository,
 	TraversalEvaluator,
 } from "@anxionos/governance";
+import type { PrincipalRepository } from "@anxionos/identity";
 import type {
-	PrincipalLookup,
 	createOrganizationsDb,
+	PrincipalLookup,
 } from "@anxionos/organizations";
 import type { betterAuth } from "better-auth";
 import { Elysia } from "elysia";
+import { governanceOpenApi } from "../openapi-operations";
+import { parseIdempotencyKey } from "../organizations/middleware/idempotency-key";
+import { requireAgencyMembership } from "../organizations/middleware/require-agency-membership";
+import { requireAgencyMutationRole } from "../organizations/middleware/require-agency-mutation-role";
+import { resolvePrincipalFromSession } from "../organizations/resolve-principal";
 import { mapGovernanceError } from "./error-handler";
 import {
 	authorizationCanBodySchema,
@@ -21,9 +26,9 @@ import {
 } from "./handlers/authorization-can";
 import {
 	agentIdParamSchema,
+	evaluateAutonomyBodySchema,
 	handleAssignAutonomy,
 	handleEvaluateAutonomyCapability,
-	evaluateAutonomyBodySchema,
 	handleGetAutonomyMatrix,
 	handleGetEffectiveAutonomy,
 	handleTransitionAutonomy,
@@ -36,11 +41,6 @@ import {
 	handleListGrants,
 	handleRevokeGrant,
 } from "./handlers/grants";
-import { governanceOpenApi } from "../openapi-operations";
-import { parseIdempotencyKey } from "../organizations/middleware/idempotency-key";
-import { requireAgencyMembership } from "../organizations/middleware/require-agency-membership";
-import { requireAgencyMutationRole } from "../organizations/middleware/require-agency-mutation-role";
-import { resolvePrincipalFromSession } from "../organizations/resolve-principal";
 
 type OrganizationsDb = ReturnType<typeof createOrganizationsDb>;
 
@@ -79,7 +79,10 @@ async function resolveSessionPrincipal(
 }
 
 export function createGovernancePlugin(deps: GovernancePluginDeps) {
-	const agencies = new Elysia({ name: "governance-agencies", prefix: "/v1/agencies" })
+	const agencies = new Elysia({
+		name: "governance-agencies",
+		prefix: "/v1/agencies",
+	})
 		.onError(({ error, set, request }) => {
 			const mapped = mapGovernanceError(error, requestIdFrom(request.headers));
 			set.status = mapped.status;
@@ -209,41 +212,37 @@ export function createGovernancePlugin(deps: GovernancePluginDeps) {
 		.post(
 			"/authorization/can",
 			async ({ request }) => {
-			const body = await request.json();
-			const { principal } = await resolveSessionPrincipal(deps, request);
-			const { agencyId } = authorizationCanBodySchema.parse(body);
-			await requireAgencyMembership(
-				deps.scopedPool,
-				agencyId,
-				principal.id,
-			);
-			return handleAuthorizationCan(deps, {
-				principalId: principal.id,
-				body,
-			});
+				const body = await request.json();
+				const { principal } = await resolveSessionPrincipal(deps, request);
+				const { agencyId } = authorizationCanBodySchema.parse(body);
+				await requireAgencyMembership(deps.scopedPool, agencyId, principal.id);
+				return handleAuthorizationCan(deps, {
+					principalId: principal.id,
+					body,
+				});
 			},
 			governanceOpenApi.authorizationCan,
 		)
 		.get(
 			"/autonomy/matrix",
 			async ({ request }) => {
-			await resolveSessionPrincipal(deps, request);
-			return handleGetAutonomyMatrix();
+				await resolveSessionPrincipal(deps, request);
+				return handleGetAutonomyMatrix();
 			},
 			governanceOpenApi.autonomyMatrix,
 		)
 		.post(
 			"/autonomy/evaluate",
 			async ({ request }) => {
-			const body = await request.json();
-			const { principal } = await resolveSessionPrincipal(deps, request);
-			const parsed = evaluateAutonomyBodySchema.parse(body);
-			await requireAgencyMembership(
-				deps.scopedPool,
-				parsed.agencyId,
-				principal.id,
-			);
-			return handleEvaluateAutonomyCapability(deps, { body });
+				const body = await request.json();
+				const { principal } = await resolveSessionPrincipal(deps, request);
+				const parsed = evaluateAutonomyBodySchema.parse(body);
+				await requireAgencyMembership(
+					deps.scopedPool,
+					parsed.agencyId,
+					principal.id,
+				);
+				return handleEvaluateAutonomyCapability(deps, { body });
 			},
 			governanceOpenApi.evaluateAutonomy,
 		);

@@ -36,7 +36,8 @@ const evaluationRef = {
 };
 
 function createEvalDeps(grantRepository = createInMemoryGrantRepository()) {
-	const autonomyAssignmentRepository = createInMemoryAutonomyAssignmentRepository();
+	const autonomyAssignmentRepository =
+		createInMemoryAutonomyAssignmentRepository();
 	const skillRepository = createInMemorySkillRepository();
 	const commandJournal = createInMemoryCommandJournalRepository();
 	const { unitOfWork } = createRecordingAgentsUnitOfWork({

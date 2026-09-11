@@ -10,15 +10,15 @@ export type { GraphQueryPort } from "./graph-query";
 export type { LeaseClock } from "./lease-clock";
 export type { OperationalBudgetPort } from "./operational-budget";
 export type {
-	OrganizationMembershipRole,
-	OrganizationScopePort,
-} from "./organization-scope";
-export { OrganizationScopeDeniedError } from "./organization-scope";
-export type {
 	OrchestrationCommandOutcome,
 	OrchestrationTransactionContext,
 	OrchestrationUnitOfWork,
 } from "./orchestration-unit-of-work";
+export type {
+	OrganizationMembershipRole,
+	OrganizationScopePort,
+} from "./organization-scope";
+export { OrganizationScopeDeniedError } from "./organization-scope";
 export type { PrincipalLookup } from "./principal-lookup";
 export { PrincipalLookupUnavailableError } from "./principal-lookup";
 export type { RunHeartbeatRepository } from "./run-heartbeat-repository";

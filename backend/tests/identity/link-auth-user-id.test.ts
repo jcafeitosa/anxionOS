@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { IDENTITY_EVENT_TYPES } from "@anxionos/contracts/identity";
-import { type Principal, linkAuthUserId } from "@anxionos/identity";
+import { linkAuthUserId, type Principal } from "@anxionos/identity";
 import {
 	createInMemoryPrincipalRepository,
 	createInMemoryServiceIdentityRepository,

@@ -1,15 +1,15 @@
 import { describe, expect, test } from "bun:test";
 import {
+	referenceSimulatedAdapterManifest,
+	runAdapterConformanceSuite,
+} from "@anxionos/adapter-gateway";
+import {
 	AdapterGatewayError,
 	assertAdapterEventOutcomeKnown,
 	assertAdapterManifestSupportsCapabilities,
 	negotiateAdapterCapabilities,
 	resolveAdapterGatewayErrorStatus,
 } from "@anxionos/contracts/adapter-gateway";
-import {
-	referenceSimulatedAdapterManifest,
-	runAdapterConformanceSuite,
-} from "@anxionos/adapter-gateway";
 
 describe("adapter gateway conformance contracts", () => {
 	test("reference adapter passes conformance suite", () => {
@@ -36,7 +36,9 @@ describe("adapter gateway conformance contracts", () => {
 			]);
 		} catch (error) {
 			expect(error).toBeInstanceOf(AdapterGatewayError);
-			expect((error as AdapterGatewayError).code).toBe("AGW_CAPABILITY_MISSING");
+			expect((error as AdapterGatewayError).code).toBe(
+				"AGW_CAPABILITY_MISSING",
+			);
 			expect(resolveAdapterGatewayErrorStatus("AGW_CAPABILITY_MISSING")).toBe(
 				422,
 			);

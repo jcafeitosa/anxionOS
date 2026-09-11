@@ -8,13 +8,13 @@ import {
 } from "@anxionos/contracts/execution";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { ExecutionUnitOfWork } from "../../domain/ports/execution-unit-of-work";
-import { openVenueReconciliationCaseInTransaction } from "../reconciliation-support";
 import {
 	loadIdempotentCommandResultWithGuard,
 	replayIdempotentCommandJournalEntry,
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwExecutionError } from "../errors";
+import { openVenueReconciliationCaseInTransaction } from "../reconciliation-support";
 
 export interface OpenVenueReconciliationCaseDeps {
 	unitOfWork: ExecutionUnitOfWork;
@@ -36,10 +36,7 @@ export async function openVenueReconciliationCase(
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			return replayIdempotentCommandJournalEntry(
-				raced,
-				command.organizationId,
-			);
+			return replayIdempotentCommandJournalEntry(raced, command.organizationId);
 		}
 
 		if (command.orderId) {

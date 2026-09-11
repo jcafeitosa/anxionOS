@@ -1,5 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { AgentsCommandError, publishAgentVersion, registerAgent } from "@anxionos/agents";
+import {
+	AgentsCommandError,
+	publishAgentVersion,
+	registerAgent,
+} from "@anxionos/agents";
 import {
 	createInMemoryAgentRepository,
 	createInMemoryAgentVersionRepository,

@@ -5,11 +5,11 @@ import {
 	transitionAutonomyLevelCommandSchema,
 } from "@anxionos/contracts/governance";
 import {
+	type AutonomyAssignment,
 	assignAutonomyLevel,
 	evaluateAutonomyCapability,
 	getEffectiveAutonomy,
 	transitionAutonomyLevel,
-	type AutonomyAssignment,
 } from "@anxionos/governance";
 import { z } from "zod";
 import type { GovernancePluginDeps } from "../plugin";

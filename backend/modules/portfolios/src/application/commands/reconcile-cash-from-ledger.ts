@@ -15,9 +15,7 @@ import type {
 	PortfoliosUnitOfWork,
 	PositionRecord,
 } from "../../domain/ports/portfolios-unit-of-work";
-import {
-	extractCashDeltaFromLedgerLines,
-} from "../cash-reconcile-support";
+import { extractCashDeltaFromLedgerLines } from "../cash-reconcile-support";
 import {
 	loadIdempotentCommandResultWithGuard,
 	replayIdempotentCommandJournalEntry,
@@ -123,10 +121,7 @@ export async function reconcileCashFromLedger(
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			return replayIdempotentCommandJournalEntry(
-				raced,
-				command.organizationId,
-			);
+			return replayIdempotentCommandJournalEntry(raced, command.organizationId);
 		}
 
 		const existingLedger = await ctx.ledgerApplications.findByJournalEntryId(
@@ -137,9 +132,8 @@ export async function reconcileCashFromLedger(
 			const cashPosition = await ctx.positions.findByPositionKey(
 				existingLedger.portfolioId,
 				cashInstrumentId(
-					(
-						await ctx.portfolios.findById(existingLedger.portfolioId)
-					)?.baseCurrency ?? "USD",
+					(await ctx.portfolios.findById(existingLedger.portfolioId))
+						?.baseCurrency ?? "USD",
 				),
 				CASH_SIDE,
 				DEFAULT_BOOK,
@@ -207,15 +201,18 @@ export async function reconcileCashFromLedger(
 			);
 			if (provisional && !provisional.settled) {
 				if (provisional.cashDelta !== cashDelta) {
-					const opened = await openPositionReconciliationCaseInTransaction(ctx, {
-						organizationId: command.organizationId,
-						portfolioId: portfolio.id,
-						caseKind: "POSITION_VS_LEDGER",
-						positionId: cashPosition.id,
-						fillId: command.fillId,
-						journalEntryId: command.journalEntryId,
-						evidence: `ledger cash delta ${cashDelta} != provisional ${provisional.cashDelta}`,
-					});
+					const opened = await openPositionReconciliationCaseInTransaction(
+						ctx,
+						{
+							organizationId: command.organizationId,
+							portfolioId: portfolio.id,
+							caseKind: "POSITION_VS_LEDGER",
+							positionId: cashPosition.id,
+							fillId: command.fillId,
+							journalEntryId: command.journalEntryId,
+							evidence: `ledger cash delta ${cashDelta} != provisional ${provisional.cashDelta}`,
+						},
+					);
 					reconciliationCaseId = opened.id;
 					// Provisional cash already applied on fill; do not layer ledger delta until resolved.
 					skipCashUpdate = true;
@@ -231,14 +228,12 @@ export async function reconcileCashFromLedger(
 						"POSITION_VS_LEDGER",
 					);
 					if (openCase) {
-						const resolved = await resolvePositionReconciliationCaseInTransaction(
-							ctx,
-							{
+						const resolved =
+							await resolvePositionReconciliationCaseInTransaction(ctx, {
 								case: openCase,
 								disposition: "LEDGER_CATCH_UP",
 								rationale: `ledger entry ${command.journalEntryId} matched provisional cash`,
-							},
-						);
+							});
 						reconciliationCaseId = resolved.id;
 					}
 				}

@@ -52,7 +52,10 @@ export const inferenceWaitingHumanPayloadSchema = z.object({
 	inferenceRequestId: inferenceRequestIdSchema,
 	bindingId: connectionBindingIdSchema,
 	operationId: z.string().min(1).max(128),
-	issueIdentifier: z.string().regex(/^ANX-[0-9]+$/).optional(),
+	issueIdentifier: z
+		.string()
+		.regex(/^ANX-[0-9]+$/)
+		.optional(),
 });
 export const usageRecordedPayloadSchema = z.object({
 	usageRecordId: usageRecordIdSchema,

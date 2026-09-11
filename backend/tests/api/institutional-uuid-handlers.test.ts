@@ -4,12 +4,12 @@ import {
 	skillIdParamSchema,
 	skillVersionIdParamSchema,
 } from "../../apps/api/src/agents/handlers/skills";
-import { changeProposalItemSchema } from "../../apps/api/src/governance/handlers/change-proposals";
+import { authorizationCanBodySchema } from "../../apps/api/src/governance/handlers/authorization-can";
 import {
 	agentIdParamSchema as autonomyAgentIdParamSchema,
 	evaluateAutonomyBodySchema,
 } from "../../apps/api/src/governance/handlers/autonomy";
-import { authorizationCanBodySchema } from "../../apps/api/src/governance/handlers/authorization-can";
+import { changeProposalItemSchema } from "../../apps/api/src/governance/handlers/change-proposals";
 import {
 	agencyIdParamSchema,
 	grantIdParamSchema,
@@ -22,11 +22,15 @@ const V6_UUID = "6ba7b810-9dad-61d1-80b4-00c04fd430c8";
 
 describe("API handler institutional UUID boundaries (ANX-446)", () => {
 	test("agentIdParamSchema rejects nil agentId", () => {
-		expect(agentIdParamSchema.safeParse({ agentId: NIL_UUID }).success).toBe(false);
+		expect(agentIdParamSchema.safeParse({ agentId: NIL_UUID }).success).toBe(
+			false,
+		);
 	});
 
 	test("skillIdParamSchema rejects v6+ skillId", () => {
-		expect(skillIdParamSchema.safeParse({ skillId: V6_UUID }).success).toBe(false);
+		expect(skillIdParamSchema.safeParse({ skillId: V6_UUID }).success).toBe(
+			false,
+		);
 	});
 
 	test("skillVersionIdParamSchema rejects nil skillVersionId", () => {
@@ -36,13 +40,15 @@ describe("API handler institutional UUID boundaries (ANX-446)", () => {
 	});
 
 	test("agencyIdParamSchema accepts institutional UUID", () => {
-		expect(agencyIdParamSchema.safeParse({ agencyId: VALID_UUID }).success).toBe(
-			true,
-		);
+		expect(
+			agencyIdParamSchema.safeParse({ agencyId: VALID_UUID }).success,
+		).toBe(true);
 	});
 
 	test("grantIdParamSchema rejects nil grantId", () => {
-		expect(grantIdParamSchema.safeParse({ grantId: NIL_UUID }).success).toBe(false);
+		expect(grantIdParamSchema.safeParse({ grantId: NIL_UUID }).success).toBe(
+			false,
+		);
 	});
 
 	test("evaluateAutonomyBodySchema rejects nil subjectAgentId", () => {

@@ -11,13 +11,13 @@ import { createEvidenceManifestRecordedEvent } from "../../domain/events/decisio
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { DecisionsUnitOfWork } from "../../domain/ports/decisions-unit-of-work";
 import type { EvidenceManifestEntryRecord } from "../../domain/ports/evidence-manifest";
-import { computeEvidenceManifestHash } from "../evidence-manifest-support";
 import {
 	loadIdempotentCommandResultWithGuard,
 	replayIdempotentCommandJournalEntry,
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwDecisionsError } from "../errors";
+import { computeEvidenceManifestHash } from "../evidence-manifest-support";
 
 export interface RecordEvidenceManifestDeps {
 	unitOfWork: DecisionsUnitOfWork;
@@ -38,10 +38,7 @@ export async function recordEvidenceManifest(
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			return replayIdempotentCommandJournalEntry(
-				raced,
-				command.organizationId,
-			);
+			return replayIdempotentCommandJournalEntry(raced, command.organizationId);
 		}
 		if (command.knowledgeEventId) {
 			const replayedEntry =

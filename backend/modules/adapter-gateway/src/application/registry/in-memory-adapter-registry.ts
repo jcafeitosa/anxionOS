@@ -1,8 +1,8 @@
 import {
-	AdapterGatewayError,
-	adapterRegistryEntrySchema,
 	type AdapterConformanceReport,
+	AdapterGatewayError,
 	type AdapterRegistryEntry,
+	adapterRegistryEntrySchema,
 } from "@anxionos/contracts/adapter-gateway";
 import type { AdapterRegistry } from "../../domain/ports/adapter-registry";
 

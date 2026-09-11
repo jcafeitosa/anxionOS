@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { domainEventEnvelopeSchema } from "../events";
-import { payloadHashSchema } from "./types";
 import { institutionalUuidSchema } from "../institutional-uuid";
+import { payloadHashSchema } from "./types";
 /** Bridge schema for audit ingest input shaped as a domain event tap envelope. */
 export const domainEventTapBridgeSchema = domainEventEnvelopeSchema
 	.pick({

@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import {
-	decisionScopeSchema,
 	decisionEngineStatusSchema,
-	decisionStatusSchema,
 	decisionIdSchema,
-	proposalIdSchema,
 	decisionRecordSchema,
+	decisionScopeSchema,
+	decisionStatusSchema,
+	proposalIdSchema,
 	proposeDecisionCommandSchema,
 	tradeIntentSchema,
 } from "@anxionos/contracts/decisions";
@@ -72,7 +72,14 @@ describe("Decision Engine delta narrow schemas", () => {
 	});
 
 	test("decisionEngineStatusSchema accepts engine statuses", () => {
-		for (const status of ["PROPOSED", "AUTHORITY_CHECKED", "SUBMITTED", "EXECUTING", "COMPLETED", "CANCELLED"]) {
+		for (const status of [
+			"PROPOSED",
+			"AUTHORITY_CHECKED",
+			"SUBMITTED",
+			"EXECUTING",
+			"COMPLETED",
+			"CANCELLED",
+		]) {
 			expect(decisionEngineStatusSchema.safeParse(status).success).toBe(true);
 		}
 		expect(decisionEngineStatusSchema.safeParse("invalid").success).toBe(false);
@@ -86,8 +93,14 @@ describe("Decision Engine delta narrow schemas", () => {
 	});
 
 	test("decision and proposal identifiers preserve existing formats", () => {
-		expect(decisionIdSchema.safeParse("dc_dec_123e4567-e89b-12d3-a456-426614174000").success).toBe(true);
-		expect(proposalIdSchema.safeParse("dc_prp_123e4567-e89b-12d3-a456-426614174000").success).toBe(true);
+		expect(
+			decisionIdSchema.safeParse("dc_dec_123e4567-e89b-12d3-a456-426614174000")
+				.success,
+		).toBe(true);
+		expect(
+			proposalIdSchema.safeParse("dc_prp_123e4567-e89b-12d3-a456-426614174000")
+				.success,
+		).toBe(true);
 		expect(decisionIdSchema.safeParse("invalid-id").success).toBe(false);
 		expect(proposalIdSchema.safeParse("invalid-id").success).toBe(false);
 	});
@@ -95,16 +108,24 @@ describe("Decision Engine delta narrow schemas", () => {
 
 describe("Decision Record envelope schemas", () => {
 	test("decisionRecordSchema accepts valid envelope", () => {
-		expect(decisionRecordSchema.safeParse(buildValidRecord()).success).toBe(true);
+		expect(decisionRecordSchema.safeParse(buildValidRecord()).success).toBe(
+			true,
+		);
 	});
 
 	test("decisionRecordSchema accepts JSON wire payload with ISO datetimes", () => {
 		const payload = JSON.stringify(buildValidRecord());
-		expect(decisionRecordSchema.safeParse(JSON.parse(payload)).success).toBe(true);
+		expect(decisionRecordSchema.safeParse(JSON.parse(payload)).success).toBe(
+			true,
+		);
 	});
 
 	test("decisionRecordSchema rejects invalid status", () => {
-		expect(decisionRecordSchema.safeParse(buildValidRecord({ status: "invalid-status" })).success).toBe(false);
+		expect(
+			decisionRecordSchema.safeParse(
+				buildValidRecord({ status: "invalid-status" }),
+			).success,
+		).toBe(false);
 	});
 
 	test("decisionRecordSchema rejects evidence without uri or checksum", () => {
@@ -178,7 +199,10 @@ describe("Decision Record envelope schemas", () => {
 	});
 
 	test("decisionRecordSchema rejects empty evidence array", () => {
-		expect(decisionRecordSchema.safeParse(buildValidRecord({ evidence: [] })).success).toBe(false);
+		expect(
+			decisionRecordSchema.safeParse(buildValidRecord({ evidence: [] }))
+				.success,
+		).toBe(false);
 	});
 
 	test("decisionRecordSchema rejects nil institutional UUIDs (ANX-444)", () => {

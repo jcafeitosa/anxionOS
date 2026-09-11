@@ -1,11 +1,11 @@
 import type { MetricsCollector } from "@anxionos/observability";
 import {
-	DEFAULT_EVENTING_LAG_THRESHOLDS,
 	computeLagMs,
-	evaluateEventingLagSli,
-	lagStatusToAlertSeverity,
+	DEFAULT_EVENTING_LAG_THRESHOLDS,
 	type EventingLagAlert,
 	type EventingLagSliThresholds,
+	evaluateEventingLagSli,
+	lagStatusToAlertSeverity,
 } from "../../domain/instrumentation/eventing-lag-sli";
 import type {
 	EventingLagQueryPort,

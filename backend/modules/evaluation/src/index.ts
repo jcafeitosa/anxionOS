@@ -1,11 +1,11 @@
 export {
-	recordEvaluationScore,
-	type RecordEvaluationScoreDeps,
-} from "./application/commands/record-evaluation-score";
-export {
-	issueCertification,
 	type IssueCertificationDeps,
+	issueCertification,
 } from "./application/commands/issue-certification";
+export {
+	type RecordEvaluationScoreDeps,
+	recordEvaluationScore,
+} from "./application/commands/record-evaluation-score";
 export {
 	createOutcomeRecordedConsumer,
 	type OutcomeRecordedConsumerDeps,
@@ -14,10 +14,23 @@ export {
 	EvaluationCommandError,
 	throwEvaluationError,
 } from "./application/errors";
-export { ensureEvaluationSchema } from "./infrastructure/migrate";
-export { createEvaluationUnitOfWork } from "./infrastructure/evaluation-unit-of-work";
-export { createPgCommandJournalRepository } from "./infrastructure/persistence/command-journal-repository";
-export { createPgCertificationRepository } from "./infrastructure/persistence/certification-repository";
+export {
+	type GetCertificationBySubjectDeps,
+	getCertificationBySubject,
+} from "./application/queries/get-certification-by-subject";
+export {
+	type GetEvaluationRecordDeps,
+	getEvaluationRecord,
+} from "./application/queries/get-evaluation-record";
+export {
+	type GetEvaluationScoreDeps,
+	getEvaluationScore,
+} from "./application/queries/get-evaluation-score";
+export type {
+	EvaluationCertificationView,
+	EvaluationRecordView,
+	EvaluationScoreView,
+} from "./application/queries/query-support";
 export type {
 	CertificationRepository,
 	CertificationRow,
@@ -31,20 +44,7 @@ export type {
 export type { ScoringPolicyQueryPort } from "./domain/ports/scoring-policy";
 
 export { createEvaluationDb } from "./infrastructure/create-db";
-export {
-	getCertificationBySubject,
-	type GetCertificationBySubjectDeps,
-} from "./application/queries/get-certification-by-subject";
-export {
-	getEvaluationRecord,
-	type GetEvaluationRecordDeps,
-} from "./application/queries/get-evaluation-record";
-export {
-	getEvaluationScore,
-	type GetEvaluationScoreDeps,
-} from "./application/queries/get-evaluation-score";
-export type {
-	EvaluationCertificationView,
-	EvaluationRecordView,
-	EvaluationScoreView,
-} from "./application/queries/query-support";
+export { createEvaluationUnitOfWork } from "./infrastructure/evaluation-unit-of-work";
+export { ensureEvaluationSchema } from "./infrastructure/migrate";
+export { createPgCertificationRepository } from "./infrastructure/persistence/certification-repository";
+export { createPgCommandJournalRepository } from "./infrastructure/persistence/command-journal-repository";

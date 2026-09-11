@@ -6,8 +6,14 @@ export async function assertAgencyScope(
 	principalId: string,
 	agencyId: string,
 ): Promise<void> {
-	const membership = await membershipRepository.findByAgencyAndPrincipal(agencyId, principalId);
-    if (!membership || membership.status !== "active") {
-        throwOrganizationError("ORG_CROSS_TENANT", `Principal ${principalId} lacks active membership in agency ${agencyId}`);
-    }
+	const membership = await membershipRepository.findByAgencyAndPrincipal(
+		agencyId,
+		principalId,
+	);
+	if (!membership || membership.status !== "active") {
+		throwOrganizationError(
+			"ORG_CROSS_TENANT",
+			`Principal ${principalId} lacks active membership in agency ${agencyId}`,
+		);
+	}
 }

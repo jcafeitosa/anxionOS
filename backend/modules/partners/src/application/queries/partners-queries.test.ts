@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { accrueCommissionFromInvoice } from "../commands/accrue-commission-from-invoice";
 import {
 	createPartnersTestUow,
 	TEST_OTHER_PARTNER_ORG,
@@ -7,7 +8,6 @@ import {
 	testCommandId,
 	testInvoiceId,
 } from "../commands/partners-test-support";
-import { accrueCommissionFromInvoice } from "../commands/accrue-commission-from-invoice";
 import { registerPartner } from "../commands/register-partner";
 import { requestPayout } from "../commands/request-payout";
 import { getPartnerByOrganization } from "./get-partner-by-organization";

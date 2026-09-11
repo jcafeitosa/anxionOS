@@ -10,6 +10,7 @@ export interface InMemoryGraphEdge {
 	from: GraphNodeRecord["nodeKey"];
 	to: GraphNodeRecord["nodeKey"];
 }
+
 import { formatNodeKey } from "../../domain/node-key";
 
 function listNeighborsFromEdges(

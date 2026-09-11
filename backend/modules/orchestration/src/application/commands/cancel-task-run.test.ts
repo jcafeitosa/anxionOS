@@ -43,7 +43,8 @@ function createHarness(run: Run, task: TaskWithLease, lease: TaskLease | null) {
 				return next;
 			},
 		} as OrchestrationTransactionContext["taskLeaseRepository"],
-		gateBindingRepository: {} as OrchestrationTransactionContext["gateBindingRepository"],
+		gateBindingRepository:
+			{} as OrchestrationTransactionContext["gateBindingRepository"],
 		commandJournal: {
 			async findByCommandId(id) {
 				const row = commandJournal.get(id);
@@ -85,7 +86,8 @@ function createHarness(run: Run, task: TaskWithLease, lease: TaskLease | null) {
 				return 1;
 			},
 		} as OrchestrationTransactionContext["runHeartbeatRepository"],
-		taskboardMirrorRepository: {} as OrchestrationTransactionContext["taskboardMirrorRepository"],
+		taskboardMirrorRepository:
+			{} as OrchestrationTransactionContext["taskboardMirrorRepository"],
 		async publishEvents(envelopes) {
 			events.push(...envelopes);
 		},
@@ -99,7 +101,10 @@ function createHarness(run: Run, task: TaskWithLease, lease: TaskLease | null) {
 		deps: {
 			unitOfWork,
 			commandJournal: ctx.commandJournal,
-			leaseClock: { now: () => NOW, expiresIn: (ms: number) => new Date(NOW.getTime() + ms) },
+			leaseClock: {
+				now: () => NOW,
+				expiresIn: (ms: number) => new Date(NOW.getTime() + ms),
+			},
 		},
 		events,
 		getRun: () => run,

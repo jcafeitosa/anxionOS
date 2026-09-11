@@ -3,10 +3,10 @@
  * PG remains authoritative; Neo4j projection is reconstructible from domain events.
  */
 import {
-	PERFORMANCE_EVENT_TYPES,
-	PERFORMANCE_OWNER_DOMAIN,
 	metricSnapshotPayloadSchema,
 	outcomeRecordedPayloadSchema,
+	PERFORMANCE_EVENT_TYPES,
+	PERFORMANCE_OWNER_DOMAIN,
 	positionExposureRecordedPayloadSchema,
 } from "@anxionos/contracts/performance";
 import { GRAPH_PERFORMANCE_CONSUMER_NAME } from "../../../domain/projections/constants";
@@ -62,7 +62,10 @@ function parseMetricSnapshot(payload: unknown) {
 			"permanent",
 		);
 	}
-	if (!parsed.data.outcomeSnapshotId && !parsed.data.positionExposureSnapshotId) {
+	if (
+		!parsed.data.outcomeSnapshotId &&
+		!parsed.data.positionExposureSnapshotId
+	) {
 		throw new ProjectionError(
 			"Invalid performance.metric.snapshot payload",
 			"SCHEMA_INVALID",
@@ -84,7 +87,10 @@ function parsePositionExposureRecorded(payload: unknown) {
 	return parsed.data;
 }
 
-function isStaleRevision(incomingRevision: number, existing: { revision: number } | null) {
+function isStaleRevision(
+	incomingRevision: number,
+	existing: { revision: number } | null,
+) {
 	return existing !== null && incomingRevision <= existing.revision;
 }
 
@@ -157,7 +163,10 @@ function toMetricSeriesRecord(
 	projectionGeneration: number,
 ) {
 	return {
-		nodeKey: metricSeriesNodeKey(payload.organizationId, payload.metricSeriesId),
+		nodeKey: metricSeriesNodeKey(
+			payload.organizationId,
+			payload.metricSeriesId,
+		),
 		schemaVersion: 1,
 		ownerDomain: PERFORMANCE_OWNER_DOMAIN,
 		status: "active",
@@ -182,7 +191,10 @@ function toHasMetricEdge(
 	return {
 		edgeType: "HAS_METRIC",
 		fromNodeKey: parentNodeKey,
-		toNodeKey: metricSeriesNodeKey(payload.organizationId, payload.metricSeriesId),
+		toNodeKey: metricSeriesNodeKey(
+			payload.organizationId,
+			payload.metricSeriesId,
+		),
 		schemaVersion: 1,
 		ownerDomain: PERFORMANCE_OWNER_DOMAIN,
 		revision: revisionFromObservedAt(payload.observedAt),
@@ -196,7 +208,9 @@ function toHasMetricEdge(
 }
 
 /** Projects performance domain events into institutional graph nodes (PERF-R05). */
-export async function projectPerformanceGraphEvent(context: ProjectionHandlerContext) {
+export async function projectPerformanceGraphEvent(
+	context: ProjectionHandlerContext,
+) {
 	const { envelope, graphStore, projectionGeneration } = context;
 	switch (envelope.eventType) {
 		case PERFORMANCE_EVENT_TYPES.OUTCOME_RECORDED: {

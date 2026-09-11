@@ -1,18 +1,21 @@
+import type {
+	SkillBindGuardPort,
+	SkillEvaluationGuardPort,
+} from "@anxionos/agents";
 import {
-	AgentsCommandError,
 	type AgentPublishGuardPort,
+	AgentsCommandError,
 	type BrainInvocationGuardPort,
+	createEvaluationRefPromotionGate,
 } from "@anxionos/agents";
 import {
 	AGENTS_PUBLISH_CAPABILITY,
 	AGENTS_SKILL_BIND_CAPABILITY,
 	AGENTS_SKILL_EVALUATE_CAPABILITY,
 } from "@anxionos/contracts/agents";
-import type { SkillBindGuardPort, SkillEvaluationGuardPort } from "@anxionos/agents";
-import { createEvaluationRefPromotionGate } from "@anxionos/agents";
 import {
-	evaluateAutonomyCapability,
 	type AutonomyAssignmentRepository,
+	evaluateAutonomyCapability,
 	type GrantRepository,
 } from "@anxionos/governance";
 
@@ -78,7 +81,6 @@ export function createGovernanceInvocationGuard(
 		},
 	};
 }
-
 
 export function createGovernanceSkillEvaluationGuard(
 	deps: GovernanceGuardDeps,

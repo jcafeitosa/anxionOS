@@ -1,3 +1,4 @@
+import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import type {
 	OperationsCommandResult,
 	OperationsRecoveryTaskStatus,
@@ -6,14 +7,13 @@ import {
 	operationsCommandResultSchema,
 	operationsRecoveryStepKindSchema,
 } from "@anxionos/contracts/operations";
-import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import { RecoveryTaskRevisionConflictError } from "../../domain/errors/recovery-errors";
+import type { CommandJournalRepository } from "../../domain/ports/command-journal";
+import type { OperationsUnitOfWork } from "../../domain/ports/operations-unit-of-work";
 import {
 	canTransitionRecoveryTaskStatus,
 	isTerminalRecoveryTaskStatus,
 } from "../../domain/recovery-lifecycle";
-import type { CommandJournalRepository } from "../../domain/ports/command-journal";
-import type { OperationsUnitOfWork } from "../../domain/ports/operations-unit-of-work";
 import {
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,

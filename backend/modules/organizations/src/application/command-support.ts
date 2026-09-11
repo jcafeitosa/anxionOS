@@ -13,7 +13,9 @@ export async function loadIdempotentCommandResult(
 	return parseCommandResultSnapshot(existing.responseSnapshot);
 }
 
-export function toCommandResultSnapshot(result: CommandResult): Record<string, unknown> {
+export function toCommandResultSnapshot(
+	result: CommandResult,
+): Record<string, unknown> {
 	return {
 		aggregateId: result.aggregateId,
 		revision: result.revision,

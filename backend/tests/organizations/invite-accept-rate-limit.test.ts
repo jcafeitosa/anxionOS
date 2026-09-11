@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { AppError } from "@anxionos/contracts/errors";
 import {
+	createInviteAcceptRateLimitStore,
 	INVITE_ACCEPT_LIMIT,
 	InMemoryInviteAcceptRateLimitStore,
 	PostgresInviteAcceptRateLimitStore,
-	createInviteAcceptRateLimitStore,
 	resolveInviteAcceptRateLimitStoreKind,
 } from "../../apps/api/src/organizations/invite-accept-rate-limit-store";
 

@@ -13,9 +13,11 @@ export interface OrganizationTransactionContext {
 	commandJournal: CommandJournalRepository;
 	publishEvents(envelopes: DomainEventEnvelope[]): Promise<void>;
 }
-export interface OrganizationCommandOutcome<TResponse = Record<string, unknown>> {
-    response: TResponse;
-    events: DomainEventEnvelope[];
+export interface OrganizationCommandOutcome<
+	TResponse = Record<string, unknown>,
+> {
+	response: TResponse;
+	events: DomainEventEnvelope[];
 }
 /**
  * Atomic state + command journal + eventing journal/outbox — implemented in S3.

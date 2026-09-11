@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import {
-	INSTRUMENT_ID,
-	ORG,
 	activeInstrument,
 	createInMemoryUow,
+	INSTRUMENT_ID,
 	type InstrumentRecord,
+	ORG,
 } from "../test-support";
 import { startBackfill, startBackfillCommandSchema } from "./start-backfill";
 
@@ -64,16 +64,26 @@ describe("startBackfillCommandSchema (ANX-146 slice A)", () => {
 
 describe("startBackfill deps integration (unit with in-memory fakes, ANX-146 slice A)", () => {
 	test("idempotent creation: same commandId returns replay", async () => {
-		const { unitOfWork, commandJournal } = createInMemoryUow(activeInstrument());
+		const { unitOfWork, commandJournal } = createInMemoryUow(
+			activeInstrument(),
+		);
 		const command = validCommand();
-		const result1 = await startBackfill({ unitOfWork, commandJournal }, command);
-		const result2 = await startBackfill({ unitOfWork, commandJournal }, command);
+		const result1 = await startBackfill(
+			{ unitOfWork, commandJournal },
+			command,
+		);
+		const result2 = await startBackfill(
+			{ unitOfWork, commandJournal },
+			command,
+		);
 		expect(result1.aggregateId).toBe(result2.aggregateId);
 		expect(result2.idempotentReplay).toBe(true);
 	});
 
 	test("rejects non-existent instrument", async () => {
-		const { unitOfWork, commandJournal } = createInMemoryUow(activeInstrument());
+		const { unitOfWork, commandJournal } = createInMemoryUow(
+			activeInstrument(),
+		);
 		await expect(
 			startBackfill(
 				{ unitOfWork, commandJournal },
@@ -96,7 +106,9 @@ describe("startBackfill deps integration (unit with in-memory fakes, ANX-146 sli
 	});
 
 	test("rejects mismatched execution mode", async () => {
-		const { unitOfWork, commandJournal } = createInMemoryUow(activeInstrument());
+		const { unitOfWork, commandJournal } = createInMemoryUow(
+			activeInstrument(),
+		);
 		await expect(
 			startBackfill(
 				{ unitOfWork, commandJournal },

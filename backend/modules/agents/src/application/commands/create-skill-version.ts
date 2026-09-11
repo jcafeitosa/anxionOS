@@ -1,14 +1,14 @@
 import { randomUUID } from "node:crypto";
 import {
-	commandResultSchema,
-	createSkillVersionCommandSchema,
 	type CommandResult,
 	type CreateSkillVersionCommand,
+	commandResultSchema,
+	createSkillVersionCommandSchema,
 } from "@anxionos/contracts/agents";
 import { createSkillVersionCreatedEvent } from "../../domain/events/agent-events";
+import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { SkillRepository } from "../../domain/ports/skill-repository";
-import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
 import {
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
@@ -23,7 +23,10 @@ export async function createSkillVersion(
 	const command = createSkillVersionCommandSchema.parse(input);
 	const preflightSkill = await deps.skillRepository.findById(command.skillId);
 	if (!preflightSkill) {
-		throwAgentsError("AGT_SKILL_NOT_FOUND", `Skill not found: ${command.skillId}`);
+		throwAgentsError(
+			"AGT_SKILL_NOT_FOUND",
+			`Skill not found: ${command.skillId}`,
+		);
 	}
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
@@ -53,12 +56,16 @@ export async function createSkillVersion(
 
 			const skill = await context.skillRepository.findById(command.skillId);
 			if (!skill) {
-				throwAgentsError("AGT_SKILL_NOT_FOUND", `Skill not found: ${command.skillId}`);
+				throwAgentsError(
+					"AGT_SKILL_NOT_FOUND",
+					`Skill not found: ${command.skillId}`,
+				);
 			}
 
-			const versionNumber = await context.skillVersionRepository.getNextVersionNumber(
-				command.skillId,
-			);
+			const versionNumber =
+				await context.skillVersionRepository.getNextVersionNumber(
+					command.skillId,
+				);
 			const nextRevision = skill.revision + 1;
 			const result = commandResultSchema.parse({
 				aggregateId: skillVersionId,

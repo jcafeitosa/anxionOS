@@ -40,7 +40,6 @@ export function createStrategyVersionPublishedEvent(input: {
 	};
 }
 
-
 export function createBacktestRequestedEvent(input: {
 	backtestRequestId: string;
 	organizationId: string;

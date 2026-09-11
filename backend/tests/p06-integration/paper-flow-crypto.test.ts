@@ -14,35 +14,33 @@
  */
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { createPgPool } from "@anxionos/eventing/postgres";
-
+import {
+	createPgCommandJournalRepository as createAccountingCommandJournal,
+	createAccountingUnitOfWork,
+	ensureAccountingSchema,
+	postTradeFill,
+} from "@anxionos/accounting";
+import { postTradeFillCommandSchema } from "@anxionos/contracts/accounting";
 import { tradeIntentSchema } from "@anxionos/contracts/decisions";
-import { runPreTradeCheckCommandSchema } from "@anxionos/contracts/risk";
 import {
 	openExecutionSessionCommandSchema,
 	submitOrderCommandSchema,
 } from "@anxionos/contracts/execution";
-import { postTradeFillCommandSchema } from "@anxionos/contracts/accounting";
-
+import { runPreTradeCheckCommandSchema } from "@anxionos/contracts/risk";
+import { createPgPool } from "@anxionos/eventing/postgres";
 import {
-	openExecutionSession,
-	submitOrder,
-	createExecutionUnitOfWork,
 	createPgCommandJournalRepository as createExecutionCommandJournal,
-	ensureExecutionSchema,
+	createExecutionUnitOfWork,
 	createPgRiskPermitValidationPort,
+	ensureExecutionSchema,
 	InMemoryExecutionCapitalNotifyAdapter,
+	openExecutionSession,
 	SimulatedVenueAdapter,
+	submitOrder,
 } from "@anxionos/execution";
 import {
-	postTradeFill,
-	createAccountingUnitOfWork,
-	createPgCommandJournalRepository as createAccountingCommandJournal,
-	ensureAccountingSchema,
-} from "@anxionos/accounting";
-import {
-	recordOutcomeSnapshot,
 	ensurePerformanceSchema,
+	recordOutcomeSnapshot,
 } from "@anxionos/performance";
 
 const VALID_UUID = "a1234567-89ab-4def-8123-456789abcdef";

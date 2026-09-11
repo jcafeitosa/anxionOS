@@ -156,7 +156,10 @@ export async function handleDuplicateVenueFill(
 export function assertNoBlindRetryOnUnknownDispatch(
 	venueDispatchStatus: string | null | undefined,
 ): void {
-	if (venueDispatchStatus === "UNKNOWN" || venueDispatchStatus === "RECONCILING") {
+	if (
+		venueDispatchStatus === "UNKNOWN" ||
+		venueDispatchStatus === "RECONCILING"
+	) {
 		throwExecutionError(
 			"EX_BLIND_RETRY_FORBIDDEN",
 			"reconcile before retry when dispatch state is UNKNOWN/RECONCILING",

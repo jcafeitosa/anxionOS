@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import {
-	DEFAULT_NATS_EVENTS_STREAM,
 	createNatsOutboxPublisher,
+	DEFAULT_NATS_EVENTS_STREAM,
 	resolveEventSubject,
 } from "@anxionos/eventing/nats-publisher";
 import {
@@ -11,7 +11,7 @@ import {
 } from "@anxionos/eventing/postgres";
 import { relayPendingOutbox } from "@anxionos/eventing/relay";
 import { DEFAULT_RETRY_POLICY } from "@anxionos/eventing/retry";
-import { AckPolicy, DeliverPolicy, JSONCodec, connect } from "nats";
+import { AckPolicy, connect, DeliverPolicy, JSONCodec } from "nats";
 import {
 	getNatsUrl,
 	shouldRunNatsIntegrationTests,

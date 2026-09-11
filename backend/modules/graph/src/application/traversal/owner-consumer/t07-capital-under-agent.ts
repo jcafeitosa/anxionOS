@@ -26,7 +26,11 @@ export async function evaluateT07CapitalUnderAgent(
 		};
 	}
 
-	const anchor = await requireAnchorNode(graphStore, input.agentNodeKey, "Agent");
+	const anchor = await requireAnchorNode(
+		graphStore,
+		input.agentNodeKey,
+		"Agent",
+	);
 	if (!("nodeKey" in anchor)) {
 		return {
 			complete: false,

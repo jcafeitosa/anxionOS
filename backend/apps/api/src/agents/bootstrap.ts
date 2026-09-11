@@ -1,7 +1,4 @@
-import {
-	createAgentsDb,
-	createAgentsUnitOfWork,
-} from "@anxionos/agents";
+import { createAgentsDb, createAgentsUnitOfWork } from "@anxionos/agents";
 import type { Pool } from "pg";
 import type { AgentsPluginDeps } from "./plugin";
 

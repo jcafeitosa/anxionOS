@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { ScopeContext } from "@anxionos/contracts/graph";
 import {
+	graphQueryEnvelopeSchema,
 	T01_INPUT_SCHEMA,
 	T01_OUTPUT_SCHEMA,
 	T02_INPUT_SCHEMA,
@@ -60,7 +61,6 @@ import {
 	TRAVERSAL_T18_META,
 	TRAVERSAL_T19_META,
 	TRAVERSAL_T20_META,
-	graphQueryEnvelopeSchema,
 } from "@anxionos/contracts/graph";
 import type { TraversalEvaluatorId } from "../../domain/ports/traversal-evaluator";
 import { getOrLoadGraphCacheValue } from "../cache/cache-aside";
@@ -137,8 +137,26 @@ const TRAVERSAL_OUTPUT_SCHEMAS = {
 	T20: T20_OUTPUT_SCHEMA,
 };
 const TRAVERSAL_IDS = new Set([
-	"T01", "T02", "T03", "T04", "T05", "T06", "T07", "T08", "T09", "T10",
-	"T11", "T12", "T13", "T14", "T15", "T16", "T17", "T18", "T19", "T20",
+	"T01",
+	"T02",
+	"T03",
+	"T04",
+	"T05",
+	"T06",
+	"T07",
+	"T08",
+	"T09",
+	"T10",
+	"T11",
+	"T12",
+	"T13",
+	"T14",
+	"T15",
+	"T16",
+	"T17",
+	"T18",
+	"T19",
+	"T20",
 ]);
 function assertTraversalId(value) {
 	if (TRAVERSAL_IDS.has(value)) {
@@ -279,10 +297,7 @@ export async function handleTraversal(
 			knownAt: envelope.temporal.knownAt,
 			projectionGeneration: evaluation.projectionGeneration,
 			checkpoint: evaluation.checkpoint,
-			complete:
-				"complete" in evaluation.data
-					? evaluation.data.complete
-					: true,
+			complete: "complete" in evaluation.data ? evaluation.data.complete : true,
 			cached: cacheHit,
 		},
 		data: evaluation.data,

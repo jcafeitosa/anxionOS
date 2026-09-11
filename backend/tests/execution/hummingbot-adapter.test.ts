@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import {
-	HummingbotAdapter,
 	HMB_REAL_WIRING_BLOCKERS,
+	HummingbotAdapter,
 	mountHummingbotAdapter,
 	resolveHmbEngineMode,
 	resolveHmbSandboxUrl,

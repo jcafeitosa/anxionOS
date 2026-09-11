@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { OPERATIONS_EVENT_TYPES } from "@anxionos/contracts/operations";
 import {
-	OperationsCommandError,
 	approveRecoveryTask,
 	cancelRecoveryTask,
 	completeRecoveryTask,
 	createIncident,
 	failRecoveryTask,
+	OperationsCommandError,
 	startRecoveryTask,
 	startRecoveryTaskExecution,
 } from "@anxionos/operations";
@@ -533,7 +533,10 @@ async function runDangerousRecoveryToInProgress(
 		recoveryTaskId: started.recoveryTaskId!,
 		expectedRevision: 2,
 	});
-	return { recoveryTaskId: started.recoveryTaskId!, revision: executed.revision };
+	return {
+		recoveryTaskId: started.recoveryTaskId!,
+		revision: executed.revision,
+	};
 }
 
 describe("recovery task commands (ANX-158 S4d)", () => {
@@ -667,9 +670,7 @@ describe("recovery task commands (ANX-158 S4d)", () => {
 		expect(
 			(await recoveryTasks.findById(started.recoveryTaskId!))?.status,
 		).toBe("COMPLETED");
-		expect(
-			published.map((event) => event.eventType),
-		).toEqual([
+		expect(published.map((event) => event.eventType)).toEqual([
 			OPERATIONS_EVENT_TYPES.INCIDENT_OPENED,
 			OPERATIONS_EVENT_TYPES.RECOVERY_TASK_STARTED,
 			OPERATIONS_EVENT_TYPES.RECOVERY_TASK_APPROVED,

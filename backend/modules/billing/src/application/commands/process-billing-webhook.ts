@@ -97,7 +97,10 @@ export async function processBillingWebhook(
 				idempotentReplay: true,
 			});
 		}
-		if (command.eventType === "subscription.cancelled" && command.subscriptionId) {
+		if (
+			command.eventType === "subscription.cancelled" &&
+			command.subscriptionId
+		) {
 			const subscription = await ctx.subscriptions.findById(
 				command.subscriptionId,
 			);
@@ -122,7 +125,8 @@ export async function processBillingWebhook(
 				]);
 			}
 		}
-		const aggregateId = command.invoiceId ?? command.subscriptionId ?? command.webhookEventId;
+		const aggregateId =
+			command.invoiceId ?? command.subscriptionId ?? command.webhookEventId;
 		const result = billingCommandResultSchema.parse({
 			aggregateId,
 			revision: 1,

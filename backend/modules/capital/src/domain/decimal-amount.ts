@@ -35,5 +35,7 @@ export function subtractDecimalAmounts(left: string, right: string): string {
 	const raw = abs.toString().padStart(SCALE + 1, "0");
 	const whole = raw.slice(0, -SCALE) || "0";
 	const fraction = raw.slice(-SCALE).replace(/0+$/, "");
-	return fraction.length > 0 ? `${sign}${whole}.${fraction}` : `${sign}${whole}`;
+	return fraction.length > 0
+		? `${sign}${whole}.${fraction}`
+		: `${sign}${whole}`;
 }

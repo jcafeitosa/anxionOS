@@ -51,7 +51,9 @@ export const computerSessionCommandResultSchema = z.object({
 	session: computerSessionRefSchema,
 });
 
-export type GovernedToolCallResult = z.infer<typeof governedToolCallResultSchema>;
+export type GovernedToolCallResult = z.infer<
+	typeof governedToolCallResultSchema
+>;
 export type AcquireComputerSessionCommand = z.infer<
 	typeof acquireComputerSessionCommandSchema
 >;

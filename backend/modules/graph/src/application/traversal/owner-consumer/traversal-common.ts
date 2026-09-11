@@ -2,8 +2,10 @@ import type { NodeKey } from "@anxionos/contracts/graph";
 import type { GraphStore } from "../../../domain/ports/graph-store";
 import { evaluateT02Temporal } from "../t02-temporal-evaluation";
 
-export const GRAPH_TRAVERSAL_INVALID_TEMPORAL = "GRAPH_TRAVERSAL_INVALID_TEMPORAL";
-export const GRAPH_TRAVERSAL_ANCHOR_NOT_FOUND = "GRAPH_TRAVERSAL_ANCHOR_NOT_FOUND";
+export const GRAPH_TRAVERSAL_INVALID_TEMPORAL =
+	"GRAPH_TRAVERSAL_INVALID_TEMPORAL";
+export const GRAPH_TRAVERSAL_ANCHOR_NOT_FOUND =
+	"GRAPH_TRAVERSAL_ANCHOR_NOT_FOUND";
 
 export function guardTemporal(validAt: string, knownAt?: string) {
 	const temporal = evaluateT02Temporal({ params: { validAt }, knownAt });

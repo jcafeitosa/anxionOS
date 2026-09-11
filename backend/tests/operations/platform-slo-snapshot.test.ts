@@ -5,9 +5,9 @@ import {
 } from "@anxionos/contracts/operations";
 import { createMetricsCollector } from "@anxionos/observability";
 import {
-	REDACTED_METRIC_VALUE,
 	getPlatformSloSnapshot,
 	parseMetricKey,
+	REDACTED_METRIC_VALUE,
 	redactMetricTagValue,
 } from "@anxionos/operations";
 

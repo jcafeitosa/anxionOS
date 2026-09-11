@@ -1,43 +1,43 @@
 import { randomUUID } from "node:crypto";
-import type { DomainEventEnvelope } from "@anxionos/contracts/events";
-import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
 import {
 	AGENTS_EVENT_TYPES,
 	AGENTS_OWNER_DOMAIN,
+	type AgentBudgetExhaustedPayload,
+	type AgentBudgetPolicySetPayload,
+	type AgentRegisteredPayload,
+	type AgentRoutinePausedPayload,
+	type AgentRoutineRegisteredPayload,
+	type AgentRoutineResumedPayload,
+	type AgentRoutineTriggeredPayload,
+	type AgentSkillBoundPayload,
+	type AgentStatusChangedPayload,
+	type AgentsEventType,
+	type AgentVersionPublishedPayload,
+	type AgentVersionRolledBackPayload,
+	agentBudgetExhaustedPayloadSchema,
+	agentBudgetPolicySetPayloadSchema,
 	agentRegisteredPayloadSchema,
+	agentRoutinePausedPayloadSchema,
+	agentRoutineRegisteredPayloadSchema,
+	agentRoutineResumedPayloadSchema,
+	agentRoutineTriggeredPayloadSchema,
+	agentSkillBoundPayloadSchema,
 	agentStatusChangedPayloadSchema,
 	agentVersionPublishedPayloadSchema,
 	agentVersionRolledBackPayloadSchema,
-	agentSkillBoundPayloadSchema,
-	brainInvocationRequestedPayloadSchema,
-	skillRegisteredPayloadSchema,
-	skillVersionCreatedPayloadSchema,
-	skillVersionEvaluatedPayloadSchema,
-	skillVersionSubmittedPayloadSchema,
-	agentRoutineRegisteredPayloadSchema,
-	agentRoutinePausedPayloadSchema,
-	agentRoutineResumedPayloadSchema,
-	agentRoutineTriggeredPayloadSchema,
-	agentBudgetPolicySetPayloadSchema,
-	agentBudgetExhaustedPayloadSchema,
-	type AgentRegisteredPayload,
-	type AgentSkillBoundPayload,
-	type AgentStatusChangedPayload,
-	type AgentVersionPublishedPayload,
-	type AgentVersionRolledBackPayload,
-	type AgentsEventType,
 	type BrainInvocationRequestedPayload,
+	brainInvocationRequestedPayloadSchema,
 	type SkillRegisteredPayload,
 	type SkillVersionCreatedPayload,
 	type SkillVersionEvaluatedPayload,
 	type SkillVersionSubmittedPayload,
-	type AgentRoutineRegisteredPayload,
-	type AgentRoutinePausedPayload,
-	type AgentRoutineResumedPayload,
-	type AgentRoutineTriggeredPayload,
-	type AgentBudgetPolicySetPayload,
-	type AgentBudgetExhaustedPayload,
+	skillRegisteredPayloadSchema,
+	skillVersionCreatedPayloadSchema,
+	skillVersionEvaluatedPayloadSchema,
+	skillVersionSubmittedPayloadSchema,
 } from "@anxionos/contracts/agents";
+import type { DomainEventEnvelope } from "@anxionos/contracts/events";
+import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
 
 function createAgentsEvent(
 	eventType: AgentsEventType,
@@ -164,27 +164,68 @@ export function createAgentSkillBoundEvent(
 	);
 }
 
-
-export function createAgentRoutineRegisteredEvent(payload: AgentRoutineRegisteredPayload, occurredAt?: Date): DomainEventEnvelope {
-	return createAgentsEvent(AGENTS_EVENT_TYPES.AGENT_ROUTINE_REGISTERED, agentRoutineRegisteredPayloadSchema.parse(payload), occurredAt);
+export function createAgentRoutineRegisteredEvent(
+	payload: AgentRoutineRegisteredPayload,
+	occurredAt?: Date,
+): DomainEventEnvelope {
+	return createAgentsEvent(
+		AGENTS_EVENT_TYPES.AGENT_ROUTINE_REGISTERED,
+		agentRoutineRegisteredPayloadSchema.parse(payload),
+		occurredAt,
+	);
 }
 
-export function createAgentRoutinePausedEvent(payload: AgentRoutinePausedPayload, occurredAt?: Date): DomainEventEnvelope {
-	return createAgentsEvent(AGENTS_EVENT_TYPES.AGENT_ROUTINE_PAUSED, agentRoutinePausedPayloadSchema.parse(payload), occurredAt);
+export function createAgentRoutinePausedEvent(
+	payload: AgentRoutinePausedPayload,
+	occurredAt?: Date,
+): DomainEventEnvelope {
+	return createAgentsEvent(
+		AGENTS_EVENT_TYPES.AGENT_ROUTINE_PAUSED,
+		agentRoutinePausedPayloadSchema.parse(payload),
+		occurredAt,
+	);
 }
 
-export function createAgentRoutineResumedEvent(payload: AgentRoutineResumedPayload, occurredAt?: Date): DomainEventEnvelope {
-	return createAgentsEvent(AGENTS_EVENT_TYPES.AGENT_ROUTINE_RESUMED, agentRoutineResumedPayloadSchema.parse(payload), occurredAt);
+export function createAgentRoutineResumedEvent(
+	payload: AgentRoutineResumedPayload,
+	occurredAt?: Date,
+): DomainEventEnvelope {
+	return createAgentsEvent(
+		AGENTS_EVENT_TYPES.AGENT_ROUTINE_RESUMED,
+		agentRoutineResumedPayloadSchema.parse(payload),
+		occurredAt,
+	);
 }
 
-export function createAgentRoutineTriggeredEvent(payload: AgentRoutineTriggeredPayload, occurredAt?: Date): DomainEventEnvelope {
-	return createAgentsEvent(AGENTS_EVENT_TYPES.AGENT_ROUTINE_TRIGGERED, agentRoutineTriggeredPayloadSchema.parse(payload), occurredAt);
+export function createAgentRoutineTriggeredEvent(
+	payload: AgentRoutineTriggeredPayload,
+	occurredAt?: Date,
+): DomainEventEnvelope {
+	return createAgentsEvent(
+		AGENTS_EVENT_TYPES.AGENT_ROUTINE_TRIGGERED,
+		agentRoutineTriggeredPayloadSchema.parse(payload),
+		occurredAt,
+	);
 }
 
-export function createAgentBudgetPolicySetEvent(payload: AgentBudgetPolicySetPayload, occurredAt?: Date): DomainEventEnvelope {
-	return createAgentsEvent(AGENTS_EVENT_TYPES.AGENT_BUDGET_POLICY_SET, agentBudgetPolicySetPayloadSchema.parse(payload), occurredAt);
+export function createAgentBudgetPolicySetEvent(
+	payload: AgentBudgetPolicySetPayload,
+	occurredAt?: Date,
+): DomainEventEnvelope {
+	return createAgentsEvent(
+		AGENTS_EVENT_TYPES.AGENT_BUDGET_POLICY_SET,
+		agentBudgetPolicySetPayloadSchema.parse(payload),
+		occurredAt,
+	);
 }
 
-export function createAgentBudgetExhaustedEvent(payload: AgentBudgetExhaustedPayload, occurredAt?: Date): DomainEventEnvelope {
-	return createAgentsEvent(AGENTS_EVENT_TYPES.AGENT_BUDGET_EXHAUSTED, agentBudgetExhaustedPayloadSchema.parse(payload), occurredAt);
+export function createAgentBudgetExhaustedEvent(
+	payload: AgentBudgetExhaustedPayload,
+	occurredAt?: Date,
+): DomainEventEnvelope {
+	return createAgentsEvent(
+		AGENTS_EVENT_TYPES.AGENT_BUDGET_EXHAUSTED,
+		agentBudgetExhaustedPayloadSchema.parse(payload),
+		occurredAt,
+	);
 }

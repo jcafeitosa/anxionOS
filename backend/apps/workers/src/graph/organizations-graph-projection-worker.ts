@@ -10,7 +10,7 @@ import {
 	organizationsProjectionConsumer,
 } from "@anxionos/graph";
 import { createLogger } from "@anxionos/observability";
-import { AckPolicy, DeliverPolicy, JSONCodec, type JsMsg, connect } from "nats";
+import { AckPolicy, connect, DeliverPolicy, JSONCodec, type JsMsg } from "nats";
 import type { Pool } from "pg";
 import {
 	DEFAULT_NATS_MAX_RECONNECT_ATTEMPTS,

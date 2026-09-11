@@ -1,30 +1,31 @@
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import type { Agent } from "../../modules/agents/src/domain/entities/agent";
+import type { AgentBudgetPolicy } from "../../modules/agents/src/domain/entities/agent-budget-policy";
+import type { AgentRoutine } from "../../modules/agents/src/domain/entities/agent-routine";
 import type { AgentSkillBinding } from "../../modules/agents/src/domain/entities/agent-skill-binding";
 import type { AgentVersion } from "../../modules/agents/src/domain/entities/agent-version";
 import type { Skill } from "../../modules/agents/src/domain/entities/skill";
 import type { SkillVersion } from "../../modules/agents/src/domain/entities/skill-version";
-import type { AgentRepository } from "../../modules/agents/src/domain/ports/agent-repository";
-
-import type { AgentBudgetPolicy } from "../../modules/agents/src/domain/entities/agent-budget-policy";
-import type { AgentRoutine } from "../../modules/agents/src/domain/entities/agent-routine";
 import type { AgentBudgetRepository } from "../../modules/agents/src/domain/ports/agent-budget-repository";
+import type { AgentRepository } from "../../modules/agents/src/domain/ports/agent-repository";
 import type { AgentRoutineRepository } from "../../modules/agents/src/domain/ports/agent-routine-repository";
 import type { AgentSkillBindingRepository } from "../../modules/agents/src/domain/ports/agent-skill-binding-repository";
 import type { AgentVersionRepository } from "../../modules/agents/src/domain/ports/agent-version-repository";
-import type { SkillRepository } from "../../modules/agents/src/domain/ports/skill-repository";
-import type { SkillVersionRepository } from "../../modules/agents/src/domain/ports/skill-version-repository";
+import type {
+	AgentsTransactionContext,
+	AgentsUnitOfWork,
+} from "../../modules/agents/src/domain/ports/agents-unit-of-work";
 import type {
 	CommandJournalRecord,
 	CommandJournalRepository,
 	NewCommandJournalRecord,
 } from "../../modules/agents/src/domain/ports/command-journal";
-import type {
-	AgentsTransactionContext,
-	AgentsUnitOfWork,
-} from "../../modules/agents/src/domain/ports/agents-unit-of-work";
+import type { SkillRepository } from "../../modules/agents/src/domain/ports/skill-repository";
+import type { SkillVersionRepository } from "../../modules/agents/src/domain/ports/skill-version-repository";
 
-export function createInMemoryAgentRepository(seed: Agent[] = []): AgentRepository {
+export function createInMemoryAgentRepository(
+	seed: Agent[] = [],
+): AgentRepository {
 	const agents = new Map(seed.map((agent) => [agent.id, { ...agent }]));
 	return {
 		async save(agent) {
@@ -72,7 +73,9 @@ function journalKey(tenantId: string, commandId: string) {
 	return `${tenantId}:${commandId}`;
 }
 
-export function createInMemorySkillRepository(seed: Skill[] = []): SkillRepository {
+export function createInMemorySkillRepository(
+	seed: Skill[] = [],
+): SkillRepository {
 	const skills = new Map(seed.map((skill) => [skill.id, { ...skill }]));
 	const slugIndex = new Map(
 		seed.map((skill) => [`${skill.organizationId}:${skill.slug}`, skill.id]),
@@ -96,19 +99,23 @@ export function createInMemorySkillRepository(seed: Skill[] = []): SkillReposito
 export function createInMemorySkillVersionRepository(
 	seed: SkillVersion[] = [],
 ): SkillVersionRepository {
-	const versions = new Map(
-		seed.map((version) => [version.id, { ...version }]),
-	);
+	const versions = new Map(seed.map((version) => [version.id, { ...version }]));
 	const versionNumbers = new Map<string, number>();
 	for (const version of seed) {
 		const current = versionNumbers.get(version.skillId) ?? 0;
-		versionNumbers.set(version.skillId, Math.max(current, version.versionNumber));
+		versionNumbers.set(
+			version.skillId,
+			Math.max(current, version.versionNumber),
+		);
 	}
 	return {
 		async save(version) {
 			versions.set(version.id, { ...version });
 			const current = versionNumbers.get(version.skillId) ?? 0;
-			versionNumbers.set(version.skillId, Math.max(current, version.versionNumber));
+			versionNumbers.set(
+				version.skillId,
+				Math.max(current, version.versionNumber),
+			);
 			return { ...version };
 		},
 		async findById(versionId) {
@@ -116,7 +123,10 @@ export function createInMemorySkillVersionRepository(
 		},
 		async findBySkillAndVersionNumber(skillId, versionNumber) {
 			for (const version of versions.values()) {
-				if (version.skillId === skillId && version.versionNumber === versionNumber) {
+				if (
+					version.skillId === skillId &&
+					version.versionNumber === versionNumber
+				) {
 					return version;
 				}
 			}
@@ -155,7 +165,10 @@ export function createInMemoryCommandJournalRepository(
 	seed: CommandJournalRecord[] = [],
 ): CommandJournalRepository {
 	const records = new Map(
-		seed.map((record) => [journalKey(record.tenantId, record.commandId), { ...record }]),
+		seed.map((record) => [
+			journalKey(record.tenantId, record.commandId),
+			{ ...record },
+		]),
 	);
 	return {
 		async findByCommandId(tenantId, commandId) {
@@ -177,9 +190,9 @@ export function createInMemoryCommandJournalRepository(
 	};
 }
 
-
-
-export function createInMemoryAgentRoutineRepository(seed: AgentRoutine[] = []): AgentRoutineRepository {
+export function createInMemoryAgentRoutineRepository(
+	seed: AgentRoutine[] = [],
+): AgentRoutineRepository {
 	const routines = new Map(seed.map((routine) => [routine.id, { ...routine }]));
 	const slugIndex = new Map(seed.map((r) => [`${r.agentId}:${r.slug}`, r.id]));
 	return {
@@ -198,7 +211,9 @@ export function createInMemoryAgentRoutineRepository(seed: AgentRoutine[] = []):
 	};
 }
 
-export function createInMemoryAgentBudgetRepository(seed: AgentBudgetPolicy[] = []): AgentBudgetRepository {
+export function createInMemoryAgentBudgetRepository(
+	seed: AgentBudgetPolicy[] = [],
+): AgentBudgetRepository {
 	const policies = new Map(seed.map((p) => [p.agentId, { ...p }]));
 	return {
 		async save(policy) {
@@ -221,13 +236,17 @@ export function createRecordingAgentsUnitOfWork(deps: {
 	agentSkillBindingRepository?: AgentSkillBindingRepository;
 	commandJournal: CommandJournalRepository;
 }): { unitOfWork: AgentsUnitOfWork; published: DomainEventEnvelope[] } {
-	const skillRepository = deps.skillRepository ?? createInMemorySkillRepository();
+	const skillRepository =
+		deps.skillRepository ?? createInMemorySkillRepository();
 	const skillVersionRepository =
 		deps.skillVersionRepository ?? createInMemorySkillVersionRepository();
-	const agentRoutineRepository = deps.agentRoutineRepository ?? createInMemoryAgentRoutineRepository();
-	const agentBudgetRepository = deps.agentBudgetRepository ?? createInMemoryAgentBudgetRepository();
+	const agentRoutineRepository =
+		deps.agentRoutineRepository ?? createInMemoryAgentRoutineRepository();
+	const agentBudgetRepository =
+		deps.agentBudgetRepository ?? createInMemoryAgentBudgetRepository();
 	const agentSkillBindingRepository =
-		deps.agentSkillBindingRepository ?? createInMemoryAgentSkillBindingRepository();
+		deps.agentSkillBindingRepository ??
+		createInMemoryAgentSkillBindingRepository();
 	const published: DomainEventEnvelope[] = [];
 	let transactionChain: Promise<unknown> = Promise.resolve();
 	const unitOfWork: AgentsUnitOfWork = {
@@ -240,8 +259,8 @@ export function createRecordingAgentsUnitOfWork(deps: {
 					skillRepository,
 					skillVersionRepository,
 					agentRoutineRepository,
-				agentBudgetRepository,
-				agentSkillBindingRepository,
+					agentBudgetRepository,
+					agentSkillBindingRepository,
 					commandJournal: deps.commandJournal,
 					async publishEvents(envelopes) {
 						published.push(...envelopes);
@@ -256,7 +275,9 @@ export function createRecordingAgentsUnitOfWork(deps: {
 	return { unitOfWork, published };
 }
 
-function versionKey(version: Pick<AgentVersion, "agentId" | "versionNumber">): string {
+function versionKey(
+	version: Pick<AgentVersion, "agentId" | "versionNumber">,
+): string {
 	return `${version.agentId}:${version.versionNumber}`;
 }
 

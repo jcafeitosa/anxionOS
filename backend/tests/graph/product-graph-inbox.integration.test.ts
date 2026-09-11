@@ -3,13 +3,14 @@
  * Skipped unless RUN_PG_INTEGRATION_TESTS=true and DATABASE_URL set.
  */
 import { describe, expect, test } from "bun:test";
+import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import {
 	AGENT_GRAPH_EVENT_TYPES,
 	AGENT_GRAPH_OWNER_DOMAIN,
 	PRODUCT_GRAPH_EVENT_TYPES,
 	PRODUCT_GRAPH_OWNER_DOMAIN,
 } from "@anxionos/contracts/graph";
-import type { DomainEventEnvelope } from "@anxionos/contracts/events";
+import { createPgPool } from "@anxionos/eventing/postgres";
 import {
 	agentProjectionConsumer,
 	createInMemoryGraphStore,
@@ -19,7 +20,6 @@ import {
 	projectAgentGraphEvent,
 	projectProductGraphEvent,
 } from "@anxionos/graph";
-import { createPgPool } from "@anxionos/eventing/postgres";
 
 function shouldRun(): boolean {
 	return (

@@ -48,9 +48,7 @@ export const aclRefSchema = z.object({
 	aclId: institutionalUuidSchema,
 	epoch: z.number().int().nonnegative(),
 });
-export const memoryEntryIdSchema = z
-	.string()
-	.regex(/^kn_mem_[0-9a-f-]{36}$/i);
+export const memoryEntryIdSchema = z.string().regex(/^kn_mem_[0-9a-f-]{36}$/i);
 export const memoryTierSchema = z.enum(["CANDIDATE", "PROMOTED"]);
 export const retrievalHitSchema = z.object({
 	chunkId: chunkIdSchema,

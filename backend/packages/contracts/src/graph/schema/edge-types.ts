@@ -7,7 +7,12 @@ export const edgeTypeDefSchema = z.object({
 	fromNodeTypes: z.array(z.string().min(1)).min(1),
 	toNodeTypes: z.array(z.string().min(1)).min(1),
 	writerDomain: z.string().min(1),
-	cardinality: z.enum(["one-to-one", "one-to-many", "many-to-one", "many-to-many"]),
+	cardinality: z.enum([
+		"one-to-one",
+		"one-to-many",
+		"many-to-one",
+		"many-to-many",
+	]),
 	temporal: z.boolean(),
 	crossScopePolicy: z.enum(["same-scope", "cross-scope-allowed", "forbidden"]),
 	status: graphSchemaStatusSchema,
@@ -51,4 +56,3 @@ export const GRAPH_F0_EDGE_TYPES = [
 		status: "active",
 	},
 ] satisfies readonly EdgeTypeDef[];
-

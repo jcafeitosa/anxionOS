@@ -12,12 +12,10 @@ import {
 } from "../../apps/api/src/operations/bootstrap-eventing-lag-sli";
 import { withEventingPgHarness } from "../eventing/test-support";
 
-function createStubLagQuery(
-	samples: {
-		outbox?: EventingLagSample[];
-		inbox?: EventingLagSample[];
-	},
-): EventingLagQueryPort {
+function createStubLagQuery(samples: {
+	outbox?: EventingLagSample[];
+	inbox?: EventingLagSample[];
+}): EventingLagQueryPort {
 	return {
 		getOutboxLagSamples: async () => samples.outbox ?? [],
 		getInboxLagSamples: async () => samples.inbox ?? [],

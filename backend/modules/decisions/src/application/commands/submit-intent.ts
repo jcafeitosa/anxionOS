@@ -9,6 +9,7 @@ import {
 	submitIntentCommandSchema,
 } from "@anxionos/contracts/decisions";
 import { createIntentSubmittedEvent } from "../../domain/events/decisions-events";
+import type { CapitalReservationQueryPort } from "../../domain/ports/capital-reservation-query-port";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { DecisionsUnitOfWork } from "../../domain/ports/decisions-unit-of-work";
 import {
@@ -18,7 +19,6 @@ import {
 } from "../command-support";
 import { throwDecisionsError } from "../errors";
 import { assertSubmitPreconditionsMet } from "../submit-preconditions-support";
-import type { CapitalReservationQueryPort } from "../../domain/ports/capital-reservation-query-port";
 
 export interface SubmitIntentDeps {
 	unitOfWork: DecisionsUnitOfWork;
@@ -41,20 +41,14 @@ export async function submitIntent(
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			return replayIdempotentCommandJournalEntry(
-				raced,
-				command.organizationId,
-			);
+			return replayIdempotentCommandJournalEntry(raced, command.organizationId);
 		}
 		const decision = await ctx.decisions.findById(command.decisionId);
 		if (!decision || decision.organizationId !== command.organizationId) {
 			throwDecisionsError("DC_DECISION_NOT_FOUND", "decision not found");
 		}
 		if (decision.status === "SUBMITTED") {
-			throwDecisionsError(
-				"DC_INTENT_IMMUTABLE",
-				"decision already submitted",
-			);
+			throwDecisionsError("DC_INTENT_IMMUTABLE", "decision already submitted");
 		}
 		if (decision.approvalPath) {
 			if (

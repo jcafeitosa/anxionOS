@@ -1,13 +1,13 @@
+import type { SkillBindingConfig } from "@anxionos/contracts/agents";
 import { and, eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import type { SkillBindingConfig } from "@anxionos/contracts/agents";
 import type { AgentSkillBinding } from "../../domain/entities/agent-skill-binding";
 import type { AgentSkillBindingRepository } from "../../domain/ports/agent-skill-binding-repository";
 import {
-	agentSkillBindings,
-	agentVersions,
-	agents,
 	type AgentSkillBindingRow,
+	agentSkillBindings,
+	agents,
+	agentVersions,
 } from "./schema";
 
 function readBindingConfig(value: unknown): SkillBindingConfig {
@@ -17,7 +17,9 @@ function readBindingConfig(value: unknown): SkillBindingConfig {
 	return value as SkillBindingConfig;
 }
 
-export function toAgentSkillBinding(row: AgentSkillBindingRow): AgentSkillBinding {
+export function toAgentSkillBinding(
+	row: AgentSkillBindingRow,
+): AgentSkillBinding {
 	return {
 		id: row.id,
 		agentVersionId: row.agentVersionId,

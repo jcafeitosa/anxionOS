@@ -117,7 +117,9 @@ function withAuthorization(
 		authorization: {
 			policyVersion: POST_LOGIN_POLICY_VERSION,
 			generatedAt: now.toISOString(),
-			expiresAt: new Date(now.getTime() + POST_LOGIN_CONTEXT_TTL_MS).toISOString(),
+			expiresAt: new Date(
+				now.getTime() + POST_LOGIN_CONTEXT_TTL_MS,
+			).toISOString(),
 		},
 	};
 }
@@ -336,7 +338,10 @@ export function decidePostLoginContext(
 			{
 				...base,
 				onboardingState: { needsProfile: false, needsOrganization: false },
-				decision: { kind: "select_organization", reason: "SELECT_ORGANIZATION" },
+				decision: {
+					kind: "select_organization",
+					reason: "SELECT_ORGANIZATION",
+				},
 			},
 			now,
 		);

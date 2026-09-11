@@ -5,14 +5,16 @@ import {
 	getPriceAsOf,
 } from "@anxionos/market-data";
 import type { Pool } from "pg";
+import { throwPortfoliosError } from "../../application/errors";
 import type {
 	FxAsOfRef,
 	MarketDataQueryPort,
 	PriceAsOfRef,
 } from "../../domain/ports/market-data-query-port";
-import { throwPortfoliosError } from "../../application/errors";
 
-export function createPgMarketDataQueryAdapter(pool: Pool): MarketDataQueryPort {
+export function createPgMarketDataQueryAdapter(
+	pool: Pool,
+): MarketDataQueryPort {
 	const instruments = createPgInstrumentRepository(pool);
 	const observations = createPgObservationRepository(pool);
 	const fxRates = createPgFxRateRepository(pool);

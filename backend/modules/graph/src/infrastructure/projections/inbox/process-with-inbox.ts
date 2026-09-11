@@ -13,8 +13,8 @@ import {
 	GRAPH_PROJECTION_MAX_ATTEMPTS,
 } from "../../../domain/projections/constants";
 import {
-	ProjectionError,
 	isProjectionError,
+	ProjectionError,
 } from "../../../domain/projections/errors";
 import { nakDelayMs } from "../../../infrastructure/messaging/nats-message-port";
 import {
@@ -29,6 +29,7 @@ import {
 	markInboxPendingRetry,
 	quarantineInboxEntry,
 } from "../../../infrastructure/persistence/inbox-repository";
+
 export type {
 	ProcessWithInboxOptions,
 	ProcessWithInboxResult,

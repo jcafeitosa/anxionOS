@@ -25,7 +25,9 @@ const agentId = "22222222-2222-4222-8222-222222222222";
 const actorPrincipalId = "33333333-3333-4333-8333-333333333333";
 const approvalId = "44444444-4444-4444-8444-444444444444";
 
-function seedAssignment(overrides: Partial<AutonomyAssignment> = {}): AutonomyAssignment {
+function seedAssignment(
+	overrides: Partial<AutonomyAssignment> = {},
+): AutonomyAssignment {
 	const now = new Date("2026-09-10T12:00:00.000Z");
 	return {
 		id: "55555555-5555-4555-8555-555555555555",

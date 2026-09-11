@@ -1,21 +1,19 @@
 import { describe, expect, test } from "bun:test";
 import { createMetricsCollector } from "@anxionos/observability";
 import {
-	DEFAULT_EVENTING_LAG_THRESHOLDS,
 	computeLagMs,
-	evaluateEventingLagSli,
-	recordEventingLagSli,
+	DEFAULT_EVENTING_LAG_THRESHOLDS,
 	type EventingLagQueryPort,
 	type EventingLagSample,
+	evaluateEventingLagSli,
 	type LagAlertHook,
+	recordEventingLagSli,
 } from "@anxionos/operations";
 
-function createStubLagQuery(
-	samples: {
-		outbox?: EventingLagSample[];
-		inbox?: EventingLagSample[];
-	},
-): EventingLagQueryPort {
+function createStubLagQuery(samples: {
+	outbox?: EventingLagSample[];
+	inbox?: EventingLagSample[];
+}): EventingLagQueryPort {
 	return {
 		getOutboxLagSamples: async () => samples.outbox ?? [],
 		getInboxLagSamples: async () => samples.inbox ?? [],
@@ -62,10 +60,16 @@ describe("eventing lag SLI (ANX-170 S2)", () => {
 		expect(result.alerts).toHaveLength(0);
 
 		const snap = metrics.getSnapshot();
-		expect(snap.histograms["operations.eventing.lag:channel=outbox,owner_domain=decisions"]).toEqual([
-			10_000,
-		]);
-		expect(snap.counters["operations.eventing.lag.alerts:channel=outbox,owner_domain=decisions,severity=warn"]).toBeUndefined();
+		expect(
+			snap.histograms[
+				"operations.eventing.lag:channel=outbox,owner_domain=decisions"
+			],
+		).toEqual([10_000]);
+		expect(
+			snap.counters[
+				"operations.eventing.lag.alerts:channel=outbox,owner_domain=decisions,severity=warn"
+			],
+		).toBeUndefined();
 	});
 
 	test("recordEventingLagSli fires alert hook and counter on critical lag", async () => {

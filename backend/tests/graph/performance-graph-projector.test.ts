@@ -16,7 +16,8 @@ import {
 
 const organizationId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const outcomeSnapshotId = "perf_out_bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
-const positionExposureSnapshotId = "perf_pes_cccccccc-cccc-4ccc-8ccc-cccccccccccc";
+const positionExposureSnapshotId =
+	"perf_pes_cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 const metricSeriesId = "perf_mtr_dddddddd-dddd-4ddd-8ddd-dddddddddddd";
 
 function outcomeRecordedEnvelope(

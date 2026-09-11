@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-	cryptofeedSimulatedAdapterManifest,
 	CRYPTOFEED_ADAPTER_ID,
+	cryptofeedSimulatedAdapterManifest,
 	runAdapterConformanceSuite,
 } from "@anxionos/adapter-gateway";
 

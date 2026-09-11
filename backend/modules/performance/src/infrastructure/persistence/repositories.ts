@@ -1,6 +1,7 @@
 import type { Pool, PoolClient } from "pg";
 
 type PgQueryable = Pool | PoolClient;
+
 import { normalizeDecimalAmount } from "../../domain/decimal-amount";
 import type {
 	ListOutcomeSnapshotsFilter,
@@ -216,7 +217,10 @@ export function createPgMetricSeriesRepository(
 			const row = result.rows[0];
 			return row ? mapMetricSeries(row) : null;
 		},
-		async findByPositionExposureAndMetric(positionExposureSnapshotId, metricName) {
+		async findByPositionExposureAndMetric(
+			positionExposureSnapshotId,
+			metricName,
+		) {
 			const result = await client.query(
 				`SELECT * FROM performance_metric_series
 				 WHERE position_exposure_snapshot_id = $1 AND metric_name = $2`,

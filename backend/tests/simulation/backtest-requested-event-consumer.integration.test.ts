@@ -6,11 +6,14 @@ import {
 } from "@anxionos/contracts/simulation";
 import { STRATEGIES_EVENT_TYPES } from "@anxionos/contracts/strategies";
 import {
-	SIMULATION_BACKTEST_REQUESTED_CONSUMER_NAME,
 	createSimulationEventConsumerDeps,
 	processSimulationBacktestRequestedEvent,
+	SIMULATION_BACKTEST_REQUESTED_CONSUMER_NAME,
 } from "../../apps/api/src/simulation/event-consumers";
-import { shouldRunPgIntegrationTests, withSimulationPgHarness } from "./test-support";
+import {
+	shouldRunPgIntegrationTests,
+	withSimulationPgHarness,
+} from "./test-support";
 
 const organizationId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const backtestRequestId = "st_btr_11111111-1111-4111-8111-111111111111";
@@ -102,23 +105,19 @@ describe("simulation backtest requested event consumer (ANX-159 P08-S2)", () => 
 
 		await withSimulationPgHarness(async ({ pool }) => {
 			const deps = createSimulationEventConsumerDeps(pool);
-			const result = await processSimulationBacktestRequestedEvent(
-				pool,
-				deps,
-				{
-					...createBacktestRequestedEnvelope(),
-					eventType: STRATEGIES_EVENT_TYPES.BACKTEST_COMPLETED,
-					payload: {
-						backtestRequestId,
-						organizationId,
-						strategyId,
-						strategyVersionId,
-						resultRef: null,
-						metricsHash: null,
-						status: "COMPLETED",
-					},
+			const result = await processSimulationBacktestRequestedEvent(pool, deps, {
+				...createBacktestRequestedEnvelope(),
+				eventType: STRATEGIES_EVENT_TYPES.BACKTEST_COMPLETED,
+				payload: {
+					backtestRequestId,
+					organizationId,
+					strategyId,
+					strategyVersionId,
+					resultRef: null,
+					metricsHash: null,
+					status: "COMPLETED",
 				},
-			);
+			});
 			expect(result).toBe("skipped");
 		});
 	});

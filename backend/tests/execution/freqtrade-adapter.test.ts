@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import {
-	FreqtradeAdapter,
 	FREQTRADE_REAL_WIRING_BLOCKERS,
+	FreqtradeAdapter,
 	mountFreqtradeAdapter,
 	resolveFqtEngineMode,
 	resolveFqtSandboxUrl,

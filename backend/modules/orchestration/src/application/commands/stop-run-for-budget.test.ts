@@ -47,7 +47,8 @@ function createHarness(run: Run, task: TaskWithLease, lease: TaskLease | null) {
 				return next;
 			},
 		} as OrchestrationTransactionContext["taskLeaseRepository"],
-		gateBindingRepository: {} as OrchestrationTransactionContext["gateBindingRepository"],
+		gateBindingRepository:
+			{} as OrchestrationTransactionContext["gateBindingRepository"],
 		commandJournal: {
 			async findByCommandId(id) {
 				const row = commandJournal.get(id);
@@ -89,7 +90,8 @@ function createHarness(run: Run, task: TaskWithLease, lease: TaskLease | null) {
 				return 1;
 			},
 		} as OrchestrationTransactionContext["runHeartbeatRepository"],
-		taskboardMirrorRepository: {} as OrchestrationTransactionContext["taskboardMirrorRepository"],
+		taskboardMirrorRepository:
+			{} as OrchestrationTransactionContext["taskboardMirrorRepository"],
 		async publishEvents(envelopes) {
 			events.push(...envelopes);
 		},
@@ -165,7 +167,10 @@ describe("stopRunForBudget", () => {
 						);
 					},
 				},
-				leaseClock: { now: () => NOW, expiresIn: (ttlMs: number) => new Date(NOW.getTime() + ttlMs) },
+				leaseClock: {
+					now: () => NOW,
+					expiresIn: (ttlMs: number) => new Date(NOW.getTime() + ttlMs),
+				},
 			},
 			{
 				organizationId: ORG,
@@ -179,7 +184,13 @@ describe("stopRunForBudget", () => {
 		expect(result.status).toBe("BUDGET_STOPPED");
 		expect(result.cancelledHeartbeats).toBe(1);
 		expect(run.status).toBe("BUDGET_STOPPED");
-		expect(events.some((e) => (e as { eventType?: string }).eventType === "orchestration.run.budget_stopped.v1")).toBe(true);
+		expect(
+			events.some(
+				(e) =>
+					(e as { eventType?: string }).eventType ===
+					"orchestration.run.budget_stopped.v1",
+			),
+		).toBe(true);
 	});
 
 	test("idempotent replay when already BUDGET_STOPPED", async () => {
@@ -231,7 +242,10 @@ describe("stopRunForBudget", () => {
 					);
 				},
 			},
-			leaseClock: { now: () => NOW, expiresIn: (ttlMs: number) => new Date(NOW.getTime() + ttlMs) },
+			leaseClock: {
+				now: () => NOW,
+				expiresIn: (ttlMs: number) => new Date(NOW.getTime() + ttlMs),
+			},
 		};
 		const result = await stopRunForBudget(deps, {
 			organizationId: ORG,

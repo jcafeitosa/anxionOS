@@ -1,14 +1,14 @@
-import { and, desc, eq } from "drizzle-orm";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type {
 	EvaluationRef,
 	ObjectRef,
 	SkillPermissionRequirement,
 	SkillSandboxPolicy,
 } from "@anxionos/contracts/agents";
+import { and, desc, eq } from "drizzle-orm";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { SkillVersion } from "../../domain/entities/skill-version";
 import type { SkillVersionRepository } from "../../domain/ports/skill-version-repository";
-import { skillVersions, skills, type SkillVersionRow } from "./schema";
+import { type SkillVersionRow, skills, skillVersions } from "./schema";
 
 function readObjectRef(value: unknown): ObjectRef {
 	if (typeof value !== "object" || value === null) {
@@ -17,7 +17,9 @@ function readObjectRef(value: unknown): ObjectRef {
 	return value as ObjectRef;
 }
 
-function readPermissionRequirements(value: unknown): SkillPermissionRequirement[] {
+function readPermissionRequirements(
+	value: unknown,
+): SkillPermissionRequirement[] {
 	return Array.isArray(value) ? (value as SkillPermissionRequirement[]) : [];
 }
 
@@ -44,7 +46,9 @@ export function toSkillVersion(row: SkillVersionRow): SkillVersion {
 		schemaVersion: row.schemaVersion,
 		contentRef: readObjectRef(row.contentRef),
 		contentHash: row.contentHash,
-		permissionRequirements: readPermissionRequirements(row.permissionRequirements),
+		permissionRequirements: readPermissionRequirements(
+			row.permissionRequirements,
+		),
 		sandboxPolicy: readSandboxPolicy(row.sandboxPolicy),
 		evaluationRef: readEvaluationRef(row.evaluationRef),
 		promotedAt: row.promotedAt ?? undefined,
@@ -66,7 +70,10 @@ export function createDrizzleSkillVersionRepository(
 				.where(eq(skillVersions.id, version.id))
 				.limit(1);
 			if (existing[0]) {
-				if (existing[0].status === "verified" || existing[0].status === "revoked") {
+				if (
+					existing[0].status === "verified" ||
+					existing[0].status === "revoked"
+				) {
 					throw new Error("Verified or revoked skill version is immutable");
 				}
 				const rows = await db
@@ -95,7 +102,9 @@ export function createDrizzleSkillVersionRepository(
 				.limit(1);
 			const organizationId = skillRows[0]?.organizationId;
 			if (!organizationId) {
-				throw new Error(`Skill not found for version insert: ${version.skillId}`);
+				throw new Error(
+					`Skill not found for version insert: ${version.skillId}`,
+				);
 			}
 
 			const rows = await db

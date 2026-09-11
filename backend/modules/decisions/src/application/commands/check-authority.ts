@@ -36,10 +36,7 @@ export async function checkAuthority(
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			return replayIdempotentCommandJournalEntry(
-				raced,
-				command.organizationId,
-			);
+			return replayIdempotentCommandJournalEntry(raced, command.organizationId);
 		}
 		const decision = await ctx.decisions.findById(command.decisionId);
 		if (!decision || decision.organizationId !== command.organizationId) {
@@ -54,7 +51,9 @@ export async function checkAuthority(
 		if (decision.status === "SUBMITTED") {
 			throwDecisionsError("DC_INTENT_IMMUTABLE", "decision already submitted");
 		}
-		const nextStatus = command.intentHash ? "RISK_PENDING" : "AUTHORITY_CHECKED";
+		const nextStatus = command.intentHash
+			? "RISK_PENDING"
+			: "AUTHORITY_CHECKED";
 		const updated = await ctx.decisions.updateStatus(
 			decision.id,
 			nextStatus,

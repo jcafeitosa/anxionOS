@@ -1,138 +1,136 @@
 export {
-	registerHealthCheck,
-	type RegisterHealthCheckDeps,
-} from "./application/commands/register-health-check";
+	type ApproveDeletionDeps,
+	approveDeletion,
+} from "./application/commands/approve-deletion";
 export {
-	executeServiceHealthProbe,
-	type ExecuteServiceHealthProbeDeps,
-} from "./application/commands/execute-service-health-probe";
-export {
-	createIncident,
-	type CreateIncidentDeps,
-} from "./application/commands/create-incident";
-export {
-	transitionIncidentStatus,
-	type TransitionIncidentStatusDeps,
-} from "./application/commands/transition-incident-status";
-export {
-	attachIncidentRunbook,
-	type AttachIncidentRunbookDeps,
-} from "./application/commands/attach-incident-runbook";
-export {
-	startRecoveryTask,
-	type StartRecoveryTaskDeps,
-} from "./application/commands/start-recovery-task";
-export {
-	approveRecoveryTask,
 	type ApproveRecoveryTaskDeps,
+	approveRecoveryTask,
 } from "./application/commands/approve-recovery-task";
 export {
-	startRecoveryTaskExecution,
-	type StartRecoveryTaskExecutionDeps,
-} from "./application/commands/start-recovery-task-execution";
+	type AttachIncidentRunbookDeps,
+	attachIncidentRunbook,
+} from "./application/commands/attach-incident-runbook";
 export {
-	completeRecoveryTask,
-	type CompleteRecoveryTaskDeps,
-} from "./application/commands/complete-recovery-task";
-export {
-	failRecoveryTask,
-	type FailRecoveryTaskDeps,
-} from "./application/commands/fail-recovery-task";
-export {
-	cancelRecoveryTask,
 	type CancelRecoveryTaskDeps,
+	cancelRecoveryTask,
 } from "./application/commands/cancel-recovery-task";
 export {
-	getServiceHealth,
-	type GetServiceHealthDeps,
-} from "./application/queries/get-service-health";
+	type CompleteRecoveryTaskDeps,
+	completeRecoveryTask,
+} from "./application/commands/complete-recovery-task";
 export {
-	getPlatformSloSnapshot,
-	type GetPlatformSloSnapshotDeps,
-} from "./application/queries/get-platform-slo-snapshot";
+	type CreateExportJobDeps,
+	createExportJob,
+} from "./application/commands/create-export-job";
 export {
-	REDACTED_METRIC_VALUE,
-	isSensitiveMetricTagKey,
-	parseMetricKey,
-	redactMetricTagValue,
-	type ParsedMetricKey,
-} from "./domain/instrumentation/metrics-redaction";
+	type CreateIncidentDeps,
+	createIncident,
+} from "./application/commands/create-incident";
 export {
-	recordEventingLagSli,
-	type LagAlertHook,
-	type RecordEventingLagSliDeps,
-	type RecordEventingLagSliResult,
-} from "./application/instrumentation/record-eventing-lag-sli";
+	type ExecuteServiceHealthProbeDeps,
+	executeServiceHealthProbe,
+} from "./application/commands/execute-service-health-probe";
 export {
-	DEFAULT_EVENTING_LAG_THRESHOLDS,
-	computeLagMs,
-	evaluateEventingLagSli,
-	type EventingLagAlert,
-	type EventingLagSliThresholds,
-} from "./domain/instrumentation/eventing-lag-sli";
-export type {
-	EventingLagQueryPort,
-	EventingLagSample,
-} from "./domain/ports/eventing-lag-query";
+	type FailRecoveryTaskDeps,
+	failRecoveryTask,
+} from "./application/commands/fail-recovery-task";
 export {
-	getIncident,
-	type GetIncidentDeps,
-} from "./application/queries/get-incident";
+	type RegisterHealthCheckDeps,
+	registerHealthCheck,
+} from "./application/commands/register-health-check";
 export {
-	listIncidents,
-	type ListIncidentsDeps,
-} from "./application/queries/list-incidents";
+	type RegisterRetentionPolicyDeps,
+	registerRetentionPolicy,
+} from "./application/commands/register-retention-policy";
 export {
-	getRecoveryTask,
-	type GetRecoveryTaskDeps,
-} from "./application/queries/get-recovery-task";
+	type RequestDeletionDeps,
+	requestDeletion,
+} from "./application/commands/request-deletion";
 export {
-	listRecoveryTasksByIncident,
-	type ListRecoveryTasksByIncidentDeps,
-} from "./application/queries/list-recovery-tasks-by-incident";
+	type StartRecoveryTaskDeps,
+	startRecoveryTask,
+} from "./application/commands/start-recovery-task";
+export {
+	type StartRecoveryTaskExecutionDeps,
+	startRecoveryTaskExecution,
+} from "./application/commands/start-recovery-task-execution";
+export {
+	type TransitionIncidentStatusDeps,
+	transitionIncidentStatus,
+} from "./application/commands/transition-incident-status";
 export {
 	OperationsCommandError,
 	throwOperationsError,
 } from "./application/errors";
 export {
-	canTransitionIncidentStatus,
-	isTerminalIncidentStatus,
-	requiresRunbookForStatus,
-} from "./domain/incident-lifecycle";
+	type LagAlertHook,
+	type RecordEventingLagSliDeps,
+	type RecordEventingLagSliResult,
+	recordEventingLagSli,
+} from "./application/instrumentation/record-eventing-lag-sli";
+export {
+	type GetIncidentDeps,
+	getIncident,
+} from "./application/queries/get-incident";
+export {
+	type GetPlatformSloSnapshotDeps,
+	getPlatformSloSnapshot,
+} from "./application/queries/get-platform-slo-snapshot";
+export {
+	type GetRecoveryTaskDeps,
+	getRecoveryTask,
+} from "./application/queries/get-recovery-task";
+export {
+	type GetServiceHealthDeps,
+	getServiceHealth,
+} from "./application/queries/get-service-health";
+export {
+	type ListIncidentsDeps,
+	listIncidents,
+} from "./application/queries/list-incidents";
+export {
+	type ListRecoveryTasksByIncidentDeps,
+	listRecoveryTasksByIncident,
+} from "./application/queries/list-recovery-tasks-by-incident";
 export {
 	deriveHealthStatusFromProbeOutcome,
 	isCheckedAtMonotonic,
 	isHealthCheckStale,
 	runHealthProbeWithTimeout,
 } from "./domain/health-lifecycle";
+export {
+	canTransitionIncidentStatus,
+	isTerminalIncidentStatus,
+	requiresRunbookForStatus,
+} from "./domain/incident-lifecycle";
 export { isEligibleForPurge } from "./domain/incident-retention-policy";
 export {
+	computeLagMs,
+	DEFAULT_EVENTING_LAG_THRESHOLDS,
+	type EventingLagAlert,
+	type EventingLagSliThresholds,
+	evaluateEventingLagSli,
+} from "./domain/instrumentation/eventing-lag-sli";
+export {
+	isSensitiveMetricTagKey,
+	type ParsedMetricKey,
+	parseMetricKey,
+	REDACTED_METRIC_VALUE,
+	redactMetricTagValue,
+} from "./domain/instrumentation/metrics-redaction";
+export type {
+	EventingLagQueryPort,
+	EventingLagSample,
+} from "./domain/ports/eventing-lag-query";
+export {
 	canTransitionRecoveryTaskStatus,
+	isAllowedRecoveryStepKind,
 	isTerminalRecoveryTaskStatus,
 	requiresApprovalForRecoveryStep,
-	isAllowedRecoveryStepKind,
 	resolveInitialRecoveryTaskStatus,
 } from "./domain/recovery-lifecycle";
-
-export {
-	registerRetentionPolicy,
-	type RegisterRetentionPolicyDeps,
-} from "./application/commands/register-retention-policy";
-export {
-	createExportJob,
-	type CreateExportJobDeps,
-} from "./application/commands/create-export-job";
-export {
-	requestDeletion,
-	type RequestDeletionDeps,
-} from "./application/commands/request-deletion";
-export {
-	approveDeletion,
-	type ApproveDeletionDeps,
-} from "./application/commands/approve-deletion";
-
-export { ensureOperationsSchema } from "./infrastructure/migrate";
-export { createOperationsDb } from "./infrastructure/create-db";
-export { createOperationsUnitOfWork } from "./infrastructure/operations-unit-of-work";
 export { createPgEventingLagQueryAdapter } from "./infrastructure/adapters/pg-eventing-lag-query-adapter";
+export { createOperationsDb } from "./infrastructure/create-db";
+export { ensureOperationsSchema } from "./infrastructure/migrate";
+export { createOperationsUnitOfWork } from "./infrastructure/operations-unit-of-work";
 export { createPgCommandJournalRepository } from "./infrastructure/persistence/command-journal-repository";

@@ -5,9 +5,9 @@
  * User instruction: implement ANX-277 Neo4j projection worker sandbox after ADR0005 greenlight.
  */
 import {
+	intelligenceFeedsBackPayloadSchema,
 	PRODUCT_GRAPH_EVENT_TYPES,
 	PRODUCT_GRAPH_OWNER_DOMAIN,
-	intelligenceFeedsBackPayloadSchema,
 	workItemStatusChangedPayloadSchema,
 } from "@anxionos/contracts/graph";
 import { GRAPH_PRODUCT_CONSUMER_NAME } from "../../../domain/projections/constants";
@@ -63,7 +63,10 @@ function parseWorkItemStatusChanged(payload: unknown) {
 	return parsed.data;
 }
 
-function isStaleRevision(incomingRevision: number, existing: { revision: number } | null) {
+function isStaleRevision(
+	incomingRevision: number,
+	existing: { revision: number } | null,
+) {
 	return existing !== null && incomingRevision <= existing.revision;
 }
 
@@ -185,7 +188,9 @@ function toTrackedInEdge(
 }
 
 /** Projects product domain events into graph WorkItem nodes (mock-friendly port). */
-export async function projectProductGraphEvent(context: ProjectionHandlerContext) {
+export async function projectProductGraphEvent(
+	context: ProjectionHandlerContext,
+) {
 	const { envelope, graphStore, projectionGeneration } = context;
 	switch (envelope.eventType) {
 		case PRODUCT_GRAPH_EVENT_TYPES.INTELLIGENCE_FEEDS_BACK: {

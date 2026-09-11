@@ -108,7 +108,9 @@ export async function verifyManifestIntegrity(
 		if (manifest.organizationId !== command.organizationId) {
 			throwAuditError("AUD_CROSS_TENANT", "manifest organization mismatch");
 		}
-		if (manifest.payloadHash.toLowerCase() !== command.payloadHash.toLowerCase()) {
+		if (
+			manifest.payloadHash.toLowerCase() !== command.payloadHash.toLowerCase()
+		) {
 			throwAuditError(
 				"AUD_TAMPER_DETECTED",
 				`Payload hash mismatch for manifest ${command.manifestId}`,

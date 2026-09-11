@@ -1,7 +1,7 @@
 import type {
 	ContextManifest,
-	RetrieveKnowledgeQuery,
 	RetrievalHit,
+	RetrieveKnowledgeQuery,
 } from "@anxionos/contracts/knowledge";
 import { retrieveKnowledgeQuerySchema } from "@anxionos/contracts/knowledge";
 import type { EmbeddingPort } from "../../domain/ports/embedding-port";
@@ -54,9 +54,9 @@ export async function retrieveKnowledge(
 				dimensions: space.dimensions,
 			},
 		]);
-		const documents = (await ctx.documents.listActiveByOrganization(
-			query.organizationId,
-		)).filter((document) =>
+		const documents = (
+			await ctx.documents.listActiveByOrganization(query.organizationId)
+		).filter((document) =>
 			isAclAllowed(document, query.aclRef.aclId, query.aclRef.epoch),
 		);
 		const chunkById = new Map<string, ChunkRecord>();

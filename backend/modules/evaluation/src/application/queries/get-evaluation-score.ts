@@ -3,7 +3,10 @@ import type {
 	EvaluationScoreRepository,
 } from "../../domain/ports/evaluation-unit-of-work";
 import { throwEvaluationError } from "../errors";
-import { toEvaluationScoreView, type EvaluationScoreView } from "./query-support";
+import {
+	type EvaluationScoreView,
+	toEvaluationScoreView,
+} from "./query-support";
 
 export interface GetEvaluationScoreDeps {
 	evaluationRecords: EvaluationRecordRepository;
@@ -28,9 +31,8 @@ export async function getEvaluationScore(
 			"evaluation record organization mismatch",
 		);
 	}
-	const score = await deps.evaluationScores.findByEvaluationRecordId(
-		evaluationRecordId,
-	);
+	const score =
+		await deps.evaluationScores.findByEvaluationRecordId(evaluationRecordId);
 	if (!score) {
 		throwEvaluationError(
 			"EVL_SCORE_NOT_FOUND",

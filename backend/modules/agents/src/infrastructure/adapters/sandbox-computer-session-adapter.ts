@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
 import type { ComputerSessionRef } from "@anxionos/contracts/openbot";
+import { throwAgentsError } from "../../application/errors";
 import {
 	assertSessionTenant,
 	buildWorkspacePath,
 } from "../../application/services/workspace-path-jail";
-import { throwAgentsError } from "../../application/errors";
 import type { ComputerSessionPort } from "../../domain/ports/computer-session-port";
 
 function sessionKey(organizationId: string, agentId: string): string {

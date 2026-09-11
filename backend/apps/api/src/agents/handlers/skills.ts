@@ -1,11 +1,3 @@
-import { institutionalUuidSchema } from "@anxionos/contracts";
-import {
-	bindAgentSkillCommandSchema,
-	createSkillVersionCommandSchema,
-	recordSkillVersionEvaluationCommandSchema,
-	registerSkillCommandSchema,
-	submitSkillVersionCommandSchema,
-} from "@anxionos/contracts/agents";
 import {
 	AgentsCommandError,
 	bindAgentSkill,
@@ -15,6 +7,14 @@ import {
 	registerSkill,
 	submitSkillVersion,
 } from "@anxionos/agents";
+import { institutionalUuidSchema } from "@anxionos/contracts";
+import {
+	bindAgentSkillCommandSchema,
+	createSkillVersionCommandSchema,
+	recordSkillVersionEvaluationCommandSchema,
+	registerSkillCommandSchema,
+	submitSkillVersionCommandSchema,
+} from "@anxionos/contracts/agents";
 import { z } from "zod";
 import type { AgentsPluginDeps } from "../plugin";
 
@@ -30,9 +30,10 @@ const submitSkillVersionBodySchema = submitSkillVersionCommandSchema
 	.omit({ commandId: true, skillId: true, skillVersionId: true })
 	.strict();
 
-const recordSkillEvaluationBodySchema = recordSkillVersionEvaluationCommandSchema
-	.omit({ commandId: true, skillId: true, skillVersionId: true })
-	.strict();
+const recordSkillEvaluationBodySchema =
+	recordSkillVersionEvaluationCommandSchema
+		.omit({ commandId: true, skillId: true, skillVersionId: true })
+		.strict();
 
 const bindAgentSkillBodySchema = bindAgentSkillCommandSchema
 	.omit({ commandId: true, agentId: true })
@@ -53,7 +54,10 @@ async function assertSkillInAgency(
 ) {
 	const skill = await deps.skillRepository.findById(skillId);
 	if (!skill || skill.organizationId !== agencyId) {
-		throw new AgentsCommandError("AGT_SKILL_NOT_FOUND", `Skill not found: ${skillId}`);
+		throw new AgentsCommandError(
+			"AGT_SKILL_NOT_FOUND",
+			`Skill not found: ${skillId}`,
+		);
 	}
 	return skill;
 }

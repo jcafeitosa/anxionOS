@@ -58,8 +58,7 @@ export function createExecutionPlugin(deps: ExecutionPluginDeps) {
 				})
 				.get(
 					"/orders",
-					({ agencyId, query }) =>
-						handleListOrders(deps, { agencyId, query }),
+					({ agencyId, query }) => handleListOrders(deps, { agencyId, query }),
 					executionOpenApi.listOrders,
 				)
 				.get(

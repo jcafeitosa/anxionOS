@@ -25,11 +25,11 @@ import {
 	subtractDecimalAmounts,
 	toCommandResultSnapshot,
 } from "../command-support";
+import { DuplicateVenueFillSignal, throwExecutionError } from "../errors";
 import {
 	assertNoBlindRetryOnUnknownDispatch,
 	handleDuplicateVenueFill,
 } from "../reconciliation-support";
-import { DuplicateVenueFillSignal, throwExecutionError } from "../errors";
 
 export interface RecordFillDeps {
 	unitOfWork: ExecutionUnitOfWork;
@@ -63,177 +63,183 @@ export async function recordFill(
 
 	try {
 		return await deps.unitOfWork.runInTransaction(async (ctx) => {
-		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
-		if (raced) {
-			return replayIdempotentCommandJournalEntry(
-				raced,
-				command.organizationId,
-			);
-		}
-
-		const order = await ctx.orders.findByIdForUpdate(command.orderId);
-		if (!order || order.organizationId !== command.organizationId) {
-			throwExecutionError("EX_ORDER_NOT_FOUND", "execution order not found");
-		}
-		assertNoBlindRetryOnUnknownDispatch(order.venueDispatchStatus);
-		if (order.status === "CANCELLED") {
-			throwExecutionError(
-				"EX_ORDER_NOT_FILLABLE",
-				"cancelled order cannot accept fills",
-			);
-		}
-		if (order.status === "FILLED") {
-			throwExecutionError(
-				"EX_ORDER_NOT_FILLABLE",
-				"filled order cannot accept additional fills",
-			);
-		}
-
-		const remainingBefore = subtractDecimalAmounts(
-			order.quantity,
-			order.filledQuantity,
-		);
-		if (compareDecimalAmounts(command.fillQuantity, remainingBefore) > 0) {
-			throwExecutionError(
-				"EX_ORDER_NOT_FILLABLE",
-				"fill quantity exceeds remaining order quantity",
-			);
-		}
-
-		const session = await ctx.sessions.findById(order.sessionId);
-		if (!session || session.organizationId !== command.organizationId) {
-			throwExecutionError("EX_ORDER_NOT_FOUND", "execution order not found");
-		}
-		if (session.status !== "OPEN") {
-			throwExecutionError("EX_SESSION_NOT_FOUND", "execution session not open");
-		}
-		assertExecutionModuleModeSupported(session.executionMode);
-
-		const permitCheck = await deps.riskPermitValidation.validatePermit({
-			organizationId: command.organizationId,
-			riskPermitId: session.riskPermitId,
-			intentHash: session.intentHash,
-			authorityEpoch: session.authorityEpoch,
-			riskEpoch: session.riskEpoch,
-		});
-		if (!permitCheck.valid) {
-			if (permitCheck.failure === "STALE") {
-				throwExecutionError("EX_PERMIT_STALE", "risk permit epoch stale");
+			const raced = await ctx.commandJournal.findByCommandId(command.commandId);
+			if (raced) {
+				return replayIdempotentCommandJournalEntry(
+					raced,
+					command.organizationId,
+				);
 			}
-			throwExecutionError("EX_PERMIT_BYPASS", "risk permit validation failed");
-		}
 
-		const fillPrice = command.price ?? order.price;
-		const fillAsset = command.asset ?? "USD";
-		const notionalAmount = multiplyDecimalAmounts(
-			command.fillQuantity,
-			fillPrice,
-		);
-		const simulated = adapter.fill(
-			{
-				orderId: order.id,
-				clientOrderId: order.clientOrderId,
-				quantity: order.quantity,
-				fillQuantity: command.fillQuantity,
-				price: fillPrice,
-				asset: fillAsset,
-			},
-			notionalAmount,
-		);
+			const order = await ctx.orders.findByIdForUpdate(command.orderId);
+			if (!order || order.organizationId !== command.organizationId) {
+				throwExecutionError("EX_ORDER_NOT_FOUND", "execution order not found");
+			}
+			assertNoBlindRetryOnUnknownDispatch(order.venueDispatchStatus);
+			if (order.status === "CANCELLED") {
+				throwExecutionError(
+					"EX_ORDER_NOT_FILLABLE",
+					"cancelled order cannot accept fills",
+				);
+			}
+			if (order.status === "FILLED") {
+				throwExecutionError(
+					"EX_ORDER_NOT_FILLABLE",
+					"filled order cannot accept additional fills",
+				);
+			}
 
-		const existingFill = await ctx.fills.findByVenueFillId(
-			simulated.venueFillId,
-		);
-		if (existingFill) {
-			throw new DuplicateVenueFillSignal({
+			const remainingBefore = subtractDecimalAmounts(
+				order.quantity,
+				order.filledQuantity,
+			);
+			if (compareDecimalAmounts(command.fillQuantity, remainingBefore) > 0) {
+				throwExecutionError(
+					"EX_ORDER_NOT_FILLABLE",
+					"fill quantity exceeds remaining order quantity",
+				);
+			}
+
+			const session = await ctx.sessions.findById(order.sessionId);
+			if (!session || session.organizationId !== command.organizationId) {
+				throwExecutionError("EX_ORDER_NOT_FOUND", "execution order not found");
+			}
+			if (session.status !== "OPEN") {
+				throwExecutionError(
+					"EX_SESSION_NOT_FOUND",
+					"execution session not open",
+				);
+			}
+			assertExecutionModuleModeSupported(session.executionMode);
+
+			const permitCheck = await deps.riskPermitValidation.validatePermit({
 				organizationId: command.organizationId,
-				orderId: order.id,
-				existingFillId: existingFill.id,
-				venueFillId: simulated.venueFillId,
-				venueAdapterRefId: session.venueAdapterRefId,
+				riskPermitId: session.riskPermitId,
+				intentHash: session.intentHash,
+				authorityEpoch: session.authorityEpoch,
+				riskEpoch: session.riskEpoch,
 			});
-		}
+			if (!permitCheck.valid) {
+				if (permitCheck.failure === "STALE") {
+					throwExecutionError("EX_PERMIT_STALE", "risk permit epoch stale");
+				}
+				throwExecutionError(
+					"EX_PERMIT_BYPASS",
+					"risk permit validation failed",
+				);
+			}
 
-		const fillId = `ex_fill_${randomUUID()}`;
-		const fillEventId = randomUUID();
-		await ctx.fills.save({
-			id: fillId,
-			organizationId: command.organizationId,
-			orderId: order.id,
-			venueFillId: simulated.venueFillId,
-			quantity: simulated.quantity,
-			price: simulated.price,
-			notionalAmount: simulated.notionalAmount,
-			asset: simulated.asset,
-			status: "CONFIRMED",
-			filledAt: simulated.filledAt,
-		});
+			const fillPrice = command.price ?? order.price;
+			const fillAsset = command.asset ?? "USD";
+			const notionalAmount = multiplyDecimalAmounts(
+				command.fillQuantity,
+				fillPrice,
+			);
+			const simulated = adapter.fill(
+				{
+					orderId: order.id,
+					clientOrderId: order.clientOrderId,
+					quantity: order.quantity,
+					fillQuantity: command.fillQuantity,
+					price: fillPrice,
+					asset: fillAsset,
+				},
+				notionalAmount,
+			);
 
-		const newFilledQuantity = addDecimalAmounts(
-			order.filledQuantity,
-			command.fillQuantity,
-		);
-		const nextStatus = resolveOrderStatusAfterFill(
-			order.quantity,
-			newFilledQuantity,
-		);
-		await ctx.orders.update({
-			...order,
-			filledQuantity: newFilledQuantity,
-			status: nextStatus,
-		});
+			const existingFill = await ctx.fills.findByVenueFillId(
+				simulated.venueFillId,
+			);
+			if (existingFill) {
+				throw new DuplicateVenueFillSignal({
+					organizationId: command.organizationId,
+					orderId: order.id,
+					existingFillId: existingFill.id,
+					venueFillId: simulated.venueFillId,
+					venueAdapterRefId: session.venueAdapterRefId,
+				});
+			}
 
-		await ctx.publishEvents([
-			createFillConfirmedEvent({
-				eventId: fillEventId,
+			const fillId = `ex_fill_${randomUUID()}`;
+			const fillEventId = randomUUID();
+			await ctx.fills.save({
+				id: fillId,
 				organizationId: command.organizationId,
-				fillId,
 				orderId: order.id,
-				side: order.side,
-				instrumentId: order.instrumentId,
+				venueFillId: simulated.venueFillId,
 				quantity: simulated.quantity,
 				price: simulated.price,
 				notionalAmount: simulated.notionalAmount,
 				asset: simulated.asset,
+				status: "CONFIRMED",
 				filledAt: simulated.filledAt,
-				executionMode: session.executionMode,
-				capitalAccountId: command.capitalAccountId,
-				portfolioId: command.portfolioId,
-			}),
-		]);
+			});
 
-		capitalNotify.onFillConfirmed({
-			organizationId: command.organizationId,
-			fillId,
-			orderId: order.id,
-			notionalAmount: simulated.notionalAmount,
-			asset: simulated.asset,
-			capitalAccountId: command.capitalAccountId,
-			portfolioId: command.portfolioId,
-		});
-
-		const result = executionCommandResultSchema.parse({
-			aggregateId: order.id,
-			revision: 1,
-			sessionId: order.sessionId,
-			orderId: order.id,
-			fillId,
-			venueFillId: simulated.venueFillId,
-			orderStatus: nextStatus,
-			remainingQuantity: subtractDecimalAmounts(
+			const newFilledQuantity = addDecimalAmounts(
+				order.filledQuantity,
+				command.fillQuantity,
+			);
+			const nextStatus = resolveOrderStatusAfterFill(
 				order.quantity,
 				newFilledQuantity,
-			),
-		});
+			);
+			await ctx.orders.update({
+				...order,
+				filledQuantity: newFilledQuantity,
+				status: nextStatus,
+			});
 
-		await ctx.commandJournal.save({
-			commandId: command.commandId,
-			organizationId: command.organizationId,
-			commandName: "recordFill",
-			responseSnapshot: toCommandResultSnapshot(result),
-		});
+			await ctx.publishEvents([
+				createFillConfirmedEvent({
+					eventId: fillEventId,
+					organizationId: command.organizationId,
+					fillId,
+					orderId: order.id,
+					side: order.side,
+					instrumentId: order.instrumentId,
+					quantity: simulated.quantity,
+					price: simulated.price,
+					notionalAmount: simulated.notionalAmount,
+					asset: simulated.asset,
+					filledAt: simulated.filledAt,
+					executionMode: session.executionMode,
+					capitalAccountId: command.capitalAccountId,
+					portfolioId: command.portfolioId,
+				}),
+			]);
 
-		return result;
+			capitalNotify.onFillConfirmed({
+				organizationId: command.organizationId,
+				fillId,
+				orderId: order.id,
+				notionalAmount: simulated.notionalAmount,
+				asset: simulated.asset,
+				capitalAccountId: command.capitalAccountId,
+				portfolioId: command.portfolioId,
+			});
+
+			const result = executionCommandResultSchema.parse({
+				aggregateId: order.id,
+				revision: 1,
+				sessionId: order.sessionId,
+				orderId: order.id,
+				fillId,
+				venueFillId: simulated.venueFillId,
+				orderStatus: nextStatus,
+				remainingQuantity: subtractDecimalAmounts(
+					order.quantity,
+					newFilledQuantity,
+				),
+			});
+
+			await ctx.commandJournal.save({
+				commandId: command.commandId,
+				organizationId: command.organizationId,
+				commandName: "recordFill",
+				responseSnapshot: toCommandResultSnapshot(result),
+			});
+
+			return result;
 		});
 	} catch (error) {
 		if (error instanceof DuplicateVenueFillSignal) {

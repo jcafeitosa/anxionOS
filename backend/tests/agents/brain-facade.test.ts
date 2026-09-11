@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import { AGENTS_EVENT_TYPES } from "@anxionos/contracts/agents";
+import type { BrainInvocationGuardPort } from "@anxionos/agents";
 import {
 	AgentsCommandError,
 	invokeBrainCapability,
 	publishAgentVersion,
 	registerAgent,
 } from "@anxionos/agents";
-import type { BrainInvocationGuardPort } from "@anxionos/agents";
+import { AGENTS_EVENT_TYPES } from "@anxionos/contracts/agents";
 import {
 	createInMemoryAgentRepository,
 	createInMemoryAgentVersionRepository,
@@ -23,9 +23,7 @@ const instructionRef = {
 	contentHash: "sha256:abc123",
 };
 
-async function seedPublishedAgent(
-	deps: ReturnType<typeof createDeps>["deps"],
-) {
+async function seedPublishedAgent(deps: ReturnType<typeof createDeps>["deps"]) {
 	const registered = await registerAgent(deps, {
 		commandId: "11111111-1111-4111-8111-111111111111",
 		displayName: "Brain Agent",
@@ -84,7 +82,8 @@ describe("invokeBrainCapability (S5)", () => {
 		});
 		expect(result.invocationId).toMatch(/^[0-9a-f-]{36}$/i);
 		const event = published.find(
-			(entry) => entry.eventType === AGENTS_EVENT_TYPES.BRAIN_INVOCATION_REQUESTED,
+			(entry) =>
+				entry.eventType === AGENTS_EVENT_TYPES.BRAIN_INVOCATION_REQUESTED,
 		);
 		expect(event?.payload).toMatchObject({
 			agentId,
@@ -116,7 +115,10 @@ describe("invokeBrainCapability (S5)", () => {
 	test("denies invoke when guard rejects", async () => {
 		const { deps } = createDeps({
 			async assertInvokeAllowed() {
-				throw new AgentsCommandError("AGT_TRAVERSAL_DENIED", "Capability denied");
+				throw new AgentsCommandError(
+					"AGT_TRAVERSAL_DENIED",
+					"Capability denied",
+				);
 			},
 		});
 		const agentId = await seedPublishedAgent(deps);

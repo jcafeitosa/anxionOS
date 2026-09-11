@@ -1,7 +1,7 @@
 import type { HealthDeps } from "@anxionos/contracts";
 import { AppError } from "@anxionos/contracts/errors";
-import { hasPlatformConsoleGrant } from "@anxionos/governance";
 import type { GrantRepository } from "@anxionos/governance";
+import { hasPlatformConsoleGrant } from "@anxionos/governance";
 
 export interface PlatformHealthSnapshot {
 	source: "probeHealthDeps";

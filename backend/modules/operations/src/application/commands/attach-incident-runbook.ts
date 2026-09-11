@@ -63,10 +63,7 @@ export async function attachIncidentRunbook(
 
 		const incident = await ctx.incidents.findById(command.incidentId);
 		if (!incident) {
-			throwOperationsError(
-				"OPS_INCIDENT_NOT_FOUND",
-				"incident not found",
-			);
+			throwOperationsError("OPS_INCIDENT_NOT_FOUND", "incident not found");
 		}
 		if (incident.organizationId !== command.organizationId) {
 			throwOperationsError(

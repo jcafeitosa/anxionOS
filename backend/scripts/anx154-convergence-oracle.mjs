@@ -32,7 +32,9 @@ function main() {
 	if (!databaseUrl) {
 		const message = "DATABASE_URL is required for ANX-154 convergence oracle";
 		if (cli.json) {
-			console.log(JSON.stringify({ issue: cli.issue, ok: false, error: message }));
+			console.log(
+				JSON.stringify({ issue: cli.issue, ok: false, error: message }),
+			);
 		} else {
 			console.error(message);
 		}
@@ -75,7 +77,9 @@ function main() {
 		if (report.stdout) process.stdout.write(report.stdout);
 		if (report.stderr) process.stderr.write(report.stderr);
 		if (!ok) {
-			console.error(`ANX-154 convergence oracle FAILED (exit ${report.exitCode})`);
+			console.error(
+				`ANX-154 convergence oracle FAILED (exit ${report.exitCode})`,
+			);
 		} else {
 			console.log("ANX-154 convergence oracle PASS");
 		}

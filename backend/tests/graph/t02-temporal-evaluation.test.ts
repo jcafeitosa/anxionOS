@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-	GRAPH_T02_INCOMPLETE_REASONS,
 	evaluateT02Temporal,
+	GRAPH_T02_INCOMPLETE_REASONS,
 	grantPayloadToTemporalInterval,
 	isBitemporallyActive,
 } from "@anxionos/graph";
@@ -66,8 +66,6 @@ describe("T02 temporal.asOf evaluation (ANX-301)", () => {
 		});
 		const validAt = new Date(t2);
 		const knownAt = new Date(t4);
-		expect(isBitemporallyActive(correctedGrant, validAt, knownAt)).toBe(
-			false,
-		);
+		expect(isBitemporallyActive(correctedGrant, validAt, knownAt)).toBe(false);
 	});
 });

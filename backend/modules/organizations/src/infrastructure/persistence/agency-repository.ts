@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Agency } from "../../domain/entities/agency";
 import type { AgencyRepository } from "../../domain/ports/agency-repository";
-import { agencies, type AgencyRow } from "./schema";
+import { type AgencyRow, agencies } from "./schema";
 
 export function toAgency(row: AgencyRow): Agency {
 	return {
@@ -23,7 +23,11 @@ export function createDrizzleAgencyRepository(
 ): AgencyRepository {
 	return {
 		async save(agency: Agency) {
-			const existing = await db.select().from(agencies).where(eq(agencies.id, agency.id)).limit(1);
+			const existing = await db
+				.select()
+				.from(agencies)
+				.where(eq(agencies.id, agency.id))
+				.limit(1);
 			if (existing[0]) {
 				const rows = await db
 					.update(agencies)
@@ -63,7 +67,11 @@ export function createDrizzleAgencyRepository(
 			return toAgency(row);
 		},
 		async findByAgencyId(agencyId: string) {
-			const rows = await db.select().from(agencies).where(eq(agencies.id, agencyId)).limit(1);
+			const rows = await db
+				.select()
+				.from(agencies)
+				.where(eq(agencies.id, agencyId))
+				.limit(1);
 			return rows[0] ? toAgency(rows[0]) : null;
 		},
 		async findByOwnerPrincipalId(ownerPrincipalId: string) {

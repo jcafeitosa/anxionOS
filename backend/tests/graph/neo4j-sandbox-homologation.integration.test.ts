@@ -9,17 +9,15 @@
  * Affected API: projectProductGraphEvent, createNeo4jGraphStore, ensureNeo4jGraphConstraints
  * Data schemas: DomainEventEnvelope work_item.status_changed.v1; GraphNode + TRACKED_IN edge in Neo4j
  */
-import { randomUUID } from "node:crypto";
+
 import { afterAll, describe, expect, test } from "bun:test";
+import { randomUUID } from "node:crypto";
+import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import {
 	PRODUCT_GRAPH_EVENT_TYPES,
 	PRODUCT_GRAPH_OWNER_DOMAIN,
 } from "@anxionos/contracts/graph";
-import type { DomainEventEnvelope } from "@anxionos/contracts/events";
-import {
-	formatNodeKey,
-	projectProductGraphEvent,
-} from "@anxionos/graph";
+import { formatNodeKey, projectProductGraphEvent } from "@anxionos/graph";
 import {
 	createNeo4jDriverFromEnv,
 	createNeo4jGraphStore,
@@ -35,7 +33,9 @@ function shouldRunNeo4jHomologation(): boolean {
 }
 
 describe("neo4j sandbox homologation (ANX-290)", () => {
-	const driver = shouldRunNeo4jHomologation() ? createNeo4jDriverFromEnv() : null;
+	const driver = shouldRunNeo4jHomologation()
+		? createNeo4jDriverFromEnv()
+		: null;
 
 	afterAll(async () => {
 		if (driver) {
@@ -102,7 +102,8 @@ describe("neo4j sandbox homologation (ANX-290)", () => {
 		expect(neighbors.some((edge) => edge.edgeType === "TRACKED_IN")).toBe(true);
 		expect(
 			neighbors.some(
-				(edge) => formatNodeKey(edge.targetNodeKey) === formatNodeKey(workItemKey),
+				(edge) =>
+					formatNodeKey(edge.targetNodeKey) === formatNodeKey(workItemKey),
 			),
 		).toBe(true);
 

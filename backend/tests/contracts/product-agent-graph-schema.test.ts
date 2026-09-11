@@ -14,9 +14,9 @@ import {
 describe("Product Graph schema registry (ANX-271)", () => {
 	test("PRODUCT_GRAPH_NODE_TYPES has 15 node types", () => {
 		expect(PRODUCT_GRAPH_NODE_TYPES.length).toBe(15);
-		expect(PRODUCT_GRAPH_NODE_TYPES.every((n) => n.ownerDomain === "product")).toBe(
-			true,
-		);
+		expect(
+			PRODUCT_GRAPH_NODE_TYPES.every((n) => n.ownerDomain === "product"),
+		).toBe(true);
 	});
 
 	test("PRODUCT_GRAPH_EDGE_TYPES includes FEEDS_BACK and IMPLEMENTS", () => {
@@ -31,16 +31,18 @@ describe("Product Graph schema registry (ANX-271)", () => {
 		const registry = createProductGraphSchemaRegistry();
 		expect(registry.requireNodeType("WorkItem", 1).ownerDomain).toBe("product");
 		registry.validateEdgeAllowlist(["TRACKED_IN", "FEEDS_BACK"]);
-		expect(registry.listEdgeTypes().length).toBe(PRODUCT_GRAPH_EDGE_TYPES.length);
+		expect(registry.listEdgeTypes().length).toBe(
+			PRODUCT_GRAPH_EDGE_TYPES.length,
+		);
 	});
 });
 
 describe("Agent Graph schema registry (ANX-271)", () => {
 	test("AGENT_GRAPH_NODE_TYPES has 9 node types", () => {
 		expect(AGENT_GRAPH_NODE_TYPES.length).toBe(9);
-		expect(AGENT_GRAPH_NODE_TYPES.every((n) => n.ownerDomain === "agents")).toBe(
-			true,
-		);
+		expect(
+			AGENT_GRAPH_NODE_TYPES.every((n) => n.ownerDomain === "agents"),
+		).toBe(true);
 	});
 
 	test("createAgentGraphSchemaRegistry resolves PAIRED_WITH", () => {

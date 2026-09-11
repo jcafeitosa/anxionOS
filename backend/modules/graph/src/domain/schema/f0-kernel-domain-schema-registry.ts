@@ -12,7 +12,10 @@ import {
 	PRODUCT_GRAPH_EDGE_TYPES,
 	PRODUCT_GRAPH_NODE_TYPES,
 } from "@anxionos/contracts/graph";
-import { createGraphSchemaRegistry, type GraphSchemaRegistry } from "./registry";
+import {
+	createGraphSchemaRegistry,
+	type GraphSchemaRegistry,
+} from "./registry";
 
 /** F0 + kernel + product/agent + domain traversal types for owner-consumer catalog. */
 export function createF0KernelDomainGraphSchemaRegistry(): GraphSchemaRegistry {

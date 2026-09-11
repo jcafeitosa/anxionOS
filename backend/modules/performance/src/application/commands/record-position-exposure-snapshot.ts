@@ -18,13 +18,11 @@ import {
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { derivePositionExposureMetrics } from "../exposure-from-position";
 import { parseCommandResultSnapshot, throwPerformanceError } from "../errors";
+import { derivePositionExposureMetrics } from "../exposure-from-position";
 
 async function persistDerivedPositionMetrics(
-	ctx: Parameters<
-		Parameters<PerformanceUnitOfWork["runInTransaction"]>[0]
-	>[0],
+	ctx: Parameters<Parameters<PerformanceUnitOfWork["runInTransaction"]>[0]>[0],
 	input: {
 		organizationId: string;
 		positionExposureSnapshotId: string;

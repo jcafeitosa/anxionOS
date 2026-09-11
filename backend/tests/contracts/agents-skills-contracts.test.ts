@@ -97,7 +97,9 @@ describe("agents skills command contracts (ANX-143 S9)", () => {
 
 describe("agents skills event contracts (ANX-143 S9)", () => {
 	test("AGENTS_EVENT_TYPES uses versioned skill event names", () => {
-		expect(AGENTS_EVENT_TYPES.SKILL_REGISTERED).toBe("agents.skill.registered.v1");
+		expect(AGENTS_EVENT_TYPES.SKILL_REGISTERED).toBe(
+			"agents.skill.registered.v1",
+		);
 		expect(AGENTS_EVENT_TYPES.SKILL_VERSION_CREATED).toBe(
 			"agents.skill_version.created.v1",
 		);

@@ -1,6 +1,8 @@
 import type { z } from "zod";
-import { ledgerLineSummarySchema } from "../accounting/events";
-import { ledgerPostedPayloadSchema } from "../accounting/events";
+import {
+	ledgerLineSummarySchema,
+	ledgerPostedPayloadSchema,
+} from "../accounting/events";
 import { journalEntryIdSchema } from "../accounting/types";
 /** Bridge schema for performance consumer input shaped as accounting.ledger.posted.v1. */
 export const accountingLedgerPostedBridgeSchema =

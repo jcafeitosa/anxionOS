@@ -2,8 +2,8 @@ import { describe, expect, test } from "bun:test";
 import {
 	mkdirSync,
 	mkdtempSync,
-	readFileSync,
 	readdirSync,
+	readFileSync,
 	rmSync,
 	statSync,
 	writeFileSync,
@@ -12,9 +12,9 @@ import { tmpdir } from "node:os";
 import { join, relative } from "node:path";
 import {
 	BACKEND_ROOT,
-	MODULE_MIGRATION_SQL_PATH,
-	type MigrationOwnershipViolation,
 	collectBackendSqlFiles,
+	type MigrationOwnershipViolation,
+	MODULE_MIGRATION_SQL_PATH,
 } from "./scan-imports";
 
 const MIGRATE_FILE_RE =

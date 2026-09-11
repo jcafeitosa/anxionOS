@@ -1,15 +1,15 @@
 import { randomUUID } from "node:crypto";
 import {
 	type AssignAutonomyLevelCommand,
-	type GovernanceCommandResult,
 	assignAutonomyLevelCommandSchema,
+	type GovernanceCommandResult,
 	governanceCommandResultSchema,
 } from "@anxionos/contracts/governance";
-import {
-	createAutonomyAssignedEvent,
-	createAuthorityEpochBumpedEvent,
-} from "../../domain/events/governance-events";
 import type { AutonomyAssignment } from "../../domain/entities/autonomy-assignment";
+import {
+	createAuthorityEpochBumpedEvent,
+	createAutonomyAssignedEvent,
+} from "../../domain/events/governance-events";
 import { validateInitialAssignment } from "../../domain/policies/autonomy-normative-matrix";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { GovernanceUnitOfWork } from "../../domain/ports/governance-unit-of-work";

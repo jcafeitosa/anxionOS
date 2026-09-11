@@ -51,7 +51,9 @@ describe("risk kill switch lifecycle (ANX-150 S3)", () => {
 				`SELECT current_risk_epoch FROM risk_epoch_registry WHERE organization_id = $1`,
 				[RISK_TEST_ORG_ID],
 			);
-			expect(epochRow.rows[0]?.current_risk_epoch).toBe(RISK_TEST_RISK_EPOCH + 1);
+			expect(epochRow.rows[0]?.current_risk_epoch).toBe(
+				RISK_TEST_RISK_EPOCH + 1,
+			);
 
 			const journalRows = await pool.query(
 				`SELECT event_type FROM domain_journal WHERE owner_domain = 'risk' ORDER BY occurred_at`,

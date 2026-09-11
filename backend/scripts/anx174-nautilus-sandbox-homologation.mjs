@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { spawnSync } from "node:child_process";
 /**
  * ANX-174 — NautilusTrader sandbox homologation oracle.
  *
@@ -8,7 +9,6 @@
  * Importers: package.json `anx174:nautilus-sandbox-homologation`
  */
 import { readFileSync } from "node:fs";
-import { spawnSync } from "node:child_process";
 import { parseArgs } from "node:util";
 import { parseSandboxLogLine } from "../deploy/docker/engines/shared/sandbox-logger.mjs";
 
@@ -113,13 +113,7 @@ function probeHealthHttp(engine) {
 function probeApiAuth(engine, authToken) {
 	const container = `docker-${engine.service}-1`;
 	const url = `http://localhost:${engine.port}${engine.apiProbePath}`;
-	const withoutAuth = run("docker", [
-		"exec",
-		container,
-		"wget",
-		"-qO-",
-		url,
-	]);
+	const withoutAuth = run("docker", ["exec", container, "wget", "-qO-", url]);
 	const withAuth = run("docker", [
 		"exec",
 		container,

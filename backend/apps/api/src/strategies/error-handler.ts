@@ -5,8 +5,11 @@ import {
 	toErrorResponse,
 } from "@anxionos/contracts/errors";
 import { resolveStrategiesErrorStatus } from "@anxionos/contracts/strategies";
+import {
+	OrganizationCommandError,
+	PrincipalLookupUnavailableError,
+} from "@anxionos/organizations";
 import { StrategiesCommandError } from "@anxionos/strategies";
-import { OrganizationCommandError, PrincipalLookupUnavailableError } from "@anxionos/organizations";
 
 function strategiesCodeToAppError(error: StrategiesCommandError): AppError {
 	const statusCode = resolveStrategiesErrorStatus(error.code);

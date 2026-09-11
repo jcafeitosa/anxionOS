@@ -9,10 +9,10 @@ import {
 	takeoverComputerSession,
 } from "@anxionos/agents";
 import {
+	computerSessionTakeoverResultSchema,
 	OPENBOT_EVENT_TYPES,
 	resumeBotControlCommandSchema,
 	takeoverComputerSessionCommandSchema,
-	computerSessionTakeoverResultSchema,
 } from "@anxionos/contracts/openbot";
 import {
 	createInMemoryToolAuditPort,
@@ -31,19 +31,25 @@ function createDeps() {
 describe("takeoverComputerSession / resumeBotControl (ANX-144 S5 / R144-05)", () => {
 	test("takeover revokes bot authority token and sets human controller", async () => {
 		const { computerSession } = createDeps();
-		const acquired = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId,
-			agentId,
-		});
+		const acquired = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId,
+				agentId,
+			},
+		);
 		const botToken = acquired.session.authorityToken;
 
-		const takeover = await takeoverComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			sessionId: acquired.session.sessionId,
-			organizationId,
-			operatorId,
-		});
+		const takeover = await takeoverComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				sessionId: acquired.session.sessionId,
+				organizationId,
+				operatorId,
+			},
+		);
 
 		expect(takeover.revokedAuthorityToken).toBe(botToken);
 		expect(takeover.session.controller).toBe("human");
@@ -53,24 +59,33 @@ describe("takeoverComputerSession / resumeBotControl (ANX-144 S5 / R144-05)", ()
 
 	test("resumeBotControl returns bot controller without new session id", async () => {
 		const { computerSession } = createDeps();
-		const acquired = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId,
-			agentId,
-		});
-		const takeover = await takeoverComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			sessionId: acquired.session.sessionId,
-			organizationId,
-			operatorId,
-		});
+		const acquired = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId,
+				agentId,
+			},
+		);
+		const takeover = await takeoverComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				sessionId: acquired.session.sessionId,
+				organizationId,
+				operatorId,
+			},
+		);
 		const humanToken = takeover.session.authorityToken;
 
-		const resumed = await resumeBotControl({ computerSession }, {
-			commandId: randomUUID(),
-			sessionId: acquired.session.sessionId,
-			organizationId,
-		});
+		const resumed = await resumeBotControl(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				sessionId: acquired.session.sessionId,
+				organizationId,
+			},
+		);
 
 		expect(resumed.session.sessionId).toBe(acquired.session.sessionId);
 		expect(resumed.session.controller).toBe("bot");
@@ -80,34 +95,46 @@ describe("takeoverComputerSession / resumeBotControl (ANX-144 S5 / R144-05)", ()
 
 	test("adversarial: takeover A → resume → takeover B invalidates all prior tokens", async () => {
 		const { computerSession } = createDeps();
-		const acquired = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId,
-			agentId,
-		});
+		const acquired = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId,
+				agentId,
+			},
+		);
 		const tokenBotInitial = acquired.session.authorityToken;
 
-		const takeoverA = await takeoverComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			sessionId: acquired.session.sessionId,
-			organizationId,
-			operatorId,
-		});
+		const takeoverA = await takeoverComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				sessionId: acquired.session.sessionId,
+				organizationId,
+				operatorId,
+			},
+		);
 		const tokenHumanA = takeoverA.session.authorityToken;
 
-		const resumed = await resumeBotControl({ computerSession }, {
-			commandId: randomUUID(),
-			sessionId: acquired.session.sessionId,
-			organizationId,
-		});
+		const resumed = await resumeBotControl(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				sessionId: acquired.session.sessionId,
+				organizationId,
+			},
+		);
 		const tokenBotResumed = resumed.session.authorityToken;
 
-		const takeoverB = await takeoverComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			sessionId: acquired.session.sessionId,
-			organizationId,
-			operatorId: operatorB,
-		});
+		const takeoverB = await takeoverComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				sessionId: acquired.session.sessionId,
+				organizationId,
+				operatorId: operatorB,
+			},
+		);
 		const tokenHumanB = takeoverB.session.authorityToken;
 
 		expect(tokenHumanA).not.toBe(tokenHumanB);
@@ -120,59 +147,75 @@ describe("takeoverComputerSession / resumeBotControl (ANX-144 S5 / R144-05)", ()
 
 	test("double takeover without resume is denied", async () => {
 		const { computerSession } = createDeps();
-		const acquired = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId,
-			agentId,
-		});
-		await takeoverComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			sessionId: acquired.session.sessionId,
-			organizationId,
-			operatorId,
-		});
-		await expect(
-			takeoverComputerSession({ computerSession }, {
+		const acquired = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId,
+				agentId,
+			},
+		);
+		await takeoverComputerSession(
+			{ computerSession },
+			{
 				commandId: randomUUID(),
 				sessionId: acquired.session.sessionId,
 				organizationId,
-				operatorId: operatorB,
-			}),
+				operatorId,
+			},
+		);
+		await expect(
+			takeoverComputerSession(
+				{ computerSession },
+				{
+					commandId: randomUUID(),
+					sessionId: acquired.session.sessionId,
+					organizationId,
+					operatorId: operatorB,
+				},
+			),
 		).rejects.toThrow();
 	});
 
 	test("resume without takeover is denied", async () => {
 		const { computerSession } = createDeps();
-		const acquired = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId,
-			agentId,
-		});
-		await expect(
-			resumeBotControl({ computerSession }, {
+		const acquired = await acquireComputerSession(
+			{ computerSession },
+			{
 				commandId: randomUUID(),
-				sessionId: acquired.session.sessionId,
 				organizationId,
-			}),
+				agentId,
+			},
+		);
+		await expect(
+			resumeBotControl(
+				{ computerSession },
+				{
+					commandId: randomUUID(),
+					sessionId: acquired.session.sessionId,
+					organizationId,
+				},
+			),
 		).rejects.toThrow();
 	});
 
 	test("publishes takeover and bot-resumed events", async () => {
 		const { computerSession } = createDeps();
 		const events: string[] = [];
-		const publishEvents = async (
-			published: { eventType: string }[],
-		) => {
+		const publishEvents = async (published: { eventType: string }[]) => {
 			for (const event of published) {
 				events.push(event.eventType);
 			}
 		};
 
-		const acquired = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId,
-			agentId,
-		});
+		const acquired = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId,
+				agentId,
+			},
+		);
 		await takeoverComputerSession(
 			{ computerSession, publishEvents },
 			{
@@ -201,18 +244,24 @@ describe("executeGovernedToolCall during takeover (ANX-144 S5)", () => {
 		const { computerSession } = createDeps();
 		const toolGateway = createInMemoryToolGatewayPort();
 		const toolAudit = createInMemoryToolAuditPort();
-		const acquired = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId,
-			agentId,
-		});
+		const acquired = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId,
+				agentId,
+			},
+		);
 		const staleBotSession = acquired.session;
-		await takeoverComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			sessionId: acquired.session.sessionId,
-			organizationId,
-			operatorId,
-		});
+		await takeoverComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				sessionId: acquired.session.sessionId,
+				organizationId,
+				operatorId,
+			},
+		);
 
 		const result = await executeGovernedToolCall(
 			{
@@ -239,23 +288,32 @@ describe("executeGovernedToolCall during takeover (ANX-144 S5)", () => {
 		const { computerSession } = createDeps();
 		const toolGateway = createInMemoryToolGatewayPort();
 		const toolAudit = createInMemoryToolAuditPort();
-		const acquired = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId,
-			agentId,
-		});
+		const acquired = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId,
+				agentId,
+			},
+		);
 		const preTakeoverSession = acquired.session;
-		await takeoverComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			sessionId: acquired.session.sessionId,
-			organizationId,
-			operatorId,
-		});
-		const resumed = await resumeBotControl({ computerSession }, {
-			commandId: randomUUID(),
-			sessionId: acquired.session.sessionId,
-			organizationId,
-		});
+		await takeoverComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				sessionId: acquired.session.sessionId,
+				organizationId,
+				operatorId,
+			},
+		);
+		const resumed = await resumeBotControl(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				sessionId: acquired.session.sessionId,
+				organizationId,
+			},
+		);
 
 		const staleDenied = await executeGovernedToolCall(
 			{
@@ -273,7 +331,9 @@ describe("executeGovernedToolCall during takeover (ANX-144 S5)", () => {
 				inputHash: "sha256:stale",
 			},
 		);
-		expect(staleDenied.decision.ruleId).toBe("openbot.computer.authority.revoked");
+		expect(staleDenied.decision.ruleId).toBe(
+			"openbot.computer.authority.revoked",
+		);
 
 		const allowed = await executeGovernedToolCall(
 			{
@@ -296,27 +356,39 @@ describe("executeGovernedToolCall during takeover (ANX-144 S5)", () => {
 
 	test("resume does not duplicate acquire effect (same session id)", async () => {
 		const { computerSession } = createDeps();
-		const acquired = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId,
-			agentId,
-		});
-		await takeoverComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			sessionId: acquired.session.sessionId,
-			organizationId,
-			operatorId,
-		});
-		const resumed = await resumeBotControl({ computerSession }, {
-			commandId: randomUUID(),
-			sessionId: acquired.session.sessionId,
-			organizationId,
-		});
-		const secondAcquire = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId,
-			agentId,
-		});
+		const acquired = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId,
+				agentId,
+			},
+		);
+		await takeoverComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				sessionId: acquired.session.sessionId,
+				organizationId,
+				operatorId,
+			},
+		);
+		const resumed = await resumeBotControl(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				sessionId: acquired.session.sessionId,
+				organizationId,
+			},
+		);
+		const secondAcquire = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId,
+				agentId,
+			},
+		);
 		expect(secondAcquire.session.sessionId).toBe(acquired.session.sessionId);
 		expect(resumed.session.sessionId).toBe(acquired.session.sessionId);
 	});
@@ -344,17 +416,23 @@ describe("openbot S5 command contracts (ANX-144 S5)", () => {
 
 	test("computerSessionTakeoverResultSchema includes revoked token", async () => {
 		const { computerSession } = createDeps();
-		const acquired = await acquireComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			organizationId,
-			agentId,
-		});
-		const result = await takeoverComputerSession({ computerSession }, {
-			commandId: randomUUID(),
-			sessionId: acquired.session.sessionId,
-			organizationId,
-			operatorId,
-		});
+		const acquired = await acquireComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				organizationId,
+				agentId,
+			},
+		);
+		const result = await takeoverComputerSession(
+			{ computerSession },
+			{
+				commandId: randomUUID(),
+				sessionId: acquired.session.sessionId,
+				organizationId,
+				operatorId,
+			},
+		);
 		const parsed = computerSessionTakeoverResultSchema.parse(result);
 		expect(parsed.previousController).toBe("bot");
 		expect(parsed.revokedAuthorityToken).toBe(acquired.session.authorityToken);

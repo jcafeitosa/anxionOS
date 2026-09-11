@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { GOVERNANCE_EVENT_TYPES } from "@anxionos/contracts/governance";
-import { revokeGrant } from "@anxionos/governance";
 import type { Grant } from "@anxionos/governance";
+import { revokeGrant } from "@anxionos/governance";
 import { GovernanceCommandError } from "../../modules/governance/src/application/errors";
 import {
 	createInMemoryApprovalRepository,

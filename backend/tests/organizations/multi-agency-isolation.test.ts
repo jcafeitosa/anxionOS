@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { assertAgencyIsolation, createTwoDistinctAgencies } from "./test-support";
+import {
+	assertAgencyIsolation,
+	createTwoDistinctAgencies,
+} from "./test-support";
 
 describe("multi-agency isolation fixtures", () => {
 	test("Agency A and Agency B have distinct IDs", () => {
@@ -11,16 +14,24 @@ describe("multi-agency isolation fixtures", () => {
 
 	test("listing by owner returns only the scoped agency", async () => {
 		const fixtures = createTwoDistinctAgencies();
-		const agenciesA = await fixtures.agencyRepositoryA.findByOwnerPrincipalId(fixtures.agencyA.ownerPrincipalId);
-		const agenciesB = await fixtures.agencyRepositoryB.findByOwnerPrincipalId(fixtures.agencyB.ownerPrincipalId);
+		const agenciesA = await fixtures.agencyRepositoryA.findByOwnerPrincipalId(
+			fixtures.agencyA.ownerPrincipalId,
+		);
+		const agenciesB = await fixtures.agencyRepositoryB.findByOwnerPrincipalId(
+			fixtures.agencyB.ownerPrincipalId,
+		);
 		expect(agenciesA.map((agency) => agency.id)).toEqual([fixtures.agencyIdA]);
 		expect(agenciesB.map((agency) => agency.id)).toEqual([fixtures.agencyIdB]);
 	});
 
 	test("Agency A cannot see Agency B and vice versa", async () => {
 		const fixtures = createTwoDistinctAgencies();
-		expect(await fixtures.agencyRepositoryA.findByAgencyId(fixtures.agencyIdB)).toBeNull();
-		expect(await fixtures.agencyRepositoryB.findByAgencyId(fixtures.agencyIdA)).toBeNull();
+		expect(
+			await fixtures.agencyRepositoryA.findByAgencyId(fixtures.agencyIdB),
+		).toBeNull();
+		expect(
+			await fixtures.agencyRepositoryB.findByAgencyId(fixtures.agencyIdA),
+		).toBeNull();
 	});
 
 	test("same fixture context produces deterministic agency attributes", () => {
@@ -38,9 +49,16 @@ describe("multi-agency isolation fixtures", () => {
 
 	test("isolation helper returns PASS for isolated agencies", async () => {
 		const fixtures = createTwoDistinctAgencies();
-		const isolation = await assertAgencyIsolation(fixtures.agencyA, fixtures.agencyB, fixtures.agencyRepositoryA, fixtures.agencyRepositoryB);
+		const isolation = await assertAgencyIsolation(
+			fixtures.agencyA,
+			fixtures.agencyB,
+			fixtures.agencyRepositoryA,
+			fixtures.agencyRepositoryB,
+		);
 		expect(isolation.agencyAIsolated).toBe(true);
 		expect(isolation.agencyBIsolated).toBe(true);
-		expect(isolation.details.every((detail) => detail.startsWith("PASS"))).toBe(true);
+		expect(isolation.details.every((detail) => detail.startsWith("PASS"))).toBe(
+			true,
+		);
 	});
 });

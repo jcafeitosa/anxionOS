@@ -1,7 +1,10 @@
 import type { RecordGateDispositionCommand } from "@anxionos/contracts/orchestration";
 import { recordGateDispositionCommandSchema } from "@anxionos/contracts/orchestration";
+import {
+	GATE_DISPOSITION_QUOTA_PER_ORG_PER_WINDOW,
+	GATE_DISPOSITION_QUOTA_WINDOW_MS,
+} from "../../domain/constants";
 import type { GateBinding } from "../../domain/entities/gate-binding";
-import {} from "../../domain/entities/gate-binding";
 import { shouldInvalidatePriorPass } from "../../domain/entities/gate-binding";
 import { createGateDispositionRecordedEvent } from "../../domain/events/orchestration-events";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
@@ -11,7 +14,6 @@ import type {
 } from "../../domain/ports/orchestration-unit-of-work";
 import type { OrganizationScopePort } from "../../domain/ports/organization-scope";
 import type { PrincipalLookup } from "../../domain/ports/principal-lookup";
-import {} from "../../domain/ports/principal-lookup";
 import { PrincipalLookupUnavailableError } from "../../domain/ports/principal-lookup";
 import {
 	buildRecordGateDispositionCommandId,
@@ -20,13 +22,8 @@ import {
 	toRecordGateDispositionSnapshot,
 } from "../command-support";
 import { toGateBindingV1 } from "../dto-mappers";
-import {
-	GATE_DISPOSITION_QUOTA_PER_ORG_PER_WINDOW,
-	GATE_DISPOSITION_QUOTA_WINDOW_MS,
-} from "../../domain/constants";
 import { throwOrchestrationError } from "../errors";
 import type { HierarchyModeResolverDeps } from "../services/hierarchy-mode-resolver";
-import {} from "../services/hierarchy-mode-resolver";
 import { resolveHierarchyModeForGate } from "../services/hierarchy-mode-resolver";
 
 export interface RecordGateDispositionResult {

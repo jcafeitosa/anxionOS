@@ -1,10 +1,9 @@
-import type { TenantScopedQueryable } from "@anxionos/database";
 import type {
 	AgentPublishGuardPort,
 	AgentRepository,
 	AgentSkillBindingRepository,
-	AgentVersionRepository,
 	AgentsUnitOfWork,
+	AgentVersionRepository,
 	BrainInvocationGuardPort,
 	CommandJournalRepository,
 	SkillBindGuardPort,
@@ -12,15 +11,22 @@ import type {
 	SkillRepository,
 	SkillVersionRepository,
 } from "@anxionos/agents";
+import type { TenantScopedQueryable } from "@anxionos/database";
+import type { PrincipalRepository } from "@anxionos/identity";
 import type { createOrganizationsDb } from "@anxionos/organizations";
 import type { betterAuth } from "better-auth";
 import { Elysia } from "elysia";
+import { agencyIdParamSchema } from "../governance/handlers/grants";
+import { agentsOpenApi } from "../openapi-operations";
+import { parseIdempotencyKey } from "../organizations/middleware/idempotency-key";
+import { requireAgencyMembership } from "../organizations/middleware/require-agency-membership";
+import { resolvePrincipalFromSession } from "../organizations/resolve-principal";
 import { mapAgentsError } from "./error-handler";
 import {
 	agentIdParamSchema,
 	handleGetAgent,
-	handleListAgentVersions,
 	handleInvokeBrainCapability,
+	handleListAgentVersions,
 	handlePublishAgentVersion,
 	handleRegisterAgent,
 	handleRollbackAgentVersion,
@@ -35,12 +41,6 @@ import {
 	skillIdParamSchema,
 	skillVersionIdParamSchema,
 } from "./handlers/skills";
-import { agencyIdParamSchema } from "../governance/handlers/grants";
-import { agentsOpenApi } from "../openapi-operations";
-import { parseIdempotencyKey } from "../organizations/middleware/idempotency-key";
-import { requireAgencyMembership } from "../organizations/middleware/require-agency-membership";
-import { resolvePrincipalFromSession } from "../organizations/resolve-principal";
-import type { PrincipalRepository } from "@anxionos/identity";
 
 type OrganizationsDb = ReturnType<typeof createOrganizationsDb>;
 
@@ -134,64 +134,64 @@ export function createAgentsPlugin(deps: AgentsPluginDeps) {
 				.post(
 					"/:agentId/versions",
 					async ({ request, agencyId, params, principal }) => {
-					const { agentId } = agentIdParamSchema.parse(params);
-					const commandId = parseIdempotencyKey(request.headers);
-					const body = await request.json();
-					return handlePublishAgentVersion(deps, {
-						commandId,
-						agencyId,
-						agentId,
-						principalId: principal.id,
-						body,
-					});
+						const { agentId } = agentIdParamSchema.parse(params);
+						const commandId = parseIdempotencyKey(request.headers);
+						const body = await request.json();
+						return handlePublishAgentVersion(deps, {
+							commandId,
+							agencyId,
+							agentId,
+							principalId: principal.id,
+							body,
+						});
 					},
 					agentsOpenApi.publishVersion,
 				)
 				.post(
 					"/:agentId/versions/rollback",
 					async ({ request, agencyId, params, principal }) => {
-					const { agentId } = agentIdParamSchema.parse(params);
-					const commandId = parseIdempotencyKey(request.headers);
-					const body = await request.json();
-					return handleRollbackAgentVersion(deps, {
-						commandId,
-						agencyId,
-						agentId,
-						principalId: principal.id,
-						body,
-					});
+						const { agentId } = agentIdParamSchema.parse(params);
+						const commandId = parseIdempotencyKey(request.headers);
+						const body = await request.json();
+						return handleRollbackAgentVersion(deps, {
+							commandId,
+							agencyId,
+							agentId,
+							principalId: principal.id,
+							body,
+						});
 					},
 					agentsOpenApi.rollbackVersion,
 				)
 				.patch(
 					"/:agentId/status",
 					async ({ request, agencyId, params, principal }) => {
-					const { agentId } = agentIdParamSchema.parse(params);
-					const commandId = parseIdempotencyKey(request.headers);
-					const body = await request.json();
-					return handleTransitionAgentStatus(deps, {
-						commandId,
-						agencyId,
-						agentId,
-						principalId: principal.id,
-						body,
-					});
+						const { agentId } = agentIdParamSchema.parse(params);
+						const commandId = parseIdempotencyKey(request.headers);
+						const body = await request.json();
+						return handleTransitionAgentStatus(deps, {
+							commandId,
+							agencyId,
+							agentId,
+							principalId: principal.id,
+							body,
+						});
 					},
 					agentsOpenApi.transitionStatus,
 				)
 				.post(
 					"/:agentId/invoke",
 					async ({ request, agencyId, params, principal }) => {
-					const { agentId } = agentIdParamSchema.parse(params);
-					const commandId = parseIdempotencyKey(request.headers);
-					const body = await request.json();
-					return handleInvokeBrainCapability(deps, {
-						commandId,
-						agencyId,
-						agentId,
-						principalId: principal.id,
-						body,
-					});
+						const { agentId } = agentIdParamSchema.parse(params);
+						const commandId = parseIdempotencyKey(request.headers);
+						const body = await request.json();
+						return handleInvokeBrainCapability(deps, {
+							commandId,
+							agencyId,
+							agentId,
+							principalId: principal.id,
+							body,
+						});
 					},
 					agentsOpenApi.invoke,
 				)

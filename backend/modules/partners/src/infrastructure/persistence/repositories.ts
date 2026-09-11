@@ -1,6 +1,7 @@
 import type { Pool, PoolClient } from "pg";
 
 type PgQueryable = Pool | PoolClient;
+
 import type {
 	CommissionAccrualRecord,
 	CommissionAccrualRepository,
@@ -49,14 +50,18 @@ function mapPayout(row: Record<string, unknown>): PayoutRecord {
 		requestedAmount: String(row.requested_amount),
 		status: String(row.status),
 		requestedAt: (row.requested_at as Date).toISOString(),
-		approvedAt: row.approved_at ? (row.approved_at as Date).toISOString() : null,
+		approvedAt: row.approved_at
+			? (row.approved_at as Date).toISOString()
+			: null,
 		approvalReference: row.approval_reference
 			? String(row.approval_reference)
 			: null,
 	};
 }
 
-export function createPgPartnerRepository(client: PgQueryable): PartnerRepository {
+export function createPgPartnerRepository(
+	client: PgQueryable,
+): PartnerRepository {
 	return {
 		async findById(id, organizationId) {
 			const result = await client.query(
@@ -85,7 +90,10 @@ export function createPgPartnerRepository(client: PgQueryable): PartnerRepositor
 			const row = result.rows[0];
 			return row ? mapPartner(row) : null;
 		},
-		async findByReferredOrganization(referredOrganizationId, partnerOrganizationId) {
+		async findByReferredOrganization(
+			referredOrganizationId,
+			partnerOrganizationId,
+		) {
 			const result = await client.query(
 				`SELECT * FROM partners_partners
 			 WHERE referred_organization_id = $1 AND organization_id = $2`,
@@ -198,7 +206,9 @@ export function createPgCommissionAccrualRepository(
 	};
 }
 
-export function createPgPayoutRepository(client: PgQueryable): PayoutRepository {
+export function createPgPayoutRepository(
+	client: PgQueryable,
+): PayoutRepository {
 	return {
 		async findById(id, partnerOrganizationId) {
 			const result = await client.query(
@@ -248,12 +258,7 @@ export function createPgPayoutRepository(client: PgQueryable): PayoutRepository 
 				`UPDATE partners_payouts
 			 SET status = $2, approved_at = $3, approval_reference = $4, updated_at = now()
 			 WHERE id = $1`,
-				[
-					record.id,
-					record.status,
-					record.approvedAt,
-					record.approvalReference,
-				],
+				[record.id, record.status, record.approvedAt, record.approvalReference],
 			);
 			return record;
 		},

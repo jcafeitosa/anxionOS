@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
 import {
-	commandResultSchema,
-	registerAgentCommandSchema,
 	type CommandResult,
+	commandResultSchema,
 	type RegisterAgentCommand,
+	registerAgentCommandSchema,
 } from "@anxionos/contracts/agents";
 import { createAgentRegisteredEvent } from "../../domain/events/agent-events";
-import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
+import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import {
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,

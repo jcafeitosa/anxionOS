@@ -24,10 +24,7 @@ export async function listRecoveryTasksByIncident(
 		throwOperationsError("OPS_INCIDENT_NOT_FOUND", "incident not found");
 	}
 	if (incident.organizationId !== organizationId) {
-		throwOperationsError(
-			"OPS_CROSS_TENANT",
-			"incident organization mismatch",
-		);
+		throwOperationsError("OPS_CROSS_TENANT", "incident organization mismatch");
 	}
 
 	const records = await deps.recoveryTasks.listByOrganizationAndIncidentId(

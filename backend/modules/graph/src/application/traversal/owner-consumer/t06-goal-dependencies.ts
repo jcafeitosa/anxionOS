@@ -1,7 +1,6 @@
-import type { T06Input, T06Output } from "@anxionos/contracts/graph";
-import type { NodeKey } from "@anxionos/contracts/graph";
-import type { GraphStore } from "../../../domain/ports/graph-store";
+import type { NodeKey, T06Input, T06Output } from "@anxionos/contracts/graph";
 import { formatNodeKey } from "../../../domain/node-key";
+import type { GraphStore } from "../../../domain/ports/graph-store";
 import {
 	collectNeighborIds,
 	guardTemporal,
@@ -41,7 +40,10 @@ async function collectTaskDependencies(
 			maxResults: 256,
 		});
 		for (const edge of deps) {
-			if (edge.targetNodeKey.type === "Task" || edge.targetNodeKey.type === "WorkItem") {
+			if (
+				edge.targetNodeKey.type === "Task" ||
+				edge.targetNodeKey.type === "WorkItem"
+			) {
 				taskIds.add(edge.targetNodeKey.id);
 			}
 			const cycle = await walk(edge.targetNodeKey, depth + 1);

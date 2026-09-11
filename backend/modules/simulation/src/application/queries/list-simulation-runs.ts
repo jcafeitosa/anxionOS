@@ -15,10 +15,7 @@ export async function listSimulationRuns(
 	organizationId: string,
 	filter?: ListSimulationRunsFilter,
 ): Promise<ListSimulationRunsResponse> {
-	const records = await deps.runs.listByOrganizationId(
-		organizationId,
-		filter,
-	);
+	const records = await deps.runs.listByOrganizationId(organizationId, filter);
 	return listSimulationRunsResponseSchema.parse({
 		simulationRuns: records.map(toSimulationRun),
 	});

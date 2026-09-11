@@ -1,20 +1,23 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { verifyManifestIntegrity } from "./verify-manifest-integrity";
-import { AuditCommandError } from "../errors";
-import { hashCommandPayload } from "../command-support";
 import type {
 	AuditManifestRecord,
 	AuditTransactionContext,
 	AuditUnitOfWork,
 } from "../../domain/ports/audit-unit-of-work";
+import { hashCommandPayload } from "../command-support";
+import { AuditCommandError } from "../errors";
+import { verifyManifestIntegrity } from "./verify-manifest-integrity";
 
 const ORG = "00000000-0000-4000-8000-000000000001";
 const ORG_B = "00000000-0000-4000-8000-000000000002";
 const HASH = "a".repeat(64);
 
 function createUow(manifest: AuditManifestRecord | null) {
-	const journal = new Map<string, { organizationId: string; responseSnapshot: Record<string, unknown> }>();
+	const journal = new Map<
+		string,
+		{ organizationId: string; responseSnapshot: Record<string, unknown> }
+	>();
 	const ctx: AuditTransactionContext = {
 		commandJournal: {
 			async findByCommandId(id) {
@@ -75,7 +78,12 @@ const manifest: AuditManifestRecord = {
 	recordedAt: new Date().toISOString(),
 };
 
-function ctxJournal(journal: Map<string, { organizationId: string; responseSnapshot: Record<string, unknown> }>) {
+function ctxJournal(
+	journal: Map<
+		string,
+		{ organizationId: string; responseSnapshot: Record<string, unknown> }
+	>,
+) {
 	return {
 		async findByCommandId(id: string) {
 			const entry = journal.get(id);

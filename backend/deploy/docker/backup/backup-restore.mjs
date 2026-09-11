@@ -16,12 +16,7 @@
  * Replaces the previous drill that restored onto the source database.
  */
 import { execFileSync } from "node:child_process";
-import {
-	existsSync,
-	mkdirSync,
-	readFileSync,
-	statSync,
-} from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync } from "node:fs";
 import os from "node:os";
 import { join } from "node:path";
 
@@ -70,7 +65,9 @@ export function assertSafeDbName(name) {
 }
 
 export function isForbiddenRestoreTarget(name) {
-	const n = String(name ?? "").trim().toLowerCase();
+	const n = String(name ?? "")
+		.trim()
+		.toLowerCase();
 	if (!n) return true;
 	if (FORBIDDEN_RESTORE_NAMES.has(n)) return true;
 	if (n.includes("production")) return true;
@@ -79,7 +76,9 @@ export function isForbiddenRestoreTarget(name) {
 
 export function resolveIsolatedTargetDb(sourceDb, requested) {
 	const source = assertSafeDbName(String(sourceDb ?? "").trim());
-	const target = assertSafeDbName(String(requested ?? `${source}_restore_drill`).trim());
+	const target = assertSafeDbName(
+		String(requested ?? `${source}_restore_drill`).trim(),
+	);
 	if (target === source) {
 		throw new Error("drill restore target must differ from source database");
 	}
@@ -112,7 +111,10 @@ export function parseCliArgs(argv) {
 
 export function isCustomFormatDump(bytes) {
 	if (!bytes || bytes.length < 5) return false;
-	const magic = typeof bytes === "string" ? bytes.slice(0, 5) : Buffer.from(bytes.subarray(0, 5)).toString("utf8");
+	const magic =
+		typeof bytes === "string"
+			? bytes.slice(0, 5)
+			: Buffer.from(bytes.subarray(0, 5)).toString("utf8");
 	return magic === CUSTOM_DUMP_MAGIC;
 }
 
@@ -121,10 +123,19 @@ export function collectSecretNeedles(parsed, env = process.env) {
 	if (env.DATABASE_URL) {
 		needles.push(env.DATABASE_URL);
 	}
-	if (parsed?.password && parsed.password !== parsed.user && parsed.password !== parsed.db) {
+	if (
+		parsed?.password &&
+		parsed.password !== parsed.user &&
+		parsed.password !== parsed.db
+	) {
 		needles.push(parsed.password);
 	}
-	for (const key of ["BETTER_AUTH_SECRET", "SEED_OWNER_PASSWORD", "SMTP_PASS", "NEO4J_PASSWORD"]) {
+	for (const key of [
+		"BETTER_AUTH_SECRET",
+		"SEED_OWNER_PASSWORD",
+		"SMTP_PASS",
+		"NEO4J_PASSWORD",
+	]) {
 		if (env[key] && env[key] !== parsed?.user && env[key] !== parsed?.db) {
 			needles.push(env[key]);
 		}
@@ -206,29 +217,58 @@ function dockerContainer() {
 }
 
 function useDocker() {
-	return process.env.BACKUP_USE_DOCKER === "1" || process.env.BACKUP_USE_DOCKER === "true";
+	return (
+		process.env.BACKUP_USE_DOCKER === "1" ||
+		process.env.BACKUP_USE_DOCKER === "true"
+	);
 }
 
 function pgExec(cli, args, env, opts = {}) {
 	if (useDocker()) {
-		return run("docker", ["exec", "-e", `PGPASSWORD=${env.PGPASSWORD}`, dockerContainer(), cli, ...args], opts);
+		return run(
+			"docker",
+			[
+				"exec",
+				"-e",
+				`PGPASSWORD=${env.PGPASSWORD}`,
+				dockerContainer(),
+				cli,
+				...args,
+			],
+			opts,
+		);
 	}
 	return run(cli, args, { env: { ...process.env, ...env }, ...opts });
 }
 
 function copyDumpFromContainer(containerPath, hostPath) {
-	run("docker", dockerCopyArgs("from", dockerContainer(), containerPath, hostPath));
+	run(
+		"docker",
+		dockerCopyArgs("from", dockerContainer(), containerPath, hostPath),
+	);
 }
 
 function copyDumpToContainer(hostPath, containerPath) {
-	run("docker", dockerCopyArgs("to", dockerContainer(), containerPath, hostPath));
+	run(
+		"docker",
+		dockerCopyArgs("to", dockerContainer(), containerPath, hostPath),
+	);
 }
 
 function pgConnectArgs(parsed, database) {
 	if (useDocker()) {
 		return ["-h", "127.0.0.1", "-p", "5432", "-U", parsed.user, "-d", database];
 	}
-	return ["-h", parsed.host, "-p", parsed.port, "-U", parsed.user, "-d", database];
+	return [
+		"-h",
+		parsed.host,
+		"-p",
+		parsed.port,
+		"-U",
+		parsed.user,
+		"-d",
+		database,
+	];
 }
 
 function requireDatabaseUrl() {
@@ -245,19 +285,33 @@ function backupToFile(parsed, hostFile) {
 	const env = { PGPASSWORD: parsed.password };
 	if (useDocker()) {
 		const containerFile = "/tmp/anxionos-backup.dump";
-		pgExec("pg_dump", [...pgConnectArgs(parsed, parsed.db), "-Fc", "-f", containerFile], env);
+		pgExec(
+			"pg_dump",
+			[...pgConnectArgs(parsed, parsed.db), "-Fc", "-f", containerFile],
+			env,
+		);
 		copyDumpFromContainer(containerFile, hostFile);
 	} else {
-		pgExec("pg_dump", [...pgConnectArgs(parsed, parsed.db), "-Fc", "-f", hostFile], env);
+		pgExec(
+			"pg_dump",
+			[...pgConnectArgs(parsed, parsed.db), "-Fc", "-f", hostFile],
+			env,
+		);
 	}
-	return { file: hostFile, elapsedMs: Date.now() - startedMs, sizeBytes: statSync(hostFile).size };
+	return {
+		file: hostFile,
+		elapsedMs: Date.now() - startedMs,
+		sizeBytes: statSync(hostFile).size,
+	};
 }
 
 function verifyDump(parsed, hostFile) {
 	const startedMs = Date.now();
 	const bytes = readFileSync(hostFile);
 	if (!isCustomFormatDump(bytes)) {
-		throw new Error("dump is not PostgreSQL custom format (expected PGDMP magic)");
+		throw new Error(
+			"dump is not PostgreSQL custom format (expected PGDMP magic)",
+		);
 	}
 	const env = { PGPASSWORD: parsed.password };
 	let listOutput = "";
@@ -270,7 +324,10 @@ function verifyDump(parsed, hostFile) {
 	}
 	const secrets = collectSecretNeedles(parsed, process.env);
 	const dumpAsText = bytes.toString("latin1");
-	if (dumpContainsSecret(listOutput, secrets) || dumpContainsSecret(dumpAsText, secrets)) {
+	if (
+		dumpContainsSecret(listOutput, secrets) ||
+		dumpContainsSecret(dumpAsText, secrets)
+	) {
 		throw new Error("dump listing leaked a secret");
 	}
 	return { verifyMs: Date.now() - startedMs, listOutput };
@@ -333,7 +390,12 @@ function restoreToDatabase(parsed, hostFile, targetDb) {
 		copyDumpToContainer(hostFile, containerFile);
 		pgExec(
 			"pg_restore",
-			[...pgConnectArgs(parsed, targetDb), "--clean", "--if-exists", containerFile],
+			[
+				...pgConnectArgs(parsed, targetDb),
+				"--clean",
+				"--if-exists",
+				containerFile,
+			],
 			env,
 			{ allowExitOne: true },
 		);
@@ -380,7 +442,13 @@ function queryLedger(parsed, targetDb) {
 		counts[name] = Number.parseInt(
 			pgExec(
 				"psql",
-				[...pgConnectArgs(parsed, targetDb), "-t", "-A", "-c", `SELECT count(*) FROM ${quoteIdent(name)};`],
+				[
+					...pgConnectArgs(parsed, targetDb),
+					"-t",
+					"-A",
+					"-c",
+					`SELECT count(*) FROM ${quoteIdent(name)};`,
+				],
 				env,
 			).trim(),
 			10,
@@ -398,7 +466,14 @@ export async function backup(outDir = join(process.cwd(), "backups")) {
 	const stamp = new Date().toISOString().replace(/[:.]/g, "-");
 	const file = join(outDir, `${parsed.db}-${stamp}.dump`);
 	const result = backupToFile(parsed, file);
-	console.log(JSON.stringify({ ok: true, file: result.file, elapsedMs: result.elapsedMs, sizeBytes: result.sizeBytes }));
+	console.log(
+		JSON.stringify({
+			ok: true,
+			file: result.file,
+			elapsedMs: result.elapsedMs,
+			sizeBytes: result.sizeBytes,
+		}),
+	);
 	return result;
 }
 
@@ -410,19 +485,31 @@ export async function restore(file, dbName) {
 	}
 	ensureIsolatedDatabase(parsed, targetDb);
 	const { restoreMs } = restoreToDatabase(parsed, file, targetDb);
-	console.log(JSON.stringify({ ok: true, restoredFrom: file, targetDb, elapsedMs: restoreMs }));
+	console.log(
+		JSON.stringify({
+			ok: true,
+			restoredFrom: file,
+			targetDb,
+			elapsedMs: restoreMs,
+		}),
+	);
 	return { restoreMs, targetDb };
 }
 
 export async function drill(opts = {}) {
 	const parsed = parseDbUrl(requireDatabaseUrl());
-	const targetDb = resolveIsolatedTargetDb(parsed.db, opts.dbName ?? process.env.BACKUP_DRILL_TARGET_DB);
+	const targetDb = resolveIsolatedTargetDb(
+		parsed.db,
+		opts.dbName ?? process.env.BACKUP_DRILL_TARGET_DB,
+	);
 	const outDir = opts.out ?? join(os.tmpdir(), "anx169-backups");
 	mkdirSync(outDir, { recursive: true });
 	const stamp = new Date().toISOString().replace(/[:.]/g, "-");
 	const hostFile = join(outDir, `${parsed.db}-${stamp}.dump`);
 
-	console.log("=== ANX-169 disaster drill: backup → isolated restore → ledger verify ===");
+	console.log(
+		"=== ANX-169 disaster drill: backup → isolated restore → ledger verify ===",
+	);
 	const { elapsedMs: backupMs, sizeBytes } = backupToFile(parsed, hostFile);
 	const { verifyMs } = verifyDump(parsed, hostFile);
 	ensureIsolatedDatabase(parsed, targetDb);
@@ -450,8 +537,12 @@ export async function drill(opts = {}) {
 
 	console.log("=== Resultado do drill ===");
 	console.log(JSON.stringify(report, null, 2));
-	console.log("RPO: ponto do dump lógico no início do backup (sandbox). Não é SLO de produção.");
-	console.log("RTO: backupMs + verifyMs + restoreMs no hardware reportado. Destino isolado ≠ origem.");
+	console.log(
+		"RPO: ponto do dump lógico no início do backup (sandbox). Não é SLO de produção.",
+	);
+	console.log(
+		"RTO: backupMs + verifyMs + restoreMs no hardware reportado. Destino isolado ≠ origem.",
+	);
 
 	if (!opts.keepTarget && !process.env.BACKUP_KEEP_TARGET) {
 		terminateAndDrop(parsed, targetDb);
@@ -470,10 +561,16 @@ export async function main(argv = process.argv.slice(2)) {
 		return;
 	}
 	if (cmd === "drill") {
-		await drill({ out: flags.out, dbName: flags.dbName, keepTarget: flags.keepTarget });
+		await drill({
+			out: flags.out,
+			dbName: flags.dbName,
+			keepTarget: flags.keepTarget,
+		});
 		return;
 	}
-	console.log("usage: backup-restore.mjs <backup|restore FILE --db-name NAME|drill> [--out DIR]");
+	console.log(
+		"usage: backup-restore.mjs <backup|restore FILE --db-name NAME|drill> [--out DIR]",
+	);
 	process.exit(1);
 }
 

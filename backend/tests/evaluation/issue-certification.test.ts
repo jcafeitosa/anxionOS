@@ -64,8 +64,7 @@ describe("issueCertification (ANX-160 S3)", () => {
 				{
 					id: evaluationRecordId,
 					organizationId,
-					outcomeSnapshotId:
-						"perf_out_44444444-4444-4444-8444-444444444444",
+					outcomeSnapshotId: "perf_out_44444444-4444-4444-8444-444444444444",
 					valueDate: "2026-09-10",
 					computedAt: "2026-09-10T12:00:00.000Z",
 				},
@@ -278,8 +277,7 @@ describe("issueCertification (ANX-160 S3)", () => {
 				responseSnapshot: {
 					aggregateId: "evl_crt_cccccccc-cccc-4ccc-8ccc-cccccccccccc",
 					revision: 1,
-					certificationId:
-						"evl_crt_cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+					certificationId: "evl_crt_cccccccc-cccc-4ccc-8ccc-cccccccccccc",
 				},
 			},
 		]);

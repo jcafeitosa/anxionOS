@@ -22,9 +22,7 @@ import { parseCommandResultSnapshot, throwPerformanceError } from "../errors";
 import { deriveLedgerPnlMetrics } from "../pnl-from-ledger-lines";
 
 async function persistDerivedMetrics(
-	ctx: Parameters<
-		Parameters<PerformanceUnitOfWork["runInTransaction"]>[0]
-	>[0],
+	ctx: Parameters<Parameters<PerformanceUnitOfWork["runInTransaction"]>[0]>[0],
 	input: {
 		organizationId: string;
 		outcomeSnapshotId: string;

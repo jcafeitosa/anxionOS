@@ -40,7 +40,8 @@ function mapRun(row: Record<string, unknown>): SimulationRunRecord {
 		executionMode: String(row.execution_mode),
 		status: String(row.status),
 		scenarioLabel: row.scenario_label ? String(row.scenario_label) : null,
-		isolationFlags: row.isolation_flags as SimulationRunRecord["isolationFlags"],
+		isolationFlags:
+			row.isolation_flags as SimulationRunRecord["isolationFlags"],
 		seedHash: row.seed_hash ? String(row.seed_hash) : null,
 		resultRef: row.result_ref ? String(row.result_ref) : null,
 		revision: Number(row.revision ?? 1),
@@ -176,7 +177,10 @@ export function createPgSimulationRunRepository(
 			const row = result.rows[0];
 			return row ? mapRun(row) : null;
 		},
-		async findByOrganizationAndBacktestRequestId(organizationId, backtestRequestId) {
+		async findByOrganizationAndBacktestRequestId(
+			organizationId,
+			backtestRequestId,
+		) {
 			const result = await client.query(
 				`SELECT * FROM simulation_runs
 			 WHERE organization_id = $1 AND backtest_request_id = $2`,

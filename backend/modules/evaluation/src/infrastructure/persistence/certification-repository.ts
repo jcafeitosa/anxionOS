@@ -1,6 +1,7 @@
 import type { Pool, PoolClient } from "pg";
 
 type PgQueryable = Pool | PoolClient;
+
 import type {
 	CertificationRepository,
 	CertificationRow,

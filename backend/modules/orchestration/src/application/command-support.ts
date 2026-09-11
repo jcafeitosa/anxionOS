@@ -108,7 +108,6 @@ export async function loadIdempotentRecordGateDispositionSnapshot(
 	};
 }
 
-
 export function buildCancelTaskRunCommandId(
 	idempotencyKey: string,
 	runId: string,
@@ -320,12 +319,13 @@ export function toCheckoutResultSnapshot(
 	};
 }
 
-
 export function buildRequestWaitingHumanCommandId(
 	runId: string,
 	operationId: string,
 ): string {
-	return deterministicCommandUuid(`waiting-human:request:${runId}:${operationId}`);
+	return deterministicCommandUuid(
+		`waiting-human:request:${runId}:${operationId}`,
+	);
 }
 
 export function buildResumeWaitingHumanCommandId(
@@ -352,7 +352,9 @@ export async function loadIdempotentWaitingHumanResult(
 	commandJournal: CommandJournalRepository,
 	commandId: string,
 	requestHash: string,
-): Promise<RequestWaitingHumanInputResult | ResumeFromWaitingHumanInputResult | null> {
+): Promise<
+	RequestWaitingHumanInputResult | ResumeFromWaitingHumanInputResult | null
+> {
 	const existing = await commandJournal.findByCommandId(commandId);
 	if (!existing?.responseSnapshot) return null;
 	assertCommandJournalReplay(existing.responseSnapshot, requestHash);

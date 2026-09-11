@@ -1,31 +1,30 @@
 export {
-	registerCapitalAccount,
-	type RegisterCapitalAccountDeps,
-} from "./application/commands/register-capital-account";
-export {
-	proposeAllocation,
 	type ProposeAllocationDeps,
+	proposeAllocation,
 } from "./application/commands/propose-allocation";
 export {
-	reserveForIntent,
+	type RegisterCapitalAccountDeps,
+	registerCapitalAccount,
+} from "./application/commands/register-capital-account";
+export {
+	type ReleaseReservationDeps,
+	releaseReservation,
+} from "./application/commands/release-reservation";
+export {
 	type ReserveForIntentDeps,
+	reserveForIntent,
 } from "./application/commands/reserve-for-intent";
+export {
+	type SweepExpiredReservationsDeps,
+	type SweepExpiredReservationsInput,
+	type SweepExpiredReservationsResult,
+	sweepExpiredReservations,
+} from "./application/commands/sweep-expired-reservations";
 export { CapitalCommandError, throwCapitalError } from "./application/errors";
 export {
 	createDefaultGrantValidationPort,
 	type GrantValidationPort,
 } from "./domain/ports/grant-validation-port";
-export { ensureCapitalSchema } from "./infrastructure/migrate";
 export { createCapitalUnitOfWork } from "./infrastructure/capital-unit-of-work";
+export { ensureCapitalSchema } from "./infrastructure/migrate";
 export { createPgCommandJournalRepository } from "./infrastructure/persistence/command-journal-repository";
-
-export {
-	releaseReservation,
-	type ReleaseReservationDeps,
-} from "./application/commands/release-reservation";
-export {
-	sweepExpiredReservations,
-	type SweepExpiredReservationsDeps,
-	type SweepExpiredReservationsInput,
-	type SweepExpiredReservationsResult,
-} from "./application/commands/sweep-expired-reservations";

@@ -20,7 +20,9 @@ function mapFxRateRow(row: Record<string, unknown>): FxRateRecord {
 	};
 }
 
-function mapCorporateActionRow(row: Record<string, unknown>): CorporateActionRecord {
+function mapCorporateActionRow(
+	row: Record<string, unknown>,
+): CorporateActionRecord {
 	return {
 		id: String(row.id),
 		organization_id: String(row.organization_id),
@@ -28,7 +30,8 @@ function mapCorporateActionRow(row: Record<string, unknown>): CorporateActionRec
 		action_kind: String(row.action_kind),
 		effective_date: (row.effective_date as Date).toISOString().split("T")[0],
 		raw_payload: row.raw_payload,
-		adjustment_factor: row.adjustment_factor != null ? String(row.adjustment_factor) : null,
+		adjustment_factor:
+			row.adjustment_factor != null ? String(row.adjustment_factor) : null,
 		source: String(row.source),
 		recorded_at: (row.recorded_at as Date).toISOString(),
 	};
@@ -52,7 +55,8 @@ export function createPgFxRateRepository(
 		},
 
 		async save(rate: FxRateRecord): Promise<FxRateRecord> {
-			const id = rate.id ?? `md_fx_${Math.random().toString(36).substring(2, 24)}`;
+			const id =
+				rate.id ?? `md_fx_${Math.random().toString(36).substring(2, 24)}`;
 			const result = await (client as any).query(
 				`INSERT INTO market_data_fx_rates (
 					id, base_currency, quote_currency, rate, as_of, source, created_at
@@ -91,7 +95,8 @@ export function createPgCorporateActionRepository(
 		},
 
 		async save(action: CorporateActionRecord): Promise<CorporateActionRecord> {
-			const id = action.id ?? `md_ca_${Math.random().toString(36).substring(2, 24)}`;
+			const id =
+				action.id ?? `md_ca_${Math.random().toString(36).substring(2, 24)}`;
 			const result = await (client as any).query(
 				`INSERT INTO market_data_corporate_actions (
 					id, organization_id, instrument_id, action_kind, effective_date,
@@ -107,7 +112,9 @@ export function createPgCorporateActionRepository(
 					action.action_kind,
 					action.effective_date,
 					JSON.stringify(action.raw_payload),
-					action.adjustment_factor != null ? Number(action.adjustment_factor) : null,
+					action.adjustment_factor != null
+						? Number(action.adjustment_factor)
+						: null,
 					action.source,
 					new Date(action.recorded_at),
 				],

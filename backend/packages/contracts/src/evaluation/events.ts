@@ -1,7 +1,7 @@
 import { z } from "zod";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import { performanceOutcomeSnapshotIdSchema } from "../performance/types";
 import { strategyIdSchema, strategyVersionIdSchema } from "../strategies/types";
-import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	decimalScoreSchema,
 	evaluationCertificationIdSchema,

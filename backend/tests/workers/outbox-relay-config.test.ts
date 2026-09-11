@@ -3,8 +3,8 @@ import {
 	DEFAULT_OUTBOX_RELAY_BATCH_SIZE,
 	DEFAULT_OUTBOX_RELAY_LEASE_TTL_MS,
 	DEFAULT_OUTBOX_RELAY_POLL_INTERVAL_MS,
-	WORKER_PROFILE_OUTBOX_RELAY,
 	loadOutboxRelayWorkerConfig,
+	WORKER_PROFILE_OUTBOX_RELAY,
 } from "../../apps/workers/src/config";
 
 describe("workers outbox relay config", () => {

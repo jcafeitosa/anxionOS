@@ -1,5 +1,5 @@
-import type { HandlePrincipalSuspendedDeps } from "./handle-principal-suspended";
 import { SessionRevocationUnavailableError } from "../../domain/ports/session-revoker";
+import type { HandlePrincipalSuspendedDeps } from "./handle-principal-suspended";
 
 export interface ReconcileSuspendedPrincipalSessionsResult {
 	revokedPrincipalCount: number;

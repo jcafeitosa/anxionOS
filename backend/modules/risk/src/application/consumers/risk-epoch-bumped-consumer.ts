@@ -1,6 +1,4 @@
-import {
-	riskEpochBumpedPayloadSchema,
-} from "@anxionos/contracts/risk";
+import { riskEpochBumpedPayloadSchema } from "@anxionos/contracts/risk";
 import type { z } from "zod";
 import { createPermitRevokedEvent } from "../../domain/events/risk-events";
 import type { RiskUnitOfWork } from "../../domain/ports/risk-unit-of-work";
@@ -21,7 +19,9 @@ export interface RiskEpochBumpedConsumerResult {
 	idempotentReplay?: boolean;
 }
 
-export function createRiskEpochBumpedConsumer(deps: RiskEpochBumpedConsumerDeps) {
+export function createRiskEpochBumpedConsumer(
+	deps: RiskEpochBumpedConsumerDeps,
+) {
 	return {
 		async handle(
 			payload: RiskEpochBumpedPayload,
@@ -62,10 +62,7 @@ export function createRiskEpochBumpedConsumer(deps: RiskEpochBumpedConsumerDeps)
 				const epoch = await ctx.epochRegistry.findByOrganization(
 					event.organizationId,
 				);
-				if (
-					!epoch ||
-					epoch.currentRiskEpoch !== event.currentRiskEpoch
-				) {
+				if (!epoch || epoch.currentRiskEpoch !== event.currentRiskEpoch) {
 					throwRiskError(
 						"RK_PERMIT_STALE",
 						"epoch registry does not match bumped event",

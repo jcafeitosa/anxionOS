@@ -23,7 +23,9 @@ describe("openbot port contracts (ANX-144 S1)", () => {
 		};
 		const decision = await gateway.authorizeToolCall(request);
 		expect(decision.decision).toBe("DENY");
-		await expect(gateway.forwardToolCall({ request, decision })).rejects.toThrow();
+		await expect(
+			gateway.forwardToolCall({ request, decision }),
+		).rejects.toThrow();
 	});
 
 	test("ToolGatewayPort allows and forwards with outcome hash", async () => {

@@ -2,11 +2,11 @@ import { z } from "zod";
 import { institutionalUuidSchema } from "../institutional-uuid";
 import {
 	checkoutStatusSchema,
-	waitingHumanContextSchema,
 	goalIdSchema,
 	issueIdentifierSchema,
 	runStatusSchema,
 	taskIdSchema,
+	waitingHumanContextSchema,
 } from "./types";
 export const taskDtoSchema = z.object({
 	id: taskIdSchema,

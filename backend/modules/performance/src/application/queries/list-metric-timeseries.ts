@@ -13,7 +13,10 @@ export async function listMetricPoints(
 	organizationId: string,
 	filter?: MetricPointFilter,
 ) {
-	const points = await deps.metricTimeseries.listMetricPoints(organizationId, filter);
+	const points = await deps.metricTimeseries.listMetricPoints(
+		organizationId,
+		filter,
+	);
 	return { metricPoints: points };
 }
 
@@ -22,6 +25,9 @@ export async function listPnlSeriesPoints(
 	organizationId: string,
 	filter?: PnlSeriesFilter,
 ) {
-	const points = await deps.metricTimeseries.listPnlSeriesPoints(organizationId, filter);
+	const points = await deps.metricTimeseries.listPnlSeriesPoints(
+		organizationId,
+		filter,
+	);
 	return { pnlSeriesPoints: points };
 }

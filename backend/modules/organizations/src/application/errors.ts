@@ -1,8 +1,8 @@
 import { AppError } from "@anxionos/contracts/errors";
 import {
+	type CommandResult,
 	ORGANIZATION_ERROR_STATUS_MAP,
 	type OrganizationErrorCode,
-	type CommandResult,
 } from "@anxionos/contracts/organizations";
 
 export class OrganizationCommandError extends AppError {

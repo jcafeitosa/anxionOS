@@ -1,9 +1,9 @@
 import {
 	AUTONOMY_NORMATIVE_MATRIX,
-	RUNTIME_DISABLED_AUTONOMY_LEVELS,
 	type AutonomyLevel,
 	type AutonomyLevelDefinition,
 	type AutonomyTransitionKind,
+	RUNTIME_DISABLED_AUTONOMY_LEVELS,
 } from "@anxionos/contracts/governance";
 
 const LEVEL_ORDER: readonly AutonomyLevel[] = ["L0", "L1", "L2", "L3", "L4"];
@@ -55,8 +55,13 @@ export interface TransitionValidationResult {
 export function validateAutonomyTransition(
 	input: TransitionValidationInput,
 ): TransitionValidationResult {
-	const { currentLevel, targetLevel, transitionKind, hasApproval, hasEvidence } =
-		input;
+	const {
+		currentLevel,
+		targetLevel,
+		transitionKind,
+		hasApproval,
+		hasEvidence,
+	} = input;
 
 	if (!isAutonomyLevelRuntimeEnabled(targetLevel)) {
 		return {
@@ -69,7 +74,10 @@ export function validateAutonomyTransition(
 
 	if (currentLevel === null) {
 		if (transitionKind !== "takeover") {
-			return { allowed: false, reason: "No active assignment; use assign first" };
+			return {
+				allowed: false,
+				reason: "No active assignment; use assign first",
+			};
 		}
 		if (targetDefinition.requiresApprovalToAssign && !hasApproval) {
 			return { allowed: false, reason: "Approval required for initial level" };
@@ -92,7 +100,10 @@ export function validateAutonomyTransition(
 
 		case "promote":
 			if (delta <= 0) {
-				return { allowed: false, reason: "Promote requires higher target level" };
+				return {
+					allowed: false,
+					reason: "Promote requires higher target level",
+				};
 			}
 			if (delta > 1) {
 				return {

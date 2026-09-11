@@ -6,8 +6,8 @@ import {
 	type CapabilityInvocationChannel,
 	type CapabilityManifestCatalog,
 	type CapabilityManifestEntry,
-	type ExecutionMode,
 	capabilityManifestCatalogSchema,
+	type ExecutionMode,
 } from "./schema";
 import {
 	getCapabilityErrorSchema,

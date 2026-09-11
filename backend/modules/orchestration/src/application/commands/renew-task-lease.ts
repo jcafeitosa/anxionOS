@@ -2,9 +2,9 @@ import type { RenewTaskLeaseCommand } from "@anxionos/contracts/orchestration";
 import { renewTaskLeaseCommandSchema } from "@anxionos/contracts/orchestration";
 import {
 	DEFAULT_LEASE_TTL_MS,
-	MAX_LEASE_TTL_MS,
 	isLeaseActive,
 	leaseTokensMatch,
+	MAX_LEASE_TTL_MS,
 } from "../../domain/entities/task-lease";
 import { createTaskLeaseRenewedEvent } from "../../domain/events/orchestration-events";
 import type { LeaseClock } from "../../domain/ports/lease-clock";

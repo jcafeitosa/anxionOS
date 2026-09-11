@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import {
-	GoCryptoTraderAdapter,
 	GCT_REAL_WIRING_BLOCKERS,
+	GoCryptoTraderAdapter,
 	mountGoCryptoTraderAdapter,
 	resolveGctEngineMode,
 	resolveGctSandboxUrl,

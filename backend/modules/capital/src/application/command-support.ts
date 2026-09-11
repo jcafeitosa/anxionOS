@@ -78,8 +78,6 @@ export function toCommandResultSnapshot(
 		accountId: result.accountId,
 		allocationId: result.allocationId,
 		reservationId: result.reservationId,
-		...(requestHash
-			? { [COMMAND_JOURNAL_REQUEST_HASH_KEY]: requestHash }
-			: {}),
+		...(requestHash ? { [COMMAND_JOURNAL_REQUEST_HASH_KEY]: requestHash } : {}),
 	};
 }

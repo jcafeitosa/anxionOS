@@ -6,6 +6,7 @@ import type {
 	DecisionsUnitOfWork,
 } from "../domain/ports/decisions-unit-of-work";
 import { createPgCommandJournalRepository } from "./persistence/command-journal-repository";
+import { createPgEvidenceManifestRepository } from "./persistence/evidence-manifest-repository";
 import {
 	createPgApprovalRepository,
 	createPgDecisionRepository,
@@ -13,7 +14,6 @@ import {
 	createPgProposalRepository,
 	createPgTradeIntentRepository,
 } from "./persistence/repositories";
-import { createPgEvidenceManifestRepository } from "./persistence/evidence-manifest-repository";
 import { createPgSubmitPreconditionsRepository } from "./persistence/submit-preconditions-repository";
 
 function createTransactionContext(

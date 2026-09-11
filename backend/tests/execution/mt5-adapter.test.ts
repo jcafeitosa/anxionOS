@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import {
-	Mt5Adapter,
 	MT5_REAL_WIRING_BLOCKERS,
+	Mt5Adapter,
 	mountMt5Adapter,
 	resolveMt5EngineMode,
 	resolveMt5SandboxUrl,

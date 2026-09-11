@@ -14,7 +14,8 @@ import { parseArgs } from "node:util";
 
 const STAGING_URI = process.env.NEO4J_STAGING_URI ?? "bolt://localhost:7688";
 const STAGING_USER = process.env.NEO4J_STAGING_USER ?? "neo4j";
-const STAGING_PASSWORD = process.env.NEO4J_STAGING_PASSWORD ?? "anxionos-staging";
+const STAGING_PASSWORD =
+	process.env.NEO4J_STAGING_PASSWORD ?? "anxionos-staging";
 
 function parseCli(argv) {
 	const { values } = parseArgs({
@@ -120,7 +121,10 @@ async function main() {
 
 	let graphTests = run(
 		"bun",
-		["test", "backend/tests/graph/neo4j-staging-homologation.integration.test.ts"],
+		[
+			"test",
+			"backend/tests/graph/neo4j-staging-homologation.integration.test.ts",
+		],
 		{
 			RUN_NEO4J_STAGING_INTEGRATION_TESTS: "true",
 			NEO4J_STAGING_URI: STAGING_URI,
@@ -132,7 +136,10 @@ async function main() {
 		await new Promise((resolve) => setTimeout(resolve, 10_000));
 		graphTests = run(
 			"bun",
-			["test", "backend/tests/graph/neo4j-staging-homologation.integration.test.ts"],
+			[
+				"test",
+				"backend/tests/graph/neo4j-staging-homologation.integration.test.ts",
+			],
 			{
 				RUN_NEO4J_STAGING_INTEGRATION_TESTS: "true",
 				NEO4J_STAGING_URI: STAGING_URI,
@@ -154,7 +161,9 @@ async function main() {
 	} else {
 		console.log(`P3 staging homologation — ${opts.issue}`);
 		console.log(`Neo4j staging running: ${report.neo4j.ok ? "yes" : "no"}`);
-		console.log(`Staging integration test: ${report.graphTests.ok ? "pass" : "fail"}`);
+		console.log(
+			`Staging integration test: ${report.graphTests.ok ? "pass" : "fail"}`,
+		);
 	}
 
 	process.exit(report.overallOk ? 0 : 1);

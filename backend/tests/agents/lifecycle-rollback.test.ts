@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { AGENTS_EVENT_TYPES } from "@anxionos/contracts/agents";
 import {
 	publishAgentVersion,
 	registerAgent,
 	rollbackAgentVersion,
 	transitionAgentStatus,
 } from "@anxionos/agents";
+import { AGENTS_EVENT_TYPES } from "@anxionos/contracts/agents";
 import {
 	createInMemoryAgentRepository,
 	createInMemoryAgentVersionRepository,
@@ -64,7 +64,9 @@ describe("transitionAgentStatus", () => {
 			modelSlots: [],
 			autonomyLevel: "L1",
 		});
-		const agentAfterPublish = await agentRepository.findById(registered.aggregateId);
+		const agentAfterPublish = await agentRepository.findById(
+			registered.aggregateId,
+		);
 		await transitionAgentStatus(deps, {
 			commandId: "33333333-3333-4333-8333-333333333333",
 			agentId: registered.aggregateId,
@@ -126,7 +128,8 @@ describe("rollbackAgentVersion", () => {
 		expect(rolledBack?.activeVersionId).toBe(v1Id);
 		expect(
 			published.some(
-				(event) => event.eventType === AGENTS_EVENT_TYPES.AGENT_VERSION_ROLLED_BACK,
+				(event) =>
+					event.eventType === AGENTS_EVENT_TYPES.AGENT_VERSION_ROLLED_BACK,
 			),
 		).toBe(true);
 	});

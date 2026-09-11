@@ -31,7 +31,9 @@ function main() {
 	if (!databaseUrl) {
 		const message = "DATABASE_URL is required for ANX-154 graph oracle";
 		if (cli.json) {
-			console.log(JSON.stringify({ issue: cli.issue, ok: false, error: message }));
+			console.log(
+				JSON.stringify({ issue: cli.issue, ok: false, error: message }),
+			);
 		} else {
 			console.error(message);
 		}

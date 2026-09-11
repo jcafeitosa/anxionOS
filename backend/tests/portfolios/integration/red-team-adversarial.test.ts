@@ -13,6 +13,7 @@ import {
 import {
 	applyTestFill,
 	buildLedgerPostedFixture,
+	confirmValuation,
 	createConfirmValuationDeps,
 	createPortfoliosLedgerConsumer,
 	createReconcileCashDeps,
@@ -21,7 +22,6 @@ import {
 	PORTFOLIOS_TEST_ORG_B_ID,
 	PORTFOLIOS_TEST_ORG_ID,
 	PORTFOLIOS_TEST_OWNER_USER_ID,
-	confirmValuation,
 	reconcileCashFromLedger,
 	seedCapitalTestAccount,
 	seedFreshInstrumentObservation,

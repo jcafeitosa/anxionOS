@@ -1,9 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import {
-	createPortfolioCommandSchema,
-	portfolioCreatedPayloadSchema,
-} from "@anxionos/contracts/portfolios";
-import {
 	dispatchBundleSchema,
 	openExecutionSessionCommandSchema,
 	reconcileUnknownCommandSchema,
@@ -11,13 +7,17 @@ import {
 	taskLeaseSchema,
 } from "@anxionos/contracts/execution";
 import {
-	registerStrategyCommandSchema,
-	strategyRegisteredPayloadSchema,
-} from "@anxionos/contracts/strategies";
+	createPortfolioCommandSchema,
+	portfolioCreatedPayloadSchema,
+} from "@anxionos/contracts/portfolios";
 import {
 	activateLimitPolicyCommandSchema,
 	checkCompletedPayloadSchema,
 } from "@anxionos/contracts/risk";
+import {
+	registerStrategyCommandSchema,
+	strategyRegisteredPayloadSchema,
+} from "@anxionos/contracts/strategies";
 
 const VALID_UUID = "a1234567-89ab-4def-8123-456789abcdef";
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";

@@ -3,15 +3,15 @@ export {
 	CAPABILITY_MANIFEST_V1_ENTRIES,
 } from "./catalog-v1";
 export {
-	createCapabilityManifestClient,
 	type CapabilityInvocationContext,
 	type CapabilityManifestClient,
+	createCapabilityManifestClient,
 } from "./client";
 export {
+	assertCapabilityOutcomeKnown,
 	CAPABILITY_MANIFEST_ERROR_CODES,
 	CAPABILITY_MANIFEST_ERROR_STATUS_MAP,
 	CapabilityManifestError,
-	assertCapabilityOutcomeKnown,
 	capabilityManifestErrorCodeSchema,
 } from "./errors";
 export { pageRequestSchema, pageResponseSchema } from "./pagination";
@@ -28,18 +28,19 @@ export {
 	validateCapabilityInput,
 } from "./registry";
 export {
-	getCapabilityErrorSchema,
-	getCapabilityInputSchema,
-	getCapabilityOutputSchema,
-	resolveCapabilitySchemaBundle,
-	type CapabilitySchemaBundle,
-	type CapabilitySchemaRef,
-} from "./schema-registry";
-export {
-	CAPABILITY_MANIFEST_CATALOG_VERSION,
+	type ApprovalPolicy,
+	type AuditPolicy,
 	approvalPolicySchema,
 	auditPolicySchema,
+	type BudgetPolicy,
 	budgetPolicySchema,
+	CAPABILITY_MANIFEST_CATALOG_VERSION,
+	type CapabilityId,
+	type CapabilityInvocationChannel,
+	type CapabilityManifestCatalog,
+	type CapabilityManifestEntry,
+	type CapabilityOwnerModule,
+	type CapabilitySurfaceMatrix,
 	capabilityContractVersionSchema,
 	capabilityIdSchema,
 	capabilityInvocationChannelSchema,
@@ -47,20 +48,19 @@ export {
 	capabilityManifestEntrySchema,
 	capabilityOwnerModuleSchema,
 	capabilitySurfaceMatrixSchema,
+	type ExecutionMode,
 	executionModeSchema,
+	type IdempotencyPolicy,
 	idempotencyKeyKindSchema,
 	idempotencyPolicySchema,
-	timeoutPolicySchema,
-	type ApprovalPolicy,
-	type AuditPolicy,
-	type BudgetPolicy,
-	type CapabilityId,
-	type CapabilityInvocationChannel,
-	type CapabilityManifestCatalog,
-	type CapabilityManifestEntry,
-	type CapabilityOwnerModule,
-	type CapabilitySurfaceMatrix,
-	type ExecutionMode,
-	type IdempotencyPolicy,
 	type TimeoutPolicy,
+	timeoutPolicySchema,
 } from "./schema";
+export {
+	type CapabilitySchemaBundle,
+	type CapabilitySchemaRef,
+	getCapabilityErrorSchema,
+	getCapabilityInputSchema,
+	getCapabilityOutputSchema,
+	resolveCapabilitySchemaBundle,
+} from "./schema-registry";

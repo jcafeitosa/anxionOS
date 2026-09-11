@@ -1,8 +1,8 @@
-import type { Pool } from "pg";
 import { createLogger } from "@anxionos/observability";
+import type { Pool } from "pg";
 import { bootstrapRealtimeNatsBridge } from "./nats-bridge";
 import { SubscriptionManager } from "./subscription-manager";
-import { startRealtimeTimers, type RealtimeTimersHandle } from "./timers";
+import { type RealtimeTimersHandle, startRealtimeTimers } from "./timers";
 
 const logger = createLogger({ service: "realtime-bootstrap" });
 

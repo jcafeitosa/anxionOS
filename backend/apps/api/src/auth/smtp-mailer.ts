@@ -30,8 +30,7 @@ export function resolveSmtpMailConfig(
 		return null;
 	}
 	const secure = env.SMTP_SECURE === "true" || port === 465;
-	const from =
-		env.SMTP_FROM?.trim() || env.EMAIL_FROM?.trim() || user;
+	const from = env.SMTP_FROM?.trim() || env.EMAIL_FROM?.trim() || user;
 	return {
 		host: env.SMTP_HOST?.trim() || "smtp.gmail.com",
 		port,

@@ -1,5 +1,5 @@
-import type { TenantScopedQueryable } from "@anxionos/database";
 import type { HealthDeps } from "@anxionos/contracts";
+import type { TenantScopedQueryable } from "@anxionos/database";
 import type { GrantRepository } from "@anxionos/governance";
 import type { PrincipalRepository } from "@anxionos/identity";
 import type { betterAuth } from "better-auth";
@@ -23,6 +23,13 @@ import {
 	incidentIdParamSchema,
 } from "./handlers/incidents";
 import {
+	handleGetPlatformHealth,
+	handleListPlatformIncidents,
+	handleListPlatformRecovery,
+	handleListPlatformRuntimes,
+	requirePlatformConsoleGrant,
+} from "./handlers/platform-queries";
+import {
 	handleGetRecoveryTask,
 	handleListRecoveryTasksByIncident,
 } from "./handlers/recovery-task-queries";
@@ -35,13 +42,6 @@ import {
 	handleStartRecoveryTaskExecution,
 	recoveryTaskIdParamSchema,
 } from "./handlers/recovery-tasks";
-import {
-	handleGetPlatformHealth,
-	handleListPlatformIncidents,
-	handleListPlatformRecovery,
-	handleListPlatformRuntimes,
-	requirePlatformConsoleGrant,
-} from "./handlers/platform-queries";
 
 export interface OperationsPluginDeps extends OperationsApiRuntime {
 	auth: ReturnType<typeof betterAuth>;
@@ -81,14 +81,8 @@ export function createOperationsPlugin(deps: OperationsPluginDeps) {
 		.group("/platform", (platform) =>
 			platform
 				.resolve(async ({ request }) => {
-					const { principal } = await resolveSessionPrincipal(
-						deps,
-						request,
-					);
-					await requirePlatformConsoleGrant(
-						deps.grantRepository,
-						principal.id,
-					);
+					const { principal } = await resolveSessionPrincipal(deps, request);
+					await requirePlatformConsoleGrant(deps.grantRepository, principal.id);
 					return { principal };
 				})
 				.get(
@@ -131,15 +125,13 @@ export function createOperationsPlugin(deps: OperationsPluginDeps) {
 						})
 						.get(
 							"/incidents",
-							({ agencyId }) =>
-								handleListIncidents(deps, { agencyId }),
+							({ agencyId }) => handleListIncidents(deps, { agencyId }),
 							operationsOpenApi.listIncidents,
 						)
 						.get(
 							"/incidents/:incidentId",
 							({ agencyId, params }) => {
-								const { incidentId } =
-									incidentIdParamSchema.parse(params);
+								const { incidentId } = incidentIdParamSchema.parse(params);
 								return handleGetIncident(deps, {
 									agencyId,
 									incidentId,
@@ -162,8 +154,7 @@ export function createOperationsPlugin(deps: OperationsPluginDeps) {
 						.get(
 							"/incidents/:incidentId/recovery-tasks",
 							({ agencyId, params }) => {
-								const { incidentId } =
-									incidentIdParamSchema.parse(params);
+								const { incidentId } = incidentIdParamSchema.parse(params);
 								return handleListRecoveryTasksByIncident(deps, {
 									agencyId,
 									incidentId,
@@ -203,8 +194,7 @@ export function createOperationsPlugin(deps: OperationsPluginDeps) {
 						.post(
 							"/incidents/:incidentId/transition-status",
 							async ({ request, agencyId, params }) => {
-								const { incidentId } =
-									incidentIdParamSchema.parse(params);
+								const { incidentId } = incidentIdParamSchema.parse(params);
 								const commandId = parseIdempotencyKey(request.headers);
 								const body = await request.json();
 								return handleTransitionIncidentStatus(deps, {
@@ -219,8 +209,7 @@ export function createOperationsPlugin(deps: OperationsPluginDeps) {
 						.post(
 							"/incidents/:incidentId/attach-runbook",
 							async ({ request, agencyId, principal, params }) => {
-								const { incidentId } =
-									incidentIdParamSchema.parse(params);
+								const { incidentId } = incidentIdParamSchema.parse(params);
 								const commandId = parseIdempotencyKey(request.headers);
 								const body = await request.json();
 								return handleAttachIncidentRunbook(deps, {
@@ -236,8 +225,7 @@ export function createOperationsPlugin(deps: OperationsPluginDeps) {
 						.post(
 							"/incidents/:incidentId/recovery-tasks",
 							async ({ request, agencyId, principal, params }) => {
-								const { incidentId } =
-									incidentIdParamSchema.parse(params);
+								const { incidentId } = incidentIdParamSchema.parse(params);
 								const commandId = parseIdempotencyKey(request.headers);
 								const body = await request.json();
 								return handleStartRecoveryTask(deps, {

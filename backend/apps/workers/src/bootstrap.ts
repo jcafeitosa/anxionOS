@@ -2,15 +2,13 @@ import {
 	createPgPool,
 	ensureEventingSchema,
 } from "@anxionos/eventing/postgres";
-import { ensureGraphSchema } from "@anxionos/graph";
 import type { GraphStore } from "@anxionos/graph";
+import { ensureGraphSchema } from "@anxionos/graph";
 import {
 	createNeo4jDriverFromEnv,
 	createNeo4jGraphStore,
 	ensureNeo4jGraphConstraints,
 } from "@anxionos/graph/neo4j";
-import type { Driver } from "neo4j-driver";
-import type { Pool } from "pg";
 import {
 	createFixtureOperationalBudget,
 	createOrchestrationDb,
@@ -20,10 +18,12 @@ import {
 	type OperationalBudgetPort,
 	type OrchestrationUnitOfWork,
 } from "@anxionos/orchestration";
-import type { OrchestrationS5WorkerConfig } from "./config";
+import type { Driver } from "neo4j-driver";
+import type { Pool } from "pg";
 import type {
 	GraphGovernanceWorkerConfig,
 	GraphProductWorkerConfig,
+	OrchestrationS5WorkerConfig,
 	OutboxRelayWorkerConfig,
 } from "./config";
 
@@ -81,7 +81,6 @@ export async function shutdownOutboxRelayWorker(
 ): Promise<void> {
 	await runtime.pool.end();
 }
-
 
 export interface OrchestrationS5WorkerRuntime {
 	pool: Pool;

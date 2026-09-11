@@ -1,18 +1,18 @@
+import { afterEach, describe, expect, test } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, test } from "bun:test";
 import {
 	SIMULATION_ERROR_CODES,
 	SIMULATION_EVENT_TYPES,
 	SIMULATION_OWNER_DOMAIN,
 } from "@anxionos/contracts/simulation";
 import {
-	SimulationCommandError,
 	createFilesystemSimulationResultStoreAdapter,
 	createSimulationRun,
 	createSqliteSimulationSandboxAdapter,
 	executeSimulationRun,
+	SimulationCommandError,
 } from "@anxionos/simulation";
 import {
 	createInMemoryCommandJournalRepository,
@@ -78,7 +78,9 @@ describe("executeSimulationRun (ANX-159 P08-S3)", () => {
 
 		expect(result.revision).toBe(2);
 		expect(published).toHaveLength(2);
-		expect(published[0]?.eventType).toBe(SIMULATION_EVENT_TYPES.SNAPSHOT_CREATED);
+		expect(published[0]?.eventType).toBe(
+			SIMULATION_EVENT_TYPES.SNAPSHOT_CREATED,
+		);
 		expect(published[1]).toMatchObject({
 			eventType: SIMULATION_EVENT_TYPES.RUN_COMPLETED,
 			ownerDomain: SIMULATION_OWNER_DOMAIN,

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { AGENTS_EVENT_TYPES } from "@anxionos/contracts/agents";
 import { publishAgentVersion, registerAgent } from "@anxionos/agents";
+import { AGENTS_EVENT_TYPES } from "@anxionos/contracts/agents";
 import {
 	createInMemoryAgentRepository,
 	createInMemoryAgentVersionRepository,
@@ -80,7 +80,8 @@ describe("registerAgent", () => {
 
 describe("publishAgentVersion", () => {
 	test("creates published version and bumps agent revision", async () => {
-		const { deps, agentRepository, agentVersionRepository, published } = createDeps();
+		const { deps, agentRepository, agentVersionRepository, published } =
+			createDeps();
 		const registered = await registerAgent(deps, {
 			commandId: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
 			displayName: "Risk Monitor",
@@ -104,7 +105,9 @@ describe("publishAgentVersion", () => {
 		const agent = await agentRepository.findById(registered.aggregateId);
 		expect(agent?.activeVersionId).toBe(publishedResult.aggregateId);
 		expect(agent?.revision).toBe(2);
-		const version = await agentVersionRepository.findById(publishedResult.aggregateId);
+		const version = await agentVersionRepository.findById(
+			publishedResult.aggregateId,
+		);
 		expect(version?.status).toBe("published");
 		expect(version?.publishedAt).toBeInstanceOf(Date);
 		const publishEvent = published.find(

@@ -11,14 +11,14 @@ import {
 	startRecoveryTaskCommandSchema,
 } from "@anxionos/contracts/operations";
 import { createRecoveryTaskStartedEvent } from "../../domain/events/operations-events";
+import type { CommandJournalRepository } from "../../domain/ports/command-journal";
+import type { OperationsUnitOfWork } from "../../domain/ports/operations-unit-of-work";
 import {
 	canTransitionRecoveryTaskStatus,
 	isAllowedRecoveryStepKind,
 	requiresApprovalForRecoveryStep,
 	resolveInitialRecoveryTaskStatus,
 } from "../../domain/recovery-lifecycle";
-import type { CommandJournalRepository } from "../../domain/ports/command-journal";
-import type { OperationsUnitOfWork } from "../../domain/ports/operations-unit-of-work";
 import {
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
@@ -110,10 +110,7 @@ export async function startRecoveryTask(
 
 		const incident = await ctx.incidents.findById(command.incidentId);
 		if (!incident) {
-			throwOperationsError(
-				"OPS_INCIDENT_NOT_FOUND",
-				"incident not found",
-			);
+			throwOperationsError("OPS_INCIDENT_NOT_FOUND", "incident not found");
 		}
 		if (incident.organizationId !== command.organizationId) {
 			throwOperationsError(

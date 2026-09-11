@@ -117,7 +117,6 @@ export function createIntentSubmittedEvent(input: {
 	};
 }
 
-
 export function createEvidenceManifestRecordedEvent(input: {
 	decisionId: string;
 	organizationId: string;

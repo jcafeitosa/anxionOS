@@ -15,8 +15,8 @@ import {
 import { parseCommandResultSnapshot, throwMarketDataError } from "../errors";
 
 export {
-	advanceBackfillCursorCommandSchema,
 	type AdvanceBackfillCursorCommand,
+	advanceBackfillCursorCommandSchema,
 } from "@anxionos/contracts/market-data";
 
 export interface AdvanceBackfillCursorDeps {

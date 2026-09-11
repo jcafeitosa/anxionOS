@@ -111,9 +111,7 @@ export type FullGenerationSwapPhase =
 	| "running";
 
 export interface RebuildConsumerControl {
-	drain(options?: {
-		timeoutMs?: number;
-	}): Promise<void>;
+	drain(options?: { timeoutMs?: number }): Promise<void>;
 	pause(): Promise<void>;
 	resume(): Promise<void>;
 }

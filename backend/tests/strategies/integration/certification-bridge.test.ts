@@ -12,10 +12,10 @@ import {
 import {
 	certifyStrategyVersionViaEvent,
 	promoteVersionToEvaluated,
-	seedBacktestedStrategyVersion,
-	shouldRunPgIntegrationTests,
 	STRATEGIES_TEST_BINDING,
 	STRATEGIES_TEST_ORG_ID,
+	seedBacktestedStrategyVersion,
+	shouldRunPgIntegrationTests,
 	withStrategiesPgHarness,
 } from "../test-support";
 
@@ -165,7 +165,10 @@ describe("strategies evaluation certification bridge (ANX-147 S5)", () => {
 			await certifyStrategyVersionViaEvent(pool, seeded);
 
 			const activated = await activateDeployment(
-				{ unitOfWork: seeded.unitOfWork, commandJournal: seeded.commandJournal },
+				{
+					unitOfWork: seeded.unitOfWork,
+					commandJournal: seeded.commandJournal,
+				},
 				{
 					commandId: randomUUID(),
 					organizationId: STRATEGIES_TEST_ORG_ID,

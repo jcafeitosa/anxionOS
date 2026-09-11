@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-	EVALUATION_EVENT_TYPES,
 	computeOutcomeNotionalScore,
+	EVALUATION_EVENT_TYPES,
 } from "@anxionos/contracts/evaluation";
 import {
 	EvaluationCommandError,
@@ -63,9 +63,8 @@ describe("recordEvaluationScore (ANX-160 S1)", () => {
 		expect(result.revision).toBe(1);
 		expect(result.idempotentReplay).toBeUndefined();
 
-		const storedRecord = await evaluationRecords.findByOutcomeSnapshotId(
-			outcomeSnapshotId,
-		);
+		const storedRecord =
+			await evaluationRecords.findByOutcomeSnapshotId(outcomeSnapshotId);
 		expect(storedRecord?.organizationId).toBe(organizationId);
 
 		const storedScore = await evaluationScores.findByEvaluationRecordId(
@@ -143,10 +142,8 @@ describe("recordEvaluationScore (ANX-160 S1)", () => {
 				responseSnapshot: {
 					aggregateId: "evl_rec_77777777-7777-4777-8777-777777777777",
 					revision: 1,
-					evaluationRecordId:
-						"evl_rec_77777777-7777-4777-8777-777777777777",
-					evaluationScoreId:
-						"evl_scr_88888888-8888-4888-8888-888888888888",
+					evaluationRecordId: "evl_rec_77777777-7777-4777-8777-777777777777",
+					evaluationScoreId: "evl_scr_88888888-8888-4888-8888-888888888888",
 				},
 			},
 		]);

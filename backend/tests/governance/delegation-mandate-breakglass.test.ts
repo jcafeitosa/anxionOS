@@ -3,8 +3,8 @@ import { GOVERNANCE_EVENT_TYPES } from "@anxionos/contracts/governance";
 import {
 	activateBreakGlass,
 	createDelegation,
-	issueMandate,
 	type Grant,
+	issueMandate,
 } from "@anxionos/governance";
 import { GovernanceCommandError } from "../../modules/governance/src/application/errors";
 import {
@@ -88,15 +88,20 @@ describe("createDelegation (G3-GOV-04)", () => {
 		});
 		expect(result.authorityEpoch).toBe(1);
 		const delegation = await delegationRepository.findById(result.aggregateId);
-		expect(delegation?.capabilitySubset).toEqual(["owner.read", "owner.manage"]);
+		expect(delegation?.capabilitySubset).toEqual([
+			"owner.read",
+			"owner.manage",
+		]);
 		const childGrants = await grantRepository.listEffective(
 			scopeId,
 			delegatePrincipalId,
 		);
 		expect(childGrants).toHaveLength(2);
-		expect(published.some((e) => e.eventType === GOVERNANCE_EVENT_TYPES.DELEGATION_CREATED)).toBe(
-			true,
-		);
+		expect(
+			published.some(
+				(e) => e.eventType === GOVERNANCE_EVENT_TYPES.DELEGATION_CREATED,
+			),
+		).toBe(true);
 	});
 
 	test("rejects capability subset that exceeds parent grant", async () => {

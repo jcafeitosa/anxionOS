@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { gateBindingV1Schema } from "./gate-binding/1.0.0/schema";
 import { institutionalUuidSchema } from "../institutional-uuid";
+import { gateBindingV1Schema } from "./gate-binding/1.0.0/schema";
 import {
 	agentIdSchema,
 	checkoutStatusSchema,
@@ -22,7 +22,8 @@ export const ORCHESTRATION_EVENT_TYPES = {
 	RUN_WAITING_HUMAN_REQUESTED: "orchestration.run.waiting_human_requested.v1",
 	RUN_RESUMED_FROM_HUMAN: "orchestration.run.resumed_from_human.v1",
 	RUN_TERMINATED: "orchestration.run.terminated.v1",
-	RUN_RESTARTED_FROM_CHECKPOINT: "orchestration.run.restarted_from_checkpoint.v1",
+	RUN_RESTARTED_FROM_CHECKPOINT:
+		"orchestration.run.restarted_from_checkpoint.v1",
 	RUN_BUDGET_STOPPED: "orchestration.run.budget_stopped.v1",
 };
 export const orchestrationTaskCheckedOutV1PayloadSchema = z.object({
@@ -42,7 +43,14 @@ export const orchestrationTaskLeaseReleasedV1PayloadSchema = z.object({
 	runId: runIdSchema.optional(),
 	agentId: agentIdSchema,
 	issueIdentifier: issueIdentifierSchema,
-	reason: z.enum(["board_in_review", "manual", "gate_blocked", "ttl_expired", "cancelled", "budget_exceeded"]),
+	reason: z.enum([
+		"board_in_review",
+		"manual",
+		"gate_blocked",
+		"ttl_expired",
+		"cancelled",
+		"budget_exceeded",
+	]),
 });
 export const orchestrationTaskLeaseRenewedV1PayloadSchema = z.object({
 	taskId: taskIdSchema,
@@ -175,7 +183,9 @@ export const orchestrationEventPayloadSchema = z.discriminatedUnion(
 			payload: orchestrationPlanRevisionProposedV1PayloadSchema,
 		}),
 		z.object({
-			eventType: z.literal(ORCHESTRATION_EVENT_TYPES.RUN_WAITING_HUMAN_REQUESTED),
+			eventType: z.literal(
+				ORCHESTRATION_EVENT_TYPES.RUN_WAITING_HUMAN_REQUESTED,
+			),
 			payload: orchestrationRunWaitingHumanRequestedV1PayloadSchema,
 		}),
 		z.object({

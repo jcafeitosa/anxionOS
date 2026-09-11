@@ -1,28 +1,18 @@
-export {
-	registerAIAccountCommandSchema,
-	authorizeAIAccountCommandSchema,
-	createConnectionBindingCommandSchema,
-	activateConnectionBindingCommandSchema,
-	invokeInferenceCommandSchema,
-	connectionsCommandResultSchema,
-	agentModelBindingRefSchema,
-} from "./commands";
 export type {
 	ConnectionsCommandResult,
 	InvokeInferenceCommand,
 	RegisterAIAccountCommand,
 } from "./commands";
 export {
-	CONNECTIONS_OWNER_DOMAIN,
-	CONNECTIONS_EVENT_TYPES,
-	connectionsEventPayloadSchema,
-	aiAccountRegisteredPayloadSchema,
-	bindingActivatedPayloadSchema,
-	inferenceCompletedPayloadSchema,
-	usageRecordedPayloadSchema,
-	inferenceWaitingHumanPayloadSchema,
-} from "./events";
-export type { ConnectionsEventType } from "./events";
+	activateConnectionBindingCommandSchema,
+	agentModelBindingRefSchema,
+	authorizeAIAccountCommandSchema,
+	connectionsCommandResultSchema,
+	createConnectionBindingCommandSchema,
+	invokeInferenceCommandSchema,
+	registerAIAccountCommandSchema,
+} from "./commands";
+export type { ConnectionsErrorCode, ConnectionsErrorDetails } from "./errors";
 export {
 	CONNECTIONS_ERROR_CODES,
 	CONNECTIONS_ERROR_STATUS_MAP,
@@ -30,24 +20,17 @@ export {
 	connectionsErrorDetailsSchema,
 	resolveConnectionsErrorStatus,
 } from "./errors";
-export type { ConnectionsErrorCode, ConnectionsErrorDetails } from "./errors";
+export type { ConnectionsEventType } from "./events";
 export {
-	aiAccountIdSchema,
-	assertConnectionKindSupported,
-	connectionBindingIdSchema,
-	connectionBindingStatusSchema,
-	connectionEnvironmentSchema,
-	connectionIdSchema,
-	connectionKindSchema,
-	connectionsEffectClassSchema,
-	connectionsSecretRefSchema,
-	consumerKindSchema,
-	ConnectionsContractError,
-	grantRefSchema,
-	inferenceRequestIdSchema,
-	usageRecordIdSchema,
-	waitingHumanResultSchema,
-} from "./types";
+	aiAccountRegisteredPayloadSchema,
+	bindingActivatedPayloadSchema,
+	CONNECTIONS_EVENT_TYPES,
+	CONNECTIONS_OWNER_DOMAIN,
+	connectionsEventPayloadSchema,
+	inferenceCompletedPayloadSchema,
+	inferenceWaitingHumanPayloadSchema,
+	usageRecordedPayloadSchema,
+} from "./events";
 export type {
 	ConnectionBindingStatus,
 	ConnectionEnvironment,
@@ -57,4 +40,21 @@ export type {
 	ConsumerKind,
 	GrantRef,
 	WaitingHumanResult,
+} from "./types";
+export {
+	aiAccountIdSchema,
+	assertConnectionKindSupported,
+	ConnectionsContractError,
+	connectionBindingIdSchema,
+	connectionBindingStatusSchema,
+	connectionEnvironmentSchema,
+	connectionIdSchema,
+	connectionKindSchema,
+	connectionsEffectClassSchema,
+	connectionsSecretRefSchema,
+	consumerKindSchema,
+	grantRefSchema,
+	inferenceRequestIdSchema,
+	usageRecordIdSchema,
+	waitingHumanResultSchema,
 } from "./types";

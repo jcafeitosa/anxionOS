@@ -112,8 +112,7 @@ describe("partners commands", () => {
 	});
 
 	test("reverseCommissionFromInvoice claws back accrued commission", async () => {
-		const { unitOfWork, commandJournal, getAccruals } =
-			createPartnersTestUow();
+		const { unitOfWork, commandJournal, getAccruals } = createPartnersTestUow();
 		await registerPartner(
 			{ unitOfWork, commandJournal },
 			{
@@ -154,8 +153,13 @@ describe("partners commands", () => {
 	});
 
 	test("requestPayout and approvePayout require approval and mark accruals paid", async () => {
-		const { unitOfWork, commandJournal, getAccruals, getPayouts, getPublished } =
-			createPartnersTestUow();
+		const {
+			unitOfWork,
+			commandJournal,
+			getAccruals,
+			getPayouts,
+			getPublished,
+		} = createPartnersTestUow();
 		const registered = await registerPartner(
 			{ unitOfWork, commandJournal },
 			{

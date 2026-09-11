@@ -1,8 +1,8 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import type { Pool } from "pg";
-import { createDrizzleAutonomyAssignmentRepository } from "./persistence/autonomy-assignment-repository";
 import { createDrizzleApprovalRepository } from "./persistence/approval-repository";
 import { createDrizzleAuthorityEpochStore } from "./persistence/authority-epoch-store";
+import { createDrizzleAutonomyAssignmentRepository } from "./persistence/autonomy-assignment-repository";
 import { createDrizzleChangeProposalRepository } from "./persistence/change-proposal-repository";
 import { createDrizzleCommandJournalRepository } from "./persistence/command-journal-repository";
 import { createDrizzleGrantRepository } from "./persistence/grant-repository";

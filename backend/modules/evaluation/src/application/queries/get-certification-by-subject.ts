@@ -1,6 +1,9 @@
 import type { CertificationRepository } from "../../domain/ports/certification";
 import { throwEvaluationError } from "../errors";
-import { toCertificationView, type EvaluationCertificationView } from "./query-support";
+import {
+	type EvaluationCertificationView,
+	toCertificationView,
+} from "./query-support";
 
 export interface GetCertificationBySubjectDeps {
 	certifications: CertificationRepository;

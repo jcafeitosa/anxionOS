@@ -22,9 +22,7 @@ export function computeFixtureDatasetHash(
 	return `sha256:${digest}`;
 }
 
-export function resolveDatasetHash(
-	manifest?: Record<string, unknown>,
-): string {
+export function resolveDatasetHash(manifest?: Record<string, unknown>): string {
 	if (!manifest) {
 		return DEFAULT_DATASET_HASH;
 	}

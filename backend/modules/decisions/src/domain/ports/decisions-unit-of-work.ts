@@ -80,14 +80,9 @@ export interface TradeIntentRepository {
 	save(record: TradeIntentRecord): Promise<TradeIntentRecord>;
 }
 export interface ApprovalRepository {
-	findPendingByDecisionId(
-		decisionId: string,
-	): Promise<ApprovalRecord | null>;
+	findPendingByDecisionId(decisionId: string): Promise<ApprovalRecord | null>;
 	save(record: ApprovalRecord): Promise<ApprovalRecord>;
-	grant(
-		id: string,
-		approverId: string,
-	): Promise<ApprovalRecord>;
+	grant(id: string, approverId: string): Promise<ApprovalRecord>;
 }
 export interface DispositionRepository {
 	findByDecisionId(decisionId: string): Promise<DispositionRecord | null>;

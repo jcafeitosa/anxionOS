@@ -12,7 +12,8 @@
 import { spawnSync } from "node:child_process";
 import { parseArgs } from "node:util";
 
-const DEFAULT_HEALTH_URL = process.env.API_HEALTH_URL ?? "http://127.0.0.1:3000/health";
+const DEFAULT_HEALTH_URL =
+	process.env.API_HEALTH_URL ?? "http://127.0.0.1:3000/health";
 
 function parseCli(argv) {
 	const { values } = parseArgs({
@@ -85,7 +86,10 @@ async function main() {
 
 	const graphTests = run(
 		"bun",
-		["test", "backend/tests/graph/neo4j-sandbox-homologation.integration.test.ts"],
+		[
+			"test",
+			"backend/tests/graph/neo4j-sandbox-homologation.integration.test.ts",
+		],
 		{
 			RUN_NEO4J_INTEGRATION_TESTS: "true",
 			NEO4J_URI: process.env.NEO4J_URI ?? "bolt://localhost:7687",
@@ -158,10 +162,16 @@ async function main() {
 	} else {
 		console.log(`P2 sandbox homologation — ${opts.issue}`);
 		console.log(`Neo4j running: ${report.neo4j.ok ? "yes" : "no"}`);
-		console.log(`Neo4j integration test: ${report.graphTests.ok ? "pass" : "fail"}`);
-		console.log(`API health (${DEFAULT_HEALTH_URL}): ${health.ok ? "ok" : "unavailable"}`);
+		console.log(
+			`Neo4j integration test: ${report.graphTests.ok ? "pass" : "fail"}`,
+		);
+		console.log(
+			`API health (${DEFAULT_HEALTH_URL}): ${health.ok ? "ok" : "unavailable"}`,
+		);
 		if (report.selfHealing) {
-			console.log(`Self-healing: ${report.selfHealing.mode}${report.selfHealing.ok ? " pass" : ""}`);
+			console.log(
+				`Self-healing: ${report.selfHealing.mode}${report.selfHealing.ok ? " pass" : ""}`,
+			);
 		}
 	}
 

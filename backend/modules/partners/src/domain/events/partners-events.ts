@@ -1,7 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { schemaVersion } from "@anxionos/contracts";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
-import { PARTNERS_EVENT_TYPES, PARTNERS_OWNER_DOMAIN } from "@anxionos/contracts/partners";
+import {
+	PARTNERS_EVENT_TYPES,
+	PARTNERS_OWNER_DOMAIN,
+} from "@anxionos/contracts/partners";
 
 export function createCommissionAccruedEvent(input: {
 	commissionAccrualId: string;

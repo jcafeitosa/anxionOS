@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import {
 	type EvaluationCommandResult,
-	type PerformanceOutcomeRecordedBridge,
 	mapOutcomeRecordedToEvaluationInput,
+	type PerformanceOutcomeRecordedBridge,
 } from "@anxionos/contracts/evaluation";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { EvaluationUnitOfWork } from "../../domain/ports/evaluation-unit-of-work";

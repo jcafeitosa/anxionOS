@@ -1,4 +1,10 @@
 import {
+	listOutcomeSnapshotsQuerySchema,
+	listPositionExposureSnapshotsQuerySchema,
+	performanceOutcomeSnapshotIdSchema,
+	performancePositionExposureSnapshotIdSchema,
+} from "@anxionos/contracts/performance";
+import {
 	getOutcomeSnapshot,
 	getPositionExposureSnapshot,
 	listOutcomeSnapshotMetrics,
@@ -6,12 +12,6 @@ import {
 	listPositionExposureSnapshotMetrics,
 	listPositionExposureSnapshots,
 } from "@anxionos/performance";
-import {
-	listOutcomeSnapshotsQuerySchema,
-	listPositionExposureSnapshotsQuerySchema,
-	performanceOutcomeSnapshotIdSchema,
-	performancePositionExposureSnapshotIdSchema,
-} from "@anxionos/contracts/performance";
 import { z } from "zod";
 import type { PerformancePluginDeps } from "../plugin";
 

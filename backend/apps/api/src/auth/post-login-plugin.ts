@@ -1,19 +1,16 @@
-import type { GrantRepository } from "@anxionos/governance";
-import { hasPlatformConsoleGrant } from "@anxionos/governance";
-import type { PrincipalRepository } from "@anxionos/identity";
-import type { MembershipRepository } from "@anxionos/organizations";
 import {
 	isAppError,
 	resolveStatusCode,
 	toErrorResponse,
 } from "@anxionos/contracts/errors";
+import type { GrantRepository } from "@anxionos/governance";
+import { hasPlatformConsoleGrant } from "@anxionos/governance";
+import type { PrincipalRepository } from "@anxionos/identity";
+import type { MembershipRepository } from "@anxionos/organizations";
 import type { betterAuth } from "better-auth";
 import { Elysia } from "elysia";
-import {
-	type ConsoleRole,
-	decidePostLoginContext,
-} from "./post-login-context";
 import { postLoginContextOpenApiDetail } from "../openapi-operations";
+import { type ConsoleRole, decidePostLoginContext } from "./post-login-context";
 
 export interface PostLoginPluginDeps {
 	auth: ReturnType<typeof betterAuth>;
@@ -70,75 +67,79 @@ export function createPostLoginPlugin(deps: PostLoginPluginDeps) {
 			set.status = 503;
 			return toErrorResponse(error, { requestId });
 		})
-		.get("/post-login-context", async ({ request }) => {
-			const now = new Date();
-			const session = await deps.auth.api.getSession({
-				headers: request.headers,
-			});
-			if (!session?.user?.id) {
+		.get(
+			"/post-login-context",
+			async ({ request }) => {
+				const now = new Date();
+				const session = await deps.auth.api.getSession({
+					headers: request.headers,
+				});
+				if (!session?.user?.id) {
+					return decidePostLoginContext({
+						authenticated: false,
+						emailVerified: false,
+						mfaRequired: false,
+						principal: null,
+						membershipsActive: [],
+						membershipsPending: [],
+						platformAccess: false,
+						partnerAccess: false,
+						now,
+					});
+				}
+
+				const principal = await deps.identityRepository.findByAuthUserId(
+					session.user.id,
+				);
+				const email = principal?.email ?? session.user.email ?? "";
+				const membershipsActive = principal
+					? await deps.membershipRepository.listActiveByPrincipal(principal.id)
+					: [];
+				const membershipsPending = principal
+					? await deps.membershipRepository.listInvitedForActor({
+							principalId: principal.id,
+							email,
+						})
+					: [];
+				const platformAccess = principal
+					? await hasPlatformConsoleGrant(
+							{ grantRepository: deps.grantRepository },
+							principal.id,
+							now,
+						)
+					: false;
+
 				return decidePostLoginContext({
-					authenticated: false,
-					emailVerified: false,
-					mfaRequired: false,
-					principal: null,
-					membershipsActive: [],
-					membershipsPending: [],
-					platformAccess: false,
+					authenticated: true,
+					emailVerified: sessionEmailVerified(session.user),
+					mfaRequired: sessionMfaRequired({
+						user: session.user,
+						session: session.session,
+					}),
+					principal: principal
+						? {
+								id: principal.id,
+								authUserId: principal.authUserId,
+								email: principal.email,
+								displayName: session.user.name ?? null,
+								status: principal.status,
+							}
+						: null,
+					membershipsActive: membershipsActive.map((membership) => ({
+						agencyId: membership.agencyId,
+						role: membership.role,
+					})),
+					membershipsPending: membershipsPending.map((membership) => ({
+						agencyId: membership.agencyId,
+						role: isConsoleRole(membership.role) ? membership.role : undefined,
+						inviteEmail: membership.inviteEmail ?? undefined,
+						inviteExpiresAt: membership.inviteExpiresAt?.toISOString(),
+					})),
+					platformAccess,
 					partnerAccess: false,
 					now,
 				});
-			}
-
-			const principal = await deps.identityRepository.findByAuthUserId(
-				session.user.id,
-			);
-			const email = principal?.email ?? session.user.email ?? "";
-			const membershipsActive = principal
-				? await deps.membershipRepository.listActiveByPrincipal(principal.id)
-				: [];
-			const membershipsPending = principal
-				? await deps.membershipRepository.listInvitedForActor({
-						principalId: principal.id,
-						email,
-					})
-				: [];
-			const platformAccess = principal
-				? await hasPlatformConsoleGrant(
-						{ grantRepository: deps.grantRepository },
-						principal.id,
-						now,
-					)
-				: false;
-
-			return decidePostLoginContext({
-				authenticated: true,
-				emailVerified: sessionEmailVerified(session.user),
-				mfaRequired: sessionMfaRequired({
-					user: session.user,
-					session: session.session,
-				}),
-				principal: principal
-					? {
-							id: principal.id,
-							authUserId: principal.authUserId,
-							email: principal.email,
-							displayName: session.user.name ?? null,
-							status: principal.status,
-						}
-					: null,
-				membershipsActive: membershipsActive.map((membership) => ({
-					agencyId: membership.agencyId,
-					role: membership.role,
-				})),
-				membershipsPending: membershipsPending.map((membership) => ({
-					agencyId: membership.agencyId,
-					role: isConsoleRole(membership.role) ? membership.role : undefined,
-					inviteEmail: membership.inviteEmail ?? undefined,
-					inviteExpiresAt: membership.inviteExpiresAt?.toISOString(),
-				})),
-				platformAccess,
-				partnerAccess: false,
-				now,
-			});
-		}, postLoginContextOpenApiDetail);
+			},
+			postLoginContextOpenApiDetail,
+		);
 }

@@ -28,9 +28,7 @@ const DEPLOYABLE_LIFECYCLE = new Set([
 function hashBindingSnapshot(
 	snapshot: ActivateDeploymentCommand["bindingSnapshot"],
 ): string {
-	return createHash("sha256")
-		.update(JSON.stringify(snapshot))
-		.digest("hex");
+	return createHash("sha256").update(JSON.stringify(snapshot)).digest("hex");
 }
 
 export interface ActivateDeploymentDeps {
@@ -52,10 +50,7 @@ export async function activateDeployment(
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
-			return replayIdempotentCommandJournalEntry(
-				raced,
-				command.organizationId,
-			);
+			return replayIdempotentCommandJournalEntry(raced, command.organizationId);
 		}
 		const strategy = await ctx.strategies.findById(
 			command.strategyId,

@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import {
-	SessionRevocationUnavailableError,
-	handlePrincipalSuspended,
-} from "@anxionos/identity";
 import type { Principal } from "@anxionos/identity";
+import {
+	handlePrincipalSuspended,
+	SessionRevocationUnavailableError,
+} from "@anxionos/identity";
 import { createInMemoryPrincipalRepository } from "./test-support";
 
 const principal: Principal = {

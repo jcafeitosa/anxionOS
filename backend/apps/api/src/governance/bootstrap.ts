@@ -1,9 +1,9 @@
-import { createIdentityDb } from "@anxionos/identity";
 import {
 	createGovernanceDb,
 	createGovernanceUnitOfWork,
 	createGraphT01TraversalEvaluator,
 } from "@anxionos/governance";
+import { createIdentityDb } from "@anxionos/identity";
 import { createIdentityPrincipalLookup } from "@anxionos/organizations";
 import type { Pool } from "pg";
 import type { GovernancePluginDeps } from "./plugin";

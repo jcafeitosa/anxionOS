@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { assertActorCanMutate } from "@anxionos/organizations";
-import type { Membership } from "../../modules/organizations/src/domain/entities/membership";
 import { mapGovernanceError } from "../../apps/api/src/governance/error-handler";
+import type { Membership } from "../../modules/organizations/src/domain/entities/membership";
 import { createInMemoryMembershipRepository } from "../organizations/test-support";
 
 const agencyId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
@@ -62,11 +62,18 @@ describe("governance POST RBAC (ANX-443)", () => {
 		["owner", "dddddddd-dddd-4ddd-8ddd-dddddddddd01"],
 		["admin", "dddddddd-dddd-4ddd-8ddd-dddddddddd02"],
 		["operator", "dddddddd-dddd-4ddd-8ddd-dddddddddd03"],
-	] as const)("%s membership passes mutation guard", async (role, principalId) => {
-		const repo = createInMemoryMembershipRepository([
-			activeMembership(role, principalId),
-		]);
-		const membership = await assertActorCanMutate(repo, principalId, agencyId);
-		expect(membership.role).toBe(role);
-	});
+	] as const)(
+		"%s membership passes mutation guard",
+		async (role, principalId) => {
+			const repo = createInMemoryMembershipRepository([
+				activeMembership(role, principalId),
+			]);
+			const membership = await assertActorCanMutate(
+				repo,
+				principalId,
+				agencyId,
+			);
+			expect(membership.role).toBe(role);
+		},
+	);
 });

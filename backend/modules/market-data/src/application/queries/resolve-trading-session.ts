@@ -1,6 +1,9 @@
-import type { MarketCalendarRepository } from "../../domain/ports/market-calendar-repository";
+import type {
+	MarketCalendarRepository,
+	TradingSessionRecord,
+	VenueCalendarRecord,
+} from "../../domain/ports/market-calendar-repository";
 import type { MarketDataUnitOfWork } from "../../domain/ports/market-data-unit-of-work";
-import type { VenueCalendarRecord, TradingSessionRecord } from "../../domain/ports/market-calendar-repository";
 
 export interface ResolveTradingSessionDeps {
 	calendarRepository: MarketCalendarRepository;
@@ -48,7 +51,9 @@ export async function resolveTradingSession(
 	input: ResolveTradingSessionInput,
 ): Promise<ResolveTradingSessionResult> {
 	// Step 1: Look up the venue calendar
-	const venueCalendar = await deps.calendarRepository.findVenueCalendar(input.venueId);
+	const venueCalendar = await deps.calendarRepository.findVenueCalendar(
+		input.venueId,
+	);
 	if (!venueCalendar) {
 		return { status: "VENUE_NOT_FOUND" };
 	}

@@ -72,7 +72,9 @@ export const sandboxToolCatalogSchema = z.object({
 	entries: z.array(sandboxToolCatalogEntrySchema).min(1),
 });
 
-export type ToolInvocationDecision = z.infer<typeof toolInvocationDecisionSchema>;
+export type ToolInvocationDecision = z.infer<
+	typeof toolInvocationDecisionSchema
+>;
 export type ToolAuditPhase = z.infer<typeof toolAuditPhaseSchema>;
 export type ComputerSessionStatus = z.infer<typeof computerSessionStatusSchema>;
 export type ComputerSessionController = z.infer<
@@ -109,5 +111,7 @@ export const botRunGenerationRefSchema = z.object({
 	abortToken: institutionalUuidSchema,
 });
 
-export type BotRunGenerationStatus = z.infer<typeof botRunGenerationStatusSchema>;
+export type BotRunGenerationStatus = z.infer<
+	typeof botRunGenerationStatusSchema
+>;
 export type BotRunGenerationRef = z.infer<typeof botRunGenerationRefSchema>;

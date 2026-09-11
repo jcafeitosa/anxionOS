@@ -3,7 +3,6 @@ import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { TaskLease } from "../../domain/entities/task-lease";
 import type { TaskLeaseRepository } from "../../domain/ports/task-lease-repository";
 import type { TaskLeaseRow } from "./schema";
-import {} from "./schema";
 import { taskLeases, tasks } from "./schema";
 
 export function toTaskLease(row: TaskLeaseRow): TaskLease {

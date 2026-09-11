@@ -106,9 +106,7 @@ export interface KillSwitchRepository {
 		organizationId: string,
 		portfolioId: string,
 	): Promise<KillSwitchRecord | null>;
-	findOrganizationStatus(
-		organizationId: string,
-	): Promise<KillSwitchStatusRow>;
+	findOrganizationStatus(organizationId: string): Promise<KillSwitchStatusRow>;
 	save(record: KillSwitchRecord): Promise<KillSwitchRecord>;
 	deactivate(input: {
 		organizationId: string;

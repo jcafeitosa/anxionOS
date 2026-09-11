@@ -1,9 +1,9 @@
+import { AgentsCommandError } from "@anxionos/agents";
 import {
 	isAppError,
 	resolveStatusCode,
 	toErrorResponse,
 } from "@anxionos/contracts/errors";
-import { AgentsCommandError } from "@anxionos/agents";
 import { PrincipalLookupUnavailableError } from "@anxionos/organizations";
 
 export function mapAgentsError(

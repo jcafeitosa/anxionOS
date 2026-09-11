@@ -121,8 +121,7 @@ export class CryptofeedAdapter implements RiskPermitValidationPort {
 		this.sandboxUrl = resolveCfsSandboxUrl(options.sandboxUrl);
 		this.engineMode = resolveCfsEngineMode(options.engineMode);
 		this.fetchFn = options.fetchFn ?? fetch;
-		this.healthTimeoutMs =
-			options.healthTimeoutMs ?? DEFAULT_HEALTH_TIMEOUT_MS;
+		this.healthTimeoutMs = options.healthTimeoutMs ?? DEFAULT_HEALTH_TIMEOUT_MS;
 	}
 
 	private validateLicenseFormat(license: string): boolean {

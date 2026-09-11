@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { OPERATIONS_ERROR_CODES } from "@anxionos/contracts/operations";
 import {
 	approveRecoveryTaskCommandSchema,
 	createIncidentCommandSchema,
+	OPERATIONS_ERROR_CODES,
 	startRecoveryTaskCommandSchema,
 	transitionIncidentStatusCommandSchema,
 } from "@anxionos/contracts/operations";
@@ -12,8 +12,8 @@ import { mapOperationsError } from "../../apps/api/src/operations/error-handler"
 import { incidentIdParamSchema } from "../../apps/api/src/operations/handlers/incidents";
 import { recoveryTaskIdParamSchema } from "../../apps/api/src/operations/handlers/recovery-tasks";
 import { createOperationsPlugin } from "../../apps/api/src/operations/plugin";
-import { createInMemoryMembershipRepository } from "../organizations/test-support";
 import type { Membership } from "../../modules/organizations/src/domain/entities/membership";
+import { createInMemoryMembershipRepository } from "../organizations/test-support";
 
 const agencyId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
@@ -73,13 +73,20 @@ describe("operations POST RBAC (ANX-158 S4e)", () => {
 		["owner", "dddddddd-dddd-4ddd-8ddd-dddddddddd01"],
 		["admin", "dddddddd-dddd-4ddd-8ddd-dddddddddd02"],
 		["operator", "dddddddd-dddd-4ddd-8ddd-dddddddddd03"],
-	] as const)("%s membership passes mutation guard", async (role, principalId) => {
-		const repo = createInMemoryMembershipRepository([
-			activeMembership(role, principalId),
-		]);
-		const membership = await assertActorCanMutate(repo, principalId, agencyId);
-		expect(membership.role).toBe(role);
-	});
+	] as const)(
+		"%s membership passes mutation guard",
+		async (role, principalId) => {
+			const repo = createInMemoryMembershipRepository([
+				activeMembership(role, principalId),
+			]);
+			const membership = await assertActorCanMutate(
+				repo,
+				principalId,
+				agencyId,
+			);
+			expect(membership.role).toBe(role);
+		},
+	);
 });
 
 describe("operations API boundary", () => {
@@ -202,9 +209,9 @@ describe("operations API boundary", () => {
 	});
 
 	test("path param schemas reject tampered ids", () => {
-		expect(
-			incidentIdParamSchema.safeParse({ incidentId: "bad" }).success,
-		).toBe(false);
+		expect(incidentIdParamSchema.safeParse({ incidentId: "bad" }).success).toBe(
+			false,
+		);
 		expect(
 			recoveryTaskIdParamSchema.safeParse({ recoveryTaskId: "bad" }).success,
 		).toBe(false);
@@ -231,11 +238,19 @@ describe("operations plugin routes (ANX-158 S4f + S2 HTTP)", () => {
 			commandJournal: {} as never,
 			incidents: {} as never,
 			recoveryTasks: {} as never,
+			grantRepository: {} as never,
+			probePlatformHealth: async () => ({
+				postgres: "ok",
+				nats: "ok",
+				neo4j: "ok",
+			}),
 		});
 		const routes = plugin.routes.map((route) => route.path);
-		expect(routes).toContain(
-			"/v1/operations/agencies/:agencyId/incidents",
-		);
+		expect(routes).toContain("/v1/operations/platform/health");
+		expect(routes).toContain("/v1/operations/platform/incidents");
+		expect(routes).toContain("/v1/operations/platform/runtimes");
+		expect(routes).toContain("/v1/operations/platform/recovery");
+		expect(routes).toContain("/v1/operations/agencies/:agencyId/incidents");
 		expect(routes).toContain(
 			"/v1/operations/agencies/:agencyId/incidents/:incidentId",
 		);

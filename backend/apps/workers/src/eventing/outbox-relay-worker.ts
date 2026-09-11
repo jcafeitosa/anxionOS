@@ -1,7 +1,7 @@
 import { createNatsOutboxPublisher } from "@anxionos/eventing/nats-publisher";
 import {
-	type OutboxRelayWorkerHandle,
 	createDefaultPoisonHandler,
+	type OutboxRelayWorkerHandle,
 	startOutboxRelayWorker,
 } from "@anxionos/eventing/outbox-relay-worker";
 import { DEFAULT_RETRY_POLICY } from "@anxionos/eventing/retry";

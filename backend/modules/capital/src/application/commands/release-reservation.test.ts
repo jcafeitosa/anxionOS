@@ -2,28 +2,38 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { CAPITAL_EVENT_TYPES } from "@anxionos/contracts/capital";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
-import { releaseReservation } from "./release-reservation";
-import { CapitalCommandError } from "../errors";
 import type {
 	CapitalTransactionContext,
 	CapitalUnitOfWork,
 	ReservationRecord,
 } from "../../domain/ports/capital-unit-of-work";
+import { CapitalCommandError } from "../errors";
+import { releaseReservation } from "./release-reservation";
 
 const ORG = "00000000-0000-4000-8000-000000000001";
 const ORG_B = "00000000-0000-4000-8000-000000000002";
 const ACCOUNT = `cap_acc_${randomUUID()}`;
 
 function createUow(reservation: ReservationRecord) {
-	const store = new Map<string, ReservationRecord>([[reservation.id, reservation]]);
+	const store = new Map<string, ReservationRecord>([
+		[reservation.id, reservation],
+	]);
 	let published: DomainEventEnvelope[] = [];
-	const journal = new Map<string, { organizationId: string; responseSnapshot: Record<string, unknown> }>();
+	const journal = new Map<
+		string,
+		{ organizationId: string; responseSnapshot: Record<string, unknown> }
+	>();
 	const ctx: CapitalTransactionContext = {
 		commandJournal: {
 			async findByCommandId(id) {
 				const entry = journal.get(id);
 				return entry
-					? { commandId: id, organizationId: entry.organizationId, commandName: "releaseReservation", responseSnapshot: entry.responseSnapshot }
+					? {
+							commandId: id,
+							organizationId: entry.organizationId,
+							commandName: "releaseReservation",
+							responseSnapshot: entry.responseSnapshot,
+						}
 					: null;
 			},
 			async save(entry) {
@@ -33,17 +43,39 @@ function createUow(reservation: ReservationRecord) {
 				});
 			},
 		},
-		accounts: { async findById() { return null; }, async findActiveByNaturalKey() { return null; }, async save(r) { return r; } },
+		accounts: {
+			async findById() {
+				return null;
+			},
+			async findActiveByNaturalKey() {
+				return null;
+			},
+			async save(r) {
+				return r;
+			},
+		},
 		balanceLines: {
-			async lockForUpdate() { return null; },
-			async save(r) { return r; },
-			async sumHeldReservations() { return "0"; },
+			async lockForUpdate() {
+				return null;
+			},
+			async save(r) {
+				return r;
+			},
+			async sumHeldReservations() {
+				return "0";
+			},
 			async acquireAccountLock() {},
-			async assertAvailableForReservation() { throw new Error("n/a"); },
+			async assertAvailableForReservation() {
+				throw new Error("n/a");
+			},
 		},
 		allocations: {
-			async save(r) { return r; },
-			async findActiveByGrant() { return null; },
+			async save(r) {
+				return r;
+			},
+			async findActiveByGrant() {
+				return null;
+			},
 		},
 		reservations: {
 			async findById(id, org) {
@@ -54,18 +86,39 @@ function createUow(reservation: ReservationRecord) {
 				const row = store.get(id);
 				return row && row.organizationId === org ? row : null;
 			},
-			async findActiveByIntent() { return null; },
-			async save(r) { store.set(r.id, r); return r; },
-			async update(r) { store.set(r.id, r); return r; },
-			async sumHeldByGrant() { return "0"; },
-			async findExpiredHeld() { return []; },
+			async findActiveByIntent() {
+				return null;
+			},
+			async save(r) {
+				store.set(r.id, r);
+				return r;
+			},
+			async update(r) {
+				store.set(r.id, r);
+				return r;
+			},
+			async sumHeldByGrant() {
+				return "0";
+			},
+			async findExpiredHeld() {
+				return [];
+			},
 		},
-		async publishEvents(events) { published = [...published, ...events]; },
+		async publishEvents(events) {
+			published = [...published, ...events];
+		},
 	};
 	const unitOfWork: CapitalUnitOfWork = {
-		async runInTransaction(work) { return work(ctx); },
+		async runInTransaction(work) {
+			return work(ctx);
+		},
 	};
-	return { unitOfWork, getStore: () => store, getPublished: () => published, journal };
+	return {
+		unitOfWork,
+		getStore: () => store,
+		getPublished: () => published,
+		journal,
+	};
 }
 
 const RESERVATION_ID = `cap_res_${randomUUID()}`;
@@ -83,15 +136,30 @@ const baseReservation: ReservationRecord = {
 	expiresAt: null,
 };
 
-function externalJournal(journal: Map<string, { organizationId: string; responseSnapshot: Record<string, unknown> }>) {
+function externalJournal(
+	journal: Map<
+		string,
+		{ organizationId: string; responseSnapshot: Record<string, unknown> }
+	>,
+) {
 	return {
 		async findByCommandId(id: string) {
 			const entry = journal.get(id);
 			return entry
-				? { commandId: id, organizationId: entry.organizationId, commandName: "releaseReservation", responseSnapshot: entry.responseSnapshot }
+				? {
+						commandId: id,
+						organizationId: entry.organizationId,
+						commandName: "releaseReservation",
+						responseSnapshot: entry.responseSnapshot,
+					}
 				: null;
 		},
-		async save(entry: { commandId: string; organizationId: string; commandName: string; responseSnapshot: Record<string, unknown> }) {
+		async save(entry: {
+			commandId: string;
+			organizationId: string;
+			commandName: string;
+			responseSnapshot: Record<string, unknown>;
+		}) {
 			journal.set(entry.commandId, {
 				organizationId: entry.organizationId,
 				responseSnapshot: entry.responseSnapshot,
@@ -102,7 +170,9 @@ function externalJournal(journal: Map<string, { organizationId: string; response
 
 describe("releaseReservation", () => {
 	test("partial fill reduces HELD amount", async () => {
-		const { unitOfWork, getStore, getPublished, journal } = createUow({ ...baseReservation });
+		const { unitOfWork, getStore, getPublished, journal } = createUow({
+			...baseReservation,
+		});
 		const result = await releaseReservation(
 			{ unitOfWork, commandJournal: externalJournal(journal) },
 			{
@@ -116,7 +186,11 @@ describe("releaseReservation", () => {
 		expect(result.reservationId).toBe(RESERVATION_ID);
 		expect(getStore().get(RESERVATION_ID)?.amount).toBe("70");
 		expect(getStore().get(RESERVATION_ID)?.status).toBe("HELD");
-		expect(getPublished().some((e) => e.eventType === CAPITAL_EVENT_TYPES.RESERVATION_RELEASED)).toBe(true);
+		expect(
+			getPublished().some(
+				(e) => e.eventType === CAPITAL_EVENT_TYPES.RESERVATION_RELEASED,
+			),
+		).toBe(true);
 	});
 
 	test("full cancel marks RELEASED", async () => {

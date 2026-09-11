@@ -95,7 +95,10 @@ export interface RetentionPolicyRecord {
 }
 export interface RetentionPolicyRepository {
 	findById(id: string): Promise<RetentionPolicyRecord | null>;
-	findByOrganizationAndScope(organizationId: string, scope: string): Promise<RetentionPolicyRecord | null>;
+	findByOrganizationAndScope(
+		organizationId: string,
+		scope: string,
+	): Promise<RetentionPolicyRecord | null>;
 	save(record: RetentionPolicyRecord): Promise<RetentionPolicyRecord>;
 	updateStatus(id: string, status: string, revision: number): Promise<void>;
 }
@@ -115,7 +118,12 @@ export interface ExportJobRecord {
 export interface ExportJobRepository {
 	findById(id: string): Promise<ExportJobRecord | null>;
 	save(record: ExportJobRecord): Promise<ExportJobRecord>;
-	updateStatus(id: string, status: string, manifestJson: Record<string, unknown> | null, completedAt: Date | null): Promise<void>;
+	updateStatus(
+		id: string,
+		status: string,
+		manifestJson: Record<string, unknown> | null,
+		completedAt: Date | null,
+	): Promise<void>;
 }
 /** ANX-313 S3 — deletion request */
 export interface DeletionRequestRecord {
@@ -134,9 +142,17 @@ export interface DeletionRequestRecord {
 }
 export interface DeletionRequestRepository {
 	findById(id: string): Promise<DeletionRequestRecord | null>;
-	findByOrganizationAndSubject(organizationId: string, subjectId: string): Promise<DeletionRequestRecord | null>;
+	findByOrganizationAndSubject(
+		organizationId: string,
+		subjectId: string,
+	): Promise<DeletionRequestRecord | null>;
 	save(record: DeletionRequestRecord): Promise<DeletionRequestRecord>;
-	updateStatus(id: string, status: string, approvedBy: string | null, executedAt: Date | null): Promise<void>;
+	updateStatus(
+		id: string,
+		status: string,
+		approvedBy: string | null,
+		executedAt: Date | null,
+	): Promise<void>;
 }
 
 export interface OperationsTransactionContext {

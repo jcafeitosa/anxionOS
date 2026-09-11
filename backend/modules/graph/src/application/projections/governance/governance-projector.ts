@@ -1,10 +1,10 @@
 import {
 	GOVERNANCE_EVENT_TYPES,
 	GOVERNANCE_OWNER_DOMAIN,
-	grantIssuedPayloadSchema,
-	grantRevokedPayloadSchema,
 	type GrantIssuedPayload,
 	type GrantRevokedPayload,
+	grantIssuedPayloadSchema,
+	grantRevokedPayloadSchema,
 } from "@anxionos/contracts/governance";
 import { GRAPH_GOVERNANCE_CONSUMER_NAME } from "../../../domain/projections/constants";
 import { ProjectionError } from "../../../domain/projections/errors";
@@ -53,7 +53,10 @@ function parseGrantRevoked(payload: unknown): GrantRevokedPayload {
 	return parsed.data;
 }
 
-function isStaleRevision(incomingRevision: number, existing: { revision: number } | null) {
+function isStaleRevision(
+	incomingRevision: number,
+	existing: { revision: number } | null,
+) {
 	return existing !== null && incomingRevision <= existing.revision;
 }
 
@@ -106,7 +109,9 @@ function toRevokedGrantRecord(
 }
 
 /** Projects governance grant events into graph Grant nodes (RB-D04 / ANX-302). */
-export async function projectGovernanceEvent(context: ProjectionHandlerContext) {
+export async function projectGovernanceEvent(
+	context: ProjectionHandlerContext,
+) {
 	const { envelope, graphStore, projectionGeneration } = context;
 	switch (envelope.eventType) {
 		case GOVERNANCE_EVENT_TYPES.GRANT_ISSUED: {

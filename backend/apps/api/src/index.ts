@@ -1,84 +1,81 @@
+import { ensureAgentsSchema } from "@anxionos/agents";
 import { healthResponseSchema, schemaVersion } from "@anxionos/contracts";
+import { ensureEvaluationSchema } from "@anxionos/evaluation";
 import {
 	createPgPool,
 	ensureEventingSchema,
 } from "@anxionos/eventing/postgres";
-import { ensureAgentsSchema } from "@anxionos/agents";
+import { ensureExecutionSchema } from "@anxionos/execution";
 import { ensureGovernanceSchema } from "@anxionos/governance";
 import { createIdentityDb, ensureIdentitySchema } from "@anxionos/identity";
 import { createLogger } from "@anxionos/observability";
+import { ensureOperationsSchema } from "@anxionos/operations";
 import { ensureOrganizationsSchema } from "@anxionos/organizations";
 import { ensurePartnersSchema } from "@anxionos/partners";
-import { ensurePortfoliosSchema } from "@anxionos/portfolios";
 import { ensurePerformanceSchema } from "@anxionos/performance";
-import { ensureOperationsSchema } from "@anxionos/operations";
-import { ensureStrategiesSchema } from "@anxionos/strategies";
-import { ensureSimulationSchema } from "@anxionos/simulation";
-import { ensureEvaluationSchema } from "@anxionos/evaluation";
-import { ensureExecutionSchema } from "@anxionos/execution";
+import { ensurePortfoliosSchema } from "@anxionos/portfolios";
 import { ensureRiskSchema } from "@anxionos/risk";
+import { ensureSimulationSchema } from "@anxionos/simulation";
+import { ensureStrategiesSchema } from "@anxionos/strategies";
 import { Elysia } from "elysia";
-import {
-	createBetterAuthRuntime,
-	resolveBetterAuthConfig,
-} from "./auth/create-better-auth";
-import { ensureBetterAuthSchema } from "./auth/ensure-better-auth-schema";
 import { createAgentsApiRuntime } from "./agents/bootstrap";
 import {
 	createGovernanceSkillBindGuard,
 	createGovernanceSkillEvaluationGuard,
 } from "./agents/governance-guards";
 import { createAgentsPlugin } from "./agents/plugin";
-import { createGovernanceApiRuntime } from "./governance/bootstrap";
-import { bootstrapGovernanceOrganizationsMembership } from "./governance/bootstrap-organizations-membership";
-import { createGovernancePlugin } from "./governance/plugin";
+import {
+	createBetterAuthRuntime,
+	resolveBetterAuthConfig,
+} from "./auth/create-better-auth";
+import { ensureBetterAuthSchema } from "./auth/ensure-better-auth-schema";
+import { createPostLoginPlugin } from "./auth/post-login-plugin";
 import { createEvaluationApiRuntime } from "./evaluation/bootstrap";
 import { bootstrapEvaluationEventConsumers } from "./evaluation/bootstrap-event-consumers";
 import { createEvaluationPlugin } from "./evaluation/plugin";
-import { createPerformanceApiRuntime } from "./performance/bootstrap";
-import { bootstrapPerformanceEventConsumers } from "./performance/bootstrap-event-consumers";
-import { bootstrapSimulationEventConsumers } from "./simulation/bootstrap-event-consumers";
-import { createSimulationApiRuntime } from "./simulation/bootstrap";
-import { createPerformancePlugin } from "./performance/plugin";
-import { createSimulationPlugin } from "./simulation/plugin";
+import { createExecutionApiRuntime } from "./execution/bootstrap";
+import { createExecutionPlugin } from "./execution/plugin";
+import { createGovernanceApiRuntime } from "./governance/bootstrap";
+import { bootstrapGovernanceOrganizationsMembership } from "./governance/bootstrap-organizations-membership";
+import { createGovernancePlugin } from "./governance/plugin";
 import { probeHealthDeps } from "./health/probe-deps";
 import { bootstrapIdentitySessionRevocation } from "./identity/bootstrap-session-revocation";
+import {
+	createSloMetricsPlugin,
+	getApiMetricsCollector,
+} from "./middleware/slo-metrics";
+import {
+	healthOpenApiDetail,
+	hiddenAuthCatchAllDetail,
+	identityOpenApi,
+} from "./openapi-operations";
+import { createOpenApiPlugin } from "./openapi-plugin";
+import { createOperationsApiRuntime } from "./operations/bootstrap";
+import { bootstrapEventingLagSli } from "./operations/bootstrap-eventing-lag-sli";
+import { createPlatformSloSnapshotPlugin } from "./operations/platform-slo-snapshot-plugin";
+import { createOperationsPlugin } from "./operations/plugin";
 import {
 	assertOrganizationsStartupEnv,
 	createOrganizationsRuntime,
 } from "./organizations/bootstrap";
 import { ensureInviteAcceptRateLimitSchema } from "./organizations/invite-accept-rate-limit-store";
-import { createPostLoginPlugin } from "./auth/post-login-plugin";
-import {
-	hiddenAuthCatchAllDetail,
-	healthOpenApiDetail,
-	identityOpenApi,
-} from "./openapi-operations";
-import { createOpenApiPlugin } from "./openapi-plugin";
-import {
-	createSloMetricsPlugin,
-	getApiMetricsCollector,
-} from "./middleware/slo-metrics";
-import { bootstrapEventingLagSli } from "./operations/bootstrap-eventing-lag-sli";
-import { createPlatformSloSnapshotPlugin } from "./operations/platform-slo-snapshot-plugin";
 import { createOrganizationsPlugin } from "./organizations/plugin";
 import { configureInviteAcceptRateLimit } from "./organizations/rate-limit";
 import { createPartnersApiRuntime } from "./partners/bootstrap";
 import { createPartnersPlugin } from "./partners/plugin";
+import { createPerformanceApiRuntime } from "./performance/bootstrap";
+import { bootstrapPerformanceEventConsumers } from "./performance/bootstrap-event-consumers";
+import { createPerformancePlugin } from "./performance/plugin";
 import { createPortfoliosApiRuntime } from "./portfolios/bootstrap";
 import { createPortfoliosPlugin } from "./portfolios/plugin";
-import { createOperationsApiRuntime } from "./operations/bootstrap";
-import { createOperationsPlugin } from "./operations/plugin";
-import { createStrategiesApiRuntime } from "./strategies/bootstrap";
-import { createStrategiesPlugin } from "./strategies/plugin";
-import { createExecutionApiRuntime } from "./execution/bootstrap";
-import { createExecutionPlugin } from "./execution/plugin";
+import { createRealtimePlugin, createRealtimeRuntime } from "./realtime";
 import { createRiskApiRuntime } from "./risk/bootstrap";
 import { createRiskPlugin } from "./risk/plugin";
-import {
-	createRealtimePlugin,
-	createRealtimeRuntime,
-} from "./realtime";
+import { createSimulationApiRuntime } from "./simulation/bootstrap";
+import { bootstrapSimulationEventConsumers } from "./simulation/bootstrap-event-consumers";
+import { createSimulationPlugin } from "./simulation/plugin";
+import { createStrategiesApiRuntime } from "./strategies/bootstrap";
+import { createStrategiesPlugin } from "./strategies/plugin";
 
 const logger = createLogger({ service: "api" });
 const port = Number(process.env.PORT ?? "3000");
@@ -136,7 +133,11 @@ if (pool && resolveBetterAuthConfig()) {
 		.post("/api/auth/sign-up/email", handleAuth, identityOpenApi.signUpEmail)
 		.get("/api/auth/get-session", handleAuth, identityOpenApi.getSession)
 		.post("/api/auth/sign-out", handleAuth, identityOpenApi.signOut)
-		.all("/api/auth/*", handleAuth, hiddenAuthCatchAllDetail) as unknown as Elysia;
+		.all(
+			"/api/auth/*",
+			handleAuth,
+			hiddenAuthCatchAllDetail,
+		) as unknown as Elysia;
 	logger.info("Better Auth mounted at /api/auth/*");
 	const orgRuntime = createOrganizationsRuntime(pool, databaseUrl!);
 	const govRuntime = createGovernanceApiRuntime(pool);
@@ -209,9 +210,7 @@ if (pool && resolveBetterAuthConfig()) {
 			scopedPool: orgRuntime.scopedPool,
 		}),
 	) as unknown as Elysia;
-	logger.info(
-		"Strategies API mounted at /v1/strategies/agencies/:agencyId/*",
-	);
+	logger.info("Strategies API mounted at /v1/strategies/agencies/:agencyId/*");
 	const portfoliosRuntime = createPortfoliosApiRuntime(pool);
 	app = app.use(
 		createPortfoliosPlugin({
@@ -295,9 +294,7 @@ if (pool && resolveBetterAuthConfig()) {
 			scopedPool: orgRuntime.scopedPool,
 		}),
 	) as unknown as Elysia;
-	logger.info(
-		"Risk API mounted at /v1/risk/agencies/:agencyId/kill-switch",
-	);
+	logger.info("Risk API mounted at /v1/risk/agencies/:agencyId/kill-switch");
 	const realtimeRuntime = createRealtimeRuntime(pool);
 	app = app.use(
 		createRealtimePlugin({ auth, manager: realtimeRuntime.manager }),

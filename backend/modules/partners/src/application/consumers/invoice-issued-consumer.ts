@@ -10,11 +10,12 @@ import {
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { PartnersUnitOfWork } from "../../domain/ports/partners-unit-of-work";
 import {
-	accrueCommissionFromInvoice,
 	type AccrueCommissionFromInvoiceDeps,
+	accrueCommissionFromInvoice,
 } from "../commands/accrue-commission-from-invoice";
 
-export interface InvoiceIssuedConsumerDeps extends AccrueCommissionFromInvoiceDeps {
+export interface InvoiceIssuedConsumerDeps
+	extends AccrueCommissionFromInvoiceDeps {
 	commandJournal: CommandJournalRepository;
 	unitOfWork: PartnersUnitOfWork;
 }

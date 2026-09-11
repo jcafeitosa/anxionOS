@@ -89,8 +89,7 @@ export async function runHealthProbeWithTimeout(
 				timedOut: true,
 			};
 		}
-		const message =
-			error instanceof Error ? error.message : "probe failed";
+		const message = error instanceof Error ? error.message : "probe failed";
 		return {
 			outcome: "error",
 			durationMs,

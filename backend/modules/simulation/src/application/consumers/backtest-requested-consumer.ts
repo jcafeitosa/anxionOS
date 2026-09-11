@@ -4,11 +4,12 @@ import type {
 } from "@anxionos/contracts/simulation";
 import { mapBacktestRequestedToSimulationInput } from "@anxionos/contracts/simulation";
 import {
-	createSimulationRun,
 	type CreateSimulationRunDeps,
+	createSimulationRun,
 } from "../commands/create-simulation-run";
 
-export interface BacktestRequestedConsumerDeps extends CreateSimulationRunDeps {}
+export interface BacktestRequestedConsumerDeps
+	extends CreateSimulationRunDeps {}
 
 export function createBacktestRequestedConsumer(
 	deps: BacktestRequestedConsumerDeps,

@@ -1,11 +1,11 @@
 export {
-	organizationsProjectionConsumer,
-	projectOrganizationsEvent,
-} from "./projections/organizations/organizations-projector";
-export {
 	governanceProjectionConsumer,
 	projectGovernanceEvent,
 } from "./projections/governance/governance-projector";
+export {
+	organizationsProjectionConsumer,
+	projectOrganizationsEvent,
+} from "./projections/organizations/organizations-projector";
 export {
 	performanceProjectionConsumer,
 	projectPerformanceGraphEvent,

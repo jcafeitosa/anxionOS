@@ -1,5 +1,4 @@
-import type { Driver } from "neo4j-driver";
-import type { Record as Neo4jRecord } from "neo4j-driver";
+import type { Driver, Record as Neo4jRecord } from "neo4j-driver";
 import neo4j, {} from "neo4j-driver";
 import { formatNodeKey, parseNodeKey } from "../../../domain/node-key";
 import type {
@@ -135,7 +134,11 @@ export function createNeo4jGraphStore(driver: Driver): GraphStore {
 				await session.run(
 					`MATCH (from:GraphNode { nodeKey: $fromKey })
 					 MATCH (to:GraphNode { nodeKey: $toKey })
-					 MERGE (from)-[r:` + "`" + record.edgeType + "`" + `]->(to)
+					 MERGE (from)-[r:` +
+						"`" +
+						record.edgeType +
+						"`" +
+						`]->(to)
 					 ON CREATE SET
 					   r.edgeType = $edgeType,
 					   r.ownerDomain = $ownerDomain,

@@ -14,7 +14,10 @@ export async function listAgentVersions(
 ): Promise<AgentVersion[]> {
 	const agent = await deps.agentRepository.findById(input.agentId);
 	if (!agent || agent.organizationId !== input.organizationId) {
-		throwAgentsError("AGT_AGENT_NOT_FOUND", `Agent not found: ${input.agentId}`);
+		throwAgentsError(
+			"AGT_AGENT_NOT_FOUND",
+			`Agent not found: ${input.agentId}`,
+		);
 	}
 	return deps.agentVersionRepository.listByAgentId(input.agentId);
 }

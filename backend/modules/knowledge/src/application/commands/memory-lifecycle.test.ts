@@ -2,14 +2,15 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { KNOWLEDGE_EVENT_TYPES } from "@anxionos/contracts/knowledge";
 import { createInMemoryMemoryStore } from "../../infrastructure/adapters/in-memory-memory-store";
+import { createKnowledgeTestUow, TEST_ORG } from "./knowledge-test-support";
 import { promoteCandidateMemory } from "./promote-candidate-memory";
 import { registerCandidateMemory } from "./register-candidate-memory";
-import { createKnowledgeTestUow, TEST_ORG } from "./knowledge-test-support";
 
 describe("memory lifecycle", () => {
 	test("register dedupes by content hash and promote emits event", async () => {
 		const memoryStore = createInMemoryMemoryStore();
-		const { unitOfWork, commandJournal, getPublished } = createKnowledgeTestUow();
+		const { unitOfWork, commandJournal, getPublished } =
+			createKnowledgeTestUow();
 		const contentHash = "c".repeat(64);
 		const registered = await registerCandidateMemory(
 			{ commandJournal, memoryStore },

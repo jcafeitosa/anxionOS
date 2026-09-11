@@ -1,16 +1,17 @@
 import { randomUUID } from "node:crypto";
+import type { PortfoliosExecutionFillConfirmedV1 } from "@anxionos/contracts/portfolios";
 import {
 	createPgPool,
 	ensureEventingSchema,
 } from "@anxionos/eventing/postgres";
-import type { PortfoliosExecutionFillConfirmedV1 } from "@anxionos/contracts/portfolios";
 import {
-	createMarketDataUnitOfWork,
 	createPgCommandJournalRepository as createMarketDataCommandJournal,
+	createMarketDataUnitOfWork,
 	recordFxRate,
 } from "@anxionos/market-data";
 import {
 	applyFillToPosition,
+	type ConfirmValuationDeps,
 	confirmValuation,
 	createFillConfirmedConsumer,
 	createLedgerPostedConsumer,
@@ -19,9 +20,8 @@ import {
 	createPgMarketDataQueryAdapter,
 	createPortfolio,
 	createPortfoliosUnitOfWork,
-	reconcileCashFromLedger,
-	type ConfirmValuationDeps,
 	type ReconcileCashFromLedgerDeps,
+	reconcileCashFromLedger,
 } from "@anxionos/portfolios";
 import { ensureMarketDataSchema } from "../../modules/market-data/src/infrastructure/migrate";
 import { ensurePortfoliosSchema } from "../../modules/portfolios/src/infrastructure/migrate";
@@ -78,8 +78,7 @@ export const PORTFOLIOS_TEST_OWNER_USER_ID =
 export const PORTFOLIOS_TEST_CAPITAL_ACCOUNT_ID = "cap_acc_test_001";
 export const PORTFOLIOS_TEST_INSTRUMENT_ID =
 	"00000000-0000-4000-8000-000000000010";
-export const PORTFOLIOS_TEST_ORG_B_ID =
-	"00000000-0000-4000-8000-000000000008";
+export const PORTFOLIOS_TEST_ORG_B_ID = "00000000-0000-4000-8000-000000000008";
 
 export function buildPortfoliosFillConfirmedFixture(input: {
 	portfolioId: string;

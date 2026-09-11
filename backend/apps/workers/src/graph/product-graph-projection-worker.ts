@@ -4,21 +4,22 @@
  * Events: `product.work_item.status_changed.v1`, `agents.decision.recorded.v1`, `agents.agent.role_assigned.v1`.
  * User instruction (goal): "somente depois da documentação aprovada, desenvolver a plataforma incrementalmente" — slice ANX-277 projection worker.
  */
-import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
+
 import { AGENTS_EVENT_TYPES } from "@anxionos/contracts/agents";
+import { domainEventEnvelopeSchema } from "@anxionos/contracts/events";
 import {
 	AGENT_GRAPH_EVENT_TYPES,
 	PRODUCT_GRAPH_EVENT_TYPES,
 } from "@anxionos/contracts/graph";
 import {
+	agentProjectionConsumer,
 	GRAPH_PROJECTION_DEFAULT_CHECKPOINT,
 	type GraphStore,
-	agentProjectionConsumer,
 	handleProjectionMessage,
 	productProjectionConsumer,
 } from "@anxionos/graph";
 import { createLogger } from "@anxionos/observability";
-import { AckPolicy, DeliverPolicy, JSONCodec, type JsMsg, connect } from "nats";
+import { AckPolicy, connect, DeliverPolicy, JSONCodec, type JsMsg } from "nats";
 import type { Pool } from "pg";
 import {
 	DEFAULT_NATS_MAX_RECONNECT_ATTEMPTS,

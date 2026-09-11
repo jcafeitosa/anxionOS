@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { buildTradeFillLines } from "../../modules/accounting/src/application/commands/post-trade-fill";
 import {
 	deriveLedgerPnlMetrics,
 	OFFICIAL_LEDGER_PNL_METRICS,
 } from "@anxionos/performance";
+import { buildTradeFillLines } from "../../modules/accounting/src/application/commands/post-trade-fill";
 
 describe("deriveLedgerPnlMetrics (ANX-154 S2 oracle)", () => {
 	test("BUY trade fill without fees: cash net equals notional", () => {
@@ -17,13 +17,9 @@ describe("deriveLedgerPnlMetrics (ANX-154 S2 oracle)", () => {
 		const metrics = deriveLedgerPnlMetrics(lines);
 		const byName = new Map(metrics.map((m) => [m.metricName, m.metricValue]));
 
-		expect(byName.get(OFFICIAL_LEDGER_PNL_METRICS.CASH_NET_DELTA)).toBe(
-			"1000",
-		);
+		expect(byName.get(OFFICIAL_LEDGER_PNL_METRICS.CASH_NET_DELTA)).toBe("1000");
 		expect(byName.get(OFFICIAL_LEDGER_PNL_METRICS.FEES_TOTAL)).toBe("0");
-		expect(byName.get(OFFICIAL_LEDGER_PNL_METRICS.NOTIONAL_TOTAL)).toBe(
-			"1000",
-		);
+		expect(byName.get(OFFICIAL_LEDGER_PNL_METRICS.NOTIONAL_TOTAL)).toBe("1000");
 	});
 
 	test("SELL trade fill with fees: fees_total and cash net reconcile", () => {

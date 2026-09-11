@@ -5,11 +5,11 @@ import {
 	revokeMembershipCommandSchema,
 } from "@anxionos/contracts/organizations";
 import {
-	OrganizationCommandError,
 	activateMembership,
 	getMembership,
 	inviteMember,
 	listMembershipsByAgency,
+	OrganizationCommandError,
 	revokeMembership,
 } from "@anxionos/organizations";
 import { z } from "zod";
@@ -106,10 +106,7 @@ export async function handleActivateMembership(
 		input.agencyId,
 		input.principalId,
 		(repos) =>
-			repos.membershipRepository.findById(
-				input.agencyId,
-				input.membershipId,
-			),
+			repos.membershipRepository.findById(input.agencyId, input.membershipId),
 	);
 	if (!membership?.inviteEmail) {
 		throw new OrganizationCommandError(

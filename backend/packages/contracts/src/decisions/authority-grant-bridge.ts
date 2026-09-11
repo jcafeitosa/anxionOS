@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { institutionalUuidSchema } from "../institutional-uuid";
 import { grantStatusSchema } from "../governance/types";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import type {
 	AuthorityReference,
 	DecisionAggregateReferences,

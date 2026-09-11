@@ -8,14 +8,14 @@ import type {
 import type { betterAuth } from "better-auth";
 import { Elysia } from "elysia";
 import { partnersOpenApi } from "../openapi-operations";
+import { requireAgencyMembership } from "../organizations/middleware/require-agency-membership";
+import { resolvePrincipalFromSession } from "../organizations/resolve-principal";
 import { mapPartnersError } from "./error-handler";
 import {
 	handleGetPartnerByOrganization,
 	handleListCommissionAccruals,
 	handleListPayouts,
 } from "./handlers/read";
-import { requireAgencyMembership } from "../organizations/middleware/require-agency-membership";
-import { resolvePrincipalFromSession } from "../organizations/resolve-principal";
 
 export interface PartnersPluginDeps {
 	auth: ReturnType<typeof betterAuth>;

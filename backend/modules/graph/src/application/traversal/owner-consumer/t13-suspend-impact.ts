@@ -29,7 +29,11 @@ export async function evaluateT13SuspendImpact(
 	}
 
 	const subjectType = input.subjectNodeKey.type;
-	const anchor = await requireAnchorNode(graphStore, input.subjectNodeKey, subjectType);
+	const anchor = await requireAnchorNode(
+		graphStore,
+		input.subjectNodeKey,
+		subjectType,
+	);
 	if (!("nodeKey" in anchor)) {
 		return {
 			complete: false,

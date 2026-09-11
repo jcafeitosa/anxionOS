@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { IDENTITY_EVENT_TYPES } from "@anxionos/contracts/identity";
 import {
+	getPrincipalById,
 	type Principal,
 	type ServiceIdentity,
-	getPrincipalById,
 	suspendPrincipal,
 } from "@anxionos/identity";
 import { IdentityCommandError } from "../../modules/identity/src/application/errors";

@@ -24,10 +24,7 @@ export interface EventingLagAlert {
 	consumerName?: string;
 }
 
-export function computeLagMs(
-	oldestPendingAt: string,
-	nowIso: string,
-): number {
+export function computeLagMs(oldestPendingAt: string, nowIso: string): number {
 	const lagMs = Date.parse(nowIso) - Date.parse(oldestPendingAt);
 	return Number.isFinite(lagMs) ? Math.max(0, lagMs) : 0;
 }

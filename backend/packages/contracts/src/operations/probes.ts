@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { operationsHealthStatusSchema } from "./types";
 import { institutionalUuidSchema } from "../institutional-uuid";
+import { operationsHealthStatusSchema } from "./types";
 
 export const DEFAULT_HEALTH_PROBE_TIMEOUT_MS = 3_000;
 export const DEFAULT_HEALTH_STALE_THRESHOLD_MS = 60_000;

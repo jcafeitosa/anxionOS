@@ -11,7 +11,10 @@ import {
 	uuid,
 } from "drizzle-orm/pg-core";
 
-export const agentKindEnum = pgEnum("agents_agent_kind", ["AGENCY", "PLATFORM"]);
+export const agentKindEnum = pgEnum("agents_agent_kind", [
+	"AGENCY",
+	"PLATFORM",
+]);
 export const agentLifecycleStatusEnum = pgEnum("agents_lifecycle_status", [
 	"DRAFT",
 	"CONFIGURED",
@@ -229,7 +232,10 @@ export const routineTriggerKindEnum = pgEnum("agents_routine_trigger_kind", [
 	"taskboard",
 	"manual",
 ]);
-export const routineStatusEnum = pgEnum("agents_routine_status", ["active", "paused"]);
+export const routineStatusEnum = pgEnum("agents_routine_status", [
+	"active",
+	"paused",
+]);
 export const agentBudgetStatusEnum = pgEnum("agents_budget_status", [
 	"active",
 	"paused",
@@ -253,11 +259,18 @@ export const agentRoutines = pgTable(
 		lastRunId: uuid("last_run_id"),
 		lastTriggeredAt: timestamp("last_triggered_at", { withTimezone: true }),
 		revision: integer("revision").notNull().default(1),
-		createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-		updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
 	},
 	(table) => [
-		uniqueIndex("agents_routines_agent_slug_uidx").on(table.agentId, table.slug),
+		uniqueIndex("agents_routines_agent_slug_uidx").on(
+			table.agentId,
+			table.slug,
+		),
 		index("agents_routines_tenant_id_idx").on(table.tenantId),
 		index("agents_routines_organization_id_idx").on(table.organizationId),
 		index("agents_routines_agent_id_idx").on(table.agentId),
@@ -279,13 +292,19 @@ export const agentBudgetPolicies = pgTable(
 		timeSecondsConsumed: integer("time_seconds_consumed").notNull().default(0),
 		status: agentBudgetStatusEnum("status").notNull().default("active"),
 		revision: integer("revision").notNull().default(1),
-		createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-		updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
 	},
 	(table) => [
 		uniqueIndex("agents_budget_policies_agent_uidx").on(table.agentId),
 		index("agents_budget_policies_tenant_id_idx").on(table.tenantId),
-		index("agents_budget_policies_organization_id_idx").on(table.organizationId),
+		index("agents_budget_policies_organization_id_idx").on(
+			table.organizationId,
+		),
 	],
 );
 

@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import {
 	type GovernanceCommandResult,
-	type IssueGrantCommand,
 	governanceCommandResultSchema,
+	type IssueGrantCommand,
 	issueGrantCommandSchema,
 } from "@anxionos/contracts/governance";
 import {

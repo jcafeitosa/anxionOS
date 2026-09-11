@@ -1,9 +1,9 @@
+import { evaluateT02Temporal } from "../../application/traversal/t02-temporal-evaluation";
 import type {
 	TraversalEvaluationInput,
 	TraversalEvaluator,
 	TraversalEvaluatorOutput,
 } from "../../domain/ports/traversal-evaluator";
-import { evaluateT02Temporal } from "../../application/traversal/t02-temporal-evaluation";
 
 export interface GraphF0Fixture {
 	grant: {

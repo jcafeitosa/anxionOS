@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ledgerLineSummarySchema } from "../accounting/events";
+import { institutionalUuidSchema } from "../institutional-uuid";
 import { performanceOutcomeSnapshotIdSchema } from "../performance/types";
 import { strategyIdSchema, strategyVersionIdSchema } from "../strategies/types";
 import {
@@ -7,7 +8,6 @@ import {
 	evaluationRecordIdSchema,
 	evaluationScoreIdSchema,
 } from "./types";
-import { institutionalUuidSchema } from "../institutional-uuid";
 export const evaluationCommandResultSchema = z.object({
 	aggregateId: z.string().min(1),
 	revision: z.number().int().nonnegative(),

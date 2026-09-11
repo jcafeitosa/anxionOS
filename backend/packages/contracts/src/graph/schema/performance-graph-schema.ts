@@ -8,7 +8,8 @@ export const PERFORMANCE_GRAPH_NODE_TYPES: readonly NodeTypeDef[] = [
 		schemaVersion: 1,
 		ownerDomain: "performance",
 		status: "active",
-		payloadSchemaRef: "graph/schema/v1/performance/PositionExposureSnapshot.json",
+		payloadSchemaRef:
+			"graph/schema/v1/performance/PositionExposureSnapshot.json",
 		checksum: "sha256:performance-position-exposure-snapshot-v1",
 	},
 	{

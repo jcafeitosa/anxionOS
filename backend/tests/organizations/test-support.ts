@@ -253,12 +253,10 @@ export async function withOrganizationsPgHarness<T>(
 	}
 }
 
-export function createTwoDistinctAgencies(
-	context?: {
-		agencyA?: Agency;
-		agencyB?: Agency;
-	},
-): {
+export function createTwoDistinctAgencies(context?: {
+	agencyA?: Agency;
+	agencyB?: Agency;
+}): {
 	agencyIdA: string;
 	agencyIdB: string;
 	agencyA: Agency;
@@ -274,7 +272,8 @@ export function createTwoDistinctAgencies(
 	const agencyA: Agency = {
 		id: agencyIdA,
 		ownerPrincipalId: randomUUID(),
-		displayName: context?.agencyA?.displayName ?? `Agency A ${agencyIdA.slice(0, 8)}`,
+		displayName:
+			context?.agencyA?.displayName ?? `Agency A ${agencyIdA.slice(0, 8)}`,
 		marketScope: context?.agencyA?.marketScope ?? "both",
 		status: context?.agencyA?.status ?? "draft",
 		onboardingStep: context?.agencyA?.onboardingStep ?? "created",
@@ -286,7 +285,8 @@ export function createTwoDistinctAgencies(
 	const agencyB: Agency = {
 		id: agencyIdB,
 		ownerPrincipalId: randomUUID(),
-		displayName: context?.agencyB?.displayName ?? `Agency B ${agencyIdB.slice(0, 8)}`,
+		displayName:
+			context?.agencyB?.displayName ?? `Agency B ${agencyIdB.slice(0, 8)}`,
 		marketScope: context?.agencyB?.marketScope ?? "both",
 		status: context?.agencyB?.status ?? "draft",
 		onboardingStep: context?.agencyB?.onboardingStep ?? "created",
@@ -321,11 +321,16 @@ export async function assertAgencyIsolation(
 	const details: string[] = [];
 
 	// Get agencies visible to each principal in their respective repositories
-	const agenciesForA = await agencyRepositoryA.findByOwnerPrincipalId(agencyA.ownerPrincipalId);
-	const agenciesForB = await agencyRepositoryB.findByOwnerPrincipalId(agencyB.ownerPrincipalId);
+	const agenciesForA = await agencyRepositoryA.findByOwnerPrincipalId(
+		agencyA.ownerPrincipalId,
+	);
+	const agenciesForB = await agencyRepositoryB.findByOwnerPrincipalId(
+		agencyB.ownerPrincipalId,
+	);
 
 	// Check A only sees its own agencies (should only see agencyA in repoA)
-	const aOnlyOwnsA = agenciesForA.length === 1 && agenciesForA[0].id === agencyA.id;
+	const aOnlyOwnsA =
+		agenciesForA.length === 1 && agenciesForA[0].id === agencyA.id;
 	if (aOnlyOwnsA) {
 		details.push("PASS: Agency A only sees its own agency");
 	} else {
@@ -335,7 +340,8 @@ export async function assertAgencyIsolation(
 	}
 
 	// Check B only sees its own agencies (should only see agencyB in repoB)
-	const bOnlyOwnsB = agenciesForB.length === 1 && agenciesForB[0].id === agencyB.id;
+	const bOnlyOwnsB =
+		agenciesForB.length === 1 && agenciesForB[0].id === agencyB.id;
 	if (bOnlyOwnsB) {
 		details.push("PASS: Agency B only sees its own agency");
 	} else {

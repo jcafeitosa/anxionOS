@@ -27,7 +27,10 @@ function agentNodeKey(scopeId: string, agentId: string) {
 	};
 }
 
-function isStaleRevision(incomingRevision: number, existing: { revision: number } | null) {
+function isStaleRevision(
+	incomingRevision: number,
+	existing: { revision: number } | null,
+) {
 	return existing !== null && incomingRevision <= existing.revision;
 }
 
@@ -135,7 +138,10 @@ function mergeAgentVersionPublished(
 		nodeKey: agentNodeKey(scopeId, payload.agentId),
 		schemaVersion: 1,
 		ownerDomain: AGENT_GRAPH_OWNER_DOMAIN,
-		status: (existing?.payload.lifecycleStatus as string | undefined)?.toLowerCase() ?? "configured",
+		status:
+			(
+				existing?.payload.lifecycleStatus as string | undefined
+			)?.toLowerCase() ?? "configured",
 		revision: payload.revision,
 		projectionGeneration,
 		payload: {
@@ -160,7 +166,10 @@ function mergeAgentVersionRolledBack(
 		nodeKey: agentNodeKey(scopeId, payload.agentId),
 		schemaVersion: 1,
 		ownerDomain: AGENT_GRAPH_OWNER_DOMAIN,
-		status: (existing?.payload.lifecycleStatus as string | undefined)?.toLowerCase() ?? "configured",
+		status:
+			(
+				existing?.payload.lifecycleStatus as string | undefined
+			)?.toLowerCase() ?? "configured",
 		revision: payload.revision,
 		projectionGeneration,
 		payload: {
@@ -175,7 +184,9 @@ function mergeAgentVersionRolledBack(
 }
 
 /** Projects ANX-139 core agents domain events into Agent graph nodes. */
-export async function projectAgentsCoreGraphEvent(context: ProjectionHandlerContext) {
+export async function projectAgentsCoreGraphEvent(
+	context: ProjectionHandlerContext,
+) {
 	const { envelope, graphStore, projectionGeneration } = context;
 	switch (envelope.eventType) {
 		case AGENTS_EVENT_TYPES.AGENT_REGISTERED: {

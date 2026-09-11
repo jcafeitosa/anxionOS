@@ -24,10 +24,13 @@ export function createFilesystemSimulationResultStoreAdapter(
 				input.organizationId,
 				input.simulationRunId,
 			);
-			mkdirSync(join(options.sandboxRoot, input.organizationId, input.simulationRunId), {
-				recursive: true,
-				mode: 0o700,
-			});
+			mkdirSync(
+				join(options.sandboxRoot, input.organizationId, input.simulationRunId),
+				{
+					recursive: true,
+					mode: 0o700,
+				},
+			);
 			writeFileSync(
 				resultPath,
 				JSON.stringify(

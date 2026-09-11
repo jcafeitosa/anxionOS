@@ -5,8 +5,6 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { GraphNodeRecord } from "@anxionos/graph";
 import {
-	GRAPH_T12_INCOMPLETE_REASONS,
-	GRAPH_T14_INCOMPLETE_REASONS,
 	createF0KernelGraphSchemaRegistry,
 	createInMemoryGraphStore,
 	createKernelAwareTraversalEvaluator,
@@ -16,6 +14,8 @@ import {
 	evaluateT14ConnectionRevokeImpact,
 	GRAPH_F0_TRAVERSAL_ENTRIES,
 	GRAPH_KERNEL_TRAVERSAL_ENTRIES,
+	GRAPH_T12_INCOMPLETE_REASONS,
+	GRAPH_T14_INCOMPLETE_REASONS,
 	type InMemoryGraphEdge,
 } from "@anxionos/graph";
 

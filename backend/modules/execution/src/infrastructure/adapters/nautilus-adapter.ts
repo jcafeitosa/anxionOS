@@ -118,8 +118,7 @@ export class NautilusTraderAdapter implements RiskPermitValidationPort {
 		this.sandboxUrl = resolveNtsSandboxUrl(options.sandboxUrl);
 		this.engineMode = resolveNtsEngineMode(options.engineMode);
 		this.fetchFn = options.fetchFn ?? fetch;
-		this.healthTimeoutMs =
-			options.healthTimeoutMs ?? DEFAULT_HEALTH_TIMEOUT_MS;
+		this.healthTimeoutMs = options.healthTimeoutMs ?? DEFAULT_HEALTH_TIMEOUT_MS;
 	}
 
 	private validateLicenseFormat(license: string): boolean {
