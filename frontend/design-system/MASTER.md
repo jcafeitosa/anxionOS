@@ -1,3 +1,7 @@
+---
+type: reference
+---
+
 # Design System Master File
 
 > **LOGIC:** When building a specific page, first check `design-system/pages/[page-name].md`.
