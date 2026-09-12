@@ -36,14 +36,7 @@ export async function revokeMembership(
 			actorPrincipalId: input.actorPrincipalId,
 		}),
 	};
-	const replay = await loadIdempotentCommandResult(
-		deps.commandJournal,
-		command.commandId,
-		intent,
-	);
-	if (replay) {
-		return replay;
-	}
+	// Red Team (Davi): replay dentro do tenant context, não antes
 	return deps.unitOfWork.runInTransaction(
 		buildAgencyTenantContext(command.agencyId, input.actorPrincipalId),
 		async (context) => {
@@ -51,6 +44,7 @@ export async function revokeMembership(
 				context.commandJournal,
 				command.commandId,
 				intent,
+				command.agencyId, // tenant_id
 			);
 			if (raced) {
 				return raced;

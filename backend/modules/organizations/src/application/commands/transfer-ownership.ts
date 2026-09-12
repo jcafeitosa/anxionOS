@@ -31,14 +31,7 @@ export async function transferOwnership(
 			actorPrincipalId: input.actorPrincipalId,
 		}),
 	};
-	const replay = await loadIdempotentCommandResult(
-		deps.commandJournal,
-		command.commandId,
-		intent,
-	);
-	if (replay) {
-		return replay;
-	}
+	// Red Team (Davi): replay dentro do tenant context, não antes
 	// G5-F1/G4-F1 — a existencia do SUCESSOR nao e' verificada aqui, fora da
 	// transacao: `newOwnerPrincipalId` e' 100% controlado pelo cliente e
 	// `identity_principals` nao tem RLS, entao um 404 de "principal inexistente"
@@ -54,6 +47,7 @@ export async function transferOwnership(
 				context.commandJournal,
 				command.commandId,
 				intent,
+				command.agencyId, // tenant_id
 			);
 			if (raced) {
 				return raced;

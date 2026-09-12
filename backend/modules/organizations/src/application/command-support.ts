@@ -120,8 +120,9 @@ export async function loadIdempotentCommandResult(
 	commandJournal: CommandJournalRepository,
 	commandId: string,
 	intent: OrganizationCommandIntent,
+	tenantId: string,
 ): Promise<CommandResult | null> {
-	const existing = await commandJournal.findByCommandId(commandId);
+	const existing = await commandJournal.findByCommandId(commandId, tenantId);
 	if (!existing) {
 		return null;
 	}

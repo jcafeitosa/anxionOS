@@ -34,14 +34,9 @@ export async function createAgency(
 			marketScope: command.marketScope,
 		}),
 	};
-	const replay = await loadIdempotentCommandResult(
-		deps.commandJournal,
-		command.commandId,
-		intent,
-	);
-	if (replay) {
-		return replay;
-	}
+	// Red Team (Davi): NAO chamar loadIdempotentCommandResult aqui, fora do tenant
+	// context. A verificacao de replay deve acontecer DENTRO da transacao, com
+	// app.tenant_id definido, para garantir isolamento por tenant.
 	await assertPrincipalExists(deps.principalLookup, input.ownerPrincipalId);
 	const agencyId = randomUUID();
 	const ownerId = randomUUID();
@@ -72,6 +67,7 @@ export async function createAgency(
 				context.commandJournal,
 				command.commandId,
 				intent,
+				agencyId, // tenant_id
 			);
 			if (raced) {
 				return raced;

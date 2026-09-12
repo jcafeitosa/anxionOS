@@ -129,8 +129,8 @@ export const memberships = pgTable(
 export const commandJournal = pgTable(
 	"organizations_command_journal",
 	{
-		commandId: uuid("command_id").primaryKey(),
 		tenantId: uuid("tenant_id").notNull(),
+		commandId: uuid("command_id").notNull(),
 		commandName: text("command_name").notNull(),
 		aggregateId: uuid("aggregate_id").notNull(),
 		aggregateType: text("aggregate_type").notNull(),
@@ -141,9 +141,10 @@ export const commandJournal = pgTable(
 			.notNull()
 			.defaultNow(),
 	},
-	(table) => [
-		index("organizations_command_journal_tenant_id_idx").on(table.tenantId),
-	],
+	(table) => ({
+		pk: { name: "organizations_command_journal_pkey", columns: [table.tenantId, table.commandId] },
+		tenantIdIdx: index("organizations_command_journal_tenant_id_idx").on(table.tenantId),
+	}),
 );
 
 export type AgencyRow = typeof agencies.$inferSelect;

@@ -42,14 +42,7 @@ export async function inviteMember(
 		role: command.role,
 		actorPrincipalId: input.actorPrincipalId,
 	});
-	const replay = await loadIdempotentCommandResult(
-		deps.commandJournal,
-		command.commandId,
-		{ commandName: "InviteMember", requestHash },
-	);
-	if (replay) {
-		return { result: replay, inviteToken: "" };
-	}
+	// Red Team (Davi): replay dentro do tenant context, não antes
 	return deps.unitOfWork.runInTransaction(
 		buildAgencyTenantContext(command.agencyId, input.actorPrincipalId),
 		async (context) => {
@@ -81,6 +74,7 @@ export async function inviteMember(
 						);
 					},
 				},
+				command.agencyId, // tenant_id
 			);
 			if (raced) {
 				return { result: raced, inviteToken: "" };

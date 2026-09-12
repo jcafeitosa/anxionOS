@@ -46,14 +46,12 @@ export async function acceptInviteByToken(
 			sessionEmail: input.sessionEmail.toLowerCase(),
 		}),
 	};
-	const replay = await loadIdempotentCommandResult(
-		deps.commandJournal,
-		command.commandId,
-		intent,
-	);
-	if (replay) {
-		return replay;
-	}
+	// Red Team (Davi): NAO chamar loadIdempotentCommandResult aqui, fora do tenant
+	// context. O replay deve acontecer DENTRO da transacao com app.tenant_id definido.
+	// O comentário original dizia "replay ANTES da busca por token para evitar 'token
+	// invalido' no retry", mas isso quebrava isolamento cross-tenant. A solução correta
+	// é: buscar o token FORA (para obter agencyId), depois fazer replay DENTRO da
+	// transação (primeiro passo) com tenant_id correto.
 	const invitedMembership =
 		await deps.membershipRepository.findInvitedByTokenHash(tokenHash);
 	if (!invitedMembership) {
@@ -74,6 +72,7 @@ export async function acceptInviteByToken(
 				context.commandJournal,
 				command.commandId,
 				intent,
+				invitedMembership.agencyId, // tenant_id
 			);
 			if (raced) {
 				return raced;

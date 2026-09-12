@@ -28,14 +28,17 @@ export interface NewCommandJournalRecord {
 	requestHash?: string | null;
 }
 export interface CommandJournalRepository {
-	findByCommandId(commandId: string): Promise<CommandJournalRecord | null>;
+	findByCommandId(
+		commandId: string,
+		tenantId: string,
+	): Promise<CommandJournalRecord | null>;
 	/**
-	 * Grava o comando. Uma colisao de `command_id` (outra transacao ja' registrou
-	 * a MESMA `Idempotency-Key`) NAO pode ser engolida devolvendo a linha alheia:
-	 * o efeito desta transacao ja' foi gravado e commitava junto (double-apply).
-	 * Implementacoes devem lancar `CommandJournalConflictError`; a aplicacao o
-	 * converte em `ORG_DUPLICATE_IDEMPOTENCY` (409), derrubando a transacao do
-	 * perdedor.
+	 * Grava o comando. Uma colisao de (tenant_id, command_id) (outra transacao ja'
+	 * registrou a MESMA `Idempotency-Key` NO MESMO tenant) NAO pode ser engolida
+	 * devolvendo a linha alheia: o efeito desta transacao ja' foi gravado e
+	 * commitava junto (double-apply). Implementacoes devem lancar
+	 * `CommandJournalConflictError`; a aplicacao o converte em
+	 * `ORG_DUPLICATE_IDEMPOTENCY` (409), derrubando a transacao do perdedor.
 	 */
 	record(entry: NewCommandJournalRecord): Promise<CommandJournalRecord>;
 }
