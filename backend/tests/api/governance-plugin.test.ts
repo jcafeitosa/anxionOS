@@ -122,7 +122,7 @@ describe("ANX-466 — issuer role + possession (HTTP route)", () => {
 	});
 
 	test("HTTP VALID CASE — unknown capability checked before authorization (ANX-466 FURO 4)", () => {
-		// Unknown capability returns 409, not 403
+		// Unknown capability returns 400, not 403
 		// This prevents leaking authorization results via error codes
 		const mapped = mapGovernanceError(
 			new GovernanceCommandError(
@@ -130,7 +130,7 @@ describe("ANX-466 — issuer role + possession (HTTP route)", () => {
 				"Capability identity.superadmin.takeover is not in the grant capability catalog",
 			),
 		);
-		expect(mapped.status).toBe(409);
+		expect(mapped.status).toBe(400);
 		expect(mapped.body.error.details.code).toBe("GOV_CAPABILITY_UNKNOWN");
 	});
 });

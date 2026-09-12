@@ -1,145 +1,224 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, test } from "bun:test";
+import { PLATFORM_SCOPE_ID } from "@anxionos/contracts/governance";
 import type { Principal } from "@anxionos/identity";
+import { Elysia } from "elysia";
+import { createIdentityPlugin } from "../../apps/api/src/identity/plugin";
 import {
-	assertTargetInDeclaredAgency,
-	assertAgencyMembership,
-} from "../../apps/api/src/identity/authorization";
-
-const agencyA = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
-const agencyB = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+	createInMemoryPrincipalRepository,
+	createInMemoryServiceIdentityRepository,
+	createRecordingUnitOfWork,
+} from "./test-support";
 
 const alicePrincipal: Principal = {
-	id: "11111111-1111-4111-8111-111111111111",
+	id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
 	authUserId: "alice-auth",
-	email: "alice@agency-a.test",
-	kind: "human",
+	email: "alice@test.anxion.os",
 	status: "active",
-	revision: 1,
-	createdAt: new Date(),
+	createdAt: new Date("2026-09-08T12:00:00.000Z"),
 	suspendedAt: null,
 	suspensionReason: null,
+	kind: "human",
+	revision: 1,
 	revokedAt: null,
 	revocationReason: null,
 };
 
 const bobPrincipal: Principal = {
-	id: "22222222-2222-4222-8222-222222222222",
+	id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
 	authUserId: "bob-auth",
-	email: "bob@agency-b.test",
-	kind: "human",
+	email: "bob@test.anxion.os",
 	status: "active",
-	revision: 1,
-	createdAt: new Date(),
+	createdAt: new Date("2026-09-08T12:00:00.000Z"),
 	suspendedAt: null,
 	suspensionReason: null,
+	kind: "human",
+	revision: 1,
 	revokedAt: null,
 	revocationReason: null,
 };
 
-/**
- * ANX-465 — Cross-tenant isolation abuse cases.
- *
- * Maya critique: Replace theater test with executable abuse cases.
- *
- * Enforcement: backend/apps/api/src/identity/authorization.ts
- * - assertAgencyMembership: Caller must be member of declared agency
- * - assertTargetInDeclaredAgency: Target must belong to declared agency
- * - Multi-agency principals require PLATFORM authority
- *
- * Abuse cases:
- * 1. Agency A actor cannot declare membership they don't have
- * 2. Agency A actor cannot read/suspend principal belonging only to agency B
- * 3. Multi-agency principal requires PLATFORM scope (no agencyId)
- */
-describe("ANX-465 — cross-tenant isolation", () => {
-	function createAgencyScope(
-		principalAgencies: Map<string, string[]> = new Map(),
-	) {
-		return {
-			async isMember(agencyId: string, principalId: string): Promise<boolean> {
-				const agencies = principalAgencies.get(principalId) ?? [];
-				return agencies.includes(agencyId);
+const agencyA = "11111111-1111-4111-8111-111111111111";
+const agencyB = "22222222-2222-4222-8222-222222222222";
+
+interface HarnessOptions {
+	principals?: Principal[];
+	capabilities?: string[];
+	authUserId?: string | null;
+	grantScopeId?: string;
+	memberships?: string[];
+	targetAgencyIds?: string[];
+}
+
+function harness(options: HarnessOptions = {}) {
+	const principalRepository = createInMemoryPrincipalRepository(
+		options.principals ?? [alicePrincipal],
+	);
+	const recording = createRecordingUnitOfWork(
+		principalRepository,
+		createInMemoryServiceIdentityRepository(),
+	);
+	const authUserId =
+		options.authUserId === undefined ? "alice-auth" : options.authUserId;
+	const grants = options.capabilities ?? [];
+	const memberships = options.memberships ?? [];
+	const targetAgencies = options.targetAgencyIds ?? [];
+
+	const app = new Elysia().use(
+		createIdentityPlugin({
+			auth: {
+				api: {
+					getSession: async ({ headers }) =>
+						headers.get("cookie") && authUserId
+							? { user: { id: authUserId } }
+							: null,
+				},
 			},
-			async listAgencyIdsForPrincipal(principalId: string): Promise<string[]> {
-				return principalAgencies.get(principalId) ?? [];
+			identityRepository: principalRepository,
+			sessionRefRepository: recording.sessionRefRepository,
+			identityUnitOfWork: recording.unitOfWork,
+			grantRepository: {
+				async listActiveByPrincipal() {
+					return grants.map((capability) => ({
+						id: "66666666-6666-4666-8666-666666666666",
+						capability,
+						scopeId: options.grantScopeId ?? PLATFORM_SCOPE_ID,
+						scopeKind: options.grantScopeId === PLATFORM_SCOPE_ID ? ("platform" as const) : ("agency" as const),
+						granteePrincipalId: alicePrincipal.id,
+						granteeAgentId: null,
+						issuedByPrincipalId: null,
+						resourceRef: null,
+						status: "active" as const,
+						validFrom: new Date(),
+						validUntil: null,
+						derivedFromMembershipId: null,
+						authorityEpochAtIssue: 1,
+						revision: 1,
+						createdAt: new Date(),
+						updatedAt: new Date(),
+					}));
+				},
 			},
-		};
+			agencyScope: {
+				async isMember(agencyId, principalId) {
+					return memberships.includes(agencyId) && principalId === alicePrincipal.id;
+				},
+				async listAgencyIdsForPrincipal(principalId) {
+					if (principalId === alicePrincipal.id) {
+						return memberships;
+					}
+					return targetAgencies;
+				},
+			},
+		}),
+	);
+
+	return { app, published: recording.published };
+}
+
+describe("ANX-465 — cross-tenant isolation (HTTP)", () => {
+	function request(path: string, opts: { headers?: Record<string, string>; method?: string; body?: unknown } = {}) {
+		return new Request(`http://127.0.0.1${path}`, {
+			method: opts.method ?? "GET",
+			headers: {
+				"content-type": "application/json",
+				cookie: "session=mock",
+				...opts.headers,
+			},
+			body: opts.body ? JSON.stringify(opts.body) : undefined,
+		});
 	}
 
 	test("ABUSE CASE 1 — actor cannot declare agency membership they don't have", async () => {
-		// Alice is member of agency A only
-		const agencyScope = createAgencyScope(
-			new Map([[alicePrincipal.id, [agencyA]]]),
+		// Alice is only in agency A, tries to declare agency B
+		const { app } = harness({
+			principals: [alicePrincipal, bobPrincipal],
+			capabilities: ["identity.read"],
+			grantScopeId: agencyA,
+			memberships: [agencyA],
+			targetAgencyIds: [],
+		});
+
+		const response = await app.handle(
+			request(`/v1/identity/principals/${alicePrincipal.id}`, {
+				headers: { "x-agency-id": agencyB },
+			}),
 		);
 
-		// Alice tries to declare agency B (cross-tenant attempt)
-		await expect(
-			assertAgencyMembership(
-				{ agencyScope },
-				agencyB, // Alice is not a member of B
-				alicePrincipal.id,
-			),
-		).rejects.toMatchObject({
-			identityCode: "IDN_CROSS_TENANT",
-		});
+		expect(response.status).toBe(403);
+		expect((await response.json()).error.details.code).toBe("IDN_CROSS_TENANT");
 	});
 
 	test("ABUSE CASE 2 — agency A actor cannot suspend principal belonging only to agency B", async () => {
-		// Alice in agency A, Bob in agency B (no overlap)
-		const agencyScope = createAgencyScope(
-			new Map([
-				[alicePrincipal.id, [agencyA]],
-				[bobPrincipal.id, [agencyB]],
-			]),
+		// Alice in agency A with identity.admin grant, Bob only in agency B
+		const { app } = harness({
+			principals: [alicePrincipal, bobPrincipal],
+			capabilities: ["identity.admin"],
+			grantScopeId: agencyA,
+			memberships: [agencyA],
+			targetAgencyIds: [agencyB],
+		});
+
+		const response = await app.handle(
+			request(`/v1/identity/principals/${bobPrincipal.id}/suspend`, {
+				method: "POST",
+				headers: {
+					"x-agency-id": agencyA,
+					"idempotency-key": randomUUID(),
+				},
+				body: { reasonCode: "ops.manual" },
+			}),
 		);
 
-		// Alice (from agency A) tries to suspend Bob (from agency B)
-		await expect(
-			assertTargetInDeclaredAgency(
-				{ agencyScope },
-				agencyA, // Alice's scope
-				bobPrincipal.id, // Bob doesn't belong to A
-			),
-		).rejects.toMatchObject({
-			identityCode: "IDN_CROSS_TENANT",
-		});
+		expect(response.status).toBe(403);
+		expect((await response.json()).error.details.code).toBe("IDN_CROSS_TENANT");
 	});
 
 	test("ABUSE CASE 3 — multi-agency principal requires PLATFORM scope", async () => {
-		// Bob belongs to both agency A and B
-		const agencyScope = createAgencyScope(
-			new Map([
-				[alicePrincipal.id, [agencyA]],
-				[bobPrincipal.id, [agencyA, agencyB]], // Multi-agency
-			]),
+		// Bob belongs to both agencies, agency-scoped grant cannot operate on him
+		const { app } = harness({
+			principals: [alicePrincipal, bobPrincipal],
+			capabilities: ["identity.admin"],
+			grantScopeId: agencyA,
+			memberships: [agencyA],
+			targetAgencyIds: [agencyA, agencyB], // Bob is in both
+		});
+
+		const response = await app.handle(
+			request(`/v1/identity/principals/${bobPrincipal.id}/suspend`, {
+				method: "POST",
+				headers: {
+					"x-agency-id": agencyA,
+					"idempotency-key": randomUUID(),
+				},
+				body: { reasonCode: "ops.manual" },
+			}),
 		);
 
-		// Alice (agency A scope) tries to suspend Bob (who has B membership too)
-		await expect(
-			assertTargetInDeclaredAgency(
-				{ agencyScope },
-				agencyA, // Agency-scoped authority
-				bobPrincipal.id, // Bob belongs to another agency
-			),
-		).rejects.toMatchObject({
-			identityCode: "IDN_CROSS_TENANT",
-		});
+		expect(response.status).toBe(403);
+		expect((await response.json()).error.details.code).toBe("IDN_CROSS_TENANT");
 	});
 
-	test("VALID CASE — PLATFORM scope (no agencyId) can operate on any principal", async () => {
-		// Bob belongs to multiple agencies
-		const agencyScope = createAgencyScope(
-			new Map([[bobPrincipal.id, [agencyA, agencyB]]]),
+	test("VALID CASE — PLATFORM scope can operate on any principal", async () => {
+		// PLATFORM authority (no x-agency-id) can suspend any principal
+		const { app } = harness({
+			principals: [alicePrincipal, bobPrincipal],
+			capabilities: ["identity.admin"],
+			grantScopeId: PLATFORM_SCOPE_ID,
+			memberships: [],
+			targetAgencyIds: [agencyB],
+		});
+
+		const response = await app.handle(
+			request(`/v1/identity/principals/${bobPrincipal.id}/suspend`, {
+				method: "POST",
+				headers: {
+					"idempotency-key": randomUUID(),
+				},
+				body: { reasonCode: "ops.manual" },
+			}),
 		);
 
-		// Platform authority (no agencyId) can operate on Bob
-		await expect(
-			assertTargetInDeclaredAgency(
-				{ agencyScope },
-				undefined, // PLATFORM scope
-				bobPrincipal.id,
-			),
-		).resolves.toBeUndefined(); // No error
+		expect(response.status).toBe(200);
 	});
 });
