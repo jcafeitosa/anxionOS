@@ -77,6 +77,12 @@ Matrizes e playbooks da entrega G0–G7. Vários destes documentos são **fonte 
 | --- | --- |
 | [Org chart](team/org-chart.md) | Hierarquia circular de agentes (G0–G7) |
 
+## Legal/Privacy
+
+| Documento | Descrição |
+| --- | --- |
+| [Parecer ANX-480/481](legal/ANX-480-481-parecer.md) | BLOCK REAL/produção; APPROVE remediação board; accept bar 480/481 |
+
 ## Knowledge base local (`brain/`)
 
 Specs, ADRs, PRD e notas de arquitetura vivem em `brain/` **somente no workspace local** (gitignored). Com `brain/` presente, comece por `brain/index.md`. Esta pasta não é publicada no GitHub.
