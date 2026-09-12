@@ -62,28 +62,6 @@ export async function runEventingLagSliTick(
 			sampleCount: result.samples.length,
 		});
 	}
-	// #region agent log
-	fetch("http://127.0.0.1:7857/ingest/a6fc5ec4-791b-4921-8e35-5c7ce20619e6", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-			"X-Debug-Session-Id": "4cc2f6",
-		},
-		body: JSON.stringify({
-			sessionId: "4cc2f6",
-			runId: "monitor",
-			hypothesisId: "M2",
-			location: "bootstrap-eventing-lag-sli.ts:runEventingLagSliTick",
-			message: "eventing lag sli tick",
-			data: {
-				alertCount: result.alerts.length,
-				sampleCount: result.samples.length,
-				alerts: result.alerts,
-			},
-			timestamp: Date.now(),
-		}),
-	}).catch(() => {});
-	// #endregion
 }
 
 export function createEventingLagSliTicker(

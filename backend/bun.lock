@@ -49,7 +49,9 @@
       "dependencies": {
         "@anxionos/agents": "workspace:*",
         "@anxionos/contracts": "workspace:*",
+        "@anxionos/evaluation": "workspace:*",
         "@anxionos/eventing": "workspace:*",
+        "@anxionos/execution": "workspace:*",
         "@anxionos/governance": "workspace:*",
         "@anxionos/identity": "workspace:*",
         "@anxionos/observability": "workspace:*",
@@ -58,6 +60,7 @@
         "@anxionos/partners": "workspace:*",
         "@anxionos/performance": "workspace:*",
         "@anxionos/portfolios": "workspace:*",
+        "@anxionos/risk": "workspace:*",
         "@anxionos/simulation": "workspace:*",
         "@anxionos/strategies": "workspace:*",
         "@better-auth/drizzle-adapter": "1.7.4",
@@ -246,6 +249,7 @@
         "@anxionos/observability": "workspace:*",
         "drizzle-orm": "0.45.2",
         "pg": "8.23.0",
+        "zod": "4.6.2",
       },
       "devDependencies": {
         "@types/pg": "8.23.1",

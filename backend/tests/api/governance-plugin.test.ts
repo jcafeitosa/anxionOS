@@ -77,19 +77,10 @@ describe("governance POST RBAC (ANX-443)", () => {
 			expect(membership.role).toBe(role);
 		},
 	);
-
-	test("GOV_CAPABILITY_SCOPE_MISMATCH vira 409 com o codigo preservado (ANX-462)", () => {
-		// O comando rejeita `console.platform` com escopo de agencia; aqui se
-		// prova que a borda HTTP nao degrada isso para 500 nem para 200.
-		const mapped = mapGovernanceError(
-			new GovernanceCommandError(
-				"GOV_CAPABILITY_SCOPE_MISMATCH",
-				"Capability console.platform requires PLATFORM scope",
-			),
-		);
-		expect(mapped.status).toBe(409);
-		expect(mapped.body.error.details.code).toBe(
-			"GOV_CAPABILITY_SCOPE_MISMATCH",
-		);
-	});
 });
+
+/**
+ * ANX-462/466 HTTP evidence (C1): real `app.handle` POST /grants lives in
+ * `governance-grants-http.test.ts`. Do not reintroduce mapGovernanceError theater here.
+ * C2 DiD platform-only remains documented in handlers/contracts.
+ */
