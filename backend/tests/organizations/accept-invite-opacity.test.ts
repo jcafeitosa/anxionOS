@@ -239,10 +239,11 @@ describe("acceptInviteByToken — opacidade do conflito de revisao (ANX-460)", (
 		expect(otherOwner.accepted.statusCode).toBe(409);
 	});
 
-	test("constraint fora da uniao falha FECHADO (nao devolve 409 incorreto)", () => {
-		// Fallback explicito pedido pelo G4/G5 (issue ANX-493): hoje isto e' um
-		// TypeError -> 500. Enquanto a ANX-493 nao for feita, o teste pina que o
-		// resultado NUNCA e' um 409 com codigo errado.
+	test("constraint fora da uniao vira 409 ORG_MEMBERSHIP_EXISTS explicito (ANX-493)", () => {
+		// O fallback explicito pedido pelo G4/G5 foi implementado na ANX-493: o
+		// caminho nao morre mais em TypeError -> 500. O que continua proibido e'
+		// devolver o conflito ERRADO — o mapeamento derivado da constraint segue
+		// mandando; a uniao desconhecida recebe o 409 generico institucional.
 		const unclassified = new MembershipUniquenessConflictError(
 			"organizations_memberships_pkey" as never,
 		);
@@ -252,6 +253,11 @@ describe("acceptInviteByToken — opacidade do conflito de revisao (ANX-460)", (
 		} catch (error) {
 			thrown = error;
 		}
-		expect(thrown).not.toBeInstanceOf(OrganizationCommandError);
+		expect(thrown).toBeInstanceOf(OrganizationCommandError);
+		const mapped = thrown as OrganizationCommandError;
+		expect(mapped.organizationCode).toBe("ORG_MEMBERSHIP_EXISTS");
+		expect(mapped.statusCode).toBe(409);
+		// `cause` preservada: a cadeia de diagnostico sobrevive ao fallback.
+		expect(mapped.cause).toBe(unclassified);
 	});
 });

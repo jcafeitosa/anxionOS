@@ -3,6 +3,7 @@ import { throwMembershipUniquenessConflict } from "../../modules/organizations/s
 import { OrganizationCommandError } from "../../modules/organizations/src/application/errors";
 import {
 	MEMBERSHIP_CONFLICT_CONSTRAINTS,
+	type MembershipConflictConstraint,
 	MembershipUniquenessConflictError,
 } from "../../modules/organizations/src/domain/errors/membership-errors";
 
@@ -75,5 +76,23 @@ describe("throwMembershipUniquenessConflict — mapeamento exaustivo (ANX-460)",
 		);
 		expect(mapped.organizationCode).toBe("ORG_OWNER_REQUIRED");
 		expect(mapped.message).toContain("active owner");
+	});
+});
+
+describe("throwMembershipUniquenessConflict — fallback explicito (ANX-493)", () => {
+	test("constraint fora da uniao vira 409 ORG_MEMBERSHIP_EXISTS (nao TypeError/500)", () => {
+		// Cast consciente APENAS em teste: injeta uma constraint que a uniao nao
+		// conhece como se chegasse de reidratacao/evento ou de allowlist e mapa
+		// dessincronizados. O `capture()` ja' falha se o tiro for TypeError cru.
+		const mapped = capture(
+			new MembershipUniquenessConflictError(
+				"organizations_memberships_pkey" as MembershipConflictConstraint,
+			),
+		);
+		expect(mapped.organizationCode).toBe("ORG_MEMBERSHIP_EXISTS");
+		expect(mapped.statusCode).toBe(409);
+		expect(mapped.message).toBe("Unclassified membership uniqueness conflict");
+		// `cause` preservada tambem no caminho de fallback: diagnostico intacto.
+		expect(mapped.cause).toBeInstanceOf(MembershipUniquenessConflictError);
 	});
 });

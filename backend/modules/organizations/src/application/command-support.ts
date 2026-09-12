@@ -178,6 +178,17 @@ export function throwMembershipUniquenessConflict(
 	error: MembershipUniquenessConflictError,
 ): never {
 	const response = MEMBERSHIP_CONFLICT_RESPONSES[error.constraint];
+	if (!response) {
+		// Fail-safe explicito (ANX-493, LOW-1 do G4/G5): o `Record` protege em
+		// compilacao, mas uma constraint fora da uniao (ex.: reidratacao a partir
+		// de evento/journal, ou allowlist e mapa dessincronizados) nao pode virar
+		// `TypeError` opaco -> 500 no boundary. Resposta institucional explicita.
+		throwOrganizationError(
+			"ORG_MEMBERSHIP_EXISTS",
+			"Unclassified membership uniqueness conflict",
+			{ cause: error },
+		);
+	}
 	throwOrganizationError(response.code, response.message, { cause: error });
 }
 
