@@ -1,5 +1,6 @@
-import { describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+import { errorResponseSchema } from "@anxionos/contracts/errors";
 import { issueGrant } from "@anxionos/governance";
 import { PrincipalLookupUnavailableError as OrganizationPrincipalLookupUnavailableError } from "@anxionos/organizations";
 import { mapGovernanceError } from "../../apps/api/src/governance/error-handler";
@@ -16,6 +17,7 @@ import {
 	createInMemoryCommandJournalRepository,
 	createInMemoryGrantRepository,
 	createRecordingGovernanceUnitOfWork,
+	createStubPrincipalLookup,
 } from "./test-support";
 
 /**
@@ -162,16 +164,51 @@ describe("ANX-477 — identidade indisponivel: comando novo propaga a classe REA
 	});
 });
 
-describe("ANX-477 — boundary de governance: status da identidade indisponivel", () => {
-	test("classe REAL (organizations) -> 404 GOV_PRINCIPAL_NOT_FOUND", () => {
+describe("ANX-492 — boundary de governance: indisponibilidade de identidade vira 503, nao 404", () => {
+	beforeEach(() => {
+		delete process.env.NODE_ENV;
+	});
+
+	afterEach(() => {
+		delete process.env.NODE_ENV;
+	});
+
+	/**
+	 * ANX-492 (achado LOW do G5 na revalidacao da ANX-477): a classe REAL
+	 * lancada pelo adapter de identidade (`@anxionos/organizations`) sinaliza
+	 * indisponibilidade de INFRA, nao "principal inexistente". Este teste
+	 * PINAVA 404 `GOV_PRINCIPAL_NOT_FOUND` (comportamento antigo, documentado
+	 * como defeito na propria issue de origem); agora prova o comportamento
+	 * corrigido — 503 com o codigo canonico do modulo em `details.code`, sem
+	 * expor a mensagem crua do driver/adapter.
+	 */
+	test("classe REAL (organizations) -> 503 GOV_IDENTITY_UNAVAILABLE (details.code), nao 404", () => {
 		const mapped = mapGovernanceError(
 			new OrganizationPrincipalLookupUnavailableError("identity down"),
 		);
-		expect(mapped.status).toBe(404);
-		expect(mapped.body.error.code).toBe("NOT_FOUND");
+		expect(mapped.status).toBe(503);
+		expect(mapped.body.error.code).toBe("SERVICE_UNAVAILABLE");
 		expect(mapped.body.error.details).toMatchObject({
-			code: "GOV_PRINCIPAL_NOT_FOUND",
+			code: "GOV_IDENTITY_UNAVAILABLE",
 		});
+		// Motivo institucional em details.code; sem vazar a mensagem crua do
+		// driver/adapter de identidade no corpo exposto ao cliente.
+		expect(mapped.body.error.message).not.toContain("identity down");
+		expect(errorResponseSchema.safeParse(mapped.body).success).toBe(true);
+	});
+
+	test("classe REAL (organizations) -> 503 valido contra errorResponseSchema em NODE_ENV=production", () => {
+		process.env.NODE_ENV = "production";
+		const mapped = mapGovernanceError(
+			new OrganizationPrincipalLookupUnavailableError("identity down"),
+		);
+		expect(mapped.status).toBe(503);
+		expect(mapped.body.error.code).toBe("SERVICE_UNAVAILABLE");
+		// Em producao `exposeDetails` e' false por padrao em `toErrorResponse`
+		// (`packages/contracts/src/errors.ts`) — details fica ausente do corpo.
+		expect(mapped.body.error).not.toHaveProperty("details");
+		expect(mapped.body.error.message).not.toContain("identity down");
+		expect(errorResponseSchema.safeParse(mapped.body).success).toBe(true);
 	});
 
 	test("classe do port do governance NAO e' a de producao (cai em 500)", () => {
@@ -181,5 +218,58 @@ describe("ANX-477 — boundary de governance: status da identidade indisponivel"
 			new GovernancePrincipalLookupUnavailableError("identity down"),
 		);
 		expect(mapped.status).toBe(500);
+	});
+
+	/**
+	 * ANX-492: principal REALMENTE inexistente (o `PrincipalLookup.exists()`
+	 * resolve `false`, sem lancar) permanece 404 `GOV_PRINCIPAL_NOT_FOUND` —
+	 * o comando lanca `GovernanceCommandError` diretamente
+	 * (`throwGovernanceError` em `issue-grant.ts`), que cai no ramo
+	 * `GovernanceCommandError || isAppError` do boundary, nao no ramo de
+	 * `PrincipalLookupUnavailableError`.
+	 */
+	test("principal inexistente (exists() = false) -> 404 GOV_PRINCIPAL_NOT_FOUND, valido em producao", async () => {
+		const grantRepository = createInMemoryGrantRepository();
+		const commandJournal = createInMemoryCommandJournalRepository();
+		const { unitOfWork } = createRecordingGovernanceUnitOfWork({
+			grantRepository,
+			changeProposalRepository: createInMemoryChangeProposalRepository(),
+			approvalRepository: createInMemoryApprovalRepository(),
+			authorityEpochStore: createInMemoryAuthorityEpochStore(),
+			commandJournal,
+		});
+		let caught: unknown;
+		try {
+			await issueGrant(
+				{
+					unitOfWork,
+					commandJournal,
+					grantRepository,
+					principalLookup: createStubPrincipalLookup([]),
+				},
+				{
+					commandId: randomUUID(),
+					scopeId: SCOPE_ID,
+					issuedByPrincipalId: null,
+					granteePrincipalId: PRINCIPAL_ID,
+					capability: CAPABILITY,
+				},
+			);
+		} catch (error) {
+			caught = error;
+		}
+		const mapped = mapGovernanceError(caught);
+		expect(mapped.status).toBe(404);
+		expect(mapped.body.error.code).toBe("NOT_FOUND");
+		expect(mapped.body.error.details).toMatchObject({
+			code: "GOV_PRINCIPAL_NOT_FOUND",
+		});
+		expect(errorResponseSchema.safeParse(mapped.body).success).toBe(true);
+
+		process.env.NODE_ENV = "production";
+		const mappedProd = mapGovernanceError(caught);
+		expect(mappedProd.status).toBe(404);
+		expect(mappedProd.body.error.code).toBe("NOT_FOUND");
+		expect(errorResponseSchema.safeParse(mappedProd.body).success).toBe(true);
 	});
 });

@@ -19,6 +19,10 @@ export const GOVERNANCE_ERROR_CODES = [
 	"GOV_CAPABILITY_UNKNOWN",
 	// ANX-457/F1 (G5): reuso de Idempotency-Key por outro comando/agregado.
 	"GOV_DUPLICATE_IDEMPOTENCY",
+	// ANX-492: indisponibilidade do servico de identidade (infra), distinto de
+	// GOV_PRINCIPAL_NOT_FOUND (principal realmente inexistente). Espelha
+	// ORG_IDENTITY_UNAVAILABLE em `organizations/errors.ts`.
+	"GOV_IDENTITY_UNAVAILABLE",
 ] as const;
 export const governanceErrorCodeSchema = z.enum(GOVERNANCE_ERROR_CODES);
 export const GOVERNANCE_ERROR_STATUS_MAP = {
@@ -38,6 +42,8 @@ export const GOVERNANCE_ERROR_STATUS_MAP = {
 	GOV_CAPABILITY_SCOPE_MISMATCH: 409,
 	GOV_CAPABILITY_UNKNOWN: 400,
 	GOV_DUPLICATE_IDEMPOTENCY: 409,
+	// ANX-492: indisponibilidade de dependencia (identidade) -> 5xx, nunca 404.
+	GOV_IDENTITY_UNAVAILABLE: 503,
 };
 export const governanceErrorDetailsSchema = z.object({
 	code: governanceErrorCodeSchema,

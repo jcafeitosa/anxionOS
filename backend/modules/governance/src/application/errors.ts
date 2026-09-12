@@ -23,7 +23,12 @@ export class GovernanceCommandError extends AppError {
 						? "FORBIDDEN"
 						: statusCode === 409
 							? "CONFLICT"
-							: "INTERNAL_ERROR";
+							: // ANX-492: indisponibilidade de dependencia (503) usa o codigo
+								// canonico do envelope `SERVICE_UNAVAILABLE`, nao INTERNAL_ERROR —
+								// mesmo padrao de `OrganizationCommandError` (ANX-486).
+								statusCode === 503
+								? "SERVICE_UNAVAILABLE"
+								: "INTERNAL_ERROR";
 		super({
 			code: appCode,
 			message,

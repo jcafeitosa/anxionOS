@@ -41,10 +41,18 @@ export function mapGovernanceError(
 			body: toErrorResponse(error, { requestId }),
 		};
 	}
+	// ANX-492: `PrincipalLookupUnavailableError` (de `@anxionos/organizations`)
+	// sinaliza indisponibilidade do servico de identidade (falha de infra), NAO
+	// "principal inexistente". Antes caia em `GOV_PRINCIPAL_NOT_FOUND` (404),
+	// indistinguivel do caso de dominio (`throwGovernanceError` em
+	// issue-grant/create-delegation/submit-change-proposal/activate-break-glass
+	// quando `principalLookup.exists()` resolve `false`). Agora mapeia para
+	// 503 com o codigo canonico do modulo em `details.code`, sem expor a
+	// mensagem crua do driver/adapter de identidade.
 	if (error instanceof PrincipalLookupUnavailableError) {
 		const mapped = new GovernanceCommandError(
-			"GOV_PRINCIPAL_NOT_FOUND",
-			error.message,
+			"GOV_IDENTITY_UNAVAILABLE",
+			"Identity service unavailable",
 			{ cause: error },
 		);
 		return {
