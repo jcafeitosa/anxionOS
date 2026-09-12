@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import {
 	type CommandResult,
 	type CreateAgencyCommand,
@@ -17,23 +17,6 @@ import {
 } from "../command-support";
 import { assertPrincipalExists } from "../services/principal-guard";
 import { buildAgencyTenantContext } from "../services/tenant-context";
-
-/**
- * Generate a deterministic UUID from a command ID.
- * Same commandId always produces the same agencyId, ensuring idempotent replay
- * works correctly with tenant-scoped journal lookups.
- */
-function deterministicAgencyId(commandId: string): string {
-	const hash = createHash("sha256").update(commandId).digest("hex");
-	// Format as UUID v5-style: xxxxxxxx-xxxx-5xxx-yxxx-xxxxxxxxxxxx
-	return [
-		hash.slice(0, 8),
-		hash.slice(8, 12),
-		`5${hash.slice(13, 16)}`, // version 5
-		`${((Number.parseInt(hash.slice(16, 18), 16) & 0x3f) | 0x80).toString(16).padStart(2, "0")}${hash.slice(18, 20)}`, // variant
-		hash.slice(20, 32),
-	].join("-");
-}
 
 export async function createAgency(
 	deps: CreateAgencyDeps,
@@ -55,10 +38,7 @@ export async function createAgency(
 	// context. A verificacao de replay deve acontecer DENTRO da transacao, com
 	// app.tenant_id definido, para garantir isolamento por tenant.
 	await assertPrincipalExists(deps.principalLookup, input.ownerPrincipalId);
-	// ANX-480: agencyId must be DETERMINISTIC (derived from commandId) so that
-	// retries of the same Idempotency-Key find the same journal row AND satisfy
-	// agencies RLS (app.agency_id must match the agency_id being inserted).
-	const agencyId = deterministicAgencyId(command.commandId);
+	const agencyId = randomUUID();
 	const ownerId = randomUUID();
 	const membershipId = randomUUID();
 	const now = new Date();
@@ -77,9 +57,6 @@ export async function createAgency(
 		revision,
 	});
 	return deps.unitOfWork.runInTransaction(
-		// ANX-480: agencyId is deterministic (from commandId), so it's stable across
-		// retries. Use agencyId for both tenant_id (journal isolation) and agency_id
-		// (agencies RLS). This matches main branch pattern.
 		buildAgencyTenantContext(agencyId, input.ownerPrincipalId),
 		async (context) => {
 			// Replay como PRIMEIRA operacao da transacao, com validacao de intencao.
