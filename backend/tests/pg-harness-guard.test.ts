@@ -840,7 +840,7 @@ describe("round 5 — fail-closed redaction of derived values", () => {
 			expect(message).not.toBe("");
 			expect(message).toMatch(/refusing|not a valid URL|protocol/);
 			for (const marker of LEAK_MARKERS) {
-				expect(message.toLowerCase()).not.toContain(marker);
+				expect(message.toLowerCase()).not.toContain(marker.toLowerCase());
 			}
 		});
 	}
