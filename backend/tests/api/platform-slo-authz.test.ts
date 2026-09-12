@@ -132,7 +132,67 @@ describe("ANX-497 — platform SLO snapshot authorization", () => {
 		expect(body.error).toBeDefined();
 	});
 
-	test("VALID CASE — valid session + console.platform grant → 200", async () => {
+	test("ABUSE CASE 4 — agency-scoped console.platform grant → 403", async () => {
+		// Hugo residual: PLATFORM capability in agency scope must be rejected
+		const agencyId = randomUUID();
+		const metrics = createMetricsCollector();
+
+		const grantRepository = createInMemoryGrantRepository([
+			{
+				id: randomUUID(),
+				tenantId: agencyId,
+				agencyId: agencyId,
+				scopeId: agencyId, // Agency scope, not PLATFORM_SCOPE_ID
+				scopeKind: "agency" as const,
+				granteePrincipalId: principalId,
+				granteeAgentId: null,
+				issuedByPrincipalId: null,
+				capability: "console.platform",
+				resourceRef: null,
+				status: "active" as const,
+				validFrom: new Date(),
+				validUntil: null,
+				derivedFromMembershipId: null,
+				authorityEpochAtIssue: 1,
+				revision: 1,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			},
+		]);
+
+		const identityRepository = createInMemoryPrincipalRepository([
+			testPrincipal,
+		]);
+
+		const auth = {
+			api: {
+				getSession: async () => ({
+					user: { id: authUserId },
+					session: { token: "mock-token" },
+				}),
+			},
+		} as any;
+
+		const app = new Elysia().use(
+			createPlatformSloSnapshotPlugin({
+				metrics,
+				grantRepository,
+				auth,
+				identityRepository,
+				now: () => "2026-09-11T12:00:00.000Z",
+			}),
+		);
+
+		const response = await app.handle(
+			new Request("http://127.0.0.1/v1/operations/platform/slo-snapshot"),
+		);
+		// Agency-scoped PLATFORM capability must be rejected
+		expect(response.status).toBe(403);
+		const body = await response.json();
+		expect(body.error).toBeDefined();
+	});
+
+	test("VALID CASE — valid session + console.platform grant in PLATFORM scope → 200", async () => {
 		const app = createApp(true, true);
 		const response = await app.handle(
 			new Request("http://127.0.0.1/v1/operations/platform/slo-snapshot"),

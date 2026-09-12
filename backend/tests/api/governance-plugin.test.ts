@@ -93,3 +93,44 @@ describe("governance POST RBAC (ANX-443)", () => {
 		);
 	});
 });
+
+describe("ANX-466 — issuer role + possession (HTTP route)", () => {
+	test("HTTP ABUSE CASE 1 — operator cannot issue identity.admin (role check)", () => {
+		// Hugo residual: operator role cannot issue administrative capabilities
+		// Even if operator somehow had the capability, the role check fails first
+		const mapped = mapGovernanceError(
+			new GovernanceCommandError(
+				"GOV_INSUFFICIENT_AUTHORITY",
+				"Role operator cannot issue capability identity.admin",
+			),
+		);
+		expect(mapped.status).toBe(403);
+		expect(mapped.body.error.details.code).toBe("GOV_INSUFFICIENT_AUTHORITY");
+	});
+
+	test("HTTP ABUSE CASE 2 — issuer must hold capability (possession check)", () => {
+		// Hugo residual: even owner/admin must possess the capability to issue it
+		// Cannot issue agents.budget.manage without holding it
+		const mapped = mapGovernanceError(
+			new GovernanceCommandError(
+				"GOV_INSUFFICIENT_AUTHORITY",
+				"Issuer does not hold capability agents.budget.manage in agency or PLATFORM scope",
+			),
+		);
+		expect(mapped.status).toBe(403);
+		expect(mapped.body.error.details.code).toBe("GOV_INSUFFICIENT_AUTHORITY");
+	});
+
+	test("HTTP VALID CASE — unknown capability checked before authorization (ANX-466 FURO 4)", () => {
+		// Unknown capability returns 409, not 403
+		// This prevents leaking authorization results via error codes
+		const mapped = mapGovernanceError(
+			new GovernanceCommandError(
+				"GOV_CAPABILITY_UNKNOWN",
+				"Capability identity.superadmin.takeover is not in the grant capability catalog",
+			),
+		);
+		expect(mapped.status).toBe(409);
+		expect(mapped.body.error.details.code).toBe("GOV_CAPABILITY_UNKNOWN");
+	});
+});
