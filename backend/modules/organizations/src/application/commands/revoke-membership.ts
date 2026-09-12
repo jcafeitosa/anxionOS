@@ -105,7 +105,10 @@ export async function revokeMembership(
 				context.membershipRepository.save({
 					...membership,
 					status: "revoked",
-					inviteTokenHash: null,
+					// Preserve a consumed token fingerprint so a retry of the original
+					// accept command can still resolve the tenant before the transaction.
+					// Pending/revoked invites remain unusable because accept checks status.
+					inviteTokenHash: membership.inviteTokenHash,
 					inviteExpiresAt: null,
 					revokedAt: now,
 					revision,

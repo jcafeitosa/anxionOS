@@ -52,9 +52,9 @@ export async function acceptInviteByToken(
 	// invalido' no retry", mas isso quebrava isolamento cross-tenant. A solução correta
 	// é: buscar o token FORA (para obter agencyId), depois fazer replay DENTRO da
 	// transação (primeiro passo) com tenant_id correto.
-	const invitedMembership =
+	const tokenMembership =
 		await deps.membershipRepository.findInvitedByTokenHash(tokenHash);
-	if (!invitedMembership) {
+	if (!tokenMembership) {
 		throwOrganizationError(
 			"ORG_AGENCY_NOT_FOUND",
 			"Invite token is invalid or already consumed",
@@ -62,7 +62,7 @@ export async function acceptInviteByToken(
 	}
 	return deps.unitOfWork.runInTransaction(
 		buildAgencyTenantContext(
-			invitedMembership.agencyId,
+			tokenMembership.agencyId,
 			input.sessionPrincipalId,
 		),
 		async (context) => {
@@ -72,14 +72,14 @@ export async function acceptInviteByToken(
 				context.commandJournal,
 				command.commandId,
 				intent,
-				invitedMembership.agencyId, // tenant_id
+				tokenMembership.agencyId, // tenant_id
 			);
 			if (raced) {
 				return raced;
 			}
 			const membership =
 				await context.membershipRepository.findInvitedByTokenHash(tokenHash);
-			if (!membership) {
+			if (!membership || membership.status !== "invited") {
 				throwOrganizationError(
 					"ORG_AGENCY_NOT_FOUND",
 					"Invite token is invalid or already consumed",
@@ -148,7 +148,10 @@ export async function acceptInviteByToken(
 					...membership,
 					principalId: input.sessionPrincipalId,
 					status: "active",
-					inviteTokenHash: null,
+					// Keep the one-way token fingerprint as a lookup anchor for a
+					// legitimate idempotent replay. A new command still fails closed
+					// because the status is no longer `invited`.
+					inviteTokenHash: membership.inviteTokenHash,
 					inviteExpiresAt: null,
 					joinedAt: now,
 					revision,
@@ -196,7 +199,7 @@ export async function acceptInviteByToken(
 					responseSnapshot: toCommandResultSnapshot(result),
 					requestHash: intent.requestHash,
 				},
-				invitedMembership.agencyId,
+				membership.agencyId,
 			);
 			await context.publishEvents([event]);
 			return result;

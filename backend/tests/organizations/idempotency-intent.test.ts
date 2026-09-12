@@ -725,9 +725,48 @@ describe("organizations idempotency intent (S2/ANX-460)", () => {
 		expect(replay.idempotentReplay).toBe(true);
 	});
 
+	test("acceptInviteByToken: consumed token with a new command stays opaque", async () => {
+		const token = "invite-token-consumed-new-command";
+		const hasher = createTestInviteTokenHasher();
+		const harness = createHarness({
+			agencies: [buildAgency(AGENCY_ID, OWNER)],
+			memberships: [
+				buildMembership(OWNER_MEMBERSHIP, AGENCY_ID, OWNER, "owner", "active"),
+				buildMembership(MEMBERSHIP_ID, AGENCY_ID, null, "operator", "invited", {
+					inviteEmail: "consumed@example.com",
+					inviteTokenHash: hasher.hash(token),
+					inviteExpiresAt: FUTURE,
+				}),
+			],
+		});
+		const deps = {
+			...harness.baseDeps,
+			membershipRepository: harness.membershipRepository,
+			inviteTokenHasher: hasher,
+		};
+
+		await acceptInviteByToken(deps, {
+			commandId: KEY,
+			token,
+			sessionPrincipalId: SUCCESSOR,
+			sessionEmail: "consumed@example.com",
+		});
+		await expect(
+			acceptInviteByToken(deps, {
+				commandId: OTHER_KEY,
+				token,
+				sessionPrincipalId: SUCCESSOR,
+				sessionEmail: "consumed@example.com",
+			}),
+		).rejects.toMatchObject({
+			organizationCode: "ORG_AGENCY_NOT_FOUND",
+			statusCode: 404,
+		});
+	});
+
 	test("reusing a key across commands is 409", async () => {
 		const harness = createHarness({ principals: [OWNER] });
-		await createAgency(
+		const created = await createAgency(
 			{ ...harness.baseDeps, principalLookup: harness.principalLookup },
 			{
 				commandId: KEY,
@@ -741,7 +780,7 @@ describe("organizations idempotency intent (S2/ANX-460)", () => {
 				{ ...harness.baseDeps, inviteTokenHasher: harness.inviteTokenHasher },
 				{
 					commandId: KEY,
-					agencyId: AGENCY_ID,
+					agencyId: created.aggregateId,
 					email: "cross@example.com",
 					role: "operator",
 					actorPrincipalId: OWNER,

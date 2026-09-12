@@ -7,6 +7,7 @@ import {
 	createOrganizationsDb,
 	createOrganizationUnitOfWork,
 } from "@anxionos/organizations";
+import { buildAgencyTenantContext } from "../../../modules/organizations/src/application/services/tenant-context";
 import {
 	createStubPrincipalLookup,
 	shouldRunPgIntegrationTests,
@@ -96,39 +97,43 @@ describe("organizations UoW journal+outbox integration (P-R5-06)", () => {
 			const now = new Date();
 
 			await expect(
-				unitOfWork.runInTransaction(undefined, async (context) => {
-					await context.agencyRepository.save({
-						id: agencyId,
-						ownerPrincipalId,
-						displayName: "Rollback Agency",
-						marketScope: "both",
-						status: "draft",
-						onboardingStep: "created",
-						revision: 1,
-						createdAt: now,
-						updatedAt: now,
-					});
-					await context.commandJournal.record({
-						commandId,
-						commandName: "CreateAgency",
-						aggregateId: agencyId,
-						aggregateType: "Agency",
-						revision: 1,
-						responseSnapshot: { aggregateId: agencyId, revision: 1 },
-					});
-					await context.publishEvents([
-						createAgencyCreatedEvent({
-							agencyId,
+				unitOfWork.runInTransaction(
+					buildAgencyTenantContext(agencyId, ownerPrincipalId),
+					async (context) => {
+						await context.agencyRepository.save({
+							id: agencyId,
 							ownerPrincipalId,
 							displayName: "Rollback Agency",
 							marketScope: "both",
 							status: "draft",
 							onboardingStep: "created",
 							revision: 1,
-						}),
-					]);
-					throw new Error("simulated transaction failure");
-				}),
+							createdAt: now,
+							updatedAt: now,
+						});
+						await context.commandJournal.record({
+							tenantId: agencyId,
+							commandId,
+							commandName: "CreateAgency",
+							aggregateId: agencyId,
+							aggregateType: "Agency",
+							revision: 1,
+							responseSnapshot: { aggregateId: agencyId, revision: 1 },
+						});
+						await context.publishEvents([
+							createAgencyCreatedEvent({
+								agencyId,
+								ownerPrincipalId,
+								displayName: "Rollback Agency",
+								marketScope: "both",
+								status: "draft",
+								onboardingStep: "created",
+								revision: 1,
+							}),
+						]);
+						throw new Error("simulated transaction failure");
+					},
+				),
 			).rejects.toThrow("simulated transaction failure");
 
 			const agencyCount = await pool.query(

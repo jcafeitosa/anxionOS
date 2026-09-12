@@ -243,7 +243,7 @@ export async function saveWithRevisionConflictMapping<T>(
  */
 export async function recordOrganizationCommand(
 	context: { commandJournal: CommandJournalRepository },
-	entry: NewCommandJournalRecord,
+	entry: Omit<NewCommandJournalRecord, "tenantId">,
 	tenantId: string,
 ): Promise<void> {
 	try {
