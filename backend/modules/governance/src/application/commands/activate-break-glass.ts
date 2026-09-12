@@ -22,6 +22,10 @@ import {
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwGovernanceError } from "../errors";
+import {
+	applyPrincipalExistenceProbe,
+	probePrincipalExistence,
+} from "../principal-probe";
 
 const MAX_BREAK_GLASS_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -59,6 +63,15 @@ export async function activateBreakGlass(
 		agencyId: command.scopeId,
 		principalId: command.granteePrincipalId,
 	};
+
+	// ANX-477 — sonda tolerante ANTES da transacao (ver `principal-probe.ts`):
+	// a existencia do principal e' estado que a transacao nao altera, entao a
+	// consulta nao precisa da conexao que a transacao ja' segura. O replay
+	// continua sendo resolvido antes de julgar a identidade.
+	const principalProbe = await probePrincipalExistence(
+		deps.principalLookup,
+		command.granteePrincipalId,
+	);
 
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
 		const incidentRef = command.incidentRef ?? command.commandId;
@@ -122,15 +135,7 @@ export async function activateBreakGlass(
 				"Break-glass TTL exceeds maximum allowed window (24h)",
 			);
 		}
-		const granteeExists = await deps.principalLookup.exists(
-			command.granteePrincipalId,
-		);
-		if (!granteeExists) {
-			throwGovernanceError(
-				"GOV_PRINCIPAL_NOT_FOUND",
-				`Principal ${command.granteePrincipalId} not found`,
-			);
-		}
+		applyPrincipalExistenceProbe(principalProbe, command.granteePrincipalId);
 
 		const bumpedEpoch = await context.authorityEpochStore.increment(
 			command.scopeId,

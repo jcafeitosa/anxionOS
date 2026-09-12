@@ -27,6 +27,10 @@ import {
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwGovernanceError } from "../errors";
+import {
+	applyPrincipalExistenceProbe,
+	probePrincipalExistence,
+} from "../principal-probe";
 
 export interface CreateDelegationDeps {
 	unitOfWork: GovernanceUnitOfWork;
@@ -77,6 +81,15 @@ export async function createDelegation(
 		agencyId: parentGrant.agencyId,
 		principalId: parentGrant.granteePrincipalId,
 	};
+
+	// ANX-477 — sonda tolerante ANTES da transacao (ver `principal-probe.ts`):
+	// a leitura de identidade nao depende do estado transacional, entao nao
+	// precisa de uma segunda conexao do pool enquanto a transacao segura a
+	// primeira. O replay continua resolvido antes de julgar a identidade.
+	const principalProbe = await probePrincipalExistence(
+		deps.principalLookup,
+		command.delegatePrincipalId,
+	);
 
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
 		// ANX-476/FURO 4 — mesma key so' repete para a MESMA delegacao
@@ -141,15 +154,7 @@ export async function createDelegation(
 			);
 		}
 
-		const delegateExists = await deps.principalLookup.exists(
-			command.delegatePrincipalId,
-		);
-		if (!delegateExists) {
-			throwGovernanceError(
-				"GOV_PRINCIPAL_NOT_FOUND",
-				`Principal ${command.delegatePrincipalId} not found`,
-			);
-		}
+		applyPrincipalExistenceProbe(principalProbe, command.delegatePrincipalId);
 
 		const bumpedEpoch = await context.authorityEpochStore.increment(
 			parent.scopeId,

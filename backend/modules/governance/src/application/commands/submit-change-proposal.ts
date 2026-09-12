@@ -16,7 +16,10 @@ import {
 	recordGovernanceCommand,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { throwGovernanceError } from "../errors";
+import {
+	applyPrincipalExistenceProbe,
+	probePrincipalExistence,
+} from "../principal-probe";
 
 export interface SubmitChangeProposalInput extends SubmitChangeProposalCommand {
 	proposerPrincipalId: string;
@@ -38,6 +41,13 @@ export async function submitChangeProposal(
 		agencyId: command.scopeId,
 		principalId: input.proposerPrincipalId,
 	};
+	// ANX-477 — sonda tolerante ANTES da transacao (ver `principal-probe.ts`):
+	// nenhuma conexao extra do pool e' pedida com a transacao aberta, e o replay
+	// continua resolvido antes de julgar a identidade.
+	const principalProbe = await probePrincipalExistence(
+		deps.principalLookup,
+		input.proposerPrincipalId,
+	);
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
 		// ANX-476/FURO 4 — a key so' repete para a MESMA proposta
 		// (escopo + tipo + payload + proponente). Nao ha lock da key: a
@@ -66,15 +76,7 @@ export async function submitChangeProposal(
 		if (raced) {
 			return raced;
 		}
-		const proposerExists = await deps.principalLookup.exists(
-			input.proposerPrincipalId,
-		);
-		if (!proposerExists) {
-			throwGovernanceError(
-				"GOV_PRINCIPAL_NOT_FOUND",
-				`Principal ${input.proposerPrincipalId} not found`,
-			);
-		}
+		applyPrincipalExistenceProbe(principalProbe, input.proposerPrincipalId);
 		const now = new Date();
 		const proposalId = randomUUID();
 		const revision = 1;

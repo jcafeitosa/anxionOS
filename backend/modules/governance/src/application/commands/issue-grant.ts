@@ -23,6 +23,10 @@ import {
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwGovernanceError } from "../errors";
+import {
+	applyPrincipalExistenceProbe,
+	probePrincipalExistence,
+} from "../principal-probe";
 
 export interface IssueGrantInput extends IssueGrantCommand {
 	scopeKind?: GovernanceScopeKind;
@@ -110,6 +114,16 @@ export async function issueGrant(
 		agencyId: command.scopeId,
 		principalId: command.granteePrincipalId,
 	};
+	// ANX-477 — a sonda de principal roda ANTES de abrir a transacao. Dentro
+	// dela, cada comando segurava uma conexao do pool e pedia uma SEGUNDA para a
+	// identidade (mesmo pool), esgotando-o sob rajada. A sonda e' tolerante
+	// (nunca lanca) para que um replay continue devolvendo o resultado
+	// journalado mesmo com a identidade indisponivel; o resultado e' aplicado
+	// DEPOIS do replay, dentro da transacao.
+	const principalProbe = await probePrincipalExistence(
+		deps.principalLookup,
+		command.granteePrincipalId,
+	);
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
 		// Replay resolvido NA TRANSACAO, com validacao de intencao: o comando CRIA
 		// o agregado, entao a intencao e' checada pelo grant que o journal aponta.
@@ -147,15 +161,7 @@ export async function issueGrant(
 		if (journaled) {
 			return journaled;
 		}
-		const granteeExists = await deps.principalLookup.exists(
-			command.granteePrincipalId,
-		);
-		if (!granteeExists) {
-			throwGovernanceError(
-				"GOV_PRINCIPAL_NOT_FOUND",
-				`Principal ${command.granteePrincipalId} not found`,
-			);
-		}
+		applyPrincipalExistenceProbe(principalProbe, command.granteePrincipalId);
 		const bumpedEpoch = await context.authorityEpochStore.increment(
 			command.scopeId,
 			command.scopeId,
