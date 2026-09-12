@@ -78,6 +78,10 @@ child.warn("Suspicious login attempt", { meta: redactSecrets({ ip: "127.0.0.1" }
 
 Chaves que contêm `password`, `token`, `secret`, `authorization`, `cookie`, `apiKey`, `credential` são substituídas por `[REDACTED]` via `redactSecrets()` e paths do pino.
 
+## Platform SLI export
+
+Ver [Platform SLI export](platform-slo-snapshot.md) — endpoint read-only para o console Platform; exporta SLI metrics (process lifetime) **não para SLO compliance**, burn-rate ou error-budget.
+
 ## Dependências
 
 - `pino` ^9.14.0 — logging estruturado

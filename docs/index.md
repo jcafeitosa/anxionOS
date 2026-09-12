@@ -54,7 +54,7 @@ Matrizes e playbooks da entrega G0–G7. Vários destes documentos são **fonte 
 | Documento | Descrição |
 | --- | --- |
 | [Observabilidade](observability/README.md) | Sinais, SLIs e SLOs da plataforma |
-| [Snapshot de SLOs](observability/platform-slo-snapshot.md) | Snapshot corrente de SLO |
+| [Platform SLI export](observability/platform-slo-snapshot.md) | Endpoint de SLI export (process lifetime; não para SLO compliance) |
 
 ## Decisões (ADRs)
 
