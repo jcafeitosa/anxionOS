@@ -20,7 +20,8 @@ type: guide
 | --- | --- |
 | [Backend](backend/README.md) | Workspace Bun/TypeScript, API, Docker, boundaries |
 | [Frontend](frontend/README.md) | Astro + React, proxy API, estrutura P07 |
-| [Design system](design-system/README.md) | Tokens ui-ux-pro-max (implementação em `frontend/design-system/`) |
+| [Design system](design-system/README.md) | **Ledger institucional ANX-504** (copper/ink/bone/paper) + kit fechado — MASTER promovido 2026-09-12 |
+| [ANX-504 Visual Kit](design-system/ANX-504-visual-kit.md) | **Decisão publicada** — Sofia APPROVE body v3, publisher Marina Okonkwo |
 | [Inventário de bibliotecas](library-inventory.md) | Versões npm/Docker resolvidas nos lockfiles |
 | [Backup e restore drill](backend/backup-restore-drill.md) | Drill isolado de backup/restore PostgreSQL |
 | [Padrões do log viewer](frontend/log-viewer-patterns.md) | Padrões de UI para logs no console |
