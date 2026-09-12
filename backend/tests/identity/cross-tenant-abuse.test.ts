@@ -221,4 +221,53 @@ describe("ANX-465 — cross-tenant isolation (HTTP)", () => {
 
 		expect(response.status).toBe(200);
 	});
+
+	test("C2 — empty x-agency-id is validation 400 (not platform scope)", async () => {
+		const { app } = harness({
+			principals: [alicePrincipal, bobPrincipal],
+			capabilities: ["identity.admin"],
+			grantScopeId: agencyA,
+			memberships: [agencyA],
+			targetAgencyIds: [agencyB],
+		});
+
+		const response = await app.handle(
+			request(`/v1/identity/principals/${bobPrincipal.id}/suspend`, {
+				method: "POST",
+				headers: {
+					"x-agency-id": "",
+					"idempotency-key": randomUUID(),
+				},
+				body: { reasonCode: "ops.manual" },
+			}),
+		);
+
+		expect(response.status).toBe(400);
+		const body = await response.json();
+		expect(body.error.code).toBe("VALIDATION_ERROR");
+	});
+
+	test("C2 — omit x-agency-id with agency-scoped grant does not escalate to PLATFORM", async () => {
+		// Agency-only grant + missing header must NOT suspend as if PLATFORM.
+		const { app } = harness({
+			principals: [alicePrincipal, bobPrincipal],
+			capabilities: ["identity.admin"],
+			grantScopeId: agencyA,
+			memberships: [agencyA],
+			targetAgencyIds: [agencyB],
+		});
+
+		const response = await app.handle(
+			request(`/v1/identity/principals/${bobPrincipal.id}/suspend`, {
+				method: "POST",
+				headers: {
+					"idempotency-key": randomUUID(),
+				},
+				body: { reasonCode: "ops.manual" },
+			}),
+		);
+
+		expect(response.status).toBe(403);
+		expect((await response.json()).error.details.code).toBe("IDN_FORBIDDEN");
+	});
 });
