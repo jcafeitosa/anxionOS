@@ -57,7 +57,11 @@ export async function createAgency(
 		revision,
 	});
 	return deps.unitOfWork.runInTransaction(
-		buildAgencyTenantContext(agencyId, input.ownerPrincipalId),
+		// QE (Rafael): createAgency CRIA o agencyId (ainda nao existe). Para que o
+		// replay funcione, tenantId deve ser ESTAVEL entre execuções da mesma key.
+		// O agencyId muda a cada tentativa (randomUUID), mas ownerPrincipalId e'
+		// estavel. Usar owner como tenant_id ate' a agency existir.
+		buildAgencyTenantContext(input.ownerPrincipalId, input.ownerPrincipalId),
 		async (context) => {
 			// Replay como PRIMEIRA operacao da transacao, com validacao de intencao.
 			// As validacoes dependentes de estado vem depois: resolver o retry
@@ -67,7 +71,7 @@ export async function createAgency(
 				context.commandJournal,
 				command.commandId,
 				intent,
-				agencyId, // tenant_id
+				input.ownerPrincipalId, // tenant_id = owner (estavel)
 			);
 			if (raced) {
 				return raced;
@@ -109,22 +113,22 @@ export async function createAgency(
 				revision: 1,
 				createdAt: now,
 				updatedAt: now,
-			});
-			await recordOrganizationCommand(
-				context,
-				{
-					commandId: command.commandId,
-					commandName: "CreateAgency",
-					aggregateId: agencyId,
-					aggregateType: "Agency",
-					revision,
-					responseSnapshot: toCommandResultSnapshot(result),
-					requestHash: intent.requestHash,
-				},
-				agencyId,
-			);
-			await context.publishEvents([event]);
-			return result;
+		});
+		await recordOrganizationCommand(
+			context,
+			{
+				commandId: command.commandId,
+				commandName: "CreateAgency",
+				aggregateId: agencyId,
+				aggregateType: "Agency",
+				revision,
+				responseSnapshot: toCommandResultSnapshot(result),
+				requestHash: intent.requestHash,
+			},
+			input.ownerPrincipalId, // tenant_id = owner (estavel)
+		);
+		await context.publishEvents([event]);
+		return result;
 		},
 	);
 }

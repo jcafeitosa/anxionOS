@@ -50,6 +50,10 @@ export function createDrizzleCommandJournalRepository(
 			//
 			// Red Team (Davi): onConflict deve usar a PK composta (tenant_id, command_id),
 			// nao apenas command_id, para garantir isolamento real por tenant.
+			//
+			// QE (Rafael): onConflictDoNothing + returning() nao retorna linha quando
+			// ha conflito (comportamento correto), mas DEVE retornar na primeira insercao.
+			// Se rows[0] e' undefined apos INSERT bem-sucedido, ha' problema na query.
 			const rows = await db
 				.insert(commandJournal)
 				.values({
