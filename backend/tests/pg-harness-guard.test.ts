@@ -468,6 +468,16 @@ describe("round 3 — credential redaction for malformed forms", () => {
 			url: "postgres:alice:S3cr3t@localhost:5432/db",
 			secrets: ["S3cr3t", "alice"],
 		},
+		{
+			name: "(d) //-less form without @, userinfo folded into database",
+			url: "postgres:alice:S3cr3t-DO-NOT-LEAK",
+			secrets: ["S3cr3t-DO-NOT-LEAK", "alice"],
+		},
+		{
+			name: "(e) authority without @, password-like fragment",
+			url: "postgres://alice:S3cr3t-DO-NOT-LEAK",
+			secrets: ["S3cr3t-DO-NOT-LEAK", "alice"],
+		},
 	];
 
 	for (const row of MALFORMED) {
@@ -493,15 +503,51 @@ describe("round 3 — credential redaction for malformed forms", () => {
 		expect(message).not.toContain("alice");
 	});
 
-	test("redactCredentialFragment scrubs a bare user[:password]@ value", () => {
+	/**
+	 * ANX-487 round 4 — the exact repro G4 reported. A `//`-less URL **without**
+	 * `@` makes the driver fold the userinfo into `database`, and the refusal
+	 * message interpolates that resolved database. The round-3 rule only handled
+	 * fragments that contain `@`, so the password was printed in full:
+	 *   `refusing to TRUNCATE database "lice:S3cr3t-DO-NOT-LEAK": ...`
+	 */
+	test("(d) the refusal for the //-less form WITHOUT @ never prints the password", () => {
+		const message = captureError(() =>
+			shouldRunPgIntegrationTests({
+				RUN_PG_INTEGRATION_TESTS: "true",
+				DATABASE_URL: "postgres:alice:S3cr3t-DO-NOT-LEAK",
+			}),
+		);
+		expect(message).toMatch(/refusing to TRUNCATE/);
+		expect(message).toContain("***REDACTED***");
+		expect(message).not.toContain("S3cr3t-DO-NOT-LEAK");
+		expect(message).not.toContain("alice");
+		expect(message).not.toContain("lice:");
+	});
+
+	test("redactCredentialFragment is an allowlist: only plain identifiers survive", () => {
+		// Round 4 — any fragment that is not a plain identifier (or IPv6 literal)
+		// is replaced wholesale. A `user[:password]@host` fragment cannot be a
+		// database name or host, so nothing of it is printed.
 		expect(redactCredentialFragment("lice:p@ss@localhost:5432/db")).toBe(
-			"***REDACTED***@localhost:5432/db",
+			"***REDACTED***",
 		);
 		expect(redactCredentialFragment("lice:S3cr3t@localhost:5432/db")).toBe(
-			"***REDACTED***@localhost:5432/db",
+			"***REDACTED***",
 		);
+		// Round-4 leak: the //-less form the driver folds into `database`.
+		expect(redactCredentialFragment("lice:S3cr3t-DO-NOT-LEAK")).toBe(
+			"***REDACTED***",
+		);
+		// Legitimate identifiers are preserved verbatim.
 		expect(redactCredentialFragment("anxionos_oracle")).toBe("anxionos_oracle");
+		expect(redactCredentialFragment("anxionos_g2r487d")).toBe(
+			"anxionos_g2r487d",
+		);
 		expect(redactCredentialFragment("localhost")).toBe("localhost");
+		expect(redactCredentialFragment("127.0.0.1")).toBe("127.0.0.1");
+		expect(redactCredentialFragment("[::1]")).toBe("[::1]");
+		expect(redactCredentialFragment("::1")).toBe("::1");
+		expect(redactCredentialFragment("")).toBe("");
 	});
 });
 

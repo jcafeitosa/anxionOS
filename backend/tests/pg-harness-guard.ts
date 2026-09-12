@@ -70,30 +70,75 @@ export function getDatabaseUrl(
 }
 
 /**
- * Removes the userinfo (`user[:password]@`) from a URL **or** from a bare
- * fragment such as the effective `database`/`host` the driver resolves for a
- * malformed `DATABASE_URL`.
+ * Identifier shapes that are safe to print in a refusal message: a PostgreSQL
+ * database name or a plain host. Deliberately an **allowlist**.
+ */
+const PRINTABLE_IDENTIFIER_PATTERN = /^[A-Za-z0-9_.-]+$/;
+
+/** IPv6 literal, bracketed (`[::1]`) or bare (`::1`). */
+const PRINTABLE_IPV6_PATTERN = /^\[[0-9A-Fa-f:.]+\]$|^[0-9A-Fa-f:.]+$/;
+
+/**
+ * Scrubs a bare fragment — the effective `host` or `database` the driver
+ * resolved — before it is embedded in a refusal message.
  *
- * ANX-487 round 3 — the previous regex `/(\/\/)[^@\s]*@/g` failed three ways:
- *   1. it excluded whitespace, so a password with a space/tab/newline survived
- *      (`postgres://alice:p ss@host` was printed verbatim);
- *   2. it stopped at the first `@`, so `postgres://alice:p@ss@host` leaked the
- *      `ss` tail despite the "greedy to the last @" comment;
- *   3. it required `//`, so the `//`-less form `postgres:alice:S3cr3t@host`
- *      (whose userinfo the driver folds into `target.database`) leaked in the
- *      refusal message.
+ * ANX-487 round 4 — this is now an **allowlist**, after G4 proved that every
+ * blocklist attempt leaked. A malformed `DATABASE_URL` makes the driver fold
+ * the userinfo into `database`: `postgres:alice:S3cr3t` resolves to
+ * `database = "lice:S3cr3t"`, which has **no `@`** and whose leading segment
+ * (`lice:`) even looks like a URL scheme — so both the "drop up to the last `@`"
+ * rule (round 3) and a scheme-aware rule return it verbatim and print the
+ * password.
  *
- * It now drops everything up to the **last** `@` and keeps only the scheme
- * prefix (`postgres://`) so the message stays readable. Over-redacting a value
- * that merely contains an `@` is deliberate: no credential can survive.
+ * A legitimate database name or host never needs anything outside
+ * `[A-Za-z0-9_.-]` (or an IPv6 literal). Anything else is treated as
+ * credential-bearing and replaced wholesale: the operator loses a detail, the
+ * log never gains a secret.
  */
 export function redactCredentialFragment(value: string): string {
-	const lastAt = value.lastIndexOf("@");
-	if (lastAt < 0) {
+	if (value === "") {
 		return value;
 	}
-	const scheme = /^[a-z][a-z0-9+.-]*:\/\//i.exec(value)?.[0] ?? "";
-	return `${scheme}${REDACTION_MARKER}@${value.slice(lastAt + 1)}`;
+	if (PRINTABLE_IDENTIFIER_PATTERN.test(value)) {
+		return value;
+	}
+	if (PRINTABLE_IPV6_PATTERN.test(value)) {
+		return value;
+	}
+	return REDACTION_MARKER;
+}
+
+/**
+ * Scrubs the **authority** of a URL (`[userinfo@]host[:port]`).
+ *
+ * Keeps `host:port` readable — it is exactly what the operator needs to
+ * diagnose a non-loopback refusal — but redacts anything that cannot be one:
+ * a `user:password` pair is indistinguishable from `host:port` except that the
+ * segment after the last `:` is not a port.
+ */
+function redactAuthority(authority: string): string {
+	const lastAt = authority.lastIndexOf("@");
+	if (lastAt >= 0) {
+		return `${REDACTION_MARKER}@${authority.slice(lastAt + 1)}`;
+	}
+	if (authority.startsWith("[")) {
+		const close = authority.indexOf("]");
+		const suffix = close > 0 ? authority.slice(close + 1) : null;
+		if (suffix !== null && (suffix === "" || /^:\d{1,5}$/.test(suffix))) {
+			return authority;
+		}
+		return REDACTION_MARKER;
+	}
+	const lastColon = authority.lastIndexOf(":");
+	if (lastColon < 0) {
+		return authority;
+	}
+	const maybePort = authority.slice(lastColon + 1);
+	const maybeHost = authority.slice(0, lastColon);
+	if (/^\d{1,5}$/.test(maybePort) && !maybeHost.includes(":")) {
+		return authority;
+	}
+	return REDACTION_MARKER;
 }
 
 /**
@@ -101,14 +146,29 @@ export function redactCredentialFragment(value: string): string {
  *
  * ANX-487 round 2 (finding 3): the invalid-URL error used to interpolate
  * `JSON.stringify(rawUrl)` verbatim, so a malformed URL printed the whole
- * password. This helper drops the userinfo — even for strings `URL` cannot
- * parse — and the value of any secret-looking query parameter.
+ * password.
+ *
+ * ANX-487 round 4: the `@`-based rule only covered URLs that **have** an `@`.
+ * G4 proved `postgres://alice:S3cr3t` (and the `//`-less sibling) printed the
+ * password in full. The URL is now split at the scheme and the authority is
+ * scrubbed by {@link redactAuthority}, which keeps `host:port` but refuses
+ * anything whose last segment is not a port. Secret-looking query parameters
+ * are scrubbed as before.
  */
 export function redactDatabaseUrl(rawUrl: string): string {
-	return redactCredentialFragment(rawUrl).replace(
-		SECRET_QUERY_PARAM_PATTERN,
-		`$1${REDACTION_MARKER}`,
-	);
+	const scheme = /^[A-Za-z][A-Za-z0-9+.-]*:(?:\/\/)?/.exec(rawUrl);
+	let redacted: string;
+	if (!scheme) {
+		redacted = redactAuthority(rawUrl);
+	} else {
+		const head = scheme[0];
+		const rest = rawUrl.slice(head.length);
+		const authorityEnd = rest.search(/[/?#]/);
+		const authority = authorityEnd >= 0 ? rest.slice(0, authorityEnd) : rest;
+		const tail = authorityEnd >= 0 ? rest.slice(authorityEnd) : "";
+		redacted = `${head}${redactAuthority(authority)}${tail}`;
+	}
+	return redacted.replace(SECRET_QUERY_PARAM_PATTERN, `$1${REDACTION_MARKER}`);
 }
 
 /**
