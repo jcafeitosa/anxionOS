@@ -119,7 +119,6 @@ if (pool) {
 }
 let app: Elysia = new Elysia()
 	.use(createSloMetricsPlugin({ metrics: apiMetrics }))
-	.use(createPlatformSloSnapshotPlugin({ metrics: apiMetrics }))
 	.use(createOpenApiPlugin()) as unknown as Elysia;
 logger.info("OpenAPI Scalar mounted at /openapi");
 
@@ -144,6 +143,12 @@ if (pool && resolveBetterAuthConfig()) {
 	logger.info("Better Auth mounted at /api/auth/*");
 	const orgRuntime = createOrganizationsRuntime(pool, databaseUrl!);
 	const govRuntime = createGovernanceApiRuntime(pool);
+	app = app.use(
+		createPlatformSloSnapshotPlugin({
+			metrics: apiMetrics,
+			grantRepository: govRuntime.grantRepository,
+		}),
+	) as unknown as Elysia;
 	const agentsRuntime = createAgentsApiRuntime(pool);
 	app = app.use(
 		createOrganizationsPlugin({

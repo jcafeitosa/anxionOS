@@ -1,10 +1,14 @@
 import { platformSloSnapshotSchema } from "@anxionos/contracts/operations";
+import type { GrantRepository } from "@anxionos/governance";
 import type { MetricsCollector } from "@anxionos/observability";
 import { getPlatformSloSnapshot } from "@anxionos/operations";
 import { Elysia } from "elysia";
+import type { IdentityContext } from "../identity/plugin";
+import { requirePlatformConsoleGrant } from "./authorization";
 
 export interface PlatformSloSnapshotPluginDeps {
 	metrics: MetricsCollector;
+	grantRepository: GrantRepository;
 	now?: () => string;
 }
 
@@ -12,22 +16,39 @@ export interface PlatformSloSnapshotPluginDeps {
 export function createPlatformSloSnapshotPlugin(
 	deps: PlatformSloSnapshotPluginDeps,
 ) {
-	return new Elysia({ name: "platform-slo-snapshot" }).get(
-		"/v1/operations/platform/slo-snapshot",
-		() => {
-			const snapshot = getPlatformSloSnapshot({
-				metrics: deps.metrics,
-				now: deps.now,
-			});
-			return platformSloSnapshotSchema.parse(snapshot);
-		},
-		{
-			detail: {
-				tags: ["operations", "platform"],
-				summary: "Platform SLO snapshot (redacted)",
-				description:
-					"Exports in-process API and eventing SLI metrics for the platform console. No tenant secrets or connection strings.",
+	return new Elysia({ name: "platform-slo-snapshot" })
+		.resolve(async ({ headers }): Promise<{ identity: IdentityContext }> => {
+			const session = headers.get("x-principal-id");
+			if (!session) {
+				throw new Error("Unauthorized");
+			}
+			return {
+				identity: {
+					principalId: session,
+					agencyId: headers.get("x-agency-id") ?? undefined,
+				},
+			};
+		})
+		.get(
+			"/v1/operations/platform/slo-snapshot",
+			async ({ identity }) => {
+				await requirePlatformConsoleGrant(
+					{ grantRepository: deps.grantRepository },
+					{ principalId: identity.principalId },
+				);
+				const snapshot = getPlatformSloSnapshot({
+					metrics: deps.metrics,
+					now: deps.now,
+				});
+				return platformSloSnapshotSchema.parse(snapshot);
 			},
-		},
-	);
+			{
+				detail: {
+					tags: ["operations", "platform"],
+					summary: "Platform SLO snapshot (redacted)",
+					description:
+						"Exports in-process API and eventing SLI metrics for the platform console. Requires console.platform grant. No tenant secrets or connection strings.",
+				},
+			},
+		);
 }
