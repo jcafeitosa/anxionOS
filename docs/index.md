@@ -58,12 +58,12 @@ Matrizes e playbooks da entrega G0–G7. Vários destes documentos são **fonte 
 
 ## Decisões (ADRs)
 
-> **Numeração colide:** ADRs vivem em `brain/project-docs/decisions/` (local) e em `project-docs/decisions/` + `docs/decisions/` (versionados). O número `0005` existe nos três caminhos com assuntos distintos. Identificar **sempre por caminho + título**. Saneamento rastreado em ANX-455.
+> **Numeração e precedência:** ADRs vivem em `brain/project-docs/decisions/` (local) e em `project-docs/decisions/` + `docs/decisions/` (versionados). A colisão de `0005` / spec `006` entre assuntos distintos foi **resolvida em ANX-456** (hierarquia → brain **0010** / **010**; gateway → **0011**; Product Graph aceito permanece **0005** / **006** em `project-docs/`). Identificar **sempre por caminho + título**. Registro: [document-precedence.md](document-precedence.md). Parent: ANX-455.
 
 | Documento | Descrição |
 | --- | --- |
 | [ADR0011 — Realtime gateway (Elysia + NATS)](decisions/0011-realtime-gateway-elysia-nats.md) | `proposed` — sem contraparte em `brain/`; renumerado de 0005 (ANX-456) |
-| [Registro de precedência ADR/spec](document-precedence.md) | Números duplicados: canônico vs legado |
+| [Registro de precedência ADR/spec](document-precedence.md) | Precedência **por assunto** + mapa de renumeração ANX-456 (0010 / 010 / 0011) |
 
 ## Pesquisa
 
@@ -81,7 +81,7 @@ Matrizes e playbooks da entrega G0–G7. Vários destes documentos são **fonte 
 
 Specs, ADRs, PRD e notas de arquitetura vivem em `brain/` **somente no workspace local** (gitignored). Com `brain/` presente, comece por `brain/index.md`. Esta pasta não é publicada no GitHub.
 
-**Duas árvores ativas:** `brain/` é a fonte canônica do domínio institucional (ADRs 0001–0008, SDD 001–005). O material versionado em `project-docs/`, `notes/` e `docs/` **não** é todo duplicado — as specs 006 (product-agent-graph) e 007 (products/marketplace) e o ADR0005 Product Graph existem apenas lá e foram aceitos no greenlight ANX-276. A **numeração colide entre as árvores**; identificar por caminho + título. Ver ANX-455.
+**Duas árvores ativas:** `brain/` é a fonte canônica do domínio institucional (ADRs institucionais e SDD 001–005; hierarquia agora **0010** / spec **010**). O material versionado em `project-docs/`, `notes/` e `docs/` **não** é todo duplicado — as specs 006 (product-agent-graph) e 007 (products/marketplace) e o ADR0005 Product Graph existem apenas lá e foram aceitos no greenlight ANX-276. Colisão de número entre assuntos distintos eliminada em **ANX-456**; regra permanente: caminho + título + [document-precedence.md](document-precedence.md). Parent: ANX-455.
 
 ## Templates GitHub
 
