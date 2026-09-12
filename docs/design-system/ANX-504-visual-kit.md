@@ -27,7 +27,7 @@ Decisão publicada do kit visual e tokens de design para anxionOS. Substitui pal
 | Papel | Token | Hex | Notas |
 |-------|-------|-----|-------|
 | Ink (fundo) | `--color-ink` | `#0B100E` | Fundo principal, profundidade OLED |
-| Copper (CTA/destaque) | `--color-copper` | `#C4843A` | **Só sobre ink** (≥6.13:1 AA) |
+| Copper (CTA/destaque) | `--color-copper` | `#C4843A` | **Só sobre ink** (6.13:1 AA) |
 
 **Tipografia** (parte do ledger aprovado — ver tabela abaixo).
 
