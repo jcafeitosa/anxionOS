@@ -11,51 +11,66 @@ type: reference
 ---
 
 **Project:** anxionOS  
-**Generated:** 2026-09-07 (ui-ux-pro-max + uupm.cc dark premium pattern)  
+**Promoted:** 2026-09-12 (ANX-504 ledger institucional)  
 **Category:** Fintech / Institutional SaaS  
-**Reference:** [UI/UX Pro Max](https://www.uupm.cc/) — dark-first premium SaaS
+**Reference:** [ANX-504 Visual Kit](../../docs/design-system/ANX-504-visual-kit.md) — kit fechado + ledger
 
 ---
 
 ## Global Rules
 
-### Color Palette (dark-first)
+### Color Palette (ledger institucional ANX-504)
 
-| Role | Hex | CSS Variable |
-|------|-----|--------------|
-| Background | `#020617` | `--color-background` |
-| Background Deep | `#020203` | `--color-background-deep` |
-| Surface | `#0a0a0c` | `--color-surface` |
-| Surface Elevated | `#0f172a` | `--color-surface-elevated` |
-| Glass | `rgba(255,255,255,0.05)` | `--color-glass` |
-| Foreground | `#f8fafc` | `--color-foreground` |
-| Muted Foreground | `#94a3b8` | `--color-muted-foreground` |
-| Primary | `#1e293b` | `--color-primary` |
-| Secondary | `#334155` | `--color-secondary` |
-| Accent / CTA | `#f97316` | `--color-accent` |
-| Accent Blue | `#3b82f6` | `--color-accent-blue` |
-| On Accent | `#0f172a` | `--color-on-accent` |
-| Border | `rgba(255,255,255,0.08)` | `--color-border` |
-| Destructive | `#ef4444` | `--color-destructive` |
-| On Destructive | `#0f172a` | `--color-on-destructive` |
-| Ring | `#f97316` | `--color-ring` |
+**Ledger canônico** — substitui palette ui-ux-pro-max obsoleta (#020617/#f97316).
 
-**Color Notes:** OLED deep blacks, orange primary CTA, blue secondary accent. Subtle aurora gradients (blue-orange) in hero only — never purple/pink AI gradients.
+| Role | Hex | CSS Variable | Notas |
+|------|-----|--------------|-------|
+| Ink (fundo) | `#0B100E` | `--color-ink` | Fundo principal OLED |
+| Copper (CTA/destaque) | `#C4843A` | `--color-copper` | **Só sobre ink** (7.08:1 AAA); proibido sobre bone/paper (2.47:1 ↯) |
+| Bone (texto primário) | `#F5F1ED` | `--color-bone` | Corpo de texto (12.62:1 AAA sobre ink) |
+| Paper (texto secundário) | `#E8E2DB` | `--color-paper` | Muted foreground (11.35:1 AAA sobre ink) |
+| Rule (hairline) | `#2A2620` | `--color-rule` | Divisores discretos sobre ink (≥3:1); **não promover** como CTA |
+
+**Contraste validado (WebAIM):**
+- Copper #C4843A sobre Ink #0B100E: **7.08:1** (AAA) ✓
+- Bone #F5F1ED sobre Ink #0B100E: **12.62:1** (AAA) ✓
+- Paper #E8E2DB sobre Ink #0B100E: **11.35:1** (AAA) ✓
+- Copper sobre Bone/Paper: **2.47:1** (FAIL) — **proibido**
+
+**Proibições ANX-504:**
+- ❌ Copper sobre Bone ou Paper (contraste insuficiente)
+- ❌ Hero KPI / big-number-as-brand (números grandes como identidade)
+- ❌ Acid green/neon + Inter (palette neon recusada)
+- ❌ Segundo sidebar/switcher-chrome (conflito com Aceternity ANX-448)
+
+**Legacy mapping (preservado para migração gradual):**
+
+| Legacy (ui-ux-pro-max) | Ledger ANX-504 |
+|------------------------|----------------|
+| `--color-background` (#020617) | `--color-ink` (#0B100E) |
+| `--color-accent` (#f97316) | `--color-copper` (#C4843A) |
+| `--color-foreground` (#f8fafc) | `--color-bone` (#F5F1ED) |
+| `--color-muted-foreground` (#94a3b8) | `--color-paper` (#E8E2DB) |
 
 ### Typography
 
-- **Heading Font:** Plus Jakarta Sans (display, modern tech)
-- **Body Font:** Inter
-- **Mono:** JetBrains Mono (IDs, codes)
-- **Mood:** premium fintech, institutional trust, bold hero, restrained UI chrome
-- **Google Fonts:** [Plus Jakarta Sans + Inter + JetBrains Mono](https://fonts.google.com/share?selection.family=Inter:wght@300;400;500;600;700|JetBrains+Mono:wght@400;500|Plus+Jakarta+Sans:wght@400;500;600;700;800)
+- **Display Font:** Newsreader (headings, hero, números grandes — ANX-504)
+- **Body Font:** Public Sans (corpo de texto, labels, UI — ANX-504)
+- **Mono:** IBM Plex Mono (IDs, códigos, logs — ANX-504)
+- **Mood:** institucional, confiança, signature Archify no centro (não hero KPI)
+- **Google Fonts:** [Newsreader + Public Sans + IBM Plex Mono](https://fonts.googleapis.com/css2?family=Newsreader:wght@400;600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap)
 
 **CSS Import:**
 ```css
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:wght@400;600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 ```
 
-**Hero scale:** `font-size: clamp(2.5rem, 6vw, 4.5rem); letter-spacing: -0.03em;`
+**Hero scale:** `font-size: clamp(2.5rem, 6vw, 4.5rem); letter-spacing: -0.03em;` (Newsreader display)
+
+**Legacy (migração gradual):**
+- Plus Jakarta Sans (display) → Newsreader
+- Inter (body) → Public Sans
+- JetBrains Mono (mono) → IBM Plex Mono
 
 ### Spacing (8px rhythm)
 
@@ -77,9 +92,11 @@ type: reference
 |-------|-------|-------|
 | `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.4)` | Subtle lift |
 | `--shadow-md` | `0 4px 24px rgba(0,0,0,0.35)` | Cards |
-| `--shadow-glow-accent` | `0 0 40px rgba(249,115,22,0.15)` | Primary CTA |
-| Glass border | `1px solid rgba(255,255,255,0.08)` | Cards, auth panels |
+| `--shadow-glow-copper` | `0 0 40px rgba(196,132,58,0.15)` | Primary CTA (copper glow) |
+| Glass border | `1px solid rgba(245,241,237,0.08)` | Cards, auth panels (bone opacity) |
 | Glass blur | `backdrop-filter: blur(12px)` | Nav, modals |
+
+**Nota ANX-504:** `--shadow-glow-accent` (orange #f97316) → `--shadow-glow-copper` (copper #C4843A).
 
 ### Internationalization
 
@@ -93,7 +110,50 @@ type: reference
 - Transitions: **150–300ms** `ease-out`
 - Entrance: `animate-fade-in-up`, `stagger-children` (respect `prefers-reduced-motion`)
 - Hover: opacity / border-color only — **no layout-shifting scale**
-- `prefers-reduced-motion`: disable ambient blob animation
+- `prefers-reduced-motion`: disable ambient animations (Magic UI AnimatedGridPattern respects — ANX-504)
+- **Default zero (ANX-504):** apenas AnimatedGridPattern (job sentence); estado vazio = HonestState (sem spinner decorativo infinito)
+
+---
+
+## Kit de componentes (ANX-504 — matriz fechada)
+
+Decisões de kit aceitas e **não reabertas** — ver [ANX-504 Visual Kit](../../docs/design-system/ANX-504-visual-kit.md).
+
+### Primitives (shadcn)
+
+- **Fonte:** [shadcn/ui](https://ui.shadcn.com/) — React + Tailwind (sem Next.js)
+- **Instalação:** `components/ui/` via CLI shadcn
+- **Proibição:** não usar versão Next.js/App Router
+
+### Chrome institucional único (Aceternity ANX-448)
+
+- **Fonte:** [Aceternity UI](https://ui.aceternity.com/) — sidebar + nav
+- **Issue:** ANX-448 — chrome único aceito
+- **Proibição:** não adicionar segundo sidebar/layout (conflito com Nyxhora)
+
+### Motion (Magic UI — default zero)
+
+- **Fonte:** [Magic UI](https://magicui.design/)
+- **Uso:** **apenas** `AnimatedGridPattern` (job sentence) + `prefers-reduced-motion`
+- **Proibição:** não instalar biblioteca completa; empty state = HonestState
+
+### Widgets (Nyxhora — sem chrome)
+
+- **Fonte:** [Nyxhora](https://nyxhora.com/) — stat cards, KPI widgets, timeline
+- **Restrição:** **não usar** sidebar/layout chrome (conflito com Aceternity); apenas widgets isolados
+- **Hero KPI proibido:** números grandes como branding = **banido**
+
+### Séries temporais (ECharts)
+
+- **Fonte:** [Apache ECharts](https://echarts.apache.org/en/index.html)
+- **A11y obrigatória:** todo chart precisa de alternativa textual (tabela/summary) **ou BLOCK**
+- **Crítica:** chart sem alt honesto = achado BLOCK
+
+### Diagramas (Archify + Mermaid)
+
+- **Archify:** diagramas interativos (architecture, workflow, sequence) — `.archify/specs/`
+- **Mermaid:** diagramas em docs (flowchart, sequence) — inline markdown
+- **Signature:** grafo Archify no centro do hero/dashboard (ANX-504)
 
 ---
 
@@ -101,31 +161,50 @@ type: reference
 
 ### Buttons
 
-- **Primary:** `bg-accent text-on-accent`, glow on hover, `min-h-11`, `rounded-lg`, `font-semibold`
+- **Primary:** `bg-copper text-ink`, glow on hover, `min-h-11` (≥44px ANX-504), `rounded-lg`, `font-semibold`
 - **Destructive filled:** `bg-destructive text-on-destructive` (≥4.5:1; do not use `text-foreground` on the fill)
-- **Secondary:** `border border-border bg-transparent text-foreground`, hover `bg-glass`
+- **Secondary:** `border border-rule bg-transparent text-bone`, hover `bg-glass`
 - **Ghost:** text only, hover muted background
-- All: `cursor-pointer`, visible `:focus-visible` ring
+- All: `cursor-pointer`, visible `:focus-visible ring-2 ring-copper`
+
+**Nota ANX-504:** 
+- `bg-accent` → `bg-copper`
+- `text-on-accent` → `text-ink`
+- `border-border` → `border-rule`
+- `text-foreground` → `text-bone`
+- `ring-ring` → `ring-copper`
+- Targets ≥44×44 CSS px obrigatório
 
 ### Cards (OLED / glass)
 
 ```css
 .glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(11, 16, 14, 0.6); /* ink com opacidade */
+  border: 1px solid rgba(245, 241, 237, 0.08); /* bone opacidade */
   border-radius: 16px;
   backdrop-filter: blur(12px);
   transition: border-color 200ms ease, box-shadow 200ms ease;
 }
+.glass-card:hover {
+  border-color: rgba(196, 132, 58, 0.3); /* copper opacidade */
+}
 ```
+
+**Nota ANX-504:** valores ajustados para ledger (ink/bone/copper).
 
 ### Inputs
 
-- `min-h-11`, `bg-surface`, `border-border`, `rounded-lg`
-- Focus: `ring-2 ring-ring border-accent/50`
-- Labels: always visible, `text-sm font-medium`
+- `min-h-11` (≥44px ANX-504), `bg-ink`, `border-rule`, `rounded-lg`
+- Focus: `ring-2 ring-copper border-copper/50`
+- Labels: always visible, `text-sm font-medium text-bone`
 - Errors: `text-destructive text-sm` below field
 - Loading: disabled + spinner on submit button
+
+**Nota ANX-504:** 
+- `bg-surface` → `bg-ink`
+- `border-border` → `border-rule`
+- `ring-ring` → `ring-copper`
+- `border-accent/50` → `border-copper/50`
 
 ### Auth shell
 
@@ -137,13 +216,20 @@ type: reference
 
 ## Style Guidelines
 
-**Style:** Modern Dark (Cinema) + Hero-centric landing (uupm.cc pattern)
+**Style:** Institucional Dark + Signature Archify central (ANX-504 visual kit)
 
-**Keywords:** OLED, glassmorphism, deep black, orange CTA, blue accent, generous whitespace, Lucide icons
+**Keywords:** OLED ink, copper CTA, bone/paper text, Archify signature, Newsreader display, Public Sans body, minimal chrome (Aceternity), HonestState empty
 
-**Landing sections:** 1. Hero + dual CTA, 2. Feature grid (3–4), 3. Trust strip, 4. Final CTA, 5. Footer
+**Landing sections:** 1. Hero + Archify signature center, 2. Feature grid (3–4), 3. Trust strip, 4. Final CTA, 5. Footer
 
 **Auth UX:** blur validation, autocomplete attributes, MFA OTP `inputmode="numeric"`, loading on submit
+
+**Proibições ANX-504:**
+- ❌ Hero KPI / big-number-as-brand
+- ❌ Copper sobre bone/paper (contraste 2.47:1 insuficiente)
+- ❌ Segundo sidebar/switcher-chrome
+- ❌ Acid green/neon
+- ❌ Decorative loading infinito (empty = HonestState)
 
 ---
 
@@ -156,6 +242,11 @@ type: reference
 - ❌ Invisible focus states
 - ❌ `autocomplete="off"` on auth fields
 - ❌ Pure `#000000` backgrounds (OLED smear)
+- ❌ **Hero KPI / big-number-as-brand (ANX-504 BANNED)**
+- ❌ **Copper sobre bone/paper (contraste 2.47:1 insuficiente — ANX-504)**
+- ❌ **Segundo sidebar/switcher-chrome (conflito Aceternity — ANX-504)**
+- ❌ **Acid green/neon + Inter (recusado — ANX-504)**
+- ❌ **Decorative loading infinito (empty = HonestState — ANX-504)**
 
 ---
 
@@ -164,9 +255,13 @@ type: reference
 - [ ] Lucide icons only
 - [ ] `cursor-pointer` on clickable elements
 - [ ] 150–300ms transitions
-- [ ] WCAG 4.5:1 contrast on dark
-- [ ] Focus rings visible
+- [ ] WCAG 2.2 AA ≥4.5:1 contrast (ledger ANX-504: copper-on-ink 7.08:1, bone-on-ink 12.62:1)
+- [ ] Focus rings visible (`ring-2 ring-copper`)
 - [ ] `prefers-reduced-motion` respected
 - [ ] Responsive: 375, 768, 1024, 1440px
 - [ ] Form loading states
 - [ ] No horizontal scroll on mobile
+- [ ] **Targets ≥44×44 CSS px (min-h-11) — ANX-504 obrigatório**
+- [ ] **expectAxeClean no `#main-content` — ANX-504**
+- [ ] **Chart com alt textual ou BLOCK — ANX-504**
+- [ ] **Copper só sobre ink (nunca sobre bone/paper) — ANX-504**
