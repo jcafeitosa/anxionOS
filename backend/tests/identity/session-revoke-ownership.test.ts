@@ -74,9 +74,9 @@ describe("Session revoke ownership enforcement", () => {
 	test("ABUSE CASE 1 — cannot revoke another principal's session by hash", async () => {
 		const { deps, alice, bob } = createRecordSessionDeps();
 
-		// Bob creates a session reference
+		// Bob creates a session reference with valid sha256 hash
 		const bobSessionRefId = randomUUID();
-		const bobExternalHash = randomUUID(); // Simulated hash
+		const bobExternalHash = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 
 		await recordSessionRevoked(deps, {
 			principalId: bob.id,
@@ -107,14 +107,15 @@ describe("Session revoke ownership enforcement", () => {
 	test("ABUSE CASE 2 — cannot replay idempotency key to get another principal's session", async () => {
 		const { deps, alice, bob } = createRecordSessionDeps();
 
-		// Bob revokes his session with idempotency key
+		// Bob revokes his session with idempotency key and valid sha256 hash
 		const bobSessionRefId = randomUUID();
 		const idempotencyKey = randomUUID();
+		const bobHash = "cc".repeat(32); // Valid 64-char hex
 
 		await recordSessionRevoked(deps, {
 			principalId: bob.id,
 			sessionRefId: bobSessionRefId,
-			externalRefHash: randomUUID(),
+			externalRefHash: bobHash,
 			commandId: idempotencyKey,
 		});
 
@@ -133,12 +134,14 @@ describe("Session revoke ownership enforcement", () => {
 	test("ABUSE CASE 3 — session ref ownership checked on existing ref", async () => {
 		const { deps, alice, bob } = createRecordSessionDeps();
 
-		// Bob creates a session reference
+		// Bob creates a session reference with valid sha256 hash
 		const bobSessionRefId = randomUUID();
+		const bobHash = "dd".repeat(32); // Valid 64-char hex
+
 		await recordSessionRevoked(deps, {
 			principalId: bob.id,
 			sessionRefId: bobSessionRefId,
-			externalRefHash: randomUUID(),
+			externalRefHash: bobHash,
 		});
 
 		// Alice tries to revoke it by knowing the sessionRefId
@@ -156,10 +159,12 @@ describe("Session revoke ownership enforcement", () => {
 		const { deps, alice } = createRecordSessionDeps();
 
 		const aliceSessionRefId = randomUUID();
+		const aliceHash = "aa".repeat(32); // Valid 64-char hex
+
 		const result = await recordSessionRevoked(deps, {
 			principalId: alice.id,
 			sessionRefId: aliceSessionRefId,
-			externalRefHash: randomUUID(),
+			externalRefHash: aliceHash,
 		});
 
 		expect(result.sessionRef.id).toBe(aliceSessionRefId);
