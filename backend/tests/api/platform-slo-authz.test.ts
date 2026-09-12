@@ -4,10 +4,7 @@ import { createMetricsCollector } from "@anxionos/observability";
 import { describe, expect, test } from "bun:test";
 import { Elysia } from "elysia";
 import { createPlatformSloSnapshotPlugin } from "../../apps/api/src/operations/platform-slo-snapshot-plugin";
-import {
-	createInMemoryGrantRepository,
-	createStubPrincipalLookup,
-} from "../governance/test-support";
+import { createInMemoryGrantRepository } from "../governance/test-support";
 
 /**
  * ANX-497 — SLO snapshot authz tests.

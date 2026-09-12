@@ -91,15 +91,17 @@ describe("ANX-462 + ANX-466 — capability scope and issuance abuse cases", () =
 				granteePrincipalId: principalId,
 				capability: "console.platform",
 				issuedByPrincipalId: null,
+				// No scopeKind: defaults to "agency", should fail
 			}),
 		).rejects.toMatchObject({
 			governanceCode: "GOV_CAPABILITY_SCOPE_MISMATCH",
 		});
 
-		// Valid: PLATFORM_SCOPE_ID works
+		// Valid: PLATFORM_SCOPE_ID with scopeKind: "platform" works
 		const platformGrant = await issueGrant(deps, {
 			commandId: randomUUID(),
 			scopeId: PLATFORM_SCOPE_ID,
+			scopeKind: "platform",
 			granteePrincipalId: principalId,
 			capability: "console.platform",
 			issuedByPrincipalId: null,
@@ -115,6 +117,7 @@ describe("ANX-462 + ANX-466 — capability scope and issuance abuse cases", () =
 			issueGrant(deps, {
 				commandId: randomUUID(),
 				scopeId: PLATFORM_SCOPE_ID,
+				scopeKind: "platform",
 				granteePrincipalId: principalId,
 				capability: "identity.superadmin.takeover",
 				issuedByPrincipalId: null,
@@ -131,6 +134,7 @@ describe("ANX-462 + ANX-466 — capability scope and issuance abuse cases", () =
 		const result = await issueGrant(deps, {
 			commandId: randomUUID(),
 			scopeId: PLATFORM_SCOPE_ID,
+			scopeKind: "platform",
 			granteePrincipalId: principalId,
 			capability: "owner.manage",
 			issuedByPrincipalId: null,
