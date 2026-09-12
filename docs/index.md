@@ -65,6 +65,18 @@ Matrizes e playbooks da entrega G0–G7. Vários destes documentos são **fonte 
 | [ADR0011 — Realtime gateway (Elysia + NATS)](decisions/0011-realtime-gateway-elysia-nats.md) | `proposed` — sem contraparte em `brain/`; renumerado de 0005 (ANX-456) |
 | [Registro de precedência ADR/spec](document-precedence.md) | Números duplicados: canônico vs legado |
 
+## Decisões de Produto
+
+Decisões CPO e orquestrador publicadas pela equipe de produto (OpenKnowledge).
+
+| Documento | Descrição |
+| --- | --- |
+| [ANX-498 — Backend-Only para Strategies/Performance/Simulation/Evaluation](product/ANX-498-backend-only-decision.md) | CPO: APIs apenas; sem UI Owner/Operator neste slice |
+| [ANX-499 — Realtime Freeze](product/ANX-499-realtime-freeze.md) | Gateway permanece; UI Owner/Operator/Platform cortada |
+| [ANX-500 — Diagnosis APPROVE; Partner GO Bloqueado](product/ANX-500-diagnosis-not-partner-go.md) | Seed/e2e/a11y aprovados; Partner console bloqueado |
+| [ANX-496 — Owner Catalog Honesty UX](product/ANX-496-owner-catalog-honesty-ux.md) | OwnerAgentsCatalog apenas; Operator Takeover estacionado |
+| [ANX-500 — Critérios UX Supersede](product/ANX-500-ux-criteria-supersede.md) | Renata: shells Partner/Platform; e2e+a11y+honesty obrigatórios |
+
 ## Pesquisa
 
 | Documento | Descrição |
