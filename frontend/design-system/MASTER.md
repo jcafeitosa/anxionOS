@@ -27,18 +27,19 @@ type: reference
 |------|-----|--------------|-------|
 | Ink (fundo) | `#0B100E` | `--color-ink` | Fundo principal OLED |
 | Copper (CTA/destaque) | `#C4843A` | `--color-copper` | **Só sobre ink** (7.08:1 AAA); proibido sobre bone/paper (2.47:1 ↯) |
-| Bone (texto primário) | `#F5F1ED` | `--color-bone` | Corpo de texto (12.62:1 AAA sobre ink) |
-| Paper (texto secundário) | `#E8E2DB` | `--color-paper` | Muted foreground (11.35:1 AAA sobre ink) |
+| Bone (texto primário) | `#E8E4DA` | `--color-bone` | Corpo de texto (lock v3) |
+| Surface | `#121816` | `--color-surface` | Superfície elevada sobre ink (lock v3; sem `paper`) |
 | Rule (hairline) | `#2A2620` | `--color-rule` | Divisores discretos sobre ink (≥3:1); **não promover** como CTA |
 
 **Contraste validado (WebAIM):**
 - Copper #C4843A sobre Ink #0B100E: **7.08:1** (AAA) ✓
-- Bone #F5F1ED sobre Ink #0B100E: **12.62:1** (AAA) ✓
-- Paper #E8E2DB sobre Ink #0B100E: **11.35:1** (AAA) ✓
-- Copper sobre Bone/Paper: **2.47:1** (FAIL) — **proibido**
+- Bone `#E8E4DA` sobre Ink `#0B100E`: corpo de texto (lock v3)
+- Surface `#121816` sobre Ink `#0B100E`: superfície elevada (lock v3)
+- Copper sobre bone/surface clara: **proibido** (copper só sobre ink)
+- Sem role `paper`; hex `#E8E4DA`/`#121816` fora do APPROVE Sofia
 
 **Proibições ANX-504:**
-- ❌ Copper sobre Bone ou Paper (contraste insuficiente)
+- ❌ Copper sobre bone/surface clara (contraste insuficiente)
 - ❌ Hero KPI / big-number-as-brand (números grandes como identidade)
 - ❌ Acid green/neon + Inter (palette neon recusada)
 - ❌ Segundo sidebar/switcher-chrome (conflito com Aceternity ANX-448)
@@ -49,8 +50,8 @@ type: reference
 |------------------------|----------------|
 | `--color-background` (#020617) | `--color-ink` (#0B100E) |
 | `--color-accent` (#f97316) | `--color-copper` (#C4843A) |
-| `--color-foreground` (#f8fafc) | `--color-bone` (#F5F1ED) |
-| `--color-muted-foreground` (#94a3b8) | `--color-paper` (#E8E2DB) |
+| `--color-foreground` (#f8fafc) | `--color-bone` (#E8E4DA) |
+| `--color-surface` / muted | `--color-surface` (#121816) |
 
 ### Typography
 

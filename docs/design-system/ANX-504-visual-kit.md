@@ -27,15 +27,16 @@ Decisão publicada do kit visual e tokens de design para anxionOS. Substitui pal
 |-------|-------|-----|-------|
 | Ink (fundo) | `--color-ink` | `#0B100E` | Fundo principal, profundidade OLED |
 | Copper (CTA/destaque) | `--color-copper` | `#C4843A` | **Só sobre ink** (≥7:1); proibido sobre bone/paper (2.47:1 ↯) |
-| Bone (texto primário) | `--color-bone` | `#F5F1ED` | Corpo de texto, labels |
-| Paper (texto secundário) | `--color-paper` | `#E8E2DB` | Muted foreground |
+| Bone (texto primário) | `--color-bone` | `#E8E4DA` | Corpo de texto, labels (lock v3) |
+| Surface | `--color-surface` | `#121816` | Superfície elevada sobre ink (lock v3; sem role `paper`) |
 | Rule (#2A2620) | `--color-rule` | `#2A2620` | Hairline sobre ink com ≥3:1 medido; **não promover** (uso restrito) |
 
 **Contraste validado:**
 - Copper #C4843A sobre Ink #0B100E: **7.08:1** (AAA) — aprovado para CTAs, borders, focus rings.
-- Copper #C4843A sobre Bone #F5F1ED: **2.47:1** (FAIL) — **proibido**.
-- Bone #F5F1ED sobre Ink #0B100E: **12.62:1** (AAA) — corpo de texto.
-- Paper #E8E2DB sobre Ink #0B100E: **11.35:1** (AAA) — muted text.
+- Copper #C4843A sobre Bone `#E8E4DA`: contraste insuficiente — **proibido** (copper só sobre ink).
+- Bone `#E8E4DA` sobre Ink `#0B100E`: corpo de texto (lock v3).
+- Surface `#121816` sobre Ink `#0B100E`: superfície elevada (lock v3).
+- **Sem role `paper`** neste lock — hex `#E8E4DA` / `#121816` fora do APPROVE Sofia.
 - Rule #2A2620 sobre Ink #0B100E: **≥3:1** (medir em uso) — hairlines discretos; não usar como CTA.
 
 ### Tipografia
