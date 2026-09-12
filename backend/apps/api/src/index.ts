@@ -147,6 +147,8 @@ if (pool && resolveBetterAuthConfig()) {
 		createPlatformSloSnapshotPlugin({
 			metrics: apiMetrics,
 			grantRepository: govRuntime.grantRepository,
+			auth,
+			identityRepository: identityRuntime.principalRepository,
 		}),
 	) as unknown as Elysia;
 	const agentsRuntime = createAgentsApiRuntime(pool);
