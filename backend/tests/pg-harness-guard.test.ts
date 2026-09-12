@@ -768,3 +768,138 @@ describe("shared database-name source of truth", () => {
 		expect(getDatabaseUrl({ DATABASE_URL: "   " })).toBeUndefined();
 	});
 });
+
+/**
+ * ANX-487 round 5 — G2 and G4 independently found that round 4 still leaked in
+ * refusal messages for attacker-controlled `database`/`host` values that pass
+ * the character allowlist, and in `redactDatabaseUrl` for path/query values.
+ * The rule is now: never print a derived value unless its safety is established
+ * by the target policy (loopback/IP-literal host, known scratch/protected
+ * database name); redact a bare URL without a scheme wholesale; redact every
+ * query-parameter value.
+ */
+describe("round 5 — fail-closed redaction of derived values", () => {
+	/** Substrings whose appearance in a message is a leak. */
+	const LEAK_MARKERS = [
+		"S3cr3t-DO-NOT-LEAK",
+		"S3cr3t",
+		"p@ss",
+		"p ss",
+		"pw",
+		"alice",
+		"lice:",
+		"lice.",
+		"lice-",
+		"lice_",
+		"alice:",
+	];
+
+	// Refusal-path repros: each URL is malformed/password-shaped, the guard must
+	// refuse AND the message must not contain any fragment of the credential.
+	const REFUSAL_CASES: Array<{ name: string; url: string }> = [
+		// G2 (round 5) — the two HIGH repros of this round.
+		{
+			name: "path carrying a password",
+			url: "postgres://localhost:5432/S3cr3t-DO-NOT-LEAK",
+		},
+		{
+			name: "path carrying a password with userinfo",
+			url: "postgres://alice:pw@localhost:5432/S3cr3t-DO-NOT-LEAK",
+		},
+		// G4 (round 4) — fresh FUROs that the round-4 allowlist let through.
+		{
+			name: "@DO-NOT-LEAK folds database to the user",
+			url: "postgres://alice:S3cr3t@DO-NOT-LEAK",
+		},
+		{ name: "//-less with dot", url: "postgres:alice.S3cr3t-DO-NOT-LEAK" },
+		{ name: "authority with dot", url: "postgres://alice.S3cr3t-DO-NOT-LEAK" },
+		{ name: "//-less with hyphen", url: "postgres:alice-S3cr3t-DO-NOT-LEAK" },
+		{
+			name: "//-less with underscore",
+			url: "postgres:alice_S3cr3t-DO-NOT-LEAK",
+		},
+		{ name: "scheme shaped like a userinfo", url: "alice:S3cr3t" },
+		// Rounds 2/3 cases that must keep being closed.
+		{
+			name: "password with a space",
+			url: "postgres://alice:p ss@localhost:99999/anxionos_oracle",
+		},
+		{
+			name: "unescaped @ in password",
+			url: "postgres://alice:p@ss@localhost:99999/anxionos_oracle",
+		},
+		{ name: "//-less with @", url: "postgres:alice:S3cr3t@localhost:5432/db" },
+		{ name: "authority without @", url: "postgres://alice:S3cr3t-DO-NOT-LEAK" },
+	];
+
+	for (const row of REFUSAL_CASES) {
+		test(`${row.name} — refusal message never prints a credential fragment`, () => {
+			const message = captureError(() =>
+				shouldRunPgIntegrationTests(enabled(row.url)),
+			);
+			expect(message).not.toBe("");
+			expect(message).toMatch(/refusing|not a valid URL|protocol/);
+			for (const marker of LEAK_MARKERS) {
+				expect(message.toLowerCase()).not.toContain(marker);
+			}
+		});
+	}
+
+	test("a hostname-shaped non-loopback host is NOT printed; an IP literal is", () => {
+		const hostname = captureError(() =>
+			shouldRunPgIntegrationTests(
+				enabled("postgres://u:p@alice.s3cr3t-do-not-leak:5432/anxionos_oracle"),
+			),
+		);
+		expect(hostname).toMatch(/non-loopback host "\*\*\*REDACTED\*\*\*"/);
+		expect(hostname.toLowerCase()).not.toContain("alice.s3cr3t-do-not-leak");
+
+		const ipv4 = captureError(() =>
+			shouldRunPgIntegrationTests(enabled(REMOTE_URL)),
+		);
+		expect(ipv4).toMatch(/non-loopback host "203\.0\.113\.9"/);
+	});
+
+	test("a known IP-literal host and a known scratch database stay readable", () => {
+		const message = captureError(() =>
+			shouldRunPgIntegrationTests(
+				enabled("postgres://u:p@203.0.113.9:5432/anxionos_oracle"),
+			),
+		);
+		expect(message).toContain("203.0.113.9");
+		expect(message).toContain("anxionos_oracle");
+	});
+
+	test("the protocol refusal does not echo the offending scheme", () => {
+		const message = captureError(() =>
+			shouldRunPgIntegrationTests(enabled("alice:S3cr3t")),
+		);
+		expect(message).toMatch(/postgres:\/\/ or postgresql:\/\//);
+		expect(message).not.toContain("alice");
+		expect(message).not.toContain("S3cr3t");
+	});
+
+	test("redactDatabaseUrl redacts a bare identifier and path/query values", () => {
+		expect(redactDatabaseUrl("S3cr3t-DO-NOT-LEAK")).toBe("***REDACTED***");
+
+		const withPath = redactDatabaseUrl(
+			"postgres://localhost:5432/S3cr3t-DO-NOT-LEAK",
+		);
+		expect(withPath).not.toContain("S3cr3t-DO-NOT-LEAK");
+		expect(withPath).toContain("localhost:5432");
+
+		const withQuery = redactDatabaseUrl(
+			"postgres://localhost:5432/anxionos_oracle?user=SECRET&sslcert=/x/y.pem",
+		);
+		expect(withQuery).toContain("anxionos_oracle");
+		expect(withQuery).not.toContain("SECRET");
+		expect(withQuery).not.toContain("/x/y.pem");
+		expect(withQuery).not.toContain("user=SECRET");
+
+		// Known scratch names in the path stay readable (diagnostic preserved).
+		const scratch = redactDatabaseUrl(
+			"postgres://localhost:5432/anxionos_oracle",
+		);
+		expect(scratch).toContain("anxionos_oracle");
+	});
+});

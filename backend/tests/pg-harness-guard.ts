@@ -57,9 +57,23 @@ export const DESTRUCTIVE_DB_OVERRIDE_ENV = "ALLOW_DESTRUCTIVE_TEST_DB";
 /** Marker used by {@link redactDatabaseUrl}; never a real credential. */
 const REDACTION_MARKER = "***REDACTED***";
 
-/** Query parameters that may carry a secret (`?password=`, `?sslkey=`, ...). */
-const SECRET_QUERY_PARAM_PATTERN =
-	/([?&][^=&#\s]*(?:pass|pwd|secret|token|key)[^=&#\s]*=)[^&#\s]*/gi;
+/**
+ * Query-parameter values are never needed in a refusal message and any of them
+ * (`password`, `user`, `sslcert`, `sslkey`, ...) can carry a secret, so every
+ * value is scrubbed. Using a name blocklist proved unreliable (ANX-487
+ * rounds 3-5); redacting all values is fail-closed.
+ */
+const QUERY_VALUE_PATTERN = /([?&][^=&#\s]*)=[^&#\s]*/g;
+
+/** IPv4 dotted quad — an unambiguous host form that can never be a password. */
+const IPV4_LITERAL_PATTERN = /^(\d{1,3}\.){3}\d{1,3}$/;
+
+/** IPv6 literal (after bracket stripping) — also unambiguous. */
+const IPV6_LITERAL_PATTERN = /^[0-9A-Fa-f:]+$/;
+
+function isIpLiteralHost(host: string): boolean {
+	return IPV4_LITERAL_PATTERN.test(host) || IPV6_LITERAL_PATTERN.test(host);
+}
 
 /** Reader used by the harnesses; mirrors the old local `getDatabaseUrl`. */
 export function getDatabaseUrl(
@@ -159,16 +173,33 @@ export function redactDatabaseUrl(rawUrl: string): string {
 	const scheme = /^[A-Za-z][A-Za-z0-9+.-]*:(?:\/\/)?/.exec(rawUrl);
 	let redacted: string;
 	if (!scheme) {
-		redacted = redactAuthority(rawUrl);
+		// No scheme, the whole value is attacker-controlled: a bare identifier
+		// (`S3cr3t-DO-NOT-LEAK`) could be a password, and an authority parse
+		// would happily "confirm" it. Fail closed — print nothing of it.
+		redacted = REDACTION_MARKER;
 	} else {
 		const head = scheme[0];
 		const rest = rawUrl.slice(head.length);
 		const authorityEnd = rest.search(/[/?#]/);
 		const authority = authorityEnd >= 0 ? rest.slice(0, authorityEnd) : rest;
 		const tail = authorityEnd >= 0 ? rest.slice(authorityEnd) : "";
-		redacted = `${head}${redactAuthority(authority)}${tail}`;
+		// Path: only print when it is one of the project's KNOWN scratch/protected
+		// names. An arbitrary valid-looking segment (`/S3cr3t-DO-NOT-LEAK`) is an
+		// equally plausible password, so it is printed as the marker.
+		const pathMatch = /^\/([^?#]*)/.exec(tail);
+		const path = pathMatch?.[1] ?? "";
+		const pathPart =
+			path !== "" &&
+			(isScratchDatabaseName(path) ||
+				PROTECTED_DATABASES.has(path.toLowerCase()))
+				? `/${path}`
+				: path !== ""
+					? `/***REDACTED***`
+					: "";
+		const queryPart = pathMatch ? tail.slice(pathMatch[0].length) : "";
+		redacted = `${head}${redactAuthority(authority)}${pathPart}${queryPart}`;
 	}
-	return redacted.replace(SECRET_QUERY_PARAM_PATTERN, `$1${REDACTION_MARKER}`);
+	return redacted.replace(QUERY_VALUE_PATTERN, `$1=${REDACTION_MARKER}`);
 }
 
 /**
@@ -346,8 +377,12 @@ export function assertDestructivePgTarget(
 		);
 	}
 	if (parsed.protocol !== "postgres:" && parsed.protocol !== "postgresql:") {
+		// The offending scheme is NOT printed: an attacker-controlled value
+		// (e.g. `alice:S3cr3t`) parses as exactly one URL scheme per RFC 3986,
+		// so a "got <scheme>" would leak the first label of a userinfo.
 		throw new Error(
-			`DATABASE_URL must use the postgres:// or postgresql:// protocol (ANX-487), got ${JSON.stringify(parsed.protocol)}.`,
+			"DATABASE_URL must use the postgres:// or postgresql:// protocol (ANX-487). " +
+				"Refusing to run the destructive TRUNCATE harness.",
 		);
 	}
 
@@ -359,8 +394,15 @@ export function assertDestructivePgTarget(
 	// A malformed URL (`postgres:alice:S3cr3t@host`) makes the driver fold the
 	// userinfo into `database`/`host`; refusal messages must never print them
 	// raw (ANX-487 round 3).
-	const safeHost = redactCredentialFragment(host);
-	const safeDatabase = redactCredentialFragment(database);
+	const safeHost =
+		LOOPBACK_HOSTS.has(host) || isIpLiteralHost(host)
+			? redactCredentialFragment(host)
+			: REDACTION_MARKER;
+	const safeDatabase =
+		PROTECTED_DATABASES.has(database.toLowerCase()) ||
+		isScratchDatabaseName(database)
+			? redactCredentialFragment(database)
+			: REDACTION_MARKER;
 
 	if (isDestructiveDbOverrideEnabled(env)) {
 		return target;
