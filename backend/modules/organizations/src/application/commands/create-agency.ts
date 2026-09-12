@@ -78,10 +78,9 @@ export async function createAgency(
 	});
 	return deps.unitOfWork.runInTransaction(
 		// ANX-480: agencyId is deterministic (from commandId), so it's stable across
-		// retries. Use agencyId as BOTH tenant_id (for journal isolation) and
-		// agency_id (for agencies RLS). This matches main branch pattern and satisfies
-		// RLS policy: app.tenant_id = app.agency_id = agencyId = row values.
-		buildAgencyTenantContext(agencyId, agencyId, input.ownerPrincipalId),
+		// retries. Use agencyId for both tenant_id (journal isolation) and agency_id
+		// (agencies RLS). This matches main branch pattern.
+		buildAgencyTenantContext(agencyId, input.ownerPrincipalId),
 		async (context) => {
 			// Replay como PRIMEIRA operacao da transacao, com validacao de intencao.
 			// As validacoes dependentes de estado vem depois: resolver o retry

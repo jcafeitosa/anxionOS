@@ -34,7 +34,7 @@ export async function updateAgencyMarkets(
 	};
 	// Red Team (Davi): replay dentro do tenant context, não antes
 	return deps.unitOfWork.runInTransaction(
-		buildAgencyTenantContext(command.agencyId, command.agencyId, input.actorPrincipalId),
+		buildAgencyTenantContext(command.agencyId, input.actorPrincipalId),
 		async (context) => {
 			const raced = await loadIdempotentCommandResult(
 				context.commandJournal,

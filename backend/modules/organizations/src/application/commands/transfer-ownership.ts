@@ -41,7 +41,7 @@ export async function transferOwnership(
 	// transacao, depois da autoridade, e colapsa no mesmo codigo opaco de
 	// "sucessor invalido".
 	return deps.unitOfWork.runInTransaction(
-		buildAgencyTenantContext(command.agencyId, command.agencyId, input.actorPrincipalId),
+		buildAgencyTenantContext(command.agencyId, input.actorPrincipalId),
 		async (context) => {
 			const raced = await loadIdempotentCommandResult(
 				context.commandJournal,
