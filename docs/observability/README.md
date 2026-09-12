@@ -84,3 +84,7 @@ Chaves que contêm `password`, `token`, `secret`, `authorization`, `cookie`, `ap
 - `pino-pretty` ^13.1.3 — saída colorida em desenvolvimento
 
 OpenTelemetry completo permanece backlog (pacote já inclui stubs OTel).
+
+## Platform SLI export
+
+Ver [Platform SLI export](platform-slo-snapshot.md) — endpoint read-only para o console Platform; exporta SLI metrics (process lifetime) **não para SLO compliance**, burn-rate ou error-budget.
