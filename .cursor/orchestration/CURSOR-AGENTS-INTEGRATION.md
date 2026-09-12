@@ -2,6 +2,8 @@
 
 Política operacional: a orquestração anxionOS **usa os subagentes nativos do Cursor** (`Task`) e cada agente **deve consumir skills, tools, MCP e plugins** disponíveis no workspace — não improvisar fluxos paralelos fora do Cursor.
 
+**Contrato G0 (Owner/CTO):** [CURSOR-VS-GROKBOT.md](./CURSOR-VS-GROKBOT.md) · pacote [G0-TOOLING-DUAL-RUNTIME.md](./G0-TOOLING-DUAL-RUNTIME.md) — Grok = control plane; Cursor = data plane; box Grok nunca muta SoT.
+
 **Modelo alvo:** paridade **Grok Bot** (teammates nomeados, paralelos, autônomos) — ver [GROK-BOT-PARITY.md](./GROK-BOT-PARITY.md) · fila: `npm run orchestration:dispatch`.
 
 **Relacionados:** [DELEGATION.md](./DELEGATION.md) · [HIRE-DELEGATION.md](./HIRE-DELEGATION.md) · [SKILLS-TOOLS-MCP-REGISTRY.md](./SKILLS-TOOLS-MCP-REGISTRY.md) · [TOOLING-INTEGRATION.md](./TOOLING-INTEGRATION.md) · [templates/SUBAGENT-DELEGATION-PACKAGE.md](./templates/SUBAGENT-DELEGATION-PACKAGE.md) · regra [cursor-agents-orchestration.mdc](../rules/cursor-agents-orchestration.mdc)
