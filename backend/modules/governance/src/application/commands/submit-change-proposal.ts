@@ -16,10 +16,7 @@ import {
 	recordGovernanceCommand,
 	toCommandResultSnapshot,
 } from "../command-support";
-import {
-	applyPrincipalExistenceProbe,
-	probePrincipalExistence,
-} from "../principal-probe";
+import { throwGovernanceError } from "../errors";
 
 export interface SubmitChangeProposalInput extends SubmitChangeProposalCommand {
 	proposerPrincipalId: string;
@@ -41,13 +38,11 @@ export async function submitChangeProposal(
 		agencyId: command.scopeId,
 		principalId: input.proposerPrincipalId,
 	};
-	// ANX-477 — sonda tolerante ANTES da transacao (ver `principal-probe.ts`):
-	// nenhuma conexao extra do pool e' pedida com a transacao aberta, e o replay
-	// continua resolvido antes de julgar a identidade.
-	const principalProbe = await probePrincipalExistence(
-		deps.principalLookup,
-		input.proposerPrincipalId,
-	);
+	// ANX-477 — a leitura de identidade usa a conexao que a transacao JA' segura
+	// (`context.client`), nao uma SEGUNDA do pool compartilhado: com N comandos
+	// concorrentes proximos de `pool.options.max` o pool esgotava. A leitura roda
+	// DEPOIS do replay e da validacao de intencao, como no baseline: um replay
+	// legitimo devolve o journal sem tocar a identidade.
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
 		// ANX-476/FURO 4 — a key so' repete para a MESMA proposta
 		// (escopo + tipo + payload + proponente). Nao ha lock da key: a
@@ -76,7 +71,16 @@ export async function submitChangeProposal(
 		if (raced) {
 			return raced;
 		}
-		applyPrincipalExistenceProbe(principalProbe, input.proposerPrincipalId);
+		const proposerExists = await deps.principalLookup.exists(
+			input.proposerPrincipalId,
+			{ transactionClient: context.client },
+		);
+		if (!proposerExists) {
+			throwGovernanceError(
+				"GOV_PRINCIPAL_NOT_FOUND",
+				`Principal ${input.proposerPrincipalId} not found`,
+			);
+		}
 		const now = new Date();
 		const proposalId = randomUUID();
 		const revision = 1;

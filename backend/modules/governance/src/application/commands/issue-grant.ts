@@ -23,10 +23,6 @@ import {
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwGovernanceError } from "../errors";
-import {
-	applyPrincipalExistenceProbe,
-	probePrincipalExistence,
-} from "../principal-probe";
 
 export interface IssueGrantInput extends IssueGrantCommand {
 	scopeKind?: GovernanceScopeKind;
@@ -114,16 +110,12 @@ export async function issueGrant(
 		agencyId: command.scopeId,
 		principalId: command.granteePrincipalId,
 	};
-	// ANX-477 — a sonda de principal roda ANTES de abrir a transacao. Dentro
-	// dela, cada comando segurava uma conexao do pool e pedia uma SEGUNDA para a
-	// identidade (mesmo pool), esgotando-o sob rajada. A sonda e' tolerante
-	// (nunca lanca) para que um replay continue devolvendo o resultado
-	// journalado mesmo com a identidade indisponivel; o resultado e' aplicado
-	// DEPOIS do replay, dentro da transacao.
-	const principalProbe = await probePrincipalExistence(
-		deps.principalLookup,
-		command.granteePrincipalId,
-	);
+	// ANX-477 — o principal e' lido com a conexao que a transacao JA' segura
+	// (`context.client`), nunca por uma SEGUNDA conexao do pool compartilhado:
+	// com N comandos concorrentes proximos de `pool.options.max` o pool esgotava
+	// e o comando ficava preso. A leitura roda DEPOIS do replay e da validacao de
+	// intencao, preservando a precedencia do baseline: um replay legitimo
+	// devolve o journal sem tocar a identidade.
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
 		// Replay resolvido NA TRANSACAO, com validacao de intencao: o comando CRIA
 		// o agregado, entao a intencao e' checada pelo grant que o journal aponta.
@@ -161,7 +153,16 @@ export async function issueGrant(
 		if (journaled) {
 			return journaled;
 		}
-		applyPrincipalExistenceProbe(principalProbe, command.granteePrincipalId);
+		const granteeExists = await deps.principalLookup.exists(
+			command.granteePrincipalId,
+			{ transactionClient: context.client },
+		);
+		if (!granteeExists) {
+			throwGovernanceError(
+				"GOV_PRINCIPAL_NOT_FOUND",
+				`Principal ${command.granteePrincipalId} not found`,
+			);
+		}
 		const bumpedEpoch = await context.authorityEpochStore.increment(
 			command.scopeId,
 			command.scopeId,

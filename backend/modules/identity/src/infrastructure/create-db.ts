@@ -1,5 +1,5 @@
 import { drizzle } from "drizzle-orm/node-postgres";
-import type { Pool } from "pg";
+import type { Pool, PoolClient } from "pg";
 import type { CommandJournalRepository } from "../domain/ports/command-journal";
 import type { PrincipalRepository } from "../domain/ports/principal-repository";
 import type { ServiceCredentialRepository } from "../domain/ports/service-credential-repository";
@@ -32,4 +32,24 @@ export function createIdentityDb(pool: Pool): {
 		commandJournal: createDrizzleCommandJournalRepository(db),
 		unitOfWork: createIdentityUnitOfWork(pool),
 	};
+}
+
+/**
+ * ANX-477 — leitura de identidade na conexao de OUTRO dono (transacao do
+ * chamador), sem pedir uma segunda conexao ao pool.
+ *
+ * Existe porque `createIdentityDb` exige um `Pool` (ele tambem monta o
+ * `unitOfWork`, que faz `pool.connect()`), mas quem le identidade dentro de uma
+ * transacao alheia ja' tem um `PoolClient`. Sem esta fabrica, o consumidor
+ * precisaria de um cast (`client as unknown as Pool`), que apagaria justamente a
+ * distincao entre "conexao dedicada" e "conexao emprestada" — e um cast assim
+ * sobreviveria a uma mudanca que passasse a chamar `unitOfWork`.
+ *
+ * O driver aceita `Pool | PoolClient`; so' o `unitaOfWork` (nao exposto aqui) e'
+ * especifico de `Pool`.
+ */
+export function createIdentityRepositoryOn(
+	client: Pool | PoolClient,
+): PrincipalRepository {
+	return createDrizzlePrincipalRepository(drizzle(client, { schema }));
 }

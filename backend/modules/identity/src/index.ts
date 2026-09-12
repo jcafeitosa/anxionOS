@@ -149,7 +149,10 @@ export {
 } from "./graph/projection-contract";
 export { hashSessionRef } from "./infrastructure/adapters/credential-crypto";
 export { createServiceCredentialCrypto } from "./infrastructure/adapters/service-credential-crypto";
-export { createIdentityDb } from "./infrastructure/create-db";
+export {
+	createIdentityDb,
+	createIdentityRepositoryOn,
+} from "./infrastructure/create-db";
 export { createIdentityUnitOfWork } from "./infrastructure/identity-unit-of-work";
 export { ensureIdentitySchema } from "./infrastructure/migrate";
 export {

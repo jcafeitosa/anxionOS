@@ -22,10 +22,6 @@ import {
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwGovernanceError } from "../errors";
-import {
-	applyPrincipalExistenceProbe,
-	probePrincipalExistence,
-} from "../principal-probe";
 
 const MAX_BREAK_GLASS_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -64,15 +60,10 @@ export async function activateBreakGlass(
 		principalId: command.granteePrincipalId,
 	};
 
-	// ANX-477 — sonda tolerante ANTES da transacao (ver `principal-probe.ts`):
-	// a existencia do principal e' estado que a transacao nao altera, entao a
-	// consulta nao precisa da conexao que a transacao ja' segura. O replay
-	// continua sendo resolvido antes de julgar a identidade.
-	const principalProbe = await probePrincipalExistence(
-		deps.principalLookup,
-		command.granteePrincipalId,
-	);
-
+	// ANX-477 — a leitura de identidade usa a conexao que a transacao JA' segura
+	// (`context.client`), nao uma SEGUNDA do pool compartilhado (pool starvation
+	// com N ~ `pool.options.max`). Roda DEPOIS do replay e da janela de validade,
+	// como no baseline; um replay legitimo nao toca a identidade.
 	return deps.unitOfWork.runInTransaction(tenantContext, async (context) => {
 		const incidentRef = command.incidentRef ?? command.commandId;
 		// ANX-476/F1 (G5): o `reason` vai para o EVENTO (auditoria) e nao existe no
@@ -135,7 +126,16 @@ export async function activateBreakGlass(
 				"Break-glass TTL exceeds maximum allowed window (24h)",
 			);
 		}
-		applyPrincipalExistenceProbe(principalProbe, command.granteePrincipalId);
+		const granteeExists = await deps.principalLookup.exists(
+			command.granteePrincipalId,
+			{ transactionClient: context.client },
+		);
+		if (!granteeExists) {
+			throwGovernanceError(
+				"GOV_PRINCIPAL_NOT_FOUND",
+				`Principal ${command.granteePrincipalId} not found`,
+			);
+		}
 
 		const bumpedEpoch = await context.authorityEpochStore.increment(
 			command.scopeId,

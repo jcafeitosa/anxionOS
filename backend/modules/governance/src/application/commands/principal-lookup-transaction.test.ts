@@ -20,9 +20,9 @@ import type {
 	GovernanceUnitOfWork,
 } from "../../domain/ports/governance-unit-of-work";
 import type { GrantRepository } from "../../domain/ports/grant-repository";
-import {
-	type PrincipalLookup,
-	PrincipalLookupUnavailableError,
+import type {
+	PrincipalLookup,
+	PrincipalLookupOptions,
 } from "../../domain/ports/principal-lookup";
 import { hashCommandPayload } from "../command-support";
 import { GovernanceCommandError } from "../errors";
@@ -32,15 +32,30 @@ import { issueGrant } from "./issue-grant";
 import { submitChangeProposal } from "./submit-change-proposal";
 
 /**
- * ANX-477 — oraculo determinístico e local ao modulo.
+ * ANX-477 (rodada 2) — ordem de aquisicao da identidade.
  *
- * O defeito era de ORDEM: `principalLookup.exists` rodava DENTRO de
- * `runInTransaction`, pedindo uma SEGUNDA conexao do mesmo pool enquanto a
- * transacao ja' segurava a primeira (pool starvation sob rajada, N ~ `pool.max`).
- * Os fakes abaixo instrumentam as duas fronteiras (port de identidade e
- * unit-of-work) e registram uma trilha ORDENADA + se a consulta aconteceu com a
- * transacao aberta. Nenhum PostgreSQL real e' necessario: o que se prova aqui e'
- * a ordem de aquisicao e a semantica de idempotencia, nao a transacao do driver.
+ * O defeito: `principalLookup.exists` rodava DENTRO de `runInTransaction` pelo
+ * POOL COMPARTILHADO — cada comando ja' segurava uma conexao e pedia uma
+ * SEGUNDA, esgotando o pool com N ~ `pool.options.max`. A rodada 1 tentou
+ * resolver com uma sonda tolerante ANTES da transacao, mas isso fez o REPLAY
+ * tocar a identidade (e travar quando ela nao responde).
+ *
+ * A correcao desta rodada mantem a leitura DENTRO da transacao, porem na
+ * conexao que a transacao JA' segura (`context.client`). O oraculo abaixo
+ * instrumenta as duas fronteiras (port de identidade e unit-of-work) e prova:
+ *
+ *   - (c) toda leitura usa `options.transactionClient === context.client`;
+ *         nenhuma chamada parte do pool compartilhado;
+ *   - (a) replay com identidade indisponivel (ou pendurada) devolve o journal
+ *         SEM chamar `exists` (contagem 0);
+ *   - a precedencia: principal ausente falha fechado e um erro da identidade
+ *         propaga sem ser engolido.
+ *
+ * O erro de PRODUCAO (a classe de `@anxionos/organizations` que o adapter real
+ * lanca) e o status que o boundary devolve sao cobertos em
+ * `tests/governance/principal-lookup-error-boundary.test.ts`: este arquivo vive
+ * no projeto composite de `modules/governance`, cujo `rootDir`/`references`
+ * proibe importar `@anxionos/organizations`.
  */
 
 const SCOPE_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
@@ -50,11 +65,11 @@ const GRANTEE_OWNER_ID = "33333333-3333-4333-8333-333333333333";
 const CAPABILITY = "owner.manage";
 const BASE_TIME = new Date("2026-09-12T00:00:00.000Z");
 /**
- * Determinístico POR IMPORT: `activateBreakGlass` exige `expiresAt` futuro e
- * dentro de 24h, e o replay compara `existing.validUntil` com o mesmo instante.
- * Se fosse recalculado por chamada, o seed e o invoke divergiriam por
- * milissegundos e o `matchesAggregate` devolveria 409 falso.
+ * Sentinela da conexao da transacao. `GovernanceTransactionContext.client` e'
+ * `PoolClient`; o sentinela permite provar, por identidade, que a consulta
+ * recebeu EXATAMENTE a conexao da transacao — e nao uma do pool.
  */
+const TRANSACTION_CLIENT = { kind: "transaction-client" } as never;
 const BREAK_GLASS_EXPIRES_AT = new Date(
 	Date.now() + 60 * 60 * 1000,
 ).toISOString();
@@ -62,16 +77,18 @@ const DELEGATION_VALID_UNTIL = new Date(
 	Date.now() + 60 * 60 * 1000,
 ).toISOString();
 
-type LookupBehavior = "present" | "absent" | "unavailable";
+type LookupBehavior = "present" | "absent" | "unavailable" | "hang";
 
 interface HarnessState {
 	behavior: LookupBehavior;
-	trace: string[];
 	transactionOpen: boolean;
 	transactionOpens: number;
 	lookupCalls: number;
-	lookupCallsDuringTransaction: number;
+	lookupCallsOnTransactionClient: number;
+	/** Leituras que pediriam uma SEGUNDA conexao do pool (o defeito). */
+	lookupCallsFromPool: number;
 	saves: number;
+	principalIdCalls: string[];
 }
 
 interface Harness {
@@ -115,12 +132,13 @@ function buildGrant(overrides: Partial<Grant> & Pick<Grant, "id">): Grant {
 function createHarness(behavior: LookupBehavior): Harness {
 	const state: HarnessState = {
 		behavior,
-		trace: [],
 		transactionOpen: false,
 		transactionOpens: 0,
 		lookupCalls: 0,
-		lookupCallsDuringTransaction: 0,
+		lookupCallsOnTransactionClient: 0,
+		lookupCallsFromPool: 0,
 		saves: 0,
+		principalIdCalls: [],
 	};
 	const grants = new Map<string, Grant>();
 	const proposals = new Map<string, ChangeProposal>();
@@ -236,8 +254,7 @@ function createHarness(behavior: LookupBehavior): Harness {
 		},
 		async record(entry) {
 			if (journal.has(entry.commandId)) {
-				// Mesma semantica do adapter PostgreSQL (ANX-476): colisao de
-				// `command_id` e' conflito, nao devolucao da linha alheia.
+				// Mesma semantica do adapter PostgreSQL (ANX-476).
 				throw new CommandJournalConflictError(entry.commandId);
 			}
 			const stored: CommandJournalRecord = {
@@ -251,7 +268,7 @@ function createHarness(behavior: LookupBehavior): Harness {
 	};
 
 	const context: GovernanceTransactionContext = {
-		client: null as never,
+		client: TRANSACTION_CLIENT,
 		grantRepository,
 		delegationRepository,
 		mandateRepository: {} as GovernanceTransactionContext["mandateRepository"],
@@ -268,30 +285,31 @@ function createHarness(behavior: LookupBehavior): Harness {
 	const unitOfWork: GovernanceUnitOfWork = {
 		async runInTransaction(_ctx, work) {
 			state.transactionOpens += 1;
-			state.trace.push("transaction.open");
 			state.transactionOpen = true;
 			try {
 				return await work(context);
 			} finally {
 				state.transactionOpen = false;
-				state.trace.push("transaction.close");
 			}
 		},
 	};
 
 	const principalLookup: PrincipalLookup = {
-		async exists() {
+		async exists(principalId: string, options?: PrincipalLookupOptions) {
 			state.lookupCalls += 1;
-			state.trace.push("principalLookup.exists");
-			if (state.transactionOpen) {
-				// O ponto do defeito: uma consulta aqui exige uma SEGUNDA conexao
-				// do pool com a transacao ainda segurando a primeira.
-				state.lookupCallsDuringTransaction += 1;
+			state.principalIdCalls.push(principalId);
+			if (options?.transactionClient === TRANSACTION_CLIENT) {
+				state.lookupCallsOnTransactionClient += 1;
+			} else {
+				// O defeito: sem a conexao da transacao, a leitura pediria uma
+				// SEGUNDA conexao do pool compartilhado.
+				state.lookupCallsFromPool += 1;
+			}
+			if (state.behavior === "hang") {
+				await new Promise(() => {});
 			}
 			if (state.behavior === "unavailable") {
-				throw new PrincipalLookupUnavailableError(
-					"identity service unavailable",
-				);
+				throw new Error("identity service unavailable");
 			}
 			return state.behavior === "present";
 		},
@@ -504,28 +522,24 @@ const COMMAND_CASES: CommandCase[] = [
 	},
 ];
 
-describe("ANX-477 — ordem de aquisicao: sonda de principal fora da transacao", () => {
+describe("ANX-477 — a identidade e' lida na conexao da transacao, nunca no pool", () => {
 	for (const commandCase of COMMAND_CASES) {
-		test(`${commandCase.name}: consulta a identidade ANTES de abrir a transacao`, async () => {
+		test(`${commandCase.name}: exists roda 1x com transactionClient === context.client`, async () => {
 			const harness = createHarness("present");
 			commandCase.prepare(harness);
 			await commandCase.invoke(harness.deps, randomUUID());
-			const lookupIndex = harness.state.trace.indexOf("principalLookup.exists");
-			const transactionIndex = harness.state.trace.indexOf("transaction.open");
-			expect(lookupIndex).toBeGreaterThanOrEqual(0);
-			expect(transactionIndex).toBeGreaterThanOrEqual(0);
-			expect(lookupIndex).toBeLessThan(transactionIndex);
-			// A prova direta do defeito: nenhuma chamada ao pool de identidade
-			// acontece enquanto a transacao segura a conexao.
-			expect(harness.state.lookupCallsDuringTransaction).toBe(0);
+			expect(harness.state.lookupCalls).toBe(1);
+			expect(harness.state.lookupCallsOnTransactionClient).toBe(1);
+			// A prova direta do defeito: NENHUMA leitura pede o pool.
+			expect(harness.state.lookupCallsFromPool).toBe(0);
 			expect(harness.state.transactionOpens).toBe(1);
 		});
 	}
 });
 
-describe("ANX-477 — replay com identidade indisponivel devolve o journal", () => {
+describe("ANX-477 — replay nao toca a identidade", () => {
 	for (const commandCase of COMMAND_CASES) {
-		test(`${commandCase.name}: retorna o resultado journalado sem lancar`, async () => {
+		test(`${commandCase.name}: identidade indisponivel devolve o journal sem chamar exists`, async () => {
 			const harness = createHarness("present");
 			commandCase.prepare(harness);
 			const commandId = randomUUID();
@@ -534,7 +548,29 @@ describe("ANX-477 — replay com identidade indisponivel devolve o journal", () 
 			const result = await commandCase.invoke(harness.deps, commandId);
 			expect(result.idempotentReplay).toBe(true);
 			expect(result.aggregateId).toBe(aggregateId);
+			// (a) contagem de chamadas == 0: o replay devolve o journal sem
+			// consultar a identidade.
+			expect(harness.state.lookupCalls).toBe(0);
+			expect(harness.state.lookupCallsFromPool).toBe(0);
 			expect(harness.state.saves).toBe(0);
+		});
+
+		test(`${commandCase.name}: identidade PENDURADA nao prende o replay`, async () => {
+			const harness = createHarness("present");
+			commandCase.prepare(harness);
+			const commandId = randomUUID();
+			const aggregateId = commandCase.seedReplay(harness, commandId);
+			harness.setLookupBehavior("hang");
+			const outcome = await Promise.race([
+				commandCase.invoke(harness.deps, commandId),
+				Bun.sleep(250).then(() => "pending" as const),
+			]);
+			expect(outcome).not.toBe("pending");
+			expect((outcome as GovernanceCommandResult).idempotentReplay).toBe(true);
+			expect((outcome as GovernanceCommandResult).aggregateId).toBe(
+				aggregateId,
+			);
+			expect(harness.state.lookupCalls).toBe(0);
 		});
 	}
 
@@ -548,6 +584,7 @@ describe("ANX-477 — replay com identidade indisponivel devolve o journal", () 
 			granteePrincipalId: PRINCIPAL_ID,
 			capability: CAPABILITY,
 		});
+		const callsBeforeReplay = harness.state.lookupCalls;
 		harness.setLookupBehavior("unavailable");
 		const replay = await issueGrant(harness.deps, {
 			commandId,
@@ -557,27 +594,13 @@ describe("ANX-477 — replay com identidade indisponivel devolve o journal", () 
 			capability: CAPABILITY,
 		});
 		expect(replay).toEqual({ ...issued, idempotentReplay: true });
+		expect(harness.state.lookupCalls).toBe(callsBeforeReplay);
 	});
 });
 
-describe("ANX-477 — comando novo com identidade indisponivel propaga o erro original", () => {
+describe("ANX-477 — comando NOVO ainda consulta a identidade", () => {
 	for (const commandCase of COMMAND_CASES) {
-		test(`${commandCase.name}: lanca PrincipalLookupUnavailableError e nao grava`, async () => {
-			const harness = createHarness("unavailable");
-			commandCase.prepare(harness);
-			const commandId = randomUUID();
-			await expect(
-				commandCase.invoke(harness.deps, commandId),
-			).rejects.toBeInstanceOf(PrincipalLookupUnavailableError);
-			expect(harness.state.saves).toBe(0);
-			expect(harness.journal.has(commandId)).toBe(false);
-		});
-	}
-});
-
-describe("ANX-477 — principal inexistente falha fechado sem gravar agregado", () => {
-	for (const commandCase of COMMAND_CASES) {
-		test(`${commandCase.name}: GOV_PRINCIPAL_NOT_FOUND`, async () => {
+		test(`${commandCase.name}: principal ausente falha fechado sem gravar`, async () => {
 			const harness = createHarness("absent");
 			commandCase.prepare(harness);
 			const commandId = randomUUID();
@@ -586,6 +609,21 @@ describe("ANX-477 — principal inexistente falha fechado sem gravar agregado", 
 			await expect(pending).rejects.toMatchObject({
 				governanceCode: "GOV_PRINCIPAL_NOT_FOUND",
 			});
+			expect(harness.state.lookupCalls).toBe(1);
+			expect(harness.state.lookupCallsFromPool).toBe(0);
+			expect(harness.state.saves).toBe(0);
+			expect(harness.journal.has(commandId)).toBe(false);
+		});
+
+		test(`${commandCase.name}: erro da identidade propaga sem ser engolido`, async () => {
+			const harness = createHarness("unavailable");
+			commandCase.prepare(harness);
+			const commandId = randomUUID();
+			await expect(commandCase.invoke(harness.deps, commandId)).rejects.toThrow(
+				"identity service unavailable",
+			);
+			expect(harness.state.lookupCalls).toBe(1);
+			expect(harness.state.lookupCallsFromPool).toBe(0);
 			expect(harness.state.saves).toBe(0);
 			expect(harness.journal.has(commandId)).toBe(false);
 		});
