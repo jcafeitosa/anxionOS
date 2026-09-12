@@ -29,8 +29,9 @@ import type { Grant } from "../../modules/governance/src/domain/entities/grant";
  * `handleIssueGrant` → `onError`/`mapGovernanceError`, o mesmo encadeamento
  * da rota do plugin (sem PostgreSQL).
  *
- * C2 (DiD platform-only) permanece documentado nos handlers/contracts; este
- * arquivo não expande 465/497/501.
+ * C2 DiD platform-only: short-circuit no handler deve falhar em SCOPE_MISMATCH
+ * (409) mesmo com actor owner — nunca degradar para 403 de papel/posse.
+ * Este arquivo não expande 465/497/501.
  */
 
 const agencyId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
@@ -266,6 +267,32 @@ describe("ANX-462/466 — POST /grants HTTP (app.handle, C1)", () => {
 		const json = await response.json();
 		expect(response.status).toBe(403);
 		expect(json.error.details.code).toBe("GOV_INSUFFICIENT_AUTHORITY");
+	});
+
+	test("C2 DiD — owner + console.platform em agency → 409 SCOPE (não 403 role)", async () => {
+		// Short-circuit platform-only deve ir ao comando (scope), não a roleMayIssue.
+		const { app, grantRepository } = createGrantsHttpApp({
+			authUserId: ownerAuthUserId,
+			seedGrants: [
+				seedGrant({ capability: "owner.manage", granteePrincipalId: ownerPrincipalId }),
+				seedGrant({
+					capability: "identity.admin",
+					granteePrincipalId: ownerPrincipalId,
+				}),
+			],
+		});
+		const before = await grantRepository.listActiveByPrincipal(ownerPrincipalId);
+		const response = await app.handle(
+			postGrant({
+				granteePrincipalId: ownerPrincipalId,
+				capability: "console.platform",
+			}),
+		);
+		const json = await response.json();
+		expect(response.status).toBe(409);
+		expect(json.error.details.code).toBe("GOV_CAPABILITY_SCOPE_MISMATCH");
+		const after = await grantRepository.listActiveByPrincipal(ownerPrincipalId);
+		expect(after).toHaveLength(before.length);
 	});
 
 	test("sem sessão → 401", async () => {

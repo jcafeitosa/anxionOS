@@ -82,5 +82,5 @@ describe("governance POST RBAC (ANX-443)", () => {
 /**
  * ANX-462/466 HTTP evidence (C1): real `app.handle` POST /grants lives in
  * `governance-grants-http.test.ts`. Do not reintroduce mapGovernanceError theater here.
- * C2 DiD platform-only remains documented in handlers/contracts.
+ * C2 DiD platform-only: regression in governance-grants-http.test.ts (owner→409 SCOPE).
  */
