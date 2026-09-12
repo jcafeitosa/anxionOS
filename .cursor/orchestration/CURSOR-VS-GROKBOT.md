@@ -61,6 +61,8 @@ Handoff Grok→Cursor deve trazer: `ANX-*`, escopo, critérios, paths.
 
 ## Evidência
 
+`brain/` continua só-local (gitignore); leitura/escrita via open-knowledge no workspace Cursor — Grok não inventa paths sem share/MCP.
+
 Aceite de código exige `command:` / `file:` / `issue:` produzidos no **Cursor** ou **CI**. Grok só encaminha — não mintar PASS no box.
 
 ## ADR0002
