@@ -60,8 +60,9 @@ export async function createAgency(
 		// QE (Rafael): createAgency CRIA o agencyId (ainda nao existe). Para que o
 		// replay funcione, tenantId deve ser ESTAVEL entre execuções da mesma key.
 		// O agencyId muda a cada tentativa (randomUUID), mas ownerPrincipalId e'
-		// estavel. Usar owner como tenant_id ate' a agency existir.
-		buildAgencyTenantContext(input.ownerPrincipalId, input.ownerPrincipalId),
+		// estavel. Usar owner como tenant_id para journal ate' a agency existir.
+		// RLS: app.agency_id deve corresponder ao agency_id inserido na tabela.
+		buildAgencyTenantContext(input.ownerPrincipalId, agencyId, input.ownerPrincipalId),
 		async (context) => {
 			// Replay como PRIMEIRA operacao da transacao, com validacao de intencao.
 			// As validacoes dependentes de estado vem depois: resolver o retry

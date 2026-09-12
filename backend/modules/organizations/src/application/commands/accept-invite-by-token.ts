@@ -63,6 +63,7 @@ export async function acceptInviteByToken(
 	return deps.unitOfWork.runInTransaction(
 		buildAgencyTenantContext(
 			invitedMembership.agencyId,
+			invitedMembership.agencyId,
 			input.sessionPrincipalId,
 		),
 		async (context) => {
