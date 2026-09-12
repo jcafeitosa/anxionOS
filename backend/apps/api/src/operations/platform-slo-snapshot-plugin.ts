@@ -1,10 +1,11 @@
+import { AppError } from "@anxionos/contracts/errors";
 import { platformSloSnapshotSchema } from "@anxionos/contracts/operations";
 import type { GrantRepository } from "@anxionos/governance";
 import type { MetricsCollector } from "@anxionos/observability";
 import { getPlatformSloSnapshot } from "@anxionos/operations";
 import { Elysia } from "elysia";
-import type { IdentityContext } from "../identity/plugin";
 import { requirePlatformConsoleGrant } from "./authorization";
+import { mapOperationsError } from "./error-handler";
 
 export interface PlatformSloSnapshotPluginDeps {
 	metrics: MetricsCollector;
@@ -12,29 +13,36 @@ export interface PlatformSloSnapshotPluginDeps {
 	now?: () => string;
 }
 
+interface PlatformSloContext {
+	principalId: string;
+}
+
 /** Platform-scoped read model for SLO/capacity dashboard (ANX-170 S4). */
 export function createPlatformSloSnapshotPlugin(
 	deps: PlatformSloSnapshotPluginDeps,
 ) {
 	return new Elysia({ name: "platform-slo-snapshot" })
-		.resolve(async ({ headers }): Promise<{ identity: IdentityContext }> => {
-			const session = headers.get("x-principal-id");
-			if (!session) {
-				throw new Error("Unauthorized");
+		.onError(({ error, set, request }) => {
+			const mapped = mapOperationsError(
+				error,
+				request.headers.get("x-request-id") ?? undefined,
+			);
+			set.status = mapped.status;
+			return mapped.body;
+		})
+		.resolve(async ({ headers }): Promise<{ slo: PlatformSloContext }> => {
+			const principalId = headers.get("x-principal-id");
+			if (!principalId) {
+				throw AppError.unauthorized();
 			}
-			return {
-				identity: {
-					principalId: session,
-					agencyId: headers.get("x-agency-id") ?? undefined,
-				},
-			};
+			return { slo: { principalId } };
 		})
 		.get(
 			"/v1/operations/platform/slo-snapshot",
-			async ({ identity }) => {
+			async ({ slo }) => {
 				await requirePlatformConsoleGrant(
 					{ grantRepository: deps.grantRepository },
-					{ principalId: identity.principalId },
+					{ principalId: slo.principalId },
 				);
 				const snapshot = getPlatformSloSnapshot({
 					metrics: deps.metrics,

@@ -15,9 +15,11 @@ import {
  * Before: GET /v1/operations/platform/slo-snapshot had zero authorization.
  * After: Requires console.platform grant with PLATFORM scope.
  *
+ * Maya criterion 1: correct authz envelope (401 unauthenticated, 403 forbidden).
+ *
  * Abuse cases:
- * 1. No session → error
- * 2. Valid session but no grant → error
+ * 1. No session → 401 unauthenticated
+ * 2. Valid session but no grant → 403 forbidden
  * 3. Valid session + console.platform grant in PLATFORM scope → 200
  */
 describe("ANX-497 — platform SLO snapshot authorization", () => {
@@ -61,15 +63,17 @@ describe("ANX-497 — platform SLO snapshot authorization", () => {
 		);
 	}
 
-	test("ABUSE CASE 1 — no session → error", async () => {
+	test("ABUSE CASE 1 — no session → 401 unauthenticated", async () => {
 		const app = createApp();
 		const response = await app.handle(
 			new Request("http://127.0.0.1/v1/operations/platform/slo-snapshot"),
 		);
-		expect(response.status).toBeGreaterThanOrEqual(400);
+		expect(response.status).toBe(401);
+		const body = await response.json();
+		expect(body.error).toBeDefined();
 	});
 
-	test("ABUSE CASE 2 — valid session but no grant → error", async () => {
+	test("ABUSE CASE 2 — valid session but no grant → 403 forbidden", async () => {
 		const principalId = randomUUID();
 		const app = createApp(principalId, false);
 		const response = await app.handle(
@@ -79,7 +83,9 @@ describe("ANX-497 — platform SLO snapshot authorization", () => {
 				},
 			}),
 		);
-		expect(response.status).toBeGreaterThanOrEqual(400);
+		expect(response.status).toBe(403);
+		const body = await response.json();
+		expect(body.error).toBeDefined();
 	});
 
 	test("VALID CASE — console.platform in PLATFORM scope → 200", async () => {

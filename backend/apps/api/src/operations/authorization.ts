@@ -1,3 +1,4 @@
+import { AppError } from "@anxionos/contracts/errors";
 import { PLATFORM_SCOPE_ID } from "@anxionos/contracts/governance";
 import { hasCapability, type GrantRepository } from "@anxionos/governance";
 
@@ -6,10 +7,10 @@ import { hasCapability, type GrantRepository } from "@anxionos/governance";
  *
  * Without this check, the endpoint was completely open (no session, no grant).
  * The route now enforces:
- * - Valid session (principalId from headers)
- * - console.platform grant in PLATFORM scope
+ * - Valid session (principalId from headers) → 401 unauthenticated
+ * - console.platform grant in PLATFORM scope → 403 forbidden
  *
- * Returns 401/403 without grant; 200 with valid grant.
+ * Pattern matches operations/handlers/platform-queries.ts.
  */
 export async function requirePlatformConsoleGrant(
 	deps: { grantRepository: GrantRepository },
@@ -24,6 +25,6 @@ export async function requirePlatformConsoleGrant(
 		},
 	);
 	if (!allowed) {
-		throw new Error("Forbidden: console.platform grant required");
+		throw AppError.forbidden("PLATFORM console grant required");
 	}
 }
