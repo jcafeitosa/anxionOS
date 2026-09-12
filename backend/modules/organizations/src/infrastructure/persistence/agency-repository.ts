@@ -58,25 +58,28 @@ export function createDrizzleAgencyRepository(
 				if (!row) throw new AgencyRevisionConflictError();
 				return toAgency(row);
 			}
-			const rows = await db
-				.insert(agencies)
-				.values({
-					id: agency.id,
-					tenantId: agency.id,
-					agencyId: agency.id,
-					ownerPrincipalId: agency.ownerPrincipalId,
-					displayName: agency.displayName,
-					marketScope: agency.marketScope,
-					status: agency.status,
-					onboardingStep: agency.onboardingStep,
-					revision: agency.revision,
-					createdAt: agency.createdAt,
-					updatedAt: agency.updatedAt,
-				})
-				.returning();
-			const row = rows[0];
-			if (!row) throw new Error("Failed to create agency");
-			return toAgency(row);
+		const rows = await db
+			.insert(agencies)
+			.values({
+				id: agency.id,
+				// ANX-480: agencyId is deterministic (from commandId), stable across retries.
+				// Session context sets app.tenant_id = app.agency_id = agencyId.
+				// INSERT must match: tenantId = agencyId, agencyId = agencyId.
+				tenantId: agency.id,
+				agencyId: agency.id,
+				ownerPrincipalId: agency.ownerPrincipalId,
+				displayName: agency.displayName,
+				marketScope: agency.marketScope,
+				status: agency.status,
+				onboardingStep: agency.onboardingStep,
+				revision: agency.revision,
+				createdAt: agency.createdAt,
+				updatedAt: agency.updatedAt,
+			})
+			.returning();
+		const row = rows[0];
+		if (!row) throw new Error("Failed to create agency");
+		return toAgency(row);
 		},
 		async findByAgencyId(agencyId: string) {
 			const rows = await db

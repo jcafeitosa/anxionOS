@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import {
 	type CommandResult,
 	type CreateAgencyCommand,
@@ -18,6 +18,25 @@ import {
 import { assertPrincipalExists } from "../services/principal-guard";
 import { buildAgencyTenantContext } from "../services/tenant-context";
 
+/**
+ * Generate a deterministic UUID from a command ID and owner principal.
+ * ANX-480: Same commandId + ownerPrincipalId always produces the same agencyId:
+ * 1. Different owners with same Idempotency-Key → different agencyId (cross-tenant isolation)
+ * 2. Same owner, same key, divergent payload → same agencyId, different requestHash → 409
+ * 3. Same owner, same key, same payload → same agencyId, same requestHash → replay
+ */
+function deterministicAgencyId(commandId: string, ownerPrincipalId: string): string {
+	const hash = createHash("sha256").update(`${commandId}:${ownerPrincipalId}`).digest("hex");
+	// Format as UUID v5-style: xxxxxxxx-xxxx-5xxx-yxxx-xxxxxxxxxxxx
+	return [
+		hash.slice(0, 8),
+		hash.slice(8, 12),
+		`5${hash.slice(13, 16)}`,
+		`${((Number.parseInt(hash.slice(16, 18), 16) & 0x3f) | 0x80).toString(16).padStart(2, "0")}${hash.slice(18, 20)}`,
+		hash.slice(20, 32),
+	].join("-");
+}
+
 export async function createAgency(
 	deps: CreateAgencyDeps,
 	input: CreateAgencyInput,
@@ -34,16 +53,14 @@ export async function createAgency(
 			marketScope: command.marketScope,
 		}),
 	};
-	const replay = await loadIdempotentCommandResult(
-		deps.commandJournal,
-		command.commandId,
-		intent,
-	);
-	if (replay) {
-		return replay;
-	}
+	// Red Team (Davi): NAO chamar loadIdempotentCommandResult aqui, fora do tenant
+	// context. A verificacao de replay deve acontecer DENTRO da transacao, com
+	// app.tenant_id definido, para garantir isolamento por tenant.
 	await assertPrincipalExists(deps.principalLookup, input.ownerPrincipalId);
-	const agencyId = randomUUID();
+	// ANX-480: Deterministic agencyId from commandId + ownerPrincipalId ensures:
+	// - Different owners, same key → different agencyId (cross-tenant isolation #1)
+	// - Same owner, same key → same agencyId (enables replay #2/#3)
+	const agencyId = deterministicAgencyId(command.commandId, input.ownerPrincipalId);
 	const ownerId = randomUUID();
 	const membershipId = randomUUID();
 	const now = new Date();
@@ -62,6 +79,8 @@ export async function createAgency(
 		revision,
 	});
 	return deps.unitOfWork.runInTransaction(
+		// ANX-480: Stable agencyId (from commandId) as BOTH tenant_id (journal) and
+		// agency_id (RLS). Matches main pattern where tenant = agency.
 		buildAgencyTenantContext(agencyId, input.ownerPrincipalId),
 		async (context) => {
 			// Replay como PRIMEIRA operacao da transacao, com validacao de intencao.
@@ -72,6 +91,7 @@ export async function createAgency(
 				context.commandJournal,
 				command.commandId,
 				intent,
+				agencyId, // tenant_id = stable agencyId
 			);
 			if (raced) {
 				return raced;
@@ -113,8 +133,10 @@ export async function createAgency(
 				revision: 1,
 				createdAt: now,
 				updatedAt: now,
-			});
-			await recordOrganizationCommand(context, {
+		});
+		await recordOrganizationCommand(
+			context,
+			{
 				commandId: command.commandId,
 				commandName: "CreateAgency",
 				aggregateId: agencyId,
@@ -122,9 +144,11 @@ export async function createAgency(
 				revision,
 				responseSnapshot: toCommandResultSnapshot(result),
 				requestHash: intent.requestHash,
-			});
-			await context.publishEvents([event]);
-			return result;
+			},
+			agencyId, // tenant_id = stable agencyId
+		);
+		await context.publishEvents([event]);
+		return result;
 		},
 	);
 }

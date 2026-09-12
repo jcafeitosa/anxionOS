@@ -49,14 +49,7 @@ export async function activateMembership(
 			targetPrincipalId: input.targetPrincipalId,
 		}),
 	};
-	const replay = await loadIdempotentCommandResult(
-		deps.commandJournal,
-		command.commandId,
-		intent,
-	);
-	if (replay) {
-		return replay;
-	}
+	// Red Team (Davi): replay dentro do tenant context, não antes
 	return deps.unitOfWork.runInTransaction(
 		buildAgencyTenantContext(command.agencyId, input.actorPrincipalId),
 		async (context) => {
@@ -64,6 +57,7 @@ export async function activateMembership(
 				context.commandJournal,
 				command.commandId,
 				intent,
+				command.agencyId, // tenant_id
 			);
 			if (raced) {
 				return raced;
@@ -171,15 +165,19 @@ export async function activateMembership(
 				role: updated.role,
 				revision: updated.revision,
 			});
-			await recordOrganizationCommand(context, {
-				commandId: command.commandId,
-				commandName: "ActivateMembership",
-				aggregateId: updated.id,
-				aggregateType: "Membership",
-				revision: updated.revision,
-				responseSnapshot: toCommandResultSnapshot(result),
-				requestHash: intent.requestHash,
-			});
+			await recordOrganizationCommand(
+				context,
+				{
+					commandId: command.commandId,
+					commandName: "ActivateMembership",
+					aggregateId: updated.id,
+					aggregateType: "Membership",
+					revision: updated.revision,
+					responseSnapshot: toCommandResultSnapshot(result),
+					requestHash: intent.requestHash,
+				},
+				command.agencyId,
+			);
 			await context.publishEvents([event]);
 			return result;
 		},

@@ -32,14 +32,7 @@ export async function updateAgencyMarkets(
 			actorPrincipalId: input.actorPrincipalId,
 		}),
 	};
-	const replay = await loadIdempotentCommandResult(
-		deps.commandJournal,
-		command.commandId,
-		intent,
-	);
-	if (replay) {
-		return replay;
-	}
+	// Red Team (Davi): replay dentro do tenant context, não antes
 	return deps.unitOfWork.runInTransaction(
 		buildAgencyTenantContext(command.agencyId, input.actorPrincipalId),
 		async (context) => {
@@ -47,6 +40,7 @@ export async function updateAgencyMarkets(
 				context.commandJournal,
 				command.commandId,
 				intent,
+				command.agencyId, // tenant_id
 			);
 			if (raced) {
 				return raced;
@@ -70,15 +64,19 @@ export async function updateAgencyMarkets(
 					aggregateId: agency.id,
 					revision: agency.revision,
 				});
-				await recordOrganizationCommand(context, {
-					commandId: command.commandId,
-					commandName: "UpdateAgencyMarkets",
-					aggregateId: agency.id,
-					aggregateType: "Agency",
-					revision: agency.revision,
-					responseSnapshot: toCommandResultSnapshot(unchanged),
-					requestHash: intent.requestHash,
-				});
+				await recordOrganizationCommand(
+					context,
+					{
+						commandId: command.commandId,
+						commandName: "UpdateAgencyMarkets",
+						aggregateId: agency.id,
+						aggregateType: "Agency",
+						revision: agency.revision,
+						responseSnapshot: toCommandResultSnapshot(unchanged),
+						requestHash: intent.requestHash,
+					},
+					command.agencyId,
+				);
 				return unchanged;
 			}
 			const now = new Date();
@@ -106,15 +104,19 @@ export async function updateAgencyMarkets(
 				previousMarketScope: agency.marketScope,
 				revision: updated.revision,
 			});
-			await recordOrganizationCommand(context, {
-				commandId: command.commandId,
-				commandName: "UpdateAgencyMarkets",
-				aggregateId: updated.id,
-				aggregateType: "Agency",
-				revision: updated.revision,
-				responseSnapshot: toCommandResultSnapshot(result),
-				requestHash: intent.requestHash,
-			});
+			await recordOrganizationCommand(
+				context,
+				{
+					commandId: command.commandId,
+					commandName: "UpdateAgencyMarkets",
+					aggregateId: updated.id,
+					aggregateType: "Agency",
+					revision: updated.revision,
+					responseSnapshot: toCommandResultSnapshot(result),
+					requestHash: intent.requestHash,
+				},
+				command.agencyId,
+			);
 			await context.publishEvents([event]);
 			return result;
 		},

@@ -57,6 +57,13 @@
 			"when": 1788863000007,
 			"tag": "0007_organizations_owners_tenant_principal_unique",
 			"breakpoints": true
+		},
+		{
+			"idx": 8,
+			"version": "7",
+			"when": 1788863000008,
+			"tag": "0008_organizations_command_journal_tenant_isolation",
+			"breakpoints": true
 		}
 	]
 }

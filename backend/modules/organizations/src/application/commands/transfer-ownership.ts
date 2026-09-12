@@ -31,14 +31,7 @@ export async function transferOwnership(
 			actorPrincipalId: input.actorPrincipalId,
 		}),
 	};
-	const replay = await loadIdempotentCommandResult(
-		deps.commandJournal,
-		command.commandId,
-		intent,
-	);
-	if (replay) {
-		return replay;
-	}
+	// Red Team (Davi): replay dentro do tenant context, não antes
 	// G5-F1/G4-F1 — a existencia do SUCESSOR nao e' verificada aqui, fora da
 	// transacao: `newOwnerPrincipalId` e' 100% controlado pelo cliente e
 	// `identity_principals` nao tem RLS, entao um 404 de "principal inexistente"
@@ -54,6 +47,7 @@ export async function transferOwnership(
 				context.commandJournal,
 				command.commandId,
 				intent,
+				command.agencyId, // tenant_id
 			);
 			if (raced) {
 				return raced;
@@ -88,15 +82,19 @@ export async function transferOwnership(
 					aggregateId: agency.id,
 					revision: agency.revision,
 				});
-				await recordOrganizationCommand(context, {
-					commandId: command.commandId,
-					commandName: "TransferOwnership",
-					aggregateId: agency.id,
-					aggregateType: "Agency",
-					revision: agency.revision,
-					responseSnapshot: toCommandResultSnapshot(unchanged),
-					requestHash: intent.requestHash,
-				});
+				await recordOrganizationCommand(
+					context,
+					{
+						commandId: command.commandId,
+						commandName: "TransferOwnership",
+						aggregateId: agency.id,
+						aggregateType: "Agency",
+						revision: agency.revision,
+						responseSnapshot: toCommandResultSnapshot(unchanged),
+						requestHash: intent.requestHash,
+					},
+					command.agencyId,
+				);
 				return unchanged;
 			}
 			const successorMembership =
@@ -164,15 +162,19 @@ export async function transferOwnership(
 				newOwnerMembershipId: successorMembership.id,
 				revision: updatedAgency.revision,
 			});
-			await recordOrganizationCommand(context, {
-				commandId: command.commandId,
-				commandName: "TransferOwnership",
-				aggregateId: updatedAgency.id,
-				aggregateType: "Agency",
-				revision: updatedAgency.revision,
-				responseSnapshot: toCommandResultSnapshot(result),
-				requestHash: intent.requestHash,
-			});
+			await recordOrganizationCommand(
+				context,
+				{
+					commandId: command.commandId,
+					commandName: "TransferOwnership",
+					aggregateId: updatedAgency.id,
+					aggregateType: "Agency",
+					revision: updatedAgency.revision,
+					responseSnapshot: toCommandResultSnapshot(result),
+					requestHash: intent.requestHash,
+				},
+				command.agencyId,
+			);
 			await context.publishEvents([event]);
 			return result;
 		},
