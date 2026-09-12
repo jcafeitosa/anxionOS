@@ -65,6 +65,18 @@ Matrizes e playbooks da entrega G0–G7. Vários destes documentos são **fonte 
 | [ADR0011 — Realtime gateway (Elysia + NATS)](decisions/0011-realtime-gateway-elysia-nats.md) | `proposed` — sem contraparte em `brain/`; renumerado de 0005 (ANX-456) |
 | [Registro de precedência ADR/spec](document-precedence.md) | Números duplicados: canônico vs legado |
 
+## Decisões de Produto
+
+Decisões de produto publicadas a partir de drafts OpenKnowledge. Publisher: Marina Okonkwo.
+
+| Documento | Issue | Descrição |
+| --- | --- | --- |
+| [ANX-498 — Backend-only decision](product/ANX-498-backend-only-decision.md) | ANX-498 | Strategies, Performance, Simulation, Evaluation: backend-only (sem UI Owner/Operator) |
+| [ANX-499 — Realtime freeze](product/ANX-499-realtime-freeze.md) | ANX-499 | Freeze realtime UI Owner/Operator/Platform (gateway stays; 4 channels remain) |
+| [ANX-500 — Diagnosis, not GO Partner](product/ANX-500-diagnosis-not-partner-go.md) | ANX-500 | Seed/e2e/a11y/honesty aprovados; Partner live bloqueado |
+| [ANX-500 — UX Criteria SUPERSEDE](product/ANX-500-ux-criteria-supersede.md) | ANX-500 | SUPERSEDE Partner live; shells apenas; `partnerAccess` flip bloqueado |
+| [ANX-496 — Owner Catalog Honesty UX](product/ANX-496-owner-catalog-honesty-ux.md) | ANX-496 | Owner Agents Catalog honesty only; Operator Takeover bloqueado; eng parked |
+
 ## Pesquisa
 
 | Documento | Descrição |
