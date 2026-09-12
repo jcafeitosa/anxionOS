@@ -58,25 +58,28 @@ export function createDrizzleAgencyRepository(
 				if (!row) throw new AgencyRevisionConflictError();
 				return toAgency(row);
 			}
-			const rows = await db
-				.insert(agencies)
-				.values({
-					id: agency.id,
-					tenantId: agency.id,
-					agencyId: agency.id,
-					ownerPrincipalId: agency.ownerPrincipalId,
-					displayName: agency.displayName,
-					marketScope: agency.marketScope,
-					status: agency.status,
-					onboardingStep: agency.onboardingStep,
-					revision: agency.revision,
-					createdAt: agency.createdAt,
-					updatedAt: agency.updatedAt,
-				})
-				.returning();
-			const row = rows[0];
-			if (!row) throw new Error("Failed to create agency");
-			return toAgency(row);
+		const rows = await db
+			.insert(agencies)
+			.values({
+				id: agency.id,
+				// ANX-480: tenantId must match session app.tenant_id set by buildAgencyTenantContext.
+				// For createAgency, session tenant is ownerPrincipalId (stable across retries),
+				// not the freshly minted agency.id (which changes on every attempt).
+				tenantId: agency.ownerPrincipalId,
+				agencyId: agency.id,
+				ownerPrincipalId: agency.ownerPrincipalId,
+				displayName: agency.displayName,
+				marketScope: agency.marketScope,
+				status: agency.status,
+				onboardingStep: agency.onboardingStep,
+				revision: agency.revision,
+				createdAt: agency.createdAt,
+				updatedAt: agency.updatedAt,
+			})
+			.returning();
+		const row = rows[0];
+		if (!row) throw new Error("Failed to create agency");
+		return toAgency(row);
 		},
 		async findByAgencyId(agencyId: string) {
 			const rows = await db
