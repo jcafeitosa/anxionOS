@@ -141,15 +141,6 @@ export const PENDING_INVITE_CONFLICT_MESSAGE =
 	"There is already a pending invite for this email in this agency";
 
 /**
- * Traduz o conflito de unicidade de membership no codigo institucional certo,
- * derivado da CONSTRAINT: "convite pendente", "vinculo ativo" e "outro owner
- * ativo" sao conflitos diferentes e o cliente precisa saber qual (F-2 do G4 /
- * LOW do G2). Compartilhado entre o wrapper de gravacao e `acceptInviteByToken`,
- * que trata o conflito de **revisao** de forma propria (404 opaco) mas deve usar
- * ESTE mapeamento para o de **unicidade** (G5 LOW-2). O indice de owner unico e'
- * hoje inalcancavel pela API, mas o mapeamento e' explicito.
- */
-/**
  * Mapa **exaustivo** de constraint → resposta institucional. Exaustivo de
  * proposito: com um `if/else` encadeado, uma 4a constraint adicionada a'
  * allowlist cairia em **silencio** na mensagem de "vinculo ativo" — o mesmo
@@ -207,7 +198,6 @@ export function throwMembershipUniquenessConflict(
  * um 404 opaco de proposito, para nao confirmar a existencia/consumo de um token.
  * O conflito de vinculo ativo, esse, vale para os dois (ANX-482).
  */
-
 export async function saveWithRevisionConflictMapping<T>(
 	operation: () => Promise<T>,
 ): Promise<T> {

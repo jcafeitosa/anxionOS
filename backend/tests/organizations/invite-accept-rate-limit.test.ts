@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { AppError } from "@anxionos/contracts/errors";
+import {
+	AppError,
+	errorResponseSchema,
+	isAppError,
+	toErrorResponse,
+} from "@anxionos/contracts/errors";
 import {
 	createInviteAcceptRateLimitStore,
 	INVITE_ACCEPT_LIMIT,
@@ -14,12 +19,33 @@ describe("invite accept rate limit store", () => {
 		delete process.env.NODE_ENV;
 	});
 
+	/**
+	 * O 429 tambem tem de sair do enum canonico: a versao anterior mutava um
+	 * `VALIDATION_ERROR` (400) via `defineProperty` para `RATE_LIMITED`/429. Hoje
+	 * canonico, mas o oraculo era fraco — so' checava `instanceof AppError`, entao
+	 * um `code` fora de `ERROR_CODES` (envelope invalido) passaria (LOW do G4 na
+	 * ANX-486). `isAppError` exige simultaneamente `code` conhecido e
+	 * `statusCode === ERROR_STATUS_MAP[code]`.
+	 */
 	test("in-memory store blocks after limit", () => {
 		const store = new InMemoryInviteAcceptRateLimitStore();
 		for (let i = 0; i < INVITE_ACCEPT_LIMIT; i += 1) {
 			store.assertWithinLimit("203.0.113.10");
 		}
-		expect(() => store.assertWithinLimit("203.0.113.10")).toThrow(AppError);
+		let caught: unknown;
+		try {
+			store.assertWithinLimit("203.0.113.10");
+		} catch (error) {
+			caught = error;
+		}
+		expect(caught).toBeInstanceOf(AppError);
+		expect(isAppError(caught)).toBe(true);
+		const appError = caught as AppError;
+		expect(appError.code).toBe("RATE_LIMITED");
+		expect(appError.statusCode).toBe(429);
+		expect(errorResponseSchema.safeParse(toErrorResponse(appError)).success).toBe(
+			true,
+		);
 	});
 
 	test("resolveInviteAcceptRateLimitStoreKind defaults to postgres when pool exists", () => {

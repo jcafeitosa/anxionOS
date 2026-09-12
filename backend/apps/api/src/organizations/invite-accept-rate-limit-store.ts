@@ -33,12 +33,11 @@ function purgeStaleInMemoryBuckets(now: number): void {
 }
 
 function rateLimitExceeded(): never {
-	const rateLimited = AppError.validation(
-		"Invite accept rate limit exceeded — try again later",
-	);
-	Object.defineProperty(rateLimited, "statusCode", { value: 429 });
-	Object.defineProperty(rateLimited, "code", { value: "RATE_LIMITED" });
-	throw rateLimited;
+	throw new AppError({
+		code: "RATE_LIMITED",
+		message: "Invite accept rate limit exceeded — try again later",
+		expose: true,
+	});
 }
 
 export class InMemoryInviteAcceptRateLimitStore
