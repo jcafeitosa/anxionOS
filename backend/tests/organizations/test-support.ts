@@ -171,18 +171,20 @@ export function createInMemoryMembershipRepository(
 export function createInMemoryCommandJournalRepository(
 	seed: CommandJournalRecord[] = [],
 ): CommandJournalRepository {
+	// Red Team (Davi): index by composite (tenantId, commandId), not commandId alone
 	const records = new Map(
-		seed.map((record) => [record.commandId, { ...record }]),
+		seed.map((record) => [compositeKey(record.tenantId, record.commandId), { ...record }]),
 	);
 	return {
-		async findByCommandId(commandId) {
-			return records.get(commandId) ?? null;
+		async findByCommandId(commandId, tenantId) {
+			return records.get(compositeKey(tenantId, commandId)) ?? null;
 		},
 		async record(entry: NewCommandJournalRecord) {
 			// Espelha o repositorio Drizzle: insercao atomica, colisao de
-			// `command_id` vira `CommandJournalConflictError` (nunca devolve a linha
+			// (tenant_id, command_id) vira `CommandJournalConflictError` (nunca devolve a linha
 			// alheia — isso seria double-apply).
-			const existing = records.get(entry.commandId);
+			const key = compositeKey(entry.tenantId, entry.commandId);
+			const existing = records.get(key);
 			if (existing) {
 				throw new CommandJournalConflictError(entry.commandId);
 			}
@@ -191,10 +193,14 @@ export function createInMemoryCommandJournalRepository(
 				requestHash: entry.requestHash ?? null,
 				createdAt: new Date(),
 			};
-			records.set(entry.commandId, stored);
+			records.set(key, stored);
 			return stored;
 		},
 	};
+}
+
+function compositeKey(tenantId: string, commandId: string): string {
+	return `${tenantId}:${commandId}`;
 }
 
 export function createRecordingOrganizationUnitOfWork(deps: {

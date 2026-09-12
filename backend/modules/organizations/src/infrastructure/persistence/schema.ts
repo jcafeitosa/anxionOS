@@ -4,6 +4,7 @@ import {
 	jsonb,
 	pgEnum,
 	pgTable,
+	primaryKey,
 	text,
 	timestamp,
 	uniqueIndex,
@@ -141,10 +142,10 @@ export const commandJournal = pgTable(
 			.notNull()
 			.defaultNow(),
 	},
-	(table) => ({
-		pk: { name: "organizations_command_journal_pkey", columns: [table.tenantId, table.commandId] },
-		tenantIdIdx: index("organizations_command_journal_tenant_id_idx").on(table.tenantId),
-	}),
+	(table) => [
+		primaryKey({ columns: [table.tenantId, table.commandId] }),
+		index("organizations_command_journal_tenant_id_idx").on(table.tenantId),
+	],
 );
 
 export type AgencyRow = typeof agencies.$inferSelect;
