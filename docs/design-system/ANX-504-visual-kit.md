@@ -129,7 +129,7 @@ Decisões **recusadas** por Sofia — não propor novamente sem aceite explícit
 
 1. **Hero KPI / big-number-as-brand:** números grandes centralizados como identidade visual — **banido**. Signature = grafo Archify, não métricas.
 2. **Copper sobre bone:** contraste 2.47:1 (FAIL) — **proibido**. Copper **só** sobre ink.
-3. **Acid green / neon + Inter:** paletas neon vibrantes — **recusadas**. Ledger institucional (ink/copper/bone/paper) prevalece.
+3. **Acid green / neon + Inter:** paletas neon vibrantes — **recusadas**. Ledger institucional (ink/copper/bone/surface) prevalece.
 4. **Segundo sidebar / switcher-chrome:** Nyxhora layout chrome + Aceternity = conflito — **proibido**. Um chrome (Aceternity ANX-448).
 5. **Promoção de Rule #2A2620:** hairline discreta sobre ink com ≥3:1 medido — **não promover** como CTA ou destaque. Uso restrito a divisores.
 
