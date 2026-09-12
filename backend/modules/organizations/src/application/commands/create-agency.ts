@@ -19,13 +19,14 @@ import { assertPrincipalExists } from "../services/principal-guard";
 import { buildAgencyTenantContext } from "../services/tenant-context";
 
 /**
- * Generate a deterministic UUID from a command ID.
- * ANX-480: Same commandId always produces the same agencyId, ensuring:
- * 1. Idempotent replay finds the same journal row (tenantId=agencyId is stable)
- * 2. RLS passes (app.agency_id = agencyId being inserted)
+ * Generate a deterministic UUID from a command ID and owner principal.
+ * ANX-480: Same commandId + ownerPrincipalId always produces the same agencyId:
+ * 1. Different owners with same Idempotency-Key → different agencyId (cross-tenant isolation)
+ * 2. Same owner, same key, divergent payload → same agencyId, different requestHash → 409
+ * 3. Same owner, same key, same payload → same agencyId, same requestHash → replay
  */
-function deterministicAgencyId(commandId: string): string {
-	const hash = createHash("sha256").update(commandId).digest("hex");
+function deterministicAgencyId(commandId: string, ownerPrincipalId: string): string {
+	const hash = createHash("sha256").update(`${commandId}:${ownerPrincipalId}`).digest("hex");
 	// Format as UUID v5-style: xxxxxxxx-xxxx-5xxx-yxxx-xxxxxxxxxxxx
 	return [
 		hash.slice(0, 8),
@@ -56,9 +57,10 @@ export async function createAgency(
 	// context. A verificacao de replay deve acontecer DENTRO da transacao, com
 	// app.tenant_id definido, para garantir isolamento por tenant.
 	await assertPrincipalExists(deps.principalLookup, input.ownerPrincipalId);
-	// ANX-480: Deterministic agencyId from commandId ensures stable tenantId for
-	// journal replay AND satisfies agencies RLS (app.agency_id matches row).
-	const agencyId = deterministicAgencyId(command.commandId);
+	// ANX-480: Deterministic agencyId from commandId + ownerPrincipalId ensures:
+	// - Different owners, same key → different agencyId (cross-tenant isolation #1)
+	// - Same owner, same key → same agencyId (enables replay #2/#3)
+	const agencyId = deterministicAgencyId(command.commandId, input.ownerPrincipalId);
 	const ownerId = randomUUID();
 	const membershipId = randomUUID();
 	const now = new Date();
