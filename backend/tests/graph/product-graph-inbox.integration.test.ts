@@ -1,6 +1,8 @@
 /**
  * ANX-277 — inbox idempotency for product graph projection (PG + in-memory store).
- * Skipped unless RUN_PG_INTEGRATION_TESTS=true and DATABASE_URL set.
+ * Skipped unless the shared ANX-487 guard enables the destructive PostgreSQL
+ * harness (recognized truthy `RUN_PG_INTEGRATION_TESTS` + validated scratch
+ * target).
  */
 import { describe, expect, test } from "bun:test";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
@@ -20,31 +22,36 @@ import {
 	projectAgentGraphEvent,
 	projectProductGraphEvent,
 } from "@anxionos/graph";
+import {
+	getDatabaseUrl,
+	runGuardedSql,
+	shouldRunPgIntegrationTests,
+} from "../pg-harness-guard";
 
 /**
  * Remove apenas as linhas dos consumers deste arquivo. O teste usa `eventId`
  * fixo, entao sem limpeza a segunda execucao contra o mesmo banco encontraria a
  * linha do inbox e trataria a PRIMEIRA chamada como duplicata (vazamento de
  * estado entre execucoes, invisivel enquanto o teste pulava).
+ *
+ * ANX-487 round 3: o `DELETE` passa por `runGuardedSql`, que revalida a flag e
+ * o alvo efetivo imediatamente antes de executar — antes ele usava `pool.query`
+ * cru com um gate local (`RUN_PG_INTEGRATION_TESTS === "true"`) e um pool criado
+ * a partir de `DATABASE_URL` sem validacao de host/banco.
  */
 async function resetInboxFixtures(
 	pool: { query: (sql: string, params?: unknown[]) => Promise<unknown> },
 	consumerNames: string[],
 ): Promise<void> {
-	await pool.query(
+	await runGuardedSql(
+		pool,
 		"DELETE FROM graph_projection_inbox WHERE consumer_name = ANY($1)",
 		[consumerNames],
 	);
-	await pool.query(
+	await runGuardedSql(
+		pool,
 		"DELETE FROM graph_projection_dlq WHERE consumer_name = ANY($1)",
 		[consumerNames],
-	);
-}
-
-function shouldRun(): boolean {
-	return (
-		process.env.RUN_PG_INTEGRATION_TESTS === "true" &&
-		Boolean(process.env.DATABASE_URL?.trim())
 	);
 }
 
@@ -64,11 +71,12 @@ const envelope: DomainEventEnvelope = {
 
 describe("product graph inbox integration (ANX-277)", () => {
 	test("processWithInbox is idempotent per eventId for graph:product:v1", async () => {
-		if (!shouldRun()) {
+		const url = getDatabaseUrl();
+		if (!shouldRunPgIntegrationTests() || !url) {
 			return;
 		}
 
-		const pool = createPgPool(process.env.DATABASE_URL!);
+		const pool = createPgPool(url);
 		try {
 			await ensureGraphSchema(pool);
 			await resetInboxFixtures(pool, [productProjectionConsumer.consumerName]);
@@ -100,7 +108,8 @@ describe("product graph inbox integration (ANX-277)", () => {
 	});
 
 	test("processWithInbox is idempotent per eventId for graph:agents:v1", async () => {
-		if (!shouldRun()) {
+		const url = getDatabaseUrl();
+		if (!shouldRunPgIntegrationTests() || !url) {
 			return;
 		}
 
@@ -118,7 +127,7 @@ describe("product graph inbox integration (ANX-277)", () => {
 			},
 		};
 
-		const pool = createPgPool(process.env.DATABASE_URL!);
+		const pool = createPgPool(url);
 		try {
 			await ensureGraphSchema(pool);
 			await resetInboxFixtures(pool, [agentProjectionConsumer.consumerName]);

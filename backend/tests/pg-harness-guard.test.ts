@@ -8,6 +8,10 @@
  * Round 2 adds the query-parameter probe table for the G2/G4 high finding: the
  * guard must validate the target the `pg` driver resolves, not the URL
  * authority.
+ *
+ * Round 3 adds the malformed-URL redaction table (whitespace, `@` inside the
+ * password, `//`-less form) and the acceptance tests for `runGuardedSql`, the
+ * guarded path used by the product-graph inbox reset.
  */
 import { describe, expect, test } from "bun:test";
 import {
@@ -19,8 +23,10 @@ import {
 	assertDestructivePgTarget,
 	getDatabaseUrl,
 	readRunPgIntegrationTestsFlag,
+	redactCredentialFragment,
 	redactDatabaseUrl,
 	resolveEffectivePgTarget,
+	runGuardedSql,
 	shouldRunPgIntegrationTests,
 	truncateDomainTables,
 } from "./pg-harness-guard";
@@ -430,6 +436,135 @@ describe("finding 3 — credentials are redacted from error messages", () => {
 			for (const secret of secrets) {
 				expect(redacted).not.toContain(secret);
 			}
+		}
+	});
+});
+
+/**
+ * ANX-487 round 3 — the three malformed forms the round-2 redaction missed.
+ * Each row asserts the URL-level redaction; the `//`-less row also asserts the
+ * refusal message, because that is where the raw `target.database` used to be
+ * interpolated.
+ */
+describe("round 3 — credential redaction for malformed forms", () => {
+	const MALFORMED: Array<{ name: string; url: string; secrets: string[] }> = [
+		{
+			name: "(a) password containing a space",
+			url: "postgres://alice:p ss@localhost:5432/anxionos_oracle",
+			secrets: ["p ss", "alice"],
+		},
+		{
+			name: "(a) password containing a tab and a newline",
+			url: "postgres://alice:p\tss\nword@localhost:5432/anxionos_oracle",
+			secrets: ["p\tss\nword", "alice"],
+		},
+		{
+			name: "(b) password containing an unescaped @ (the tail used to leak)",
+			url: "postgres://alice:p@ss@localhost:99999/anxionos_oracle",
+			secrets: ["p@ss", "ss@localhost", "alice"],
+		},
+		{
+			name: "(c) //-less form, userinfo folded into the driver target",
+			url: "postgres:alice:S3cr3t@localhost:5432/db",
+			secrets: ["S3cr3t", "alice"],
+		},
+	];
+
+	for (const row of MALFORMED) {
+		test(`${row.name} — redactDatabaseUrl leaves no credential`, () => {
+			const redacted = redactDatabaseUrl(row.url);
+			expect(redacted).toContain("***REDACTED***");
+			for (const secret of row.secrets) {
+				expect(redacted).not.toContain(secret);
+			}
+		});
+	}
+
+	test("(c) the guard refusal for the //-less form never prints the userinfo", () => {
+		const message = captureError(() =>
+			shouldRunPgIntegrationTests({
+				RUN_PG_INTEGRATION_TESTS: "true",
+				DATABASE_URL: "postgres:alice:S3cr3t@localhost:5432/db",
+			}),
+		);
+		expect(message).toMatch(/refusing to TRUNCATE/);
+		expect(message).toContain("***REDACTED***");
+		expect(message).not.toContain("S3cr3t");
+		expect(message).not.toContain("alice");
+	});
+
+	test("redactCredentialFragment scrubs a bare user[:password]@ value", () => {
+		expect(redactCredentialFragment("lice:p@ss@localhost:5432/db")).toBe(
+			"***REDACTED***@localhost:5432/db",
+		);
+		expect(redactCredentialFragment("lice:S3cr3t@localhost:5432/db")).toBe(
+			"***REDACTED***@localhost:5432/db",
+		);
+		expect(redactCredentialFragment("anxionos_oracle")).toBe("anxionos_oracle");
+		expect(redactCredentialFragment("localhost")).toBe("localhost");
+	});
+});
+
+/**
+ * ANX-487 round 3 — `runGuardedSql` is the sanctioned path for the
+ * parameterized `DELETE` of the product-graph inbox reset. It must keep the
+ * round-2 TRUNCATE/DELETE-only guarantee (no DDL) and revalidate flag/target.
+ */
+describe("round 3 — runGuardedSql for parameterized fixture cleanup", () => {
+	function createFakePool() {
+		const calls: Array<{ sql: string; params?: unknown[] }> = [];
+		return {
+			calls,
+			pool: {
+				async query(sql: string, params?: unknown[]) {
+					calls.push({ sql, params });
+					return { rows: [] };
+				},
+			},
+		};
+	}
+
+	test("executes a parameterized DELETE on an approved target", async () => {
+		const { calls, pool } = createFakePool();
+		const sql =
+			"DELETE FROM graph_projection_inbox WHERE consumer_name = ANY($1)";
+		const params = [["graph:product:v1"]];
+		await runGuardedSql(pool, sql, params, enabled(SCRATCH_URL));
+		expect(calls).toEqual([{ sql, params }]);
+	});
+
+	test("refuses and does not query when the flag is off", async () => {
+		const { calls, pool } = createFakePool();
+		await expect(
+			runGuardedSql(pool, "DELETE FROM graph_projection_inbox", [], {}),
+		).rejects.toThrow(/RUN_PG_INTEGRATION_TESTS is not enabled/);
+		expect(calls).toEqual([]);
+	});
+
+	test("refuses and does not query on an unsafe target", async () => {
+		const { calls, pool } = createFakePool();
+		await expect(
+			runGuardedSql(pool, "DELETE FROM graph_projection_inbox", [], {
+				RUN_PG_INTEGRATION_TESTS: "true",
+				DATABASE_URL: DEV_URL,
+			}),
+		).rejects.toThrow(/protected database "anxionos"/);
+		expect(calls).toEqual([]);
+	});
+
+	test("refuses DDL and multi-statement payloads on an approved target", async () => {
+		for (const sql of [
+			"DROP DATABASE anxionos_oracle",
+			"ALTER TABLE graph_projection_inbox DROP COLUMN x",
+			"DELETE FROM graph_projection_inbox; DROP DATABASE anxionos_oracle",
+			"SELECT 1",
+			"",
+		]) {
+			const { calls, pool } = createFakePool();
+			await expect(
+				runGuardedSql(pool, sql, [], enabled(SCRATCH_URL)),
+			).rejects.toThrow(/non-cleanup statement/);
+			expect(calls).toEqual([]);
 		}
 	});
 });

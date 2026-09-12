@@ -62,6 +62,10 @@ import {
 	ensureRiskSchema,
 	runPreTradeCheck,
 } from "@anxionos/risk";
+import {
+	getDatabaseUrl,
+	shouldRunPgIntegrationTests,
+} from "../pg-harness-guard";
 
 const ORG_ID = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
 const GRANT_ID = "bbbbbbbb-cccc-4ddd-8eee-ffffffffffff";
@@ -72,14 +76,6 @@ const INTENT_HASH = "sha256:intent-stock-buy-p06";
 const AUTHORITY_EPOCH = 1;
 const RISK_EPOCH = 1;
 const EXECUTION_MODES = ["SIMULATED", "PAPER"] as const;
-
-function shouldRunPg(): boolean {
-	return (
-		(process.env.RUN_PG_INTEGRATION_TESTS === "true" ||
-			!!process.env.RUN_PG_INTEGRATION_TESTS) &&
-		!!process.env.DATABASE_URL?.trim()
-	);
-}
 
 describe("P06 paper flow — cross-module pipeline (ANX-163)", () => {
 	test("validate contract schemas align across modules", () => {
@@ -132,12 +128,15 @@ describe("P06 paper flow — cross-module pipeline (ANX-163)", () => {
 	});
 
 	test("real PG pipeline: decisions → risk → capital → execution", async () => {
-		if (!shouldRunPg()) {
-			console.log("⚠ Skipping PG pipeline: DATABASE_URL not set");
+		const url = getDatabaseUrl();
+		if (!shouldRunPgIntegrationTests() || !url) {
+			console.log(
+				"⚠ Skipping PG pipeline: RUN_PG_INTEGRATION_TESTS not enabled",
+			);
 			return;
 		}
 
-		const pool = createPgPool(process.env.DATABASE_URL);
+		const pool = createPgPool(url);
 		try {
 			// 1. Migrate all P06 modules. capital/accounting migrations were
 			// created in this session (ANX-163) — previously missing.

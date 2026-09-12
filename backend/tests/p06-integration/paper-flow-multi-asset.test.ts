@@ -45,6 +45,10 @@ import {
 	submitOrder,
 } from "@anxionos/execution";
 import { ensurePerformanceSchema } from "@anxionos/performance";
+import {
+	getDatabaseUrl,
+	shouldRunPgIntegrationTests,
+} from "../pg-harness-guard";
 
 const VALID_UUID = "a1234567-89ab-4def-8123-456789abcdef";
 const ORG_ID = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
@@ -60,14 +64,6 @@ const RISK_EPOCH = 1;
 const EXECUTION_MODES = ["SIMULATED", "PAPER"] as const;
 
 type ExecutionMode = (typeof EXECUTION_MODES)[number];
-
-function shouldRunPg(): boolean {
-	return (
-		(process.env.RUN_PG_INTEGRATION_TESTS === "true" ||
-			!!process.env.RUN_PG_INTEGRATION_TESTS) &&
-		!!process.env.DATABASE_URL?.trim()
-	);
-}
 
 function resolveOrderStatusAfterFill(
 	orderQuantity: string,
@@ -371,14 +367,15 @@ describe("P06 paper flow — multi-asset STOCK+CRYPTO portfolio (ANX-163 S3)", (
 	});
 
 	test("real PG pipeline: multi-asset fills → accounting (when DATABASE_URL set)", async () => {
-		if (!shouldRunPg()) {
+		const url = getDatabaseUrl();
+		if (!shouldRunPgIntegrationTests() || !url) {
 			console.log(
-				"⚠ Skipping PG multi-asset pipeline: set RUN_PG_INTEGRATION_TESTS=true and DATABASE_URL",
+				"⚠ Skipping PG multi-asset pipeline: RUN_PG_INTEGRATION_TESTS not enabled",
 			);
 			return;
 		}
 
-		const pool = createPgPool(process.env.DATABASE_URL);
+		const pool = createPgPool(url);
 		try {
 			await ensureExecutionSchema(pool);
 			await ensureAccountingSchema(pool);

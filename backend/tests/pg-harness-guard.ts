@@ -19,6 +19,13 @@
  * parameters and the `PG*` environment fallbacks. The guard now validates the
  * target the driver resolves (see {@link resolveEffectivePgTarget}).
  *
+ * Round 3 extended coverage to the two harnesses that never called this module
+ * (`tests/graph/product-graph-inbox.integration.test.ts` and the
+ * `tests/p06-integration/paper-flow-*.test.ts` trio), added
+ * {@link runGuardedSql} for the parameterized `DELETE` of the inbox reset, and
+ * fixed the credential redaction for whitespace, an `@` inside the password and
+ * the `//`-less URL form.
+ *
  * This module is the single source of truth for that decision. It is imported
  * by the 15 module `test-support.ts` files, which no longer keep a local copy.
  */
@@ -50,12 +57,6 @@ export const DESTRUCTIVE_DB_OVERRIDE_ENV = "ALLOW_DESTRUCTIVE_TEST_DB";
 /** Marker used by {@link redactDatabaseUrl}; never a real credential. */
 const REDACTION_MARKER = "***REDACTED***";
 
-/**
- * `user:password@` userinfo, matched greedily up to the last `@` so a password
- * containing `/` (an otherwise invalid URL) cannot survive redaction.
- */
-const USERINFO_PATTERN = /(\/\/)[^@\s]*@/g;
-
 /** Query parameters that may carry a secret (`?password=`, `?sslkey=`, ...). */
 const SECRET_QUERY_PARAM_PATTERN =
 	/([?&][^=&#\s]*(?:pass|pwd|secret|token|key)[^=&#\s]*=)[^&#\s]*/gi;
@@ -69,17 +70,45 @@ export function getDatabaseUrl(
 }
 
 /**
+ * Removes the userinfo (`user[:password]@`) from a URL **or** from a bare
+ * fragment such as the effective `database`/`host` the driver resolves for a
+ * malformed `DATABASE_URL`.
+ *
+ * ANX-487 round 3 — the previous regex `/(\/\/)[^@\s]*@/g` failed three ways:
+ *   1. it excluded whitespace, so a password with a space/tab/newline survived
+ *      (`postgres://alice:p ss@host` was printed verbatim);
+ *   2. it stopped at the first `@`, so `postgres://alice:p@ss@host` leaked the
+ *      `ss` tail despite the "greedy to the last @" comment;
+ *   3. it required `//`, so the `//`-less form `postgres:alice:S3cr3t@host`
+ *      (whose userinfo the driver folds into `target.database`) leaked in the
+ *      refusal message.
+ *
+ * It now drops everything up to the **last** `@` and keeps only the scheme
+ * prefix (`postgres://`) so the message stays readable. Over-redacting a value
+ * that merely contains an `@` is deliberate: no credential can survive.
+ */
+export function redactCredentialFragment(value: string): string {
+	const lastAt = value.lastIndexOf("@");
+	if (lastAt < 0) {
+		return value;
+	}
+	const scheme = /^[a-z][a-z0-9+.-]*:\/\//i.exec(value)?.[0] ?? "";
+	return `${scheme}${REDACTION_MARKER}@${value.slice(lastAt + 1)}`;
+}
+
+/**
  * Removes credentials before a URL is embedded in an error message.
  *
  * ANX-487 round 2 (finding 3): the invalid-URL error used to interpolate
  * `JSON.stringify(rawUrl)` verbatim, so a malformed URL printed the whole
- * password. This helper drops the userinfo (even for strings `URL` cannot
- * parse) and the value of any secret-looking query parameter.
+ * password. This helper drops the userinfo — even for strings `URL` cannot
+ * parse — and the value of any secret-looking query parameter.
  */
 export function redactDatabaseUrl(rawUrl: string): string {
-	return rawUrl
-		.replace(USERINFO_PATTERN, `$1${REDACTION_MARKER}@`)
-		.replace(SECRET_QUERY_PARAM_PATTERN, `$1${REDACTION_MARKER}`);
+	return redactCredentialFragment(rawUrl).replace(
+		SECRET_QUERY_PARAM_PATTERN,
+		`$1${REDACTION_MARKER}`,
+	);
 }
 
 /**
@@ -267,6 +296,11 @@ export function assertDestructivePgTarget(
 	const target = resolveEffectivePgTarget(rawUrl);
 	const host = normalizeHost(target.host);
 	const database = target.database;
+	// A malformed URL (`postgres:alice:S3cr3t@host`) makes the driver fold the
+	// userinfo into `database`/`host`; refusal messages must never print them
+	// raw (ANX-487 round 3).
+	const safeHost = redactCredentialFragment(host);
+	const safeDatabase = redactCredentialFragment(database);
 
 	if (isDestructiveDbOverrideEnabled(env)) {
 		return target;
@@ -274,7 +308,7 @@ export function assertDestructivePgTarget(
 
 	if (!LOOPBACK_HOSTS.has(host)) {
 		throw new Error(
-			`refusing to TRUNCATE database "${database}" on non-loopback host "${host}" (ANX-487). ` +
+			`refusing to TRUNCATE database "${safeDatabase}" on non-loopback host "${safeHost}" (ANX-487). ` +
 				"The PostgreSQL integration harness is destructive (TRUNCATE ... CASCADE), so it only runs " +
 				"against localhost/127.0.0.1/::1. To accept the risk on purpose, set " +
 				`${DESTRUCTIVE_DB_OVERRIDE_ENV}=true.`,
@@ -286,7 +320,7 @@ export function assertDestructivePgTarget(
 		target.port > 65535
 	) {
 		throw new Error(
-			`refusing to TRUNCATE database "${database}": DATABASE_URL resolves to invalid port ${String(target.port)} (ANX-487). ` +
+			`refusing to TRUNCATE database "${safeDatabase}": DATABASE_URL resolves to invalid port ${String(target.port)} (ANX-487). ` +
 				`Fix the port or the ?port= parameter (the pg driver uses it to override the authority).`,
 		);
 	}
@@ -296,14 +330,14 @@ export function assertDestructivePgTarget(
 	// check must be conservative.
 	if (PROTECTED_DATABASES.has(database.toLowerCase())) {
 		throw new Error(
-			`refusing to TRUNCATE protected database "${database}" (ANX-487). ` +
+			`refusing to TRUNCATE protected database "${safeDatabase}" (ANX-487). ` +
 				"It is reserved for dev/shared use and holds real data. Point DATABASE_URL at a scratch " +
 				`database (e.g. anxionos_oracle) or set ${DESTRUCTIVE_DB_OVERRIDE_ENV}=true to accept the risk.`,
 		);
 	}
 	if (!isScratchDatabaseName(database)) {
 		throw new Error(
-			`refusing to TRUNCATE database "${database}": it does not match a documented test/scratch name (ANX-487). ` +
+			`refusing to TRUNCATE database "${safeDatabase}": it does not match a documented test/scratch name (ANX-487). ` +
 				"Accepted names are anxionos_<scratch>, *_test, *_oracle, *_oracle_neg, *_g<d>r*, *_wt, " +
 				`*_zero or *_scratch on loopback. Set ${DESTRUCTIVE_DB_OVERRIDE_ENV}=true to accept the risk.`,
 		);
@@ -334,6 +368,11 @@ export interface TruncateQueryable {
 	query(sql: string): Promise<unknown>;
 }
 
+/** Query surface for the guarded cleanup helpers (parameterized statements). */
+export interface GuardedQueryable {
+	query(sql: string, params?: unknown[]): Promise<unknown>;
+}
+
 /**
  * A single `TRUNCATE` statement, with at most one trailing `;`. Anything else
  * — `DROP DATABASE ...`, `DELETE ...`, or a second statement smuggled after a
@@ -342,11 +381,40 @@ export interface TruncateQueryable {
 const TRUNCATE_STATEMENT_PATTERN = /^\s*TRUNCATE\b[^;]*(?:;\s*)?$/i;
 
 /**
- * The only sanctioned way to execute a domain `TRUNCATE` from the test
- * harnesses. It requires a single `TRUNCATE` statement and re-evaluates the
- * full guard immediately before executing it, so a harness cannot reach the
- * destructive path by calling `pool.query` directly with a prepared SQL
+ * A single fixture-cleanup statement, with at most one trailing `;`. `DELETE`
+ * is allowed here because the product-graph inbox reset (ANX-277) removes only
+ * its own consumer rows; DDL (`DROP`, `ALTER`) and multi-statement payloads
+ * stay refused even on an approved target (ANX-487 round 2, finding 5).
+ */
+const GUARDED_CLEANUP_STATEMENT_PATTERN =
+	/^\s*(?:TRUNCATE|DELETE)\b[^;]*(?:;\s*)?$/i;
+
+/**
+ * Shared tail of every sanctioned cleanup helper: it re-evaluates the flag and
+ * the effective target immediately before executing, so a harness cannot reach
+ * the destructive path by calling `pool.query` directly with a prepared SQL
  * constant.
+ */
+async function executeGuardedCleanup(
+	pool: GuardedQueryable,
+	sql: string,
+	params: unknown[],
+	env: PgHarnessEnv,
+): Promise<unknown> {
+	if (!readRunPgIntegrationTestsFlag(env)) {
+		throw new Error(
+			"refusing to execute a destructive cleanup: RUN_PG_INTEGRATION_TESTS is not enabled (ANX-487). " +
+				"Use the guarded cleanup helpers only inside a guarded PostgreSQL harness.",
+		);
+	}
+	assertDestructivePgTarget(env);
+	return pool.query(sql, params);
+}
+
+/**
+ * The only sanctioned way to execute a domain `TRUNCATE` from the test
+ * harnesses. Its signature is stable for the existing call sites
+ * (`truncateDomainTables(pool, sql)` / `(pool, sql, env)`).
  */
 export async function truncateDomainTables(
 	pool: TruncateQueryable,
@@ -359,12 +427,31 @@ export async function truncateDomainTables(
 				"Only a single TRUNCATE statement is allowed on the sanctioned destructive path.",
 		);
 	}
-	if (!readRunPgIntegrationTestsFlag(env)) {
+	await executeGuardedCleanup(pool, sql, [], env);
+}
+
+/**
+ * Guarded path for parameterized fixture cleanup that is not a `TRUNCATE` —
+ * currently the `DELETE FROM graph_projection_inbox/dlq` reset of ANX-277.
+ *
+ * ANX-487 round 3: that file used a raw `createPgPool(process.env.DATABASE_URL)`
+ * plus a local `RUN_PG_INTEGRATION_TESTS === "true"` check, so a real database
+ * could lose real rows. It accepts only a single `TRUNCATE` or `DELETE`
+ * statement, revalidates the flag and the effective target immediately before
+ * executing, and forwards `params` to the driver (never interpolated).
+ */
+export async function runGuardedSql(
+	pool: GuardedQueryable,
+	sql: string,
+	params: unknown[] = [],
+	env: PgHarnessEnv = process.env,
+): Promise<unknown> {
+	if (typeof sql !== "string" || !GUARDED_CLEANUP_STATEMENT_PATTERN.test(sql)) {
 		throw new Error(
-			"refusing to TRUNCATE: RUN_PG_INTEGRATION_TESTS is not enabled (ANX-487). " +
-				"Use truncateDomainTables only inside a guarded PostgreSQL harness.",
+			"refusing to execute a non-cleanup statement through runGuardedSql (ANX-487). " +
+				"Only a single TRUNCATE or DELETE statement is allowed on the sanctioned destructive path; " +
+				"DDL such as DROP/ALTER is never executed by the test harness.",
 		);
 	}
-	assertDestructivePgTarget(env);
-	await pool.query(sql);
+	return executeGuardedCleanup(pool, sql, params, env);
 }

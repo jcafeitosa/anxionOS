@@ -42,6 +42,10 @@ import {
 	ensurePerformanceSchema,
 	recordOutcomeSnapshot,
 } from "@anxionos/performance";
+import {
+	getDatabaseUrl,
+	shouldRunPgIntegrationTests,
+} from "../pg-harness-guard";
 
 const VALID_UUID = "a1234567-89ab-4def-8123-456789abcdef";
 const ORG_ID = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
@@ -54,14 +58,6 @@ const SESSION_ID = "ex_ses_a1234567-89ab-4def-8123-456789abcdef";
 const AUTHORITY_EPOCH = 1;
 const RISK_EPOCH = 1;
 const EXECUTION_MODES = ["SIMULATED", "PAPER"] as const;
-
-function shouldRunPg(): boolean {
-	return (
-		(process.env.RUN_PG_INTEGRATION_TESTS === "true" ||
-			!!process.env.RUN_PG_INTEGRATION_TESTS) &&
-		!!process.env.DATABASE_URL?.trim()
-	);
-}
 
 function buildCryptoTradeIntent(executionMode: "SIMULATED" | "PAPER") {
 	return {
@@ -187,12 +183,15 @@ describe("P06 paper flow — CRYPTO cross-module pipeline (ANX-163)", () => {
 	});
 
 	test("real PG pipeline: CRYPTO fill → accounting (when DATABASE_URL set)", async () => {
-		if (!shouldRunPg()) {
-			console.log("⚠ Skipping PG CRYPTO pipeline: DATABASE_URL not set");
+		const url = getDatabaseUrl();
+		if (!shouldRunPgIntegrationTests() || !url) {
+			console.log(
+				"⚠ Skipping PG CRYPTO pipeline: RUN_PG_INTEGRATION_TESTS not enabled",
+			);
 			return;
 		}
 
-		const pool = createPgPool(process.env.DATABASE_URL);
+		const pool = createPgPool(url);
 		try {
 			await ensureExecutionSchema(pool);
 			await ensureAccountingSchema(pool);
