@@ -46,13 +46,13 @@ const DEFAULT_SCRATCH_DB = "anxionos_oracle";
  * the same state fails the oracle. Removing a module from this list once its
  * migrations exist is safe.
  */
-const KNOWN_MISSING_MIGRATIONS = new Set([
-	"audit",
-	"billing",
-	"connections",
-	"knowledge",
-	"orchestration",
-]);
+/*
+ * ANX-470 — os 5 modulos deste bloco passaram a ter migrations versionadas
+ * (`0000_<module>_core.sql` + `meta/_journal.json`) e o bootstrap de banco novo
+ * fecha com ZERO gaps. Qualquer modulo que volte ao estado "sem migrations" a
+ * partir de agora falha o oraculo.
+ */
+const KNOWN_MISSING_MIGRATIONS = new Set([]);
 
 function parseCli(argv) {
 	return parseArgs({

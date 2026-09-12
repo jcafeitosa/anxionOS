@@ -1,5 +1,8 @@
 import { AppError } from "@anxionos/contracts/errors";
+import { createLogger } from "@anxionos/observability";
 import type { Pool } from "pg";
+
+const logger = createLogger({ service: "api" });
 
 export const INVITE_ACCEPT_LIMIT = 10;
 export const INVITE_ACCEPT_WINDOW_MS = 60_000;
@@ -116,13 +119,37 @@ export class PostgresInviteAcceptRateLimitStore
 				!row ||
 				now - Number(row.window_start_ms) >= INVITE_ACCEPT_WINDOW_MS
 			) {
-				await client.query(
+				// ANX-489 F4 — janela nova nao colapsa concorrentes: o `ON
+				// CONFLICT` comparava `window_start_ms` por ms exato; duas
+				// transacoes que leem "sem linha" e inserem com `now` distintos
+				// (ex.: 1000 vs 1005) zeravam o contador uma da outra
+				// (count = 1 com N aceitos). Agora o bucket e' a JANELA
+				// (`div(window_start_ms, window)`): na mesma janela incrementa;
+				// janela diferente comeca de 1. E o contrato "10 por janela"
+				// vale TAMBEM no instante de abertura: a chamada que estourar o
+				// limite no proprio upsert recebe 429.
+				const upserted = await client.query<{ count: number }>(
 					`INSERT INTO api_invite_accept_rate_limits (client_ip, count, window_start_ms)
            VALUES ($1, 1, $2)
            ON CONFLICT (client_ip)
-           DO UPDATE SET count = 1, window_start_ms = EXCLUDED.window_start_ms`,
-					[clientIp, now],
+           DO UPDATE SET
+             count = CASE
+               WHEN div(api_invite_accept_rate_limits.window_start_ms, $3) =
+                    div(EXCLUDED.window_start_ms, $3)
+               THEN api_invite_accept_rate_limits.count + 1
+               ELSE 1
+             END,
+             window_start_ms = GREATEST(
+               api_invite_accept_rate_limits.window_start_ms,
+               EXCLUDED.window_start_ms
+             )
+           RETURNING count`,
+					[clientIp, now, INVITE_ACCEPT_WINDOW_MS],
 				);
+				if (Number(upserted.rows[0]?.count) > INVITE_ACCEPT_LIMIT) {
+					await client.query("ROLLBACK");
+					rateLimitExceeded();
+				}
 				await client.query("COMMIT");
 				return;
 			}
@@ -138,7 +165,14 @@ export class PostgresInviteAcceptRateLimitStore
 			);
 			await client.query("COMMIT");
 		} catch (error) {
-			await client.query("ROLLBACK");
+			// ANX-489 F5 — rollback best-effort: nunca substitui o erro original.
+			try {
+				await client.query("ROLLBACK");
+			} catch (rollbackError) {
+				logger.error("invite accept rate limit rollback failed", {
+					cause: rollbackError,
+				});
+			}
 			throw error;
 		} finally {
 			client.release();
