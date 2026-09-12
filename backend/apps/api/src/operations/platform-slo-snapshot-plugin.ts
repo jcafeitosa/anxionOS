@@ -1,10 +1,12 @@
 import { AppError } from "@anxionos/contracts/errors";
 import { platformSloSnapshotSchema } from "@anxionos/contracts/operations";
-import type { GrantRepository } from "@anxionos/governance";
+import {
+	hasPlatformConsoleGrant,
+	type GrantRepository,
+} from "@anxionos/governance";
 import type { MetricsCollector } from "@anxionos/observability";
 import { getPlatformSloSnapshot } from "@anxionos/operations";
 import { Elysia } from "elysia";
-import { requirePlatformConsoleGrant } from "./authorization";
 import { mapOperationsError } from "./error-handler";
 
 export interface PlatformSloSnapshotPluginDeps {
@@ -17,7 +19,10 @@ interface PlatformSloContext {
 	principalId: string;
 }
 
-/** Platform-scoped read model for SLO/capacity dashboard (ANX-170 S4). */
+/**
+ * Platform-scoped read model for SLO/capacity dashboard (ANX-170 S4).
+ * ANX-497: Requires console.platform grant.
+ */
 export function createPlatformSloSnapshotPlugin(
 	deps: PlatformSloSnapshotPluginDeps,
 ) {
@@ -30,8 +35,8 @@ export function createPlatformSloSnapshotPlugin(
 			set.status = mapped.status;
 			return mapped.body;
 		})
-		.resolve(async ({ headers }): Promise<{ slo: PlatformSloContext }> => {
-			const principalId = headers.get("x-principal-id");
+		.resolve(async ({ request }): Promise<{ slo: PlatformSloContext }> => {
+			const principalId = request.headers.get("x-principal-id");
 			if (!principalId) {
 				throw AppError.unauthorized();
 			}
@@ -40,10 +45,13 @@ export function createPlatformSloSnapshotPlugin(
 		.get(
 			"/v1/operations/platform/slo-snapshot",
 			async ({ slo }) => {
-				await requirePlatformConsoleGrant(
+				const allowed = await hasPlatformConsoleGrant(
 					{ grantRepository: deps.grantRepository },
-					{ principalId: slo.principalId },
+					slo.principalId,
 				);
+				if (!allowed) {
+					throw AppError.forbidden("PLATFORM console grant required");
+				}
 				const snapshot = getPlatformSloSnapshot({
 					metrics: deps.metrics,
 					now: deps.now,

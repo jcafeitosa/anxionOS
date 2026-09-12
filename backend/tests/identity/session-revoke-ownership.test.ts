@@ -1,13 +1,41 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, test } from "bun:test";
+import type { Principal } from "@anxionos/identity";
 import { recordSessionRevoked } from "@anxionos/identity";
 import { IdentityCommandError } from "../../modules/identity/src/application/errors";
 import {
-	createInMemoryCommandJournalRepository,
 	createInMemoryPrincipalRepository,
 	createInMemorySessionRefRepository,
 	createRecordingUnitOfWork,
 } from "./test-support";
+
+const alicePrincipal: Principal = {
+	id: "11111111-1111-4111-8111-111111111111",
+	authUserId: "alice-auth",
+	email: "alice@test.anxion.os",
+	kind: "human",
+	status: "active",
+	revision: 1,
+	createdAt: new Date(),
+	suspendedAt: null,
+	suspensionReason: null,
+	revokedAt: null,
+	revocationReason: null,
+};
+
+const bobPrincipal: Principal = {
+	id: "22222222-2222-4222-8222-222222222222",
+	authUserId: "bob-auth",
+	email: "bob@test.anxion.os",
+	kind: "human",
+	status: "active",
+	revision: 1,
+	createdAt: new Date(),
+	suspendedAt: null,
+	suspensionReason: null,
+	revokedAt: null,
+	revocationReason: null,
+};
 
 /**
  * Session revoke ownership abuse cases.
@@ -23,32 +51,8 @@ import {
 describe("Session revoke ownership enforcement", () => {
 	function createRecordSessionDeps() {
 		const principalRepository = createInMemoryPrincipalRepository([
-			{
-				id: randomUUID(),
-				authUserId: "alice-auth",
-				email: "alice@test.anxion.os",
-				kind: "human",
-				status: "active",
-				revision: 1,
-				createdAt: new Date(),
-				suspendedAt: null,
-				suspensionReason: null,
-				revokedAt: null,
-				revocationReason: null,
-			},
-			{
-				id: randomUUID(),
-				authUserId: "bob-auth",
-				email: "bob@test.anxion.os",
-				kind: "human",
-				status: "active",
-				revision: 1,
-				createdAt: new Date(),
-				suspendedAt: null,
-				suspensionReason: null,
-				revokedAt: null,
-				revocationReason: null,
-			},
+			alicePrincipal,
+			bobPrincipal,
 		]);
 		const sessionRefRepository = createInMemorySessionRefRepository();
 		const { unitOfWork } = createRecordingUnitOfWork(
@@ -56,21 +60,14 @@ describe("Session revoke ownership enforcement", () => {
 			sessionRefRepository,
 		);
 
-		const alice = Array.from(
-			(principalRepository as any).principals.values(),
-		).find((p: any) => p.email === "alice@test.anxion.os");
-		const bob = Array.from(
-			(principalRepository as any).principals.values(),
-		).find((p: any) => p.email === "bob@test.anxion.os");
-
 		return {
 			deps: {
 				principalRepository,
 				sessionRefRepository,
 				unitOfWork,
 			},
-			alice,
-			bob,
+			alice: alicePrincipal,
+			bob: bobPrincipal,
 		};
 	}
 
