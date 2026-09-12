@@ -1,37 +1,35 @@
 import { randomUUID } from "node:crypto";
-import { describe, expect, test } from "bun:test";
+import { beforeAll, describe, expect, mock, test } from "bun:test";
 import type { Principal } from "@anxionos/identity";
-import { Elysia } from "elysia";
-import { mapGovernanceError } from "../../apps/api/src/governance/error-handler";
-import { handleIssueGrant } from "../../apps/api/src/governance/handlers/grants";
-import { parseIdempotencyKey } from "../../apps/api/src/organizations/middleware/idempotency-key";
-import { assertActorCanMutate } from "@anxionos/organizations";
+import {
+	createGraphT01TraversalEvaluator,
+} from "@anxionos/governance";
+import type { Membership } from "../../modules/organizations/src/domain/entities/membership";
+import type { Grant } from "../../modules/governance/src/domain/entities/grant";
 import { createInMemoryPrincipalRepository } from "../identity/test-support";
 import {
 	createInMemoryApprovalRepository,
 	createInMemoryAuthorityEpochStore,
+	createInMemoryAutonomyAssignmentRepository,
 	createInMemoryChangeProposalRepository,
 	createInMemoryCommandJournalRepository,
 	createInMemoryGrantRepository,
 	createRecordingGovernanceUnitOfWork,
 	createStubPrincipalLookup,
 } from "../governance/test-support";
-import { createInMemoryMembershipRepository } from "../organizations/test-support";
-import type { Membership } from "../../modules/organizations/src/domain/entities/membership";
-import type { Grant } from "../../modules/governance/src/domain/entities/grant";
+import {
+	createInMemoryAgencyRepository,
+	createInMemoryMembershipRepository,
+} from "../organizations/test-support";
 
 /**
- * ANX-462 / ANX-466 — C1 (G5): evidência HTTP real via Elysia `app.handle`
- * em `POST /v1/agencies/:agencyId/grants`.
+ * ANX-462 / ANX-466 — C1: evidência HTTP via **createGovernancePlugin** prod
+ * (`app.handle` POST /v1/agencies/:agencyId/grants).
  *
- * Substitui o teatro de `mapGovernanceError(new GovernanceCommandError(...))`
- * em isolation: aqui a request atravessa session → papel de mutação →
- * `handleIssueGrant` → `onError`/`mapGovernanceError`, o mesmo encadeamento
- * da rota do plugin (sem PostgreSQL).
+ * `runAgencyScopedRead` é mockado só para injetar membership in-memory
+ * (sem PG); o plugin Elysia, handlers e error mapper são os de produção.
  *
- * C2 DiD platform-only: short-circuit no handler deve falhar em SCOPE_MISMATCH
- * (409) mesmo com actor owner — nunca degradar para 403 de papel/posse.
- * Este arquivo não expande 465/497/501.
+ * C2 DiD: owner + console.platform em agency → 409 SCOPE + zero write.
  */
 
 const agencyId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
@@ -41,11 +39,10 @@ const operatorPrincipalId = "11111111-1111-4111-8111-111111111111";
 const ownerPrincipalId = "22222222-2222-4222-8222-222222222222";
 const granteePrincipalId = "33333333-3333-4333-8333-333333333333";
 
-function principal(
-	id: string,
-	authUserId: string,
-	email: string,
-): Principal {
+let createGovernancePlugin: typeof import("../../apps/api/src/governance/plugin").createGovernancePlugin;
+let membershipRepository = createInMemoryMembershipRepository();
+
+function principal(id: string, authUserId: string, email: string): Principal {
 	return {
 		id,
 		authUserId,
@@ -109,41 +106,82 @@ function seedGrant(overrides: Partial<Grant> = {}): Grant {
 	};
 }
 
+beforeAll(async () => {
+	membershipRepository = createInMemoryMembershipRepository([
+		membership("operator", operatorPrincipalId),
+		membership("owner", ownerPrincipalId),
+	]);
+	const agencyRepository = createInMemoryAgencyRepository();
+
+	mock.module("../../apps/api/src/middleware/resolve-tenant-context", () => ({
+		runAgencyScopedRead: async (
+			_scopedPool: unknown,
+			_agencyId: string,
+			_principalId: string,
+			work: (repos: {
+				agencyRepository: typeof agencyRepository;
+				membershipRepository: typeof membershipRepository;
+			}) => Promise<unknown>,
+		) =>
+			work({
+				agencyRepository,
+				membershipRepository,
+			}),
+		resolveAgencyTenantContext: (a: string, p: string) => ({
+			tenantId: a,
+			agencyId: a,
+			principalId: p,
+		}),
+		buildAgencyTenantContext: (a: string, p: string) => ({
+			tenantId: a,
+			agencyId: a,
+			principalId: p,
+		}),
+		buildAgencyBootstrapContext: () => ({}),
+		resolveAgencyNatsSubjectPrefix: (a: string) => `agency.${a}.events.`,
+		resolveAgencyGraphScope: (a: string, p: string) => ({
+			principalId: p,
+			actingScope: { scopeType: "AGENCY", scopeId: a },
+		}),
+	}));
+
+	({ createGovernancePlugin } = await import(
+		"../../apps/api/src/governance/plugin"
+	));
+});
+
 function createGrantsHttpApp(options: {
 	authUserId: string | null;
 	seedGrants?: Grant[];
-	extraPrincipals?: string[];
 }) {
+	membershipRepository = createInMemoryMembershipRepository([
+		membership("operator", operatorPrincipalId),
+		membership("owner", ownerPrincipalId),
+	]);
+
 	const identityRepository = createInMemoryPrincipalRepository([
 		principal(operatorPrincipalId, operatorAuthUserId, "op@test.anxion.os"),
 		principal(ownerPrincipalId, ownerAuthUserId, "owner@test.anxion.os"),
 	]);
-	const membershipRepository = createInMemoryMembershipRepository([
-		membership("operator", operatorPrincipalId),
-		membership("owner", ownerPrincipalId),
-	]);
 	const grantRepository = createInMemoryGrantRepository(
 		options.seedGrants ?? [seedGrant()],
 	);
+	const changeProposalRepository = createInMemoryChangeProposalRepository();
 	const commandJournal = createInMemoryCommandJournalRepository();
 	const { unitOfWork } = createRecordingGovernanceUnitOfWork({
 		grantRepository,
-		changeProposalRepository: createInMemoryChangeProposalRepository(),
+		changeProposalRepository,
 		approvalRepository: createInMemoryApprovalRepository(),
 		authorityEpochStore: createInMemoryAuthorityEpochStore(),
 		commandJournal,
 	});
-	const principalLookup = createStubPrincipalLookup([
-		operatorPrincipalId,
-		ownerPrincipalId,
-		granteePrincipalId,
-		...(options.extraPrincipals ?? []),
-	]);
 
 	const auth = {
 		api: {
-			getSession: async () => {
+			getSession: async ({ headers }: { headers: Headers }) => {
 				if (!options.authUserId) return null;
+				// Better Auth shape; cookie optional for this harness
+				void headers;
 				return {
 					user: { id: options.authUserId },
 					session: { token: "mock" },
@@ -152,55 +190,44 @@ function createGrantsHttpApp(options: {
 		},
 	};
 
-	const deps = {
-		grantRepository,
-		commandJournal,
-		unitOfWork,
-		principalLookup,
+	const scopedPool = {
+		withContext: async () => {
+			throw new Error("scopedPool.withContext should not run — runAgencyScopedRead is mocked");
+		},
+		end: async () => {},
 	};
 
-	const app = new Elysia({ name: "governance-grants-http-c1" })
-		.onError(({ error, set, request }) => {
-			const mapped = mapGovernanceError(
-				error,
-				request.headers.get("x-request-id") ?? undefined,
-			);
-			set.status = mapped.status;
-			return mapped.body;
-		})
-		.post("/v1/agencies/:agencyId/grants", async ({ request, params }) => {
-			const session = await auth.api.getSession();
-			if (!session?.user?.id) {
-				const { AppError } = await import("@anxionos/contracts/errors");
-				throw AppError.unauthorized();
-			}
-			const routeAgencyId = String(params.agencyId);
-			const actorPrincipal = await identityRepository.findByAuthUserId(
-				session.user.id,
-			);
-			if (!actorPrincipal) {
-				const { AppError } = await import("@anxionos/contracts/errors");
-				throw AppError.unauthorized();
-			}
-			const mutating = await assertActorCanMutate(
-				membershipRepository,
-				actorPrincipal.id,
-				routeAgencyId,
-			);
-			const commandId = parseIdempotencyKey(request.headers);
-			const body = await request.json();
-			return handleIssueGrant(deps, {
-				commandId,
-				agencyId: routeAgencyId,
-				actor: { principalId: actorPrincipal.id, role: mutating.role },
-				body,
-			});
-		});
+	const traversalEvaluator = createGraphT01TraversalEvaluator({
+		async queryPaths() {
+			return [];
+		},
+	} as never);
+
+	const app = createGovernancePlugin({
+		auth: auth as never,
+		grantRepository,
+		changeProposalRepository,
+		autonomyAssignmentRepository: createInMemoryAutonomyAssignmentRepository(),
+		commandJournal,
+		unitOfWork,
+		principalLookup: createStubPrincipalLookup([
+			operatorPrincipalId,
+			ownerPrincipalId,
+			granteePrincipalId,
+		]),
+		membershipRepository,
+		scopedPool: scopedPool as never,
+		identityRepository,
+		traversalEvaluator,
+	});
 
 	return { app, grantRepository };
 }
 
-function postGrant(body: Record<string, unknown>, idempotencyKey = randomUUID()) {
+function postGrant(
+	body: Record<string, unknown>,
+	idempotencyKey = randomUUID(),
+) {
 	return new Request(`http://localhost/v1/agencies/${agencyId}/grants`, {
 		method: "POST",
 		headers: {
@@ -211,11 +238,9 @@ function postGrant(body: Record<string, unknown>, idempotencyKey = randomUUID())
 	});
 }
 
-describe("ANX-462/466 — POST /grants HTTP (app.handle, C1)", () => {
+describe("ANX-462/466 — POST /grants via createGovernancePlugin (C1)", () => {
 	test("ANX-462 — console.platform em agency scope → 409 GOV_CAPABILITY_SCOPE_MISMATCH", async () => {
-		const { app } = createGrantsHttpApp({
-			authUserId: operatorAuthUserId,
-		});
+		const { app } = createGrantsHttpApp({ authUserId: operatorAuthUserId });
 		const response = await app.handle(
 			postGrant({
 				granteePrincipalId: operatorPrincipalId,
@@ -270,11 +295,13 @@ describe("ANX-462/466 — POST /grants HTTP (app.handle, C1)", () => {
 	});
 
 	test("C2 DiD — owner + console.platform em agency → 409 SCOPE (não 403 role)", async () => {
-		// Short-circuit platform-only deve ir ao comando (scope), não a roleMayIssue.
 		const { app, grantRepository } = createGrantsHttpApp({
 			authUserId: ownerAuthUserId,
 			seedGrants: [
-				seedGrant({ capability: "owner.manage", granteePrincipalId: ownerPrincipalId }),
+				seedGrant({
+					capability: "owner.manage",
+					granteePrincipalId: ownerPrincipalId,
+				}),
 				seedGrant({
 					capability: "identity.admin",
 					granteePrincipalId: ownerPrincipalId,
