@@ -167,7 +167,7 @@ describe("Session revoke ownership enforcement", () => {
 			externalRefHash: aliceHash,
 		});
 
-		expect(result.sessionRef.id).toBe(aliceSessionRefId);
+		expect(result.sessionRef.sessionRefId).toBe(aliceSessionRefId);
 		expect(result.sessionRef.principalId).toBe(alice.id);
 		expect(result.transitioned).toBe(true);
 	});
