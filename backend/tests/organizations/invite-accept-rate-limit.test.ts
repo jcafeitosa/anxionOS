@@ -2,7 +2,6 @@ import { afterEach, describe, expect, test } from "bun:test";
 import {
 	AppError,
 	errorResponseSchema,
-	isAppError,
 	toErrorResponse,
 } from "@anxionos/contracts/errors";
 import {
@@ -24,8 +23,10 @@ describe("invite accept rate limit store", () => {
 	 * `VALIDATION_ERROR` (400) via `defineProperty` para `RATE_LIMITED`/429. Hoje
 	 * canonico, mas o oraculo era fraco — so' checava `instanceof AppError`, entao
 	 * um `code` fora de `ERROR_CODES` (envelope invalido) passaria (LOW do G4 na
-	 * ANX-486). `isAppError` exige simultaneamente `code` conhecido e
-	 * `statusCode === ERROR_STATUS_MAP[code]`.
+	 * ANX-486). O que fecha o achado e' a validacao do **envelope** contra
+	 * `errorResponseSchema`; `isAppError` NAO serve de oraculo aqui, porque
+	 * curto-circuita em `instanceof AppError` e devolve `true` sem olhar o enum
+	 * (provado no G2 da ANX-460) — por isso ele nao aparece neste teste.
 	 */
 	test("in-memory store blocks after limit", () => {
 		const store = new InMemoryInviteAcceptRateLimitStore();
@@ -39,13 +40,12 @@ describe("invite accept rate limit store", () => {
 			caught = error;
 		}
 		expect(caught).toBeInstanceOf(AppError);
-		expect(isAppError(caught)).toBe(true);
 		const appError = caught as AppError;
 		expect(appError.code).toBe("RATE_LIMITED");
 		expect(appError.statusCode).toBe(429);
-		expect(errorResponseSchema.safeParse(toErrorResponse(appError)).success).toBe(
-			true,
-		);
+		expect(
+			errorResponseSchema.safeParse(toErrorResponse(appError)).success,
+		).toBe(true);
 	});
 
 	test("resolveInviteAcceptRateLimitStoreKind defaults to postgres when pool exists", () => {
