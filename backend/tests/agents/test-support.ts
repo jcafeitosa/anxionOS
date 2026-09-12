@@ -27,6 +27,7 @@ import type {
 	CommandJournalRepository,
 	NewCommandJournalRecord,
 } from "../../modules/agents/src/domain/ports/command-journal";
+import { CommandJournalConflictError } from "../../modules/agents/src/domain/ports/command-journal";
 import type { SkillRepository } from "../../modules/agents/src/domain/ports/skill-repository";
 import type { SkillVersionRepository } from "../../modules/agents/src/domain/ports/skill-version-repository";
 
@@ -183,9 +184,8 @@ export function createInMemoryCommandJournalRepository(
 		},
 		async record(entry: NewCommandJournalRecord) {
 			const key = journalKey(entry.tenantId, entry.commandId);
-			const existing = records.get(key);
-			if (existing) {
-				return existing;
+			if (records.has(key)) {
+				throw new CommandJournalConflictError(entry.commandId);
 			}
 			const stored: CommandJournalRecord = {
 				...entry,

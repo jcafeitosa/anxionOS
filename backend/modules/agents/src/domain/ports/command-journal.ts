@@ -26,3 +26,14 @@ export interface CommandJournalRepository {
 	): Promise<CommandJournalRecord | null>;
 	record(entry: NewCommandJournalRecord): Promise<CommandJournalRecord>;
 }
+
+/** Colisao de `(tenant_id, command_id)` detectada durante uma insercao atomica. */
+export class CommandJournalConflictError extends Error {
+	readonly commandId: string;
+
+	constructor(commandId: string) {
+		super(`Command journal already has an entry for ${commandId}`);
+		this.name = "CommandJournalConflictError";
+		this.commandId = commandId;
+	}
+}

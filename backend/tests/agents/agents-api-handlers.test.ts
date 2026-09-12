@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { AgentsCommandError } from "@anxionos/agents";
+import {
+	AgentsCommandError,
+	AgentsCommandJournalConflictError,
+} from "@anxionos/agents";
 import {
 	handleGetAgent,
 	handleListAgentVersions,
@@ -13,6 +16,7 @@ import {
 	handleRegisterSkill,
 	handleSubmitSkillVersion,
 } from "../../apps/api/src/agents/handlers/skills";
+import { mapAgentsError } from "../../apps/api/src/agents/error-handler";
 import {
 	createInMemoryAgentRepository,
 	createInMemoryAgentVersionRepository,
@@ -64,6 +68,19 @@ function createHandlerDeps() {
 }
 
 describe("agents API handlers", () => {
+	test("maps concurrent journal collision to the public 409 contract", () => {
+		const mapped = mapAgentsError(
+			new AgentsCommandJournalConflictError("collision-command"),
+			"request-1",
+		);
+
+		expect(mapped.status).toBe(409);
+		expect(mapped.body.error.code).toBe("CONFLICT");
+		expect(mapped.body.error.details).toEqual({
+			code: "AGT_DUPLICATE_IDEMPOTENCY",
+		});
+	});
+
 	test("register, get, list versions and publish via handlers", async () => {
 		const deps = createHandlerDeps();
 		const registerCommandId = "11111111-1111-4111-8111-111111111111";

@@ -23,6 +23,7 @@ export { takeoverComputerSession } from "./application/commands/takeover-compute
 export { transitionAgentStatus } from "./application/commands/transition-agent-status";
 export { triggerAgentRoutine } from "./application/commands/trigger-agent-routine";
 export { AgentsCommandError } from "./application/errors";
+export { CommandJournalConflictError as AgentsCommandJournalConflictError } from "./domain/ports/command-journal";
 export { getAgent } from "./application/queries/get-agent";
 export { listAgentVersions } from "./application/queries/list-agent-versions";
 export {
