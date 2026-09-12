@@ -82,6 +82,7 @@ Decisões CPO e orquestrador publicadas pela equipe de produto (OpenKnowledge).
 | [ANX-500 — Diagnosis APPROVE; Partner GO Bloqueado](product/ANX-500-diagnosis-not-partner-go.md) | Seed/e2e/a11y aprovados; Partner console bloqueado |
 | [ANX-496 — Owner Catalog Honesty UX](product/ANX-496-owner-catalog-honesty-ux.md) | OwnerAgentsCatalog apenas; Operator Takeover estacionado |
 | [ANX-500 — Critérios UX Supersede](product/ANX-500-ux-criteria-supersede.md) | Renata: shells Partner/Platform; e2e+a11y+honesty obrigatórios |
+| [ANX-505 — FE Better Auth Client](product/ANX-505-better-auth-client.md) | Plugins 1:1; useSession vs post-login-context; BA1–BA8; sem twoFactor/SSO até server |
 
 ## Pesquisa
 
