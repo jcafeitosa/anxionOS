@@ -12,23 +12,32 @@ date: 2026-09-12
 
 ## Decisão
 
-**APPROVE**: seed + e2e/a11y + honesty/diagnosis para **Owner e Platform**.  
-**BLOCK**: `partnerAccess` flip e Partner console live/GO.
+**APPROVE**: seed + e2e/a11y + honesty/diagnosis.  
+**BLOCK**: flip `partnerAccess` e Partner console live/GO.
 
 ### Escopo Aprovado
 
-1. **Seed**: fixtures realistas.
-2. **e2e + a11y**: WCAG 2.2 AA.
-3. **Auth**: `/onboarding` + `/select-organization`.
-4. **Platform**: seed/e2e sem UI nova neste slice.
+1. **Platform seed PP-J2**: fixtures realistas.
+2. **Auth**: `/onboarding` + `/select-organization`.
+3. **e2e + a11y**: WCAG 2.2 AA.
+4. **Honesty/diagnosis**: HonestState aplicado.
+5. **Sem UI nova** neste slice.
+
+### Partner neste Issue
+
+- **Fixtures**: Partner retorna `HonestState` denied/empty.
+- **Escopo**: fixtures apenas; **sem** Partner console live.
 
 ### Escopo Bloqueado
 
-- **Partner console GO**: não liberar neste momento.
 - **`partnerAccess` flip**: bloqueado até CPO reabrir.
-- **Partner fixtures**: devem retornar `HonestState` denied/empty.
+- **Partner console GO**: não liberar neste momento.
 
-## Critérios UX
+## Owner Catalog Honesty
+
+Critérios de honestidade UX para Owner Agents Catalog pertencem **exclusivamente** a [ANX-496-owner-catalog-honesty-ux.md](./ANX-496-owner-catalog-honesty-ux.md). **Não** misturar com ANX-500.
+
+## Critérios UX Supersede
 
 Ver [ANX-500-ux-criteria-supersede.md](./ANX-500-ux-criteria-supersede.md) (decisão Renata).
 
@@ -39,4 +48,4 @@ Ver [ANX-500-ux-criteria-supersede.md](./ANX-500-ux-criteria-supersede.md) (deci
 
 ---
 
-**Cross-references**: ANX-498 (backend-only), ANX-499 (realtime freeze), ANX-496 (Owner catalog), ANX-500-ux-criteria-supersede (Renata).
+**Cross-references**: ANX-498 (backend-only), ANX-499 (realtime freeze), ANX-496 (Owner catalog — **não** misturar), ANX-500-ux-criteria-supersede (Renata).
