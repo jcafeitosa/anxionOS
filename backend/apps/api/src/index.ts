@@ -148,7 +148,7 @@ if (pool && resolveBetterAuthConfig()) {
 			metrics: apiMetrics,
 			grantRepository: govRuntime.grantRepository,
 			auth,
-			identityRepository: identityRuntime.principalRepository,
+			identityRepository: orgRuntime.identityRepository,
 		}),
 	) as unknown as Elysia;
 	const agentsRuntime = createAgentsApiRuntime(pool);
