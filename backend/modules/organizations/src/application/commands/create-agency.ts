@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import {
 	type CommandResult,
 	type CreateAgencyCommand,
@@ -17,6 +17,23 @@ import {
 } from "../command-support";
 import { assertPrincipalExists } from "../services/principal-guard";
 import { buildAgencyTenantContext } from "../services/tenant-context";
+
+/**
+ * Generate a deterministic UUID from a command ID.
+ * Same commandId always produces the same agencyId, ensuring idempotent replay
+ * works correctly with tenant-scoped journal lookups.
+ */
+function deterministicAgencyId(commandId: string): string {
+	const hash = createHash("sha256").update(commandId).digest("hex");
+	// Format as UUID v5-style: xxxxxxxx-xxxx-5xxx-yxxx-xxxxxxxxxxxx
+	return [
+		hash.slice(0, 8),
+		hash.slice(8, 12),
+		`5${hash.slice(13, 16)}`, // version 5
+		`${((Number.parseInt(hash.slice(16, 18), 16) & 0x3f) | 0x80).toString(16).padStart(2, "0")}${hash.slice(18, 20)}`, // variant
+		hash.slice(20, 32),
+	].join("-");
+}
 
 export async function createAgency(
 	deps: CreateAgencyDeps,
@@ -38,7 +55,10 @@ export async function createAgency(
 	// context. A verificacao de replay deve acontecer DENTRO da transacao, com
 	// app.tenant_id definido, para garantir isolamento por tenant.
 	await assertPrincipalExists(deps.principalLookup, input.ownerPrincipalId);
-	const agencyId = randomUUID();
+	// ANX-480: agencyId must be DETERMINISTIC (derived from commandId) so that
+	// retries of the same Idempotency-Key find the same journal row AND satisfy
+	// agencies RLS (app.agency_id must match the agency_id being inserted).
+	const agencyId = deterministicAgencyId(command.commandId);
 	const ownerId = randomUUID();
 	const membershipId = randomUUID();
 	const now = new Date();
@@ -57,12 +77,11 @@ export async function createAgency(
 		revision,
 	});
 	return deps.unitOfWork.runInTransaction(
-		// QE (Rafael): createAgency CRIA o agencyId (ainda nao existe). Para que o
-		// replay funcione, tenantId deve ser ESTAVEL entre execuções da mesma key.
-		// O agencyId muda a cada tentativa (randomUUID), mas ownerPrincipalId e'
-		// estavel. Usar owner como tenant_id para journal ate' a agency existir.
-		// RLS: app.agency_id deve corresponder ao agency_id inserido na tabela.
-		buildAgencyTenantContext(input.ownerPrincipalId, agencyId, input.ownerPrincipalId),
+		// ANX-480: agencyId is deterministic (from commandId), so it's stable across
+		// retries. Use agencyId as BOTH tenant_id (for journal isolation) and
+		// agency_id (for agencies RLS). This matches main branch pattern and satisfies
+		// RLS policy: app.tenant_id = app.agency_id = agencyId = row values.
+		buildAgencyTenantContext(agencyId, agencyId, input.ownerPrincipalId),
 		async (context) => {
 			// Replay como PRIMEIRA operacao da transacao, com validacao de intencao.
 			// As validacoes dependentes de estado vem depois: resolver o retry
@@ -72,7 +91,7 @@ export async function createAgency(
 				context.commandJournal,
 				command.commandId,
 				intent,
-				input.ownerPrincipalId, // tenant_id = owner (estavel)
+				agencyId, // tenant_id = stable agencyId
 			);
 			if (raced) {
 				return raced;
@@ -126,7 +145,7 @@ export async function createAgency(
 				responseSnapshot: toCommandResultSnapshot(result),
 				requestHash: intent.requestHash,
 			},
-			input.ownerPrincipalId, // tenant_id = owner (estavel)
+			agencyId, // tenant_id = stable agencyId
 		);
 		await context.publishEvents([event]);
 		return result;

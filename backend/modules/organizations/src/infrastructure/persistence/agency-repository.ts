@@ -62,10 +62,10 @@ export function createDrizzleAgencyRepository(
 			.insert(agencies)
 			.values({
 				id: agency.id,
-				// ANX-480: tenantId must match session app.tenant_id set by buildAgencyTenantContext.
-				// For createAgency, session tenant is ownerPrincipalId (stable across retries),
-				// not the freshly minted agency.id (which changes on every attempt).
-				tenantId: agency.ownerPrincipalId,
+				// ANX-480: agencyId is deterministic (from commandId), stable across retries.
+				// Session context sets app.tenant_id = app.agency_id = agencyId.
+				// INSERT must match: tenantId = agencyId, agencyId = agencyId.
+				tenantId: agency.id,
 				agencyId: agency.id,
 				ownerPrincipalId: agency.ownerPrincipalId,
 				displayName: agency.displayName,
