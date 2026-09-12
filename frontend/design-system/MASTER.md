@@ -21,28 +21,25 @@ type: reference
 
 ### Color Palette (ledger institucional ANX-504)
 
-**Ledger canônico** — substitui palette ui-ux-pro-max obsoleta (#020617/#f97316).
+**Ledger canônico (Sofia APPROVE body)** — ink + copper + type. Substitui palette ui-ux-pro-max obsoleta (#020617/#f97316).
 
 | Role | Hex | CSS Variable | Notas |
 |------|-----|--------------|-------|
 | Ink (fundo) | `#0B100E` | `--color-ink` | Fundo principal OLED |
-| Copper (CTA/destaque) | `#C4843A` | `--color-copper` | **Só sobre ink** (7.08:1 AAA); proibido sobre bone (2.47:1 ↯) |
-| Bone (texto primário) | `#E8E4DA` | `--color-bone` | Corpo de texto (lock v3) |
-| Surface | `#121816` | `--color-surface` | Superfície elevada sobre ink (lock v3; sem `paper`) |
-| Rule (hairline) | `#2A2620` | `--color-rule` | Divisores discretos sobre ink (≥3:1); **não promover** como CTA |
+| Copper (CTA/destaque) | `#C4843A` | `--color-copper` | **Só sobre ink** (7.08:1 AAA) |
 
-**Contraste validado (WebAIM):**
-- Copper #C4843A sobre Ink #0B100E: **7.08:1** (AAA) ✓
-- Bone `#E8E4DA` sobre Ink `#0B100E`: corpo de texto (lock v3)
-- Surface `#121816` sobre Ink `#0B100E`: superfície elevada (lock v3)
-- Copper sobre bone/surface clara: **proibido** (copper só sobre ink)
-- Sem role `paper`; tokens oficiais: bone `#E8E4DA`, surface `#121816` (Sofia lock v3)
+**Fora deste APPROVE:** Bone / Paper / Surface hex e Rule `#2A2620` **não** entram na palette publicada. Foreground permanece **genérico** até nova fatia com contraste medido + gate Sofia.
+
+**Contraste validado nesta fatia (WebAIM):**
+- Copper `#C4843A` sobre Ink `#0B100E`: **7.08:1** (AAA) ✓
+- Copper **só** sobre ink
 
 **Proibições ANX-504:**
-- ❌ Copper sobre bone/surface clara (contraste insuficiente)
-- ❌ Hero KPI / big-number-as-brand (números grandes como identidade)
-- ❌ Acid green/neon + Inter (palette neon recusada)
+- ❌ Copper fora de ink (sem medição + APPROVE)
+- ❌ Hero KPI / big-number-as-brand
+- ❌ Acid green/neon + Inter
 - ❌ Segundo sidebar/switcher-chrome (conflito com Aceternity ANX-448)
+- ❌ Rule `#2A2620` / Bone / Paper inventados nesta fatia
 
 **Legacy mapping (preservado para migração gradual):**
 
@@ -50,8 +47,7 @@ type: reference
 |------------------------|----------------|
 | `--color-background` (#020617) | `--color-ink` (#0B100E) |
 | `--color-accent` (#f97316) | `--color-copper` (#C4843A) |
-| `--color-foreground` (#f8fafc) | `--color-bone` (#E8E4DA) |
-| `--color-surface` / muted | `--color-surface` (#121816) |
+| `--color-foreground` (#f8fafc) | **genérico** (sem hex canônico nesta fatia) |
 
 ### Typography
 
@@ -94,7 +90,7 @@ type: reference
 | `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.4)` | Subtle lift |
 | `--shadow-md` | `0 4px 24px rgba(0,0,0,0.35)` | Cards |
 | `--shadow-glow-copper` | `0 0 40px rgba(196,132,58,0.15)` | Primary CTA (copper glow) |
-| Glass border | `1px solid rgba(245,241,237,0.08)` | Cards, auth panels (bone opacity) |
+| Glass border | `1px solid rgba(255,255,255,0.08)` | Cards, auth panels (foreground genérico) |
 | Glass blur | `backdrop-filter: blur(12px)` | Nav, modals |
 
 **Nota ANX-504:** `--shadow-glow-accent` (orange #f97316) → `--shadow-glow-copper` (copper #C4843A).
@@ -111,8 +107,8 @@ type: reference
 - Transitions: **150–300ms** `ease-out`
 - Entrance: `animate-fade-in-up`, `stagger-children` (respect `prefers-reduced-motion`)
 - Hover: opacity / border-color only — **no layout-shifting scale**
-- `prefers-reduced-motion`: disable ambient animations (Magic UI AnimatedGridPattern respects — ANX-504)
-- **Default zero (ANX-504):** apenas AnimatedGridPattern (job sentence); estado vazio = HonestState (sem spinner decorativo infinito)
+- `prefers-reduced-motion`: disable ambient animations (ANX-504)
+- **Default zero (ANX-504):** Magic UI só com **job sentence** na issue + `prefers-reduced-motion`; sem componente nomeado sem job sentence; empty = HonestState
 
 ---
 
@@ -135,8 +131,8 @@ Decisões de kit aceitas e **não reabertas** — ver [ANX-504 Visual Kit](../..
 ### Motion (Magic UI — default zero)
 
 - **Fonte:** [Magic UI](https://magicui.design/)
-- **Uso:** **apenas** `AnimatedGridPattern` (job sentence) + `prefers-reduced-motion`
-- **Proibição:** não instalar biblioteca completa; empty state = HonestState
+- **Uso:** **default zero** + job sentence na issue + `prefers-reduced-motion`
+- **Proibição:** sem whitelist de componente nomeado; não instalar biblioteca completa; empty = HonestState
 
 ### Widgets (Nyxhora — sem chrome)
 
@@ -163,17 +159,16 @@ Decisões de kit aceitas e **não reabertas** — ver [ANX-504 Visual Kit](../..
 ### Buttons
 
 - **Primary:** `bg-copper text-ink`, glow on hover, `min-h-11` (≥44px ANX-504), `rounded-lg`, `font-semibold`
-- **Destructive filled:** `bg-destructive text-on-destructive` (≥4.5:1; do not use `text-foreground` on the fill)
-- **Secondary:** `border border-rule bg-transparent text-bone`, hover `bg-glass`
+- **Destructive filled:** `bg-destructive text-on-destructive` (≥4.5:1; do not use light text on the fill without measured contrast)
+- **Secondary:** border transparente / muted, `text-foreground` genérico, hover `bg-glass`
 - **Ghost:** text only, hover muted background
 - All: `cursor-pointer`, visible `:focus-visible ring-2 ring-copper`
 
 **Nota ANX-504:** 
 - `bg-accent` → `bg-copper`
 - `text-on-accent` → `text-ink`
-- `border-border` → `border-rule`
-- `text-foreground` → `text-bone`
 - `ring-ring` → `ring-copper`
+- Foreground / borders secundários: genéricos até fatia Sofia
 - Targets ≥44×44 CSS px obrigatório
 
 ### Cards (OLED / glass)
@@ -181,7 +176,7 @@ Decisões de kit aceitas e **não reabertas** — ver [ANX-504 Visual Kit](../..
 ```css
 .glass-card {
   background: rgba(11, 16, 14, 0.6); /* ink com opacidade */
-  border: 1px solid rgba(245, 241, 237, 0.08); /* bone opacidade */
+  border: 1px solid rgba(255, 255, 255, 0.08); /* foreground genérico */
   border-radius: 16px;
   backdrop-filter: blur(12px);
   transition: border-color 200ms ease, box-shadow 200ms ease;
@@ -191,19 +186,18 @@ Decisões de kit aceitas e **não reabertas** — ver [ANX-504 Visual Kit](../..
 }
 ```
 
-**Nota ANX-504:** valores ajustados para ledger (ink/bone/copper).
+**Nota ANX-504:** valores ajustados para ledger (ink/copper; foreground genérico).
 
 ### Inputs
 
-- `min-h-11` (≥44px ANX-504), `bg-ink`, `border-rule`, `rounded-lg`
+- `min-h-11` (≥44px ANX-504), `bg-ink`, border muted genérico, `rounded-lg`
 - Focus: `ring-2 ring-copper border-copper/50`
-- Labels: always visible, `text-sm font-medium text-bone`
+- Labels: always visible, `text-sm font-medium text-foreground` (genérico nesta fatia)
 - Errors: `text-destructive text-sm` below field
 - Loading: disabled + spinner on submit button
 
 **Nota ANX-504:** 
-- `bg-surface` → `bg-ink`
-- `border-border` → `border-rule`
+- surfaces → `bg-ink` onde aplicável
 - `ring-ring` → `ring-copper`
 - `border-accent/50` → `border-copper/50`
 
@@ -219,7 +213,7 @@ Decisões de kit aceitas e **não reabertas** — ver [ANX-504 Visual Kit](../..
 
 **Style:** Institucional Dark + Signature Archify central (ANX-504 visual kit)
 
-**Keywords:** OLED ink, copper CTA, bone text, Archify signature, Newsreader display, Public Sans body, minimal chrome (Aceternity), HonestState empty
+**Keywords:** OLED ink, copper CTA, Archify signature, Newsreader display, Public Sans body, minimal chrome (Aceternity), HonestState empty
 
 **Landing sections:** 1. Hero + Archify signature center, 2. Feature grid (3–4), 3. Trust strip, 4. Final CTA, 5. Footer
 
@@ -227,10 +221,11 @@ Decisões de kit aceitas e **não reabertas** — ver [ANX-504 Visual Kit](../..
 
 **Proibições ANX-504:**
 - ❌ Hero KPI / big-number-as-brand
-- ❌ Copper sobre bone (contraste 2.47:1 insuficiente)
+- ❌ Copper fora de ink
 - ❌ Segundo sidebar/switcher-chrome
 - ❌ Acid green/neon
 - ❌ Decorative loading infinito (empty = HonestState)
+- ❌ Bone/Paper/Rule inventados nesta fatia; Magic UI nomeado sem job sentence
 
 ---
 
@@ -244,7 +239,7 @@ Decisões de kit aceitas e **não reabertas** — ver [ANX-504 Visual Kit](../..
 - ❌ `autocomplete="off"` on auth fields
 - ❌ Pure `#000000` backgrounds (OLED smear)
 - ❌ **Hero KPI / big-number-as-brand (ANX-504 BANNED)**
-- ❌ **Copper sobre bone (contraste 2.47:1 insuficiente — ANX-504)**
+- ❌ **Copper fora de ink (ANX-504)**
 - ❌ **Segundo sidebar/switcher-chrome (conflito Aceternity — ANX-504)**
 - ❌ **Acid green/neon + Inter (recusado — ANX-504)**
 - ❌ **Decorative loading infinito (empty = HonestState — ANX-504)**
@@ -256,7 +251,7 @@ Decisões de kit aceitas e **não reabertas** — ver [ANX-504 Visual Kit](../..
 - [ ] Lucide icons only
 - [ ] `cursor-pointer` on clickable elements
 - [ ] 150–300ms transitions
-- [ ] WCAG 2.2 AA ≥4.5:1 contrast (ledger ANX-504: copper-on-ink 7.08:1, bone-on-ink 12.62:1)
+- [ ] WCAG 2.2 AA ≥4.5:1 contrast (ledger ANX-504 nesta fatia: copper-on-ink 7.08:1; texto genérico até fatia Sofia)
 - [ ] Focus rings visible (`ring-2 ring-copper`)
 - [ ] `prefers-reduced-motion` respected
 - [ ] Responsive: 375, 768, 1024, 1440px
@@ -265,4 +260,4 @@ Decisões de kit aceitas e **não reabertas** — ver [ANX-504 Visual Kit](../..
 - [ ] **Targets ≥44×44 CSS px (min-h-11) — ANX-504 obrigatório**
 - [ ] **expectAxeClean no `#main-content` — ANX-504**
 - [ ] **Chart com alt textual ou BLOCK — ANX-504**
-- [ ] **Copper só sobre ink (nunca sobre bone) — ANX-504**
+- [ ] **Copper só sobre ink — ANX-504**

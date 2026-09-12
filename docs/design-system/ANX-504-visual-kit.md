@@ -12,32 +12,32 @@ date: 2026-09-12
 
 Decisão publicada do kit visual e tokens de design para anxionOS. Substitui palette obsoleta (ui-ux-pro-max #020617/#f97316) por ledger institucional com rastreabilidade WCAG e restrições de kit explícitas.
 
-**Status:** PUBLISHED  
-**Crítica:** Sofia Nascimento — APPROVE (body v3)  
+**Status:** DRAFT (PR — Sofia re-gate antes do merge)  
+**Crítica:** Sofia Nascimento — APPROVE body v3 (tokens além de ink/copper/type exigem nova fatia)  
 **Publisher:** Marina Okonkwo  
-**Draft:** Renata Alves
+**Draft:** Renata Alves  
+**CHANGES (Renata):** sem Bone/Paper inventados; sem Rule `#2A2620` na palette publicada; Magic UI sem whitelist de componente nomeado.
 
 ---
 
 ## Tokens do ledger institucional
 
-### Paleta de cores (ledger canônico)
+### Paleta de cores (ledger canônico — Sofia APPROVE body)
 
 | Papel | Token | Hex | Notas |
 |-------|-------|-----|-------|
 | Ink (fundo) | `--color-ink` | `#0B100E` | Fundo principal, profundidade OLED |
-| Copper (CTA/destaque) | `--color-copper` | `#C4843A` | **Só sobre ink** (≥7:1); proibido sobre bone (2.47:1 ↯) |
-| Bone (texto primário) | `--color-bone` | `#E8E4DA` | Corpo de texto, labels (lock v3) |
-| Surface | `--color-surface` | `#121816` | Superfície elevada sobre ink (lock v3; sem role `paper`) |
-| Rule (#2A2620) | `--color-rule` | `#2A2620` | Hairline sobre ink com ≥3:1 medido; **não promover** (uso restrito) |
+| Copper (CTA/destaque) | `--color-copper` | `#C4843A` | **Só sobre ink** (≥7:1) |
 
-**Contraste validado:**
-- Copper #C4843A sobre Ink #0B100E: **7.08:1** (AAA) — aprovado para CTAs, borders, focus rings.
-- Copper #C4843A sobre Bone `#E8E4DA`: contraste insuficiente — **proibido** (copper só sobre ink).
-- Bone `#E8E4DA` sobre Ink `#0B100E`: corpo de texto (lock v3).
-- Surface `#121816` sobre Ink `#0B100E`: superfície elevada (lock v3).
-- **Sem role `paper`** neste lock — tokens oficiais: bone `#E8E4DA`, surface `#121816` (Sofia lock v3).
-- Rule #2A2620 sobre Ink #0B100E: **≥3:1** (medir em uso) — hairlines discretos; não usar como CTA.
+**Tipografia** (parte do ledger aprovado — ver tabela abaixo).
+
+**Fora deste APPROVE (não publicar como canônico):**
+- Tokens de foreground / Bone / Paper / Surface com hex inventado ou não medido nesta fatia — **cortados**. Foreground permanece **genérico** até nova fatia com contraste medido + gate Sofia.
+- Rule `#2A2620` — APPROVE: **não promover**; **não entra** na palette publicada.
+
+**Contraste validado nesta fatia:**
+- Copper `#C4843A` sobre Ink `#0B100E`: **7.08:1** (AAA) — aprovado para CTAs, borders, focus rings.
+- Copper **só** sobre ink — proibido sobre fundos claros / texto claro sem medição + APPROVE.
 
 ### Tipografia
 
@@ -78,8 +78,9 @@ Decisões de kit aceitas e **não reabertas** — violação retorna para Sofia.
 ### Motion (Magic UI — default zero)
 
 - **Fonte:** [Magic UI](https://magicui.design/)
-- **Política:** **default zero** — **apenas** componente `AnimatedGridPattern` (job sentence) + `prefers-reduced-motion` respeitado
-- **Proibição:** não instalar biblioteca completa; quando state vazio = HonestState (sem animação decorativa de "loading" infinito)
+- **Política canônica:** **default zero** + **job sentence** na issue + `prefers-reduced-motion` respeitado
+- **Empty:** HonestState (sem animação decorativa / spinner infinito)
+- **Proibição:** sem componente Magic UI **nomeado** sem job sentence na issue; sem whitelist inventada; não instalar biblioteca completa “por padrão”
 
 ### Widgets de dados (Nyxhora — sem segundo chrome)
 
@@ -109,9 +110,9 @@ WCAG 2.2 Level AA obrigatório — violação = BLOCK.
 1. **`expectAxeClean` no `#main-content`** — axe-core limpo em testes E2E
 2. **Targets ≥44×44 CSS px** — controles clicáveis `min-h-11` (44px Tailwind `h-11`)
 3. **Chart sem alt honesto = BLOCK** — toda série temporal precisa de alternativa textual ou tabela (não canvas puro)
-4. **Contraste validado** — ledger garante ≥7:1 copper-on-ink; ≥11:1 bone-on-ink
+4. **Contraste validado nesta fatia** — ledger garante ≥7:1 copper-on-ink; texto/foreground genérico até fatia com medição + Sofia
 5. **Focus rings visíveis** — `:focus-visible` com `ring-2 ring-copper`
-6. **`prefers-reduced-motion`** — Magic UI AnimatedGridPattern respeita; sem motion quando desabilitado
+6. **`prefers-reduced-motion`** — qualquer motion (só com job sentence) respeita; sem motion quando desabilitado
 
 ### Targets mínimos
 
@@ -128,10 +129,12 @@ WCAG 2.2 Level AA obrigatório — violação = BLOCK.
 Decisões **recusadas** por Sofia — não propor novamente sem aceite explícito:
 
 1. **Hero KPI / big-number-as-brand:** números grandes centralizados como identidade visual — **banido**. Signature = grafo Archify, não métricas.
-2. **Copper sobre bone:** contraste 2.47:1 (FAIL) — **proibido**. Copper **só** sobre ink.
-3. **Acid green / neon + Inter:** paletas neon vibrantes — **recusadas**. Ledger institucional (ink/copper/bone/surface) prevalece.
+2. **Copper fora de ink:** copper **só** sobre ink — proibido sobre fundos/textos claros sem contraste medido + APPROVE.
+3. **Acid green / neon + Inter:** paletas neon vibrantes — **recusadas**. Ledger institucional (ink + copper + type) prevalece.
 4. **Segundo sidebar / switcher-chrome:** Nyxhora layout chrome + Aceternity = conflito — **proibido**. Um chrome (Aceternity ANX-448).
-5. **Promoção de Rule #2A2620:** hairline discreta sobre ink com ≥3:1 medido — **não promover** como CTA ou destaque. Uso restrito a divisores.
+5. **Rule `#2A2620` na palette publicada:** APPROVE disse **não promover** — não publicar como token canônico.
+6. **Bone / Paper / Surface hex inventados** nesta fatia — cortados; foreground genérico até nova fatia.
+7. **Whitelist Magic UI de componente nomeado** sem job sentence na issue — inventado; canônico = default zero + job sentence + `prefers-reduced-motion`.
 
 ---
 
@@ -141,10 +144,10 @@ Decisões **recusadas** por Sofia — não propor novamente sem aceite explícit
 
 ### Post-P0 (separado)
 
-1. Migrar `frontend/src/styles/global.css` para tokens do ledger (`--color-ink`, `--color-copper`, etc.)
+1. Migrar `frontend/src/styles/global.css` para tokens do ledger (`--color-ink`, `--color-copper`; foreground após fatia Sofia)
 2. Atualizar primitivos shadcn em `components/ui/` para usar ledger
 3. Instalar Aceternity sidebar (ANX-448) como chrome único
-4. Implementar AnimatedGridPattern (Magic UI) para job sentence com `prefers-reduced-motion`
+4. Motion Magic UI **somente** com job sentence na issue + `prefers-reduced-motion`; empty = HonestState
 5. Adicionar widgets Nyxhora (stat cards, timeline) sem layout chrome
 6. Configurar ECharts com alt textual obrigatório ou bloquear uso
 7. Integrar Archify signature no centro do hero/dashboard
@@ -158,9 +161,9 @@ Decisões **recusadas** por Sofia — não propor novamente sem aceite explícit
 
 ## Referências
 
-- **Issue:** ANX-504 (todo; Sofia APPROVE body v3)
+- **Issue:** ANX-504 (Sofia APPROVE body v3; Renata CHANGES no PR)
 - **Chrome Aceternity:** ANX-448
-- **Critic:** Sofia Nascimento
+- **Critic:** Sofia Nascimento (re-gate antes do merge)
 - **Publisher:** Marina Okonkwo
 - **Draft:** Renata Alves
 
