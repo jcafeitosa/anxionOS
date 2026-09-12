@@ -12,11 +12,11 @@ date: 2026-09-12
 
 Decisão publicada do kit visual e tokens de design para anxionOS. Substitui palette obsoleta (ui-ux-pro-max #020617/#f97316) por ledger institucional com rastreabilidade WCAG e restrições de kit explícitas.
 
-**Status:** DRAFT (PR — Sofia re-gate antes do merge)  
-**Crítica:** Sofia Nascimento — APPROVE body v3 (tokens além de ink/copper/type exigem nova fatia)  
+**Status:** PUBLISHED (merged `#9` / `f2ae5928`)  
+**Crítica:** Sofia Nascimento — APPROVE (tip `e592967`; ink/copper/type; copper/ink 6.13:1 AA)  
 **Publisher:** Marina Okonkwo  
 **Draft:** Renata Alves  
-**CHANGES (Renata):** sem Bone/Paper inventados; sem Rule `#2A2620` na palette publicada; Magic UI sem whitelist de componente nomeado.
+**Gate:** cortes Renata + residual contraste/Newsreader incorporados; sem produto.
 
 ---
 
