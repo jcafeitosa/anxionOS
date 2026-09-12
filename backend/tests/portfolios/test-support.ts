@@ -1,3 +1,10 @@
+import {
+	shouldRunPgIntegrationTests,
+	truncateDomainTables,
+} from "../pg-harness-guard";
+
+export { shouldRunPgIntegrationTests } from "../pg-harness-guard";
+
 import { randomUUID } from "node:crypto";
 import type { PortfoliosExecutionFillConfirmedV1 } from "@anxionos/contracts/portfolios";
 import {
@@ -30,12 +37,6 @@ export function getDatabaseUrl(): string | undefined {
 	return process.env.DATABASE_URL?.trim() || undefined;
 }
 
-export function shouldRunPgIntegrationTests(): boolean {
-	return (
-		process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl())
-	);
-}
-
 const PORTFOLIOS_TRUNCATE_SQL =
 	"TRUNCATE portfolios_command_journal, portfolios_position_reconciliation_cases, portfolios_ledger_applications, portfolios_provisional_cash, portfolios_valuation_snapshots, portfolios_holdings, portfolios_positions, portfolios_portfolios, market_data_observations_ts, market_data_observation_headers, market_data_command_journal, market_data_fx_rates, market_data_instruments, capital_accounts, domain_journal, outbox CASCADE";
 
@@ -65,7 +66,7 @@ export async function withPortfoliosPgHarness<T>(
 		await ensurePortfoliosSchema(pool);
 		await ensureMarketDataSchema(pool);
 		await pool.query(CAPITAL_ACCOUNTS_DDL);
-		await pool.query(PORTFOLIOS_TRUNCATE_SQL);
+		await truncateDomainTables(pool, PORTFOLIOS_TRUNCATE_SQL);
 		return await work({ pool });
 	} finally {
 		await pool.end();

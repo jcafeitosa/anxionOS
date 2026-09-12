@@ -1,3 +1,10 @@
+import {
+	shouldRunPgIntegrationTests,
+	truncateDomainTables,
+} from "../pg-harness-guard";
+
+export { shouldRunPgIntegrationTests } from "../pg-harness-guard";
+
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import type { Agent } from "../../modules/agents/src/domain/entities/agent";
 import type { AgentBudgetPolicy } from "../../modules/agents/src/domain/entities/agent-budget-policy";
@@ -285,12 +292,6 @@ export function getDatabaseUrl(): string | undefined {
 	return process.env.DATABASE_URL?.trim() || undefined;
 }
 
-export function shouldRunPgIntegrationTests(): boolean {
-	return (
-		process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl())
-	);
-}
-
 const AGENTS_TRUNCATE_SQL =
 	"TRUNCATE agents_command_journal, agents_budget_policies, agents_routines, agents_agent_skill_bindings, agents_skill_versions, agents_skills, agents_agent_versions, agents_agents, domain_journal, outbox CASCADE";
 
@@ -321,7 +322,7 @@ export async function withAgentsPgHarness<T>(
 	try {
 		await ensureEventingSchema(pool);
 		await ensureAgentsSchema(pool);
-		await pool.query(AGENTS_TRUNCATE_SQL);
+		await truncateDomainTables(pool, AGENTS_TRUNCATE_SQL);
 		return await work({ pool });
 	} finally {
 		await pool.end();

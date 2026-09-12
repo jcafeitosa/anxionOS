@@ -26,6 +26,7 @@ import { createGovernancePlugin } from "../../../apps/api/src/governance/plugin"
 import { createAgencyScope } from "../../../apps/api/src/identity/agency-scope";
 import { createIdentityApiRuntime } from "../../../apps/api/src/identity/bootstrap";
 import { createIdentityPlugin } from "../../../apps/api/src/identity/plugin";
+import { truncateDomainTables } from "../../pg-harness-guard";
 import {
 	assertPgIntegrationEnvForCi,
 	getDatabaseUrl,
@@ -264,7 +265,7 @@ async function withHarness(
 		await ensureIdentitySchema(pool);
 		await ensureOrganizationsSchema(pool);
 		await ensureGovernanceSchema(pool);
-		await pool.query(TRUNCATE_SQL);
+		await truncateDomainTables(pool, TRUNCATE_SQL);
 		const fixture = await seedFixture(
 			pool,
 			harness.scopedPool,

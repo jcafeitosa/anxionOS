@@ -1,3 +1,10 @@
+import {
+	shouldRunPgIntegrationTests,
+	truncateDomainTables,
+} from "../pg-harness-guard";
+
+export { shouldRunPgIntegrationTests } from "../pg-harness-guard";
+
 import { randomUUID } from "node:crypto";
 import {
 	createPgPool,
@@ -14,12 +21,6 @@ import { ensureRiskSchema } from "../../modules/risk/src/infrastructure/migrate"
 
 export function getDatabaseUrl(): string | undefined {
 	return process.env.DATABASE_URL?.trim() || undefined;
-}
-
-export function shouldRunPgIntegrationTests(): boolean {
-	return (
-		process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl())
-	);
 }
 
 const RISK_TRUNCATE_SQL =
@@ -41,8 +42,8 @@ export async function withExecutionPgHarness<T>(
 		await ensureEventingSchema(pool);
 		await ensureRiskSchema(pool);
 		await ensureExecutionSchema(pool);
-		await pool.query(RISK_TRUNCATE_SQL);
-		await pool.query(EXECUTION_TRUNCATE_SQL);
+		await truncateDomainTables(pool, RISK_TRUNCATE_SQL);
+		await truncateDomainTables(pool, EXECUTION_TRUNCATE_SQL);
 		return await work({ pool });
 	} finally {
 		await pool.end();

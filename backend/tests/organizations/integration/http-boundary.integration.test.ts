@@ -23,6 +23,7 @@ import {
 import { Elysia } from "elysia";
 import type { Pool } from "pg";
 import { createOrganizationsPlugin } from "../../../apps/api/src/organizations/plugin";
+import { truncateDomainTables } from "../../pg-harness-guard";
 import { getDatabaseUrl, shouldRunPgIntegrationTests } from "../test-support";
 
 /**
@@ -80,7 +81,7 @@ async function withOrganizationsHttpHarness(
 		await ensureEventingSchema(pool);
 		await ensureIdentitySchema(pool);
 		await ensureOrganizationsSchema(pool);
-		await pool.query(TRUNCATE_SQL);
+		await truncateDomainTables(pool, TRUNCATE_SQL);
 
 		const orgDb = createOrganizationsDb(pool);
 		const identityDb = createIdentityDb(pool);

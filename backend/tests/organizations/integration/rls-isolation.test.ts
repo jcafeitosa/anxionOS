@@ -7,6 +7,7 @@ import {
 	createOrganizationsDb,
 	createOrganizationUnitOfWork,
 } from "@anxionos/organizations";
+import { truncateDomainTables } from "../../pg-harness-guard";
 import {
 	createStubPrincipalLookup,
 	getDatabaseUrl,
@@ -39,7 +40,7 @@ describe("organizations RLS integration (ANX-256)", () => {
 				"@anxionos/organizations"
 			);
 			await ensureOrganizationsSchema(scoped.pool);
-			await scoped.pool.query(ORGANIZATIONS_TRUNCATE_SQL);
+			await truncateDomainTables(scoped.pool, ORGANIZATIONS_TRUNCATE_SQL);
 
 			const ownerPrincipalId = randomUUID();
 			const orgDb = createOrganizationsDb(scoped.pool);
@@ -113,7 +114,7 @@ describe("organizations RLS integration (ANX-256)", () => {
 				"@anxionos/organizations"
 			);
 			await ensureOrganizationsSchema(scoped.pool);
-			await scoped.pool.query(ORGANIZATIONS_TRUNCATE_SQL);
+			await truncateDomainTables(scoped.pool, ORGANIZATIONS_TRUNCATE_SQL);
 
 			const ownerPrincipalId = randomUUID();
 			const orgDb = createOrganizationsDb(scoped.pool);

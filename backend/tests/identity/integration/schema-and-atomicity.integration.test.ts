@@ -15,6 +15,7 @@ import {
 	getDatabaseUrl,
 	shouldRunPgIntegrationTests,
 } from "../../api/test-support";
+import { truncateDomainTables } from "../../pg-harness-guard";
 
 const skipReason = shouldRunPgIntegrationTests()
 	? null
@@ -49,7 +50,7 @@ async function withIdentityPgHarness<T>(
 	try {
 		await ensureEventingSchema(pool);
 		await ensureIdentitySchema(pool);
-		await pool.query(TRUNCATE_SQL);
+		await truncateDomainTables(pool, TRUNCATE_SQL);
 		return await work({ pool });
 	} finally {
 		await pool.end();

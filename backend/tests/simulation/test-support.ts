@@ -1,3 +1,10 @@
+import {
+	shouldRunPgIntegrationTests,
+	truncateDomainTables,
+} from "../pg-harness-guard";
+
+export { shouldRunPgIntegrationTests } from "../pg-harness-guard";
+
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import {
 	createPgPool,
@@ -24,12 +31,6 @@ export function getDatabaseUrl(): string | undefined {
 	return process.env.DATABASE_URL?.trim() || undefined;
 }
 
-export function shouldRunPgIntegrationTests(): boolean {
-	return (
-		process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl())
-	);
-}
-
 const SIMULATION_TRUNCATE_SQL =
 	"TRUNCATE simulation_snapshots, simulation_runs, simulation_manifests, simulation_command_journal, domain_journal, outbox, inbox CASCADE";
 
@@ -45,7 +46,7 @@ export async function withSimulationPgHarness<T>(
 	try {
 		await ensureEventingSchema(pool);
 		await ensureSimulationSchema(pool);
-		await pool.query(SIMULATION_TRUNCATE_SQL);
+		await truncateDomainTables(pool, SIMULATION_TRUNCATE_SQL);
 		return await work({ pool });
 	} finally {
 		await pool.end();

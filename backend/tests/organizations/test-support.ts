@@ -1,3 +1,10 @@
+import {
+	shouldRunPgIntegrationTests,
+	truncateDomainTables,
+} from "../pg-harness-guard";
+
+export { shouldRunPgIntegrationTests } from "../pg-harness-guard";
+
 import { randomUUID } from "node:crypto";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import {
@@ -241,12 +248,6 @@ export function getDatabaseUrl(): string | undefined {
 	return process.env.DATABASE_URL?.trim() || undefined;
 }
 
-export function shouldRunPgIntegrationTests(): boolean {
-	return (
-		process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl())
-	);
-}
-
 const ORGANIZATIONS_TRUNCATE_SQL =
 	"TRUNCATE organizations_command_journal, organizations_memberships, organizations_owners, organizations_agencies, domain_journal, outbox RESTART IDENTITY CASCADE";
 
@@ -271,7 +272,7 @@ export async function withOrganizationsPgHarness<T>(
 	try {
 		await ensureEventingSchema(pool);
 		await ensureOrganizationsSchema(pool);
-		await pool.query(ORGANIZATIONS_TRUNCATE_SQL);
+		await truncateDomainTables(pool, ORGANIZATIONS_TRUNCATE_SQL);
 		return await work({ pool });
 	} finally {
 		await pool.end();

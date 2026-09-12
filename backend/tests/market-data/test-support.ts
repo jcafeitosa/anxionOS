@@ -1,4 +1,11 @@
 import {
+	shouldRunPgIntegrationTests,
+	truncateDomainTables,
+} from "../pg-harness-guard";
+
+export { shouldRunPgIntegrationTests } from "../pg-harness-guard";
+
+import {
 	createPgPool,
 	ensureEventingSchema,
 } from "@anxionos/eventing/postgres";
@@ -6,12 +13,6 @@ import { ensureMarketDataSchema } from "../../modules/market-data/src/infrastruc
 
 export function getDatabaseUrl(): string | undefined {
 	return process.env.DATABASE_URL?.trim() || undefined;
-}
-
-export function shouldRunPgIntegrationTests(): boolean {
-	return (
-		process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl())
-	);
 }
 
 const MARKET_DATA_TRUNCATE_SQL =
@@ -29,7 +30,7 @@ export async function withMarketDataPgHarness<T>(
 	try {
 		await ensureEventingSchema(pool);
 		await ensureMarketDataSchema(pool);
-		await pool.query(MARKET_DATA_TRUNCATE_SQL);
+		await truncateDomainTables(pool, MARKET_DATA_TRUNCATE_SQL);
 		return await work({ pool });
 	} finally {
 		await pool.end();

@@ -16,6 +16,7 @@ import {
 	getDatabaseUrl,
 	shouldRunPgIntegrationTests,
 } from "../../api/test-support";
+import { truncateDomainTables } from "../../pg-harness-guard";
 
 const skipReason = shouldRunPgIntegrationTests()
 	? null
@@ -54,7 +55,7 @@ async function withIdentityHttpPgHarness<T>(
 	try {
 		await ensureEventingSchema(pool);
 		await ensureIdentitySchema(pool);
-		await pool.query(TRUNCATE_SQL);
+		await truncateDomainTables(pool, TRUNCATE_SQL);
 		const db = createIdentityDb(pool);
 		const app = new Elysia().use(
 			createIdentityPlugin({

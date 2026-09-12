@@ -1,4 +1,11 @@
 import {
+	shouldRunPgIntegrationTests,
+	truncateDomainTables,
+} from "../pg-harness-guard";
+
+export { shouldRunPgIntegrationTests } from "../pg-harness-guard";
+
+import {
 	createScopedPool,
 	rollbackDatabaseMigrations,
 	runDatabaseMigrations,
@@ -8,12 +15,6 @@ export const FIXTURE_TABLE = "anxionos_tenant_records";
 
 export function getDatabaseUrl(): string | undefined {
 	return process.env.DATABASE_URL?.trim() || undefined;
-}
-
-export function shouldRunPgIntegrationTests(): boolean {
-	return (
-		process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl())
-	);
 }
 
 export async function withPgTestHarness<T>(
@@ -38,7 +39,7 @@ export async function withPgTestHarness<T>(
 			rolePassword:
 				process.env.DATABASE_ROLE_PASSWORD ?? "change-me-in-production",
 		});
-		await pool.pool.query(`TRUNCATE ${FIXTURE_TABLE}`);
+		await truncateDomainTables(pool.pool, `TRUNCATE ${FIXTURE_TABLE}`);
 		return await work({ pool, tenantA, tenantB });
 	} finally {
 		try {

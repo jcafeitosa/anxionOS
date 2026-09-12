@@ -1,3 +1,10 @@
+import {
+	shouldRunPgIntegrationTests,
+	truncateDomainTables,
+} from "../pg-harness-guard";
+
+export { shouldRunPgIntegrationTests } from "../pg-harness-guard";
+
 import { expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import {
@@ -37,12 +44,6 @@ export function getDatabaseUrl(): string | undefined {
 	return process.env.DATABASE_URL?.trim() || undefined;
 }
 
-export function shouldRunPgIntegrationTests(): boolean {
-	return (
-		process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl())
-	);
-}
-
 const PERFORMANCE_TRUNCATE_SQL =
 	"TRUNCATE performance_pnl_series, performance_metric_points, performance_metric_series, performance_position_exposure_snapshots, performance_outcome_snapshots, performance_command_journal, domain_journal, outbox CASCADE";
 
@@ -64,7 +65,7 @@ export async function withPerformancePgHarness<T>(
 	try {
 		await ensureEventingSchema(pool);
 		await ensurePerformanceSchema(pool);
-		await pool.query(PERFORMANCE_TRUNCATE_SQL);
+		await truncateDomainTables(pool, PERFORMANCE_TRUNCATE_SQL);
 		const unitOfWork = createPerformanceUnitOfWork(pool);
 		const commandJournal = createPgCommandJournalRepository(pool);
 		return await work({ pool, unitOfWork, commandJournal });

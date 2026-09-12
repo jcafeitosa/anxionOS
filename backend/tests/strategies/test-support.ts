@@ -1,3 +1,10 @@
+import {
+	shouldRunPgIntegrationTests,
+	truncateDomainTables,
+} from "../pg-harness-guard";
+
+export { shouldRunPgIntegrationTests } from "../pg-harness-guard";
+
 import { randomUUID } from "node:crypto";
 import {
 	createPgPool,
@@ -20,12 +27,6 @@ export function getDatabaseUrl(): string | undefined {
 	return process.env.DATABASE_URL?.trim() || undefined;
 }
 
-export function shouldRunPgIntegrationTests(): boolean {
-	return (
-		process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl())
-	);
-}
-
 const STRATEGIES_TRUNCATE_SQL =
 	"TRUNCATE strategies_signals, strategies_deployments, strategies_backtest_runs, strategies_command_journal, strategy_versions, strategies, domain_journal, outbox CASCADE";
 
@@ -41,7 +42,7 @@ export async function withStrategiesPgHarness<T>(
 	try {
 		await ensureEventingSchema(pool);
 		await ensureStrategiesSchema(pool);
-		await pool.query(STRATEGIES_TRUNCATE_SQL);
+		await truncateDomainTables(pool, STRATEGIES_TRUNCATE_SQL);
 		return await work({ pool });
 	} finally {
 		await pool.end();

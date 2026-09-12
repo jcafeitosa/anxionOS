@@ -33,6 +33,10 @@ import { ensureDecisionsSchema } from "../../modules/decisions/src/infrastructur
 import { ensureExecutionSchema } from "../../modules/execution/src/infrastructure/migrate";
 import { ensurePerformanceSchema } from "../../modules/performance/src/infrastructure/migrate";
 import { ensureRiskSchema } from "../../modules/risk/src/infrastructure/migrate";
+import {
+	shouldRunPgIntegrationTests,
+	truncateDomainTables,
+} from "../pg-harness-guard";
 
 export const P06_TEST_ORG_ID = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
 export const P06_TEST_GRANT_ID = "bbbbbbbb-cccc-4ddd-8eee-ffffffffffff";
@@ -95,10 +99,10 @@ TRUNCATE
 CASCADE`;
 
 export function shouldRunP06PgIntegrationTests(): boolean {
-	return (
-		process.env.RUN_PG_INTEGRATION_TESTS === "true" &&
-		Boolean(process.env.DATABASE_URL?.trim())
-	);
+	// ANX-487: same shared guard as the module harnesses — recognized truthy
+	// values enable it, an unrecognized value fails loudly, and the TRUNCATE
+	// target must be a loopback scratch database.
+	return shouldRunPgIntegrationTests();
 }
 
 export async function withP06PgHarness<T>(
@@ -118,7 +122,7 @@ export async function withP06PgHarness<T>(
 		await ensureExecutionSchema(pool);
 		await ensureAccountingSchema(pool);
 		await ensurePerformanceSchema(pool);
-		await pool.query(P06_TRUNCATE_SQL);
+		await truncateDomainTables(pool, P06_TRUNCATE_SQL);
 		return await work({ pool });
 	} finally {
 		await pool.end();

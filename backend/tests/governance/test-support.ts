@@ -1,3 +1,10 @@
+import {
+	shouldRunPgIntegrationTests,
+	truncateDomainTables,
+} from "../pg-harness-guard";
+
+export { shouldRunPgIntegrationTests } from "../pg-harness-guard";
+
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import type { TenantContext } from "@anxionos/database";
 import {
@@ -329,29 +336,27 @@ export function getDatabaseUrl(): string | undefined {
 }
 
 export const PG_INTEGRATION_SKIP_MESSAGE =
-	"PG integration tests require RUN_PG_INTEGRATION_TESTS=true and DATABASE_URL";
+	"PG integration tests require RUN_PG_INTEGRATION_TESTS=true|1|yes|on and a scratch DATABASE_URL (ANX-487)";
 
-/** Returns skip reason when tests should not run; null when they should run. */
+/**
+ * Returns skip reason when tests should not run; null when they should run.
+ *
+ * ANX-487: delegates to the shared guard so `RUN_PG_INTEGRATION_TESTS` with an
+ * unrecognized value, or an unsafe `DATABASE_URL` target, fails loudly instead
+ * of becoming a skipped-but-green suite.
+ */
 export function getPgIntegrationTestSkipReason(): string | null {
-	if (process.env.RUN_PG_INTEGRATION_TESTS !== "true") {
-		return PG_INTEGRATION_SKIP_MESSAGE;
+	if (shouldRunPgIntegrationTests()) {
+		return null;
 	}
-	return null;
+	return PG_INTEGRATION_SKIP_MESSAGE;
 }
 
-/** Fail CI when RUN_PG_INTEGRATION_TESTS=true but DATABASE_URL is missing. */
+/** Fail CI when the PostgreSQL harness is requested but its target is unsafe. */
 export function assertPgIntegrationEnvForCi(): void {
-	if (process.env.RUN_PG_INTEGRATION_TESTS === "true" && !getDatabaseUrl()) {
-		throw new Error(
-			`${PG_INTEGRATION_SKIP_MESSAGE} — RUN_PG_INTEGRATION_TESTS=true but DATABASE_URL is unset`,
-		);
-	}
-}
-
-export function shouldRunPgIntegrationTests(): boolean {
-	return (
-		process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl())
-	);
+	// The guard throws for an unrecognized flag value, a missing/invalid
+	// DATABASE_URL or a non-scratch target; a disabled/absent flag is a no-op.
+	shouldRunPgIntegrationTests();
 }
 
 const GOVERNANCE_TRUNCATE_SQL =
@@ -369,7 +374,7 @@ export async function withGovernancePgHarness<T>(
 	try {
 		await ensureEventingSchema(pool);
 		await ensureGovernanceSchema(pool);
-		await pool.query(GOVERNANCE_TRUNCATE_SQL);
+		await truncateDomainTables(pool, GOVERNANCE_TRUNCATE_SQL);
 		return await work({ pool });
 	} finally {
 		await pool.end();

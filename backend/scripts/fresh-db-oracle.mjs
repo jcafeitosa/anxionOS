@@ -29,26 +29,15 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { createPgPool } from "@anxionos/eventing/postgres";
+// ANX-487: shared with `tests/pg-harness-guard.ts` (which refuses to TRUNCATE
+// these same names). Kept in a neutral module so `scripts/` never imports test
+// code and the list has exactly one definition.
+import { PROTECTED_DATABASES } from "./protected-databases.ts";
 
 const BACKEND_ROOT = new URL("..", import.meta.url).pathname;
 const DEFAULT_ADMIN_URL =
 	"postgres://anxionos:anxionos@localhost:5432/anxionos";
 const DEFAULT_SCRATCH_DB = "anxionos_oracle";
-
-/** Databases this oracle must never drop — dev/shared/reserved per ANX-463. */
-const PROTECTED_DATABASES = new Set([
-	"postgres",
-	"template0",
-	"template1",
-	"anxionos",
-	"anxionos_g2r",
-	"anxionos_g3r",
-	"anxionos_g3r2",
-	"anxionos_g4r",
-	"anxionos_g5r",
-	"anxionos_g5r2",
-	"anxionos_org",
-]);
 
 /**
  * ANX-463 residual (reported, not masked): these modules expose an

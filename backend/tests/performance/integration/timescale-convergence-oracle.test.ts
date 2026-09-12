@@ -8,6 +8,7 @@ import {
 	listPnlSeriesPoints,
 	rebuildMetricTimeseries,
 } from "@anxionos/performance";
+import { truncateDomainTables } from "../../pg-harness-guard";
 import {
 	assertDerivedMetricsMatch,
 	metricsToMap,
@@ -189,7 +190,8 @@ describe("ANX-154 S4 Timescale convergence oracle", () => {
 					linesSummary: lines,
 				});
 
-				await pool.query(
+				await truncateDomainTables(
+					pool,
 					"TRUNCATE performance_pnl_series, performance_metric_points",
 				);
 

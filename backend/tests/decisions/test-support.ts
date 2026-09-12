@@ -1,3 +1,10 @@
+import {
+	shouldRunPgIntegrationTests,
+	truncateDomainTables,
+} from "../pg-harness-guard";
+
+export { shouldRunPgIntegrationTests } from "../pg-harness-guard";
+
 import { randomUUID } from "node:crypto";
 import {
 	createPgCommandJournalRepository as createCapitalCommandJournal,
@@ -31,12 +38,6 @@ export function getDatabaseUrl(): string | undefined {
 	return process.env.DATABASE_URL?.trim() || undefined;
 }
 
-export function shouldRunPgIntegrationTests(): boolean {
-	return (
-		process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl())
-	);
-}
-
 const RISK_TRUNCATE_SQL =
 	"TRUNCATE risk_command_journal, risk_permits, risk_check_results, risk_limit_policies, risk_epoch_registry CASCADE";
 const CAPITAL_TRUNCATE_SQL =
@@ -61,9 +62,9 @@ export async function withDecisionsPgHarness<T>(
 		// ANX-463: apply the module's own versioned migration instead of a duplicated
 		// fixture — the copy had drifted to TEXT money columns and broke SUM(amount).
 		await ensureCapitalSchema(pool);
-		await pool.query(RISK_TRUNCATE_SQL);
-		await pool.query(CAPITAL_TRUNCATE_SQL);
-		await pool.query(DECISIONS_TRUNCATE_SQL);
+		await truncateDomainTables(pool, RISK_TRUNCATE_SQL);
+		await truncateDomainTables(pool, CAPITAL_TRUNCATE_SQL);
+		await truncateDomainTables(pool, DECISIONS_TRUNCATE_SQL);
 		return await work({ pool });
 	} finally {
 		await pool.end();

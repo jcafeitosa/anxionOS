@@ -1,3 +1,10 @@
+import {
+	shouldRunPgIntegrationTests,
+	truncateDomainTables,
+} from "../pg-harness-guard";
+
+export { shouldRunPgIntegrationTests } from "../pg-harness-guard";
+
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import {
 	createEvaluationUnitOfWork,
@@ -206,12 +213,6 @@ export function getDatabaseUrl(): string | undefined {
 	return process.env.DATABASE_URL?.trim() || undefined;
 }
 
-export function shouldRunPgIntegrationTests(): boolean {
-	return (
-		process.env.RUN_PG_INTEGRATION_TESTS === "true" && Boolean(getDatabaseUrl())
-	);
-}
-
 const EVALUATION_TRUNCATE_SQL =
 	"TRUNCATE evaluation_certifications, evaluation_scores, evaluation_records, evaluation_command_journal, domain_journal, outbox CASCADE";
 
@@ -233,7 +234,7 @@ export async function withEvaluationPgHarness<T>(
 	try {
 		await ensureEventingSchema(pool);
 		await ensureEvaluationSchema(pool);
-		await pool.query(EVALUATION_TRUNCATE_SQL);
+		await truncateDomainTables(pool, EVALUATION_TRUNCATE_SQL);
 		const unitOfWork = createEvaluationUnitOfWork(pool);
 		const commandJournal = createPgCommandJournalRepository(pool);
 		return await work({ pool, unitOfWork, commandJournal });
