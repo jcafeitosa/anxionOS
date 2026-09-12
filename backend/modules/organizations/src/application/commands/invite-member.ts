@@ -152,15 +152,19 @@ export async function inviteMember(
 				role: command.role,
 				revision,
 			});
-			await recordOrganizationCommand(context, {
-				commandId: command.commandId,
-				commandName: "InviteMember",
-				aggregateId: membershipId,
-				aggregateType: "Membership",
-				revision,
-				responseSnapshot: toCommandResultSnapshot(result),
-				requestHash,
-			});
+			await recordOrganizationCommand(
+				context,
+				{
+					commandId: command.commandId,
+					commandName: "InviteMember",
+					aggregateId: membershipId,
+					aggregateType: "Membership",
+					revision,
+					responseSnapshot: toCommandResultSnapshot(result),
+					requestHash,
+				},
+				command.agencyId,
+			);
 			await context.publishEvents([event]);
 			return { result, inviteToken };
 		},

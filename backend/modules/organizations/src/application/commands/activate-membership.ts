@@ -171,15 +171,19 @@ export async function activateMembership(
 				role: updated.role,
 				revision: updated.revision,
 			});
-			await recordOrganizationCommand(context, {
-				commandId: command.commandId,
-				commandName: "ActivateMembership",
-				aggregateId: updated.id,
-				aggregateType: "Membership",
-				revision: updated.revision,
-				responseSnapshot: toCommandResultSnapshot(result),
-				requestHash: intent.requestHash,
-			});
+			await recordOrganizationCommand(
+				context,
+				{
+					commandId: command.commandId,
+					commandName: "ActivateMembership",
+					aggregateId: updated.id,
+					aggregateType: "Membership",
+					revision: updated.revision,
+					responseSnapshot: toCommandResultSnapshot(result),
+					requestHash: intent.requestHash,
+				},
+				command.agencyId,
+			);
 			await context.publishEvents([event]);
 			return result;
 		},

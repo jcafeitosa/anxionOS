@@ -1,5 +1,6 @@
 export interface CommandJournalRecord {
 	commandId: string;
+	tenantId: string;
 	commandName: string;
 	aggregateId: string;
 	aggregateType: string;
@@ -17,6 +18,7 @@ export interface CommandJournalRecord {
 }
 export interface NewCommandJournalRecord {
 	commandId: string;
+	tenantId: string;
 	commandName: string;
 	aggregateId: string;
 	aggregateType: string;

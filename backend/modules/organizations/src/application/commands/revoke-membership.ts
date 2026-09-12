@@ -75,15 +75,19 @@ export async function revokeMembership(
 					aggregateId: membership.id,
 					revision: membership.revision,
 				});
-				await recordOrganizationCommand(context, {
-					commandId: command.commandId,
-					commandName: "RevokeMembership",
-					aggregateId: membership.id,
-					aggregateType: "Membership",
-					revision: membership.revision,
-					responseSnapshot: toCommandResultSnapshot(unchanged),
-					requestHash: intent.requestHash,
-				});
+				await recordOrganizationCommand(
+					context,
+					{
+						commandId: command.commandId,
+						commandName: "RevokeMembership",
+						aggregateId: membership.id,
+						aggregateType: "Membership",
+						revision: membership.revision,
+						responseSnapshot: toCommandResultSnapshot(unchanged),
+						requestHash: intent.requestHash,
+					},
+					command.agencyId,
+				);
 				return unchanged;
 			}
 			if (!canTransitionMembershipStatus(membership.status, "revoked")) {
@@ -130,15 +134,19 @@ export async function revokeMembership(
 				principalId: updated.principalId,
 				revision: updated.revision,
 			});
-			await recordOrganizationCommand(context, {
-				commandId: command.commandId,
-				commandName: "RevokeMembership",
-				aggregateId: updated.id,
-				aggregateType: "Membership",
-				revision: updated.revision,
-				responseSnapshot: toCommandResultSnapshot(result),
-				requestHash: intent.requestHash,
-			});
+			await recordOrganizationCommand(
+				context,
+				{
+					commandId: command.commandId,
+					commandName: "RevokeMembership",
+					aggregateId: updated.id,
+					aggregateType: "Membership",
+					revision: updated.revision,
+					responseSnapshot: toCommandResultSnapshot(result),
+					requestHash: intent.requestHash,
+				},
+				command.agencyId,
+			);
 			await context.publishEvents([event]);
 			return result;
 		},

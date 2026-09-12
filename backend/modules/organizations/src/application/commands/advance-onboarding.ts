@@ -77,15 +77,19 @@ export async function advanceOnboarding(
 					aggregateId: agency.id,
 					revision: agency.revision,
 				});
-				await recordOrganizationCommand(context, {
-					commandId: command.commandId,
-					commandName: "AdvanceOnboarding",
-					aggregateId: agency.id,
-					aggregateType: "Agency",
-					revision: agency.revision,
-					responseSnapshot: toCommandResultSnapshot(unchanged),
-					requestHash: intent.requestHash,
-				});
+				await recordOrganizationCommand(
+					context,
+					{
+						commandId: command.commandId,
+						commandName: "AdvanceOnboarding",
+						aggregateId: agency.id,
+						aggregateType: "Agency",
+						revision: agency.revision,
+						responseSnapshot: toCommandResultSnapshot(unchanged),
+						requestHash: intent.requestHash,
+					},
+					command.agencyId,
+				);
 				return unchanged;
 			}
 			const now = new Date();
@@ -110,15 +114,19 @@ export async function advanceOnboarding(
 				previousStatus,
 				revision: updated.revision,
 			});
-			await recordOrganizationCommand(context, {
-				commandId: command.commandId,
-				commandName: "AdvanceOnboarding",
-				aggregateId: updated.id,
-				aggregateType: "Agency",
-				revision: updated.revision,
-				responseSnapshot: toCommandResultSnapshot(result),
-				requestHash: intent.requestHash,
-			});
+			await recordOrganizationCommand(
+				context,
+				{
+					commandId: command.commandId,
+					commandName: "AdvanceOnboarding",
+					aggregateId: updated.id,
+					aggregateType: "Agency",
+					revision: updated.revision,
+					responseSnapshot: toCommandResultSnapshot(result),
+					requestHash: intent.requestHash,
+				},
+				command.agencyId,
+			);
 			await context.publishEvents([event]);
 			return result;
 		},

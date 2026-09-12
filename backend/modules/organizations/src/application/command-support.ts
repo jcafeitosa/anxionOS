@@ -243,9 +243,10 @@ export async function saveWithRevisionConflictMapping<T>(
 export async function recordOrganizationCommand(
 	context: { commandJournal: CommandJournalRepository },
 	entry: NewCommandJournalRecord,
+	tenantId: string,
 ): Promise<void> {
 	try {
-		await context.commandJournal.record(entry);
+		await context.commandJournal.record({ ...entry, tenantId });
 	} catch (error) {
 		if (error instanceof CommandJournalConflictError) {
 			throwOrganizationError(

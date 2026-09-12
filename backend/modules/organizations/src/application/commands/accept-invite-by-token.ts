@@ -186,15 +186,19 @@ export async function acceptInviteByToken(
 				role: updated.role,
 				revision: updated.revision,
 			});
-			await recordOrganizationCommand(context, {
-				commandId: command.commandId,
-				commandName: "AcceptInviteByToken",
-				aggregateId: updated.id,
-				aggregateType: "Membership",
-				revision: updated.revision,
-				responseSnapshot: toCommandResultSnapshot(result),
-				requestHash: intent.requestHash,
-			});
+			await recordOrganizationCommand(
+				context,
+				{
+					commandId: command.commandId,
+					commandName: "AcceptInviteByToken",
+					aggregateId: updated.id,
+					aggregateType: "Membership",
+					revision: updated.revision,
+					responseSnapshot: toCommandResultSnapshot(result),
+					requestHash: intent.requestHash,
+				},
+				invitedMembership.agencyId,
+			);
 			await context.publishEvents([event]);
 			return result;
 		},

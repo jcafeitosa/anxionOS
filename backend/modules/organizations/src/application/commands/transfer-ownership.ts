@@ -88,15 +88,19 @@ export async function transferOwnership(
 					aggregateId: agency.id,
 					revision: agency.revision,
 				});
-				await recordOrganizationCommand(context, {
-					commandId: command.commandId,
-					commandName: "TransferOwnership",
-					aggregateId: agency.id,
-					aggregateType: "Agency",
-					revision: agency.revision,
-					responseSnapshot: toCommandResultSnapshot(unchanged),
-					requestHash: intent.requestHash,
-				});
+				await recordOrganizationCommand(
+					context,
+					{
+						commandId: command.commandId,
+						commandName: "TransferOwnership",
+						aggregateId: agency.id,
+						aggregateType: "Agency",
+						revision: agency.revision,
+						responseSnapshot: toCommandResultSnapshot(unchanged),
+						requestHash: intent.requestHash,
+					},
+					command.agencyId,
+				);
 				return unchanged;
 			}
 			const successorMembership =
@@ -164,15 +168,19 @@ export async function transferOwnership(
 				newOwnerMembershipId: successorMembership.id,
 				revision: updatedAgency.revision,
 			});
-			await recordOrganizationCommand(context, {
-				commandId: command.commandId,
-				commandName: "TransferOwnership",
-				aggregateId: updatedAgency.id,
-				aggregateType: "Agency",
-				revision: updatedAgency.revision,
-				responseSnapshot: toCommandResultSnapshot(result),
-				requestHash: intent.requestHash,
-			});
+			await recordOrganizationCommand(
+				context,
+				{
+					commandId: command.commandId,
+					commandName: "TransferOwnership",
+					aggregateId: updatedAgency.id,
+					aggregateType: "Agency",
+					revision: updatedAgency.revision,
+					responseSnapshot: toCommandResultSnapshot(result),
+					requestHash: intent.requestHash,
+				},
+				command.agencyId,
+			);
 			await context.publishEvents([event]);
 			return result;
 		},

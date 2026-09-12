@@ -126,18 +126,25 @@ export const memberships = pgTable(
 		index("organizations_memberships_tenant_id_idx").on(table.tenantId),
 	],
 );
-export const commandJournal = pgTable("organizations_command_journal", {
-	commandId: uuid("command_id").primaryKey(),
-	commandName: text("command_name").notNull(),
-	aggregateId: uuid("aggregate_id").notNull(),
-	aggregateType: text("aggregate_type").notNull(),
-	revision: integer("revision").notNull(),
-	responseSnapshot: jsonb("response_snapshot"),
-	requestHash: text("request_hash"),
-	createdAt: timestamp("created_at", { withTimezone: true })
-		.notNull()
-		.defaultNow(),
-});
+export const commandJournal = pgTable(
+	"organizations_command_journal",
+	{
+		commandId: uuid("command_id").primaryKey(),
+		tenantId: uuid("tenant_id").notNull(),
+		commandName: text("command_name").notNull(),
+		aggregateId: uuid("aggregate_id").notNull(),
+		aggregateType: text("aggregate_type").notNull(),
+		revision: integer("revision").notNull(),
+		responseSnapshot: jsonb("response_snapshot"),
+		requestHash: text("request_hash"),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [
+		index("organizations_command_journal_tenant_id_idx").on(table.tenantId),
+	],
+);
 
 export type AgencyRow = typeof agencies.$inferSelect;
 export type NewAgencyRow = typeof agencies.$inferInsert;

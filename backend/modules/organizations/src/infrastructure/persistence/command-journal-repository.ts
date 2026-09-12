@@ -13,6 +13,7 @@ export function toCommandJournalRecord(
 ): CommandJournalRecord {
 	return {
 		commandId: row.commandId,
+		tenantId: row.tenantId,
 		commandName: row.commandName,
 		aggregateId: row.aggregateId,
 		aggregateType: row.aggregateType,
@@ -45,6 +46,7 @@ export function createDrizzleCommandJournalRepository(
 				.insert(commandJournal)
 				.values({
 					commandId: entry.commandId,
+					tenantId: entry.tenantId,
 					commandName: entry.commandName,
 					aggregateId: entry.aggregateId,
 					aggregateType: entry.aggregateType,

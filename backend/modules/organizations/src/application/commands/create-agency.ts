@@ -114,15 +114,19 @@ export async function createAgency(
 				createdAt: now,
 				updatedAt: now,
 			});
-			await recordOrganizationCommand(context, {
-				commandId: command.commandId,
-				commandName: "CreateAgency",
-				aggregateId: agencyId,
-				aggregateType: "Agency",
-				revision,
-				responseSnapshot: toCommandResultSnapshot(result),
-				requestHash: intent.requestHash,
-			});
+			await recordOrganizationCommand(
+				context,
+				{
+					commandId: command.commandId,
+					commandName: "CreateAgency",
+					aggregateId: agencyId,
+					aggregateType: "Agency",
+					revision,
+					responseSnapshot: toCommandResultSnapshot(result),
+					requestHash: intent.requestHash,
+				},
+				agencyId,
+			);
 			await context.publishEvents([event]);
 			return result;
 		},
