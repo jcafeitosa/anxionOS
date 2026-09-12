@@ -26,12 +26,12 @@ type: reference
 | Role | Hex | CSS Variable | Notas |
 |------|-----|--------------|-------|
 | Ink (fundo) | `#0B100E` | `--color-ink` | Fundo principal OLED |
-| Copper (CTA/destaque) | `#C4843A` | `--color-copper` | **Só sobre ink** (7.08:1 AAA) |
+| Copper (CTA/destaque) | `#C4843A` | `--color-copper` | **Só sobre ink** (6.13:1 AA) |
 
 **Fora deste APPROVE:** Bone / Paper / Surface hex e Rule `#2A2620` **não** entram na palette publicada. Foreground permanece **genérico** até nova fatia com contraste medido + gate Sofia.
 
 **Contraste validado nesta fatia (WebAIM):**
-- Copper `#C4843A` sobre Ink `#0B100E`: **7.08:1** (AAA) ✓
+- Copper `#C4843A` sobre Ink `#0B100E`: **6.13:1** (AA) ✓
 - Copper **só** sobre ink
 
 **Proibições ANX-504:**
@@ -51,7 +51,7 @@ type: reference
 
 ### Typography
 
-- **Display Font:** Newsreader (headings, hero, números grandes — ANX-504)
+- **Display Font:** Newsreader (títulos / razão apenas — ANX-504; **sem** hero / números grandes)
 - **Body Font:** Public Sans (corpo de texto, labels, UI — ANX-504)
 - **Mono:** IBM Plex Mono (IDs, códigos, logs — ANX-504)
 - **Mood:** institucional, confiança, signature Archify no centro (não hero KPI)
@@ -62,7 +62,7 @@ type: reference
 @import url('https://fonts.googleapis.com/css2?family=Newsreader:wght@400;600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 ```
 
-**Hero scale:** `font-size: clamp(2.5rem, 6vw, 4.5rem); letter-spacing: -0.03em;` (Newsreader display)
+**Display scale (título/razão):** `font-size` tipográfico para título/razão em Newsreader — **não** aplicar a hero KPI / números grandes (banidos).
 
 **Legacy (migração gradual):**
 - Plus Jakarta Sans (display) → Newsreader
@@ -251,7 +251,7 @@ Decisões de kit aceitas e **não reabertas** — ver [ANX-504 Visual Kit](../..
 - [ ] Lucide icons only
 - [ ] `cursor-pointer` on clickable elements
 - [ ] 150–300ms transitions
-- [ ] WCAG 2.2 AA ≥4.5:1 contrast (ledger ANX-504 nesta fatia: copper-on-ink 7.08:1; texto genérico até fatia Sofia)
+- [ ] WCAG 2.2 AA ≥4.5:1 contrast (ledger ANX-504 nesta fatia: copper-on-ink 6.13:1 AA; texto genérico até fatia Sofia)
 - [ ] Focus rings visible (`ring-2 ring-copper`)
 - [ ] `prefers-reduced-motion` respected
 - [ ] Responsive: 375, 768, 1024, 1440px

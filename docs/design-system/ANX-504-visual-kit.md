@@ -27,7 +27,7 @@ Decisão publicada do kit visual e tokens de design para anxionOS. Substitui pal
 | Papel | Token | Hex | Notas |
 |-------|-------|-----|-------|
 | Ink (fundo) | `--color-ink` | `#0B100E` | Fundo principal, profundidade OLED |
-| Copper (CTA/destaque) | `--color-copper` | `#C4843A` | **Só sobre ink** (≥7:1) |
+| Copper (CTA/destaque) | `--color-copper` | `#C4843A` | **Só sobre ink** (≥6.13:1 AA) |
 
 **Tipografia** (parte do ledger aprovado — ver tabela abaixo).
 
@@ -36,14 +36,14 @@ Decisão publicada do kit visual e tokens de design para anxionOS. Substitui pal
 - Rule `#2A2620` — APPROVE: **não promover**; **não entra** na palette publicada.
 
 **Contraste validado nesta fatia:**
-- Copper `#C4843A` sobre Ink `#0B100E`: **7.08:1** (AAA) — aprovado para CTAs, borders, focus rings.
+- Copper `#C4843A` sobre Ink `#0B100E`: **6.13:1** (AA) — aprovado para CTAs, borders, focus rings.
 - Copper **só** sobre ink — proibido sobre fundos claros / texto claro sem medição + APPROVE.
 
 ### Tipografia
 
 | Papel | Família | Pesos | Uso |
 |-------|---------|-------|-----|
-| Display | Newsreader | 400, 600, 700 | Headings, hero, números grandes |
+| Display | Newsreader | 400, 600, 700 | Títulos / razão (display); **sem** hero / números grandes |
 | Body | Public Sans | 400, 500, 600 | Corpo de texto, labels, UI |
 | Mono | IBM Plex Mono | 400, 500 | IDs, códigos, logs |
 
@@ -110,7 +110,7 @@ WCAG 2.2 Level AA obrigatório — violação = BLOCK.
 1. **`expectAxeClean` no `#main-content`** — axe-core limpo em testes E2E
 2. **Targets ≥44×44 CSS px** — controles clicáveis `min-h-11` (44px Tailwind `h-11`)
 3. **Chart sem alt honesto = BLOCK** — toda série temporal precisa de alternativa textual ou tabela (não canvas puro)
-4. **Contraste validado nesta fatia** — ledger garante ≥7:1 copper-on-ink; texto/foreground genérico até fatia com medição + Sofia
+4. **Contraste validado nesta fatia** — ledger garante 6.13:1 AA copper-on-ink; texto/foreground genérico até fatia com medição + Sofia
 5. **Focus rings visíveis** — `:focus-visible` com `ring-2 ring-copper`
 6. **`prefers-reduced-motion`** — qualquer motion (só com job sentence) respeita; sem motion quando desabilitado
 
@@ -135,6 +135,7 @@ Decisões **recusadas** por Sofia — não propor novamente sem aceite explícit
 5. **Rule `#2A2620` na palette publicada:** APPROVE disse **não promover** — não publicar como token canônico.
 6. **Bone / Paper / Surface hex inventados** nesta fatia — cortados; foreground genérico até nova fatia.
 7. **Whitelist Magic UI de componente nomeado** sem job sentence na issue — inventado; canônico = default zero + job sentence + `prefers-reduced-motion`.
+8. **Newsreader em hero / números grandes** — **fora**; Newsreader = títulos / razão (display) apenas.
 
 ---
 
