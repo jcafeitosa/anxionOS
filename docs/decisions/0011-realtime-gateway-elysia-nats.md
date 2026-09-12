@@ -2,7 +2,7 @@
 type: decision
 ---
 
-# ADR0005 — Realtime gateway (Elysia + NATS)
+# ADR0011 — Realtime gateway (Elysia + NATS)
 
 | Campo | Valor |
 | --- | --- |

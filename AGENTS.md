@@ -29,10 +29,10 @@ anxionOS é uma plataforma multi-tenant de investimentos autônomos governados p
 
 | Aspecto | Situação |
 | --- | --- |
-| Board | Dashi ativo — 453 issues (442 `done`, 3 `in_review`, 1 `in_progress`, 2 `backlog`, 5 `canceled`) em 2026-09-11. **O board é a fonte de status**; revalidar antes de implementar |
+| Board | Snapshot histórico C1 (2026-09-11 — 453 issues). **O board é a fonte de status em tempo real**; revalidar antes de implementar |
 | Código | Baseline P01–P09 implementado: `backend/` com os 23 módulos do ADR0002, API Bun/Elysia, `frontend/` Astro+React e deploy Docker com sandbox de engines. Verificado localmente em 2026-09-11: `bun run lint` e `tsc --build` com exit 0; `bun test` 1576 pass / 3 skip / 0 fail |
 | Implantação | Ambiente real de produção **não verificado**; engines operam em sandbox/SIMULATED |
-| Documentação | Duas árvores ativas: `brain/` **local** (OKF; não versionada) e o material versionado (`docs/` 548, `notes/` 70, `project-docs/` 12). A numeração de ADRs e specs **colide** entre elas (ADR0005 e spec 006 existem nas duas com assuntos distintos) — identificar sempre por caminho + título. Saneamento em ANX-455 |
+| Documentação | Duas árvores ativas: `brain/` **local** (OKF; não versionada) e o material versionado (`docs/`, `notes/`, `project-docs/`). Precedência por assunto: hierarquia de agentes → brain/ (ADR 0010, spec 010); realtime gateway → docs/decisions/ (ADR 0011); Product Graph aceito mantém 0005 e 006 em project-docs/. Identificar sempre por caminho + título. Mapa: [document-precedence.md](docs/document-precedence.md). Parent ANX-455 |
 | Organização do backend | **Aceita** — [ADR0002](brain/project-docs/decisions/0002-adopt-modular-backend-layout.md) |
 | Modelo operacional do grafo | **Proposto** — [ADR0001](brain/project-docs/decisions/0001-graph-operational-domain-authority.md) |
 | PRD | Rascunho — [0001-anxionos-prd-mestre](brain/project-docs/proposals/0001-anxionos-prd-mestre.md) |
@@ -44,7 +44,7 @@ Este retrato é factual e datado; autorizações de escopo continuam regidas pel
 
 A pasta **`brain/`** (Open Knowledge / OKF) é **somente local**: está no `.gitignore` e **não** é enviada ao GitHub. Os caminhos abaixo (`brain/index.md`, specs, ADRs) são fontes de verdade **no workspace local**; links relativos continuam válidos para quem tem `brain/` clonado ou sincronizado fora do git.
 
-Além de [README.md](README.md) e deste arquivo, o remote publica `docs/` (548 arquivos), `notes/` (70) e `project-docs/` (12, incluindo specs e ADRs). Parte desse material **não** está duplicada em `brain/` e é canônica no próprio caminho — por exemplo o ADR0005 Product Graph e as specs 006 (product-agent-graph) e 007 (products/marketplace), aceitos no greenlight ANX-276. A numeração de ADRs e specs **colide entre as árvores**; identificar sempre por caminho + título, nunca só pelo número. Saneamento rastreado em ANX-455. Obtenham `brain/` pelo canal acordado com o mantenedor.
+Além de [README.md](README.md) e deste arquivo, o remote publica `docs/`, `notes/` e `project-docs/` (incluindo specs e ADRs). Parte desse material **não** está duplicada em `brain/` e é canônica no próprio caminho — por exemplo o ADR0005 Product Graph e as specs 006 (product-agent-graph) e 007 (products/marketplace), aceitos no greenlight ANX-276. A precedência é **por assunto** conforme [document-precedence.md](docs/document-precedence.md): hierarquia de agentes → brain/ 0010/010, realtime gateway → docs/decisions/ 0011, Product Graph aceito mantém 0005/006 em project-docs/. Identificar sempre por caminho + título, nunca só pelo número. Resolução ANX-456; parent ANX-455. Obtenham `brain/` pelo canal acordado com o mantenedor.
 
 **Não** commitar `brain/` neste repositório.
 
