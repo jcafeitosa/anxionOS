@@ -20,8 +20,18 @@ jobs:
         with:
           node-version: "22"
 
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - name: Install root dependencies
         run: npm install
+
+      # ANX-506: orchestration tests import backend packages (contracts/zod).
+      # Root npm install alone leaves workspace deps unresolved in CI.
+      - name: Install backend workspace dependencies
+        working-directory: backend
+        run: bun install
 
       - name: orchestration:verify
         run: npm run orchestration:verify
