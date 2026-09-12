@@ -49,10 +49,10 @@ async function assertIntentMatches(
 	commandId: string,
 ): Promise<void> {
 	if (existing.commandName !== intent.commandName) {
-		// F-06 do G5: a mensagem NAO nomeia o comando alheio. O namespace de
-		// `Idempotency-Key` e' global (sem tenant_id — ANX-480), entao nomear o
-		// comando vazaria o nome de um comando de OUTRO tenant para quem
-		// adivinhasse a key. O codigo em `details.code` ja' basta para depurar.
+		// F-06 do G5: a mensagem NAO nomeia o comando alheio. ANX-480 isolou o
+		// namespace de `Idempotency-Key` por tenant (tenant_id + RLS no journal),
+		// mas preservamos a mensagem opaca por defesa em profundidade: o codigo
+		// em `details.code` ja' basta para depurar sem vazar nome do comando.
 		throwOrganizationError(
 			"ORG_DUPLICATE_IDEMPOTENCY",
 			`Idempotency key ${commandId} was already used by another command`,
