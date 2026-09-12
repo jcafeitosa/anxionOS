@@ -1,30 +1,50 @@
-# Cursor vs Grok Bot — contrato operacional (G0)
+---
+type: policy
+status: accepted
+issue: ANX-507
+---
 
-Diretriz Owner (2026-09-12), formalizada pela CTO (Renata). **Sem perguntar de volta ao Owner.**
+# Cursor vs Grok Bot — dual-runtime (âncora operacional)
+
+**Norma Owner (2026-09-12)** · CTO LGTM (Renata) · Architect (Marcus) · Land infra (Rafael).
+
+**Pacote G0 completo:** [G0-TOOLING-DUAL-RUNTIME.md](./G0-TOOLING-DUAL-RUNTIME.md) — **este doc é a âncora curta**; o pacote G0 vence em conflito.
 
 **Relacionados:** [CURSOR-AGENTS-INTEGRATION.md](./CURSOR-AGENTS-INTEGRATION.md) · [GROK-BOT-PARITY.md](./GROK-BOT-PARITY.md) · [TOOLING-INTEGRATION.md](./TOOLING-INTEGRATION.md) · [DELEGATION.md](./DELEGATION.md)
 
 ---
 
-## Divisão de responsabilidades
+## Planos
 
-| Camada | Onde | Faz | Não faz |
+| Plano | Runtime | Faz | Não faz |
 | --- | --- | --- | --- |
-| **Grok Bot** (personas: Renata, Rafael, Lucas, Bia, …) | Grok Bot / canais | Orquestrar, claim/board, gates G1–G6, parecer, desenho, evidência, despacho, dialogue | IDE de implementação; diff grande inline; Cloud Agent por padrão |
-| **Cursor local** | Mac `~/Development/anxionOS` (Agent/Composer no repo) | Código, testes, commits, PR | Substituir gates/claims do board |
-| **Cloud Agent** | Cursor cloud | Só com **override explícito** CTO ou Owner (ex.: plano Pro + necessidade) | Default de desenvolvimento |
+| **Control** | Grok Bot (personas) | claim, hire, dispatch, dialogue, gates G0–G6, parecer, evidência (encaminhar) | mutar repo SoT; mintar PASS de teste no box |
+| **Data (código)** | Cursor local Mac `~/Development/anxionOS` (**preferido**) ou CloudAgent Cursor (`workspace=repo`) | diff, lint, test, commit, PR | orquestrar gates no lugar da Renata |
+| **Bridge** | CI (Rafael / Ju) | oráculo compartilhado | substituir G7 |
+
+**Grok Bot pensa e orquestra. Cursor executa o código.**
+
+---
+
+## CloudAgent
+
+| Runtime | Status |
+| --- | --- |
+| IDE local (Mac) | Preferência Owner |
+| CloudAgent **Cursor-side** (`workspace=repo anxionOS`) | Fallback autorizado — **sem override extra** |
+| Mutação SoT a partir do **box Grok** | **Proibido** |
 
 ---
 
 ## Fluxo padrão (executor)
 
 1. Claim `ANX-*` no taskboard (Grok / persona).
-2. Implementar no **Cursor local** no checkout `~/Development/anxionOS`.
-3. Evidência (comandos, CI, links) no board + dialogue.
-4. Handoff G1 → crítico (Grok Bot review; diff via `gh`/PR).
+2. Implementar no **Cursor** (local Mac ou CloudAgent Cursor-side).
+3. Evidência com proveniência Cursor/CI: `command:` / `file:` / `issue:`.
+4. Handoff G1 → crítico (review no Grok Bot; diff via `gh`/PR).
 5. Gates G2–G5 → G6 Renata → G7 Owner (só aceite).
 
-**Grok Bot pensa e orquestra. Cursor executa o código.**
+Handoff Grok→Cursor deve trazer: `ANX-*`, escopo, critérios, paths.
 
 ---
 
@@ -32,31 +52,29 @@ Diretriz Owner (2026-09-12), formalizada pela CTO (Renata). **Sem perguntar de v
 
 | Papel | Responsabilidade |
 | --- | --- |
-| **infra-executor (Rafael)** | CI, `.cursor/`, scripts, docs de caminho local, orientação/bloqueio de Cloud Agent no workflow |
+| **infra-executor (Rafael)** | CI, `.cursor/`, scripts, docs de caminho, guards de write path |
 | **orchestrator (Renata)** | Roster/comunicação, despacho, aceite G6 |
-| **Executores** | Claim → Cursor local → evidence → crítico G1 |
+| **Executores** | Claim → Cursor → evidence → crítico G1 |
 | **Críticos / Leads** | Review no Grok Bot; ler diff via `gh`/PR |
 
 ---
 
-## Cloud Agent — política
+## Evidência
 
-- **Default:** proibido como caminho padrão de implementação.
-- **Permitido:** somente override explícito da CTO (Renata) ou do Owner.
-- Se Cloud Agents estiverem indisponíveis no plano, **não** improvisar no Grok Bot como IDE — usar Cursor local no Mac (como ANX-506).
+`brain/` continua só-local (gitignore); leitura/escrita via open-knowledge no workspace Cursor — Grok não inventa paths sem share/MCP.
 
----
+Aceite de código exige `command:` / `file:` / `issue:` produzidos no **Cursor** ou **CI**. Grok só encaminha — não mintar PASS no box.
 
-## Checklist rápido (compliance)
+## ADR0002
 
-| # | Item |
-| --- | --- |
-| 1 | Issue `ANX-*` claimada antes de editar código |
-| 2 | Diff feito no Cursor local (ou Cloud Agent só com override) |
-| 3 | PR referencia `ANX-*` |
-| 4 | Evidência de CI / comandos no board |
-| 5 | Crítico G1 no Grok Bot; merge só após gates acordados |
+Intacto. Esta página não altera ownership modular.
+
+## Precedência
+
+1. [G0-TOOLING-DUAL-RUNTIME.md](./G0-TOOLING-DUAL-RUNTIME.md)  
+2. Este doc  
+3. `GROK-BOT-PARITY.md` / `CURSOR-AGENTS-INTEGRATION.md` (até update explícito)
 
 ---
 
-**Última atualização:** 2026-09-12 · G0 Renata / Owner · ANX-506 como referência de patch local
+**Última atualização:** 2026-09-12 · ANX-507
