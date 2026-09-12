@@ -5,6 +5,7 @@ import {
 	toErrorResponse,
 } from "@anxionos/contracts/errors";
 import { PrincipalLookupUnavailableError } from "@anxionos/organizations";
+import { logUnhandledBoundaryError } from "../middleware/unhandled-error-log";
 
 export function mapPortfoliosError(
 	error: unknown,
@@ -23,6 +24,7 @@ export function mapPortfoliosError(
 			body: toErrorResponse(error, { requestId }),
 		};
 	}
+	logUnhandledBoundaryError(error, requestId);
 	return {
 		status: 500,
 		body: toErrorResponse(error, { requestId }),

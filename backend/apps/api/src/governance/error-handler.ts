@@ -10,6 +10,7 @@ import {
 	PrincipalLookupUnavailableError,
 } from "@anxionos/organizations";
 import { ZodError } from "zod";
+import { logUnhandledBoundaryError } from "../middleware/unhandled-error-log";
 
 /**
  * ANX-466 (G5 FURO 3) — corpo JSON malformado nao passa por `ZodError`: o
@@ -90,6 +91,7 @@ export function mapGovernanceError(
 			body: toErrorResponse(error, { requestId }),
 		};
 	}
+	logUnhandledBoundaryError(error, requestId);
 	return {
 		status: 500,
 		body: toErrorResponse(error, { requestId }),

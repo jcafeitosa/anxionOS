@@ -10,6 +10,7 @@ import {
 } from "@anxionos/contracts/simulation";
 import { PrincipalLookupUnavailableError } from "@anxionos/organizations";
 import { SimulationCommandError } from "@anxionos/simulation";
+import { logUnhandledBoundaryError } from "../middleware/unhandled-error-log";
 
 function simulationCodeToAppError(error: SimulationCommandError): AppError {
 	const statusCode = resolveSimulationErrorStatus(error.code);
@@ -64,6 +65,7 @@ export function mapSimulationError(
 			body: toErrorResponse(error, { requestId }),
 		};
 	}
+	logUnhandledBoundaryError(error, requestId);
 	return {
 		status: 500,
 		body: toErrorResponse(error, { requestId }),

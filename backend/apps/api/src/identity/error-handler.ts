@@ -11,6 +11,7 @@ import {
 	throwIdentityError,
 } from "@anxionos/identity";
 import { ZodError } from "zod";
+import { logUnhandledBoundaryError } from "../middleware/unhandled-error-log";
 
 function identityCodeToAppError(error: IdentityCommandError): AppError {
 	const statusCode = resolveIdentityErrorStatus(error.identityCode);
@@ -90,6 +91,7 @@ export function mapIdentityError(
 			body: toErrorResponse(error, { requestId, exposeDetails: true }),
 		};
 	}
+	logUnhandledBoundaryError(error, requestId);
 	return {
 		status: 500,
 		body: toErrorResponse(error, { requestId }),

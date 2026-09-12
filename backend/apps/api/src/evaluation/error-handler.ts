@@ -7,6 +7,7 @@ import {
 import { resolveEvaluationErrorStatus } from "@anxionos/contracts/evaluation";
 import { EvaluationCommandError } from "@anxionos/evaluation";
 import { PrincipalLookupUnavailableError } from "@anxionos/organizations";
+import { logUnhandledBoundaryError } from "../middleware/unhandled-error-log";
 
 function evaluationCodeToAppError(error: EvaluationCommandError): AppError {
 	const statusCode = resolveEvaluationErrorStatus(error.code);
@@ -58,6 +59,7 @@ export function mapEvaluationError(
 			body: toErrorResponse(error, { requestId }),
 		};
 	}
+	logUnhandledBoundaryError(error, requestId);
 	return {
 		status: 500,
 		body: toErrorResponse(error, { requestId }),

@@ -10,6 +10,7 @@ import {
 } from "@anxionos/contracts/execution";
 import { ExecutionCommandError } from "@anxionos/execution";
 import { PrincipalLookupUnavailableError } from "@anxionos/organizations";
+import { logUnhandledBoundaryError } from "../middleware/unhandled-error-log";
 
 function executionCodeToAppError(error: ExecutionCommandError): AppError {
 	const statusCode = resolveExecutionModuleErrorStatus(error.code);
@@ -64,6 +65,7 @@ export function mapExecutionError(
 			body: toErrorResponse(error, { requestId }),
 		};
 	}
+	logUnhandledBoundaryError(error, requestId);
 	return {
 		status: 500,
 		body: toErrorResponse(error, { requestId }),

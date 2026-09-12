@@ -13,6 +13,7 @@ import {
 	OrganizationCommandError,
 	PrincipalLookupUnavailableError,
 } from "@anxionos/organizations";
+import { logUnhandledBoundaryError } from "../middleware/unhandled-error-log";
 
 function operationsCodeToAppError(error: OperationsCommandError): AppError {
 	const statusCode = resolveOperationsErrorStatus(error.code);
@@ -73,6 +74,7 @@ export function mapOperationsError(
 			body: toErrorResponse(error, { requestId }),
 		};
 	}
+	logUnhandledBoundaryError(error, requestId);
 	return {
 		status: 500,
 		body: toErrorResponse(error, { requestId }),

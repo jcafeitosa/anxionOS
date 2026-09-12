@@ -173,15 +173,40 @@ function defaultMessageForCode(code: ErrorCode): string {
 			return "Erro interno do servidor";
 	}
 }
+
+/**
+ * ANX-484 — fail-closed da exposicao de erro.
+ *
+ * O default antigo de `exposeDetails` (`process.env.NODE_ENV !== "production"`)
+ * expunha a mensagem crua de erro desconhecido (SQL + params do driver) porque
+ * NENHUM arquivo de deploy deste repo define `NODE_ENV=production` para a API
+ * (`grep -rn NODE_ENV backend/deploy` nao retorna nada). Decisao registrada:
+ * a ausencia da env agora fecha a exposicao, e a exposicao sensivel exige
+ * opt-in EXPLICITO (`EXPOSE_ERROR_DETAILS=true`, documentada em
+ * `backend/.env.example`) E ambiente nao-producao. Nenhuma combinacao de env
+ * expoe mensagem crua ou stack em producao.
+ *
+ * `details` institucional (ex.: `{ code: "<MODULO>_*" }`) nao e' segredo e
+ * mantem o comportamento anterior (visivel fora de producao), preservando o
+ * contrato do envelope (R04) sem depender da flag.
+ */
+function institutionalDetailsEnabled(): boolean {
+	return process.env.NODE_ENV !== "production";
+}
+function sensitiveErrorExposureEnabled(): boolean {
+	return (
+		process.env.NODE_ENV !== "production" &&
+		process.env.EXPOSE_ERROR_DETAILS === "true"
+	);
+}
 export function toErrorResponse(
 	error: unknown,
 	options: ToErrorResponseOptions = {},
 ): ErrorResponse {
 	const timestamp = new Date().toISOString();
-	const exposeDetails =
-		options.exposeDetails ?? process.env.NODE_ENV !== "production";
-	const exposeStack =
-		options.exposeStack ?? process.env.EXPOSE_ERROR_DETAILS === "true";
+	const exposeDetails = options.exposeDetails ?? institutionalDetailsEnabled();
+	const exposeSensitive =
+		options.exposeStack ?? sensitiveErrorExposureEnabled();
 	if (isAppError(error)) {
 		const body = {
 			code: error.code,
@@ -191,7 +216,7 @@ export function toErrorResponse(
 			...(exposeDetails && error.details !== undefined
 				? { details: error.details }
 				: {}),
-			...(exposeStack && error.stack ? { stack: error.stack } : {}),
+			...(exposeSensitive && error.stack ? { stack: error.stack } : {}),
 		};
 		return { error: body };
 	}
@@ -203,7 +228,7 @@ export function toErrorResponse(
 			? extractValidationDetails(error)
 			: undefined;
 	const message =
-		exposeDetails && error instanceof Error
+		exposeSensitive && error instanceof Error
 			? error.message
 			: defaultMessageForCode(mappedCode);
 	const body: ErrorBody = {
@@ -214,7 +239,7 @@ export function toErrorResponse(
 		...(exposeDetails && validationDetails !== undefined
 			? { details: validationDetails }
 			: {}),
-		...(exposeStack && error instanceof Error && error.stack
+		...(exposeSensitive && error instanceof Error && error.stack
 			? { stack: error.stack }
 			: {}),
 	};

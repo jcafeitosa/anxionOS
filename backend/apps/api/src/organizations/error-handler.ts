@@ -9,6 +9,7 @@ import {
 	PrincipalLookupUnavailableError,
 } from "@anxionos/organizations";
 import { ZodError } from "zod";
+import { logUnhandledBoundaryError } from "../middleware/unhandled-error-log";
 
 /**
  * ANX-460 (G3) — body invalido e' 400, nao 500. O mapeamento caia direto no
@@ -82,6 +83,7 @@ export function mapOrganizationsError(
 	// (query SQL + parametros ligados) podia chegar ao cliente em producao.
 	// `AppError.internal` tem `expose: false`: resposta sempre generica, detalhe
 	// preservado na causa (F-01/F-02 dos gates G3/G4/G5, ANX-460).
+	logUnhandledBoundaryError(error, requestId);
 	return {
 		status: 500,
 		body: toErrorResponse(AppError.internal(undefined, error), { requestId }),

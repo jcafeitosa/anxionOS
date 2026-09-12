@@ -10,6 +10,7 @@ import {
 } from "@anxionos/contracts/performance";
 import { PrincipalLookupUnavailableError } from "@anxionos/organizations";
 import { PerformanceCommandError } from "@anxionos/performance";
+import { logUnhandledBoundaryError } from "../middleware/unhandled-error-log";
 
 function performanceCodeToAppError(error: PerformanceCommandError): AppError {
 	const statusCode = resolvePerformanceErrorStatus(error.code);
@@ -64,6 +65,7 @@ export function mapPerformanceError(
 			body: toErrorResponse(error, { requestId }),
 		};
 	}
+	logUnhandledBoundaryError(error, requestId);
 	return {
 		status: 500,
 		body: toErrorResponse(error, { requestId }),

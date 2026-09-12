@@ -10,6 +10,7 @@ import {
 	PrincipalLookupUnavailableError,
 } from "@anxionos/organizations";
 import { StrategiesCommandError } from "@anxionos/strategies";
+import { logUnhandledBoundaryError } from "../middleware/unhandled-error-log";
 
 function strategiesCodeToAppError(error: StrategiesCommandError): AppError {
 	const statusCode = resolveStrategiesErrorStatus(error.code);
@@ -67,6 +68,7 @@ export function mapStrategiesError(
 			body: toErrorResponse(error, { requestId }),
 		};
 	}
+	logUnhandledBoundaryError(error, requestId);
 	return {
 		status: 500,
 		body: toErrorResponse(error, { requestId }),

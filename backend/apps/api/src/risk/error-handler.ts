@@ -10,6 +10,7 @@ import {
 } from "@anxionos/contracts/risk";
 import { PrincipalLookupUnavailableError } from "@anxionos/organizations";
 import { RiskCommandError } from "@anxionos/risk";
+import { logUnhandledBoundaryError } from "../middleware/unhandled-error-log";
 
 function riskCodeToAppError(error: RiskCommandError): AppError {
 	const statusCode = resolveRiskErrorStatus(error.code);
@@ -64,6 +65,7 @@ export function mapRiskError(
 			body: toErrorResponse(error, { requestId }),
 		};
 	}
+	logUnhandledBoundaryError(error, requestId);
 	return {
 		status: 500,
 		body: toErrorResponse(error, { requestId }),
