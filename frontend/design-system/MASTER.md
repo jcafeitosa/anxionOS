@@ -26,7 +26,7 @@ type: reference
 | Role | Hex | CSS Variable | Notas |
 |------|-----|--------------|-------|
 | Ink (fundo) | `#0B100E` | `--color-ink` | Fundo principal OLED |
-| Copper (CTA/destaque) | `#C4843A` | `--color-copper` | **Só sobre ink** (7.08:1 AAA); proibido sobre bone/paper (2.47:1 ↯) |
+| Copper (CTA/destaque) | `#C4843A` | `--color-copper` | **Só sobre ink** (7.08:1 AAA); proibido sobre bone (2.47:1 ↯) |
 | Bone (texto primário) | `#E8E4DA` | `--color-bone` | Corpo de texto (lock v3) |
 | Surface | `#121816` | `--color-surface` | Superfície elevada sobre ink (lock v3; sem `paper`) |
 | Rule (hairline) | `#2A2620` | `--color-rule` | Divisores discretos sobre ink (≥3:1); **não promover** como CTA |
@@ -36,7 +36,7 @@ type: reference
 - Bone `#E8E4DA` sobre Ink `#0B100E`: corpo de texto (lock v3)
 - Surface `#121816` sobre Ink `#0B100E`: superfície elevada (lock v3)
 - Copper sobre bone/surface clara: **proibido** (copper só sobre ink)
-- Sem role `paper`; hex `#E8E4DA`/`#121816` fora do APPROVE Sofia
+- Sem role `paper`; tokens oficiais: bone `#E8E4DA`, surface `#121816` (Sofia lock v3)
 
 **Proibições ANX-504:**
 - ❌ Copper sobre bone/surface clara (contraste insuficiente)
@@ -219,7 +219,7 @@ Decisões de kit aceitas e **não reabertas** — ver [ANX-504 Visual Kit](../..
 
 **Style:** Institucional Dark + Signature Archify central (ANX-504 visual kit)
 
-**Keywords:** OLED ink, copper CTA, bone/paper text, Archify signature, Newsreader display, Public Sans body, minimal chrome (Aceternity), HonestState empty
+**Keywords:** OLED ink, copper CTA, bone text, Archify signature, Newsreader display, Public Sans body, minimal chrome (Aceternity), HonestState empty
 
 **Landing sections:** 1. Hero + Archify signature center, 2. Feature grid (3–4), 3. Trust strip, 4. Final CTA, 5. Footer
 
@@ -227,7 +227,7 @@ Decisões de kit aceitas e **não reabertas** — ver [ANX-504 Visual Kit](../..
 
 **Proibições ANX-504:**
 - ❌ Hero KPI / big-number-as-brand
-- ❌ Copper sobre bone/paper (contraste 2.47:1 insuficiente)
+- ❌ Copper sobre bone (contraste 2.47:1 insuficiente)
 - ❌ Segundo sidebar/switcher-chrome
 - ❌ Acid green/neon
 - ❌ Decorative loading infinito (empty = HonestState)
@@ -244,7 +244,7 @@ Decisões de kit aceitas e **não reabertas** — ver [ANX-504 Visual Kit](../..
 - ❌ `autocomplete="off"` on auth fields
 - ❌ Pure `#000000` backgrounds (OLED smear)
 - ❌ **Hero KPI / big-number-as-brand (ANX-504 BANNED)**
-- ❌ **Copper sobre bone/paper (contraste 2.47:1 insuficiente — ANX-504)**
+- ❌ **Copper sobre bone (contraste 2.47:1 insuficiente — ANX-504)**
 - ❌ **Segundo sidebar/switcher-chrome (conflito Aceternity — ANX-504)**
 - ❌ **Acid green/neon + Inter (recusado — ANX-504)**
 - ❌ **Decorative loading infinito (empty = HonestState — ANX-504)**
@@ -265,4 +265,4 @@ Decisões de kit aceitas e **não reabertas** — ver [ANX-504 Visual Kit](../..
 - [ ] **Targets ≥44×44 CSS px (min-h-11) — ANX-504 obrigatório**
 - [ ] **expectAxeClean no `#main-content` — ANX-504**
 - [ ] **Chart com alt textual ou BLOCK — ANX-504**
-- [ ] **Copper só sobre ink (nunca sobre bone/paper) — ANX-504**
+- [ ] **Copper só sobre ink (nunca sobre bone) — ANX-504**

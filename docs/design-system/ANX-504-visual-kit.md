@@ -26,7 +26,7 @@ Decisão publicada do kit visual e tokens de design para anxionOS. Substitui pal
 | Papel | Token | Hex | Notas |
 |-------|-------|-----|-------|
 | Ink (fundo) | `--color-ink` | `#0B100E` | Fundo principal, profundidade OLED |
-| Copper (CTA/destaque) | `--color-copper` | `#C4843A` | **Só sobre ink** (≥7:1); proibido sobre bone/paper (2.47:1 ↯) |
+| Copper (CTA/destaque) | `--color-copper` | `#C4843A` | **Só sobre ink** (≥7:1); proibido sobre bone (2.47:1 ↯) |
 | Bone (texto primário) | `--color-bone` | `#E8E4DA` | Corpo de texto, labels (lock v3) |
 | Surface | `--color-surface` | `#121816` | Superfície elevada sobre ink (lock v3; sem role `paper`) |
 | Rule (#2A2620) | `--color-rule` | `#2A2620` | Hairline sobre ink com ≥3:1 medido; **não promover** (uso restrito) |
@@ -36,7 +36,7 @@ Decisão publicada do kit visual e tokens de design para anxionOS. Substitui pal
 - Copper #C4843A sobre Bone `#E8E4DA`: contraste insuficiente — **proibido** (copper só sobre ink).
 - Bone `#E8E4DA` sobre Ink `#0B100E`: corpo de texto (lock v3).
 - Surface `#121816` sobre Ink `#0B100E`: superfície elevada (lock v3).
-- **Sem role `paper`** neste lock — hex `#E8E4DA` / `#121816` fora do APPROVE Sofia.
+- **Sem role `paper`** neste lock — tokens oficiais: bone `#E8E4DA`, surface `#121816` (Sofia lock v3).
 - Rule #2A2620 sobre Ink #0B100E: **≥3:1** (medir em uso) — hairlines discretos; não usar como CTA.
 
 ### Tipografia
@@ -109,7 +109,7 @@ WCAG 2.2 Level AA obrigatório — violação = BLOCK.
 1. **`expectAxeClean` no `#main-content`** — axe-core limpo em testes E2E
 2. **Targets ≥44×44 CSS px** — controles clicáveis `min-h-11` (44px Tailwind `h-11`)
 3. **Chart sem alt honesto = BLOCK** — toda série temporal precisa de alternativa textual ou tabela (não canvas puro)
-4. **Contraste validado** — ledger garante ≥7:1 copper-on-ink; ≥11:1 bone/paper-on-ink
+4. **Contraste validado** — ledger garante ≥7:1 copper-on-ink; ≥11:1 bone-on-ink
 5. **Focus rings visíveis** — `:focus-visible` com `ring-2 ring-copper`
 6. **`prefers-reduced-motion`** — Magic UI AnimatedGridPattern respeita; sem motion quando desabilitado
 
@@ -128,7 +128,7 @@ WCAG 2.2 Level AA obrigatório — violação = BLOCK.
 Decisões **recusadas** por Sofia — não propor novamente sem aceite explícito:
 
 1. **Hero KPI / big-number-as-brand:** números grandes centralizados como identidade visual — **banido**. Signature = grafo Archify, não métricas.
-2. **Copper sobre bone/paper:** contraste 2.47:1 (FAIL) — **proibido**. Copper **só** sobre ink.
+2. **Copper sobre bone:** contraste 2.47:1 (FAIL) — **proibido**. Copper **só** sobre ink.
 3. **Acid green / neon + Inter:** paletas neon vibrantes — **recusadas**. Ledger institucional (ink/copper/bone/paper) prevalece.
 4. **Segundo sidebar / switcher-chrome:** Nyxhora layout chrome + Aceternity = conflito — **proibido**. Um chrome (Aceternity ANX-448).
 5. **Promoção de Rule #2A2620:** hairline discreta sobre ink com ≥3:1 medido — **não promover** como CTA ou destaque. Uso restrito a divisores.
