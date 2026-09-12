@@ -32,6 +32,12 @@ type: guide
 | [Archify](archify/README.md) | Diagramas interativos a partir de `.archify/specs/` |
 | [Graphify](graphify/README.md) | Grafo de conhecimento local (`.graphify/out/`) |
 
+## SOPs
+
+| Documento | Descrição |
+| --- | --- |
+| [OpenKnowledge + Graphify workflow](sop/openknowledge-graphify.md) | Protocolo obrigatório: índice `brain/`, exploração Graphify, publicação single-writer |
+
 ## Orquestração e gates
 
 Matrizes e playbooks da entrega G0–G7. Vários destes documentos são **fonte G0** citada pelas issues do board.
