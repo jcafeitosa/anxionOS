@@ -1,9 +1,13 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, test } from "bun:test";
-import { getTestPool } from "../helpers";
-import { registerPrincipalForTest } from "./helpers";
 import { recordSessionRevoked } from "@anxionos/identity";
-import { createIdentityDb } from "@anxionos/identity";
+import { IdentityCommandError } from "../../modules/identity/src/application/errors";
+import {
+	createInMemoryCommandJournalRepository,
+	createInMemoryPrincipalRepository,
+	createInMemorySessionRefRepository,
+	createRecordingUnitOfWork,
+} from "./test-support";
 
 /**
  * Session revoke ownership abuse cases.
@@ -17,174 +21,149 @@ import { createIdentityDb } from "@anxionos/identity";
  * 3. Session ref belongs to principalB, command claims principalA → opaque 404
  */
 describe("Session revoke ownership enforcement", () => {
-	const pool = getTestPool();
+	function createRecordSessionDeps() {
+		const principalRepository = createInMemoryPrincipalRepository([
+			{
+				id: randomUUID(),
+				authUserId: "alice-auth",
+				email: "alice@test.anxion.os",
+				kind: "human",
+				status: "active",
+				revision: 1,
+				createdAt: new Date(),
+				suspendedAt: null,
+				suspensionReason: null,
+				revokedAt: null,
+				revocationReason: null,
+			},
+			{
+				id: randomUUID(),
+				authUserId: "bob-auth",
+				email: "bob@test.anxion.os",
+				kind: "human",
+				status: "active",
+				revision: 1,
+				createdAt: new Date(),
+				suspendedAt: null,
+				suspensionReason: null,
+				revokedAt: null,
+				revocationReason: null,
+			},
+		]);
+		const sessionRefRepository = createInMemorySessionRefRepository();
+		const { unitOfWork } = createRecordingUnitOfWork(
+			principalRepository,
+			sessionRefRepository,
+		);
+
+		const alice = Array.from(
+			(principalRepository as any).principals.values(),
+		).find((p: any) => p.email === "alice@test.anxion.os");
+		const bob = Array.from(
+			(principalRepository as any).principals.values(),
+		).find((p: any) => p.email === "bob@test.anxion.os");
+
+		return {
+			deps: {
+				principalRepository,
+				sessionRefRepository,
+				unitOfWork,
+			},
+			alice,
+			bob,
+		};
+	}
 
 	test("ABUSE CASE 1 — cannot revoke another principal's session by hash", async () => {
-		const alice = await registerPrincipalForTest(pool, {
-			authUserId: randomUUID(),
-			email: "alice@test.anxion.os",
-		});
-
-		const bob = await registerPrincipalForTest(pool, {
-			authUserId: randomUUID(),
-			email: "bob@test.anxion.os",
-		});
-
-		const identityDb = createIdentityDb(pool);
+		const { deps, alice, bob } = createRecordSessionDeps();
 
 		// Bob creates a session reference
 		const bobSessionRefId = randomUUID();
 		const bobExternalHash = randomUUID(); // Simulated hash
 
-		await recordSessionRevoked(
-			{
-				principalRepository: identityDb.repository,
-				sessionRefRepository: identityDb.sessionRefRepository,
-				unitOfWork: identityDb.unitOfWork,
-			},
-			{
-				principalId: bob.id,
-				sessionRefId: bobSessionRefId,
-				externalRefHash: bobExternalHash,
-			},
-		);
+		await recordSessionRevoked(deps, {
+			principalId: bob.id,
+			sessionRefId: bobSessionRefId,
+			externalRefHash: bobExternalHash,
+		});
 
 		// Alice tries to revoke Bob's session with self-access + Bob's hash
 		await expect(
-			recordSessionRevoked(
-				{
-					principalRepository: identityDb.repository,
-					sessionRefRepository: identityDb.sessionRefRepository,
-					unitOfWork: identityDb.unitOfWork,
-				},
-				{
-					principalId: alice.id, // Alice claims it's her session
-					sessionRefId: randomUUID(), // Unknown id
-					externalRefHash: bobExternalHash, // But Bob's hash
-				},
-			),
+			recordSessionRevoked(deps, {
+				principalId: alice.id, // Alice claims it's her session
+				sessionRefId: randomUUID(), // Unknown id
+				externalRefHash: bobExternalHash, // But Bob's hash
+			}),
+		).rejects.toThrow(IdentityCommandError);
+
+		await expect(
+			recordSessionRevoked(deps, {
+				principalId: alice.id,
+				sessionRefId: randomUUID(),
+				externalRefHash: bobExternalHash,
+			}),
 		).rejects.toMatchObject({
 			identityCode: "IDN_SESSION_NOT_FOUND",
 		});
 	});
 
 	test("ABUSE CASE 2 — cannot replay idempotency key to get another principal's session", async () => {
-		const alice = await registerPrincipalForTest(pool, {
-			authUserId: randomUUID(),
-			email: "alice-replay@test.anxion.os",
-		});
-
-		const bob = await registerPrincipalForTest(pool, {
-			authUserId: randomUUID(),
-			email: "bob-replay@test.anxion.os",
-		});
-
-		const identityDb = createIdentityDb(pool);
+		const { deps, alice, bob } = createRecordSessionDeps();
 
 		// Bob revokes his session with idempotency key
 		const bobSessionRefId = randomUUID();
 		const idempotencyKey = randomUUID();
 
-		await recordSessionRevoked(
-			{
-				principalRepository: identityDb.repository,
-				sessionRefRepository: identityDb.sessionRefRepository,
-				unitOfWork: identityDb.unitOfWork,
-			},
-			{
-				principalId: bob.id,
-				sessionRefId: bobSessionRefId,
-				externalRefHash: randomUUID(),
-				commandId: idempotencyKey,
-			},
-		);
+		await recordSessionRevoked(deps, {
+			principalId: bob.id,
+			sessionRefId: bobSessionRefId,
+			externalRefHash: randomUUID(),
+			commandId: idempotencyKey,
+		});
 
 		// Alice tries to replay with same key but different principalId
 		await expect(
-			recordSessionRevoked(
-				{
-					principalRepository: identityDb.repository,
-					sessionRefRepository: identityDb.sessionRefRepository,
-					unitOfWork: identityDb.unitOfWork,
-				},
-				{
-					principalId: alice.id, // Alice's id
-					sessionRefId: bobSessionRefId, // Bob's session
-					commandId: idempotencyKey, // Bob's key
-				},
-			),
+			recordSessionRevoked(deps, {
+				principalId: alice.id, // Alice's id
+				sessionRefId: bobSessionRefId, // Bob's session
+				commandId: idempotencyKey, // Bob's key
+			}),
 		).rejects.toMatchObject({
 			identityCode: "IDN_SESSION_NOT_FOUND",
 		});
 	});
 
 	test("ABUSE CASE 3 — session ref ownership checked on existing ref", async () => {
-		const alice = await registerPrincipalForTest(pool, {
-			authUserId: randomUUID(),
-			email: "alice-existing@test.anxion.os",
-		});
-
-		const bob = await registerPrincipalForTest(pool, {
-			authUserId: randomUUID(),
-			email: "bob-existing@test.anxion.os",
-		});
-
-		const identityDb = createIdentityDb(pool);
+		const { deps, alice, bob } = createRecordSessionDeps();
 
 		// Bob creates a session reference
 		const bobSessionRefId = randomUUID();
-		await recordSessionRevoked(
-			{
-				principalRepository: identityDb.repository,
-				sessionRefRepository: identityDb.sessionRefRepository,
-				unitOfWork: identityDb.unitOfWork,
-			},
-			{
-				principalId: bob.id,
-				sessionRefId: bobSessionRefId,
-				externalRefHash: randomUUID(),
-			},
-		);
+		await recordSessionRevoked(deps, {
+			principalId: bob.id,
+			sessionRefId: bobSessionRefId,
+			externalRefHash: randomUUID(),
+		});
 
 		// Alice tries to revoke it by knowing the sessionRefId
 		await expect(
-			recordSessionRevoked(
-				{
-					principalRepository: identityDb.repository,
-					sessionRefRepository: identityDb.sessionRefRepository,
-					unitOfWork: identityDb.unitOfWork,
-				},
-				{
-					principalId: alice.id, // Wrong principal
-					sessionRefId: bobSessionRefId, // Bob's session ref
-				},
-			),
+			recordSessionRevoked(deps, {
+				principalId: alice.id, // Wrong principal
+				sessionRefId: bobSessionRefId, // Bob's session ref
+			}),
 		).rejects.toMatchObject({
 			identityCode: "IDN_SESSION_NOT_FOUND",
 		});
 	});
 
 	test("VALID CASE — owner can revoke their own session", async () => {
-		const alice = await registerPrincipalForTest(pool, {
-			authUserId: randomUUID(),
-			email: "alice-valid@test.anxion.os",
-		});
-
-		const identityDb = createIdentityDb(pool);
+		const { deps, alice } = createRecordSessionDeps();
 
 		const aliceSessionRefId = randomUUID();
-		const result = await recordSessionRevoked(
-			{
-				principalRepository: identityDb.repository,
-				sessionRefRepository: identityDb.sessionRefRepository,
-				unitOfWork: identityDb.unitOfWork,
-			},
-			{
-				principalId: alice.id,
-				sessionRefId: aliceSessionRefId,
-				externalRefHash: randomUUID(),
-			},
-		);
+		const result = await recordSessionRevoked(deps, {
+			principalId: alice.id,
+			sessionRefId: aliceSessionRefId,
+			externalRefHash: randomUUID(),
+		});
 
 		expect(result.sessionRef.id).toBe(aliceSessionRefId);
 		expect(result.sessionRef.principalId).toBe(alice.id);
