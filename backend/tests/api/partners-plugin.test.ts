@@ -39,6 +39,28 @@ describe("partners API boundary", () => {
 		expect(result.partnerId).toMatch(/^ptr_prt_/);
 	});
 
+	test("register handler rejects secret-bearing display names", async () => {
+		const runtime = createPartnersTestUow();
+		await expect(
+			handleRegisterPartner(
+				{
+					unitOfWork: runtime.unitOfWork,
+					commandJournal: runtime.commandJournal,
+				},
+				{
+					commandId: randomUUID(),
+					organizationId: TEST_PARTNER_ORG,
+					body: {
+						referralCode: "REF-DISPLAY",
+						displayName: "Bearer sk_live_partner_secret",
+						commissionRate: "10",
+						referredOrganizationId: TEST_REFERRED_ORG,
+					},
+				},
+			),
+		).rejects.toThrow();
+	});
+
 	test("partner detail handler enforces organization scope", async () => {
 		const partnerId = "ptr_prt_00000000-0000-4000-8000-000000000011";
 		const runtime = createPartnersTestUow({
@@ -139,5 +161,43 @@ describe("partners API boundary", () => {
 			attemptCount: 0,
 		});
 		expect(payout.requestedAmount).toBe("10.00");
+	});
+
+	test("read DTOs redact unsafe legacy partner and payout text", () => {
+		const partner = toPartnerDto({
+			id: "ptr_prt_00000000-0000-4000-8000-000000000010",
+			organizationId: "00000000-0000-4000-8000-000000000011",
+			referralCode: "postgres://user:password@host/db",
+			displayName: "Bearer sk_live_partner_secret",
+			commissionRate: "10",
+			referredOrganizationId: "00000000-0000-4000-8000-000000000012",
+			status: "ACTIVE",
+			revision: 1,
+		});
+		expect(partner.referralCode).toBe("[REDACTED]");
+		expect(partner.displayName).toBe("[REDACTED]");
+
+		const payout = toPayoutDto({
+			id: "ptr_pay_00000000-0000-4000-8000-000000000013",
+			partnerId: partner.id,
+			partnerOrganizationId: partner.organizationId,
+			requestedAmount: "10.00",
+			status: "FAILED",
+			requestedAt: "2026-09-10T13:00:00.000Z",
+			approvedAt: null,
+			approvalReference: "Bearer legacy-secret",
+			processingAt: null,
+			settledAt: null,
+			failedAt: "2026-09-10T14:00:00.000Z",
+			failureReason: "postgres://user:password@host/db",
+			providerReference: "api_key=legacy-secret",
+			reversalReference: "-----BEGIN PRIVATE KEY-----",
+			reversedAt: null,
+			attemptCount: 1,
+		});
+		expect(payout.approvalReference).toBe("[REDACTED]");
+		expect(payout.failureReason).toBe("[REDACTED]");
+		expect(payout.providerReference).toBe("[REDACTED]");
+		expect(payout.reversalReference).toBe("[REDACTED]");
 	});
 });

@@ -53,6 +53,16 @@ describe("partners commands", () => {
 			}),
 		).toThrow();
 		expect(() =>
+			registerPartnerCommandSchema.parse({
+				commandId: identifiers.commandId,
+				organizationId: identifiers.partnerOrganizationId,
+				referralCode: "REF-SAFE",
+				displayName: "Bearer sk_live_partner_secret",
+				commissionRate: "10",
+				referredOrganizationId: identifiers.partnerOrganizationId,
+			}),
+		).toThrow();
+		expect(() =>
 			failPayoutCommandSchema.parse({
 				...identifiers,
 				failedAt: "2026-09-13T12:00:00.000Z",

@@ -52,9 +52,12 @@ export {
 } from "./refund-processed-bridge";
 export {
 	isPartnerTextFreeOfSecrets,
+	PARTNER_REDACTED_TEXT,
 	PARTNER_SECRET_REJECTION_MESSAGE,
+	partnerDisplayNameSchema,
 	partnerReasonSchema,
 	partnerReferenceSchema,
+	redactPartnerText,
 } from "./safe-text";
 export {
 	commissionRateSchema,

@@ -1,7 +1,11 @@
 import { z } from "zod";
 import { billingInvoiceIdSchema } from "../billing/types";
 import { institutionalUuidSchema } from "../institutional-uuid";
-import { partnerReasonSchema, partnerReferenceSchema } from "./safe-text";
+import {
+	partnerDisplayNameSchema,
+	partnerReasonSchema,
+	partnerReferenceSchema,
+} from "./safe-text";
 import {
 	commissionRateSchema,
 	decimalAmountSchema,
@@ -26,7 +30,7 @@ export const registerPartnerCommandSchema = z.object({
 	commandId: institutionalUuidSchema,
 	organizationId: institutionalUuidSchema,
 	referralCode: partnersReferralIdSchema,
-	displayName: z.string().min(1).max(256),
+	displayName: partnerDisplayNameSchema,
 	commissionRate: commissionRateSchema,
 	referredOrganizationId: institutionalUuidSchema,
 });

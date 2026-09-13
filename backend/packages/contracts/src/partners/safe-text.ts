@@ -12,6 +12,7 @@ const PARTNER_HIGH_ENTROPY_TOKEN_PATTERN =
 
 export const PARTNER_SECRET_REJECTION_MESSAGE =
 	"Partner references and reasons must not contain credentials or connection strings";
+export const PARTNER_REDACTED_TEXT = "[REDACTED]";
 
 export function isPartnerTextFreeOfSecrets(value: string): boolean {
 	return (
@@ -22,6 +23,19 @@ export function isPartnerTextFreeOfSecrets(value: string): boolean {
 		!PARTNER_HIGH_ENTROPY_TOKEN_PATTERN.test(value)
 	);
 }
+
+export function redactPartnerText(value: string | null): string | null {
+	if (value === null || isPartnerTextFreeOfSecrets(value)) return value;
+	return PARTNER_REDACTED_TEXT;
+}
+
+export const partnerDisplayNameSchema = z
+	.string()
+	.min(1)
+	.max(256)
+	.refine(isPartnerTextFreeOfSecrets, {
+		message: PARTNER_SECRET_REJECTION_MESSAGE,
+	});
 
 export const partnerReferenceSchema = z
 	.string()

@@ -17,6 +17,20 @@ const baselineSql = readFileSync(
 	),
 	"utf8",
 );
+const payoutLifecycleSql = readFileSync(
+	new URL(
+		"../../modules/partners/src/infrastructure/migrations/0003_partners_payout_lifecycle.sql",
+		import.meta.url,
+	),
+	"utf8",
+);
+const secretRemediationSql = readFileSync(
+	new URL(
+		"../../modules/partners/src/infrastructure/migrations/0004_partners_secret_text_remediation.sql",
+		import.meta.url,
+	),
+	"utf8",
+);
 
 const legacyPartnerOrganizationId = "11111111-1111-4111-8111-111111111111";
 
@@ -82,7 +96,71 @@ describe("partners schema migration", () => {
 			// this is the production path for the legacy database that exposed the
 			// 42703 startup failure.
 			await client.query(baselineSql);
+			await client.query(
+				`INSERT INTO partners_partners (
+					id, organization_id, referral_code, display_name,
+					commission_rate, referred_organization_id, status
+				) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+				[
+					"ptr_legacy",
+					legacyPartnerOrganizationId,
+					"postgres://user:password@host/db",
+					"Bearer legacy-display-secret",
+					"10.00",
+					"22222222-2222-4222-8222-222222222222",
+					"ACTIVE",
+				],
+			);
 			await client.query(migrationSql);
+			await client.query(payoutLifecycleSql);
+			await client.query(
+				`INSERT INTO partners_payouts (
+					id, partner_id, partner_organization_id, requested_amount, status,
+					requested_at, approval_reference, failure_reason,
+					provider_reference, reversal_reference
+				) VALUES ($1, $2, $3, $4, $5, NOW(), $6, $7, $8, $9)`,
+				[
+					"ptr_pay_legacy",
+					"ptr_legacy",
+					legacyPartnerOrganizationId,
+					"10.00",
+					"FAILED",
+					"Bearer legacy-approval-secret",
+					"postgres://user:password@host/db",
+					"api_key=legacy-provider-secret",
+					"-----BEGIN PRIVATE KEY-----",
+				],
+			);
+			await client.query(secretRemediationSql);
+
+			const sanitizedPartner = await client.query<{
+				referral_code: string;
+				display_name: string;
+			}>(
+				`SELECT referral_code, display_name
+				 FROM partners_partners WHERE id = 'ptr_legacy'`,
+			);
+			expect(sanitizedPartner.rows[0]).toEqual({
+				referral_code: "[REDACTED:ptr_legacy]",
+				display_name: "[REDACTED]",
+			});
+
+			const sanitizedPayout = await client.query<{
+				approval_reference: string;
+				failure_reason: string;
+				provider_reference: string;
+				reversal_reference: string;
+			}>(
+				`SELECT approval_reference, failure_reason, provider_reference,
+						reversal_reference
+				 FROM partners_payouts WHERE id = 'ptr_pay_legacy'`,
+			);
+			expect(sanitizedPayout.rows[0]).toEqual({
+				approval_reference: "[REDACTED]",
+				failure_reason: "[REDACTED]",
+				provider_reference: "[REDACTED]",
+				reversal_reference: "[REDACTED]",
+			});
 
 			const upgraded = await client.query<{
 				partner_organization_id: string;

@@ -1,5 +1,8 @@
 import { institutionalUuidSchema } from "@anxionos/contracts";
-import { partnersPartnerIdSchema } from "@anxionos/contracts/partners";
+import {
+	partnersPartnerIdSchema,
+	redactPartnerText,
+} from "@anxionos/contracts/partners";
 import {
 	type CommissionAccrualRecord,
 	getPartnerById,
@@ -30,8 +33,8 @@ export function toPartnerDto(partner: PartnerRecord) {
 	return {
 		id: partner.id,
 		organizationId: partner.organizationId,
-		referralCode: partner.referralCode,
-		displayName: partner.displayName,
+		referralCode: redactPartnerText(partner.referralCode),
+		displayName: redactPartnerText(partner.displayName),
 		commissionRate: partner.commissionRate,
 		referredOrganizationId: partner.referredOrganizationId,
 		status: partner.status,
@@ -64,13 +67,13 @@ export function toPayoutDto(payout: PayoutRecord) {
 		status: payout.status,
 		requestedAt: payout.requestedAt,
 		approvedAt: payout.approvedAt,
-		approvalReference: payout.approvalReference,
+		approvalReference: redactPartnerText(payout.approvalReference),
 		processingAt: payout.processingAt,
 		settledAt: payout.settledAt,
 		failedAt: payout.failedAt,
-		failureReason: payout.failureReason,
-		providerReference: payout.providerReference,
-		reversalReference: payout.reversalReference,
+		failureReason: redactPartnerText(payout.failureReason),
+		providerReference: redactPartnerText(payout.providerReference),
+		reversalReference: redactPartnerText(payout.reversalReference),
 		reversedAt: payout.reversedAt,
 		attemptCount: payout.attemptCount,
 	};
