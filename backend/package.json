@@ -11,7 +11,7 @@
 	"scripts": {
 		"dev": "bun run --filter @anxionos/api dev",
 		"build": "bun run --filter '*' build",
-		"test": "bun test --max-concurrency=1",
+		"test": "bun test --max-concurrency=1 --isolate",
 		"test:pg:fresh": "bun run scripts/fresh-db-oracle.mjs",
 		"db:bootstrap": "bun run scripts/db-bootstrap.mjs",
 		"test:orchestration": "bun test tests/orchestration --max-concurrency=1",
