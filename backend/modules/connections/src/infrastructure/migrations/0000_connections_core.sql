@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS connections_inference_requests (
 	binding_version INTEGER NOT NULL,
 	idempotency_key TEXT NOT NULL,
 	operation TEXT NOT NULL,
+	request_hash TEXT,
 	status TEXT NOT NULL,
 	model_ref TEXT,
 	latency_ms INTEGER,
@@ -65,8 +66,10 @@ CREATE TABLE IF NOT EXISTS connections_usage_records (
 );
 
 CREATE TABLE IF NOT EXISTS connections_command_journal (
-	command_id UUID PRIMARY KEY,
+	command_id UUID NOT NULL,
 	organization_id UUID NOT NULL,
 	command_name TEXT NOT NULL,
-	response_snapshot JSONB NOT NULL
+	request_hash TEXT,
+	response_snapshot JSONB NOT NULL,
+	PRIMARY KEY (organization_id, command_id)
 );

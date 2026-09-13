@@ -12,6 +12,7 @@ import {
 } from "../../domain/events/connections-events";
 import type { ConnectionsUnitOfWork } from "../../domain/ports/connections-unit-of-work";
 import type { InferencePort } from "../../domain/ports/inference-port";
+import { createConnectionsCommandIntent } from "../command-support";
 import { throwConnectionsError } from "../errors";
 
 export interface InvokeInferenceDeps {
@@ -58,12 +59,27 @@ export async function invokeInference(
 	input: InvokeInferenceCommand,
 ): Promise<ConnectionsCommandResult> {
 	const command = invokeInferenceCommandSchema.parse(input);
+	const intent = createConnectionsCommandIntent("invokeInference", {
+		...command,
+		commandId: undefined,
+		organizationId: deps.organizationId,
+		consumerPrincipalId: deps.consumerPrincipalId,
+	});
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
+		await ctx.lockIdempotencyKey(
+			`${deps.organizationId}:${command.idempotencyKey}`,
+		);
 		const existing = await ctx.inferenceRequests.findByIdempotencyKey(
 			deps.organizationId,
 			command.idempotencyKey,
 		);
 		if (existing) {
+			if (existing.requestHash !== intent.requestHash) {
+				throwConnectionsError(
+					"CX_IDEMPOTENCY_CONFLICT",
+					`Idempotency key ${command.idempotencyKey} was already used with a different intent`,
+				);
+			}
 			if (existing.status === "waiting_human") {
 				return toReplayResult(existing, command.issueIdentifier);
 			}
@@ -96,6 +112,7 @@ export async function invokeInference(
 			bindingVersion: binding.bindingVersion,
 			idempotencyKey: command.idempotencyKey,
 			operation: command.operation,
+			requestHash: intent.requestHash,
 			status: "pending",
 			modelRef: null,
 			latencyMs: null,
@@ -112,6 +129,7 @@ export async function invokeInference(
 				bindingVersion: binding.bindingVersion,
 				idempotencyKey: command.idempotencyKey,
 				operation: command.operation,
+				requestHash: intent.requestHash,
 				status: "waiting_human",
 				modelRef: `waiting:${adapterResult.operationId}`,
 				latencyMs: null,
@@ -143,6 +161,7 @@ export async function invokeInference(
 			bindingVersion: binding.bindingVersion,
 			idempotencyKey: command.idempotencyKey,
 			operation: command.operation,
+			requestHash: intent.requestHash,
 			status: "completed",
 			modelRef: adapterResult.modelRef,
 			latencyMs: adapterResult.latencyMs,

@@ -9,10 +9,10 @@ import { createAiAccountRegisteredEvent } from "../../domain/events/connections-
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { ConnectionsUnitOfWork } from "../../domain/ports/connections-unit-of-work";
 import {
+	createConnectionsCommandIntent,
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot } from "../errors";
 
 export interface RegisterAIAccountDeps {
 	unitOfWork: ConnectionsUnitOfWork;
@@ -24,22 +24,27 @@ export async function registerAIAccount(
 	input: RegisterAIAccountCommand,
 ): Promise<ConnectionsCommandResult> {
 	const command = registerAIAccountCommandSchema.parse(input);
+	const intent = createConnectionsCommandIntent("registerAIAccount", command);
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
+		command.organizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay) {
 		return replay;
 	}
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
-		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
-		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return connectionsCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
-		}
+		await ctx.lockIdempotencyKey(
+			`${command.organizationId}:${command.commandId}`,
+		);
+		const raced = await loadIdempotentCommandResult(
+			ctx.commandJournal,
+			command.organizationId,
+			command.commandId,
+			intent,
+		);
+		if (raced) return raced;
 		const existing = await ctx.aiAccounts.findDraftByNaturalKey({
 			organizationId: command.organizationId,
 			ownerPrincipalId: command.ownerPrincipalId,
@@ -55,6 +60,7 @@ export async function registerAIAccount(
 				commandId: command.commandId,
 				organizationId: command.organizationId,
 				commandName: "registerAIAccount",
+				requestHash: intent.requestHash,
 				responseSnapshot: toCommandResultSnapshot(result),
 			});
 			return result;
@@ -85,6 +91,7 @@ export async function registerAIAccount(
 			commandId: command.commandId,
 			organizationId: command.organizationId,
 			commandName: "registerAIAccount",
+			requestHash: intent.requestHash,
 			responseSnapshot: toCommandResultSnapshot(result),
 		});
 		return result;
