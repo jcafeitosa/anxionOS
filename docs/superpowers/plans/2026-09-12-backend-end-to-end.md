@@ -20,6 +20,8 @@ type: plan
 - [x] `ANX-503`: the partners migration upgrades pre-P07 databases, backfills `organization_id` into canonical partner ownership, creates the payout ledger, and lets the API boot without PostgreSQL `42703`; onboarding and organization-selection routes now have real heading assertions and scoped axe coverage.
 - [x] `ANX-508`: CI workflows pin all `actions/checkout` and `actions/setup-node` references to immutable official v4.4.0 SHAs; orchestration verification remains green.
 - [x] `ANX-511`: eventing now persists and reconstructs tenant `agencyId` across journal/outbox/DLQ, backfills valid legacy payloads, and atomically fences poison events into terminal `dead_letter` status; targeted PostgreSQL relay/fencing tests pass.
+- [x] `ANX-500`: authorized Partner/Platform console journeys, auth-page smoke coverage, and axe checks are covered by reusable E2E fixtures; the full local E2E suite passes 43/43.
+- [x] `ANX-502`: dead frontend shell paths and the unreachable `RoleArchifyDashboard` branch were removed; frontend unit, typecheck, and build verification remain green.
 - [x] Backend baseline: 23 owner modules plus `adapter-gateway` match the accepted layout; lint, typecheck, full unit suite, and fresh-database oracle are green for the recorded runs.
 - [ ] Program acceptance remains open while the board-owned identity, governance, OpenAPI response, idempotency, tenancy, error-boundary, and platform-security slices are still in progress or in review. REAL capital and L3/L4 autonomy remain non-authorized.
 
