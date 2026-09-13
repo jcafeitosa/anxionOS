@@ -80,6 +80,24 @@ describe("startBackfill deps integration (unit with in-memory fakes, ANX-146 sli
 		expect(result2.idempotentReplay).toBe(true);
 	});
 
+	test("rejects the same commandId with a divergent payload", async () => {
+		const { unitOfWork, commandJournal } = createInMemoryUow(
+			activeInstrument(),
+		);
+		const command = validCommand();
+		await startBackfill({ unitOfWork, commandJournal }, command);
+
+		await expect(
+			startBackfill(
+				{ unitOfWork, commandJournal },
+				validCommand({
+					commandId: command.commandId,
+					requestedTo: "2024-01-03T00:00:00.000Z",
+				}),
+			),
+		).rejects.toMatchObject({ code: "MD_IDEMPOTENCY_CONFLICT" });
+	});
+
 	test("rejects non-existent instrument", async () => {
 		const { unitOfWork, commandJournal } = createInMemoryUow(
 			activeInstrument(),

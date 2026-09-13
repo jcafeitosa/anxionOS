@@ -11,10 +11,10 @@ import { createInstrumentRegisteredEvent } from "../../domain/events/market-data
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { MarketDataUnitOfWork } from "../../domain/ports/market-data-unit-of-work";
 import {
+	createMarketDataCommandIntent,
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot } from "../errors";
 
 export interface RegisterInstrumentDeps {
 	unitOfWork: MarketDataUnitOfWork;
@@ -26,20 +26,25 @@ export async function registerInstrument(
 	input: RegisterInstrumentCommand,
 ): Promise<MarketDataCommandResult> {
 	const command = registerInstrumentCommandSchema.parse(input);
+	const intent = createMarketDataCommandIntent("registerInstrument", command);
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
+		command.organizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay) return replay;
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
-		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
-		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return marketDataCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
-		}
+		await ctx.lockIdempotencyKey(
+			`${command.organizationId}:${command.commandId}`,
+		);
+		const raced = await loadIdempotentCommandResult(
+			ctx.commandJournal,
+			command.organizationId,
+			command.commandId,
+			intent,
+		);
+		if (raced) return raced;
 		const existing = await ctx.instruments.findActiveByNaturalKey(
 			command.organizationId,
 			command.canonicalSymbol,
@@ -55,6 +60,7 @@ export async function registerInstrument(
 				commandId: command.commandId,
 				organizationId: command.organizationId,
 				commandName: "registerInstrument",
+				requestHash: intent.requestHash,
 				responseSnapshot: toCommandResultSnapshot(result),
 			});
 			return result;
@@ -86,6 +92,7 @@ export async function registerInstrument(
 				commandId: command.commandId,
 				organizationId: command.organizationId,
 				commandName: "registerInstrument",
+				requestHash: intent.requestHash,
 				responseSnapshot: toCommandResultSnapshot(result),
 			});
 			return result;
@@ -107,6 +114,7 @@ export async function registerInstrument(
 			commandId: command.commandId,
 			organizationId: command.organizationId,
 			commandName: "registerInstrument",
+			requestHash: intent.requestHash,
 			responseSnapshot: toCommandResultSnapshot(result),
 		});
 		return result;

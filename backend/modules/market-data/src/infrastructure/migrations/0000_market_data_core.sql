@@ -145,9 +145,11 @@ SELECT create_hypertable(
 
 -- Command journal (D-MD-014): HTTP/command idempotency, 90d hot PG per matrix.
 CREATE TABLE IF NOT EXISTS market_data_command_journal (
-	command_id UUID PRIMARY KEY,
+	command_id UUID NOT NULL,
 	organization_id UUID NOT NULL,
 	command_name TEXT NOT NULL,
+	request_hash TEXT,
 	response_snapshot JSONB NOT NULL,
-	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	PRIMARY KEY (organization_id, command_id)
 );

@@ -69,6 +69,7 @@ export interface ObservationRepository {
 	}): Promise<void>;
 }
 export interface MarketDataTransactionContext {
+	lockIdempotencyKey(key: string): Promise<void>;
 	commandJournal: CommandJournalRepository;
 	instruments: InstrumentRepository;
 	observations: ObservationRepository;
