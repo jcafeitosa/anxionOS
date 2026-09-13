@@ -25,6 +25,7 @@ export { triggerAgentRoutine } from "./application/commands/trigger-agent-routin
 export { AgentsCommandError } from "./application/errors";
 export { getAgent } from "./application/queries/get-agent";
 export { listAgentVersions } from "./application/queries/list-agent-versions";
+export { listAgents } from "./application/queries/list-agents";
 export {
 	evaluateComputerSessionAuthority,
 	toolRequiresComputerSession,

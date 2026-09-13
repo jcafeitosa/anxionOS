@@ -26,6 +26,7 @@ import {
 	agentIdParamSchema,
 	handleGetAgent,
 	handleInvokeBrainCapability,
+	handleListAgents,
 	handleListAgentVersions,
 	handlePublishAgentVersion,
 	handleRegisterAgent,
@@ -101,6 +102,11 @@ export function createAgentsPlugin(deps: AgentsPluginDeps) {
 					);
 					return { principal, agencyId };
 				})
+				.get(
+					"",
+					({ agencyId }) => handleListAgents(deps, { agencyId }),
+					agentsOpenApi.list,
+				)
 				.post(
 					"",
 					async ({ request, agencyId, principal }) => {

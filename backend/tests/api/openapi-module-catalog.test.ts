@@ -277,6 +277,7 @@ const DOCUMENTED_OPERATIONS: Array<{
 		tag: "Governance",
 	},
 	{ path: "/v1/agencies/{agencyId}/agents", method: "post", tag: "Agents" },
+	{ path: "/v1/agencies/{agencyId}/agents", method: "get", tag: "Agents" },
 	{
 		path: "/v1/agencies/{agencyId}/agents/{agentId}",
 		method: "get",

@@ -43,6 +43,19 @@ export function createInMemoryAgentRepository(
 		async findById(agentId) {
 			return agents.get(agentId) ?? null;
 		},
+		async listByAgency({ organizationId, agencyId }) {
+			return [...agents.values()]
+				.filter(
+					(agent) =>
+						agent.organizationId === organizationId &&
+						agent.agencyId === agencyId,
+				)
+				.sort((left, right) => {
+					const byCreatedAt =
+						left.createdAt.getTime() - right.createdAt.getTime();
+					return byCreatedAt || left.id.localeCompare(right.id);
+				});
+		},
 	};
 }
 

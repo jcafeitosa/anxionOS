@@ -117,6 +117,48 @@ describe("agents register/publish against real Postgres (ANX-323)", () => {
 		});
 	});
 
+	test("listByAgency applies organization and agency scope", async () => {
+		if (!shouldRunPgIntegrationTests()) return;
+
+		await withAgentsPgHarness(async ({ pool }) => {
+			const deps = await createAgentsPgDeps(pool);
+			const organizationId = randomUUID();
+			const otherOrganizationId = randomUUID();
+			const agencyId = randomUUID();
+			const otherAgencyId = randomUUID();
+
+			const included = await registerAgent(deps, {
+				commandId: randomUUID(),
+				displayName: "Included Agency Agent",
+				kind: "AGENCY",
+				agencyId,
+				organizationId,
+			});
+			await registerAgent(deps, {
+				commandId: randomUUID(),
+				displayName: "Other Agency Agent",
+				kind: "AGENCY",
+				agencyId: otherAgencyId,
+				organizationId,
+			});
+			await registerAgent(deps, {
+				commandId: randomUUID(),
+				displayName: "Other Organization Agent",
+				kind: "AGENCY",
+				agencyId,
+				organizationId: otherOrganizationId,
+			});
+
+			const listed = await deps.agentRepository.listByAgency({
+				organizationId,
+				agencyId,
+			});
+
+			expect(listed.map((agent) => agent.id)).toEqual([included.aggregateId]);
+			expect(listed[0]?.displayName).toBe("Included Agency Agent");
+		});
+	});
+
 	test("same commandId concurrent registration applies exactly once", async () => {
 		if (!shouldRunPgIntegrationTests()) return;
 

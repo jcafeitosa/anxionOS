@@ -1106,6 +1106,19 @@ export const agentsOpenApi = {
 			...ERROR_RESPONSES,
 		},
 	}),
+	list: op({
+		tag: "Agents",
+		operationId: "listAgents",
+		summary: "List agency agents",
+		description:
+			"Module: agents. Lists agents explicitly assigned to the requested agency. The caller must have active agency membership; organization and agency scope are both applied to the query.",
+		security: COOKIE_SECURITY,
+		parameters: agencyParams,
+		responses: {
+			"200": { description: "Agency agent collection DTO." },
+			...ERROR_RESPONSES,
+		},
+	}),
 	listVersions: op({
 		tag: "Agents",
 		operationId: "listAgentVersions",

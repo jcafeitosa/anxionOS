@@ -6,6 +6,7 @@ import {
 import { mapAgentsError } from "../../apps/api/src/agents/error-handler";
 import {
 	handleGetAgent,
+	handleListAgents,
 	handleListAgentVersions,
 	handlePublishAgentVersion,
 	handleRegisterAgent,
@@ -310,5 +311,28 @@ describe("agents API handlers", () => {
 				agentId: registered.agentId,
 			}),
 		).rejects.toMatchObject({ agentsCode: "AGT_AGENT_NOT_FOUND" });
+	});
+
+	test("lists only agents in the requested agency scope", async () => {
+		const deps = createHandlerDeps();
+		const otherAgencyId = "99999999-9999-4999-8999-999999999999";
+		const registered = await handleRegisterAgent(deps, {
+			commandId: "88888888-8888-4888-8888-888888888888",
+			agencyId,
+			principalId,
+			body: { displayName: "Listed Agent", kind: "AGENCY" },
+		});
+		await handleRegisterAgent(deps, {
+			commandId: "99999999-9999-4999-8999-999999999999",
+			agencyId: otherAgencyId,
+			principalId,
+			body: { displayName: "Other Agency Agent", kind: "AGENCY" },
+		});
+
+		const listed = await handleListAgents(deps, { agencyId });
+
+		expect(listed.agents).toHaveLength(1);
+		expect(listed.agents[0]?.id).toBe(registered.agentId);
+		expect(listed.agents[0]?.agencyId).toBe(agencyId);
 	});
 });
