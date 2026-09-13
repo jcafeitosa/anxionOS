@@ -112,6 +112,9 @@ describe("ANX-489 F5 — rollback best-effort nao mascara o erro original", () =
 		} finally {
 			console.log = originalLog;
 		}
-		expect(loggedCause).toBeTruthy();
+		expect(loggedCause).toEqual({
+			name: "Error",
+			message: "connection broken",
+		});
 	});
 });

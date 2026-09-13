@@ -43,6 +43,16 @@ function rateLimitExceeded(): never {
 	});
 }
 
+function serializeRollbackError(error: unknown): {
+	name: string;
+	message: string;
+} {
+	if (error instanceof Error) {
+		return { name: error.name, message: error.message };
+	}
+	return { name: typeof error, message: String(error) };
+}
+
 export class InMemoryInviteAcceptRateLimitStore
 	implements InviteAcceptRateLimitStore
 {
@@ -170,7 +180,7 @@ export class PostgresInviteAcceptRateLimitStore
 				await client.query("ROLLBACK");
 			} catch (rollbackError) {
 				logger.error("invite accept rate limit rollback failed", {
-					cause: rollbackError,
+					cause: serializeRollbackError(rollbackError),
 				});
 			}
 			throw error;
