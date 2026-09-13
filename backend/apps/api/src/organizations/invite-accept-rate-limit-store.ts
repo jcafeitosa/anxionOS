@@ -93,8 +93,19 @@ export class PostgresInviteAcceptRateLimitStore
 	implements InviteAcceptRateLimitStore
 {
 	private lastPurgeMs = 0;
+	private readonly clock: () => number;
+	private readonly beforeWindowUpsert?: () => Promise<void>;
 
-	constructor(private readonly pool: Pool) {}
+	constructor(
+		private readonly pool: Pool,
+		options: {
+			clock?: () => number;
+			beforeWindowUpsert?: () => Promise<void>;
+		} = {},
+	) {
+		this.clock = options.clock ?? Date.now;
+		this.beforeWindowUpsert = options.beforeWindowUpsert;
+	}
 
 	private async purgeStaleRows(now: number): Promise<void> {
 		if (now - this.lastPurgeMs < INVITE_ACCEPT_PURGE_INTERVAL_MS) {
@@ -109,7 +120,7 @@ export class PostgresInviteAcceptRateLimitStore
 	}
 
 	async assertWithinLimit(clientIp: string): Promise<void> {
-		const now = Date.now();
+		const now = this.clock();
 		await this.purgeStaleRows(now);
 		const client = await this.pool.connect();
 		try {
@@ -129,6 +140,7 @@ export class PostgresInviteAcceptRateLimitStore
 				!row ||
 				now - Number(row.window_start_ms) >= INVITE_ACCEPT_WINDOW_MS
 			) {
+				await this.beforeWindowUpsert?.();
 				// ANX-489 F4 — janela nova nao colapsa concorrentes: o `ON
 				// CONFLICT` comparava `window_start_ms` por ms exato; duas
 				// transacoes que leem "sem linha" e inserem com `now` distintos
@@ -143,9 +155,11 @@ export class PostgresInviteAcceptRateLimitStore
            VALUES ($1, 1, $2)
            ON CONFLICT (client_ip)
            DO UPDATE SET
-             count = CASE
-               WHEN div(api_invite_accept_rate_limits.window_start_ms, $3) =
-                    div(EXCLUDED.window_start_ms, $3)
+							count = CASE
+							  WHEN api_invite_accept_rate_limits.window_start_ms > EXCLUDED.window_start_ms
+							  THEN api_invite_accept_rate_limits.count
+							  WHEN div(api_invite_accept_rate_limits.window_start_ms, $3) =
+							       div(EXCLUDED.window_start_ms, $3)
                THEN api_invite_accept_rate_limits.count + 1
                ELSE 1
              END,
