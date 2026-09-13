@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, setSystemTime, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import {
 	activateBreakGlass,
 	assignAutonomyLevel,
@@ -41,10 +41,11 @@ const parentGrantId = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const ownerPrincipalId = "11111111-1111-4111-8111-111111111111";
 const delegatePrincipalId = "22222222-2222-4222-8222-222222222222";
 const subjectAgentId = "33333333-3333-4333-8333-333333333333";
-const delegationValidUntil = "2027-01-01T00:00:00.000Z";
+const HOUR_MS = 60 * 60 * 1000;
+const delegationValidUntil = new Date(Date.now() + 24 * HOUR_MS).toISOString();
 
 function seedGrant(capability = "owner.*"): Grant {
-	const now = new Date("2026-09-10T12:00:00.000Z");
+	const now = new Date();
 	return {
 		id: parentGrantId,
 		tenantId: scopeId,
@@ -57,7 +58,7 @@ function seedGrant(capability = "owner.*"): Grant {
 		resourceRef: null,
 		status: "active",
 		validFrom: now,
-		validUntil: new Date("2027-09-10T12:00:00.000Z"),
+		validUntil: new Date(now.getTime() + 24 * HOUR_MS),
 		derivedFromMembershipId: null,
 		issuedByPrincipalId: null,
 		authorityEpochAtIssue: 1,
@@ -110,10 +111,6 @@ async function revokeSeedGrant(
 		updatedAt: new Date(),
 	});
 }
-
-afterEach(() => {
-	setSystemTime();
-});
 
 describe("ANX-476/B — retry legitimo apos o mundo mudar", () => {
 	test("CreateDelegation replaya mesmo com o parent grant revogado", async () => {
@@ -175,70 +172,64 @@ describe("ANX-476/B — retry legitimo apos o mundo mudar", () => {
 	});
 
 	test("ActivateBreakGlass replaya mesmo depois do expiresAt vencer", async () => {
-		const before = new Date("2030-01-01T00:00:00.000Z");
-		setSystemTime(before);
-		try {
-			const harness = createHarness();
-			const deps = {
-				unitOfWork: harness.unitOfWork,
-				commandJournal: harness.commandJournal,
-				principalLookup: harness.principalLookup,
-			};
-			const commandId = "cccc1111-1111-4111-8111-111111111111";
-			const input = {
-				commandId,
-				scopeId,
-				granteePrincipalId: delegatePrincipalId,
-				capability: "owner.manage",
-				reason: "incident INC-B",
-				expiresAt: "2030-01-01T01:00:00.000Z",
-				incidentRef: "INC-B",
-			};
-			const first = await activateBreakGlass(deps, input);
-			const writesAfterFirst = harness.published.length;
+		let now = new Date();
+		const expiresAt = new Date(now.getTime() + HOUR_MS).toISOString();
+		const harness = createHarness();
+		const deps = {
+			unitOfWork: harness.unitOfWork,
+			commandJournal: harness.commandJournal,
+			principalLookup: harness.principalLookup,
+			now: () => now,
+		};
+		const commandId = "cccc1111-1111-4111-8111-111111111111";
+		const input = {
+			commandId,
+			scopeId,
+			granteePrincipalId: delegatePrincipalId,
+			capability: "owner.manage",
+			reason: "incident INC-B",
+			expiresAt,
+			incidentRef: "INC-B",
+		};
+		const first = await activateBreakGlass(deps, input);
+		const writesAfterFirst = harness.published.length;
 
-			// O mundo mudou: a janela venceu. O retry tem de reproduzir o
-			// resultado — antes deste passe ele falhava com
-			// `GOV_INSUFFICIENT_AUTHORITY`.
-			setSystemTime(new Date("2030-01-01T02:00:00.000Z"));
-			const replay = await activateBreakGlass(deps, input);
+		// O mundo mudou: a janela venceu. O retry tem de reproduzir o
+		// resultado — antes deste passe ele falhava com
+		// `GOV_INSUFFICIENT_AUTHORITY`.
+		now = new Date(new Date(expiresAt).getTime() + 1);
+		const replay = await activateBreakGlass(deps, input);
 
-			expect(replay).toEqual({ ...first, idempotentReplay: true });
-			expect(replay.aggregateId).toBe(first.aggregateId);
-			expect(harness.published).toHaveLength(writesAfterFirst);
-		} finally {
-			setSystemTime();
-		}
+		expect(replay).toEqual({ ...first, idempotentReplay: true });
+		expect(replay.aggregateId).toBe(first.aggregateId);
+		expect(harness.published).toHaveLength(writesAfterFirst);
 	});
 
 	test("execucao NOVA depois do expiresAt vencer continua recusada", async () => {
-		setSystemTime(new Date("2030-01-01T02:00:00.000Z"));
-		try {
-			const harness = createHarness();
-			await expect(
-				activateBreakGlass(
-					{
-						unitOfWork: harness.unitOfWork,
-						commandJournal: harness.commandJournal,
-						principalLookup: harness.principalLookup,
-					},
-					{
-						commandId: "cccc2222-2222-4222-8222-222222222222",
-						scopeId,
-						granteePrincipalId: delegatePrincipalId,
-						capability: "owner.manage",
-						reason: "incident INC-C",
-						expiresAt: "2030-01-01T01:00:00.000Z",
-						incidentRef: "INC-C",
-					},
-				),
-			).rejects.toMatchObject({
-				governanceCode: "GOV_INSUFFICIENT_AUTHORITY",
-			} satisfies Partial<GovernanceCommandError>);
-			expect(harness.published).toHaveLength(0);
-		} finally {
-			setSystemTime();
-		}
+		const now = new Date();
+		const harness = createHarness();
+		await expect(
+			activateBreakGlass(
+				{
+					unitOfWork: harness.unitOfWork,
+					commandJournal: harness.commandJournal,
+					principalLookup: harness.principalLookup,
+					now: () => now,
+				},
+				{
+					commandId: "cccc2222-2222-4222-8222-222222222222",
+					scopeId,
+					granteePrincipalId: delegatePrincipalId,
+					capability: "owner.manage",
+					reason: "incident INC-C",
+					expiresAt: new Date(now.getTime() - 1).toISOString(),
+					incidentRef: "INC-C",
+				},
+			),
+		).rejects.toMatchObject({
+			governanceCode: "GOV_INSUFFICIENT_AUTHORITY",
+		} satisfies Partial<GovernanceCommandError>);
+		expect(harness.published).toHaveLength(0);
 	});
 });
 
@@ -481,14 +472,16 @@ describe("ANX-476/D — intencao de CreateDelegation insensivel a ordem", () => 
 	 * `requestHash` gravado junto da intencao.
 	 */
 	test("ActivateBreakGlass recusa reuso da key com motivo divergente", async () => {
-		// A janela do break-glass e' limitada a 24h: fixa o relogio para que o
-		// `expiresAt` de 2030 seja uma janela valida (como o teste irmao faz).
-		setSystemTime(new Date("2030-01-01T00:00:00.000Z"));
+		// A janela do break-glass e' limitada a 24h: calcula uma janela futura
+		// relativa ao clock local do teste, sem alterar o relogio global do processo.
+		const now = new Date();
+		const expiresAt = new Date(now.getTime() + HOUR_MS).toISOString();
 		const harness = createHarness();
 		const deps = {
 			unitOfWork: harness.unitOfWork,
 			commandJournal: harness.commandJournal,
 			principalLookup: harness.principalLookup,
+			now: () => now,
 		};
 		const commandId = "cccc2222-2222-4222-8222-222222222222";
 		const input = {
@@ -497,7 +490,7 @@ describe("ANX-476/D — intencao de CreateDelegation insensivel a ordem", () => 
 			granteePrincipalId: delegatePrincipalId,
 			capability: "owner.manage",
 			reason: "incident INC-C",
-			expiresAt: "2030-01-01T01:00:00.000Z",
+			expiresAt,
 			incidentRef: "INC-C",
 		};
 		await activateBreakGlass(deps, input);

@@ -186,7 +186,11 @@ async function main() {
 			);
 		}
 
-		const suite = runStep("bun", ["test", "--max-concurrency=1"], env);
+		const suite = runStep(
+			"bun",
+			["test", "--max-concurrency=1", "--isolate"],
+			env,
+		);
 		const output = `${suite.stdout ?? ""}${suite.stderr ?? ""}`;
 		const logPath = join(tmpdir(), `anx463-fresh-db-${Date.now()}.log`);
 		writeFileSync(logPath, output, "utf8");

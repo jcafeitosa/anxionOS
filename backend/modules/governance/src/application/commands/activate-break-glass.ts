@@ -29,6 +29,7 @@ export interface ActivateBreakGlassDeps {
 	unitOfWork: GovernanceUnitOfWork;
 	commandJournal: CommandJournalRepository;
 	principalLookup: PrincipalLookup;
+	now?: () => Date;
 }
 
 export async function activateBreakGlass(
@@ -113,7 +114,7 @@ export async function activateBreakGlass(
 		}
 
 		const expiresAt = new Date(command.expiresAt);
-		const now = new Date();
+		const now = deps.now?.() ?? new Date();
 		if (expiresAt <= now) {
 			throwGovernanceError(
 				"GOV_INSUFFICIENT_AUTHORITY",
