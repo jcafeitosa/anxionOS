@@ -18,8 +18,8 @@ status: draft
 
 G3-PTR-S2-01 commission on paid · G3-PTR-S3-01 refund reversal idempotent · G3-PTR-S3-02 payout FAILED retry · G3-PTR-S3-03 cross-tenant
 
-**Evidência impl:** `backend/tests/partners/` (ANX-114 `in_review`)
+**Evidência impl:** `backend/tests/partners/` (ANX-114 baseline + ANX-522 S3)
 
-**ANX-114** — impl `in_review`; debate G7 pendente **ANX-113**
+**ANX-522** — S3 payout lifecycle implementado e verificado: module tests 21/21, PostgreSQL integration 2/2, fresh oracle 1925/1925 with 0 failures and 0 skips. Debate G7 permanece pendente em **ANX-113**.
 
 → **R10** ([R10-g0-handoff.md](./R10-g0-handoff.md))
