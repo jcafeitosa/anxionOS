@@ -14,6 +14,13 @@ type: plan
 
 **Spec:** [docs/superpowers/specs/2026-09-12-backend-end-to-end-design.md](../specs/2026-09-12-backend-end-to-end-design.md)
 
+## Verified Progress (2026-09-13)
+
+- [x] `ANX-468`: generated OpenAPI preserves declared path, tenancy, request-id, and idempotency parameters across the module catalog; request bodies and response schemas remain present.
+- [x] `ANX-503`: the partners migration upgrades pre-P07 databases, backfills `organization_id` into canonical partner ownership, creates the payout ledger, and lets the API boot without PostgreSQL `42703`; onboarding and organization-selection routes now have real heading assertions and scoped axe coverage.
+- [x] Backend baseline: 23 owner modules plus `adapter-gateway` match the accepted layout; lint, typecheck, full unit suite, and fresh-database oracle are green for the recorded runs.
+- [ ] Program acceptance remains open while the board-owned identity, governance, OpenAPI response, idempotency, tenancy, error-boundary, and platform-security slices are still in progress or in review. REAL capital and L3/L4 autonomy remain non-authorized.
+
 ## Global Constraints
 
 - Read \`AGENTS.md\`, load the orchestration framework, ensure the Dashi board, claim one \`ANX-*\` issue, and pass orchestration pre-work before every implementation slice.
