@@ -69,6 +69,29 @@ describe("partners commands", () => {
 				reason: "token: partner-secret",
 			}),
 		).toThrow();
+		expect(() =>
+			failPayoutCommandSchema.parse({
+				...identifiers,
+				failedAt: "2026-09-13T12:00:00.000Z",
+				failureReason:
+					"provider returned 4f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9",
+			}),
+		).toThrow();
+		expect(() =>
+			failPayoutCommandSchema.parse({
+				...identifiers,
+				failedAt: "2026-09-13T12:00:00.000Z",
+				failureReason: "-----BEGIN PRIVATE KEY-----",
+			}),
+		).toThrow();
+		expect(() =>
+			reverseCommissionFromInvoiceCommandSchema.parse({
+				...identifiers,
+				reversedAt: "2026-09-13T12:00:00.000Z",
+				reason:
+					"provider assertion eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.signature",
+			}),
+		).toThrow();
 	});
 
 	test("rejects secret-bearing partner event payload fields", () => {
@@ -117,6 +140,29 @@ describe("partners commands", () => {
 					...identifiers,
 					reversalReference: "-----BEGIN PRIVATE KEY-----",
 					reversedAt: "2026-09-13T12:00:00.000Z",
+				},
+			}),
+		).toThrow();
+		expect(() =>
+			partnersEventPayloadSchema.parse({
+				eventType: PARTNERS_EVENT_TYPES.PAYOUT_APPROVED,
+				payload: {
+					...identifiers,
+					approvedAmount: "10",
+					approvalReference:
+						"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.signature",
+					approvedAt: "2026-09-13T12:00:00.000Z",
+				},
+			}),
+		).toThrow();
+		expect(() =>
+			partnersEventPayloadSchema.parse({
+				eventType: PARTNERS_EVENT_TYPES.PAYOUT_FAILED,
+				payload: {
+					...identifiers,
+					failureReason: "-----BEGIN RSA PRIVATE KEY-----",
+					attemptNumber: 1,
+					failedAt: "2026-09-13T12:00:00.000Z",
 				},
 			}),
 		).toThrow();
