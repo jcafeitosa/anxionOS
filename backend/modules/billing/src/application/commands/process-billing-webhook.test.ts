@@ -15,29 +15,30 @@ const WEBHOOK_EVENT_ID = `evt_${randomUUID()}`;
 
 describe("processBillingWebhook", () => {
 	test("duplicate webhookEventId is idempotent", async () => {
-		const { unitOfWork, commandJournal } = createBillingTestUow({
-			subscriptions: [
-				{
-					id: SUBSCRIPTION_ID,
-					organizationId: TEST_ORG,
-					planCode: "trader",
-					billingPeriodStart: "2026-09-01T00:00:00.000Z",
-					billingPeriodEnd: "2026-10-01T00:00:00.000Z",
-					status: "ACTIVE",
-				},
-			],
-			invoices: [
-				{
-					id: INVOICE_ID,
-					organizationId: TEST_ORG,
-					subscriptionId: SUBSCRIPTION_ID,
-					billingPeriod: "2026-09",
-					status: "ISSUED",
-					totalAmount: "19.00",
-					issuedAt: "2026-09-01T00:00:00.000Z",
-				},
-			],
-		});
+		const { unitOfWork, commandJournal, getInvoices, getPublished } =
+			createBillingTestUow({
+				subscriptions: [
+					{
+						id: SUBSCRIPTION_ID,
+						organizationId: TEST_ORG,
+						planCode: "trader",
+						billingPeriodStart: "2026-09-01T00:00:00.000Z",
+						billingPeriodEnd: "2026-10-01T00:00:00.000Z",
+						status: "ACTIVE",
+					},
+				],
+				invoices: [
+					{
+						id: INVOICE_ID,
+						organizationId: TEST_ORG,
+						subscriptionId: SUBSCRIPTION_ID,
+						billingPeriod: "2026-09",
+						status: "ISSUED",
+						totalAmount: "19.00",
+						issuedAt: "2026-09-01T00:00:00.000Z",
+					},
+				],
+			});
 
 		const baseInput = {
 			commandId: randomUUID(),
@@ -59,6 +60,12 @@ describe("processBillingWebhook", () => {
 		);
 
 		expect(replay.idempotentReplay).toBe(true);
+		expect(getInvoices().get(INVOICE_ID)?.status).toBe("PAID");
+		expect(
+			getPublished().filter(
+				(event) => event.eventType === BILLING_EVENT_TYPES.INVOICE_PAID,
+			),
+		).toHaveLength(1);
 	});
 
 	test("subscription.cancelled webhook cancels subscription", async () => {

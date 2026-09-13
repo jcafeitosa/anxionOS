@@ -69,7 +69,7 @@ describe("partners read queries (ANX-167 unblock)", () => {
 				subscriptionId: "bil_sub_test",
 				billingPeriod: "2026-09",
 				totalAmount: "100",
-				issuedAt: "2026-09-10T12:00:00.000Z",
+				paidAt: "2026-09-10T12:00:00.000Z",
 			},
 		);
 
@@ -107,7 +107,7 @@ describe("partners read queries (ANX-167 unblock)", () => {
 				subscriptionId: "bil_sub_test",
 				billingPeriod: "2026-09",
 				totalAmount: "200",
-				issuedAt: "2026-09-10T12:00:00.000Z",
+				paidAt: "2026-09-10T12:00:00.000Z",
 			},
 		);
 		await requestPayout(

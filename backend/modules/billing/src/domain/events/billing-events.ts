@@ -23,6 +23,24 @@ export function createInvoiceIssuedEvent(input: {
 	};
 }
 
+export function createInvoicePaidEvent(input: {
+	invoiceId: string;
+	organizationId: string;
+	subscriptionId: string;
+	billingPeriod: string;
+	totalAmount: string;
+	paidAt: string;
+}): DomainEventEnvelope {
+	return {
+		eventId: randomUUID(),
+		eventType: BILLING_EVENT_TYPES.INVOICE_PAID,
+		schemaVersion: "0.1.0",
+		ownerDomain: BILLING_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload: input,
+	};
+}
+
 export function createSubscriptionCancelledEvent(input: {
 	subscriptionId: string;
 	organizationId: string;
@@ -41,6 +59,7 @@ export function createSubscriptionCancelledEvent(input: {
 
 export function createInvoiceRefundedEvent(input: {
 	invoiceId: string;
+	refundId?: string;
 	organizationId: string;
 	subscriptionId: string;
 	refundAmount: string;
@@ -50,6 +69,25 @@ export function createInvoiceRefundedEvent(input: {
 	return {
 		eventId: randomUUID(),
 		eventType: BILLING_EVENT_TYPES.INVOICE_REFUNDED,
+		schemaVersion: "0.1.0",
+		ownerDomain: BILLING_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload: { refundId: input.refundId ?? randomUUID(), ...input },
+	};
+}
+
+export function createRefundProcessedEvent(input: {
+	refundId: string;
+	invoiceId: string;
+	organizationId: string;
+	subscriptionId: string;
+	refundAmount: string;
+	refundedAt: string;
+	reason?: string;
+}): DomainEventEnvelope {
+	return {
+		eventId: randomUUID(),
+		eventType: BILLING_EVENT_TYPES.REFUND_PROCESSED,
 		schemaVersion: "0.1.0",
 		ownerDomain: BILLING_OWNER_DOMAIN,
 		occurredAt: new Date().toISOString(),

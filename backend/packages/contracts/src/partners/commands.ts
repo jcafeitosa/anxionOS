@@ -35,10 +35,11 @@ export const accrueCommissionFromInvoiceCommandSchema = z.object({
 	subscriptionId: z.string().min(1),
 	billingPeriod: z.string().regex(/^\d{4}-\d{2}$/),
 	totalAmount: decimalAmountSchema,
-	issuedAt: z.string().datetime(),
+	paidAt: z.string().datetime(),
 });
 export const reverseCommissionFromInvoiceCommandSchema = z.object({
 	commandId: institutionalUuidSchema,
+	refundId: institutionalUuidSchema.optional(),
 	partnerOrganizationId: institutionalUuidSchema,
 	invoiceId: billingInvoiceIdSchema,
 	reversedAt: z.string().datetime(),

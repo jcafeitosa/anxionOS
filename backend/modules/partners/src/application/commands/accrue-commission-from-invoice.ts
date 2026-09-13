@@ -116,7 +116,7 @@ export async function accrueCommissionFromInvoice(
 			commissionRate: partner.commissionRate,
 			commissionAmount,
 			status: "ACCRUED",
-			accruedAt: command.issuedAt,
+			accruedAt: command.paidAt,
 			reversedAt: null,
 		});
 		await ctx.publishEvents([
@@ -130,7 +130,7 @@ export async function accrueCommissionFromInvoice(
 				invoiceTotalAmount: command.totalAmount,
 				commissionRate: partner.commissionRate,
 				commissionAmount,
-				accruedAt: command.issuedAt,
+				accruedAt: command.paidAt,
 			}),
 		]);
 		const result = partnersCommandResultSchema.parse({

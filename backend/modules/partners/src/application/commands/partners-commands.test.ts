@@ -110,7 +110,7 @@ describe("partners commands", () => {
 				subscriptionId: "bil_sub_test",
 				billingPeriod: "2026-09",
 				totalAmount: "1000",
-				issuedAt: "2026-09-10T12:00:00.000Z",
+				paidAt: "2026-09-10T12:00:00.000Z",
 			},
 		);
 		expect(first.commissionAmount).toBe("100");
@@ -125,7 +125,7 @@ describe("partners commands", () => {
 				subscriptionId: "bil_sub_test",
 				billingPeriod: "2026-09",
 				totalAmount: "1000",
-				issuedAt: "2026-09-10T12:00:00.000Z",
+				paidAt: "2026-09-10T12:00:00.000Z",
 			},
 		);
 		expect(second.idempotentReplay).toBe(true);
@@ -161,7 +161,7 @@ describe("partners commands", () => {
 				subscriptionId: "bil_sub_test",
 				billingPeriod: "2026-09",
 				totalAmount: "500",
-				issuedAt: "2026-09-10T12:00:00.000Z",
+				paidAt: "2026-09-10T12:00:00.000Z",
 			},
 		);
 		const reversed = await reverseCommissionFromInvoice(
@@ -208,7 +208,7 @@ describe("partners commands", () => {
 				subscriptionId: "bil_sub_test",
 				billingPeriod: "2026-09",
 				totalAmount: "200",
-				issuedAt: "2026-09-10T12:00:00.000Z",
+				paidAt: "2026-09-10T12:00:00.000Z",
 			},
 		);
 		const requested = await requestPayout(

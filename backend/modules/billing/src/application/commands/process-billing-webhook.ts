@@ -7,6 +7,7 @@ import {
 	processBillingWebhookCommandSchema,
 } from "@anxionos/contracts/billing";
 import {
+	createInvoicePaidEvent,
 	createSubscriptionCancelledEvent,
 	createWebhookProcessedEvent,
 } from "../../domain/events/billing-events";
@@ -112,6 +113,42 @@ export async function processBillingWebhook(
 					}),
 				]);
 			}
+		}
+		if (
+			command.eventType === "invoice.payment_succeeded" &&
+			command.invoiceId
+		) {
+			const invoice = await ctx.invoices.findById(command.invoiceId);
+			if (!invoice || invoice.organizationId !== command.organizationId) {
+				throwBillingError(
+					"BIL_INVOICE_NOT_FOUND",
+					"invoice not found for organization",
+				);
+			}
+			if (invoice.status !== "ISSUED" && invoice.status !== "PAID") {
+				throwBillingError(
+					"BIL_INVOICE_NOT_ISSUED",
+					"invoice must be ISSUED before payment",
+				);
+			}
+			const paid =
+				invoice.status === "PAID"
+					? invoice
+					: await ctx.invoices.updateStatus(
+							invoice.id,
+							"PAID",
+							invoice.issuedAt,
+						);
+			await ctx.publishEvents([
+				createInvoicePaidEvent({
+					invoiceId: paid.id,
+					organizationId: paid.organizationId,
+					subscriptionId: paid.subscriptionId,
+					billingPeriod: paid.billingPeriod,
+					totalAmount: paid.totalAmount,
+					paidAt: command.occurredAt,
+				}),
+			]);
 		}
 		const aggregateId =
 			command.invoiceId ?? command.subscriptionId ?? command.webhookEventId;

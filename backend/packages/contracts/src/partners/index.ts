@@ -27,12 +27,16 @@ export {
 	payoutApprovedPayloadSchema,
 	payoutRequestedPayloadSchema,
 } from "./events";
+export type { AccrueCommissionFromInvoiceInput } from "./invoice-accrual-input";
 export {
-	type AccrueCommissionFromInvoiceInput,
-	type BillingInvoiceIssuedBridge,
-	billingInvoiceIssuedBridgeSchema,
-	mapInvoiceIssuedToAccrualInput,
-} from "./invoice-issued-bridge";
+	type BillingInvoicePaidBridge,
+	billingInvoicePaidBridgeSchema,
+	mapInvoicePaidToAccrualInput,
+} from "./invoice-paid-bridge";
+export {
+	type BillingRefundProcessedBridge,
+	billingRefundProcessedBridgeSchema,
+} from "./refund-processed-bridge";
 export {
 	commissionRateSchema,
 	decimalAmountSchema as partnersDecimalAmountSchema,

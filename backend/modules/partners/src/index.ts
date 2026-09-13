@@ -3,7 +3,6 @@ export {
 	type ApprovePayoutCommand,
 	accrueCommissionFromInvoiceCommandSchema,
 	approvePayoutCommandSchema,
-	mapInvoiceIssuedToAccrualInput,
 	PARTNERS_OWNER_DOMAIN,
 	type PartnersCommandResult,
 	partnersCommandResultSchema,
@@ -35,9 +34,13 @@ export {
 	reverseCommissionFromInvoice,
 } from "./application/commands/reverse-commission-from-invoice";
 export {
-	createInvoiceIssuedConsumer,
-	type InvoiceIssuedConsumerDeps,
-} from "./application/consumers/invoice-issued-consumer";
+	createInvoicePaidConsumer,
+	type InvoicePaidConsumerDeps,
+} from "./application/consumers/invoice-paid-consumer";
+export {
+	createRefundProcessedConsumer,
+	type RefundProcessedConsumerDeps,
+} from "./application/consumers/refund-processed-consumer";
 export {
 	PartnersCommandError,
 	parseCommandResultSnapshot,

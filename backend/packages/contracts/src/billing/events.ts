@@ -9,8 +9,10 @@ import {
 } from "./types";
 export const BILLING_EVENT_TYPES = {
 	INVOICE_ISSUED: "billing.invoice.issued.v1",
+	INVOICE_PAID: "billing.invoice.paid.v1",
 	SUBSCRIPTION_CANCELLED: "billing.subscription.cancelled.v1",
 	INVOICE_REFUNDED: "billing.invoice.refunded.v1",
+	REFUND_PROCESSED: "billing.refund.processed.v1",
 	WEBHOOK_PROCESSED: "billing.webhook.processed.v1",
 };
 export const invoiceIssuedPayloadSchema = z.object({
@@ -21,6 +23,14 @@ export const invoiceIssuedPayloadSchema = z.object({
 	totalAmount: decimalAmountSchema,
 	issuedAt: z.string().datetime(),
 });
+export const invoicePaidPayloadSchema = z.object({
+	invoiceId: billingInvoiceIdSchema,
+	organizationId: z.string().uuid(),
+	subscriptionId: billingSubscriptionIdSchema,
+	billingPeriod: billingPeriodSchema,
+	totalAmount: decimalAmountSchema,
+	paidAt: z.string().datetime(),
+});
 export const subscriptionCancelledPayloadSchema = z.object({
 	subscriptionId: billingSubscriptionIdSchema,
 	organizationId: z.string().uuid(),
@@ -29,6 +39,7 @@ export const subscriptionCancelledPayloadSchema = z.object({
 });
 export const invoiceRefundedPayloadSchema = z.object({
 	invoiceId: billingInvoiceIdSchema,
+	refundId: z.string().uuid(),
 	organizationId: z.string().uuid(),
 	subscriptionId: billingSubscriptionIdSchema,
 	refundAmount: decimalAmountSchema,
@@ -47,11 +58,19 @@ export const billingEventPayloadSchema = z.discriminatedUnion("eventType", [
 		payload: invoiceIssuedPayloadSchema,
 	}),
 	z.object({
+		eventType: z.literal(BILLING_EVENT_TYPES.INVOICE_PAID),
+		payload: invoicePaidPayloadSchema,
+	}),
+	z.object({
 		eventType: z.literal(BILLING_EVENT_TYPES.SUBSCRIPTION_CANCELLED),
 		payload: subscriptionCancelledPayloadSchema,
 	}),
 	z.object({
 		eventType: z.literal(BILLING_EVENT_TYPES.INVOICE_REFUNDED),
+		payload: invoiceRefundedPayloadSchema,
+	}),
+	z.object({
+		eventType: z.literal(BILLING_EVENT_TYPES.REFUND_PROCESSED),
 		payload: invoiceRefundedPayloadSchema,
 	}),
 	z.object({

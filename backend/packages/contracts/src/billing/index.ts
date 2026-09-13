@@ -24,6 +24,7 @@ export {
 	BILLING_EVENT_TYPES,
 	billingEventPayloadSchema,
 	invoiceIssuedPayloadSchema,
+	invoicePaidPayloadSchema,
 	invoiceRefundedPayloadSchema,
 	subscriptionCancelledPayloadSchema,
 	webhookProcessedPayloadSchema,

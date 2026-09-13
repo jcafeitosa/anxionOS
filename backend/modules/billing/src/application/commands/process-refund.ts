@@ -6,7 +6,10 @@ import {
 	billingCommandResultSchema,
 	processRefundCommandSchema,
 } from "@anxionos/contracts/billing";
-import { createInvoiceRefundedEvent } from "../../domain/events/billing-events";
+import {
+	createInvoiceRefundedEvent,
+	createRefundProcessedEvent,
+} from "../../domain/events/billing-events";
 import type { BillingUnitOfWork } from "../../domain/ports/billing-unit-of-work";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import {
@@ -84,7 +87,7 @@ export async function processRefund(
 			});
 			return result;
 		}
-		if (invoice.status !== "ISSUED") {
+		if (invoice.status !== "ISSUED" && invoice.status !== "PAID") {
 			throwBillingError(
 				"BIL_INVOICE_NOT_ISSUED",
 				"invoice must be ISSUED before refund",
@@ -97,6 +100,16 @@ export async function processRefund(
 		);
 		await ctx.publishEvents([
 			createInvoiceRefundedEvent({
+				invoiceId: refunded.id,
+				refundId: command.commandId,
+				organizationId: refunded.organizationId,
+				subscriptionId: refunded.subscriptionId,
+				refundAmount: command.refundAmount,
+				refundedAt: command.refundedAt,
+				reason: command.reason,
+			}),
+			createRefundProcessedEvent({
+				refundId: command.commandId,
 				invoiceId: refunded.id,
 				organizationId: refunded.organizationId,
 				subscriptionId: refunded.subscriptionId,
