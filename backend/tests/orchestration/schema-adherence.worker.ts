@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { createPgPool } from "@anxionos/eventing/postgres";
 import {
 	createOrchestrationDb,
+	createPostgresOperationalBudget,
 	ensureOrchestrationSchema,
 } from "@anxionos/orchestration";
 
@@ -11,7 +12,7 @@ const pool = createPgPool(url);
 try {
 	await ensureOrchestrationSchema(pool);
 	await pool.query(
-		"TRUNCATE orchestration_goals, orchestration_tasks, orchestration_runs, orchestration_task_leases, orchestration_run_heartbeats, orchestration_gate_bindings, orchestration_command_journal, orchestration_taskboard_mirror RESTART IDENTITY CASCADE",
+		"TRUNCATE orchestration_goals, orchestration_tasks, orchestration_runs, orchestration_task_leases, orchestration_run_heartbeats, orchestration_gate_bindings, orchestration_command_journal, orchestration_taskboard_mirror, orchestration_operational_budgets RESTART IDENTITY CASCADE",
 	);
 	const db = createOrchestrationDb(pool);
 	const organizationId = `org_${randomUUID()}`;
@@ -76,6 +77,13 @@ try {
 		threadId: "thread-1",
 		occurredAt: new Date(),
 	});
+	const operationalBudget = createPostgresOperationalBudget(pool, {
+		capPerOrganization: 2,
+	});
+	const budgetReserved =
+		await operationalBudget.reserveWakeupUnit(organizationId);
+	const remainingBudget =
+		await operationalBudget.remainingWakeupUnits(organizationId);
 	if (
 		!goal.id ||
 		!task.id ||
@@ -84,7 +92,9 @@ try {
 		!heartbeat.id ||
 		!binding.id ||
 		journal.commandId !== commandId ||
-		mirror !== "inserted"
+		mirror !== "inserted" ||
+		!budgetReserved ||
+		remainingBudget !== 1
 	)
 		throw new Error("orchestration adherence assertion failed");
 	console.log("ORCHESTRATION_ADHERENCE_OK");

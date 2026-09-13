@@ -5,7 +5,7 @@ import {
 } from "../pg-harness-guard";
 
 describe("orchestration schema adherence (ANX-470)", () => {
-	test("real repositories and all eight tables pass in an isolated process", async () => {
+	test("real repositories and all nine tables pass in an isolated process", async () => {
 		if (!shouldRunPgIntegrationTests()) return;
 		const url = getDatabaseUrl();
 		if (!url) return;

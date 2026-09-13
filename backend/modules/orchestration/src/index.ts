@@ -124,6 +124,7 @@ export {
 	HEARTBEAT_QUEUE_CAP_PER_ORG,
 	LEASE_SWEEPER_BATCH_SIZE,
 	LEASE_SWEEPER_JITTER_MAX_MS,
+	OPERATIONAL_BUDGET_WAKEUP_UNITS_CAP_PER_ORG,
 	T01_EVAL_TIMEOUT_MS,
 	TASKBOARD_POLL_INTERVAL_MS,
 } from "./domain/constants";
@@ -196,7 +197,6 @@ export {
 	type DashiTaskboardMirrorConfig,
 	resolveDashiProjectId,
 } from "./infrastructure/adapters/dashi-taskboard-mirror";
-export { createFixtureOperationalBudget } from "./infrastructure/adapters/fixture-operational-budget";
 export { createFixtureOrganizationScope } from "./infrastructure/adapters/fixture-organization-scope";
 export { createFixturePrincipalLookup } from "./infrastructure/adapters/fixture-principal-lookup";
 export {
@@ -205,6 +205,12 @@ export {
 } from "./infrastructure/adapters/fixture-taskboard-mirror";
 export { createGovernanceTraversalAdapter } from "./infrastructure/adapters/governance-traversal-adapter";
 export { createGraphQueryAdapter } from "./infrastructure/adapters/graph-query-adapter";
+export {
+	createPostgresOperationalBudget,
+	DEFAULT_OPERATIONAL_BUDGET_CAP_PER_ORGANIZATION,
+	type OperationalBudgetQueryable,
+	type PostgresOperationalBudgetOptions,
+} from "./infrastructure/adapters/postgres-operational-budget";
 export { createOrchestrationDb } from "./infrastructure/create-db";
 export { ensureOrchestrationSchema } from "./infrastructure/migrate";
 export { createOrchestrationUnitOfWork } from "./infrastructure/orchestration-unit-of-work";
@@ -212,6 +218,7 @@ export {
 	commandJournal,
 	gateBindings,
 	goals,
+	operationalBudgets,
 	runHeartbeats,
 	runs,
 	taskboardMirror,

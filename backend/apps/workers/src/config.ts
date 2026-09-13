@@ -1,4 +1,6 @@
 /** Worker profile identifiers (composition root — apps/workers). */
+import { OPERATIONAL_BUDGET_WAKEUP_UNITS_CAP_PER_ORG } from "@anxionos/orchestration";
+
 export const WORKER_PROFILE_GRAPH_GOVERNANCE = "graph-governance-projection";
 export const WORKER_PROFILE_GRAPH_PRODUCT = "graph-product-projection";
 export const WORKER_PROFILE_OUTBOX_RELAY = "outbox-relay";
@@ -62,6 +64,7 @@ export interface OrchestrationS5WorkerConfig {
 	leaseSweeperBatchSize: number;
 	heartbeatDequeuePollIntervalMs: number;
 	heartbeatDequeueBatchLimit: number;
+	operationalBudgetCapPerOrganization: number;
 }
 
 function requireEnv(name: string): string {
@@ -204,6 +207,10 @@ export function loadOrchestrationS5WorkerConfig(): OrchestrationS5WorkerConfig {
 		heartbeatDequeueBatchLimit: parsePositiveIntEnv(
 			"ORCHESTRATION_HEARTBEAT_DEQUEUE_BATCH_LIMIT",
 			DEFAULT_ORCHESTRATION_HEARTBEAT_DEQUEUE_BATCH_LIMIT,
+		),
+		operationalBudgetCapPerOrganization: parsePositiveIntEnv(
+			"ORCHESTRATION_OPERATIONAL_BUDGET_CAP_PER_ORG",
+			OPERATIONAL_BUDGET_WAKEUP_UNITS_CAP_PER_ORG,
 		),
 	};
 }

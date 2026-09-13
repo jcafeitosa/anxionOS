@@ -28,6 +28,8 @@ export async function dequeueRunHeartbeats(
 	const now = deps.leaseClock.now();
 	return deps.unitOfWork.runInTransaction(
 		async (context: OrchestrationTransactionContext) => {
+			const operationalBudget =
+				context.operationalBudget ?? deps.operationalBudget;
 			const due = await context.runHeartbeatRepository.findDuePending(
 				command.limit,
 				now,
@@ -44,7 +46,7 @@ export async function dequeueRunHeartbeats(
 					});
 					continue;
 				}
-				const allowed = await deps.operationalBudget.reserveWakeupUnit(
+				const allowed = await operationalBudget.reserveWakeupUnit(
 					run.organizationId,
 				);
 				if (!allowed) {

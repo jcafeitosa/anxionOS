@@ -23,6 +23,7 @@ mock.module("@anxionos/orchestration", () => ({
 	dequeueRunHeartbeats,
 	acknowledgeRunHeartbeat,
 	LEASE_SWEEPER_BATCH_SIZE: 100,
+	OPERATIONAL_BUDGET_WAKEUP_UNITS_CAP_PER_ORG: 10_000,
 }));
 
 const { startOrchestrationLeaseSweeper } = await import("./lease-sweeper");
@@ -45,11 +46,25 @@ describe("orchestration S5 workers", () => {
 			"postgres://anxionos:anxionos@localhost:5432/anxionos";
 		delete process.env.ORCHESTRATION_LEASE_SWEEPER_POLL_INTERVAL_MS;
 		delete process.env.ORCHESTRATION_HEARTBEAT_DEQUEUE_POLL_INTERVAL_MS;
+		delete process.env.ORCHESTRATION_OPERATIONAL_BUDGET_CAP_PER_ORG;
 
 		const config = loadOrchestrationS5WorkerConfig();
 		expect(config.profile).toBe(WORKER_PROFILE_ORCHESTRATION_S5);
 		expect(config.leaseSweeperPollIntervalMs).toBe(30_000);
 		expect(config.heartbeatDequeuePollIntervalMs).toBe(120_000);
+		expect(config.operationalBudgetCapPerOrganization).toBe(10_000);
+	});
+
+	test("loadOrchestrationS5WorkerConfig reads the operational budget cap", () => {
+		process.env.WORKER_PROFILE = WORKER_PROFILE_ORCHESTRATION_S5;
+		process.env.DATABASE_URL =
+			"postgres://anxionos:anxionos@localhost:5432/anxionos";
+		process.env.ORCHESTRATION_OPERATIONAL_BUDGET_CAP_PER_ORG = "42";
+
+		const config = loadOrchestrationS5WorkerConfig();
+		expect(config.operationalBudgetCapPerOrganization).toBe(42);
+
+		delete process.env.ORCHESTRATION_OPERATIONAL_BUDGET_CAP_PER_ORG;
 	});
 
 	test("lease sweeper worker invokes sweepExpiredLeases on bootstrap loop", async () => {

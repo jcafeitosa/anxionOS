@@ -256,6 +256,24 @@ export const taskboardMirror = pgTable(
 	],
 );
 
+export const operationalBudgets = pgTable(
+	"orchestration_operational_budgets",
+	{
+		organizationId: text("organization_id").notNull(),
+		capUnits: integer("cap_units").notNull(),
+		consumedUnits: integer("consumed_units").notNull().default(0),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.organizationId] }),
+		index("orchestration_operational_budgets_updated_at_idx").on(
+			table.updatedAt,
+		),
+	],
+);
+
 export type GoalRow = typeof goals.$inferSelect;
 export type TaskRow = typeof tasks.$inferSelect;
 export type RunRow = typeof runs.$inferSelect;

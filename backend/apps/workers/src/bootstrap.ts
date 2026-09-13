@@ -10,8 +10,8 @@ import {
 	ensureNeo4jGraphConstraints,
 } from "@anxionos/graph/neo4j";
 import {
-	createFixtureOperationalBudget,
 	createOrchestrationDb,
+	createPostgresOperationalBudget,
 	createSystemLeaseClock,
 	ensureOrchestrationSchema,
 	type LeaseClock,
@@ -96,12 +96,17 @@ export async function bootstrapOrchestrationS5Worker(
 	await pool.query("SELECT 1");
 	await ensureEventingSchema(pool);
 	await ensureOrchestrationSchema(pool);
-	const { unitOfWork } = createOrchestrationDb(pool);
+	const { unitOfWork } = createOrchestrationDb(pool, {
+		operationalBudgetCapPerOrganization:
+			config.operationalBudgetCapPerOrganization,
+	});
 	return {
 		pool,
 		unitOfWork,
 		leaseClock: createSystemLeaseClock(),
-		operationalBudget: createFixtureOperationalBudget(),
+		operationalBudget: createPostgresOperationalBudget(pool, {
+			capPerOrganization: config.operationalBudgetCapPerOrganization,
+		}),
 	};
 }
 
