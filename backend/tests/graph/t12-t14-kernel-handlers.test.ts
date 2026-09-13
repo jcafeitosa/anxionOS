@@ -8,7 +8,6 @@ import {
 	createF0KernelGraphSchemaRegistry,
 	createInMemoryGraphStore,
 	createKernelAwareTraversalEvaluator,
-	createMockTraversalEvaluator,
 	createTraversalCatalog,
 	evaluateT12OutcomeAttribution,
 	evaluateT14ConnectionRevokeImpact,
@@ -18,6 +17,7 @@ import {
 	GRAPH_T14_INCOMPLETE_REASONS,
 	type InMemoryGraphEdge,
 } from "@anxionos/graph";
+import { createMockTraversalEvaluator } from "./fixtures/mock-traversal-evaluator";
 
 const agencyId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const validAt = "2026-09-10T12:00:00.000Z";

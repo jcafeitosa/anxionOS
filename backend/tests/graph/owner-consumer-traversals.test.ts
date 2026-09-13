@@ -8,7 +8,6 @@ import {
 	createF0KernelDomainGraphSchemaRegistry,
 	createInMemoryGraphStore,
 	createKernelAwareTraversalEvaluator,
-	createMockTraversalEvaluator,
 	createTraversalCatalog,
 	evaluateT06GoalDependencies,
 	evaluateT07CapitalUnderAgent,
@@ -27,6 +26,7 @@ import {
 	type InMemoryGraphEdge,
 	TRAVERSAL_OWNER_CONSUMER_DOMAINS,
 } from "@anxionos/graph";
+import { createMockTraversalEvaluator } from "./fixtures/mock-traversal-evaluator";
 
 const agencyId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const validAt = "2026-09-10T12:00:00.000Z";

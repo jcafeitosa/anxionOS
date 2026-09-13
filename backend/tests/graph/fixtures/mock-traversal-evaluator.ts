@@ -1,9 +1,9 @@
-import { evaluateT02Temporal } from "../../application/traversal/t02-temporal-evaluation";
+import { evaluateT02Temporal } from "../../../modules/graph/src/application/traversal/t02-temporal-evaluation";
 import type {
 	TraversalEvaluationInput,
 	TraversalEvaluator,
 	TraversalEvaluatorOutput,
-} from "../../domain/ports/traversal-evaluator";
+} from "../../../modules/graph/src/domain/ports/traversal-evaluator";
 
 export interface GraphF0Fixture {
 	grant: {
@@ -41,6 +41,7 @@ function authorizationOutput(
 				denyReasons: ["MOCK_EVALUATOR_DENY"],
 			};
 }
+
 export function createMockTraversalEvaluator(
 	fixture: GraphF0Fixture,
 ): TraversalEvaluator {
@@ -61,8 +62,6 @@ export function createMockTraversalEvaluator(
 					break;
 				}
 				case "T04":
-					data = { complete: true };
-					break;
 				case "T05":
 					data = { complete: true };
 					break;
@@ -84,9 +83,8 @@ export function createMockTraversalEvaluator(
 					};
 					break;
 				}
-				default: {
+				default:
 					data = authorizationOutput(fixture, input);
-				}
 			}
 			return {
 				data,
