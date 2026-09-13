@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { errorResponseSchema } from "@anxionos/contracts/errors";
+import { PrincipalLookupUnavailableError as ContractPrincipalLookupUnavailableError } from "@anxionos/contracts/identity";
 import { issueGrant } from "@anxionos/governance";
 import { PrincipalLookupUnavailableError as OrganizationPrincipalLookupUnavailableError } from "@anxionos/organizations";
 import { mapGovernanceError } from "../../apps/api/src/governance/error-handler";
@@ -23,13 +24,10 @@ import {
 /**
  * ANX-477 (rodada 2) — contrato de erro do caminho de identidade.
  *
- * O teste da rodada 1 lancava `PrincipalLookupUnavailableError` do PORT DO
- * GOVERNANCE. Em producao quem lanca e' o adapter de identidade de
- * `@anxionos/organizations` (`identity-principal-lookup.ts`), e o boundary de
- * governance reconhece ESSA classe (`apps/api/src/governance/error-handler.ts`).
- * A classe errada cai no ramo generico e vira 500; a real vira
- * `GOV_PRINCIPAL_NOT_FOUND` / 404. Este arquivo usa a classe REAL, como a
- * producao, e pina o status devolvido hoje.
+ * ANX-494 consolida a classe em `@anxionos/contracts/identity`, que e' a
+ * mesma instancia reexportada por organizations e governance. Este arquivo
+ * continua usando a superficie publica de organizations para representar o
+ * adapter de identidade em producao.
  *
  * Vive em `tests/` (fora do projeto composite de `modules/governance`) de
  * proposito: e' o unico lugar que pode importar `@anxionos/organizations` e o
@@ -211,13 +209,20 @@ describe("ANX-492 — boundary de governance: indisponibilidade de identidade vi
 		expect(errorResponseSchema.safeParse(mapped.body).success).toBe(true);
 	});
 
-	test("classe do port do governance NAO e' a de producao (cai em 500)", () => {
-		// Contraste que documenta o defeito da rodada 1: o boundary reconhece a
-		// classe de `@anxionos/organizations`, nao a duplicata do port.
+	test("governance e organizations reexportam a classe canonica compartilhada", () => {
+		expect(OrganizationPrincipalLookupUnavailableError).toBe(
+			ContractPrincipalLookupUnavailableError,
+		);
+		expect(GovernancePrincipalLookupUnavailableError).toBe(
+			ContractPrincipalLookupUnavailableError,
+		);
 		const mapped = mapGovernanceError(
 			new GovernancePrincipalLookupUnavailableError("identity down"),
 		);
-		expect(mapped.status).toBe(500);
+		expect(mapped.status).toBe(503);
+		expect(mapped.body.error.details).toMatchObject({
+			code: "GOV_IDENTITY_UNAVAILABLE",
+		});
 	});
 
 	/**
