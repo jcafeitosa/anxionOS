@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { createPgPool } from "@anxionos/eventing/postgres";
+import {
+	createPartnersCommandIntent,
+	loadIdempotentCommandResult,
+} from "../../modules/partners/src/application/command-support";
+import type { CommandJournalRepository } from "../../modules/partners/src/domain/ports/command-journal";
 import { shouldRunPgIntegrationTests } from "../pg-harness-guard";
 
 const migrationSql = readFileSync(
@@ -31,8 +36,16 @@ const secretRemediationSql = readFileSync(
 	),
 	"utf8",
 );
+const commandJournalRemediationSql = readFileSync(
+	new URL(
+		"../../modules/partners/src/infrastructure/migrations/0005_partners_command_journal_secret_remediation.sql",
+		import.meta.url,
+	),
+	"utf8",
+);
 
 const legacyPartnerOrganizationId = "11111111-1111-4111-8111-111111111111";
+const replayCommandId = "00000000-0000-4000-8000-000000000099";
 
 describe("partners schema migration", () => {
 	test("upgrades the legacy accrual schema without losing tenant ownership", async () => {
@@ -96,6 +109,30 @@ describe("partners schema migration", () => {
 			// this is the production path for the legacy database that exposed the
 			// 42703 startup failure.
 			await client.query(baselineSql);
+			const replayIntent = createPartnersCommandIntent("registerPartner", {
+				organizationId: legacyPartnerOrganizationId,
+				referralCode: "campaign_ghp_legacy_token",
+				displayName: "Legacy Partner",
+				commissionRate: "10.00",
+				referredOrganizationId: "22222222-2222-4222-8222-222222222222",
+			});
+			await client.query(
+				`INSERT INTO partners_command_journal (
+					organization_id, command_id, command_name, request_hash, response_snapshot
+				) VALUES ($1, $2, $3, $4, $5::jsonb)`,
+				[
+					legacyPartnerOrganizationId,
+					replayCommandId,
+					"registerPartner",
+					replayIntent.requestHash,
+					JSON.stringify({
+						aggregateId: "ptr_prt_00000000-0000-4000-8000-000000000099",
+						revision: 1,
+						partnerId: "ptr_prt_00000000-0000-4000-8000-000000000099",
+						referralId: "campaign_ghp_legacy_token",
+					}),
+				],
+			);
 			await client.query(
 				`INSERT INTO partners_partners (
 					id, organization_id, referral_code, display_name,
@@ -132,6 +169,49 @@ describe("partners schema migration", () => {
 				],
 			);
 			await client.query(secretRemediationSql);
+			await client.query(commandJournalRemediationSql);
+
+			const commandJournal: CommandJournalRepository = {
+				async findByCommandId(organizationId, commandId) {
+					const result = await client.query<{
+						organization_id: string;
+						command_id: string;
+						command_name: string;
+						request_hash: string | null;
+						response_snapshot: Record<string, unknown>;
+					}>(
+						`SELECT organization_id, command_id, command_name, request_hash,
+								response_snapshot
+						 FROM partners_command_journal
+						 WHERE organization_id = $1 AND command_id = $2`,
+						[organizationId, commandId],
+					);
+					const row = result.rows[0];
+					return row
+						? {
+								organizationId: row.organization_id,
+								commandId: row.command_id,
+								commandName: row.command_name,
+								requestHash: row.request_hash,
+								responseSnapshot: row.response_snapshot,
+							}
+						: null;
+				},
+				async findByInvoiceId() {
+					return null;
+				},
+				async save() {},
+			};
+			const replay = await loadIdempotentCommandResult(
+				commandJournal,
+				legacyPartnerOrganizationId,
+				replayCommandId,
+				replayIntent,
+			);
+			expect(replay).toMatchObject({
+				referralId: `[REDACTED:${replayCommandId}]`,
+				idempotentReplay: true,
+			});
 
 			const sanitizedPartner = await client.query<{
 				referral_code: string;

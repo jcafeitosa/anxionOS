@@ -36,6 +36,13 @@
 			"when": 1789272000001,
 			"tag": "0004_partners_secret_text_remediation",
 			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "7",
+			"when": 1789272000002,
+			"tag": "0005_partners_command_journal_secret_remediation",
+			"breakpoints": true
 		}
 	]
 }
