@@ -12,9 +12,11 @@ export const partnersPayoutIdSchema = z
 	.regex(/^ptr_pay_[0-9a-f-]{36}$/i);
 export const partnersPartnerStatusSchema = z.enum(["ACTIVE", "SUSPENDED"]);
 export const partnersPayoutStatusSchema = z.enum([
-	"REQUESTED",
-	"APPROVED",
-	"REJECTED",
+	"SCHEDULED",
+	"PROCESSING",
+	"SETTLED",
+	"FAILED",
+	"REVERSED",
 ]);
 export const partnersAccrualStatusSchema = z.enum([
 	"ACCRUED",

@@ -14,6 +14,11 @@ export const PARTNERS_EVENT_TYPES = {
 	COMMISSION_REVERSED: "partners.commission.reversed.v1",
 	PAYOUT_REQUESTED: "partners.payout.requested.v1",
 	PAYOUT_APPROVED: "partners.payout.approved.v1",
+	PAYOUT_SCHEDULED: "partners.payout.scheduled.v1",
+	PAYOUT_PROCESSING: "partners.payout.processing.v1",
+	PAYOUT_SETTLED: "partners.payout.settled.v1",
+	PAYOUT_FAILED: "partners.payout.failed.v1",
+	PAYOUT_REVERSED: "partners.payout.reversed.v1",
 };
 export const commissionAccruedPayloadSchema = z.object({
 	commissionAccrualId: partnersCommissionAccrualIdSchema,
@@ -50,6 +55,37 @@ export const payoutApprovedPayloadSchema = z.object({
 	approvalReference: z.string().min(1).max(128),
 	approvedAt: z.string().datetime(),
 });
+export const payoutScheduledPayloadSchema = payoutRequestedPayloadSchema;
+export const payoutProcessingPayloadSchema = z.object({
+	payoutId: partnersPayoutIdSchema,
+	partnerId: partnersPartnerIdSchema,
+	organizationId: institutionalUuidSchema,
+	processingAt: z.string().datetime(),
+	attemptNumber: z.number().int().positive(),
+});
+export const payoutSettledPayloadSchema = z.object({
+	payoutId: partnersPayoutIdSchema,
+	partnerId: partnersPartnerIdSchema,
+	organizationId: institutionalUuidSchema,
+	settledAmount: decimalAmountSchema,
+	providerReference: z.string().min(1).max(128),
+	settledAt: z.string().datetime(),
+});
+export const payoutFailedPayloadSchema = z.object({
+	payoutId: partnersPayoutIdSchema,
+	partnerId: partnersPartnerIdSchema,
+	organizationId: institutionalUuidSchema,
+	failureReason: z.string().min(1).max(256),
+	attemptNumber: z.number().int().positive(),
+	failedAt: z.string().datetime(),
+});
+export const payoutReversedPayloadSchema = z.object({
+	payoutId: partnersPayoutIdSchema,
+	partnerId: partnersPartnerIdSchema,
+	organizationId: institutionalUuidSchema,
+	reversalReference: z.string().min(1).max(128),
+	reversedAt: z.string().datetime(),
+});
 export const partnersEventPayloadSchema = z.discriminatedUnion("eventType", [
 	z.object({
 		eventType: z.literal(PARTNERS_EVENT_TYPES.COMMISSION_ACCRUED),
@@ -66,6 +102,26 @@ export const partnersEventPayloadSchema = z.discriminatedUnion("eventType", [
 	z.object({
 		eventType: z.literal(PARTNERS_EVENT_TYPES.PAYOUT_APPROVED),
 		payload: payoutApprovedPayloadSchema,
+	}),
+	z.object({
+		eventType: z.literal(PARTNERS_EVENT_TYPES.PAYOUT_SCHEDULED),
+		payload: payoutScheduledPayloadSchema,
+	}),
+	z.object({
+		eventType: z.literal(PARTNERS_EVENT_TYPES.PAYOUT_PROCESSING),
+		payload: payoutProcessingPayloadSchema,
+	}),
+	z.object({
+		eventType: z.literal(PARTNERS_EVENT_TYPES.PAYOUT_SETTLED),
+		payload: payoutSettledPayloadSchema,
+	}),
+	z.object({
+		eventType: z.literal(PARTNERS_EVENT_TYPES.PAYOUT_FAILED),
+		payload: payoutFailedPayloadSchema,
+	}),
+	z.object({
+		eventType: z.literal(PARTNERS_EVENT_TYPES.PAYOUT_REVERSED),
+		payload: payoutReversedPayloadSchema,
 	}),
 ]);
 

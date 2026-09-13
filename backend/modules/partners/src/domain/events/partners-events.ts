@@ -80,3 +80,90 @@ export function createPayoutApprovedEvent(input: {
 		payload: input,
 	};
 }
+
+export function createPayoutScheduledEvent(input: {
+	payoutId: string;
+	partnerId: string;
+	organizationId: string;
+	requestedAmount: string;
+	requestedAt: string;
+}): DomainEventEnvelope {
+	return {
+		eventId: randomUUID(),
+		eventType: PARTNERS_EVENT_TYPES.PAYOUT_SCHEDULED,
+		schemaVersion,
+		ownerDomain: PARTNERS_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload: input,
+	};
+}
+
+export function createPayoutProcessingEvent(input: {
+	payoutId: string;
+	partnerId: string;
+	organizationId: string;
+	processingAt: string;
+	attemptNumber: number;
+}): DomainEventEnvelope {
+	return {
+		eventId: randomUUID(),
+		eventType: PARTNERS_EVENT_TYPES.PAYOUT_PROCESSING,
+		schemaVersion,
+		ownerDomain: PARTNERS_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload: input,
+	};
+}
+
+export function createPayoutSettledEvent(input: {
+	payoutId: string;
+	partnerId: string;
+	organizationId: string;
+	settledAmount: string;
+	providerReference: string;
+	settledAt: string;
+}): DomainEventEnvelope {
+	return {
+		eventId: randomUUID(),
+		eventType: PARTNERS_EVENT_TYPES.PAYOUT_SETTLED,
+		schemaVersion,
+		ownerDomain: PARTNERS_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload: input,
+	};
+}
+
+export function createPayoutFailedEvent(input: {
+	payoutId: string;
+	partnerId: string;
+	organizationId: string;
+	failureReason: string;
+	attemptNumber: number;
+	failedAt: string;
+}): DomainEventEnvelope {
+	return {
+		eventId: randomUUID(),
+		eventType: PARTNERS_EVENT_TYPES.PAYOUT_FAILED,
+		schemaVersion,
+		ownerDomain: PARTNERS_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload: input,
+	};
+}
+
+export function createPayoutReversedEvent(input: {
+	payoutId: string;
+	partnerId: string;
+	organizationId: string;
+	reversalReference: string;
+	reversedAt: string;
+}): DomainEventEnvelope {
+	return {
+		eventId: randomUUID(),
+		eventType: PARTNERS_EVENT_TYPES.PAYOUT_REVERSED,
+		schemaVersion,
+		ownerDomain: PARTNERS_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload: input,
+	};
+}

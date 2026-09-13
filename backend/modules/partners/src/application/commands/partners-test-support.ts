@@ -145,6 +145,12 @@ export function createPartnersTestUow(initial?: {
 					? row
 					: null;
 			},
+			async findByIdForUpdate(id, partnerOrganizationId) {
+				const row = payouts.get(id);
+				return row && row.partnerOrganizationId === partnerOrganizationId
+					? row
+					: null;
+			},
 			async listByPartnerOrganization(partnerOrganizationId, partnerId) {
 				return [...payouts.values()]
 					.filter(

@@ -65,10 +65,18 @@ describe("partners API boundary", () => {
 			partnerId: partner.id,
 			partnerOrganizationId: partner.organizationId,
 			requestedAmount: "10.00",
-			status: "REQUESTED",
+			status: "SCHEDULED",
 			requestedAt: "2026-09-10T13:00:00.000Z",
 			approvedAt: null,
 			approvalReference: null,
+			processingAt: null,
+			settledAt: null,
+			failedAt: null,
+			failureReason: null,
+			providerReference: null,
+			reversalReference: null,
+			reversedAt: null,
+			attemptCount: 0,
 		});
 		expect(payout.requestedAmount).toBe("10.00");
 	});

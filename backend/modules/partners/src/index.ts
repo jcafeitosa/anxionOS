@@ -22,6 +22,10 @@ export {
 	approvePayout,
 } from "./application/commands/approve-payout";
 export {
+	type FailPayoutDeps,
+	failPayout,
+} from "./application/commands/fail-payout";
+export {
 	type RegisterPartnerDeps,
 	registerPartner,
 } from "./application/commands/register-partner";
@@ -30,9 +34,21 @@ export {
 	requestPayout,
 } from "./application/commands/request-payout";
 export {
+	type RetryPayoutDeps,
+	retryPayout,
+} from "./application/commands/retry-payout";
+export {
 	type ReverseCommissionFromInvoiceDeps,
 	reverseCommissionFromInvoice,
 } from "./application/commands/reverse-commission-from-invoice";
+export {
+	type ReversePayoutDeps,
+	reversePayout,
+} from "./application/commands/reverse-payout";
+export {
+	type SettlePayoutDeps,
+	settlePayout,
+} from "./application/commands/settle-payout";
 export {
 	createInvoicePaidConsumer,
 	type InvoicePaidConsumerDeps,

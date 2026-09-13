@@ -35,6 +35,14 @@ export interface PayoutRecord {
 	requestedAt: string;
 	approvedAt: string | null;
 	approvalReference: string | null;
+	processingAt: string | null;
+	settledAt: string | null;
+	failedAt: string | null;
+	failureReason: string | null;
+	providerReference: string | null;
+	reversalReference: string | null;
+	reversedAt: string | null;
+	attemptCount: number;
 }
 
 export interface PartnerRepository {
@@ -74,6 +82,10 @@ export interface CommissionAccrualRepository {
 
 export interface PayoutRepository {
 	findById(
+		id: string,
+		partnerOrganizationId: string,
+	): Promise<PayoutRecord | null>;
+	findByIdForUpdate(
 		id: string,
 		partnerOrganizationId: string,
 	): Promise<PayoutRecord | null>;

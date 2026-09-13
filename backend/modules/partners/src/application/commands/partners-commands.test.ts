@@ -3,6 +3,7 @@ import { PARTNERS_EVENT_TYPES } from "@anxionos/contracts/partners";
 import { PartnersCommandError } from "../errors";
 import { accrueCommissionFromInvoice } from "./accrue-commission-from-invoice";
 import { approvePayout } from "./approve-payout";
+import { failPayout } from "./fail-payout";
 import {
 	createPartnersTestUow,
 	TEST_PARTNER_ORG,
@@ -12,7 +13,10 @@ import {
 } from "./partners-test-support";
 import { registerPartner } from "./register-partner";
 import { requestPayout } from "./request-payout";
+import { retryPayout } from "./retry-payout";
 import { reverseCommissionFromInvoice } from "./reverse-commission-from-invoice";
+import { reversePayout } from "./reverse-payout";
+import { settlePayout } from "./settle-payout";
 
 describe("partners commands", () => {
 	test("registerPartner creates partner scoped to organization", async () => {
@@ -178,7 +182,7 @@ describe("partners commands", () => {
 		expect(row?.status).toBe("REVERSED");
 	});
 
-	test("requestPayout and approvePayout require approval and mark accruals paid", async () => {
+	test("requestPayout and approvePayout start processing and mark accruals paid", async () => {
 		const {
 			unitOfWork,
 			commandJournal,
@@ -221,7 +225,7 @@ describe("partners commands", () => {
 			},
 		);
 		expect(requested.commissionAmount).toBe("20");
-		expect(getPayouts().get(requested.payoutId!)?.status).toBe("REQUESTED");
+		expect(getPayouts().get(requested.payoutId!)?.status).toBe("SCHEDULED");
 		const approved = await approvePayout(
 			{ unitOfWork, commandJournal },
 			{
@@ -233,15 +237,135 @@ describe("partners commands", () => {
 			},
 		);
 		expect(approved.payoutId).toBe(requested.payoutId);
-		expect(getPayouts().get(requested.payoutId!)?.status).toBe("APPROVED");
+		expect(getPayouts().get(requested.payoutId!)?.status).toBe("PROCESSING");
 		expect(getAccruals().get(accrued.commissionAccrualId!)?.status).toBe(
 			"PAID",
 		);
 		expect(
 			getPublished().some(
-				(event) => event.eventType === PARTNERS_EVENT_TYPES.PAYOUT_APPROVED,
+				(event) => event.eventType === PARTNERS_EVENT_TYPES.PAYOUT_PROCESSING,
 			),
 		).toBe(true);
+	});
+
+	test("payout lifecycle retries FAILED once and settles without duplicate events", async () => {
+		const { unitOfWork, commandJournal, getPayouts, getPublished } =
+			createPartnersTestUow();
+		const registered = await registerPartner(
+			{ unitOfWork, commandJournal },
+			{
+				commandId: testCommandId(),
+				organizationId: TEST_PARTNER_ORG,
+				referralCode: "REF-LIFECYCLE",
+				displayName: "Lifecycle Partner",
+				commissionRate: "10",
+				referredOrganizationId: TEST_REFERRED_ORG,
+			},
+		);
+		await accrueCommissionFromInvoice(
+			{ unitOfWork, commandJournal },
+			{
+				commandId: testCommandId(),
+				partnerOrganizationId: TEST_PARTNER_ORG,
+				invoiceId: testInvoiceId(),
+				referredOrganizationId: TEST_REFERRED_ORG,
+				subscriptionId: "bil_sub_test",
+				billingPeriod: "2026-09",
+				totalAmount: "200",
+				paidAt: "2026-09-10T12:00:00.000Z",
+			},
+		);
+		const requested = await requestPayout(
+			{ unitOfWork, commandJournal },
+			{
+				commandId: testCommandId(),
+				partnerOrganizationId: TEST_PARTNER_ORG,
+				partnerId: registered.partnerId!,
+				requestedAt: "2026-09-12T12:00:00.000Z",
+			},
+		);
+		const processing = await approvePayout(
+			{ unitOfWork, commandJournal },
+			{
+				commandId: testCommandId(),
+				partnerOrganizationId: TEST_PARTNER_ORG,
+				payoutId: requested.payoutId!,
+				approvedAt: "2026-09-13T12:00:00.000Z",
+				approvalReference: "APPR-LIFECYCLE",
+			},
+		);
+		expect(processing.payoutStatus).toBe("PROCESSING");
+		await expect(
+			settlePayout(
+				{ unitOfWork, commandJournal },
+				{
+					commandId: testCommandId(),
+					partnerOrganizationId: "00000000-0000-4000-8000-000000000099",
+					payoutId: requested.payoutId!,
+					settledAt: "2026-09-13T12:00:30.000Z",
+					providerReference: "cross-tenant",
+				},
+			),
+		).rejects.toMatchObject({ partnersCode: "PTR_PAYOUT_NOT_FOUND" });
+		const failureCommandId = testCommandId();
+		const failed = await failPayout(
+			{ unitOfWork, commandJournal },
+			{
+				commandId: failureCommandId,
+				partnerOrganizationId: TEST_PARTNER_ORG,
+				payoutId: requested.payoutId!,
+				failedAt: "2026-09-13T12:01:00.000Z",
+				failureReason: "simulated provider timeout",
+			},
+		);
+		expect(failed.payoutStatus).toBe("FAILED");
+		const failedReplay = await failPayout(
+			{ unitOfWork, commandJournal },
+			{
+				commandId: failureCommandId,
+				partnerOrganizationId: TEST_PARTNER_ORG,
+				payoutId: requested.payoutId!,
+				failedAt: "2026-09-13T12:01:00.000Z",
+				failureReason: "simulated provider timeout",
+			},
+		);
+		expect(failedReplay.idempotentReplay).toBe(true);
+		const retried = await retryPayout(
+			{ unitOfWork, commandJournal },
+			{
+				commandId: testCommandId(),
+				partnerOrganizationId: TEST_PARTNER_ORG,
+				payoutId: requested.payoutId!,
+				processingAt: "2026-09-13T12:02:00.000Z",
+			},
+		);
+		expect(retried.payoutStatus).toBe("PROCESSING");
+		expect(getPayouts().get(requested.payoutId!)?.attemptCount).toBe(2);
+		const settled = await settlePayout(
+			{ unitOfWork, commandJournal },
+			{
+				commandId: testCommandId(),
+				partnerOrganizationId: TEST_PARTNER_ORG,
+				payoutId: requested.payoutId!,
+				settledAt: "2026-09-13T12:03:00.000Z",
+				providerReference: "sim_payout_001",
+			},
+		);
+		expect(settled.payoutStatus).toBe("SETTLED");
+		const reversed = await reversePayout(
+			{ unitOfWork, commandJournal },
+			{
+				commandId: testCommandId(),
+				partnerOrganizationId: TEST_PARTNER_ORG,
+				payoutId: requested.payoutId!,
+				reversedAt: "2026-09-14T12:00:00.000Z",
+				reversalReference: "refund_001",
+			},
+		);
+		expect(reversed.payoutStatus).toBe("REVERSED");
+		expect(
+			getPublished().filter((event) => event.eventType.includes("payout")),
+		).toHaveLength(6);
 	});
 
 	test("partner scope blocks cross-tenant partner lookup", async () => {

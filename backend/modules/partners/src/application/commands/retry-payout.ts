@@ -1,10 +1,10 @@
 import type {
-	ApprovePayoutCommand,
 	PartnersCommandResult,
+	RetryPayoutCommand,
 } from "@anxionos/contracts/partners";
 import {
-	approvePayoutCommandSchema,
 	partnersCommandResultSchema,
+	retryPayoutCommandSchema,
 } from "@anxionos/contracts/partners";
 import { createPayoutProcessingEvent } from "../../domain/events/partners-events";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
@@ -16,17 +16,17 @@ import {
 } from "../command-support";
 import { throwPartnersError } from "../errors";
 
-export interface ApprovePayoutDeps {
+export interface RetryPayoutDeps {
 	unitOfWork: PartnersUnitOfWork;
 	commandJournal: CommandJournalRepository;
 }
 
-export async function approvePayout(
-	deps: ApprovePayoutDeps,
-	input: ApprovePayoutCommand,
+export async function retryPayout(
+	deps: RetryPayoutDeps,
+	input: RetryPayoutCommand,
 ): Promise<PartnersCommandResult> {
-	const command = approvePayoutCommandSchema.parse(input);
-	const intent = createPartnersCommandIntent("approvePayout", command);
+	const command = retryPayoutCommandSchema.parse(input);
+	const intent = createPartnersCommandIntent("retryPayout", command);
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
 		command.partnerOrganizationId,
@@ -52,70 +52,41 @@ export async function approvePayout(
 		if (!payout) {
 			throwPartnersError("PTR_PAYOUT_NOT_FOUND", "payout not found");
 		}
-		if (payout.status === "PROCESSING") {
-			const result = partnersCommandResultSchema.parse({
-				aggregateId: payout.id,
-				revision: 1,
-				partnerId: payout.partnerId,
-				payoutId: payout.id,
-				commissionAmount: payout.requestedAmount,
-				payoutStatus: payout.status,
-				idempotentReplay: true,
-			});
-			await ctx.commandJournal.save({
-				commandId: command.commandId,
-				organizationId: command.partnerOrganizationId,
-				commandName: "approvePayout",
-				requestHash: intent.requestHash,
-				responseSnapshot: toCommandResultSnapshot(result),
-			});
-			return result;
-		}
-		if (payout.status !== "SCHEDULED") {
+		if (payout.status !== "FAILED") {
 			throwPartnersError(
-				"PTR_PAYOUT_NOT_SCHEDULED",
-				"payout is not in SCHEDULED status",
+				"PTR_PAYOUT_NOT_FAILED",
+				"payout is not in FAILED status",
 			);
 		}
-		const approved = await ctx.payouts.update({
+		const retried = await ctx.payouts.update({
 			...payout,
 			status: "PROCESSING",
-			approvedAt: command.approvedAt,
-			approvalReference: command.approvalReference,
-			processingAt: command.approvedAt,
+			processingAt: command.processingAt,
+			failedAt: null,
+			failureReason: null,
 			attemptCount: payout.attemptCount + 1,
 		});
-		const accrued = await ctx.commissionAccruals.listAccruedByPartner(
-			payout.partnerId,
-			command.partnerOrganizationId,
-		);
-		for (const row of accrued) {
-			await ctx.commissionAccruals.update({
-				...row,
-				status: "PAID",
-			});
-		}
 		await ctx.publishEvents([
 			createPayoutProcessingEvent({
-				payoutId: approved.id,
-				partnerId: approved.partnerId,
+				payoutId: retried.id,
+				partnerId: retried.partnerId,
 				organizationId: command.partnerOrganizationId,
-				processingAt: command.approvedAt,
-				attemptNumber: approved.attemptCount,
+				processingAt: command.processingAt,
+				attemptNumber: retried.attemptCount,
 			}),
 		]);
 		const result = partnersCommandResultSchema.parse({
-			aggregateId: approved.id,
+			aggregateId: retried.id,
 			revision: 1,
-			partnerId: approved.partnerId,
-			payoutId: approved.id,
-			commissionAmount: approved.requestedAmount,
-			payoutStatus: approved.status,
+			partnerId: retried.partnerId,
+			payoutId: retried.id,
+			commissionAmount: retried.requestedAmount,
+			payoutStatus: retried.status,
 		});
 		await ctx.commandJournal.save({
 			commandId: command.commandId,
 			organizationId: command.partnerOrganizationId,
-			commandName: "approvePayout",
+			commandName: "retryPayout",
 			requestHash: intent.requestHash,
 			responseSnapshot: toCommandResultSnapshot(result),
 		});

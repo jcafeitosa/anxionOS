@@ -8,7 +8,7 @@ import {
 	requestPayoutCommandSchema,
 } from "@anxionos/contracts/partners";
 import { sumDecimalAmounts } from "../../domain/commission";
-import { createPayoutRequestedEvent } from "../../domain/events/partners-events";
+import { createPayoutScheduledEvent } from "../../domain/events/partners-events";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { PartnersUnitOfWork } from "../../domain/ports/partners-unit-of-work";
 import {
@@ -73,13 +73,21 @@ export async function requestPayout(
 			partnerId: partner.id,
 			partnerOrganizationId: command.partnerOrganizationId,
 			requestedAmount,
-			status: "REQUESTED",
+			status: "SCHEDULED",
 			requestedAt: command.requestedAt,
 			approvedAt: null,
 			approvalReference: null,
+			processingAt: null,
+			settledAt: null,
+			failedAt: null,
+			failureReason: null,
+			providerReference: null,
+			reversalReference: null,
+			reversedAt: null,
+			attemptCount: 0,
 		});
 		await ctx.publishEvents([
-			createPayoutRequestedEvent({
+			createPayoutScheduledEvent({
 				payoutId: saved.id,
 				partnerId: partner.id,
 				organizationId: command.partnerOrganizationId,
@@ -93,6 +101,7 @@ export async function requestPayout(
 			partnerId: partner.id,
 			payoutId: saved.id,
 			commissionAmount: requestedAmount,
+			payoutStatus: saved.status,
 		});
 		await ctx.commandJournal.save({
 			commandId: command.commandId,

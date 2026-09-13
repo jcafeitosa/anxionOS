@@ -60,6 +60,14 @@ export function toPayoutDto(payout: PayoutRecord) {
 		requestedAt: payout.requestedAt,
 		approvedAt: payout.approvedAt,
 		approvalReference: payout.approvalReference,
+		processingAt: payout.processingAt,
+		settledAt: payout.settledAt,
+		failedAt: payout.failedAt,
+		failureReason: payout.failureReason,
+		providerReference: payout.providerReference,
+		reversalReference: payout.reversalReference,
+		reversedAt: payout.reversedAt,
+		attemptCount: payout.attemptCount,
 	};
 }
 

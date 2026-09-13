@@ -7,6 +7,7 @@ import {
 	partnersCommissionAccrualIdSchema,
 	partnersPartnerIdSchema,
 	partnersPayoutIdSchema,
+	partnersPayoutStatusSchema,
 	partnersReferralIdSchema,
 } from "./types";
 export const partnersCommandResultSchema = z.object({
@@ -18,6 +19,7 @@ export const partnersCommandResultSchema = z.object({
 	commissionAccrualId: partnersCommissionAccrualIdSchema.optional(),
 	commissionAmount: decimalAmountSchema.optional(),
 	payoutId: partnersPayoutIdSchema.optional(),
+	payoutStatus: partnersPayoutStatusSchema.optional(),
 });
 export const registerPartnerCommandSchema = z.object({
 	commandId: institutionalUuidSchema,
@@ -58,6 +60,33 @@ export const approvePayoutCommandSchema = z.object({
 	approvedAt: z.string().datetime(),
 	approvalReference: z.string().min(1).max(128),
 });
+export const failPayoutCommandSchema = z.object({
+	commandId: institutionalUuidSchema,
+	partnerOrganizationId: institutionalUuidSchema,
+	payoutId: partnersPayoutIdSchema,
+	failedAt: z.string().datetime(),
+	failureReason: z.string().min(1).max(256),
+});
+export const retryPayoutCommandSchema = z.object({
+	commandId: institutionalUuidSchema,
+	partnerOrganizationId: institutionalUuidSchema,
+	payoutId: partnersPayoutIdSchema,
+	processingAt: z.string().datetime(),
+});
+export const settlePayoutCommandSchema = z.object({
+	commandId: institutionalUuidSchema,
+	partnerOrganizationId: institutionalUuidSchema,
+	payoutId: partnersPayoutIdSchema,
+	settledAt: z.string().datetime(),
+	providerReference: z.string().min(1).max(128),
+});
+export const reversePayoutCommandSchema = z.object({
+	commandId: institutionalUuidSchema,
+	partnerOrganizationId: institutionalUuidSchema,
+	payoutId: partnersPayoutIdSchema,
+	reversedAt: z.string().datetime(),
+	reversalReference: z.string().min(1).max(128),
+});
 
 export type PartnersCommandResult = z.infer<typeof partnersCommandResultSchema>;
 
@@ -76,3 +105,7 @@ export type ReverseCommissionFromInvoiceCommand = z.infer<
 export type RequestPayoutCommand = z.infer<typeof requestPayoutCommandSchema>;
 
 export type ApprovePayoutCommand = z.infer<typeof approvePayoutCommandSchema>;
+export type FailPayoutCommand = z.infer<typeof failPayoutCommandSchema>;
+export type RetryPayoutCommand = z.infer<typeof retryPayoutCommandSchema>;
+export type SettlePayoutCommand = z.infer<typeof settlePayoutCommandSchema>;
+export type ReversePayoutCommand = z.infer<typeof reversePayoutCommandSchema>;

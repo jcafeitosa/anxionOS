@@ -55,5 +55,6 @@ export function parseCommandResultSnapshot(
 		commissionAccrualId: snapshot.commissionAccrualId,
 		commissionAmount: snapshot.commissionAmount,
 		payoutId: snapshot.payoutId,
+		payoutStatus: snapshot.payoutStatus,
 	});
 }

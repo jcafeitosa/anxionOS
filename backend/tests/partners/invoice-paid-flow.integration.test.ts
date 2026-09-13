@@ -17,10 +17,17 @@ import {
 } from "../../modules/billing/src";
 import { ensureBillingSchema } from "../../modules/billing/src/infrastructure/migrate";
 import {
+	accrueCommissionFromInvoice,
+	approvePayout,
 	createInvoicePaidConsumer,
 	createPartnersUnitOfWork,
 	createRefundProcessedConsumer,
+	failPayout,
 	registerPartner,
+	requestPayout,
+	retryPayout,
+	reversePayout,
+	settlePayout,
 } from "../../modules/partners/src";
 import { ensurePartnersSchema } from "../../modules/partners/src/infrastructure/migrate";
 import { createPgCommandJournalRepository as createPartnersJournal } from "../../modules/partners/src/infrastructure/persistence/command-journal-repository";
@@ -153,6 +160,132 @@ describe("partners paid/refund flow against real PostgreSQL", () => {
 			);
 			expect(reversed.commissionAccrualId).toBe(accrued.commissionAccrualId);
 			expect(reversalReplay.idempotentReplay).toBe(true);
+		} finally {
+			await pool.end();
+		}
+	});
+
+	test("payout lifecycle persists transitions and retry without duplicate effects", async () => {
+		if (!shouldRunPgIntegrationTests()) return;
+		const url = process.env.DATABASE_URL?.trim();
+		if (!url) return;
+		const pool = createPgPool(url);
+		try {
+			await ensureEventingSchema(pool);
+			await ensurePartnersSchema(pool);
+			await truncateDomainTables(pool, ALL_P07_TABLES);
+			const unitOfWork = createPartnersUnitOfWork(pool);
+			const commandJournal = createPartnersJournal(pool);
+			const organizationId = randomUUID();
+			const referredOrganizationId = randomUUID();
+			const registered = await registerPartner(
+				{ unitOfWork, commandJournal },
+				{
+					commandId: randomUUID(),
+					organizationId,
+					referralCode: `REF-PAYOUT-${randomUUID()}`,
+					displayName: "PG Payout Partner",
+					commissionRate: "10",
+					referredOrganizationId,
+				},
+			);
+			await accrueCommissionFromInvoice(
+				{ unitOfWork, commandJournal },
+				{
+					commandId: randomUUID(),
+					partnerOrganizationId: organizationId,
+					invoiceId: `bil_inv_${randomUUID()}`,
+					referredOrganizationId,
+					subscriptionId: `bil_sub_${randomUUID()}`,
+					billingPeriod: "2026-09",
+					totalAmount: "200",
+					paidAt: "2026-09-10T12:00:00.000Z",
+				},
+			);
+			const requested = await requestPayout(
+				{ unitOfWork, commandJournal },
+				{
+					commandId: randomUUID(),
+					partnerOrganizationId: organizationId,
+					partnerId: registered.partnerId!,
+					requestedAt: "2026-09-12T12:00:00.000Z",
+				},
+			);
+			const processing = await approvePayout(
+				{ unitOfWork, commandJournal },
+				{
+					commandId: randomUUID(),
+					partnerOrganizationId: organizationId,
+					payoutId: requested.payoutId!,
+					approvedAt: "2026-09-13T12:00:00.000Z",
+					approvalReference: "APPR-PG",
+				},
+			);
+			const failed = await failPayout(
+				{ unitOfWork, commandJournal },
+				{
+					commandId: randomUUID(),
+					partnerOrganizationId: organizationId,
+					payoutId: requested.payoutId!,
+					failedAt: "2026-09-13T12:01:00.000Z",
+					failureReason: "SIMULATED_FAILURE",
+				},
+			);
+			const retry = await retryPayout(
+				{ unitOfWork, commandJournal },
+				{
+					commandId: randomUUID(),
+					partnerOrganizationId: organizationId,
+					payoutId: requested.payoutId!,
+					processingAt: "2026-09-13T12:02:00.000Z",
+				},
+			);
+			const settled = await settlePayout(
+				{ unitOfWork, commandJournal },
+				{
+					commandId: randomUUID(),
+					partnerOrganizationId: organizationId,
+					payoutId: requested.payoutId!,
+					settledAt: "2026-09-13T12:03:00.000Z",
+					providerReference: "SIM-PG-001",
+				},
+			);
+			const reversed = await reversePayout(
+				{ unitOfWork, commandJournal },
+				{
+					commandId: randomUUID(),
+					partnerOrganizationId: organizationId,
+					payoutId: requested.payoutId!,
+					reversedAt: "2026-09-14T12:00:00.000Z",
+					reversalReference: "SIM-REFUND-001",
+				},
+			);
+			const row = await pool.query(
+				"SELECT status, attempt_count, provider_reference FROM partners_payouts WHERE id = $1 AND partner_organization_id = $2",
+				[requested.payoutId, organizationId],
+			);
+			const events = await pool.query(
+				"SELECT event_type FROM domain_journal WHERE payload->>'payoutId' = $1 ORDER BY recorded_at ASC",
+				[requested.payoutId],
+			);
+			expect(processing.payoutStatus).toBe("PROCESSING");
+			expect(failed.payoutStatus).toBe("FAILED");
+			expect(retry.payoutStatus).toBe("PROCESSING");
+			expect(settled.payoutStatus).toBe("SETTLED");
+			expect(reversed.payoutStatus).toBe("REVERSED");
+			expect(row.rows[0]).toMatchObject({
+				status: "REVERSED",
+				attempt_count: 2,
+				provider_reference: "SIM-PG-001",
+			});
+			expect(events.rows.map((event) => event.event_type)).toEqual([
+				"partners.payout.scheduled.v1",
+				"partners.payout.processing.v1",
+				"partners.payout.failed.v1",
+				"partners.payout.processing.v1",
+				"partners.payout.settled.v1",
+				"partners.payout.reversed.v1",
+			]);
 		} finally {
 			await pool.end();
 		}
