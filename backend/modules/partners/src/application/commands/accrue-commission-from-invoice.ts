@@ -12,11 +12,12 @@ import { createCommissionAccruedEvent } from "../../domain/events/partners-event
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { PartnersUnitOfWork } from "../../domain/ports/partners-unit-of-work";
 import {
+	createPartnersCommandIntent,
 	loadIdempotentByInvoiceId,
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwPartnersError } from "../errors";
+import { throwPartnersError } from "../errors";
 
 export interface AccrueCommissionFromInvoiceDeps {
 	unitOfWork: PartnersUnitOfWork;
@@ -28,67 +29,45 @@ export async function accrueCommissionFromInvoice(
 	input: AccrueCommissionFromInvoiceCommand,
 ): Promise<PartnersCommandResult> {
 	const command = accrueCommissionFromInvoiceCommandSchema.parse(input);
-	const existingCommand = await deps.commandJournal.findByCommandId(
-		command.commandId,
+	const intent = createPartnersCommandIntent(
+		"accrueCommissionFromInvoice",
+		command,
 	);
-	if (
-		existingCommand &&
-		existingCommand.organizationId !== command.partnerOrganizationId
-	) {
-		throwPartnersError(
-			"PTR_CROSS_TENANT",
-			"command journal organization mismatch",
-		);
-	}
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
+		command.partnerOrganizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay) return replay;
 	const replayByInvoice = await loadIdempotentByInvoiceId(
 		deps.commandJournal,
+		command.partnerOrganizationId,
 		command.invoiceId,
+		intent,
 	);
 	if (replayByInvoice) return replayByInvoice;
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
-		const racedByCommand = await ctx.commandJournal.findByCommandId(
+		await ctx.lockIdempotencyKey(
+			`${command.partnerOrganizationId}:${command.commandId}`,
+		);
+		await ctx.lockIdempotencyKey(
+			`${command.partnerOrganizationId}:invoice:${command.invoiceId}`,
+		);
+		const racedByCommand = await loadIdempotentCommandResult(
+			ctx.commandJournal,
+			command.partnerOrganizationId,
 			command.commandId,
+			intent,
 		);
-		if (racedByCommand) {
-			const parsed = parseCommandResultSnapshot(
-				racedByCommand.responseSnapshot,
-			);
-			return partnersCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
-		}
-		const racedByInvoice = await ctx.commandJournal.findByInvoiceId(
+		if (racedByCommand) return racedByCommand;
+		const racedByInvoice = await loadIdempotentByInvoiceId(
+			ctx.commandJournal,
+			command.partnerOrganizationId,
 			command.invoiceId,
+			intent,
 		);
-		if (racedByInvoice) {
-			if (racedByInvoice.organizationId !== command.partnerOrganizationId) {
-				throwPartnersError(
-					"PTR_CROSS_TENANT",
-					"invoice accrual organization mismatch",
-				);
-			}
-			const parsed = parseCommandResultSnapshot(
-				racedByInvoice.responseSnapshot,
-			);
-			const result = partnersCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
-			await ctx.commandJournal.save({
-				commandId: command.commandId,
-				organizationId: command.partnerOrganizationId,
-				commandName: "accrueCommissionFromInvoice",
-				invoiceId: command.invoiceId,
-				responseSnapshot: toCommandResultSnapshot(result),
-			});
-			return result;
-		}
+		if (racedByInvoice) return racedByInvoice;
 		const partner = await ctx.partners.findByReferredOrganization(
 			command.referredOrganizationId,
 			command.partnerOrganizationId,
@@ -117,6 +96,7 @@ export async function accrueCommissionFromInvoice(
 				commandId: command.commandId,
 				organizationId: command.partnerOrganizationId,
 				commandName: "accrueCommissionFromInvoice",
+				requestHash: intent.requestHash,
 				invoiceId: command.invoiceId,
 				responseSnapshot: toCommandResultSnapshot(result),
 			});
@@ -126,10 +106,8 @@ export async function accrueCommissionFromInvoice(
 			command.totalAmount,
 			partner.commissionRate,
 		);
-		const accrualId = `ptr_acc_${randomUUID()}`;
-		const accruedAt = command.issuedAt;
 		const saved = await ctx.commissionAccruals.save({
-			id: accrualId,
+			id: `ptr_acc_${randomUUID()}`,
 			partnerId: partner.id,
 			partnerOrganizationId: command.partnerOrganizationId,
 			referredOrganizationId: command.referredOrganizationId,
@@ -138,7 +116,7 @@ export async function accrueCommissionFromInvoice(
 			commissionRate: partner.commissionRate,
 			commissionAmount,
 			status: "ACCRUED",
-			accruedAt,
+			accruedAt: command.issuedAt,
 			reversedAt: null,
 		});
 		await ctx.publishEvents([
@@ -152,7 +130,7 @@ export async function accrueCommissionFromInvoice(
 				invoiceTotalAmount: command.totalAmount,
 				commissionRate: partner.commissionRate,
 				commissionAmount,
-				accruedAt,
+				accruedAt: command.issuedAt,
 			}),
 		]);
 		const result = partnersCommandResultSchema.parse({
@@ -167,6 +145,7 @@ export async function accrueCommissionFromInvoice(
 			commandId: command.commandId,
 			organizationId: command.partnerOrganizationId,
 			commandName: "accrueCommissionFromInvoice",
+			requestHash: intent.requestHash,
 			invoiceId: command.invoiceId,
 			responseSnapshot: toCommandResultSnapshot(result),
 		});

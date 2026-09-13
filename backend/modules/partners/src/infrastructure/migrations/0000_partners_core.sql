@@ -1,11 +1,13 @@
 -- partners module baseline schema (ANX-157 / ANX-324 read infra)
 CREATE TABLE IF NOT EXISTS partners_command_journal (
-	command_id UUID PRIMARY KEY,
 	organization_id UUID NOT NULL,
+	command_id UUID NOT NULL,
 	command_name TEXT NOT NULL,
+	request_hash TEXT,
 	invoice_id TEXT,
 	response_snapshot JSONB NOT NULL,
-	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	PRIMARY KEY (organization_id, command_id)
 );
 
 CREATE INDEX IF NOT EXISTS partners_command_journal_organization_id_idx

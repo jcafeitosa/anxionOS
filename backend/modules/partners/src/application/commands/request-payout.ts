@@ -12,10 +12,11 @@ import { createPayoutRequestedEvent } from "../../domain/events/partners-events"
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { PartnersUnitOfWork } from "../../domain/ports/partners-unit-of-work";
 import {
+	createPartnersCommandIntent,
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwPartnersError } from "../errors";
+import { throwPartnersError } from "../errors";
 
 export interface RequestPayoutDeps {
 	unitOfWork: PartnersUnitOfWork;
@@ -27,32 +28,25 @@ export async function requestPayout(
 	input: RequestPayoutCommand,
 ): Promise<PartnersCommandResult> {
 	const command = requestPayoutCommandSchema.parse(input);
-	const existingCommand = await deps.commandJournal.findByCommandId(
-		command.commandId,
-	);
-	if (
-		existingCommand &&
-		existingCommand.organizationId !== command.partnerOrganizationId
-	) {
-		throwPartnersError(
-			"PTR_CROSS_TENANT",
-			"command journal organization mismatch",
-		);
-	}
+	const intent = createPartnersCommandIntent("requestPayout", command);
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
+		command.partnerOrganizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay) return replay;
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
-		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
-		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return partnersCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
-		}
+		await ctx.lockIdempotencyKey(
+			`${command.partnerOrganizationId}:${command.commandId}`,
+		);
+		const raced = await loadIdempotentCommandResult(
+			ctx.commandJournal,
+			command.partnerOrganizationId,
+			command.commandId,
+			intent,
+		);
+		if (raced) return raced;
 		const partner = await ctx.partners.findById(
 			command.partnerId,
 			command.partnerOrganizationId,
@@ -104,6 +98,7 @@ export async function requestPayout(
 			commandId: command.commandId,
 			organizationId: command.partnerOrganizationId,
 			commandName: "requestPayout",
+			requestHash: intent.requestHash,
 			responseSnapshot: toCommandResultSnapshot(result),
 		});
 		return result;

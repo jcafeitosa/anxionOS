@@ -59,6 +59,32 @@ describe("partners commands", () => {
 		).rejects.toMatchObject({ partnersCode: "PTR_REFERRAL_CONFLICT" });
 	});
 
+	test("registerPartner rejects a divergent replay for the same commandId", async () => {
+		const { unitOfWork, commandJournal, getPartners, getPublished } =
+			createPartnersTestUow();
+		const commandId = testCommandId();
+		const base = {
+			commandId,
+			organizationId: TEST_PARTNER_ORG,
+			referralCode: "REF-INTENT",
+			displayName: "Partner Alpha",
+			commissionRate: "10",
+			referredOrganizationId: TEST_REFERRED_ORG,
+		};
+		await registerPartner({ unitOfWork, commandJournal }, base);
+		await expect(
+			registerPartner(
+				{ unitOfWork, commandJournal },
+				{
+					...base,
+					displayName: "Partner Divergent",
+				},
+			),
+		).rejects.toMatchObject({ partnersCode: "PTR_IDEMPOTENCY_CONFLICT" });
+		expect(getPartners()).toHaveLength(1);
+		expect(getPublished()).toHaveLength(0);
+	});
+
 	test("accrueCommissionFromInvoice calculates exact commission and is idempotent by invoice", async () => {
 		const { unitOfWork, commandJournal, getPublished } =
 			createPartnersTestUow();

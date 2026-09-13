@@ -31,19 +31,23 @@ export function createPartnersTestUow(initial?: {
 
 	const ctx: PartnersTransactionContext = {
 		commandJournal: {
-			async findByCommandId(commandId) {
-				return journal.get(commandId) ?? null;
+			async findByCommandId(organizationId, commandId) {
+				return journal.get(`${organizationId}:${commandId}`) ?? null;
 			},
-			async findByInvoiceId(invoiceId) {
-				return invoiceJournal.get(invoiceId) ?? null;
+			async findByInvoiceId(organizationId, invoiceId) {
+				return invoiceJournal.get(`${organizationId}:${invoiceId}`) ?? null;
 			},
 			async save(entry) {
-				journal.set(entry.commandId, entry);
+				journal.set(`${entry.organizationId}:${entry.commandId}`, entry);
 				if (entry.invoiceId) {
-					invoiceJournal.set(entry.invoiceId, entry);
+					invoiceJournal.set(
+						`${entry.organizationId}:${entry.invoiceId}`,
+						entry,
+					);
 				}
 			},
 		},
+		async lockIdempotencyKey() {},
 		partners: {
 			async findById(id, organizationId) {
 				const row = partners.get(id);

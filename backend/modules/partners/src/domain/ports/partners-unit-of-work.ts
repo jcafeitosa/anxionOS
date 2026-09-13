@@ -90,6 +90,7 @@ export interface PartnersTransactionContext {
 	partners: PartnerRepository;
 	commissionAccruals: CommissionAccrualRepository;
 	payouts: PayoutRepository;
+	lockIdempotencyKey(key: string): Promise<void>;
 	publishEvents(envelopes: DomainEventEnvelope[]): Promise<void>;
 }
 
