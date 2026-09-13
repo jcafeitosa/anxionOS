@@ -54,6 +54,8 @@ Não criar `marketplace/`.
 
 S4 evidence: ANX-523 implements `POST /v1/partners/organizations/:organizationId` with Zod body validation, mandatory `Idempotency-Key`, active agency mutation-role authorization and the canonical `registerPartner` command; `GET /:partnerId` delegates to an organization-scoped query. OpenAPI catalog coverage pins both operationIds, path/header parameters and error statuses. Verification: partners API boundary 6/6, OpenAPI catalog/plugin 9/9, focused partners integration 10/10, fresh PostgreSQL oracle 1,928 pass / 0 fail / 0 skip, lint/typecheck/boundaries/Graphify pass. Graph projection remains outside S4 and is not inferred from HTTP completion.
 
+ANX-520 evidence: partner command and event contracts now reject credential-like values, connection strings, PEM private-key markers, control characters and known token prefixes in approval/provider/reversal references and reasons. Payout event creators parse their payload schemas before publication, preserving the no-secrets event invariant. Verification: partners module 23/23, partners integration 5/5, contracts 227/227, targeted Biome 11 files clean, typecheck clean; global lint remains blocked by an unrelated pre-existing formatting finding in `tests/governance/integration/grant-revocation-policy.integration.test.ts`.
+
 ## Matriz oráculos
 
 | ID | Caso |
