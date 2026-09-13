@@ -10,10 +10,11 @@ import {
 import type { BillingUnitOfWork } from "../../domain/ports/billing-unit-of-work";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import {
+	createBillingCommandIntent,
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwBillingError } from "../errors";
+import { throwBillingError } from "../errors";
 
 export interface CreateSubscriptionDeps {
 	unitOfWork: BillingUnitOfWork;
@@ -25,32 +26,25 @@ export async function createSubscription(
 	input: CreateSubscriptionCommand,
 ): Promise<BillingCommandResult> {
 	const command = createSubscriptionCommandSchema.parse(input);
-	const existingCommand = await deps.commandJournal.findByCommandId(
-		command.commandId,
-	);
-	if (
-		existingCommand &&
-		existingCommand.organizationId !== command.organizationId
-	) {
-		throwBillingError(
-			"BIL_CROSS_TENANT",
-			"command journal organization mismatch",
-		);
-	}
+	const intent = createBillingCommandIntent("createSubscription", command);
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
+		command.organizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay) return replay;
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
-		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
-		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return billingCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
-		}
+		await ctx.lockIdempotencyKey(
+			`${command.organizationId}:${command.commandId}`,
+		);
+		const raced = await loadIdempotentCommandResult(
+			ctx.commandJournal,
+			command.organizationId,
+			command.commandId,
+			intent,
+		);
+		if (raced) return raced;
 		const existing = await ctx.subscriptions.findActiveByOrganizationAndPlan(
 			command.organizationId,
 			command.planCode,
@@ -66,6 +60,7 @@ export async function createSubscription(
 				commandId: command.commandId,
 				organizationId: command.organizationId,
 				commandName: "createSubscription",
+				requestHash: intent.requestHash,
 				responseSnapshot: toCommandResultSnapshot(result),
 			});
 			return result;
@@ -88,6 +83,7 @@ export async function createSubscription(
 			commandId: command.commandId,
 			organizationId: command.organizationId,
 			commandName: "createSubscription",
+			requestHash: intent.requestHash,
 			responseSnapshot: toCommandResultSnapshot(result),
 		});
 		return result;

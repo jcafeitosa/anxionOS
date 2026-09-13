@@ -26,15 +26,26 @@ export function createBillingTestUow(initial?: {
 	let published: DomainEventEnvelope[] = [];
 
 	const ctx: BillingTransactionContext = {
+		async lockIdempotencyKey() {},
 		commandJournal: {
-			async findByCommandId(commandId) {
-				return journal.get(commandId) ?? null;
+			async findByCommandId(organizationId, commandId) {
+				const entry = journal.get(commandId);
+				return entry?.organizationId === organizationId ? entry : null;
 			},
-			async findByUsageRecordId() {
+			async findByUsageRecordId(organizationId, usageRecordId) {
+				for (const entry of journal.values()) {
+					if (
+						entry.organizationId === organizationId &&
+						entry.usageRecordId === usageRecordId
+					) {
+						return entry;
+					}
+				}
 				return null;
 			},
-			async findByWebhookEventId(webhookEventId) {
-				return webhookJournal.get(webhookEventId) ?? null;
+			async findByWebhookEventId(organizationId, webhookEventId) {
+				const entry = webhookJournal.get(webhookEventId);
+				return entry?.organizationId === organizationId ? entry : null;
 			},
 			async save(entry) {
 				journal.set(entry.commandId, entry);

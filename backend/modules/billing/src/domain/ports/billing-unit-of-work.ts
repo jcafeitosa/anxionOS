@@ -74,6 +74,7 @@ export interface UsageAggregationRepository {
 	save(record: UsageAggregationRecord): Promise<UsageAggregationRecord>;
 }
 export interface BillingTransactionContext {
+	lockIdempotencyKey(key: string): Promise<void>;
 	commandJournal: CommandJournalRepository;
 	subscriptions: SubscriptionRepository;
 	invoices: InvoiceRepository;
