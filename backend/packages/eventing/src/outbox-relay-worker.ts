@@ -35,6 +35,7 @@ export interface OutboxRelayWorkerOptions {
 		envelope: DomainEventEnvelope,
 		error: unknown,
 		attempts: number,
+		relayId?: string,
 	) => Promise<void>;
 	logger?: OutboxRelayWorkerLogger;
 }
@@ -186,12 +187,12 @@ export function startOutboxRelayWorker(
 	};
 }
 
-export function createDefaultPoisonHandler(pool: Pool) {
+export function createDefaultPoisonHandler(pool: Pool, relayId?: string) {
 	return async (
 		envelope: DomainEventEnvelope,
 		error: unknown,
 		attempts: number,
 	) => {
-		await moveToDeadLetter(pool, envelope, String(error), attempts);
+		await moveToDeadLetter(pool, envelope, String(error), attempts, relayId);
 	};
 }

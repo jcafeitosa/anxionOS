@@ -26,7 +26,10 @@ export async function startAppOutboxRelayWorker(input: {
 		natsUrl: input.config.natsUrl,
 		streamName: input.config.eventsStream,
 	});
-	const onPoison = createDefaultPoisonHandler(input.pool);
+	const onPoison = createDefaultPoisonHandler(
+		input.pool,
+		OUTBOX_RELAY_WORKER_NAME,
+	);
 	const relay: OutboxRelayWorkerHandle = startOutboxRelayWorker({
 		pool: input.pool,
 		publisher,

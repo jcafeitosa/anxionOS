@@ -13,6 +13,7 @@ function rowToEnvelope(row: {
 	owner_domain: string;
 	event_type: string;
 	occurred_at: Date;
+	agency_id?: string | null;
 	payload: unknown;
 }): DomainEventEnvelope {
 	return domainEventEnvelopeSchema.parse({
@@ -21,6 +22,7 @@ function rowToEnvelope(row: {
 		ownerDomain: row.owner_domain,
 		eventType: row.event_type,
 		occurredAt: row.occurred_at.toISOString(),
+		...(row.agency_id ? { agencyId: row.agency_id } : {}),
 		payload: row.payload,
 	});
 }
@@ -35,8 +37,8 @@ export async function appendJournal(
 ): Promise<void> {
 	const parsed = domainEventEnvelopeSchema.parse(envelope);
 	await queryable.query(
-		`INSERT INTO domain_journal (event_id, owner_domain, event_type, schema_version, occurred_at, payload)
-		 VALUES ($1, $2, $3, $4, $5, $6::jsonb)
+		`INSERT INTO domain_journal (event_id, owner_domain, event_type, schema_version, occurred_at, agency_id, payload)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)
 		 ON CONFLICT (event_id) DO NOTHING`,
 		[
 			parsed.eventId,
@@ -44,6 +46,7 @@ export async function appendJournal(
 			parsed.eventType,
 			parsed.schemaVersion,
 			parsed.occurredAt,
+			parsed.agencyId ?? null,
 			JSON.stringify(parsed.payload),
 		],
 	);
@@ -55,8 +58,8 @@ export async function enqueueOutbox(
 ): Promise<void> {
 	const parsed = domainEventEnvelopeSchema.parse(envelope);
 	await queryable.query(
-		`INSERT INTO outbox (event_id, owner_domain, event_type, schema_version, occurred_at, payload, status)
-		 VALUES ($1, $2, $3, $4, $5, $6::jsonb, 'pending')
+		`INSERT INTO outbox (event_id, owner_domain, event_type, schema_version, occurred_at, agency_id, payload, status)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, 'pending')
 		 ON CONFLICT (event_id) DO NOTHING`,
 		[
 			parsed.eventId,
@@ -64,6 +67,7 @@ export async function enqueueOutbox(
 			parsed.eventType,
 			parsed.schemaVersion,
 			parsed.occurredAt,
+			parsed.agencyId ?? null,
 			JSON.stringify(parsed.payload),
 		],
 	);
@@ -140,7 +144,7 @@ export async function claimPendingOutboxForRelay(
 			LIMIT $3
 			FOR UPDATE SKIP LOCKED
 		 )
-		 RETURNING event_id, owner_domain, event_type, schema_version, occurred_at, payload`,
+			RETURNING event_id, owner_domain, event_type, schema_version, occurred_at, agency_id, payload`,
 		[relayId, leaseTtlMs, limit],
 	);
 	return result.rows.map((row) => rowToEnvelope(row));
@@ -188,7 +192,7 @@ export async function fetchPendingOutbox(
 	limit = 50,
 ): Promise<DomainEventEnvelope[]> {
 	const result = await queryable.query(
-		`SELECT event_id, owner_domain, event_type, schema_version, occurred_at, payload
+		`SELECT event_id, owner_domain, event_type, schema_version, occurred_at, agency_id, payload
 		 FROM outbox WHERE status = 'pending' ORDER BY occurred_at ASC LIMIT $1`,
 		[limit],
 	);
