@@ -30,6 +30,9 @@ export {
 	registerPartner,
 } from "./application/commands/register-partner";
 export {
+	loadPartnersCommandReplayBeforeValidation,
+} from "./application/command-support";
+export {
 	type RequestPayoutDeps,
 	requestPayout,
 } from "./application/commands/request-payout";

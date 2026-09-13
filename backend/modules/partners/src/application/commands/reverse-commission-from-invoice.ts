@@ -12,6 +12,7 @@ import type { PartnersUnitOfWork } from "../../domain/ports/partners-unit-of-wor
 import {
 	createPartnersCommandIntent,
 	loadIdempotentCommandResult,
+	loadPartnersCommandReplayBeforeValidation,
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwPartnersError } from "../errors";
@@ -25,6 +26,15 @@ export async function reverseCommissionFromInvoice(
 	deps: ReverseCommissionFromInvoiceDeps,
 	input: ReverseCommissionFromInvoiceCommand,
 ): Promise<PartnersCommandResult> {
+	const replayBeforeValidation =
+		await loadPartnersCommandReplayBeforeValidation(
+			deps.commandJournal,
+			input.partnerOrganizationId,
+			input.commandId,
+			"reverseCommissionFromInvoice",
+			input,
+		);
+	if (replayBeforeValidation) return replayBeforeValidation;
 	const command = reverseCommissionFromInvoiceCommandSchema.parse(input);
 	const intent = createPartnersCommandIntent(
 		"reverseCommissionFromInvoice",

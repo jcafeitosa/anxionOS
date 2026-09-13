@@ -15,6 +15,7 @@ import {
 	createPartnersCommandIntent,
 	loadIdempotentByInvoiceId,
 	loadIdempotentCommandResult,
+	loadPartnersCommandReplayBeforeValidation,
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwPartnersError } from "../errors";
@@ -28,6 +29,15 @@ export async function accrueCommissionFromInvoice(
 	deps: AccrueCommissionFromInvoiceDeps,
 	input: AccrueCommissionFromInvoiceCommand,
 ): Promise<PartnersCommandResult> {
+	const replayBeforeValidation =
+		await loadPartnersCommandReplayBeforeValidation(
+			deps.commandJournal,
+			input.partnerOrganizationId,
+			input.commandId,
+			"accrueCommissionFromInvoice",
+			input,
+		);
+	if (replayBeforeValidation) return replayBeforeValidation;
 	const command = accrueCommissionFromInvoiceCommandSchema.parse(input);
 	const intent = createPartnersCommandIntent(
 		"accrueCommissionFromInvoice",

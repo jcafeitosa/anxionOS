@@ -12,7 +12,8 @@ SET response_snapshot = jsonb_set(
 )
 WHERE jsonb_typeof(response_snapshot -> 'referralId') = 'string'
 	AND (
-		(response_snapshot ->> 'referralId') ~* '(api[_-]?key|authorization|bearer|credential|password|private[_-]?key|secret|token)[[:space:]]*([:=]|[[:space:]])+[[:space:]]*[^[:space:],]+'
+		(response_snapshot ->> 'referralId') ~ '[[:cntrl:]]'
+		OR (response_snapshot ->> 'referralId') ~* '(api[_-]?key|authorization|bearer|credential|password|private[_-]?key|secret|token)[[:space:]]*([:=]|[[:space:]])+[[:space:]]*[^[:space:],]+'
 		OR (response_snapshot ->> 'referralId') ~* '(postgres(ql)?|mysql|mongodb(\+srv)?|redis|amqp)://'
 		OR (response_snapshot ->> 'referralId') ~* '-----[A-Z0-9 ]*(BEGIN|END)[A-Z0-9 ]*PRIVATE KEY-----'
 		OR (response_snapshot ->> 'referralId') ~* '(^|[^A-Za-z0-9])(sk|pk)_(live|test)_'

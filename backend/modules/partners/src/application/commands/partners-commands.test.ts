@@ -9,6 +9,7 @@ import {
 	reversePayoutCommandSchema,
 	settlePayoutCommandSchema,
 } from "@anxionos/contracts/partners";
+import { createPartnersCommandIntent } from "../command-support";
 import { PartnersCommandError } from "../errors";
 import { accrueCommissionFromInvoice } from "./accrue-commission-from-invoice";
 import { approvePayout } from "./approve-payout";
@@ -206,6 +207,45 @@ describe("partners commands", () => {
 		expect(result.referralId).toBe("REF-001");
 		const saved = getPartners().get(result.partnerId!);
 		expect(saved?.organizationId).toBe(TEST_PARTNER_ORG);
+	});
+
+	test("replays a legacy unsafe register payload before schema validation", async () => {
+		const runtime = createPartnersTestUow();
+		const command = {
+			commandId: testCommandId(),
+			organizationId: TEST_PARTNER_ORG,
+			referralCode: "campaign_ghp_legacy_token",
+			displayName: "Legacy Partner",
+			commissionRate: "10",
+			referredOrganizationId: TEST_REFERRED_ORG,
+		};
+		const intent = createPartnersCommandIntent("registerPartner", command);
+		await runtime.commandJournal.save({
+			commandId: command.commandId,
+			organizationId: command.organizationId,
+			commandName: "registerPartner",
+			requestHash: intent.requestHash,
+			responseSnapshot: {
+				aggregateId: "ptr_prt_00000000-0000-4000-8000-000000000099",
+				revision: 1,
+				partnerId: "ptr_prt_00000000-0000-4000-8000-000000000099",
+				referralId: `[REDACTED:${command.commandId}]`,
+			},
+		});
+
+		const result = await registerPartner(
+			{
+				unitOfWork: runtime.unitOfWork,
+				commandJournal: runtime.commandJournal,
+			},
+			command,
+		);
+
+		expect(result).toMatchObject({
+			referralId: `[REDACTED:${command.commandId}]`,
+			idempotentReplay: true,
+		});
+		expect(runtime.getPartners().size).toBe(0);
 	});
 
 	test("registerPartner rejects duplicate referral code", async () => {

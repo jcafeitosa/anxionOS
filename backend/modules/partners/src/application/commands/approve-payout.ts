@@ -12,6 +12,7 @@ import type { PartnersUnitOfWork } from "../../domain/ports/partners-unit-of-wor
 import {
 	createPartnersCommandIntent,
 	loadIdempotentCommandResult,
+	loadPartnersCommandReplayBeforeValidation,
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwPartnersError } from "../errors";
@@ -25,6 +26,15 @@ export async function approvePayout(
 	deps: ApprovePayoutDeps,
 	input: ApprovePayoutCommand,
 ): Promise<PartnersCommandResult> {
+	const replayBeforeValidation =
+		await loadPartnersCommandReplayBeforeValidation(
+			deps.commandJournal,
+			input.partnerOrganizationId,
+			input.commandId,
+			"approvePayout",
+			input,
+		);
+	if (replayBeforeValidation) return replayBeforeValidation;
 	const command = approvePayoutCommandSchema.parse(input);
 	const intent = createPartnersCommandIntent("approvePayout", command);
 	const replay = await loadIdempotentCommandResult(

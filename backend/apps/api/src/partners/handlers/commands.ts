@@ -1,4 +1,5 @@
 import {
+	loadPartnersCommandReplayBeforeValidation,
 	registerPartner,
 	registerPartnerCommandSchema,
 } from "@anxionos/partners";
@@ -16,6 +17,25 @@ export async function handleRegisterPartner(
 		body: unknown;
 	},
 ) {
+	const rawBody =
+		typeof input.body === "object" &&
+		input.body !== null &&
+		!Array.isArray(input.body)
+			? input.body
+			: {};
+	const replayBeforeValidation =
+		await loadPartnersCommandReplayBeforeValidation(
+			deps.commandJournal,
+			input.organizationId,
+			input.commandId,
+			"registerPartner",
+			{
+				...rawBody,
+				commandId: input.commandId,
+				organizationId: input.organizationId,
+			},
+		);
+	if (replayBeforeValidation) return replayBeforeValidation;
 	const body = registerPartnerBodySchema.parse(input.body);
 	return registerPartner(
 		{

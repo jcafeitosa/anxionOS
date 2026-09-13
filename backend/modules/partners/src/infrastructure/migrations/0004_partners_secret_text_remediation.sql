@@ -6,7 +6,8 @@
 
 UPDATE partners_partners
 SET referral_code = format('[REDACTED:%s]', id)
-WHERE referral_code ~* '(api[_-]?key|authorization|bearer|credential|password|private[_-]?key|secret|token)[[:space:]]*([:=]|[[:space:]])+[[:space:]]*[^[:space:],]+'
+WHERE referral_code ~ '[[:cntrl:]]'
+	OR referral_code ~* '(api[_-]?key|authorization|bearer|credential|password|private[_-]?key|secret|token)[[:space:]]*([:=]|[[:space:]])+[[:space:]]*[^[:space:],]+'
 	OR referral_code ~* '(postgres(ql)?|mysql|mongodb(\+srv)?|redis|amqp)://'
 	OR referral_code ~* '-----[A-Z0-9 ]*(BEGIN|END)[A-Z0-9 ]*PRIVATE KEY-----'
 	OR referral_code ~* '(^|[^A-Za-z0-9])(sk|pk)_(live|test)_'
@@ -20,7 +21,8 @@ WHERE referral_code ~* '(api[_-]?key|authorization|bearer|credential|password|pr
 
 UPDATE partners_partners
 SET display_name = '[REDACTED]'
-WHERE display_name ~* '(api[_-]?key|authorization|bearer|credential|password|private[_-]?key|secret|token)[[:space:]]*([:=]|[[:space:]])+[[:space:]]*[^[:space:],]+'
+WHERE display_name ~ '[[:cntrl:]]'
+	OR display_name ~* '(api[_-]?key|authorization|bearer|credential|password|private[_-]?key|secret|token)[[:space:]]*([:=]|[[:space:]])+[[:space:]]*[^[:space:],]+'
 	OR display_name ~* '(postgres(ql)?|mysql|mongodb(\+srv)?|redis|amqp)://'
 	OR display_name ~* '-----[A-Z0-9 ]*(BEGIN|END)[A-Z0-9 ]*PRIVATE KEY-----'
 	OR display_name ~* '(^|[^A-Za-z0-9])(sk|pk)_(live|test)_'
@@ -39,7 +41,8 @@ SET approval_reference = CASE
 	END
 WHERE approval_reference IS NOT NULL
 	AND (
-		approval_reference ~* '(api[_-]?key|authorization|bearer|credential|password|private[_-]?key|secret|token)[[:space:]]*([:=]|[[:space:]])+[[:space:]]*[^[:space:],]+'
+		approval_reference ~ '[[:cntrl:]]'
+		OR approval_reference ~* '(api[_-]?key|authorization|bearer|credential|password|private[_-]?key|secret|token)[[:space:]]*([:=]|[[:space:]])+[[:space:]]*[^[:space:],]+'
 		OR approval_reference ~* '(postgres(ql)?|mysql|mongodb(\+srv)?|redis|amqp)://'
 		OR approval_reference ~* '-----[A-Z0-9 ]*(BEGIN|END)[A-Z0-9 ]*PRIVATE KEY-----'
 		OR approval_reference ~* '(^|[^A-Za-z0-9])(sk|pk)_(live|test)_'
@@ -59,7 +62,8 @@ SET failure_reason = CASE
 	END
 WHERE failure_reason IS NOT NULL
 	AND (
-		failure_reason ~* '(api[_-]?key|authorization|bearer|credential|password|private[_-]?key|secret|token)[[:space:]]*([:=]|[[:space:]])+[[:space:]]*[^[:space:],]+'
+		failure_reason ~ '[[:cntrl:]]'
+		OR failure_reason ~* '(api[_-]?key|authorization|bearer|credential|password|private[_-]?key|secret|token)[[:space:]]*([:=]|[[:space:]])+[[:space:]]*[^[:space:],]+'
 		OR failure_reason ~* '(postgres(ql)?|mysql|mongodb(\+srv)?|redis|amqp)://'
 		OR failure_reason ~* '-----[A-Z0-9 ]*(BEGIN|END)[A-Z0-9 ]*PRIVATE KEY-----'
 		OR failure_reason ~* '(^|[^A-Za-z0-9])(sk|pk)_(live|test)_'
@@ -79,7 +83,8 @@ SET provider_reference = CASE
 	END
 WHERE provider_reference IS NOT NULL
 	AND (
-		provider_reference ~* '(api[_-]?key|authorization|bearer|credential|password|private[_-]?key|secret|token)[[:space:]]*([:=]|[[:space:]])+[[:space:]]*[^[:space:],]+'
+		provider_reference ~ '[[:cntrl:]]'
+		OR provider_reference ~* '(api[_-]?key|authorization|bearer|credential|password|private[_-]?key|secret|token)[[:space:]]*([:=]|[[:space:]])+[[:space:]]*[^[:space:],]+'
 		OR provider_reference ~* '(postgres(ql)?|mysql|mongodb(\+srv)?|redis|amqp)://'
 		OR provider_reference ~* '-----[A-Z0-9 ]*(BEGIN|END)[A-Z0-9 ]*PRIVATE KEY-----'
 		OR provider_reference ~* '(^|[^A-Za-z0-9])(sk|pk)_(live|test)_'
@@ -99,7 +104,8 @@ SET reversal_reference = CASE
 	END
 WHERE reversal_reference IS NOT NULL
 	AND (
-		reversal_reference ~* '(api[_-]?key|authorization|bearer|credential|password|private[_-]?key|secret|token)[[:space:]]*([:=]|[[:space:]])+[[:space:]]*[^[:space:],]+'
+		reversal_reference ~ '[[:cntrl:]]'
+		OR reversal_reference ~* '(api[_-]?key|authorization|bearer|credential|password|private[_-]?key|secret|token)[[:space:]]*([:=]|[[:space:]])+[[:space:]]*[^[:space:],]+'
 		OR reversal_reference ~* '(postgres(ql)?|mysql|mongodb(\+srv)?|redis|amqp)://'
 		OR reversal_reference ~* '-----[A-Z0-9 ]*(BEGIN|END)[A-Z0-9 ]*PRIVATE KEY-----'
 		OR reversal_reference ~* '(^|[^A-Za-z0-9])(sk|pk)_(live|test)_'

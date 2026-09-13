@@ -4,6 +4,7 @@ import { partnersPartnerIdSchema } from "@anxionos/contracts/partners";
 import { PartnersCommandError } from "@anxionos/partners";
 import { mapPartnersError } from "../../apps/api/src/partners/error-handler";
 import { handleRegisterPartner } from "../../apps/api/src/partners/handlers/commands";
+import { createPartnersCommandIntent } from "../../modules/partners/src/application/command-support";
 import {
 	handleGetPartnerById,
 	toCommissionAccrualDto,
@@ -59,6 +60,55 @@ describe("partners API boundary", () => {
 				},
 			),
 		).rejects.toThrow();
+	});
+
+	test("register handler replays a legacy unsafe body before validation", async () => {
+		const runtime = createPartnersTestUow();
+		const commandId = randomUUID();
+		const command = {
+			commandId,
+			organizationId: TEST_PARTNER_ORG,
+			referralCode: "campaign_ghp_legacy_token",
+			displayName: "Legacy Partner",
+			commissionRate: "10",
+			referredOrganizationId: TEST_REFERRED_ORG,
+		};
+		const intent = createPartnersCommandIntent("registerPartner", command);
+		await runtime.commandJournal.save({
+			commandId,
+			organizationId: TEST_PARTNER_ORG,
+			commandName: "registerPartner",
+			requestHash: intent.requestHash,
+			responseSnapshot: {
+				aggregateId: "ptr_prt_00000000-0000-4000-8000-000000000098",
+				revision: 1,
+				partnerId: "ptr_prt_00000000-0000-4000-8000-000000000098",
+				referralId: `[REDACTED:${commandId}]`,
+			},
+		});
+
+		const result = await handleRegisterPartner(
+			{
+				unitOfWork: runtime.unitOfWork,
+				commandJournal: runtime.commandJournal,
+			},
+			{
+				commandId,
+				organizationId: TEST_PARTNER_ORG,
+				body: {
+					referralCode: command.referralCode,
+					displayName: command.displayName,
+					commissionRate: command.commissionRate,
+					referredOrganizationId: command.referredOrganizationId,
+				},
+			},
+		);
+
+		expect(result).toMatchObject({
+			referralId: `[REDACTED:${commandId}]`,
+			idempotentReplay: true,
+		});
+		expect(runtime.getPartners().size).toBe(0);
 	});
 
 	test("partner detail handler enforces organization scope", async () => {

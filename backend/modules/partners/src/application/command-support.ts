@@ -39,6 +39,22 @@ export function createPartnersCommandIntent(
 	return { commandName, requestHash: hashCommandPayload(semanticPayload) };
 }
 
+export async function loadPartnersCommandReplayBeforeValidation(
+	commandJournal: CommandJournalRepository,
+	organizationId: string,
+	commandId: string,
+	commandName: string,
+	payload: object,
+): Promise<PartnersCommandResult | null> {
+	const intent = createPartnersCommandIntent(commandName, payload);
+	return loadIdempotentCommandResult(
+		commandJournal,
+		organizationId,
+		commandId,
+		intent,
+	);
+}
+
 export function hashCommandPayload(payload: Record<string, unknown>): string {
 	return createHash("sha256").update(canonicalJson(payload)).digest("hex");
 }

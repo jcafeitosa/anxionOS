@@ -12,6 +12,7 @@ import type { PartnersUnitOfWork } from "../../domain/ports/partners-unit-of-wor
 import {
 	createPartnersCommandIntent,
 	loadIdempotentCommandResult,
+	loadPartnersCommandReplayBeforeValidation,
 	toCommandResultSnapshot,
 } from "../command-support";
 import { throwPartnersError } from "../errors";
@@ -25,6 +26,15 @@ export async function registerPartner(
 	deps: RegisterPartnerDeps,
 	input: RegisterPartnerCommand,
 ): Promise<PartnersCommandResult> {
+	const replayBeforeValidation =
+		await loadPartnersCommandReplayBeforeValidation(
+			deps.commandJournal,
+			input.organizationId,
+			input.commandId,
+			"registerPartner",
+			input,
+		);
+	if (replayBeforeValidation) return replayBeforeValidation;
 	const command = registerPartnerCommandSchema.parse(input);
 	const intent = createPartnersCommandIntent("registerPartner", command);
 	const replay = await loadIdempotentCommandResult(

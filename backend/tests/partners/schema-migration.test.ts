@@ -3,8 +3,8 @@ import { readFileSync } from "node:fs";
 import { createPgPool } from "@anxionos/eventing/postgres";
 import {
 	createPartnersCommandIntent,
-	loadIdempotentCommandResult,
 } from "../../modules/partners/src/application/command-support";
+import { registerPartner } from "../../modules/partners/src/application/commands/register-partner";
 import type { CommandJournalRepository } from "../../modules/partners/src/domain/ports/command-journal";
 import { shouldRunPgIntegrationTests } from "../pg-harness-guard";
 
@@ -111,7 +111,7 @@ describe("partners schema migration", () => {
 			await client.query(baselineSql);
 			const replayIntent = createPartnersCommandIntent("registerPartner", {
 				organizationId: legacyPartnerOrganizationId,
-				referralCode: "campaign_ghp_legacy_token",
+				referralCode: "legacy\nreferral",
 				displayName: "Legacy Partner",
 				commissionRate: "10.00",
 				referredOrganizationId: "22222222-2222-4222-8222-222222222222",
@@ -129,7 +129,7 @@ describe("partners schema migration", () => {
 						aggregateId: "ptr_prt_00000000-0000-4000-8000-000000000099",
 						revision: 1,
 						partnerId: "ptr_prt_00000000-0000-4000-8000-000000000099",
-						referralId: "campaign_ghp_legacy_token",
+						referralId: "legacy\nreferral",
 					}),
 				],
 			);
@@ -142,7 +142,7 @@ describe("partners schema migration", () => {
 					"ptr_legacy",
 					legacyPartnerOrganizationId,
 					"campaign_akia1234567890123456",
-					"Acme_ghp_legacy_token",
+					"Acme\nLegacy Partner",
 					"10.00",
 					"22222222-2222-4222-8222-222222222222",
 					"ACTIVE",
@@ -202,11 +202,23 @@ describe("partners schema migration", () => {
 				},
 				async save() {},
 			};
-			const replay = await loadIdempotentCommandResult(
-				commandJournal,
-				legacyPartnerOrganizationId,
-				replayCommandId,
-				replayIntent,
+			const replay = await registerPartner(
+				{
+					commandJournal,
+					unitOfWork: {
+						async runInTransaction() {
+							throw new Error("legacy replay must not start a transaction");
+						},
+					},
+				},
+				{
+					commandId: replayCommandId,
+					organizationId: legacyPartnerOrganizationId,
+					referralCode: "legacy\nreferral",
+					displayName: "Legacy Partner",
+					commissionRate: "10.00",
+					referredOrganizationId: "22222222-2222-4222-8222-222222222222",
+				},
 			);
 			expect(replay).toMatchObject({
 				referralId: `[REDACTED:${replayCommandId}]`,
