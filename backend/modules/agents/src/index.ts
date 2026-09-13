@@ -71,7 +71,6 @@ export { CommandJournalConflictError as AgentsCommandJournalConflictError } from
 export type { AgentRegistryAdapter } from "./infrastructure/adapters/agent-registry-adapter";
 export { createAgentRegistryAdapter } from "./infrastructure/adapters/agent-registry-adapter";
 export { createAppendOnlyToolAuditAdapter } from "./infrastructure/adapters/append-only-tool-audit-adapter";
-export { createInMemoryOrchestrationRunFenceAdapter } from "./infrastructure/adapters/in-memory-orchestration-run-fence-adapter";
 export { createSandboxBotRunGenerationAdapter } from "./infrastructure/adapters/sandbox-bot-run-generation-adapter";
 export { createSandboxComputerSessionAdapter } from "./infrastructure/adapters/sandbox-computer-session-adapter";
 export { createAgentsUnitOfWork } from "./infrastructure/agents-unit-of-work";

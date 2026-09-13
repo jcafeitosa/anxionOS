@@ -3,7 +3,6 @@ import { randomUUID } from "node:crypto";
 import {
 	abortBotRunGeneration,
 	acquireBotRunGeneration,
-	createInMemoryOrchestrationRunFenceAdapter,
 	createSandboxBotRunGenerationAdapter,
 	releaseBotRunGeneration,
 } from "@anxionos/agents";
@@ -14,6 +13,7 @@ import {
 	botRunGenerationRefSchema,
 	OPENBOT_EVENT_TYPES,
 } from "@anxionos/contracts/openbot";
+import { createInMemoryOrchestrationRunFenceAdapter } from "../agents/fixtures/in-memory-orchestration-run-fence-adapter";
 
 const organizationId = "b2000002-0002-4002-8002-000000000002";
 const agentId = "c3000003-0003-4003-8003-000000000003";
