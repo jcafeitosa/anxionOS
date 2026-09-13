@@ -63,6 +63,10 @@ export {
 	throwPartnersError,
 } from "./application/errors";
 export {
+	type GetPartnerByIdDeps,
+	getPartnerById,
+} from "./application/queries/get-partner-by-id";
+export {
 	type GetPartnerByOrganizationDeps,
 	getPartnerByOrganization,
 } from "./application/queries/get-partner-by-organization";
@@ -78,14 +82,17 @@ export {
 	calculateCommissionAmount,
 	sumDecimalAmounts,
 } from "./domain/commission";
+export type { CommandJournalRepository } from "./domain/ports/command-journal";
 export type {
 	CommissionAccrualRecord,
 	CommissionAccrualRepository,
 	PartnerRecord,
 	PartnerRepository,
+	PartnersUnitOfWork,
 	PayoutRecord,
 	PayoutRepository,
 } from "./domain/ports/partners-unit-of-work";
 export { createPartnersDb } from "./infrastructure/create-db";
 export { ensurePartnersSchema } from "./infrastructure/migrate";
 export { createPartnersUnitOfWork } from "./infrastructure/partners-unit-of-work";
+export { createPgCommandJournalRepository } from "./infrastructure/persistence/command-journal-repository";

@@ -1,14 +1,74 @@
 import { describe, expect, test } from "bun:test";
+import { randomUUID } from "node:crypto";
 import { partnersPartnerIdSchema } from "@anxionos/contracts/partners";
 import { PartnersCommandError } from "@anxionos/partners";
 import { mapPartnersError } from "../../apps/api/src/partners/error-handler";
+import { handleRegisterPartner } from "../../apps/api/src/partners/handlers/commands";
 import {
+	handleGetPartnerById,
 	toCommissionAccrualDto,
 	toPartnerDto,
 	toPayoutDto,
 } from "../../apps/api/src/partners/handlers/read";
+import {
+	createPartnersTestUow,
+	TEST_OTHER_PARTNER_ORG,
+	TEST_PARTNER_ORG,
+	TEST_REFERRED_ORG,
+} from "../../modules/partners/src/application/commands/partners-test-support";
 
 describe("partners API boundary", () => {
+	test("register handler maps Idempotency-Key and validates the command body", async () => {
+		const runtime = createPartnersTestUow();
+		const result = await handleRegisterPartner(
+			{
+				unitOfWork: runtime.unitOfWork,
+				commandJournal: runtime.commandJournal,
+			},
+			{
+				commandId: randomUUID(),
+				organizationId: TEST_PARTNER_ORG,
+				body: {
+					referralCode: "REF-HTTP",
+					displayName: "HTTP Partner",
+					commissionRate: "10",
+					referredOrganizationId: TEST_REFERRED_ORG,
+				},
+			},
+		);
+		expect(result.partnerId).toMatch(/^ptr_prt_/);
+	});
+
+	test("partner detail handler enforces organization scope", async () => {
+		const partnerId = "ptr_prt_00000000-0000-4000-8000-000000000011";
+		const runtime = createPartnersTestUow({
+			partners: [
+				{
+					id: partnerId,
+					organizationId: TEST_PARTNER_ORG,
+					referralCode: "REF-DETAIL",
+					displayName: "Detail Partner",
+					commissionRate: "10",
+					referredOrganizationId: TEST_REFERRED_ORG,
+					status: "ACTIVE",
+					revision: 1,
+				},
+			],
+		});
+		const result = await handleGetPartnerById(
+			{ partners: runtime.partners },
+			{ organizationId: TEST_PARTNER_ORG, partnerId },
+		);
+		expect(result.partner.id).toBe(partnerId);
+		await expect(
+			handleGetPartnerById(
+				{ partners: runtime.partners },
+				{ organizationId: TEST_OTHER_PARTNER_ORG, partnerId },
+			),
+		).rejects.toMatchObject({
+			details: { code: "PTR_PARTNER_NOT_FOUND" },
+		});
+	});
 	test("mapPartnersError maps PTR_PARTNER_NOT_FOUND to 404", () => {
 		const error = new PartnersCommandError(
 			"PTR_PARTNER_NOT_FOUND",

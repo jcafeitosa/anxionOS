@@ -125,6 +125,8 @@ export function createOpenApiCatalogApp() {
 		.use(
 			createPartnersPlugin({
 				auth: stubAuth as never,
+				unitOfWork: unused,
+				commandJournal: unused,
 				partners: unused,
 				commissionAccruals: unused,
 				payouts: unused,

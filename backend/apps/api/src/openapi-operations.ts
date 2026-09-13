@@ -1459,6 +1459,42 @@ export const agentsOpenApi = {
 } as const;
 
 export const partnersOpenApi = {
+	register: op({
+		tag: "Partners",
+		operationId: "registerPartner",
+		summary: "Register a partner",
+		description:
+			"Module: partners. Registers the partner profile owned by the organization. Requires an active agency mutation role and is idempotent via `Idempotency-Key`.",
+		security: COOKIE_SECURITY,
+		parameters: [
+			pathUuid("organizationId", "Organization/agency UUID."),
+			idempotencyKey(),
+			REQUEST_ID,
+		],
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: [
+					"referralCode",
+					"displayName",
+					"commissionRate",
+					"referredOrganizationId",
+				],
+				properties: {
+					referralCode: { type: "string", minLength: 1, maxLength: 64 },
+					displayName: { type: "string", minLength: 1, maxLength: 256 },
+					commissionRate: { type: "string", pattern: "^\\d+(\\.\\d+)?$" },
+					referredOrganizationId: UUID,
+				},
+			},
+			"Partner profile and referral configuration.",
+		),
+		responses: {
+			"200": { description: "Command result with partnerId and referralId." },
+			...ERROR_RESPONSES,
+		},
+	}),
 	getByOrganization: op({
 		tag: "Partners",
 		operationId: "getPartnerByOrganization",
@@ -1474,6 +1510,29 @@ export const partnersOpenApi = {
 			"200": {
 				description: "Partner record (referral, commission rate, status).",
 			},
+			...ERROR_RESPONSES,
+		},
+	}),
+	getById: op({
+		tag: "Partners",
+		operationId: "getPartnerById",
+		summary: "Get a partner by id",
+		description:
+			"Module: partners. Returns a partner profile within the organization tenant scope. Cross-tenant ids resolve as not found.",
+		security: COOKIE_SECURITY,
+		parameters: [
+			pathUuid("organizationId", "Organization/agency UUID."),
+			{
+				name: "partnerId",
+				in: "path" as const,
+				required: true,
+				schema: { type: "string", pattern: "^ptr_prt_[0-9a-f-]{36}$" },
+				description: "Partner aggregate id.",
+			},
+			REQUEST_ID,
+		],
+		responses: {
+			"200": { description: "Partner record for the organization." },
 			...ERROR_RESPONSES,
 		},
 	}),
@@ -1505,7 +1564,7 @@ export const partnersOpenApi = {
 		operationId: "listPayouts",
 		summary: "List partner payouts",
 		description:
-			"Module: partners. Lists payout records. Optional query `partnerId`. Write/approve payout commands are not exposed on this HTTP surface yet.",
+			"Module: partners. Lists payout records. Optional query `partnerId`. Payout lifecycle commands remain owned by the application command surface.",
 		security: COOKIE_SECURITY,
 		parameters: [
 			pathUuid("organizationId", "Organization/agency UUID."),

@@ -33,6 +33,16 @@ const GRANT_ID: ParameterExpectation = {
 	in: "path",
 	required: true,
 };
+const ORGANIZATION_ID: ParameterExpectation = {
+	name: "organizationId",
+	in: "path",
+	required: true,
+};
+const PARTNER_ID: ParameterExpectation = {
+	name: "partnerId",
+	in: "path",
+	required: true,
+};
 const REQUEST_ID_HEADER: ParameterExpectation = {
 	name: "X-Request-Id",
 	in: "header",
@@ -331,8 +341,27 @@ const DOCUMENTED_OPERATIONS: Array<{
 	},
 	{
 		path: "/v1/partners/organizations/{organizationId}",
+		method: "post",
+		tag: "Partners",
+		operationId: "registerPartner",
+		statuses: ["200", "400", "401", "403", "404", "409", "429"],
+		parameters: [ORGANIZATION_ID, IDEMPOTENCY_HEADER, REQUEST_ID_HEADER],
+	},
+	{
+		path: "/v1/partners/organizations/{organizationId}",
 		method: "get",
 		tag: "Partners",
+		operationId: "getPartnerByOrganization",
+		statuses: ["200", "400", "401", "403", "404", "409", "429"],
+		parameters: [ORGANIZATION_ID, REQUEST_ID_HEADER],
+	},
+	{
+		path: "/v1/partners/organizations/{organizationId}/{partnerId}",
+		method: "get",
+		tag: "Partners",
+		operationId: "getPartnerById",
+		statuses: ["200", "400", "401", "403", "404", "409", "429"],
+		parameters: [ORGANIZATION_ID, PARTNER_ID, REQUEST_ID_HEADER],
 	},
 	{
 		path: "/v1/partners/organizations/{organizationId}/commission-accruals",

@@ -1,23 +1,31 @@
 import type { TenantScopedQueryable } from "@anxionos/database";
 import type { PrincipalRepository } from "@anxionos/identity";
 import type {
+	CommandJournalRepository,
 	CommissionAccrualRepository,
 	PartnerRepository,
+	PartnersUnitOfWork,
 	PayoutRepository,
 } from "@anxionos/partners";
 import type { betterAuth } from "better-auth";
 import { Elysia } from "elysia";
 import { partnersOpenApi } from "../openapi-operations";
+import { parseIdempotencyKey } from "../organizations/middleware/idempotency-key";
 import { requireAgencyMembership } from "../organizations/middleware/require-agency-membership";
+import { requireAgencyMutationRole } from "../organizations/middleware/require-agency-mutation-role";
 import { resolvePrincipalFromSession } from "../organizations/resolve-principal";
 import { mapPartnersError } from "./error-handler";
+import { handleRegisterPartner } from "./handlers/commands";
 import {
+	handleGetPartnerById,
 	handleGetPartnerByOrganization,
 	handleListCommissionAccruals,
 	handleListPayouts,
 } from "./handlers/read";
 
 export interface PartnersPluginDeps {
+	unitOfWork: PartnersUnitOfWork;
+	commandJournal: CommandJournalRepository;
 	auth: ReturnType<typeof betterAuth>;
 	partners: PartnerRepository;
 	commissionAccruals: CommissionAccrualRepository;
@@ -64,11 +72,38 @@ export function createPartnersPlugin(deps: PartnersPluginDeps) {
 					);
 					return { principal, organizationId: params.organizationId };
 				})
+				.post(
+					"",
+					async ({ request, principal, organizationId }) => {
+						await requireAgencyMutationRole(
+							deps.scopedPool,
+							organizationId,
+							principal.id,
+						);
+						const commandId = parseIdempotencyKey(request.headers);
+						const body = await request.json();
+						return handleRegisterPartner(deps, {
+							commandId,
+							organizationId,
+							body,
+						});
+					},
+					partnersOpenApi.register,
+				)
 				.get(
 					"",
 					async ({ organizationId }) =>
 						handleGetPartnerByOrganization(deps, { organizationId }),
 					partnersOpenApi.getByOrganization,
+				)
+				.get(
+					"/:partnerId",
+					async ({ organizationId, params }) =>
+						handleGetPartnerById(deps, {
+							organizationId,
+							partnerId: params.partnerId,
+						}),
+					partnersOpenApi.getById,
 				)
 				.get(
 					"/commission-accruals",

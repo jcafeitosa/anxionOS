@@ -2,6 +2,7 @@ import { institutionalUuidSchema } from "@anxionos/contracts";
 import { partnersPartnerIdSchema } from "@anxionos/contracts/partners";
 import {
 	type CommissionAccrualRecord,
+	getPartnerById,
 	getPartnerByOrganization,
 	listCommissionAccruals,
 	listPayouts,
@@ -13,6 +14,10 @@ import type { PartnersPluginDeps } from "../plugin";
 
 export const organizationIdParamSchema = z.object({
 	organizationId: institutionalUuidSchema,
+});
+
+export const partnerIdParamSchema = organizationIdParamSchema.extend({
+	partnerId: partnersPartnerIdSchema,
 });
 
 const partnerIdQuerySchema = z
@@ -80,6 +85,15 @@ export async function handleGetPartnerByOrganization(
 		{ partners: deps.partners },
 		organizationId,
 	);
+	return { partner: toPartnerDto(partner) };
+}
+
+export async function handleGetPartnerById(
+	deps: Pick<PartnersPluginDeps, "partners">,
+	input: { organizationId: string; partnerId: string },
+) {
+	const params = partnerIdParamSchema.parse(input);
+	const partner = await getPartnerById({ partners: deps.partners }, params);
 	return { partner: toPartnerDto(partner) };
 }
 
