@@ -90,7 +90,6 @@ export {
 } from "./application/commands/sync-taskboard-status";
 export { toGateBindingV1 } from "./application/dto-mappers";
 export { OrchestrationCommandError } from "./application/errors";
-export { CommandJournalConflictError as OrchestrationCommandJournalConflictError } from "./domain/ports/command-journal";
 export {
 	type GetRunDeps,
 	type GetRunInput,
@@ -191,6 +190,7 @@ export {
 	OrganizationScopeDeniedError,
 	PrincipalLookupUnavailableError,
 } from "./domain/ports";
+export { CommandJournalConflictError as OrchestrationCommandJournalConflictError } from "./domain/ports/command-journal";
 export {
 	createDashiTaskboardMirror,
 	type DashiTaskboardMirrorConfig,

@@ -3,6 +3,7 @@ import {
 	AgentsCommandError,
 	AgentsCommandJournalConflictError,
 } from "@anxionos/agents";
+import { mapAgentsError } from "../../apps/api/src/agents/error-handler";
 import {
 	handleGetAgent,
 	handleListAgentVersions,
@@ -16,7 +17,6 @@ import {
 	handleRegisterSkill,
 	handleSubmitSkillVersion,
 } from "../../apps/api/src/agents/handlers/skills";
-import { mapAgentsError } from "../../apps/api/src/agents/error-handler";
 import {
 	createInMemoryAgentRepository,
 	createInMemoryAgentVersionRepository,

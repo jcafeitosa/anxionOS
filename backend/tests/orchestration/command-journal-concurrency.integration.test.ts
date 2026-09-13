@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+import { createPgPool } from "@anxionos/eventing/postgres";
 import {
 	createOrchestrationDb,
 	ensureOrchestrationSchema,
 	OrchestrationCommandJournalConflictError,
 } from "@anxionos/orchestration";
-import { createPgPool } from "@anxionos/eventing/postgres";
 import {
 	getDatabaseUrl,
 	shouldRunPgIntegrationTests,

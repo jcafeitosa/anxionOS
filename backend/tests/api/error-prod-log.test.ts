@@ -13,13 +13,8 @@
  * o 42P01 injetado) deixa de valer.
  */
 import { afterEach, describe, expect, test } from "bun:test";
-import {
-	AppError,
-	toErrorResponse,
-} from "@anxionos/contracts/errors";
-import {
-	logUnhandledBoundaryError,
-} from "../../apps/api/src/middleware/unhandled-error-log";
+import { AppError, toErrorResponse } from "@anxionos/contracts/errors";
+import { logUnhandledBoundaryError } from "../../apps/api/src/middleware/unhandled-error-log";
 import { mapOrganizationsError } from "../../apps/api/src/organizations/error-handler";
 
 type Env = Record<string, string | undefined>;
@@ -76,21 +71,15 @@ describe("ANX-484 — fail-closed do detalhe de erro em produção", () => {
 	});
 
 	test("EXPOSE_ERROR_DETAILS=true exige ambiente nao-producao para expor", () => {
-		withEnv(
-			{ NODE_ENV: "production", EXPOSE_ERROR_DETAILS: "true" },
-			() => {
-				const response = toErrorResponse(DRIVER_ERROR);
-				expect(response.error.message).not.toContain("Failed query");
-			},
-		);
-		withEnv(
-			{ NODE_ENV: "development", EXPOSE_ERROR_DETAILS: "true" },
-			() => {
-				const response = toErrorResponse(DRIVER_ERROR);
-				expect(response.error.message).toContain("Failed query");
-				expect(response.error.stack).toBeString();
-			},
-		);
+		withEnv({ NODE_ENV: "production", EXPOSE_ERROR_DETAILS: "true" }, () => {
+			const response = toErrorResponse(DRIVER_ERROR);
+			expect(response.error.message).not.toContain("Failed query");
+		});
+		withEnv({ NODE_ENV: "development", EXPOSE_ERROR_DETAILS: "true" }, () => {
+			const response = toErrorResponse(DRIVER_ERROR);
+			expect(response.error.message).toContain("Failed query");
+			expect(response.error.stack).toBeString();
+		});
 	});
 
 	test("details institucional (details.code) sai fora de producao sem depender da flag (R04)", () => {
@@ -140,7 +129,9 @@ describe("ANX-485 — log estruturado do 500 nao mapeado", () => {
 	});
 
 	test("boundary de organizations: erro cru vira 500 E gera log com a causa (42P01)", () => {
-		const driverError = new Error('relation "organizations_memberships" does not exist (42P01)');
+		const driverError = new Error(
+			'relation "organizations_memberships" does not exist (42P01)',
+		);
 		const lines = captureLog(() => {
 			const mapped = mapOrganizationsError(driverError, "req-42p01");
 			expect(mapped.status).toBe(500);

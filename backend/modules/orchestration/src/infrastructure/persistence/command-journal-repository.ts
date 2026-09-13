@@ -1,10 +1,10 @@
 import { eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { CommandJournalConflictError } from "../../domain/ports/command-journal";
 import type {
 	CommandJournalRecord,
 	CommandJournalRepository,
 } from "../../domain/ports/command-journal";
+import { CommandJournalConflictError } from "../../domain/ports/command-journal";
 import { type CommandJournalRow, commandJournal } from "./schema";
 
 export function toCommandJournalRecord(
