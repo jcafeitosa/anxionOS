@@ -4,6 +4,7 @@ import {
 	failPayoutCommandSchema,
 	PARTNERS_EVENT_TYPES,
 	partnersEventPayloadSchema,
+	registerPartnerCommandSchema,
 	reverseCommissionFromInvoiceCommandSchema,
 	reversePayoutCommandSchema,
 	settlePayoutCommandSchema,
@@ -39,6 +40,16 @@ describe("partners commands", () => {
 				...identifiers,
 				approvedAt: "2026-09-13T12:00:00.000Z",
 				approvalReference: "Bearer sk_live_partner_secret",
+			}),
+		).toThrow();
+		expect(() =>
+			registerPartnerCommandSchema.parse({
+				commandId: identifiers.commandId,
+				organizationId: identifiers.partnerOrganizationId,
+				referralCode: "postgres://user:password@host/db",
+				displayName: "Partner",
+				commissionRate: "10",
+				referredOrganizationId: identifiers.partnerOrganizationId,
 			}),
 		).toThrow();
 		expect(() =>
