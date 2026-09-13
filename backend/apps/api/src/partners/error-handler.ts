@@ -1,10 +1,12 @@
 import {
+	AppError,
 	isAppError,
 	resolveStatusCode,
 	toErrorResponse,
 } from "@anxionos/contracts/errors";
 import { PrincipalLookupUnavailableError } from "@anxionos/organizations";
 import { PartnersCommandError } from "@anxionos/partners";
+import { ZodError } from "zod";
 import { logUnhandledBoundaryError } from "../middleware/unhandled-error-log";
 
 export function mapPartnersError(
@@ -20,6 +22,20 @@ export function mapPartnersError(
 		return {
 			status: mapped.statusCode,
 			body: toErrorResponse(mapped, { requestId }),
+		};
+	}
+	if (error instanceof ZodError) {
+		return {
+			status: 400,
+			body: toErrorResponse(
+				AppError.validation("Invalid request payload", {
+					issues: error.issues.map((issue) => ({
+						path: issue.path.join("."),
+						code: issue.code,
+					})),
+				}),
+				{ requestId },
+			),
 		};
 	}
 	if (error instanceof PartnersCommandError || isAppError(error)) {

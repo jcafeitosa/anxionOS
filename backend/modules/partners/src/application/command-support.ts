@@ -101,5 +101,6 @@ export function toCommandResultSnapshot(
 		commissionAccrualId: result.commissionAccrualId,
 		commissionAmount: result.commissionAmount,
 		payoutId: result.payoutId,
+		payoutStatus: result.payoutStatus,
 	};
 }

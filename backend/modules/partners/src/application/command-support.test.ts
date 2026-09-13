@@ -4,16 +4,23 @@ import {
 	createPartnersCommandIntent,
 	hashCommandPayload,
 	loadIdempotentCommandResult,
+	toCommandResultSnapshot,
 } from "./command-support";
 
 const ORGANIZATION_ID = "00000000-0000-4000-8000-000000000001";
 const COMMAND_ID = "00000000-0000-4000-8000-000000000002";
 
-function journalWith(entry: {
-	organizationId: string;
-	commandName: string;
-	requestHash: string | null;
-}): CommandJournalRepository {
+function journalWith(
+	entry: {
+		organizationId: string;
+		commandName: string;
+		requestHash: string | null;
+	},
+	responseSnapshot: Record<string, unknown> = {
+		aggregateId: "ptr_prt_1",
+		revision: 1,
+	},
+): CommandJournalRepository {
 	return {
 		async findByCommandId(organizationId, commandId) {
 			if (organizationId !== entry.organizationId || commandId !== COMMAND_ID) {
@@ -22,7 +29,7 @@ function journalWith(entry: {
 			return {
 				commandId,
 				...entry,
-				responseSnapshot: { aggregateId: "ptr_prt_1", revision: 1 },
+				responseSnapshot,
 			};
 		},
 		async findByInvoiceId() {
@@ -76,5 +83,31 @@ describe("partners command intent", () => {
 			intent,
 		);
 		expect(result).toBeNull();
+	});
+
+	test("replay snapshot preserves payoutStatus", async () => {
+		const intent = createPartnersCommandIntent("requestPayout", {
+			organizationId: ORGANIZATION_ID,
+			partnerId: "ptr_prt_00000000-0000-4000-8000-000000000003",
+		});
+		const result = await loadIdempotentCommandResult(
+			journalWith(
+				{
+					organizationId: ORGANIZATION_ID,
+					commandName: "requestPayout",
+					requestHash: intent.requestHash,
+				},
+				toCommandResultSnapshot({
+					aggregateId: "ptr_pay_00000000-0000-4000-8000-000000000004",
+					revision: 1,
+					payoutId: "ptr_pay_00000000-0000-4000-8000-000000000004",
+					payoutStatus: "SCHEDULED",
+				}),
+			),
+			ORGANIZATION_ID,
+			COMMAND_ID,
+			intent,
+		);
+		expect(result?.payoutStatus).toBe("SCHEDULED");
 	});
 });
