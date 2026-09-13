@@ -10,10 +10,11 @@ import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { SkillRepository } from "../../domain/ports/skill-repository";
 import {
+	createAgentCommandIntent,
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwAgentsError } from "../errors";
+import { throwAgentsError } from "../errors";
 import { buildOrganizationTenantContext } from "../services/tenant-context";
 
 export async function createSkillVersion(
@@ -21,6 +22,10 @@ export async function createSkillVersion(
 	input: CreateSkillVersionInput,
 ): Promise<CommandResult> {
 	const command = createSkillVersionCommandSchema.parse(input);
+	const intent = createAgentCommandIntent("CreateSkillVersion", {
+		...command,
+		actorPrincipalId: input.actorPrincipalId,
+	});
 	const preflightSkill = await deps.skillRepository.findById(command.skillId);
 	if (!preflightSkill) {
 		throwAgentsError(
@@ -32,6 +37,7 @@ export async function createSkillVersion(
 		deps.commandJournal,
 		preflightSkill.organizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay) {
 		return replay;
@@ -46,13 +52,13 @@ export async function createSkillVersion(
 			principalId: input.actorPrincipalId,
 		}),
 		async (context) => {
-			const raced = await context.commandJournal.findByCommandId(
+			const raced = await loadIdempotentCommandResult(
+				context.commandJournal,
 				preflightSkill.organizationId,
 				command.commandId,
+				intent,
 			);
-			if (raced) {
-				return parseCommandResultSnapshot(raced.responseSnapshot);
-			}
+			if (raced) return raced;
 
 			const skill = await context.skillRepository.findById(command.skillId);
 			if (!skill) {
@@ -111,6 +117,7 @@ export async function createSkillVersion(
 				aggregateId: skillVersionId,
 				aggregateType: "SkillVersion",
 				revision: nextRevision,
+				requestHash: intent.requestHash,
 				responseSnapshot: toCommandResultSnapshot(result, { versionNumber }),
 			});
 			await context.publishEvents([event]);

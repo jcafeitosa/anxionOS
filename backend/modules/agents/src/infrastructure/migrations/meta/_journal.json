@@ -29,6 +29,13 @@
 			"when": 1757800000000,
 			"tag": "0003_agents_routines_budget",
 			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "7",
+			"when": 1757900000000,
+			"tag": "0004_agents_command_intent",
+			"breakpoints": true
 		}
 	]
 }

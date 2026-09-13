@@ -5,6 +5,7 @@ export interface CommandJournalRecord {
 	aggregateId: string;
 	aggregateType: string;
 	revision: number;
+	requestHash: string | null;
 	responseSnapshot: Record<string, unknown> | null;
 	createdAt: Date;
 }
@@ -16,6 +17,7 @@ export interface NewCommandJournalRecord {
 	aggregateId: string;
 	aggregateType: string;
 	revision: number;
+	requestHash: string;
 	responseSnapshot: Record<string, unknown> | null;
 }
 

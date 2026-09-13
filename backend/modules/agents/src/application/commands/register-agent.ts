@@ -9,10 +9,10 @@ import { createAgentRegisteredEvent } from "../../domain/events/agent-events";
 import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import {
+	createAgentCommandIntent,
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot } from "../errors";
 import { buildOrganizationTenantContext } from "../services/tenant-context";
 
 export async function registerAgent(
@@ -20,10 +20,15 @@ export async function registerAgent(
 	input: RegisterAgentInput,
 ): Promise<CommandResult> {
 	const command = registerAgentCommandSchema.parse(input);
+	const intent = createAgentCommandIntent("RegisterAgent", {
+		...command,
+		actorPrincipalId: input.actorPrincipalId,
+	});
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
 		input.organizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay) {
 		return replay;
@@ -52,13 +57,13 @@ export async function registerAgent(
 			principalId: input.actorPrincipalId,
 		}),
 		async (context) => {
-			const raced = await context.commandJournal.findByCommandId(
+			const raced = await loadIdempotentCommandResult(
+				context.commandJournal,
 				input.organizationId,
 				command.commandId,
+				intent,
 			);
-			if (raced) {
-				return parseCommandResultSnapshot(raced.responseSnapshot);
-			}
+			if (raced) return raced;
 
 			await context.agentRepository.save({
 				id: agentId,
@@ -79,6 +84,7 @@ export async function registerAgent(
 				aggregateId: agentId,
 				aggregateType: "Agent",
 				revision,
+				requestHash: intent.requestHash,
 				responseSnapshot: toCommandResultSnapshot(result),
 			});
 			await context.publishEvents([event]);

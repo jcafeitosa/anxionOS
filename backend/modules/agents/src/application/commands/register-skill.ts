@@ -10,10 +10,11 @@ import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { SkillRepository } from "../../domain/ports/skill-repository";
 import {
+	createAgentCommandIntent,
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwAgentsError } from "../errors";
+import { throwAgentsError } from "../errors";
 import { buildOrganizationTenantContext } from "../services/tenant-context";
 
 export async function registerSkill(
@@ -21,10 +22,15 @@ export async function registerSkill(
 	input: RegisterSkillInput,
 ): Promise<CommandResult> {
 	const command = registerSkillCommandSchema.parse(input);
+	const intent = createAgentCommandIntent("RegisterSkill", {
+		...command,
+		actorPrincipalId: input.actorPrincipalId,
+	});
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
 		input.organizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay) {
 		return replay;
@@ -63,13 +69,13 @@ export async function registerSkill(
 			principalId: input.actorPrincipalId,
 		}),
 		async (context) => {
-			const raced = await context.commandJournal.findByCommandId(
+			const raced = await loadIdempotentCommandResult(
+				context.commandJournal,
 				input.organizationId,
 				command.commandId,
+				intent,
 			);
-			if (raced) {
-				return parseCommandResultSnapshot(raced.responseSnapshot);
-			}
+			if (raced) return raced;
 
 			const racedSlug = await context.skillRepository.findByOrganizationAndSlug(
 				input.organizationId,
@@ -101,6 +107,7 @@ export async function registerSkill(
 				aggregateId: skillId,
 				aggregateType: "Skill",
 				revision,
+				requestHash: intent.requestHash,
 				responseSnapshot: toCommandResultSnapshot(result),
 			});
 			await context.publishEvents([event]);

@@ -11,10 +11,11 @@ import type { AgentRepository } from "../../domain/ports/agent-repository";
 import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import {
+	createAgentCommandIntent,
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwAgentsError } from "../errors";
+import { throwAgentsError } from "../errors";
 import { buildOrganizationTenantContext } from "../services/tenant-context";
 
 export async function setAgentBudgetPolicy(
@@ -22,6 +23,10 @@ export async function setAgentBudgetPolicy(
 	input: SetAgentBudgetPolicyInput,
 ): Promise<CommandResult> {
 	const command = setAgentBudgetPolicyCommandSchema.parse(input);
+	const intent = createAgentCommandIntent("SetAgentBudgetPolicy", {
+		...command,
+		actorPrincipalId: input.actorPrincipalId,
+	});
 	const agent = await deps.agentRepository.findById(command.agentId);
 	if (!agent)
 		throwAgentsError(
@@ -32,6 +37,7 @@ export async function setAgentBudgetPolicy(
 		deps.commandJournal,
 		agent.organizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay) return replay;
 	const existing = await deps.agentBudgetRepository.findByAgentId(
@@ -46,11 +52,13 @@ export async function setAgentBudgetPolicy(
 			agencyId: agent.agencyId,
 		}),
 		async (context) => {
-			const raced = await context.commandJournal.findByCommandId(
+			const raced = await loadIdempotentCommandResult(
+				context.commandJournal,
 				agent.organizationId,
 				command.commandId,
+				intent,
 			);
-			if (raced) return parseCommandResultSnapshot(raced.responseSnapshot);
+			if (raced) return raced;
 			const saved = await context.agentBudgetRepository.save({
 				id: policyId,
 				organizationId: agent.organizationId,
@@ -71,6 +79,7 @@ export async function setAgentBudgetPolicy(
 				aggregateId: saved.id,
 				aggregateType: "AgentBudgetPolicy",
 				revision,
+				requestHash: intent.requestHash,
 				responseSnapshot: toCommandResultSnapshot(result),
 			});
 			await context.publishEvents([

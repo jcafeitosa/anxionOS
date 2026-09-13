@@ -204,6 +204,7 @@ export const commandJournal = pgTable(
 		aggregateId: uuid("aggregate_id").notNull(),
 		aggregateType: text("aggregate_type").notNull(),
 		revision: integer("revision").notNull(),
+		requestHash: text("request_hash"),
 		responseSnapshot: jsonb("response_snapshot"),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.notNull()

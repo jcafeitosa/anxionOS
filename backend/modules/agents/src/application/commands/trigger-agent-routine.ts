@@ -12,10 +12,11 @@ import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { RoutineRunDispatchPort } from "../../domain/ports/routine-run-dispatch";
 import {
+	createAgentCommandIntent,
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwAgentsError } from "../errors";
+import { throwAgentsError } from "../errors";
 import { buildOrganizationTenantContext } from "../services/tenant-context";
 
 function budgetAllows(policy: {
@@ -38,6 +39,14 @@ export async function triggerAgentRoutine(
 	input: TriggerAgentRoutineInput,
 ): Promise<TriggerAgentRoutineResult> {
 	const command = triggerAgentRoutineCommandSchema.parse(input);
+	const intent = createAgentCommandIntent(
+		"TriggerAgentRoutine",
+		{
+			...command,
+			actorPrincipalId: input.actorPrincipalId,
+		},
+		command.routineId,
+	);
 	const pre = await deps.agentRoutineRepository.findById(command.routineId);
 	if (!pre)
 		throwAgentsError(
@@ -49,6 +58,12 @@ export async function triggerAgentRoutine(
 		command.commandId,
 	);
 	if (replayRaw?.responseSnapshot) {
+		await loadIdempotentCommandResult(
+			deps.commandJournal,
+			pre.organizationId,
+			command.commandId,
+			intent,
+		);
 		const parsed = triggerAgentRoutineResultSchema.safeParse(
 			replayRaw.responseSnapshot,
 		);
@@ -62,6 +77,12 @@ export async function triggerAgentRoutine(
 				command.commandId,
 			);
 			if (raced?.responseSnapshot) {
+				await loadIdempotentCommandResult(
+					context.commandJournal,
+					pre.organizationId,
+					command.commandId,
+					intent,
+				);
 				const parsed = triggerAgentRoutineResultSchema.safeParse(
 					raced.responseSnapshot,
 				);
@@ -100,7 +121,11 @@ export async function triggerAgentRoutine(
 					aggregateId: routine.id,
 					aggregateType: "AgentRoutine",
 					revision: routine.revision,
-					responseSnapshot: result,
+					requestHash: intent.requestHash,
+					responseSnapshot: toCommandResultSnapshot(
+						{ aggregateId: routine.id, revision: routine.revision },
+						result,
+					),
 				});
 				return result;
 			}
@@ -145,7 +170,11 @@ export async function triggerAgentRoutine(
 				aggregateId: updated.id,
 				aggregateType: "AgentRoutine",
 				revision,
-				responseSnapshot: result,
+				requestHash: intent.requestHash,
+				responseSnapshot: toCommandResultSnapshot(
+					{ aggregateId: updated.id, revision },
+					result,
+				),
 			});
 			await context.publishEvents([
 				createAgentRoutineTriggeredEvent({
