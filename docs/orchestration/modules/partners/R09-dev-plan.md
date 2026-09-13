@@ -8,7 +8,7 @@ status: draft
 **Rodada:** R9  
 **Data:** 2026-09-11  
 **Issue debate:** ANX-389 / ANX-113 · impl **ANX-114** (não neste pack)  
-**Callers:** [R08-decision-log.md](./R08-decision-log.md) · [R10-g0-handoff.md](./R10-g0-handoff.md). Sem migration.
+**Callers:** [R08-decision-log.md](./R08-decision-log.md) · [R10-g0-handoff.md](./R10-g0-handoff.md). Migrations versionadas pertencem ao módulo e são validadas no oracle de banco novo.
 
 ## In / Out (R9)
 
@@ -50,7 +50,9 @@ Não criar `marketplace/`.
 | P07-S1 | schema partners_* + contracts | G2, G4 |
 | P07-S2 | consumer invoice.paid → accrual | G3-PTR-01/02 |
 | P07-S3 | refund reverse + payout lifecycle | G3-PTR-03/04 |
-| P07-S4 | HTTP `/v1/partners` | G5-PTR-01 |
+| P07-S4 | HTTP `/v1/partners`: register, organization detail, partner detail, lists | G5-PTR-01 |
+
+S4 evidence: ANX-523 implements `POST /v1/partners/organizations/:organizationId` with Zod body validation, mandatory `Idempotency-Key`, active agency mutation-role authorization and the canonical `registerPartner` command; `GET /:partnerId` delegates to an organization-scoped query. OpenAPI catalog coverage pins both operationIds, path/header parameters and error statuses. Verification: partners API boundary 6/6, OpenAPI catalog/plugin 9/9, focused partners integration 10/10, fresh PostgreSQL oracle 1,928 pass / 0 fail / 0 skip, lint/typecheck/boundaries/Graphify pass. Graph projection remains outside S4 and is not inferred from HTTP completion.
 
 ## Matriz oráculos
 
