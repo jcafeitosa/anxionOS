@@ -3,7 +3,7 @@ import { z } from "zod";
 const PARTNER_SECRET_PATTERN =
 	/(?:api[_-]?key|authorization|bearer|credential|password|private[_-]?key|secret|token)\s*(?:[:=]|\s+)\s*[^\s,]+|(?:postgres(?:ql)?|mysql|mongodb(?:\+srv)?|redis|amqp):\/\/|-----(?:BEGIN|END)(?: [A-Z0-9]+)* PRIVATE KEY-----/i;
 const PARTNER_CREDENTIAL_PREFIX_PATTERN =
-	/^(?:sk|pk)_(?:live|test)_|^gh[pousr]_|^github_pat_|^xox[baprs]-|^AKIA[0-9A-Z]{16}/i;
+	/(?:^|[^A-Za-z0-9_])(?:sk|pk)_(?:live|test)_|(?:^|[^A-Za-z0-9_])gh[pousr]_|(?:^|[^A-Za-z0-9_])github_pat_|(?:^|[^A-Za-z0-9_])xox[baprs]-|(?:^|[^A-Za-z0-9_])AKIA[0-9A-Z]{16}/i;
 const PARTNER_CONTROL_CHARACTER_PATTERN = /[\u0000-\u001f\u007f]/;
 const PARTNER_JWT_PATTERN =
 	/\b[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\b/;

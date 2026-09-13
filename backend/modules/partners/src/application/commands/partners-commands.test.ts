@@ -57,7 +57,7 @@ describe("partners commands", () => {
 				commandId: identifiers.commandId,
 				organizationId: identifiers.partnerOrganizationId,
 				referralCode: "REF-SAFE",
-				displayName: "Bearer sk_live_partner_secret",
+				displayName: "Acme ghp_legacy_token",
 				commissionRate: "10",
 				referredOrganizationId: identifiers.partnerOrganizationId,
 			}),
