@@ -128,6 +128,8 @@ docker compose -f backend/deploy/docker/docker-compose.yml \
 
 No host, o equivalente continua `cd backend && bun run workers:outbox-relay`. Não rode os dois contra o mesmo banco se quiser um único dispatcher; o lease do outbox tolera corrida, mas o processo Docker é o caminho durável.
 
+O eventing persiste `agency_id` no `domain_journal`, `outbox` e `dead_letter_queue`, mantendo o escopo do envelope durante o relay. O bootstrap é compatível com bancos existentes e faz backfill apenas de `payload.agencyId` com formato UUID válido. Estados do outbox são `pending`, `published` e `dead_letter`; após esgotar as tentativas, o poison é movido para a DLQ e retirado do fluxo pendente em uma transição atômica protegida pelo lease do relay.
+
 #### Profile `engines-sandbox` (ANX-162 S3 + S4)
 
 Containers de engine externo em modo **SIMULATED** — sem credenciais live:
