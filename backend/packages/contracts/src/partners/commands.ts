@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { billingInvoiceIdSchema } from "../billing/types";
 import { institutionalUuidSchema } from "../institutional-uuid";
+import { partnerReasonSchema, partnerReferenceSchema } from "./safe-text";
 import {
 	commissionRateSchema,
 	decimalAmountSchema,
@@ -45,7 +46,7 @@ export const reverseCommissionFromInvoiceCommandSchema = z.object({
 	partnerOrganizationId: institutionalUuidSchema,
 	invoiceId: billingInvoiceIdSchema,
 	reversedAt: z.string().datetime(),
-	reason: z.string().min(1).max(256).optional(),
+	reason: partnerReasonSchema.optional(),
 });
 export const requestPayoutCommandSchema = z.object({
 	commandId: institutionalUuidSchema,
@@ -58,14 +59,14 @@ export const approvePayoutCommandSchema = z.object({
 	partnerOrganizationId: institutionalUuidSchema,
 	payoutId: partnersPayoutIdSchema,
 	approvedAt: z.string().datetime(),
-	approvalReference: z.string().min(1).max(128),
+	approvalReference: partnerReferenceSchema,
 });
 export const failPayoutCommandSchema = z.object({
 	commandId: institutionalUuidSchema,
 	partnerOrganizationId: institutionalUuidSchema,
 	payoutId: partnersPayoutIdSchema,
 	failedAt: z.string().datetime(),
-	failureReason: z.string().min(1).max(256),
+	failureReason: partnerReasonSchema,
 });
 export const retryPayoutCommandSchema = z.object({
 	commandId: institutionalUuidSchema,
@@ -78,14 +79,14 @@ export const settlePayoutCommandSchema = z.object({
 	partnerOrganizationId: institutionalUuidSchema,
 	payoutId: partnersPayoutIdSchema,
 	settledAt: z.string().datetime(),
-	providerReference: z.string().min(1).max(128),
+	providerReference: partnerReferenceSchema,
 });
 export const reversePayoutCommandSchema = z.object({
 	commandId: institutionalUuidSchema,
 	partnerOrganizationId: institutionalUuidSchema,
 	payoutId: partnersPayoutIdSchema,
 	reversedAt: z.string().datetime(),
-	reversalReference: z.string().min(1).max(128),
+	reversalReference: partnerReferenceSchema,
 });
 
 export type PartnersCommandResult = z.infer<typeof partnersCommandResultSchema>;

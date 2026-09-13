@@ -51,6 +51,12 @@ export {
 	billingRefundProcessedBridgeSchema,
 } from "./refund-processed-bridge";
 export {
+	isPartnerTextFreeOfSecrets,
+	PARTNER_SECRET_REJECTION_MESSAGE,
+	partnerReasonSchema,
+	partnerReferenceSchema,
+} from "./safe-text";
+export {
 	commissionRateSchema,
 	decimalAmountSchema as partnersDecimalAmountSchema,
 	PARTNERS_OWNER_DOMAIN,

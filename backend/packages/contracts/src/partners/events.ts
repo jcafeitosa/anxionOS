@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { billingInvoiceIdSchema } from "../billing/types";
 import { institutionalUuidSchema } from "../institutional-uuid";
+import { partnerReasonSchema, partnerReferenceSchema } from "./safe-text";
 import {
 	commissionRateSchema,
 	decimalAmountSchema,
@@ -52,7 +53,7 @@ export const payoutApprovedPayloadSchema = z.object({
 	partnerId: partnersPartnerIdSchema,
 	organizationId: institutionalUuidSchema,
 	approvedAmount: decimalAmountSchema,
-	approvalReference: z.string().min(1).max(128),
+	approvalReference: partnerReferenceSchema,
 	approvedAt: z.string().datetime(),
 });
 export const payoutScheduledPayloadSchema = payoutRequestedPayloadSchema;
@@ -68,14 +69,14 @@ export const payoutSettledPayloadSchema = z.object({
 	partnerId: partnersPartnerIdSchema,
 	organizationId: institutionalUuidSchema,
 	settledAmount: decimalAmountSchema,
-	providerReference: z.string().min(1).max(128),
+	providerReference: partnerReferenceSchema,
 	settledAt: z.string().datetime(),
 });
 export const payoutFailedPayloadSchema = z.object({
 	payoutId: partnersPayoutIdSchema,
 	partnerId: partnersPartnerIdSchema,
 	organizationId: institutionalUuidSchema,
-	failureReason: z.string().min(1).max(256),
+	failureReason: partnerReasonSchema,
 	attemptNumber: z.number().int().positive(),
 	failedAt: z.string().datetime(),
 });
@@ -83,7 +84,7 @@ export const payoutReversedPayloadSchema = z.object({
 	payoutId: partnersPayoutIdSchema,
 	partnerId: partnersPartnerIdSchema,
 	organizationId: institutionalUuidSchema,
-	reversalReference: z.string().min(1).max(128),
+	reversalReference: partnerReferenceSchema,
 	reversedAt: z.string().datetime(),
 });
 export const partnersEventPayloadSchema = z.discriminatedUnion("eventType", [

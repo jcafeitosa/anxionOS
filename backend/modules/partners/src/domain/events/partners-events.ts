@@ -4,6 +4,10 @@ import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import {
 	PARTNERS_EVENT_TYPES,
 	PARTNERS_OWNER_DOMAIN,
+	payoutApprovedPayloadSchema,
+	payoutFailedPayloadSchema,
+	payoutReversedPayloadSchema,
+	payoutSettledPayloadSchema,
 } from "@anxionos/contracts/partners";
 
 export function createCommissionAccruedEvent(input: {
@@ -71,13 +75,14 @@ export function createPayoutApprovedEvent(input: {
 	approvalReference: string;
 	approvedAt: string;
 }): DomainEventEnvelope {
+	const payload = payoutApprovedPayloadSchema.parse(input);
 	return {
 		eventId: randomUUID(),
 		eventType: PARTNERS_EVENT_TYPES.PAYOUT_APPROVED,
 		schemaVersion,
 		ownerDomain: PARTNERS_OWNER_DOMAIN,
 		occurredAt: new Date().toISOString(),
-		payload: input,
+		payload,
 	};
 }
 
@@ -123,13 +128,14 @@ export function createPayoutSettledEvent(input: {
 	providerReference: string;
 	settledAt: string;
 }): DomainEventEnvelope {
+	const payload = payoutSettledPayloadSchema.parse(input);
 	return {
 		eventId: randomUUID(),
 		eventType: PARTNERS_EVENT_TYPES.PAYOUT_SETTLED,
 		schemaVersion,
 		ownerDomain: PARTNERS_OWNER_DOMAIN,
 		occurredAt: new Date().toISOString(),
-		payload: input,
+		payload,
 	};
 }
 
@@ -141,13 +147,14 @@ export function createPayoutFailedEvent(input: {
 	attemptNumber: number;
 	failedAt: string;
 }): DomainEventEnvelope {
+	const payload = payoutFailedPayloadSchema.parse(input);
 	return {
 		eventId: randomUUID(),
 		eventType: PARTNERS_EVENT_TYPES.PAYOUT_FAILED,
 		schemaVersion,
 		ownerDomain: PARTNERS_OWNER_DOMAIN,
 		occurredAt: new Date().toISOString(),
-		payload: input,
+		payload,
 	};
 }
 
@@ -158,12 +165,13 @@ export function createPayoutReversedEvent(input: {
 	reversalReference: string;
 	reversedAt: string;
 }): DomainEventEnvelope {
+	const payload = payoutReversedPayloadSchema.parse(input);
 	return {
 		eventId: randomUUID(),
 		eventType: PARTNERS_EVENT_TYPES.PAYOUT_REVERSED,
 		schemaVersion,
 		ownerDomain: PARTNERS_OWNER_DOMAIN,
 		occurredAt: new Date().toISOString(),
-		payload: input,
+		payload,
 	};
 }

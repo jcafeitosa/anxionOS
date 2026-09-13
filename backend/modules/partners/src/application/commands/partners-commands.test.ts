@@ -1,5 +1,13 @@
 import { describe, expect, test } from "bun:test";
-import { PARTNERS_EVENT_TYPES } from "@anxionos/contracts/partners";
+import {
+	approvePayoutCommandSchema,
+	failPayoutCommandSchema,
+	PARTNERS_EVENT_TYPES,
+	partnersEventPayloadSchema,
+	reverseCommissionFromInvoiceCommandSchema,
+	reversePayoutCommandSchema,
+	settlePayoutCommandSchema,
+} from "@anxionos/contracts/partners";
 import { PartnersCommandError } from "../errors";
 import { accrueCommissionFromInvoice } from "./accrue-commission-from-invoice";
 import { approvePayout } from "./approve-payout";
@@ -19,6 +27,101 @@ import { reversePayout } from "./reverse-payout";
 import { settlePayout } from "./settle-payout";
 
 describe("partners commands", () => {
+	test("rejects secret-bearing partner command text fields", () => {
+		const identifiers = {
+			commandId: "00000000-0000-4000-8000-000000000001",
+			partnerOrganizationId: "00000000-0000-4000-8000-000000000002",
+			payoutId: "ptr_pay_00000000-0000-4000-8000-000000000003",
+			invoiceId: "bil_inv_00000000-0000-4000-8000-000000000004",
+		};
+		expect(() =>
+			approvePayoutCommandSchema.parse({
+				...identifiers,
+				approvedAt: "2026-09-13T12:00:00.000Z",
+				approvalReference: "Bearer sk_live_partner_secret",
+			}),
+		).toThrow();
+		expect(() =>
+			failPayoutCommandSchema.parse({
+				...identifiers,
+				failedAt: "2026-09-13T12:00:00.000Z",
+				failureReason: "api_key=partner-secret",
+			}),
+		).toThrow();
+		expect(() =>
+			settlePayoutCommandSchema.parse({
+				...identifiers,
+				settledAt: "2026-09-13T12:00:00.000Z",
+				providerReference: "postgres://user:password@host/db",
+			}),
+		).toThrow();
+		expect(() =>
+			reversePayoutCommandSchema.parse({
+				...identifiers,
+				reversedAt: "2026-09-13T12:00:00.000Z",
+				reversalReference: "-----BEGIN PRIVATE KEY-----",
+			}),
+		).toThrow();
+		expect(() =>
+			reverseCommissionFromInvoiceCommandSchema.parse({
+				...identifiers,
+				reversedAt: "2026-09-13T12:00:00.000Z",
+				reason: "token: partner-secret",
+			}),
+		).toThrow();
+	});
+
+	test("rejects secret-bearing partner event payload fields", () => {
+		const identifiers = {
+			payoutId: "ptr_pay_00000000-0000-4000-8000-000000000003",
+			partnerId: "ptr_prt_00000000-0000-4000-8000-000000000005",
+			organizationId: "00000000-0000-4000-8000-000000000002",
+		};
+		expect(() =>
+			partnersEventPayloadSchema.parse({
+				eventType: PARTNERS_EVENT_TYPES.PAYOUT_APPROVED,
+				payload: {
+					...identifiers,
+					approvedAmount: "10",
+					approvalReference: "authorization: Bearer partner-secret",
+					approvedAt: "2026-09-13T12:00:00.000Z",
+				},
+			}),
+		).toThrow();
+		expect(() =>
+			partnersEventPayloadSchema.parse({
+				eventType: PARTNERS_EVENT_TYPES.PAYOUT_SETTLED,
+				payload: {
+					...identifiers,
+					settledAmount: "10",
+					providerReference: "api_key=partner-secret",
+					settledAt: "2026-09-13T12:00:00.000Z",
+				},
+			}),
+		).toThrow();
+		expect(() =>
+			partnersEventPayloadSchema.parse({
+				eventType: PARTNERS_EVENT_TYPES.PAYOUT_FAILED,
+				payload: {
+					...identifiers,
+					failureReason: "postgres://user:password@host/db",
+					attemptNumber: 1,
+					failedAt: "2026-09-13T12:00:00.000Z",
+				},
+			}),
+		).toThrow();
+		expect(() =>
+			partnersEventPayloadSchema.parse({
+				eventType: PARTNERS_EVENT_TYPES.PAYOUT_REVERSED,
+				payload: {
+					...identifiers,
+					reversalReference: "-----BEGIN PRIVATE KEY-----",
+					reversedAt: "2026-09-13T12:00:00.000Z",
+				},
+			}),
+		).toThrow();
+	});
+
 	test("registerPartner creates partner scoped to organization", async () => {
 		const { unitOfWork, commandJournal, getPartners } = createPartnersTestUow();
 		const result = await registerPartner(
