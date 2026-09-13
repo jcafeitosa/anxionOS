@@ -8,8 +8,6 @@ import {
 	type PostLoginAuthContext,
 	PostLoginContextUnavailableError,
 } from "../../lib/auth";
-import { membershipForAgency } from "../../lib/owner-dashboard";
-import { ArchifyCanvas } from "./ArchifyCanvas";
 import { ConsoleSidebar } from "./ConsoleSidebar";
 import { DecisionTrail } from "./DecisionTrail";
 import { HonestState } from "./HonestState";
@@ -29,82 +27,6 @@ const titles: Record<ConsoleKind, string> = {
 	platform: "Platform Console",
 	partner: "Partner Console",
 };
-
-function RoleArchifyDashboard({
-	kind,
-	context,
-	agencyId,
-}: {
-	kind: "operator" | "platform";
-	context: PostLoginAuthContext;
-	agencyId?: string;
-}) {
-	const membership = agencyId ? membershipForAgency(context, agencyId) : null;
-	const testPrefix = kind === "operator" ? "operator" : "platform";
-	return (
-		<ArchifyCanvas
-			title={
-				kind === "operator"
-					? "anxionOS — visão operator"
-					: "anxionOS — visão platform"
-			}
-			testId={`${testPrefix}-dashboard`}
-			defaultSelectedId="frontend"
-			passport={() => (
-				<div className="flex flex-col gap-4 border-t border-border pt-4">
-					<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-						Dados do loader
-					</p>
-					<dl className="grid gap-2 text-xs" data-testid={`${testPrefix}-membership`}>
-						<div>
-							<dt className="text-muted-foreground">agencyId</dt>
-							<dd className="break-all font-mono text-foreground">
-								{agencyId ?? "escopo PLATFORM — sem agencyId"}
-							</dd>
-						</div>
-						<div>
-							<dt className="text-muted-foreground">role</dt>
-							<dd className="font-mono text-foreground">
-								{membership?.role ?? context.decision.kind}
-							</dd>
-						</div>
-					</dl>
-					<p className="text-sm" data-testid={`${testPrefix}-platform-grant`}>
-						{context.platformAccess === true
-							? "O loader autorizou acesso PLATFORM."
-							: "platformAccess=false — console /platform permanece negado."}
-					</p>
-					<p
-						className="text-sm text-muted-foreground"
-						data-testid={`${testPrefix}-partner-grant`}
-					>
-						{context.partnerAccess === true
-							? "O loader autorizou acesso partner."
-							: "partnerAccess=false — console /partner permanece negado."}
-					</p>
-				</div>
-			)}
-			footer={
-				<section aria-labelledby={`${testPrefix}-empty-heading`} id="team">
-					<h2
-						id={`${testPrefix}-empty-heading`}
-						className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground"
-					>
-						Dados operacionais
-					</h2>
-					<div data-testid={`${testPrefix}-operational-empty`}>
-						<HonestState
-							kind="empty"
-							titleAs="h3"
-							title="Este console não lista Owner capabilities"
-							description="Operator/Platform não consomem GET /v1/agencies/:agencyId/agents. ANX-153 (portfólio) permanece aberto; nenhum tenant demo ou número financeiro é inventado."
-						/>
-					</div>
-				</section>
-			}
-		/>
-	);
-}
 
 export function ConsoleApp({ kind, agencyId }: ConsoleAppProps) {
 	const [mode, setMode] = useState<"loading" | "ready" | "denied" | "stale">(
@@ -228,10 +150,11 @@ export function ConsoleApp({ kind, agencyId }: ConsoleAppProps) {
 						) : kind === "platform" ? (
 							<PlatformDashboard platformAccess={context.platformAccess === true} />
 						) : (
-							<RoleArchifyDashboard
-								kind="platform"
-								context={context}
-								agencyId={agencyId}
+							<HonestState
+								kind="denied"
+								titleAs="h2"
+								title="Console indisponível"
+								description="O contexto de autorização não corresponde a um console navegável."
 							/>
 						)}
 					</div>
