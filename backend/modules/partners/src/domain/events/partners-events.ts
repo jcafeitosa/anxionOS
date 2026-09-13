@@ -2,11 +2,16 @@ import { randomUUID } from "node:crypto";
 import { schemaVersion } from "@anxionos/contracts";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import {
+	commissionAccruedPayloadSchema,
+	commissionReversedPayloadSchema,
 	PARTNERS_EVENT_TYPES,
 	PARTNERS_OWNER_DOMAIN,
 	payoutApprovedPayloadSchema,
 	payoutFailedPayloadSchema,
+	payoutProcessingPayloadSchema,
+	payoutRequestedPayloadSchema,
 	payoutReversedPayloadSchema,
+	payoutScheduledPayloadSchema,
 	payoutSettledPayloadSchema,
 } from "@anxionos/contracts/partners";
 
@@ -22,13 +27,14 @@ export function createCommissionAccruedEvent(input: {
 	commissionAmount: string;
 	accruedAt: string;
 }): DomainEventEnvelope {
+	const payload = commissionAccruedPayloadSchema.parse(input);
 	return {
 		eventId: randomUUID(),
 		eventType: PARTNERS_EVENT_TYPES.COMMISSION_ACCRUED,
 		schemaVersion,
 		ownerDomain: PARTNERS_OWNER_DOMAIN,
 		occurredAt: new Date().toISOString(),
-		payload: input,
+		payload,
 	};
 }
 
@@ -40,13 +46,14 @@ export function createCommissionReversedEvent(input: {
 	reversedAmount: string;
 	reversedAt: string;
 }): DomainEventEnvelope {
+	const payload = commissionReversedPayloadSchema.parse(input);
 	return {
 		eventId: randomUUID(),
 		eventType: PARTNERS_EVENT_TYPES.COMMISSION_REVERSED,
 		schemaVersion,
 		ownerDomain: PARTNERS_OWNER_DOMAIN,
 		occurredAt: new Date().toISOString(),
-		payload: input,
+		payload,
 	};
 }
 
@@ -57,13 +64,14 @@ export function createPayoutRequestedEvent(input: {
 	requestedAmount: string;
 	requestedAt: string;
 }): DomainEventEnvelope {
+	const payload = payoutRequestedPayloadSchema.parse(input);
 	return {
 		eventId: randomUUID(),
 		eventType: PARTNERS_EVENT_TYPES.PAYOUT_REQUESTED,
 		schemaVersion,
 		ownerDomain: PARTNERS_OWNER_DOMAIN,
 		occurredAt: new Date().toISOString(),
-		payload: input,
+		payload,
 	};
 }
 
@@ -93,13 +101,14 @@ export function createPayoutScheduledEvent(input: {
 	requestedAmount: string;
 	requestedAt: string;
 }): DomainEventEnvelope {
+	const payload = payoutScheduledPayloadSchema.parse(input);
 	return {
 		eventId: randomUUID(),
 		eventType: PARTNERS_EVENT_TYPES.PAYOUT_SCHEDULED,
 		schemaVersion,
 		ownerDomain: PARTNERS_OWNER_DOMAIN,
 		occurredAt: new Date().toISOString(),
-		payload: input,
+		payload,
 	};
 }
 
@@ -110,13 +119,14 @@ export function createPayoutProcessingEvent(input: {
 	processingAt: string;
 	attemptNumber: number;
 }): DomainEventEnvelope {
+	const payload = payoutProcessingPayloadSchema.parse(input);
 	return {
 		eventId: randomUUID(),
 		eventType: PARTNERS_EVENT_TYPES.PAYOUT_PROCESSING,
 		schemaVersion,
 		ownerDomain: PARTNERS_OWNER_DOMAIN,
 		occurredAt: new Date().toISOString(),
-		payload: input,
+		payload,
 	};
 }
 
