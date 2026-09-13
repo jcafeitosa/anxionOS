@@ -133,6 +133,26 @@ test.describe("WCAG 2.2 axe — login + shells (ANX-340)", () => {
 		await expectAxeClean(page, "/access-denied");
 	});
 
+	test("onboarding route is axe-clean within its main content", async ({ page }) => {
+		await signInLive(page, DEV_SEED_ACCOUNTS.none);
+		await expect(page).toHaveURL(/\/onboarding$/, { timeout: 20_000 });
+		await expect(
+			page.getByRole("heading", { name: "Organização ainda não vinculada" }),
+		).toBeVisible();
+		await expectAxeClean(page, "/onboarding");
+	});
+
+	test("select-organization route is axe-clean within its main content", async ({
+		page,
+	}) => {
+		await signInLive(page, DEV_SEED_ACCOUNTS.multi);
+		await expect(page).toHaveURL(/\/select-organization$/, { timeout: 20_000 });
+		await expect(
+			page.getByRole("heading", { name: "Escolher organização" }),
+		).toBeVisible();
+		await expectAxeClean(page, "/select-organization");
+	});
+
 	test("/platform bounce fail-closed lands on axe-clean Owner shell", async ({
 		page,
 	}) => {
