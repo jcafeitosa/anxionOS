@@ -104,8 +104,8 @@ describe("partners schema migration", () => {
 				[
 					"ptr_legacy",
 					legacyPartnerOrganizationId,
-					"postgres://user:password@host/db",
-					"Bearer legacy-display-secret",
+					"campaign_akia1234567890123456",
+					"Acme_ghp_legacy_token",
 					"10.00",
 					"22222222-2222-4222-8222-222222222222",
 					"ACTIVE",
@@ -125,10 +125,10 @@ describe("partners schema migration", () => {
 					legacyPartnerOrganizationId,
 					"10.00",
 					"FAILED",
-					"Bearer legacy-approval-secret",
-					"postgres://user:password@host/db",
-					"api_key=legacy-provider-secret",
-					"-----BEGIN PRIVATE KEY-----",
+					"provider_ghp_legacy_token",
+					"provider_ghp_legacy_token",
+					"provider_ghp_legacy_token",
+					"legacy_ghp_legacy_token",
 				],
 			);
 			await client.query(secretRemediationSql);
