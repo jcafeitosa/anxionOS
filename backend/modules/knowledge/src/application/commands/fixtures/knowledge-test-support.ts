@@ -1,5 +1,5 @@
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
-import type { CommandJournalEntry } from "../../domain/ports/command-journal";
+import type { CommandJournalEntry } from "../../../domain/ports/command-journal";
 import type {
 	ChunkRecord,
 	DocumentRecord,
@@ -10,7 +10,7 @@ import type {
 	KnowledgeTransactionContext,
 	KnowledgeUnitOfWork,
 	RetrievalEmbeddingRecord,
-} from "../../domain/ports/knowledge-unit-of-work";
+} from "../../../domain/ports/knowledge-unit-of-work";
 
 export const TEST_ORG = "00000000-0000-4000-8000-000000000001";
 export const TEST_ACL_ID = "11111111-1111-4111-8111-111111111111";

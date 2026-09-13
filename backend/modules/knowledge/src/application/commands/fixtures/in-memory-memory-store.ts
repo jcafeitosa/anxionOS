@@ -1,8 +1,9 @@
 import type {
 	MemoryEntryRecord,
 	MemoryStorePort,
-} from "../../domain/ports/memory-store";
+} from "../../../domain/ports/memory-store";
 
+/** Test-only fixture for command unit tests; never exported by the module. */
 export function createInMemoryMemoryStore(): MemoryStorePort {
 	const entries = new Map<string, MemoryEntryRecord>();
 

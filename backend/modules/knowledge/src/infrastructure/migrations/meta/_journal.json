@@ -8,6 +8,13 @@
 			"when": 1789232236474,
 			"tag": "0000_knowledge_core",
 			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1789265400000,
+			"tag": "0001_knowledge_memories",
+			"breakpoints": true
 		}
 	]
 }

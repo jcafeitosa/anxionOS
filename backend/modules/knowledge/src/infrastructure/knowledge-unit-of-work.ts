@@ -5,6 +5,7 @@ import type {
 	KnowledgeTransactionContext,
 	KnowledgeUnitOfWork,
 } from "../domain/ports/knowledge-unit-of-work";
+import { createPgMemoryStore } from "./adapters/postgres-memory-store";
 import { createPgCommandJournalRepository } from "./persistence/command-journal-repository";
 import {
 	createPgChunkRepository,
@@ -28,6 +29,7 @@ function createTransactionContext(
 		chunks: createPgChunkRepository(client),
 		embeddings: createPgEmbeddingRepository(client),
 		embeddingSpaces: createPgEmbeddingSpaceRepository(client),
+		memoryStore: createPgMemoryStore(client),
 		async publishEvents(envelopes: DomainEventEnvelope[]) {
 			for (const envelope of envelopes) {
 				await appendJournal(client, envelope);

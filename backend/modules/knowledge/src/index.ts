@@ -40,7 +40,10 @@ export {
 	createIngestDocumentWorker,
 	type IngestDocumentWorkerDeps,
 } from "./application/workers/ingest-document-worker";
-export { createInMemoryMemoryStore } from "./infrastructure/adapters/in-memory-memory-store";
+export {
+	createPgMemoryStore,
+	type KnowledgeMemoryQueryable,
+} from "./infrastructure/adapters/postgres-memory-store";
 export {
 	createSimulatedEmbeddingPort,
 	SIMULATED_EMBEDDING_DIMENSIONS,
@@ -48,3 +51,4 @@ export {
 export { createKnowledgeUnitOfWork } from "./infrastructure/knowledge-unit-of-work";
 export { ensureKnowledgeSchema } from "./infrastructure/migrate";
 export { createPgCommandJournalRepository } from "./infrastructure/persistence/command-journal-repository";
+export { knowledgeMemories } from "./infrastructure/persistence/schema";
