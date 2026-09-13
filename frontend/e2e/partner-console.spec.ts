@@ -1,4 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
+import {
+	assertAuthorizedConsoleHeading,
+	mockAuthorizedPartnerApis,
+	PARTNER_ORGANIZATION_ID,
+} from "./fixtures/authorized-consoles";
 import { DEV_SEED_ACCOUNTS, signInLive } from "./fixtures/live-auth";
 
 async function assertPartnerRouteBlocked(page: Page): Promise<void> {
@@ -57,5 +62,33 @@ test.describe("Partner console fail-closed (seed partnerAccess=false)", () => {
 		await signInLive(page, DEV_SEED_ACCOUNTS.multi);
 		await expect(page).toHaveURL(/\/select-organization$/, { timeout: 20_000 });
 		await assertPartnerRouteBlocked(page);
+	});
+});
+
+test.describe("Partner console authorized contract fixture", () => {
+	test("authorized partner reaches the real dashboard consumer", async ({ page }) => {
+		const agencyRequests: string[] = [];
+		page.on("request", (request) => {
+			if (/\/v1\/operations\/agencies\//.test(request.url())) {
+				agencyRequests.push(request.url());
+			}
+		});
+		await mockAuthorizedPartnerApis(page);
+		await page.goto("/partner");
+		await assertAuthorizedConsoleHeading(page, "Partner Console");
+		await expect(page.getByTestId("partner-dashboard")).toBeVisible();
+		await expect(page.getByTestId("partner-organization")).toContainText(
+			PARTNER_ORGANIZATION_ID,
+		);
+		await expect(page.getByTestId("partner-organization")).toContainText("Partner E2E");
+		await expect(page.getByTestId("partner-accruals-list")).toContainText(
+			"invoice-e2e-001",
+		);
+		await expect(page.getByTestId("partner-payouts-list")).toContainText("REQUESTED");
+		await expect(page.getByTestId("console-sidebar")).toHaveAttribute(
+			"data-console",
+			"partner",
+		);
+		expect(agencyRequests).toEqual([]);
 	});
 });
