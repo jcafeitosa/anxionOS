@@ -201,7 +201,7 @@ async function issueBaselineOwnerGrants(
 				granteePrincipalId: payload.principalId,
 				granteeAgentId: null,
 				// Grant derivado do sistema (membership.activated): sem emissor
-				// principal, so' revogavel por owner/admin da agencia (ANX-469).
+				// principal, so' revogavel por owner da agencia (ANX-469).
 				issuedByPrincipalId: null,
 				capability,
 				resourceRef: null,

@@ -46,7 +46,9 @@ assertPgIntegrationEnvForCi();
 const skipReason = getPgIntegrationTestSkipReason();
 
 const AGENCY_ID = "dddddddd-dddd-4ddd-8ddd-dddddddddddd";
+const OTHER_AGENCY_ID = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
 const OWNER_AUTH_USER_ID = "anx-469-owner-auth";
+const ADMIN_AUTH_USER_ID = "anx-469-admin-auth";
 const OPERATOR_AUTH_USER_ID = "anx-469-operator-auth";
 const OUTSIDER_AUTH_USER_ID = "anx-469-outsider-auth";
 
@@ -55,6 +57,7 @@ const TRUNCATE_SQL =
 
 interface Fixture {
 	ownerPrincipalId: string;
+	adminPrincipalId: string;
 	operatorPrincipalId: string;
 	outsiderPrincipalId: string;
 }
@@ -69,6 +72,7 @@ interface Harness {
 async function seedOwnerBaseline(
 	govRuntime: GovernanceApiRuntime,
 	ownerPrincipalId: string,
+	agencyId = AGENCY_ID,
 ): Promise<void> {
 	for (const capability of OWNER_AUTHORITY_CAPABILITIES) {
 		await issueGrant(
@@ -79,7 +83,7 @@ async function seedOwnerBaseline(
 			},
 			{
 				commandId: randomUUID(),
-				scopeId: AGENCY_ID,
+				scopeId: agencyId,
 				granteePrincipalId: ownerPrincipalId,
 				issuedByPrincipalId: null,
 				capability,
@@ -100,6 +104,7 @@ async function seedGrant(
 		granteePrincipalId: string;
 		capability: string;
 		issuedByPrincipalId: string | null;
+		agencyId?: string;
 	},
 ): Promise<string> {
 	const result = await issueGrant(
@@ -110,7 +115,7 @@ async function seedGrant(
 		},
 		{
 			commandId: randomUUID(),
-			scopeId: AGENCY_ID,
+			scopeId: input.agencyId ?? AGENCY_ID,
 			granteePrincipalId: input.granteePrincipalId,
 			issuedByPrincipalId: input.issuedByPrincipalId,
 			capability: input.capability,
@@ -129,6 +134,10 @@ async function seedFixture(
 		authUserId: OWNER_AUTH_USER_ID,
 		email: "anx-469-owner@example.test",
 	});
+	const admin = await identityDb.repository.createIfAbsent({
+		authUserId: ADMIN_AUTH_USER_ID,
+		email: "anx-469-admin@example.test",
+	});
 	const operator = await identityDb.repository.createIfAbsent({
 		authUserId: OPERATOR_AUTH_USER_ID,
 		email: "anx-469-operator@example.test",
@@ -137,7 +146,7 @@ async function seedFixture(
 		authUserId: OUTSIDER_AUTH_USER_ID,
 		email: "anx-469-outsider@example.test",
 	});
-	if (!owner || !operator || !outsider) {
+	if (!owner || !admin || !operator || !outsider) {
 		throw new Error("ANX-469 fixture: principals were not created");
 	}
 	const now = new Date();
@@ -158,6 +167,7 @@ async function seedFixture(
 			});
 			for (const [principalId, role] of [
 				[owner.id, "owner"],
+				[admin.id, "admin"],
 				[operator.id, "operator"],
 			] as const) {
 				await orgDb.membershipRepository.save({
@@ -179,7 +189,41 @@ async function seedFixture(
 			}
 		},
 	);
+	await scopedPool.withContext(
+		buildAgencyTenantContext(OTHER_AGENCY_ID, outsider.id),
+		async (client) => {
+			const orgDb = createOrganizationsDb(client);
+			await orgDb.agencyRepository.save({
+				id: OTHER_AGENCY_ID,
+				ownerPrincipalId: outsider.id,
+				displayName: "ANX-469 other fixture agency",
+				marketScope: "both",
+				status: "draft",
+				onboardingStep: "created",
+				revision: 1,
+				createdAt: now,
+				updatedAt: now,
+			});
+			await orgDb.membershipRepository.save({
+				id: randomUUID(),
+				agencyId: OTHER_AGENCY_ID,
+				principalId: outsider.id,
+				inviteEmail: null,
+				inviteTokenHash: null,
+				inviteExpiresAt: null,
+				role: "owner",
+				status: "active",
+				invitedAt: null,
+				joinedAt: now,
+				revokedAt: null,
+				revision: 1,
+				createdAt: now,
+				updatedAt: now,
+			});
+		},
+	);
 	await seedOwnerBaseline(govRuntime, owner.id);
+	await seedOwnerBaseline(govRuntime, outsider.id, OTHER_AGENCY_ID);
 	// O operator precisa DETER a capability operacional para poder repassa-la
 	// pela rota (ANX-466: ninguem concede o que nao detem).
 	await seedGrant(govRuntime, {
@@ -189,6 +233,7 @@ async function seedFixture(
 	});
 	return {
 		ownerPrincipalId: owner.id,
+		adminPrincipalId: admin.id,
 		operatorPrincipalId: operator.id,
 		outsiderPrincipalId: outsider.id,
 	};
@@ -328,6 +373,89 @@ describe("ANX-469 — revogacao de grant limita o alvo (PostgreSQL real + app.ha
 					dbStatus: "active",
 				});
 				expect(body.error.details.code).toBe("GOV_INSUFFICIENT_AUTHORITY");
+			});
+		},
+	);
+
+	test.skipIf(Boolean(skipReason))(
+		"admin nao-emissor nao revoga grant do owner",
+		async () => {
+			await withHarness(async ({ app, pool, ownerPrincipalId }) => {
+				const ownerGrantId = await activeGrantId(
+					pool,
+					ownerPrincipalId,
+					"owner.manage",
+				);
+				const response = await app.handle(
+					request(`/v1/agencies/${AGENCY_ID}/grants/${ownerGrantId}`, {
+						method: "DELETE",
+						authUserId: ADMIN_AUTH_USER_ID,
+						idempotencyKey: randomUUID(),
+						body: {},
+					}),
+				);
+				expect({
+					status: response.status,
+					dbStatus: await grantStatus(pool, ownerGrantId),
+				}).toEqual({
+					status: 403,
+					dbStatus: "active",
+				});
+			});
+		},
+	);
+
+	test.skipIf(Boolean(skipReason))(
+		"grant de outra agencia responde not found e permanece ativo",
+		async () => {
+			await withHarness(async ({ app, pool, outsiderPrincipalId }) => {
+				const otherAgencyGrantId = await activeGrantId(
+					pool,
+					outsiderPrincipalId,
+					"owner.manage",
+				);
+				const response = await app.handle(
+					request(`/v1/agencies/${AGENCY_ID}/grants/${otherAgencyGrantId}`, {
+						method: "DELETE",
+						authUserId: OPERATOR_AUTH_USER_ID,
+						idempotencyKey: randomUUID(),
+						body: {},
+					}),
+				);
+				expect({
+					status: response.status,
+					dbStatus: await grantStatus(pool, otherAgencyGrantId),
+				}).toEqual({
+					status: 404,
+					dbStatus: "active",
+				});
+			});
+		},
+	);
+
+	test.skipIf(Boolean(skipReason))(
+		"sessao ausente responde unauthorized e preserva o grant",
+		async () => {
+			await withHarness(async ({ app, pool, ownerPrincipalId }) => {
+				const ownerGrantId = await activeGrantId(
+					pool,
+					ownerPrincipalId,
+					"owner.manage",
+				);
+				const response = await app.handle(
+					request(`/v1/agencies/${AGENCY_ID}/grants/${ownerGrantId}`, {
+						method: "DELETE",
+						idempotencyKey: randomUUID(),
+						body: {},
+					}),
+				);
+				expect({
+					status: response.status,
+					dbStatus: await grantStatus(pool, ownerGrantId),
+				}).toEqual({
+					status: 401,
+					dbStatus: "active",
+				});
 			});
 		},
 	);

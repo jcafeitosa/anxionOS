@@ -329,6 +329,22 @@ describe("governance API handlers (slice 6)", () => {
 		expect(stored?.status).toBe("active");
 	});
 
+	test("handleRevokeGrant nega admin nao-emissor revogando grant do owner", async () => {
+		const deps = createGrantHandlerDeps();
+		await expect(
+			handleRevokeGrant(deps, {
+				commandId: "2b2b2b2b-2b2b-4b2b-8b2b-2b2b2b2b2b2b",
+				agencyId: scopeId,
+				grantId,
+				actor: { principalId: otherPrincipalId, role: "admin" },
+				body: {},
+			}),
+		).rejects.toMatchObject({ governanceCode: "GOV_INSUFFICIENT_AUTHORITY" });
+		expect((await deps.grantRepository.findById(grantId))?.status).toBe(
+			"active",
+		);
+	});
+
 	test("handleRevokeGrant permite ao emissor revogar o proprio grant operacional", async () => {
 		const deps = createGrantHandlerDeps();
 		const issuedGrant = seedGrant({
