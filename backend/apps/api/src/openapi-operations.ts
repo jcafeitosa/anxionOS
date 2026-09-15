@@ -882,7 +882,7 @@ export const governanceOpenApi = {
 		operationId: "revokeGrant",
 		summary: "Revoke a grant",
 		description:
-			"Module: governance. Revokes `grantId`. Authorization (ANX-469): the caller must be an **owner/admin** of the declared agency **or** the grant's **issuer** (`issued_by_principal_id`); anyone else is refused with `GOV_INSUFFICIENT_AUTHORITY` (403) and **nothing is written**. `revokeGrant` is never a way to undo a grant issued by a higher role. Body may be empty (`Content-Length: 0`) or `{ reason }`. `commandId`/`grantId` in JSON are ignored in favor of header/path.",
+			"Module: governance. Revokes `grantId`. Authorization (ANX-469): the caller must be an **owner** of the declared agency **or** the grant's **issuer** (`issued_by_principal_id`); anyone else is refused with `GOV_INSUFFICIENT_AUTHORITY` (403) and **nothing is written**. `revokeGrant` is never a way to undo a grant issued by a higher role. Body may be empty (`Content-Length: 0`) or `{ reason }`. `commandId`/`grantId` in JSON are ignored in favor of header/path.",
 		security: COOKIE_SECURITY,
 		parameters: [
 			...commandParams,
@@ -909,7 +909,7 @@ export const governanceOpenApi = {
 			"401": { description: "No session." },
 			"403": {
 				description:
-					"`GOV_INSUFFICIENT_AUTHORITY` (not owner/admin and not the issuer) / `ORG_CROSS_TENANT`.",
+					"`GOV_INSUFFICIENT_AUTHORITY` (not owner and not the issuer) / `ORG_CROSS_TENANT`.",
 			},
 			"404": {
 				description: "`GOV_GRANT_NOT_FOUND` / `GOV_PRINCIPAL_NOT_FOUND`.",
