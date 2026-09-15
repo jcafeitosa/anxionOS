@@ -237,6 +237,42 @@ describe("resolveClientIp", () => {
 		expect(resolveTrustedProxyHops()).toBe(DEFAULT_TRUSTED_PROXY_HOPS);
 	});
 
+	test("ANX-491 G4: config malformada NAO e' truncada para um prefixo inteiro", () => {
+		// `Number.parseInt` aceitava estes valores como 1, promovendo uma
+		// configuracao invalida a um numero de hops silenciosamente diferente
+		// do pretendido. Todos devem cair no default documentado.
+		for (const malformed of [
+			"1foo",
+			"1.5",
+			"1e2",
+			"0x10",
+			"+1",
+			"2,5",
+			"two",
+		]) {
+			process.env.TRUSTED_PROXY_HOPS = malformed;
+			expect(resolveTrustedProxyHops()).toBe(DEFAULT_TRUSTED_PROXY_HOPS);
+		}
+	});
+
+	test("ANX-491 G4: config malformada cai para o default NA DERIVACAO do IP", () => {
+		// O achado nao e' so' de parsing: com `1foo` o hop efetivo nao podia
+		// ficar ambiguo na fronteira de confianca do X-Forwarded-For.
+		process.env.TRUST_PROXY = "true";
+		process.env.TRUSTED_PROXY_HOPS = "1foo";
+		const request = new Request(
+			"http://localhost/v1/organizations/invites/accept",
+			{
+				headers: { "x-forwarded-for": "203.0.113.7, 10.0.0.1" },
+			},
+		);
+		const server = {
+			requestIP: () => ({ address: "203.0.113.10" }),
+		};
+		// default = 1 hop => ultima entrada escrita pela infra confiavel.
+		expect(resolveClientIp(request, server)).toBe("10.0.0.1");
+	});
+
 	test("ANX-491: TRUSTED_PROXY_HOPS=0 desabilita a confianca no X-Forwarded-For", () => {
 		process.env.TRUST_PROXY = "true";
 		process.env.TRUSTED_PROXY_HOPS = "0";

@@ -35,16 +35,26 @@ export function isTrustProxyEnabled(): boolean {
  *
  * Valores inválidos (não numéricos, negativos) caem no default documentado,
  * seguindo o padrão de env do módulo (ex.: `resolveRealtimeMaxChannels*`).
+ *
+ * ANX-491 (G4 MEDIUM): a validação é do valor INTEIRO, não de um prefixo.
+ * `Number.parseInt` aceitava `1foo` como `1` e `1.5` como `1`, promovendo uma
+ * configuração malformada a um número de hops silenciosamente diferente do
+ * pretendido — na fronteira de confiança que decide QUAIS entradas do
+ * `X-Forwarded-For` a API aceita. Só dígitos decimais são aceitos; qualquer
+ * outro formato cai no default documentado.
  */
 export const DEFAULT_TRUSTED_PROXY_HOPS = 1;
 
+/** Aceita apenas inteiro decimal completo — sem sinal, fração, expoente ou hex. */
+const TRUSTED_PROXY_HOPS_PATTERN = /^\d+$/;
+
 export function resolveTrustedProxyHops(): number {
 	const raw = process.env.TRUSTED_PROXY_HOPS?.trim();
-	if (!raw) {
+	if (!raw || !TRUSTED_PROXY_HOPS_PATTERN.test(raw)) {
 		return DEFAULT_TRUSTED_PROXY_HOPS;
 	}
 	const parsed = Number.parseInt(raw, 10);
-	return Number.isFinite(parsed) && parsed >= 0
+	return Number.isSafeInteger(parsed) && parsed >= 0
 		? parsed
 		: DEFAULT_TRUSTED_PROXY_HOPS;
 }
