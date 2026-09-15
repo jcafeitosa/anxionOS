@@ -4,13 +4,13 @@ import { partnersPartnerIdSchema } from "@anxionos/contracts/partners";
 import { PartnersCommandError } from "@anxionos/partners";
 import { mapPartnersError } from "../../apps/api/src/partners/error-handler";
 import { handleRegisterPartner } from "../../apps/api/src/partners/handlers/commands";
-import { createPartnersCommandIntent } from "../../modules/partners/src/application/command-support";
 import {
 	handleGetPartnerById,
 	toCommissionAccrualDto,
 	toPartnerDto,
 	toPayoutDto,
 } from "../../apps/api/src/partners/handlers/read";
+import { createPartnersCommandIntent } from "../../modules/partners/src/application/command-support";
 import {
 	createPartnersTestUow,
 	TEST_OTHER_PARTNER_ORG,

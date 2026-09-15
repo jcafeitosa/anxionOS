@@ -13,6 +13,7 @@ export {
 	requestPayoutCommandSchema,
 	reverseCommissionFromInvoiceCommandSchema,
 } from "@anxionos/contracts/partners";
+export { loadPartnersCommandReplayBeforeValidation } from "./application/command-support";
 export {
 	type AccrueCommissionFromInvoiceDeps,
 	accrueCommissionFromInvoice,
@@ -29,9 +30,6 @@ export {
 	type RegisterPartnerDeps,
 	registerPartner,
 } from "./application/commands/register-partner";
-export {
-	loadPartnersCommandReplayBeforeValidation,
-} from "./application/command-support";
 export {
 	type RequestPayoutDeps,
 	requestPayout,
