@@ -53,6 +53,11 @@ describe("processRefund", () => {
 		);
 
 		expect(result.invoiceId).toBe(INVOICE_ID);
+		expect(
+			getPublished().some(
+				(event) => event.eventType === BILLING_EVENT_TYPES.REFUND_PROCESSED,
+			),
+		).toBe(true);
 		expect(getInvoices().get(INVOICE_ID)?.status).toBe("REFUNDED");
 		expect(getPublished()[0]?.eventType).toBe(
 			BILLING_EVENT_TYPES.INVOICE_REFUNDED,

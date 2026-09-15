@@ -10,10 +10,12 @@ import { createCommissionReversedEvent } from "../../domain/events/partners-even
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { PartnersUnitOfWork } from "../../domain/ports/partners-unit-of-work";
 import {
+	createPartnersCommandIntent,
 	loadIdempotentCommandResult,
+	loadPartnersCommandReplayBeforeValidation,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwPartnersError } from "../errors";
+import { throwPartnersError } from "../errors";
 
 export interface ReverseCommissionFromInvoiceDeps {
 	unitOfWork: PartnersUnitOfWork;
@@ -24,33 +26,38 @@ export async function reverseCommissionFromInvoice(
 	deps: ReverseCommissionFromInvoiceDeps,
 	input: ReverseCommissionFromInvoiceCommand,
 ): Promise<PartnersCommandResult> {
-	const command = reverseCommissionFromInvoiceCommandSchema.parse(input);
-	const existingCommand = await deps.commandJournal.findByCommandId(
-		command.commandId,
-	);
-	if (
-		existingCommand &&
-		existingCommand.organizationId !== command.partnerOrganizationId
-	) {
-		throwPartnersError(
-			"PTR_CROSS_TENANT",
-			"command journal organization mismatch",
+	const replayBeforeValidation =
+		await loadPartnersCommandReplayBeforeValidation(
+			deps.commandJournal,
+			input.partnerOrganizationId,
+			input.commandId,
+			"reverseCommissionFromInvoice",
+			input,
 		);
-	}
+	if (replayBeforeValidation) return replayBeforeValidation;
+	const command = reverseCommissionFromInvoiceCommandSchema.parse(input);
+	const intent = createPartnersCommandIntent(
+		"reverseCommissionFromInvoice",
+		command,
+	);
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
+		command.partnerOrganizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay) return replay;
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
-		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
-		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return partnersCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
-		}
+		await ctx.lockIdempotencyKey(
+			`${command.partnerOrganizationId}:${command.commandId}`,
+		);
+		const raced = await loadIdempotentCommandResult(
+			ctx.commandJournal,
+			command.partnerOrganizationId,
+			command.commandId,
+			intent,
+		);
+		if (raced) return raced;
 		const accrual = await ctx.commissionAccruals.findByInvoiceId(
 			command.invoiceId,
 			command.partnerOrganizationId,
@@ -74,6 +81,7 @@ export async function reverseCommissionFromInvoice(
 				commandId: command.commandId,
 				organizationId: command.partnerOrganizationId,
 				commandName: "reverseCommissionFromInvoice",
+				requestHash: intent.requestHash,
 				invoiceId: command.invoiceId,
 				responseSnapshot: toCommandResultSnapshot(result),
 			});
@@ -111,6 +119,7 @@ export async function reverseCommissionFromInvoice(
 			commandId: command.commandId,
 			organizationId: command.partnerOrganizationId,
 			commandName: "reverseCommissionFromInvoice",
+			requestHash: intent.requestHash,
 			invoiceId: command.invoiceId,
 			responseSnapshot: toCommandResultSnapshot(result),
 		});

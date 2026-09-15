@@ -29,6 +29,7 @@ export interface ActivateBreakGlassDeps {
 	unitOfWork: GovernanceUnitOfWork;
 	commandJournal: CommandJournalRepository;
 	principalLookup: PrincipalLookup;
+	now?: () => Date;
 }
 
 export async function activateBreakGlass(
@@ -113,7 +114,7 @@ export async function activateBreakGlass(
 		}
 
 		const expiresAt = new Date(command.expiresAt);
-		const now = new Date();
+		const now = deps.now?.() ?? new Date();
 		if (expiresAt <= now) {
 			throwGovernanceError(
 				"GOV_INSUFFICIENT_AUTHORITY",
@@ -152,7 +153,7 @@ export async function activateBreakGlass(
 			granteePrincipalId: command.granteePrincipalId,
 			granteeAgentId: null,
 			// Break-glass e' derivado de incidente, nao de um emissor principal:
-			// revogavel por owner/admin da agencia (ANX-469).
+			// revogavel por owner da agencia (ANX-469).
 			issuedByPrincipalId: null,
 			capability: command.capability,
 			resourceRef: `break-glass:${incidentRef}`,

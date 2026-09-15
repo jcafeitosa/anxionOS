@@ -10,10 +10,10 @@ import {
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { MarketDataUnitOfWork } from "../../domain/ports/market-data-unit-of-work";
 import {
+	createMarketDataCommandIntent,
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot } from "../errors";
 
 export interface RecordFxRateDeps {
 	unitOfWork: MarketDataUnitOfWork;
@@ -25,20 +25,25 @@ export async function recordFxRate(
 	input: RecordFxRateCommand,
 ): Promise<MarketDataCommandResult> {
 	const command = recordFxRateCommandSchema.parse(input);
+	const intent = createMarketDataCommandIntent("recordFxRate", command);
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
+		command.organizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay) return replay;
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
-		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
-		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return marketDataCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
-		}
+		await ctx.lockIdempotencyKey(
+			`${command.organizationId}:${command.commandId}`,
+		);
+		const raced = await loadIdempotentCommandResult(
+			ctx.commandJournal,
+			command.organizationId,
+			command.commandId,
+			intent,
+		);
+		if (raced) return raced;
 		const saved = await ctx.marketDataFxRates.save({
 			id: `md_fx_${randomUUID()}`,
 			base_currency: command.baseCurrency,
@@ -56,6 +61,7 @@ export async function recordFxRate(
 			commandId: command.commandId,
 			organizationId: command.organizationId,
 			commandName: "recordFxRate",
+			requestHash: intent.requestHash,
 			responseSnapshot: toCommandResultSnapshot(result),
 		});
 		return result;

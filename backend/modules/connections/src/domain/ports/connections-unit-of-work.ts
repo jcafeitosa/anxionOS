@@ -33,6 +33,7 @@ export interface InferenceRequestRecord {
 	bindingVersion: number;
 	idempotencyKey: string;
 	operation: string;
+	requestHash: string | null;
 	status: string;
 	modelRef: string | null;
 	latencyMs: number | null;
@@ -82,6 +83,7 @@ export interface UsageRecordRepository {
 }
 
 export interface ConnectionsTransactionContext {
+	lockIdempotencyKey(key: string): Promise<void>;
 	commandJournal: CommandJournalRepository;
 	aiAccounts: AiAccountRepository;
 	bindings: ConnectionBindingRepository;

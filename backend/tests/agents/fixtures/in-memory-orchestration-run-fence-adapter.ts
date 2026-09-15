@@ -1,10 +1,11 @@
-import { throwAgentsError } from "../../application/errors";
-import type { OrchestrationRunFencePort } from "../../domain/ports/orchestration-run-fence-port";
+import { throwAgentsError } from "../../../modules/agents/src/application/errors";
+import type { OrchestrationRunFencePort } from "../../../modules/agents/src/domain/ports/orchestration-run-fence-port";
 
 function revisionKey(organizationId: string, runId: string): string {
 	return `${organizationId}:${runId}`;
 }
 
+/** Test-only fixture; production must inject the orchestration-owned fence. */
 export function createInMemoryOrchestrationRunFenceAdapter(
 	initialRevisions: Record<string, number> = {},
 ): OrchestrationRunFencePort & {

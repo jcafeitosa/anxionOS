@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import { MARKET_DATA_EVENT_TYPES } from "@anxionos/contracts/market-data";
+import type { CommandJournalEntry } from "../../domain/ports/command-journal";
 import type {
 	InstrumentRecord,
 	MarketDataTransactionContext,
@@ -38,24 +39,19 @@ function activeInstrument(): InstrumentRecord {
 function createInMemoryUow(instrument: InstrumentRecord) {
 	const headersBySourceEvent = new Map<string, ObservationHeaderRecord>();
 	const headersById = new Map<string, ObservationHeaderRecord>();
-	const commandJournal = new Map<string, Record<string, unknown>>();
+	const commandJournal = new Map<string, CommandJournalEntry>();
 	let published: DomainEventEnvelope[] = [];
 	let timeseriesInserts = 0;
 
 	const ctx: MarketDataTransactionContext = {
+		async lockIdempotencyKey() {},
 		commandJournal: {
-			async findByCommandId(commandId) {
-				const snapshot = commandJournal.get(commandId);
-				if (!snapshot) return null;
-				return {
-					commandId,
-					organizationId: ORG,
-					commandName: "recordObservation",
-					responseSnapshot: snapshot,
-				};
+			async findByCommandId(organizationId, commandId) {
+				const entry = commandJournal.get(commandId);
+				return entry?.organizationId === organizationId ? entry : null;
 			},
 			async save(entry) {
-				commandJournal.set(entry.commandId, entry.responseSnapshot);
+				commandJournal.set(entry.commandId, entry);
 			},
 		},
 		instruments: {

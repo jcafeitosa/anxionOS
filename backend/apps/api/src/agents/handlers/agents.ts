@@ -3,6 +3,7 @@ import {
 	type AgentVersion,
 	getAgent,
 	invokeBrainCapability,
+	listAgents,
 	listAgentVersions,
 	publishAgentVersion,
 	registerAgent,
@@ -114,6 +115,17 @@ export async function handleGetAgent(
 		{ agentId: input.agentId, organizationId: input.agencyId },
 	);
 	return toAgentDto(agent);
+}
+
+export async function handleListAgents(
+	deps: AgentsPluginDeps,
+	input: { agencyId: string },
+) {
+	const agents = await listAgents(
+		{ agentRepository: deps.agentRepository },
+		{ organizationId: input.agencyId, agencyId: input.agencyId },
+	);
+	return { agents: agents.map(toAgentDto) };
 }
 
 export async function handleListAgentVersions(

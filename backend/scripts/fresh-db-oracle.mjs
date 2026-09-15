@@ -148,6 +148,7 @@ async function main() {
 		ok: false,
 		steps: {},
 	};
+	let cleanupEligible = false;
 
 	try {
 		if (PROTECTED_DATABASES.has(scratchDb)) {
@@ -155,6 +156,7 @@ async function main() {
 				`refusing to recreate protected database "${scratchDb}" — the oracle only runs on a scratch name`,
 			);
 		}
+		cleanupEligible = true;
 		await recreateDatabase(maintenanceUrl, scratchDb);
 		result.steps.recreate = "ok";
 
@@ -186,7 +188,11 @@ async function main() {
 			);
 		}
 
-		const suite = runStep("bun", ["test", "--max-concurrency=1"], env);
+		const suite = runStep(
+			"bun",
+			["test", "--max-concurrency=1", "--isolate"],
+			env,
+		);
 		const output = `${suite.stdout ?? ""}${suite.stderr ?? ""}`;
 		const logPath = join(tmpdir(), `anx463-fresh-db-${Date.now()}.log`);
 		writeFileSync(logPath, output, "utf8");
@@ -210,11 +216,22 @@ async function main() {
 			process.stderr.write(`${tail}\n`);
 			process.stderr.write(`[fresh-db-oracle] full log: ${logPath}\n`);
 		}
-		if (!cli.keep) {
-			await dropDatabase(maintenanceUrl, scratchDb).catch(() => {});
-		}
 	} catch (error) {
 		result.error = error instanceof Error ? error.message : String(error);
+	} finally {
+		if (!cli.keep && cleanupEligible) {
+			try {
+				await dropDatabase(maintenanceUrl, scratchDb);
+				result.steps.cleanup = "ok";
+			} catch (error) {
+				result.ok = false;
+				result.cleanupError =
+					error instanceof Error ? error.message : String(error);
+				if (!result.error) {
+					result.error = `scratch database cleanup failed: ${result.cleanupError}`;
+				}
+			}
+		}
 	}
 
 	if (cli.json) {

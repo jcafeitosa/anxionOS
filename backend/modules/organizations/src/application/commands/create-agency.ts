@@ -25,8 +25,13 @@ import { buildAgencyTenantContext } from "../services/tenant-context";
  * 2. Same owner, same key, divergent payload → same agencyId, different requestHash → 409
  * 3. Same owner, same key, same payload → same agencyId, same requestHash → replay
  */
-function deterministicAgencyId(commandId: string, ownerPrincipalId: string): string {
-	const hash = createHash("sha256").update(`${commandId}:${ownerPrincipalId}`).digest("hex");
+function deterministicAgencyId(
+	commandId: string,
+	ownerPrincipalId: string,
+): string {
+	const hash = createHash("sha256")
+		.update(`${commandId}:${ownerPrincipalId}`)
+		.digest("hex");
 	// Format as UUID v5-style: xxxxxxxx-xxxx-5xxx-yxxx-xxxxxxxxxxxx
 	return [
 		hash.slice(0, 8),
@@ -60,7 +65,10 @@ export async function createAgency(
 	// ANX-480: Deterministic agencyId from commandId + ownerPrincipalId ensures:
 	// - Different owners, same key → different agencyId (cross-tenant isolation #1)
 	// - Same owner, same key → same agencyId (enables replay #2/#3)
-	const agencyId = deterministicAgencyId(command.commandId, input.ownerPrincipalId);
+	const agencyId = deterministicAgencyId(
+		command.commandId,
+		input.ownerPrincipalId,
+	);
 	const ownerId = randomUUID();
 	const membershipId = randomUUID();
 	const now = new Date();
@@ -96,6 +104,23 @@ export async function createAgency(
 			if (raced) {
 				return raced;
 			}
+			// Reserve the idempotency intent before mutating the aggregate. The
+			// journal's composite key serializes concurrent requests for the same
+			// deterministic agencyId: the winner proceeds, while a loser rolls back
+			// with the institutional 409 instead of surfacing a raw agency PK error.
+			await recordOrganizationCommand(
+				context,
+				{
+					commandId: command.commandId,
+					commandName: "CreateAgency",
+					aggregateId: agencyId,
+					aggregateType: "Agency",
+					revision,
+					responseSnapshot: toCommandResultSnapshot(result),
+					requestHash: intent.requestHash,
+				},
+				agencyId, // tenant_id = stable agencyId
+			);
 			await context.agencyRepository.save({
 				id: agencyId,
 				ownerPrincipalId: input.ownerPrincipalId,
@@ -133,22 +158,9 @@ export async function createAgency(
 				revision: 1,
 				createdAt: now,
 				updatedAt: now,
-		});
-		await recordOrganizationCommand(
-			context,
-			{
-				commandId: command.commandId,
-				commandName: "CreateAgency",
-				aggregateId: agencyId,
-				aggregateType: "Agency",
-				revision,
-				responseSnapshot: toCommandResultSnapshot(result),
-				requestHash: intent.requestHash,
-			},
-			agencyId, // tenant_id = stable agencyId
-		);
-		await context.publishEvents([event]);
-		return result;
+			});
+			await context.publishEvents([event]);
+			return result;
 		},
 	);
 }

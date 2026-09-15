@@ -102,7 +102,7 @@ export function createPgInferenceRepository(
 	return {
 		async findByIdempotencyKey(organizationId: string, idempotencyKey: string) {
 			const result = await client.query(
-				`SELECT id, organization_id, binding_id, binding_version, idempotency_key, operation, status, model_ref, latency_ms
+				`SELECT id, organization_id, binding_id, binding_version, idempotency_key, operation, request_hash, status, model_ref, latency_ms
 				 FROM connections_inference_requests
 				 WHERE organization_id = $1 AND idempotency_key = $2`,
 				[organizationId, idempotencyKey],
@@ -116,8 +116,8 @@ export function createPgInferenceRepository(
 		async save(record: InferenceRequestRecord) {
 			await client.query(
 				`INSERT INTO connections_inference_requests (
-					id, organization_id, binding_id, binding_version, idempotency_key, operation, status, model_ref, latency_ms
-				) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+					id, organization_id, binding_id, binding_version, idempotency_key, operation, request_hash, status, model_ref, latency_ms
+				) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
 				[
 					record.id,
 					record.organizationId,
@@ -125,6 +125,7 @@ export function createPgInferenceRepository(
 					record.bindingVersion,
 					record.idempotencyKey,
 					record.operation,
+					record.requestHash,
 					record.status,
 					record.modelRef,
 					record.latencyMs,
@@ -209,6 +210,7 @@ function mapInference(row: Record<string, unknown>): InferenceRequestRecord {
 		bindingVersion: Number(row.binding_version),
 		idempotencyKey: String(row.idempotency_key),
 		operation: String(row.operation),
+		requestHash: row.request_hash ? String(row.request_hash) : null,
 		status: String(row.status),
 		modelRef: row.model_ref ? String(row.model_ref) : null,
 		latencyMs: row.latency_ms != null ? Number(row.latency_ms) : null,

@@ -882,7 +882,7 @@ export const governanceOpenApi = {
 		operationId: "revokeGrant",
 		summary: "Revoke a grant",
 		description:
-			"Module: governance. Revokes `grantId`. Authorization (ANX-469): the caller must be an **owner/admin** of the declared agency **or** the grant's **issuer** (`issued_by_principal_id`); anyone else is refused with `GOV_INSUFFICIENT_AUTHORITY` (403) and **nothing is written**. `revokeGrant` is never a way to undo a grant issued by a higher role. Body may be empty (`Content-Length: 0`) or `{ reason }`. `commandId`/`grantId` in JSON are ignored in favor of header/path.",
+			"Module: governance. Revokes `grantId`. Authorization (ANX-469): the caller must be an **owner** of the declared agency **or** the grant's **issuer** (`issued_by_principal_id`); anyone else is refused with `GOV_INSUFFICIENT_AUTHORITY` (403) and **nothing is written**. `revokeGrant` is never a way to undo a grant issued by a higher role. Body may be empty (`Content-Length: 0`) or `{ reason }`. `commandId`/`grantId` in JSON are ignored in favor of header/path.",
 		security: COOKIE_SECURITY,
 		parameters: [
 			...commandParams,
@@ -909,7 +909,7 @@ export const governanceOpenApi = {
 			"401": { description: "No session." },
 			"403": {
 				description:
-					"`GOV_INSUFFICIENT_AUTHORITY` (not owner/admin and not the issuer) / `ORG_CROSS_TENANT`.",
+					"`GOV_INSUFFICIENT_AUTHORITY` (not owner and not the issuer) / `ORG_CROSS_TENANT`.",
 			},
 			"404": {
 				description: "`GOV_GRANT_NOT_FOUND` / `GOV_PRINCIPAL_NOT_FOUND`.",
@@ -1103,6 +1103,19 @@ export const agentsOpenApi = {
 		parameters: [...agencyParams, pathUuid("agentId", "Agent UUID.")],
 		responses: {
 			"200": { description: "Agent DTO." },
+			...ERROR_RESPONSES,
+		},
+	}),
+	list: op({
+		tag: "Agents",
+		operationId: "listAgents",
+		summary: "List agency agents",
+		description:
+			"Module: agents. Lists agents explicitly assigned to the requested agency. The caller must have active agency membership; organization and agency scope are both applied to the query.",
+		security: COOKIE_SECURITY,
+		parameters: agencyParams,
+		responses: {
+			"200": { description: "Agency agent collection DTO." },
 			...ERROR_RESPONSES,
 		},
 	}),
@@ -1446,6 +1459,42 @@ export const agentsOpenApi = {
 } as const;
 
 export const partnersOpenApi = {
+	register: op({
+		tag: "Partners",
+		operationId: "registerPartner",
+		summary: "Register a partner",
+		description:
+			"Module: partners. Registers the partner profile owned by the organization. Requires an active agency mutation role and is idempotent via `Idempotency-Key`.",
+		security: COOKIE_SECURITY,
+		parameters: [
+			pathUuid("organizationId", "Organization/agency UUID."),
+			idempotencyKey(),
+			REQUEST_ID,
+		],
+		requestBody: jsonBody(
+			{
+				type: "object",
+				additionalProperties: false,
+				required: [
+					"referralCode",
+					"displayName",
+					"commissionRate",
+					"referredOrganizationId",
+				],
+				properties: {
+					referralCode: { type: "string", minLength: 1, maxLength: 64 },
+					displayName: { type: "string", minLength: 1, maxLength: 256 },
+					commissionRate: { type: "string", pattern: "^\\d+(\\.\\d+)?$" },
+					referredOrganizationId: UUID,
+				},
+			},
+			"Partner profile and referral configuration.",
+		),
+		responses: {
+			"200": { description: "Command result with partnerId and referralId." },
+			...ERROR_RESPONSES,
+		},
+	}),
 	getByOrganization: op({
 		tag: "Partners",
 		operationId: "getPartnerByOrganization",
@@ -1461,6 +1510,29 @@ export const partnersOpenApi = {
 			"200": {
 				description: "Partner record (referral, commission rate, status).",
 			},
+			...ERROR_RESPONSES,
+		},
+	}),
+	getById: op({
+		tag: "Partners",
+		operationId: "getPartnerById",
+		summary: "Get a partner by id",
+		description:
+			"Module: partners. Returns a partner profile within the organization tenant scope. Cross-tenant ids resolve as not found.",
+		security: COOKIE_SECURITY,
+		parameters: [
+			pathUuid("organizationId", "Organization/agency UUID."),
+			{
+				name: "partnerId",
+				in: "path" as const,
+				required: true,
+				schema: { type: "string", pattern: "^ptr_prt_[0-9a-f-]{36}$" },
+				description: "Partner aggregate id.",
+			},
+			REQUEST_ID,
+		],
+		responses: {
+			"200": { description: "Partner record for the organization." },
 			...ERROR_RESPONSES,
 		},
 	}),
@@ -1492,7 +1564,7 @@ export const partnersOpenApi = {
 		operationId: "listPayouts",
 		summary: "List partner payouts",
 		description:
-			"Module: partners. Lists payout records. Optional query `partnerId`. Write/approve payout commands are not exposed on this HTTP surface yet.",
+			"Module: partners. Lists payout records. Optional query `partnerId`. Payout lifecycle commands remain owned by the application command surface.",
 		security: COOKIE_SECURITY,
 		parameters: [
 			pathUuid("organizationId", "Organization/agency UUID."),

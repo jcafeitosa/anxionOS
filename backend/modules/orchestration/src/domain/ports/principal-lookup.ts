@@ -6,12 +6,4 @@ export interface PrincipalLookup {
 	): Promise<boolean>;
 }
 
-export class PrincipalLookupUnavailableError extends Error {
-	constructor(
-		message = "Identity service unavailable",
-		options?: { cause?: unknown },
-	) {
-		super(message, options);
-		this.name = "PrincipalLookupUnavailableError";
-	}
-}
+export { PrincipalLookupUnavailableError } from "@anxionos/contracts/identity";

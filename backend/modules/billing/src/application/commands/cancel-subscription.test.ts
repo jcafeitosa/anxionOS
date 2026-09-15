@@ -72,6 +72,38 @@ describe("cancelSubscription", () => {
 		expect(replay.idempotentReplay).toBe(true);
 	});
 
+	test("rejects divergent commandId reuse without another effect", async () => {
+		const commandId = randomUUID();
+		const { unitOfWork, commandJournal, getPublished } = createBillingTestUow({
+			subscriptions: [
+				{
+					id: SUBSCRIPTION_ID,
+					organizationId: TEST_ORG,
+					planCode: "trader",
+					billingPeriodStart: "2026-09-01T00:00:00.000Z",
+					billingPeriodEnd: "2026-10-01T00:00:00.000Z",
+					status: "ACTIVE",
+				},
+			],
+		});
+		const input = {
+			commandId,
+			organizationId: TEST_ORG,
+			subscriptionId: SUBSCRIPTION_ID,
+			cancelledAt: "2026-09-10T12:00:00.000Z",
+			reason: "requested by owner",
+		};
+
+		await cancelSubscription({ unitOfWork, commandJournal }, input);
+		await expect(
+			cancelSubscription(
+				{ unitOfWork, commandJournal },
+				{ ...input, reason: "requested by operator" },
+			),
+		).rejects.toMatchObject({ code: "BIL_IDEMPOTENCY_CONFLICT" });
+		expect(getPublished()).toHaveLength(1);
+	});
+
 	test("rejects missing subscription", async () => {
 		const { unitOfWork, commandJournal } = createBillingTestUow();
 		await expect(

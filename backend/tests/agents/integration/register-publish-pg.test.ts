@@ -4,9 +4,19 @@
  */
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { publishAgentVersion, registerAgent } from "@anxionos/agents";
+import {
+	AgentsCommandJournalConflictError,
+	ensureAgentsSchema,
+	publishAgentVersion,
+	registerAgent,
+} from "@anxionos/agents";
+import {
+	createPgPool,
+	ensureEventingSchema,
+} from "@anxionos/eventing/postgres";
 import {
 	createAgentsPgDeps,
+	getDatabaseUrl,
 	shouldRunPgIntegrationTests,
 	withAgentsPgHarness,
 } from "../test-support";
@@ -105,5 +115,130 @@ describe("agents register/publish against real Postgres (ANX-323)", () => {
 			);
 			expect(outboxRows.rows[0]?.count).toBeGreaterThanOrEqual(1);
 		});
+	});
+
+	test("listByAgency applies organization and agency scope", async () => {
+		if (!shouldRunPgIntegrationTests()) return;
+
+		await withAgentsPgHarness(async ({ pool }) => {
+			const deps = await createAgentsPgDeps(pool);
+			const organizationId = randomUUID();
+			const otherOrganizationId = randomUUID();
+			const agencyId = randomUUID();
+			const otherAgencyId = randomUUID();
+
+			const included = await registerAgent(deps, {
+				commandId: randomUUID(),
+				displayName: "Included Agency Agent",
+				kind: "AGENCY",
+				agencyId,
+				organizationId,
+			});
+			await registerAgent(deps, {
+				commandId: randomUUID(),
+				displayName: "Other Agency Agent",
+				kind: "AGENCY",
+				agencyId: otherAgencyId,
+				organizationId,
+			});
+			await registerAgent(deps, {
+				commandId: randomUUID(),
+				displayName: "Other Organization Agent",
+				kind: "AGENCY",
+				agencyId,
+				organizationId: otherOrganizationId,
+			});
+
+			const listed = await deps.agentRepository.listByAgency({
+				organizationId,
+				agencyId,
+			});
+
+			expect(listed.map((agent) => agent.id)).toEqual([included.aggregateId]);
+			expect(listed[0]?.displayName).toBe("Included Agency Agent");
+		});
+	});
+
+	test("same commandId concurrent registration applies exactly once", async () => {
+		if (!shouldRunPgIntegrationTests()) return;
+
+		const databaseUrl = getDatabaseUrl();
+		if (!databaseUrl) return;
+		const pool = createPgPool(databaseUrl);
+		try {
+			await ensureEventingSchema(pool);
+			await ensureAgentsSchema(pool);
+			for (let round = 0; round < 5; round += 1) {
+				const { unitOfWork, commandJournal } = await createAgentsPgDeps(pool);
+				const organizationId = randomUUID();
+				const commandId = randomUUID();
+				const outcomes = await Promise.allSettled([
+					registerAgent(
+						{ unitOfWork, commandJournal },
+						{
+							commandId,
+							displayName: `Concurrent Agent ${round}`,
+							kind: "PLATFORM",
+							organizationId,
+						},
+					),
+					registerAgent(
+						{ unitOfWork, commandJournal },
+						{
+							commandId,
+							displayName: `Concurrent Agent ${round}`,
+							kind: "PLATFORM",
+							organizationId,
+						},
+					),
+				]);
+
+				const fulfilled = outcomes.filter(
+					(outcome) => outcome.status === "fulfilled",
+				);
+				const rejected = outcomes.filter(
+					(outcome) => outcome.status === "rejected",
+				);
+				expect(fulfilled.length).toBeGreaterThanOrEqual(1);
+				expect(rejected.length).toBeLessThanOrEqual(1);
+				if (rejected[0]?.status === "rejected") {
+					expect(rejected[0].reason).toBeInstanceOf(
+						AgentsCommandJournalConflictError,
+					);
+				}
+				const successfulResults = outcomes.flatMap((outcome) =>
+					outcome.status === "fulfilled" ? [outcome.value] : [],
+				);
+				expect(
+					new Set(successfulResults.map((result) => result.aggregateId)).size,
+				).toBe(1);
+				if (successfulResults.length === 2) {
+					expect(
+						successfulResults.filter((result) => result.idempotentReplay),
+					).toHaveLength(1);
+				}
+
+				const agents = await pool.query(
+					"SELECT count(*)::int AS count FROM agents_agents WHERE organization_id = $1",
+					[organizationId],
+				);
+				const journal = await pool.query(
+					"SELECT count(*)::int AS count FROM agents_command_journal WHERE tenant_id = $1 AND command_id = $2",
+					[organizationId, commandId],
+				);
+				expect(agents.rows[0]?.count).toBe(1);
+				expect(journal.rows[0]?.count).toBe(1);
+				await pool.query(
+					"DELETE FROM agents_command_journal WHERE tenant_id = $1 AND command_id = $2",
+					[organizationId, commandId],
+				);
+				await pool.query(
+					"DELETE FROM agents_agents WHERE organization_id = $1",
+					[organizationId],
+				);
+			}
+		} finally {
+			await pool.end();
+		}
 	});
 });

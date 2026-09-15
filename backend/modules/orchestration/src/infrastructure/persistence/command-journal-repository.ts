@@ -1,13 +1,10 @@
 import { eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import {
-	assertCommandJournalReplay,
-	CommandJournalHashMismatchError,
-} from "../../application/command-support";
 import type {
 	CommandJournalRecord,
 	CommandJournalRepository,
 } from "../../domain/ports/command-journal";
+import { CommandJournalConflictError } from "../../domain/ports/command-journal";
 import { type CommandJournalRow, commandJournal } from "./schema";
 
 export function toCommandJournalRecord(
@@ -39,21 +36,8 @@ export function createDrizzleCommandJournalRepository(
 			return rows[0] ? toCommandJournalRecord(rows[0]) : null;
 		},
 		async record(entry) {
-			const existing = await this.findByCommandId(entry.commandId);
-			if (existing) {
-				const incomingHash = entry.responseSnapshot?.requestHash;
-				if (typeof incomingHash === "string") {
-					try {
-						assertCommandJournalReplay(existing.responseSnapshot, incomingHash);
-					} catch (error) {
-						if (error instanceof CommandJournalHashMismatchError) {
-							throw error;
-						}
-						throw error;
-					}
-				}
-				return existing;
-			}
+			// Insercao atomica: uma colisao nao pode devolver a linha alheia depois
+			// de a transacao atual ter aplicado o efeito do comando.
 			const rows = await db
 				.insert(commandJournal)
 				.values({
@@ -64,9 +48,12 @@ export function createDrizzleCommandJournalRepository(
 					revision: entry.revision,
 					responseSnapshot: entry.responseSnapshot,
 				})
+				.onConflictDoNothing({ target: commandJournal.commandId })
 				.returning();
 			const row = rows[0];
-			if (!row) throw new Error("Failed to record command journal entry");
+			if (!row) {
+				throw new CommandJournalConflictError(entry.commandId);
+			}
 			return toCommandJournalRecord(row);
 		},
 	};

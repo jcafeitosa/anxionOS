@@ -3,6 +3,7 @@ import {
 	integer,
 	jsonb,
 	pgTable,
+	primaryKey,
 	text,
 	timestamp,
 	uuid,
@@ -61,6 +62,7 @@ export const inferenceRequests = pgTable(
 		bindingVersion: integer("binding_version").notNull(),
 		idempotencyKey: text("idempotency_key").notNull(),
 		operation: text("operation").notNull(),
+		requestHash: text("request_hash"),
 		status: text("status").notNull(),
 		modelRef: text("model_ref"),
 		latencyMs: integer("latency_ms"),
@@ -88,9 +90,14 @@ export const usageRecords = pgTable("connections_usage_records", {
 	unit: text("unit").notNull(),
 });
 
-export const commandJournal = pgTable("connections_command_journal", {
-	commandId: uuid("command_id").primaryKey(),
-	organizationId: uuid("organization_id").notNull(),
-	commandName: text("command_name").notNull(),
-	responseSnapshot: jsonb("response_snapshot").notNull(),
-});
+export const commandJournal = pgTable(
+	"connections_command_journal",
+	{
+		commandId: uuid("command_id").notNull(),
+		organizationId: uuid("organization_id").notNull(),
+		commandName: text("command_name").notNull(),
+		requestHash: text("request_hash"),
+		responseSnapshot: jsonb("response_snapshot").notNull(),
+	},
+	(table) => [primaryKey({ columns: [table.organizationId, table.commandId] })],
+);

@@ -40,7 +40,7 @@ function createDeps() {
 
 describe("registerAgent", () => {
 	test("creates agent in DRAFT and emits registered event", async () => {
-		const { deps, published } = createDeps();
+		const { deps, agentRepository, published } = createDeps();
 		const commandId = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 		const result = await registerAgent(deps, {
 			commandId,
@@ -75,6 +75,30 @@ describe("registerAgent", () => {
 			organizationId,
 		});
 		expect(second).toEqual({ ...first, idempotentReplay: true });
+	});
+
+	test("rejects the same commandId when the payload changes", async () => {
+		const { deps, agentRepository, published } = createDeps();
+		const commandId = "12121212-1212-4212-8212-121212121212";
+		const first = await registerAgent(deps, {
+			commandId,
+			displayName: "Original agent",
+			kind: "PLATFORM",
+			organizationId,
+		});
+
+		await expect(
+			registerAgent(deps, {
+				commandId,
+				displayName: "Changed agent",
+				kind: "PLATFORM",
+				organizationId,
+			}),
+		).rejects.toMatchObject({ agentsCode: "AGT_DUPLICATE_IDEMPOTENCY" });
+		expect(published).toHaveLength(1);
+		expect(
+			(await agentRepository.findById(first.aggregateId))?.displayName,
+		).toBe("Original agent");
 	});
 });
 

@@ -1,5 +1,6 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import type { Pool } from "pg";
+import type { OrchestrationUnitOfWorkOptions } from "./orchestration-unit-of-work";
 import { createOrchestrationUnitOfWork } from "./orchestration-unit-of-work";
 import { createDrizzleCommandJournalRepository } from "./persistence/command-journal-repository";
 import { createDrizzleGateBindingRepository } from "./persistence/gate-binding-repository";
@@ -11,7 +12,10 @@ import { createDrizzleTaskLeaseRepository } from "./persistence/task-lease-repos
 import { createDrizzleTaskRepository } from "./persistence/task-repository";
 import { createDrizzleTaskboardMirrorRepository } from "./persistence/taskboard-mirror-repository";
 
-export function createOrchestrationDb(pool: Pool) {
+export function createOrchestrationDb(
+	pool: Pool,
+	options: OrchestrationUnitOfWorkOptions = {},
+) {
 	const db = drizzle(pool, { schema });
 	return {
 		db,
@@ -24,6 +28,6 @@ export function createOrchestrationDb(pool: Pool) {
 		commandJournal: createDrizzleCommandJournalRepository(db),
 		runHeartbeatRepository: createDrizzleRunHeartbeatRepository(db),
 		taskboardMirrorRepository: createDrizzleTaskboardMirrorRepository(db),
-		unitOfWork: createOrchestrationUnitOfWork(pool),
+		unitOfWork: createOrchestrationUnitOfWork(pool, options),
 	};
 }

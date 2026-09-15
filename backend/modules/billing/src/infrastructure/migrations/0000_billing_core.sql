@@ -62,12 +62,14 @@ CREATE INDEX IF NOT EXISTS billing_usage_aggregations_usage_record_idx
  ON billing_usage_aggregations (usage_record_id);
 
 CREATE TABLE IF NOT EXISTS billing_command_journal (
-	command_id UUID PRIMARY KEY,
 	organization_id UUID NOT NULL,
+	command_id UUID NOT NULL,
 	command_name TEXT NOT NULL,
+	request_hash TEXT,
 	usage_record_id TEXT,
 	webhook_event_id TEXT,
-	response_snapshot JSONB
+	response_snapshot JSONB,
+	PRIMARY KEY (organization_id, command_id)
 );
 
 CREATE INDEX IF NOT EXISTS billing_command_journal_org_idx

@@ -9,10 +9,11 @@ import type { AgentRoutineRepository } from "../../domain/ports/agent-routine-re
 import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import {
+	createAgentCommandIntent,
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwAgentsError } from "../errors";
+import { throwAgentsError } from "../errors";
 import { buildOrganizationTenantContext } from "../services/tenant-context";
 
 export async function pauseAgentRoutine(
@@ -20,6 +21,11 @@ export async function pauseAgentRoutine(
 	input: PauseAgentRoutineInput,
 ): Promise<CommandResult> {
 	const command = pauseAgentRoutineCommandSchema.parse(input);
+	const intent = createAgentCommandIntent(
+		"PauseAgentRoutine",
+		{ ...command, actorPrincipalId: input.actorPrincipalId },
+		command.routineId,
+	);
 	const pre = await deps.agentRoutineRepository.findById(command.routineId);
 	if (!pre)
 		throwAgentsError(
@@ -30,16 +36,19 @@ export async function pauseAgentRoutine(
 		deps.commandJournal,
 		pre.organizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay) return replay;
 	return deps.unitOfWork.runInTransaction(
 		buildOrganizationTenantContext(pre.organizationId),
 		async (context) => {
-			const raced = await context.commandJournal.findByCommandId(
+			const raced = await loadIdempotentCommandResult(
+				context.commandJournal,
 				pre.organizationId,
 				command.commandId,
+				intent,
 			);
-			if (raced) return parseCommandResultSnapshot(raced.responseSnapshot);
+			if (raced) return raced;
 			const routine = await context.agentRoutineRepository.findById(
 				command.routineId,
 			);
@@ -79,6 +88,7 @@ export async function pauseAgentRoutine(
 				aggregateId: updated.id,
 				aggregateType: "AgentRoutine",
 				revision,
+				requestHash: intent.requestHash,
 				responseSnapshot: toCommandResultSnapshot(result),
 			});
 			await context.publishEvents([

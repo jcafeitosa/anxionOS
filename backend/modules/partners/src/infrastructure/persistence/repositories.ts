@@ -56,6 +56,22 @@ function mapPayout(row: Record<string, unknown>): PayoutRecord {
 		approvalReference: row.approval_reference
 			? String(row.approval_reference)
 			: null,
+		processingAt: row.processing_at
+			? (row.processing_at as Date).toISOString()
+			: null,
+		settledAt: row.settled_at ? (row.settled_at as Date).toISOString() : null,
+		failedAt: row.failed_at ? (row.failed_at as Date).toISOString() : null,
+		failureReason: row.failure_reason ? String(row.failure_reason) : null,
+		providerReference: row.provider_reference
+			? String(row.provider_reference)
+			: null,
+		reversalReference: row.reversal_reference
+			? String(row.reversal_reference)
+			: null,
+		reversedAt: row.reversed_at
+			? (row.reversed_at as Date).toISOString()
+			: null,
+		attemptCount: Number(row.attempt_count),
 	};
 }
 
@@ -218,6 +234,15 @@ export function createPgPayoutRepository(
 			const row = result.rows[0];
 			return row ? mapPayout(row) : null;
 		},
+		async findByIdForUpdate(id, partnerOrganizationId) {
+			const result = await client.query(
+				`SELECT * FROM partners_payouts
+				 WHERE id = $1 AND partner_organization_id = $2 FOR UPDATE`,
+				[id, partnerOrganizationId],
+			);
+			const row = result.rows[0];
+			return row ? mapPayout(row) : null;
+		},
 		async listByPartnerOrganization(partnerOrganizationId, partnerId) {
 			const result = partnerId
 				? await client.query(
@@ -238,8 +263,10 @@ export function createPgPayoutRepository(
 			await client.query(
 				`INSERT INTO partners_payouts (
 			   id, partner_id, partner_organization_id, requested_amount, status,
-			   requested_at, approved_at, approval_reference
-			 ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+			   requested_at, approved_at, approval_reference, processing_at,
+			   settled_at, failed_at, failure_reason, provider_reference,
+			   reversal_reference, reversed_at, attempt_count
+			 ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
 				[
 					record.id,
 					record.partnerId,
@@ -249,6 +276,14 @@ export function createPgPayoutRepository(
 					record.requestedAt,
 					record.approvedAt,
 					record.approvalReference,
+					record.processingAt,
+					record.settledAt,
+					record.failedAt,
+					record.failureReason,
+					record.providerReference,
+					record.reversalReference,
+					record.reversedAt,
+					record.attemptCount,
 				],
 			);
 			return record;
@@ -256,9 +291,27 @@ export function createPgPayoutRepository(
 		async update(record) {
 			await client.query(
 				`UPDATE partners_payouts
-			 SET status = $2, approved_at = $3, approval_reference = $4, updated_at = now()
-			 WHERE id = $1`,
-				[record.id, record.status, record.approvedAt, record.approvalReference],
+			 SET status = $3, approved_at = $4, approval_reference = $5,
+			     processing_at = $6, settled_at = $7, failed_at = $8,
+			     failure_reason = $9, provider_reference = $10,
+			     reversal_reference = $11, reversed_at = $12,
+			     attempt_count = $13, updated_at = now()
+			 WHERE id = $1 AND partner_organization_id = $2`,
+				[
+					record.id,
+					record.partnerOrganizationId,
+					record.status,
+					record.approvedAt,
+					record.approvalReference,
+					record.processingAt,
+					record.settledAt,
+					record.failedAt,
+					record.failureReason,
+					record.providerReference,
+					record.reversalReference,
+					record.reversedAt,
+					record.attemptCount,
+				],
 			);
 			return record;
 		},

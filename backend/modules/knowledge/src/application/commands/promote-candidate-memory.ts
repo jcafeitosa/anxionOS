@@ -32,31 +32,32 @@ export async function promoteCandidateMemory(
 		command.commandId,
 	);
 	if (replay) return replay;
-	const entry = await deps.memoryStore.findById(
-		command.memoryEntryId,
-		command.organizationId,
-	);
-	if (!entry) {
-		throwKnowledgeError(
-			"KN_MEMORY_NOT_FOUND",
-			`Memory entry ${command.memoryEntryId} not found`,
-		);
-	}
-	if (entry.tier === "PROMOTED") {
-		const result = knowledgeCommandResultSchema.parse({
-			aggregateId: entry.id,
-			revision: 1,
-			idempotentReplay: true,
-		});
-		await deps.commandJournal.save({
-			commandId: command.commandId,
-			organizationId: command.organizationId,
-			commandName: "promoteCandidateMemory",
-			responseSnapshot: toCommandResultSnapshot(result),
-		});
-		return result;
-	}
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
+		const memoryStore = ctx.memoryStore ?? deps.memoryStore;
+		const entry = await memoryStore.findById(
+			command.memoryEntryId,
+			command.organizationId,
+		);
+		if (!entry) {
+			throwKnowledgeError(
+				"KN_MEMORY_NOT_FOUND",
+				`Memory entry ${command.memoryEntryId} not found`,
+			);
+		}
+		if (entry.tier === "PROMOTED") {
+			const result = knowledgeCommandResultSchema.parse({
+				aggregateId: entry.id,
+				revision: 1,
+				idempotentReplay: true,
+			});
+			await ctx.commandJournal.save({
+				commandId: command.commandId,
+				organizationId: command.organizationId,
+				commandName: "promoteCandidateMemory",
+				responseSnapshot: toCommandResultSnapshot(result),
+			});
+			return result;
+		}
 		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
 		if (raced) {
 			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
@@ -65,7 +66,7 @@ export async function promoteCandidateMemory(
 				idempotentReplay: true,
 			});
 		}
-		const promoted = await deps.memoryStore.update({
+		const promoted = await memoryStore.update({
 			...entry,
 			tier: "PROMOTED",
 			promotedAt: command.promotedAt,

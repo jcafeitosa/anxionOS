@@ -9,11 +9,12 @@ import type { BillingUnitOfWork } from "../../domain/ports/billing-unit-of-work"
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import {
 	addDecimalAmounts,
+	createBillingCommandIntent,
 	loadIdempotentByUsageRecordId,
 	multiplyDecimalAmount,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwBillingError } from "../errors";
+import { throwBillingError } from "../errors";
 
 export interface UsageRecordedConsumerDeps {
 	unitOfWork: BillingUnitOfWork;
@@ -26,42 +27,25 @@ export function createUsageRecordedConsumer(deps: UsageRecordedConsumerDeps): {
 	return {
 		async handle(usage: ConnectionsUsageRecordedBridge) {
 			const command = mapUsageRecordedToBillingInput(usage, randomUUID());
-			const existingByUsage = await deps.commandJournal.findByUsageRecordId(
-				command.usageRecordId,
-			);
-			if (
-				existingByUsage &&
-				existingByUsage.organizationId !== command.organizationId
-			) {
-				throwBillingError(
-					"BIL_CROSS_TENANT",
-					"usage record organization mismatch",
-				);
-			}
+			const intent = createBillingCommandIntent("recordUsage", command);
 			const replayByUsage = await loadIdempotentByUsageRecordId(
 				deps.commandJournal,
+				command.organizationId,
 				command.usageRecordId,
+				intent,
 			);
 			if (replayByUsage) return replayByUsage;
 			return deps.unitOfWork.runInTransaction(async (ctx) => {
-				const racedByUsage = await ctx.commandJournal.findByUsageRecordId(
-					command.usageRecordId,
+				await ctx.lockIdempotencyKey(
+					`${command.organizationId}:usage:${command.usageRecordId}`,
 				);
-				if (racedByUsage) {
-					if (racedByUsage.organizationId !== command.organizationId) {
-						throwBillingError(
-							"BIL_CROSS_TENANT",
-							"usage record organization mismatch",
-						);
-					}
-					const parsed = parseCommandResultSnapshot(
-						racedByUsage.responseSnapshot,
-					);
-					return billingCommandResultSchema.parse({
-						...parsed,
-						idempotentReplay: true,
-					});
-				}
+				const racedByUsage = await loadIdempotentByUsageRecordId(
+					ctx.commandJournal,
+					command.organizationId,
+					command.usageRecordId,
+					intent,
+				);
+				if (racedByUsage) return racedByUsage;
 				const existingAggregation =
 					await ctx.usageAggregations.findByUsageRecordId(
 						command.usageRecordId,
@@ -89,6 +73,7 @@ export function createUsageRecordedConsumer(deps: UsageRecordedConsumerDeps): {
 						commandId: command.commandId,
 						organizationId: command.organizationId,
 						commandName: "recordUsage",
+						requestHash: intent.requestHash,
 						usageRecordId: command.usageRecordId,
 						responseSnapshot: toCommandResultSnapshot(result),
 					});
@@ -164,6 +149,7 @@ export function createUsageRecordedConsumer(deps: UsageRecordedConsumerDeps): {
 					commandId: command.commandId,
 					organizationId: command.organizationId,
 					commandName: "recordUsage",
+					requestHash: intent.requestHash,
 					usageRecordId: command.usageRecordId,
 					responseSnapshot: toCommandResultSnapshot(result),
 				});

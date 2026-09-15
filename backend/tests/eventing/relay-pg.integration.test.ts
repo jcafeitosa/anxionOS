@@ -25,6 +25,19 @@ const sampleEnvelope: DomainEventEnvelope = {
 	payload: { principalId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb" },
 };
 
+const tenantScopedEnvelope: DomainEventEnvelope = {
+	eventId: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+	schemaVersion: "0.1.0",
+	ownerDomain: "organizations",
+	eventType: "organizations.agency.created.v1",
+	occurredAt: "2026-09-08T12:00:00.000Z",
+	agencyId: "99999999-9999-4999-8999-999999999999",
+	payload: {
+		agencyId: "99999999-9999-4999-8999-999999999999",
+		name: "Tenant relay test",
+	},
+};
+
 describe("eventing relay postgres integration", () => {
 	test("relay marks outbox dispatched after publish", async () => {
 		if (!shouldRunPgIntegrationTests()) {
@@ -50,6 +63,20 @@ describe("eventing relay postgres integration", () => {
 			expect(published).toEqual([sampleEnvelope.eventId]);
 			const pending = await fetchPendingOutbox(pool);
 			expect(pending).toHaveLength(0);
+		});
+	});
+
+	test("outbox round-trip preserves agencyId for tenant-scoped events", async () => {
+		if (!shouldRunPgIntegrationTests()) {
+			return;
+		}
+
+		await withEventingPgHarness(async ({ pool }) => {
+			await appendEventAtomic(pool, tenantScopedEnvelope);
+			const pending = await fetchPendingOutbox(pool);
+
+			expect(pending).toHaveLength(1);
+			expect(pending[0]?.agencyId).toBe(tenantScopedEnvelope.agencyId);
 		});
 	});
 
@@ -94,6 +121,34 @@ describe("eventing relay postgres integration", () => {
 				[poison.eventId],
 			);
 			expect(dlq.rowCount).toBe(1);
+			const pending = await fetchPendingOutbox(pool);
+			expect(pending).toHaveLength(0);
+			const status = await pool.query<{ status: string }>(
+				"SELECT status FROM outbox WHERE event_id = $1",
+				[poison.eventId],
+			);
+			expect(status.rows[0]?.status).toBe("dead_letter");
+		});
+	});
+
+	test("poison transition is fenced to the owning relay lease", async () => {
+		if (!shouldRunPgIntegrationTests()) {
+			return;
+		}
+
+		await withEventingPgHarness(async ({ pool }) => {
+			await appendEventAtomic(pool, sampleEnvelope);
+
+			await expect(
+				moveToDeadLetter(
+					pool,
+					sampleEnvelope,
+					"publish failed",
+					1,
+					"relay-without-lease",
+				),
+			).rejects.toThrow(/fencing/);
+			expect(await fetchPendingOutbox(pool)).toHaveLength(1);
 		});
 	});
 

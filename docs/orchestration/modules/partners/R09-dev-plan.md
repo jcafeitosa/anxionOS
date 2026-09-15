@@ -8,7 +8,7 @@ status: draft
 **Rodada:** R9  
 **Data:** 2026-09-11  
 **Issue debate:** ANX-389 / ANX-113 · impl **ANX-114** (não neste pack)  
-**Callers:** [R08-decision-log.md](./R08-decision-log.md) · [R10-g0-handoff.md](./R10-g0-handoff.md). Sem migration.
+**Callers:** [R08-decision-log.md](./R08-decision-log.md) · [R10-g0-handoff.md](./R10-g0-handoff.md). Migrations versionadas pertencem ao módulo e são validadas no oracle de banco novo.
 
 ## In / Out (R9)
 
@@ -50,7 +50,11 @@ Não criar `marketplace/`.
 | P07-S1 | schema partners_* + contracts | G2, G4 |
 | P07-S2 | consumer invoice.paid → accrual | G3-PTR-01/02 |
 | P07-S3 | refund reverse + payout lifecycle | G3-PTR-03/04 |
-| P07-S4 | HTTP `/v1/partners` | G5-PTR-01 |
+| P07-S4 | HTTP `/v1/partners`: register, organization detail, partner detail, lists | G5-PTR-01 |
+
+S4 evidence: ANX-523 implements `POST /v1/partners/organizations/:organizationId` with Zod body validation, mandatory `Idempotency-Key`, active agency mutation-role authorization and the canonical `registerPartner` command; `GET /:partnerId` delegates to an organization-scoped query. OpenAPI catalog coverage pins both operationIds, path/header parameters and error statuses. Verification: partners API boundary 6/6, OpenAPI catalog/plugin 9/9, focused partners integration 10/10, fresh PostgreSQL oracle 1,928 pass / 0 fail / 0 skip, lint/typecheck/boundaries/Graphify pass. Graph projection remains outside S4 and is not inferred from HTTP completion.
+
+ANX-520 evidence: partner command and event contracts now reject credential markers (including embedded credential prefixes), connection strings, JWT-shaped values, opaque high-entropy token sequences, PEM private-key markers and control characters in referral IDs, display names, approval/provider/reversal references and reasons. All partner event factories parse their payload schemas before publication, preserving structural and no-secrets event invariants. Migration `0004_partners_secret_text_remediation` redacts known unsafe legacy rows, migration `0005_partners_command_journal_secret_remediation` redacts unsafe `referralId` values in legacy idempotency snapshots, and partner/payout DTOs redact defensively on output. Idempotent replay snapshots preserve public `payoutStatus`; a PostgreSQL-backed migration test proves a redacted legacy snapshot still replays with `idempotentReplay: true`. The partners API boundary maps safe-text `ZodError` failures to `VALIDATION_ERROR`/400 with structured issue paths. Verification: partners module 31/31, partners integration 5/5, API boundary 9/9, contracts 227/227, fresh PostgreSQL oracle 1,948/1,948 with 0 failures and 0 skips including cleanup, targeted Biome/typecheck/Graphify clean; global lint remains blocked by an unrelated pre-existing formatting finding in `tests/governance/integration/grant-revocation-policy.integration.test.ts`.
 
 ## Matriz oráculos
 

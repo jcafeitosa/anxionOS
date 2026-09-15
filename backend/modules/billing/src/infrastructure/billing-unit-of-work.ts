@@ -17,6 +17,12 @@ function createTransactionContext(
 	client: PoolClient,
 ): BillingTransactionContext {
 	return {
+		async lockIdempotencyKey(key) {
+			await client.query(
+				"SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
+				[`billing:${key}`],
+			);
+		},
 		commandJournal: createPgCommandJournalRepository(client),
 		subscriptions: createPgSubscriptionRepository(client),
 		invoices: createPgInvoiceRepository(client),

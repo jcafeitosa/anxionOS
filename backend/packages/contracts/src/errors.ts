@@ -183,8 +183,9 @@ function defaultMessageForCode(code: ErrorCode): string {
  * (`grep -rn NODE_ENV backend/deploy` nao retorna nada). Decisao registrada:
  * a ausencia da env agora fecha a exposicao, e a exposicao sensivel exige
  * opt-in EXPLICITO (`EXPOSE_ERROR_DETAILS=true`, documentada em
- * `backend/.env.example`) E ambiente nao-producao. Nenhuma combinacao de env
- * expoe mensagem crua ou stack em producao.
+ * `backend/.env.example`) E ambiente explicitamente de desenvolvimento ou
+ * teste. `NODE_ENV` ausente ou desconhecido permanece fechado para respostas
+ * 500, que sao o escopo deste gate.
  *
  * `details` institucional (ex.: `{ code: "<MODULO>_*" }`) nao e' segredo e
  * mantem o comportamento anterior (visivel fora de producao), preservando o
@@ -194,8 +195,9 @@ function institutionalDetailsEnabled(): boolean {
 	return process.env.NODE_ENV !== "production";
 }
 function sensitiveErrorExposureEnabled(): boolean {
+	const runtimeEnvironment = process.env.NODE_ENV;
 	return (
-		process.env.NODE_ENV !== "production" &&
+		(runtimeEnvironment === "development" || runtimeEnvironment === "test") &&
 		process.env.EXPOSE_ERROR_DETAILS === "true"
 	);
 }
@@ -206,14 +208,20 @@ export function toErrorResponse(
 	const timestamp = new Date().toISOString();
 	const exposeDetails = options.exposeDetails ?? institutionalDetailsEnabled();
 	const exposeSensitive =
-		options.exposeStack ?? sensitiveErrorExposureEnabled();
+		sensitiveErrorExposureEnabled() && options.exposeStack !== false;
 	if (isAppError(error)) {
+		const exposeMessage =
+			error.expose && (error.statusCode !== 500 || exposeSensitive);
+		const exposeErrorDetails =
+			exposeDetails && (error.statusCode !== 500 || exposeSensitive);
 		const body = {
 			code: error.code,
-			message: error.expose ? error.message : defaultMessageForCode(error.code),
+			message: exposeMessage
+				? error.message
+				: defaultMessageForCode(error.code),
 			requestId: options.requestId,
 			timestamp,
-			...(exposeDetails && error.details !== undefined
+			...(exposeErrorDetails && error.details !== undefined
 				? { details: error.details }
 				: {}),
 			...(exposeSensitive && error.stack ? { stack: error.stack } : {}),

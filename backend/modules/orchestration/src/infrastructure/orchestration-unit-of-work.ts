@@ -5,6 +5,11 @@ import type {
 	OrchestrationTransactionContext,
 	OrchestrationUnitOfWork,
 } from "../domain/ports/orchestration-unit-of-work";
+import {
+	createPostgresOperationalBudget,
+	DEFAULT_OPERATIONAL_BUDGET_CAP_PER_ORGANIZATION,
+	type OperationalBudgetQueryable,
+} from "./adapters/postgres-operational-budget";
 import { createDrizzleCommandJournalRepository } from "./persistence/command-journal-repository";
 import { createDrizzleGateBindingRepository } from "./persistence/gate-binding-repository";
 import { createDrizzleGoalRepository } from "./persistence/goal-repository";
@@ -15,7 +20,14 @@ import { createDrizzleTaskLeaseRepository } from "./persistence/task-lease-repos
 import { createDrizzleTaskRepository } from "./persistence/task-repository";
 import { createDrizzleTaskboardMirrorRepository } from "./persistence/taskboard-mirror-repository";
 
-function createTransactionContext(client: import("pg").PoolClient) {
+export interface OrchestrationUnitOfWorkOptions {
+	operationalBudgetCapPerOrganization?: number;
+}
+
+function createTransactionContext(
+	client: import("pg").PoolClient,
+	options: OrchestrationUnitOfWorkOptions,
+) {
 	const db = drizzle(client, { schema });
 	return {
 		client,
@@ -27,6 +39,14 @@ function createTransactionContext(client: import("pg").PoolClient) {
 		commandJournal: createDrizzleCommandJournalRepository(db),
 		runHeartbeatRepository: createDrizzleRunHeartbeatRepository(db),
 		taskboardMirrorRepository: createDrizzleTaskboardMirrorRepository(db),
+		operationalBudget: createPostgresOperationalBudget(
+			client as OperationalBudgetQueryable,
+			{
+				capPerOrganization:
+					options.operationalBudgetCapPerOrganization ??
+					DEFAULT_OPERATIONAL_BUDGET_CAP_PER_ORGANIZATION,
+			},
+		),
 		async publishEvents(
 			envelopes: import("@anxionos/contracts/events").DomainEventEnvelope[],
 		) {
@@ -39,6 +59,7 @@ function createTransactionContext(client: import("pg").PoolClient) {
 }
 export function createOrchestrationUnitOfWork(
 	pool: Pool,
+	options: OrchestrationUnitOfWorkOptions = {},
 ): OrchestrationUnitOfWork {
 	return {
 		async runInTransaction<T>(
@@ -47,7 +68,7 @@ export function createOrchestrationUnitOfWork(
 			const client = await pool.connect();
 			try {
 				await client.query("BEGIN");
-				const context = createTransactionContext(client);
+				const context = createTransactionContext(client, options);
 				const result = await work(context);
 				await client.query("COMMIT");
 				return result;

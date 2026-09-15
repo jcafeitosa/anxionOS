@@ -8,6 +8,41 @@
 			"when": 1757538000000,
 			"tag": "0000_partners_core",
 			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1789259700000,
+			"tag": "0001_partners_legacy_upgrade",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1789270500000,
+			"tag": "0002_partners_command_intent",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "7",
+			"when": 1789272000000,
+			"tag": "0003_partners_payout_lifecycle",
+			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "7",
+			"when": 1789272000001,
+			"tag": "0004_partners_secret_text_remediation",
+			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "7",
+			"when": 1789272000002,
+			"tag": "0005_partners_command_journal_secret_remediation",
+			"breakpoints": true
 		}
 	]
 }

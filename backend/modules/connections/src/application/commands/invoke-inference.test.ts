@@ -60,6 +60,7 @@ function createInMemoryUow(binding: ConnectionBindingRecord) {
 	const inferenceByKey = new Map<string, InferenceRequestRecord>();
 	let published: DomainEventEnvelope[] = [];
 	const ctx: ConnectionsTransactionContext = {
+		async lockIdempotencyKey() {},
 		commandJournal: {
 			async findByCommandId() {
 				return null;
@@ -228,6 +229,42 @@ describe("invokeInference waitingHuman (D-CX-049)", () => {
 		const second = await invokeInference(deps, command);
 		expect(second.idempotentReplay).toBe(true);
 		expect(second.aggregateId).toBe(first.aggregateId);
+		expect(getPublished().length).toBe(eventCount);
+	});
+
+	test("rejects a divergent payload for the same idempotencyKey", async () => {
+		const { unitOfWork, getPublished } = createInMemoryUow(binding);
+		const deps = {
+			unitOfWork,
+			inferencePort,
+			organizationId: ORG,
+			consumerPrincipalId: PRINCIPAL,
+		};
+		const command = {
+			commandId: randomUUID(),
+			bindingId: BINDING_ID,
+			bindingVersion: 1,
+			operation: "summarize",
+			requirements: {
+				schemaVersion: "1.0.0" as const,
+				taskType: "test",
+				operation: "summarize",
+				requiredCapabilities: ["text"],
+				requiredPurpose: "ROUTINE" as const,
+				dataClass: "INTERNAL" as const,
+				latencyClass: "INTERACTIVE" as const,
+				complexity: "SMALL" as const,
+			},
+			typedInput: { text: "original" },
+			deadline: new Date(Date.now() + 60_000).toISOString(),
+			idempotencyKey: randomUUID(),
+		};
+		await invokeInference(deps, command);
+		const eventCount = getPublished().length;
+
+		await expect(
+			invokeInference(deps, { ...command, typedInput: { text: "changed" } }),
+		).rejects.toMatchObject({ code: "CX_IDEMPOTENCY_CONFLICT" });
 		expect(getPublished().length).toBe(eventCount);
 	});
 });

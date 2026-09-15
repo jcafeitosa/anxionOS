@@ -25,6 +25,7 @@ export { triggerAgentRoutine } from "./application/commands/trigger-agent-routin
 export { AgentsCommandError } from "./application/errors";
 export { getAgent } from "./application/queries/get-agent";
 export { listAgentVersions } from "./application/queries/list-agent-versions";
+export { listAgents } from "./application/queries/list-agents";
 export {
 	evaluateComputerSessionAuthority,
 	toolRequiresComputerSession,
@@ -67,10 +68,10 @@ export type {
 	ToolAuditTrailQuery,
 	ToolGatewayPort,
 } from "./domain/ports";
+export { CommandJournalConflictError as AgentsCommandJournalConflictError } from "./domain/ports/command-journal";
 export type { AgentRegistryAdapter } from "./infrastructure/adapters/agent-registry-adapter";
 export { createAgentRegistryAdapter } from "./infrastructure/adapters/agent-registry-adapter";
 export { createAppendOnlyToolAuditAdapter } from "./infrastructure/adapters/append-only-tool-audit-adapter";
-export { createInMemoryOrchestrationRunFenceAdapter } from "./infrastructure/adapters/in-memory-orchestration-run-fence-adapter";
 export { createSandboxBotRunGenerationAdapter } from "./infrastructure/adapters/sandbox-bot-run-generation-adapter";
 export { createSandboxComputerSessionAdapter } from "./infrastructure/adapters/sandbox-computer-session-adapter";
 export { createAgentsUnitOfWork } from "./infrastructure/agents-unit-of-work";

@@ -9,10 +9,11 @@ import {
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { MarketDataUnitOfWork } from "../../domain/ports/market-data-unit-of-work";
 import {
+	createMarketDataCommandIntent,
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwMarketDataError } from "../errors";
+import { throwMarketDataError } from "../errors";
 
 export {
 	type AdvanceBackfillCursorCommand,
@@ -29,20 +30,28 @@ export async function advanceBackfillCursor(
 	input: AdvanceBackfillCursorCommand,
 ): Promise<MarketDataCommandResult> {
 	const command = advanceBackfillCursorCommandSchema.parse(input);
+	const intent = createMarketDataCommandIntent(
+		"advanceBackfillCursor",
+		command,
+	);
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
+		command.organizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay) return replay;
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
-		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
-		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return marketDataCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
-		}
+		await ctx.lockIdempotencyKey(
+			`${command.organizationId}:${command.commandId}`,
+		);
+		const raced = await loadIdempotentCommandResult(
+			ctx.commandJournal,
+			command.organizationId,
+			command.commandId,
+			intent,
+		);
+		if (raced) return raced;
 		const existing = await ctx.backfillJobs.findById(
 			command.jobId,
 			command.organizationId,
@@ -82,6 +91,7 @@ export async function advanceBackfillCursor(
 			commandId: command.commandId,
 			organizationId: command.organizationId,
 			commandName: "advanceBackfillCursor",
+			requestHash: intent.requestHash,
 			responseSnapshot: toCommandResultSnapshot(result),
 		});
 		return result;

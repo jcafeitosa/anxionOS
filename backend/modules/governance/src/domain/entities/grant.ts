@@ -15,7 +15,7 @@ export interface Grant {
 	 * ANX-469 — principal que emitiu o grant quando a emissao tem ator
 	 * identificado. `null` em grants derivados pelo sistema (baseline de
 	 * membership, break-glass e filhos de delegation), que nao tem principal
-	 * emissor e por isso so' sao revogaveis por `owner`/`admin` da agencia.
+	 * emissor e por isso so' sao revogaveis por `owner` da agencia.
 	 */
 	issuedByPrincipalId: string | null;
 	capability: string;

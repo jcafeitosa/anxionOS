@@ -20,6 +20,12 @@ function createTransactionContext(
 		partners: createPgPartnerRepository(client),
 		commissionAccruals: createPgCommissionAccrualRepository(client),
 		payouts: createPgPayoutRepository(client),
+		async lockIdempotencyKey(key: string) {
+			await client.query(
+				"SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
+				[`partners:${key}`],
+			);
+		},
 		async publishEvents(envelopes: DomainEventEnvelope[]) {
 			for (const envelope of envelopes) {
 				await appendJournal(client, envelope);

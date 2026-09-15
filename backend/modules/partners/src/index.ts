@@ -3,7 +3,6 @@ export {
 	type ApprovePayoutCommand,
 	accrueCommissionFromInvoiceCommandSchema,
 	approvePayoutCommandSchema,
-	mapInvoiceIssuedToAccrualInput,
 	PARTNERS_OWNER_DOMAIN,
 	type PartnersCommandResult,
 	partnersCommandResultSchema,
@@ -14,6 +13,7 @@ export {
 	requestPayoutCommandSchema,
 	reverseCommissionFromInvoiceCommandSchema,
 } from "@anxionos/contracts/partners";
+export { loadPartnersCommandReplayBeforeValidation } from "./application/command-support";
 export {
 	type AccrueCommissionFromInvoiceDeps,
 	accrueCommissionFromInvoice,
@@ -23,6 +23,10 @@ export {
 	approvePayout,
 } from "./application/commands/approve-payout";
 export {
+	type FailPayoutDeps,
+	failPayout,
+} from "./application/commands/fail-payout";
+export {
 	type RegisterPartnerDeps,
 	registerPartner,
 } from "./application/commands/register-partner";
@@ -31,18 +35,38 @@ export {
 	requestPayout,
 } from "./application/commands/request-payout";
 export {
+	type RetryPayoutDeps,
+	retryPayout,
+} from "./application/commands/retry-payout";
+export {
 	type ReverseCommissionFromInvoiceDeps,
 	reverseCommissionFromInvoice,
 } from "./application/commands/reverse-commission-from-invoice";
 export {
-	createInvoiceIssuedConsumer,
-	type InvoiceIssuedConsumerDeps,
-} from "./application/consumers/invoice-issued-consumer";
+	type ReversePayoutDeps,
+	reversePayout,
+} from "./application/commands/reverse-payout";
+export {
+	type SettlePayoutDeps,
+	settlePayout,
+} from "./application/commands/settle-payout";
+export {
+	createInvoicePaidConsumer,
+	type InvoicePaidConsumerDeps,
+} from "./application/consumers/invoice-paid-consumer";
+export {
+	createRefundProcessedConsumer,
+	type RefundProcessedConsumerDeps,
+} from "./application/consumers/refund-processed-consumer";
 export {
 	PartnersCommandError,
 	parseCommandResultSnapshot,
 	throwPartnersError,
 } from "./application/errors";
+export {
+	type GetPartnerByIdDeps,
+	getPartnerById,
+} from "./application/queries/get-partner-by-id";
 export {
 	type GetPartnerByOrganizationDeps,
 	getPartnerByOrganization,
@@ -59,14 +83,17 @@ export {
 	calculateCommissionAmount,
 	sumDecimalAmounts,
 } from "./domain/commission";
+export type { CommandJournalRepository } from "./domain/ports/command-journal";
 export type {
 	CommissionAccrualRecord,
 	CommissionAccrualRepository,
 	PartnerRecord,
 	PartnerRepository,
+	PartnersUnitOfWork,
 	PayoutRecord,
 	PayoutRepository,
 } from "./domain/ports/partners-unit-of-work";
 export { createPartnersDb } from "./infrastructure/create-db";
 export { ensurePartnersSchema } from "./infrastructure/migrate";
 export { createPartnersUnitOfWork } from "./infrastructure/partners-unit-of-work";
+export { createPgCommandJournalRepository } from "./infrastructure/persistence/command-journal-repository";

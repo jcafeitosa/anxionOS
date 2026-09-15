@@ -21,6 +21,12 @@ function createTransactionContext(
 	client: PoolClient,
 ): MarketDataTransactionContext {
 	return {
+		async lockIdempotencyKey(key) {
+			await client.query(
+				"SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
+				[`market-data:${key}`],
+			);
+		},
 		commandJournal: createPgCommandJournalRepository(client),
 		instruments: createPgInstrumentRepository(client),
 		observations: createPgObservationRepository(client),

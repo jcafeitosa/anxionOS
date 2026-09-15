@@ -1,5 +1,5 @@
-import { randomUUID } from "node:crypto";
 import { describe, expect, test } from "bun:test";
+import { randomUUID } from "node:crypto";
 import { PLATFORM_SCOPE_ID } from "@anxionos/contracts/governance";
 import type { Principal } from "@anxionos/identity";
 import { Elysia } from "elysia";
@@ -83,7 +83,10 @@ function harness(options: HarnessOptions = {}) {
 						id: "66666666-6666-4666-8666-666666666666",
 						capability,
 						scopeId: options.grantScopeId ?? PLATFORM_SCOPE_ID,
-						scopeKind: options.grantScopeId === PLATFORM_SCOPE_ID ? ("platform" as const) : ("agency" as const),
+						scopeKind:
+							options.grantScopeId === PLATFORM_SCOPE_ID
+								? ("platform" as const)
+								: ("agency" as const),
 						granteePrincipalId: alicePrincipal.id,
 						granteeAgentId: null,
 						issuedByPrincipalId: null,
@@ -101,7 +104,9 @@ function harness(options: HarnessOptions = {}) {
 			},
 			agencyScope: {
 				async isMember(agencyId, principalId) {
-					return memberships.includes(agencyId) && principalId === alicePrincipal.id;
+					return (
+						memberships.includes(agencyId) && principalId === alicePrincipal.id
+					);
 				},
 				async listAgencyIdsForPrincipal(principalId) {
 					if (principalId === alicePrincipal.id) {
@@ -117,7 +122,14 @@ function harness(options: HarnessOptions = {}) {
 }
 
 describe("ANX-465 — cross-tenant isolation (HTTP)", () => {
-	function request(path: string, opts: { headers?: Record<string, string>; method?: string; body?: unknown } = {}) {
+	function request(
+		path: string,
+		opts: {
+			headers?: Record<string, string>;
+			method?: string;
+			body?: unknown;
+		} = {},
+	) {
 		return new Request(`http://127.0.0.1${path}`, {
 			method: opts.method ?? "GET",
 			headers: {

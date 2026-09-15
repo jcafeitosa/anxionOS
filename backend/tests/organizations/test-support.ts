@@ -135,10 +135,7 @@ export function createInMemoryMembershipRepository(
 		},
 		async findInvitedByTokenHash(tokenHash) {
 			for (const membership of memberships.values()) {
-				if (
-					membership.status === "invited" &&
-					membership.inviteTokenHash === tokenHash
-				) {
+				if (membership.inviteTokenHash === tokenHash) {
 					return membership;
 				}
 			}
@@ -173,7 +170,10 @@ export function createInMemoryCommandJournalRepository(
 ): CommandJournalRepository {
 	// Red Team (Davi): index by composite (tenantId, commandId), not commandId alone
 	const records = new Map(
-		seed.map((record) => [compositeKey(record.tenantId, record.commandId), { ...record }]),
+		seed.map((record) => [
+			compositeKey(record.tenantId, record.commandId),
+			{ ...record },
+		]),
 	);
 	return {
 		async findByCommandId(commandId, tenantId) {

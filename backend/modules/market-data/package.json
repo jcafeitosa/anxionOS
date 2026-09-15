@@ -17,7 +17,8 @@
 		"@anxionos/eventing": "workspace:*",
 		"@anxionos/observability": "workspace:*",
 		"drizzle-orm": "0.45.2",
-		"pg": "8.23.0"
+		"pg": "8.23.0",
+		"zod": "4.6.2"
 	},
 	"devDependencies": {
 		"@types/pg": "8.23.1"

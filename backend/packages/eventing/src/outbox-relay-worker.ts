@@ -35,6 +35,7 @@ export interface OutboxRelayWorkerOptions {
 		envelope: DomainEventEnvelope,
 		error: unknown,
 		attempts: number,
+		relayId?: string,
 	) => Promise<void>;
 	logger?: OutboxRelayWorkerLogger;
 }
@@ -115,55 +116,11 @@ export function startOutboxRelayWorker(
 				const result = await runOutboxRelayBatch(options);
 				if (result.dispatched + result.failed + result.poisoned > 0) {
 					options.logger?.info("Outbox relay batch complete", { ...result });
-					// #region agent log
-					fetch(
-						"http://127.0.0.1:7857/ingest/a6fc5ec4-791b-4921-8e35-5c7ce20619e6",
-						{
-							method: "POST",
-							headers: {
-								"Content-Type": "application/json",
-								"X-Debug-Session-Id": "4cc2f6",
-							},
-							body: JSON.stringify({
-								sessionId: "4cc2f6",
-								runId: "monitor",
-								hypothesisId: "O1",
-								location: "outbox-relay-worker.ts:runLoop",
-								message: "outbox batch",
-								data: result,
-								timestamp: Date.now(),
-							}),
-						},
-					).catch(() => {});
-					// #endregion
 				}
 			} catch (error) {
 				options.logger?.error("Outbox relay batch failed", {
 					error: error instanceof Error ? error.message : String(error),
 				});
-				// #region agent log
-				fetch(
-					"http://127.0.0.1:7857/ingest/a6fc5ec4-791b-4921-8e35-5c7ce20619e6",
-					{
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-							"X-Debug-Session-Id": "4cc2f6",
-						},
-						body: JSON.stringify({
-							sessionId: "4cc2f6",
-							runId: "monitor",
-							hypothesisId: "O1",
-							location: "outbox-relay-worker.ts:runLoop",
-							message: "outbox batch failed",
-							data: {
-								error: error instanceof Error ? error.message : String(error),
-							},
-							timestamp: Date.now(),
-						}),
-					},
-				).catch(() => {});
-				// #endregion
 			}
 			await sleepWithAbort(options.config.pollIntervalMs, options.signal);
 		}
@@ -186,12 +143,12 @@ export function startOutboxRelayWorker(
 	};
 }
 
-export function createDefaultPoisonHandler(pool: Pool) {
+export function createDefaultPoisonHandler(pool: Pool, relayId?: string) {
 	return async (
 		envelope: DomainEventEnvelope,
 		error: unknown,
 		attempts: number,
 	) => {
-		await moveToDeadLetter(pool, envelope, String(error), attempts);
+		await moveToDeadLetter(pool, envelope, String(error), attempts, relayId);
 	};
 }

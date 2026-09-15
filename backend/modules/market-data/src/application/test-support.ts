@@ -1,6 +1,9 @@
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import type { BackfillJobRecord } from "../domain/ports/backfill-repository";
-import type { CommandJournalRepository } from "../domain/ports/command-journal";
+import type {
+	CommandJournalEntry,
+	CommandJournalRepository,
+} from "../domain/ports/command-journal";
 import type {
 	InstrumentRecord,
 	MarketDataTransactionContext,
@@ -27,31 +30,21 @@ export function activeInstrument(): InstrumentRecord {
 }
 
 export function createInMemoryUow(instrument: InstrumentRecord) {
-	const commandJournalStore = new Map<string, Record<string, unknown>>();
+	const commandJournalStore = new Map<string, CommandJournalEntry>();
 	const jobsById = new Map<string, BackfillJobRecord>();
 	const jobsByNatural = new Map<string, BackfillJobRecord>();
 	let published: DomainEventEnvelope[] = [];
 
 	const ctx: MarketDataTransactionContext = {
+		async lockIdempotencyKey() {},
 		commandJournal: {
-			async findByCommandId(commandId) {
-				const snapshot = commandJournalStore.get(commandId);
-				if (!snapshot) return null;
-				return {
-					commandId,
-					organizationId: String(
-						snapshot.organizationId ?? instrument.organizationId,
-					),
-					commandName: String(snapshot.commandName ?? "startBackfill"),
-					responseSnapshot: snapshot,
-				};
+			async findByCommandId(organizationId, commandId) {
+				const entry = commandJournalStore.get(commandId);
+				if (!entry || entry.organizationId !== organizationId) return null;
+				return entry;
 			},
 			async save(entry) {
-				commandJournalStore.set(entry.commandId, {
-					...entry.responseSnapshot,
-					organizationId: entry.organizationId,
-					commandName: entry.commandName,
-				});
+				commandJournalStore.set(entry.commandId, entry);
 			},
 		},
 		instruments: {

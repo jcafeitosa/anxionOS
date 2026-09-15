@@ -1,29 +1,13 @@
+import type {
+	PrincipalLookup as ContractPrincipalLookup,
+	PrincipalLookupOptions as ContractPrincipalLookupOptions,
+} from "@anxionos/contracts/identity";
 import type { PoolClient } from "pg";
 
-export interface PrincipalLookupOptions {
-	/**
-	 * ANX-477 — quando presente, a leitura usa ESTA conexao (a transacao do
-	 * chamador) em vez do pool compartilhado. O comando ja' segura uma conexao
-	 * enquanto a transacao esta' aberta; pedir uma SEGUNDA do mesmo pool esgota
-	 * o pool sob rajada (N ~ `pool.options.max`). Mesmo padrao de
-	 * `OrganizationsMembershipReadOptions`.
-	 */
-	transactionClient?: PoolClient;
-}
-
-export interface PrincipalLookup {
-	exists(
-		principalId: string,
-		options?: PrincipalLookupOptions,
-	): Promise<boolean>;
-}
-
-export class PrincipalLookupUnavailableError extends Error {
-	constructor(
-		message = "Identity service unavailable",
-		options?: ErrorOptions,
-	) {
-		super(message, options);
-		this.name = "PrincipalLookupUnavailableError";
-	}
-}
+/**
+ * ANX-494 — the shared contract is specialized by the adapter boundary with
+ * the transaction client type used by PostgreSQL infrastructure.
+ */
+export type PrincipalLookupOptions = ContractPrincipalLookupOptions<PoolClient>;
+export type PrincipalLookup = ContractPrincipalLookup<PoolClient>;
+export { PrincipalLookupUnavailableError } from "@anxionos/contracts/identity";

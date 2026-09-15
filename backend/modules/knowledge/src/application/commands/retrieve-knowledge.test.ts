@@ -5,7 +5,7 @@ import {
 	createKnowledgeTestUow,
 	TEST_ACL_ID,
 	TEST_ORG,
-} from "./knowledge-test-support";
+} from "./fixtures/knowledge-test-support";
 import { retrieveKnowledge } from "./retrieve-knowledge";
 
 const SPACE_ID = `kn_espc_${randomUUID()}`;

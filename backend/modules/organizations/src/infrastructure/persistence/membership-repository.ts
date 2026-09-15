@@ -201,15 +201,13 @@ export function createDrizzleMembershipRepository(
 			return rows[0] ? toMembership(rows[0]) : null;
 		},
 		async findInvitedByTokenHash(tokenHash: string) {
+			// Do not filter by status here: acceptInviteByToken needs the agencyId
+			// for an idempotent replay after the invite was consumed. The application
+			// command applies the opaque status check inside the tenant transaction.
 			const rows = await db
 				.select()
 				.from(memberships)
-				.where(
-					and(
-						eq(memberships.inviteTokenHash, tokenHash),
-						eq(memberships.status, "invited"),
-					),
-				)
+				.where(eq(memberships.inviteTokenHash, tokenHash))
 				.limit(1);
 			return rows[0] ? toMembership(rows[0]) : null;
 		},

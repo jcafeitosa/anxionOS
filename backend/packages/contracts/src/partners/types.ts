@@ -1,9 +1,19 @@
 import { z } from "zod";
+import {
+	isPartnerTextFreeOfSecrets,
+	PARTNER_SECRET_REJECTION_MESSAGE,
+} from "./safe-text";
 export const PARTNERS_OWNER_DOMAIN = "partners";
 export const partnersPartnerIdSchema = z
 	.string()
 	.regex(/^ptr_prt_[0-9a-f-]{36}$/i);
-export const partnersReferralIdSchema = z.string().min(1).max(64);
+export const partnersReferralIdSchema = z
+	.string()
+	.min(1)
+	.max(64)
+	.refine(isPartnerTextFreeOfSecrets, {
+		message: PARTNER_SECRET_REJECTION_MESSAGE,
+	});
 export const partnersCommissionAccrualIdSchema = z
 	.string()
 	.regex(/^ptr_acc_[0-9a-f-]{36}$/i);
@@ -12,9 +22,11 @@ export const partnersPayoutIdSchema = z
 	.regex(/^ptr_pay_[0-9a-f-]{36}$/i);
 export const partnersPartnerStatusSchema = z.enum(["ACTIVE", "SUSPENDED"]);
 export const partnersPayoutStatusSchema = z.enum([
-	"REQUESTED",
-	"APPROVED",
-	"REJECTED",
+	"SCHEDULED",
+	"PROCESSING",
+	"SETTLED",
+	"FAILED",
+	"REVERSED",
 ]);
 export const partnersAccrualStatusSchema = z.enum([
 	"ACCRUED",

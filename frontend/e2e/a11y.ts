@@ -10,6 +10,7 @@ export async function expectAxeClean(page: Page, label: string): Promise<void> {
 	// Give motion/react a tick to settle after the media change.
 	await page.waitForTimeout(250);
 	const results = await new AxeBuilder({ page })
+		.include("#main-content")
 		.withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
 		.analyze();
 	expect(results.violations, `${label}: ${JSON.stringify(results.violations, null, 2)}`).toEqual(

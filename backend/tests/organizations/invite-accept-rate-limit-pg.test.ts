@@ -71,6 +71,49 @@ describe("ANX-489 F4 — abertura de janela com concorrencia (PG real)", () => {
 			expect(Number(row.rows[0]?.count)).toBe(INVITE_ACCEPT_LIMIT);
 		});
 	});
+
+	test("janela anterior que retoma nao redefine o contador da janela ativa", async () => {
+		await withPgHarness(async (pool) => {
+			let oldReadResolver!: () => void;
+			let oldReleaseResolver!: () => void;
+			const oldReadReached = new Promise<void>((resolve) => {
+				oldReadResolver = resolve;
+			});
+			const oldReadRelease = new Promise<void>((resolve) => {
+				oldReleaseResolver = resolve;
+			});
+			const oldStore = new PostgresInviteAcceptRateLimitStore(pool, {
+				clock: () => 59_999,
+				beforeWindowUpsert: async () => {
+					oldReadResolver();
+					await oldReadRelease;
+				},
+			});
+			const currentStore = new PostgresInviteAcceptRateLimitStore(pool, {
+				clock: () => 60_000,
+			});
+			const ip = "203.0.113.100";
+
+			const oldAttempt = oldStore.assertWithinLimit(ip);
+			await oldReadReached;
+			await Promise.all([
+				currentStore.assertWithinLimit(ip),
+				currentStore.assertWithinLimit(ip),
+			]);
+			oldReleaseResolver();
+			await oldAttempt;
+
+			const row = await pool.query<{
+				count: number;
+				window_start_ms: string;
+			}>(
+				"SELECT count, window_start_ms FROM api_invite_accept_rate_limits WHERE client_ip = $1",
+				[ip],
+			);
+			expect(Number(row.rows[0]?.count)).toBe(2);
+			expect(Number(row.rows[0]?.window_start_ms)).toBe(60_000);
+		});
+	});
 });
 
 describe("ANX-489 F5 — rollback best-effort nao mascara o erro original", () => {
@@ -112,6 +155,9 @@ describe("ANX-489 F5 — rollback best-effort nao mascara o erro original", () =
 		} finally {
 			console.log = originalLog;
 		}
-		expect(loggedCause).toBeTruthy();
+		expect(loggedCause).toEqual({
+			name: "Error",
+			message: "connection broken",
+		});
 	});
 });

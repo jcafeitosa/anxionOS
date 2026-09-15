@@ -10,10 +10,11 @@ import type { CommandJournalRepository } from "../../domain/ports/command-journa
 import type { SkillEvaluationGuardPort } from "../../domain/ports/skill-evaluation-guard";
 import type { SkillRepository } from "../../domain/ports/skill-repository";
 import {
+	createAgentCommandIntent,
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwAgentsError } from "../errors";
+import { throwAgentsError } from "../errors";
 import { assertEvaluationRefMatchesOutcome } from "../services/evaluation-ref-gate";
 import { buildOrganizationTenantContext } from "../services/tenant-context";
 
@@ -22,6 +23,11 @@ export async function recordSkillVersionEvaluation(
 	input: RecordSkillVersionEvaluationInput,
 ): Promise<CommandResult> {
 	const command = recordSkillVersionEvaluationCommandSchema.parse(input);
+	const intent = createAgentCommandIntent(
+		"RecordSkillVersionEvaluation",
+		{ ...command, actorPrincipalId: input.actorPrincipalId },
+		command.skillVersionId,
+	);
 	const preflightSkill = await deps.skillRepository.findById(command.skillId);
 	if (!preflightSkill) {
 		throwAgentsError(
@@ -33,6 +39,7 @@ export async function recordSkillVersionEvaluation(
 		deps.commandJournal,
 		preflightSkill.organizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay) {
 		return replay;
@@ -68,13 +75,13 @@ export async function recordSkillVersionEvaluation(
 			principalId: input.actorPrincipalId,
 		}),
 		async (context) => {
-			const raced = await context.commandJournal.findByCommandId(
+			const raced = await loadIdempotentCommandResult(
+				context.commandJournal,
 				preflightSkill.organizationId,
 				command.commandId,
+				intent,
 			);
-			if (raced) {
-				return parseCommandResultSnapshot(raced.responseSnapshot);
-			}
+			if (raced) return raced;
 
 			const skill = await context.skillRepository.findById(command.skillId);
 			if (!skill) {
@@ -142,6 +149,7 @@ export async function recordSkillVersionEvaluation(
 				aggregateId: command.skillVersionId,
 				aggregateType: "SkillVersion",
 				revision: nextRevision,
+				requestHash: intent.requestHash,
 				responseSnapshot: toCommandResultSnapshot(result),
 			});
 			await context.publishEvents([event]);

@@ -17,6 +17,12 @@ function createTransactionContext(
 	client: PoolClient,
 ): ConnectionsTransactionContext {
 	return {
+		async lockIdempotencyKey(key) {
+			await client.query(
+				"SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
+				[`connections:${key}`],
+			);
+		},
 		commandJournal: createPgCommandJournalRepository(client),
 		aiAccounts: createPgAiAccountRepository(client),
 		bindings: createPgBindingRepository(client),

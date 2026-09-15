@@ -116,21 +116,12 @@ export const GRANT_ISSUANCE_ROLES: readonly MembershipRole[] = [
 /**
  * ANX-469 — roles que revogam **qualquer** grant da agencia. O catalogo declara
  * `governance.grant.revoke` com `requiredGrants: ["governance.owner",
- * "governance.issuer"]`: `owner`/`admin` sao a autoridade institucional sobre a
- * agencia; os demais papeis de mutacao (`operator`) so' alcancam o caminho de
+ * "governance.issuer"]`: `owner` e' a autoridade institucional sobre a agencia;
+ * os demais papeis de mutacao (`admin`/`operator`) so' alcancam o caminho de
  * emissor.
  */
 export const GRANT_REVOCATION_OWNER_ROLES: readonly MembershipRole[] = [
-	// ANX-469 — roles que revogam QUALQUER grant da agencia.
-	//
-	// DIVERGENCIA ABERTA (N4 da revalidacao G4): o manifest publica
-	// `governance.grant.revoke` como "Owner ou issuer", mas aqui `admin` tambem
-	// revoga qualquer grant — inclusive do owner (verificado: 200 + `revoked`).
-	// Estreitar muda politica de autorizacao e alargar muda contrato publicado:
-	// as duas direcoes exigem decisao do dono do modulo (issue rastreada), entao
-	// o comportamento fica como esta' e a divergencia registrada.
 	"owner",
-	"admin",
 ];
 
 /**
@@ -162,7 +153,7 @@ export function roleMayIssueGrantCapability(
  * Antes desta regra a rota `DELETE /v1/agencies/:agencyId/grants/:grantId`
  * reusava a guarda de papel da emissao (`owner|admin|operator`) e **nao limitava
  * o alvo**: um `operator` revogava grants do `owner` da propria agencia. Aqui o
- * papel deixou de ser suficiente — a autoridade e' de `owner`/`admin` da agencia
+ * papel deixou de ser suficiente — a autoridade e' de `owner` da agencia
  * (qualquer grant) ou do **emissor registrado no grant**.
  *
  * O caminho de emissor nao amplia a classe do papel: um `operator` so' revoga o

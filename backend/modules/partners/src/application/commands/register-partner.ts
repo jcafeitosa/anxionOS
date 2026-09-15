@@ -10,10 +10,12 @@ import {
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { PartnersUnitOfWork } from "../../domain/ports/partners-unit-of-work";
 import {
+	createPartnersCommandIntent,
 	loadIdempotentCommandResult,
+	loadPartnersCommandReplayBeforeValidation,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwPartnersError } from "../errors";
+import { throwPartnersError } from "../errors";
 
 export interface RegisterPartnerDeps {
 	unitOfWork: PartnersUnitOfWork;
@@ -24,33 +26,35 @@ export async function registerPartner(
 	deps: RegisterPartnerDeps,
 	input: RegisterPartnerCommand,
 ): Promise<PartnersCommandResult> {
-	const command = registerPartnerCommandSchema.parse(input);
-	const existingCommand = await deps.commandJournal.findByCommandId(
-		command.commandId,
-	);
-	if (
-		existingCommand &&
-		existingCommand.organizationId !== command.organizationId
-	) {
-		throwPartnersError(
-			"PTR_CROSS_TENANT",
-			"command journal organization mismatch",
+	const replayBeforeValidation =
+		await loadPartnersCommandReplayBeforeValidation(
+			deps.commandJournal,
+			input.organizationId,
+			input.commandId,
+			"registerPartner",
+			input,
 		);
-	}
+	if (replayBeforeValidation) return replayBeforeValidation;
+	const command = registerPartnerCommandSchema.parse(input);
+	const intent = createPartnersCommandIntent("registerPartner", command);
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
+		command.organizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay) return replay;
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
-		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
-		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return partnersCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
-		}
+		await ctx.lockIdempotencyKey(
+			`${command.organizationId}:${command.commandId}`,
+		);
+		const raced = await loadIdempotentCommandResult(
+			ctx.commandJournal,
+			command.organizationId,
+			command.commandId,
+			intent,
+		);
+		if (raced) return raced;
 		const referralConflict = await ctx.partners.findByReferralCode(
 			command.referralCode,
 			command.organizationId,
@@ -92,6 +96,7 @@ export async function registerPartner(
 			commandId: command.commandId,
 			organizationId: command.organizationId,
 			commandName: "registerPartner",
+			requestHash: intent.requestHash,
 			responseSnapshot: toCommandResultSnapshot(result),
 		});
 		return result;

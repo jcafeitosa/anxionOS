@@ -1,4 +1,7 @@
-import { AgentsCommandError } from "@anxionos/agents";
+import {
+	AgentsCommandError,
+	AgentsCommandJournalConflictError,
+} from "@anxionos/agents";
 import {
 	isAppError,
 	resolveStatusCode,
@@ -15,6 +18,17 @@ export function mapAgentsError(
 		const mapped = new AgentsCommandError(
 			"AGT_AGENT_NOT_FOUND",
 			error.message,
+			{ cause: error },
+		);
+		return {
+			status: mapped.statusCode,
+			body: toErrorResponse(mapped, { requestId }),
+		};
+	}
+	if (error instanceof AgentsCommandJournalConflictError) {
+		const mapped = new AgentsCommandError(
+			"AGT_DUPLICATE_IDEMPOTENCY",
+			`Idempotency key ${error.commandId} was already recorded by another command`,
 			{ cause: error },
 		);
 		return {

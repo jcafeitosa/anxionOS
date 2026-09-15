@@ -118,6 +118,9 @@ test.describe("post-login routing (live Better Auth)", () => {
 	test("zero memberships open onboarding", async ({ page }) => {
 		await signInLive(page, DEV_SEED_ACCOUNTS.none);
 		await expect(page).toHaveURL(/\/onboarding$/, { timeout: 20_000 });
+		await expect(
+			page.getByRole("heading", { name: "Organização ainda não vinculada" }),
+		).toBeVisible();
 	});
 
 	test("multiple memberships open select-organization", async ({ page }) => {

@@ -1,5 +1,6 @@
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import type { CommandJournalRepository } from "./command-journal";
+import type { MemoryStorePort } from "./memory-store";
 export interface KnowledgeSourceRecord {
 	id: string;
 	organizationId: string;
@@ -140,6 +141,7 @@ export interface KnowledgeTransactionContext {
 	chunks: ChunkRepository;
 	embeddings: EmbeddingRepository;
 	embeddingSpaces: EmbeddingSpaceRepository;
+	memoryStore?: MemoryStorePort;
 	publishEvents(envelopes: DomainEventEnvelope[]): Promise<void>;
 }
 export interface KnowledgeUnitOfWork {

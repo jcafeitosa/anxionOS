@@ -8,7 +8,7 @@
 -- `NULL` e' semanticamente correto para grants derivados pelo sistema, que nao
 -- tem principal emissor: baseline CAP-B01 emitida no `membership.activated`,
 -- break-glass e grants filhos de delegation. Esses so' sao revogaveis pela
--- autoridade de `owner`/`admin` da agencia. Aditivo e idempotente: nenhuma
+-- autoridade de `owner` da agencia. Aditivo e idempotente: nenhuma
 -- linha existente muda de valor (todas ficam com emissor desconhecido).
 ALTER TABLE governance_grants
  ADD COLUMN IF NOT EXISTS issued_by_principal_id UUID;

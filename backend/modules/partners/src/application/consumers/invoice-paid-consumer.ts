@@ -1,12 +1,9 @@
 import { randomUUID } from "node:crypto";
 import type {
-	AccrueCommissionFromInvoiceInput,
-	BillingInvoiceIssuedBridge,
+	BillingInvoicePaidBridge,
+	PartnersCommandResult,
 } from "@anxionos/contracts/partners";
-import {
-	mapInvoiceIssuedToAccrualInput,
-	type PartnersCommandResult,
-} from "@anxionos/contracts/partners";
+import { mapInvoicePaidToAccrualInput } from "@anxionos/contracts/partners";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { PartnersUnitOfWork } from "../../domain/ports/partners-unit-of-work";
 import {
@@ -14,27 +11,28 @@ import {
 	accrueCommissionFromInvoice,
 } from "../commands/accrue-commission-from-invoice";
 
-export interface InvoiceIssuedConsumerDeps
+export interface InvoicePaidConsumerDeps
 	extends AccrueCommissionFromInvoiceDeps {
 	commandJournal: CommandJournalRepository;
 	unitOfWork: PartnersUnitOfWork;
 }
 
-export function createInvoiceIssuedConsumer(deps: InvoiceIssuedConsumerDeps): {
+export function createInvoicePaidConsumer(deps: InvoicePaidConsumerDeps): {
 	handle(
-		invoice: BillingInvoiceIssuedBridge,
+		invoice: BillingInvoicePaidBridge,
 		partnerOrganizationId: string,
 	): Promise<PartnersCommandResult>;
 } {
 	return {
 		async handle(invoice, partnerOrganizationId) {
-			const input: AccrueCommissionFromInvoiceInput =
-				mapInvoiceIssuedToAccrualInput(
+			return accrueCommissionFromInvoice(
+				deps,
+				mapInvoicePaidToAccrualInput(
 					invoice,
 					randomUUID(),
 					partnerOrganizationId,
-				);
-			return accrueCommissionFromInvoice(deps, input);
+				),
+			);
 		},
 	};
 }

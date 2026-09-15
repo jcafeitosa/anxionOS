@@ -178,7 +178,7 @@ export async function createDelegation(
 				granteePrincipalId: command.delegatePrincipalId,
 				granteeAgentId: null,
 				// Filho de delegation e' derivado do grant pai, nao de um emissor
-				// principal: revogavel por owner/admin da agencia (ANX-469).
+				// principal: revogavel por owner da agencia (ANX-469).
 				issuedByPrincipalId: null,
 				capability,
 				resourceRef: `delegation:${delegationId}`,

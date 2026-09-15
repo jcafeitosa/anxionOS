@@ -12,10 +12,11 @@ import type { AgentRepository } from "../../domain/ports/agent-repository";
 import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import {
+	createAgentCommandIntent,
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwAgentsError } from "../errors";
+import { throwAgentsError } from "../errors";
 import { buildOrganizationTenantContext } from "../services/tenant-context";
 
 export async function publishAgentVersion(
@@ -23,6 +24,10 @@ export async function publishAgentVersion(
 	input: PublishAgentVersionInput,
 ): Promise<CommandResult> {
 	const command = publishAgentVersionCommandSchema.parse(input);
+	const intent = createAgentCommandIntent("PublishAgentVersion", {
+		...command,
+		actorPrincipalId: input.actorPrincipalId,
+	});
 	if (!isAutonomyLevelRuntimeEnabled(command.autonomyLevel)) {
 		throwAgentsError(
 			"AGT_AUTONOMY_LEVEL_DISABLED",
@@ -40,6 +45,7 @@ export async function publishAgentVersion(
 		deps.commandJournal,
 		preflightAgent.organizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay) {
 		return replay;
@@ -61,13 +67,13 @@ export async function publishAgentVersion(
 			principalId: input.actorPrincipalId,
 		}),
 		async (context) => {
-			const raced = await context.commandJournal.findByCommandId(
+			const raced = await loadIdempotentCommandResult(
+				context.commandJournal,
 				preflightAgent.organizationId,
 				command.commandId,
+				intent,
 			);
-			if (raced) {
-				return parseCommandResultSnapshot(raced.responseSnapshot);
-			}
+			if (raced) return raced;
 
 			const agent = await context.agentRepository.findById(command.agentId);
 			if (!agent) {
@@ -147,6 +153,7 @@ export async function publishAgentVersion(
 				aggregateId: agentVersionId,
 				aggregateType: "AgentVersion",
 				revision: nextRevision,
+				requestHash: intent.requestHash,
 				responseSnapshot: toCommandResultSnapshot(result),
 			});
 			await context.publishEvents([event]);

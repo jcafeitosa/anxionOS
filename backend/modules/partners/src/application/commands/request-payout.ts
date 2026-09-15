@@ -8,14 +8,16 @@ import {
 	requestPayoutCommandSchema,
 } from "@anxionos/contracts/partners";
 import { sumDecimalAmounts } from "../../domain/commission";
-import { createPayoutRequestedEvent } from "../../domain/events/partners-events";
+import { createPayoutScheduledEvent } from "../../domain/events/partners-events";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import type { PartnersUnitOfWork } from "../../domain/ports/partners-unit-of-work";
 import {
+	createPartnersCommandIntent,
 	loadIdempotentCommandResult,
+	loadPartnersCommandReplayBeforeValidation,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwPartnersError } from "../errors";
+import { throwPartnersError } from "../errors";
 
 export interface RequestPayoutDeps {
 	unitOfWork: PartnersUnitOfWork;
@@ -26,33 +28,35 @@ export async function requestPayout(
 	deps: RequestPayoutDeps,
 	input: RequestPayoutCommand,
 ): Promise<PartnersCommandResult> {
-	const command = requestPayoutCommandSchema.parse(input);
-	const existingCommand = await deps.commandJournal.findByCommandId(
-		command.commandId,
-	);
-	if (
-		existingCommand &&
-		existingCommand.organizationId !== command.partnerOrganizationId
-	) {
-		throwPartnersError(
-			"PTR_CROSS_TENANT",
-			"command journal organization mismatch",
+	const replayBeforeValidation =
+		await loadPartnersCommandReplayBeforeValidation(
+			deps.commandJournal,
+			input.partnerOrganizationId,
+			input.commandId,
+			"requestPayout",
+			input,
 		);
-	}
+	if (replayBeforeValidation) return replayBeforeValidation;
+	const command = requestPayoutCommandSchema.parse(input);
+	const intent = createPartnersCommandIntent("requestPayout", command);
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
+		command.partnerOrganizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay) return replay;
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
-		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
-		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return partnersCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
-		}
+		await ctx.lockIdempotencyKey(
+			`${command.partnerOrganizationId}:${command.commandId}`,
+		);
+		const raced = await loadIdempotentCommandResult(
+			ctx.commandJournal,
+			command.partnerOrganizationId,
+			command.commandId,
+			intent,
+		);
+		if (raced) return raced;
 		const partner = await ctx.partners.findById(
 			command.partnerId,
 			command.partnerOrganizationId,
@@ -79,13 +83,21 @@ export async function requestPayout(
 			partnerId: partner.id,
 			partnerOrganizationId: command.partnerOrganizationId,
 			requestedAmount,
-			status: "REQUESTED",
+			status: "SCHEDULED",
 			requestedAt: command.requestedAt,
 			approvedAt: null,
 			approvalReference: null,
+			processingAt: null,
+			settledAt: null,
+			failedAt: null,
+			failureReason: null,
+			providerReference: null,
+			reversalReference: null,
+			reversedAt: null,
+			attemptCount: 0,
 		});
 		await ctx.publishEvents([
-			createPayoutRequestedEvent({
+			createPayoutScheduledEvent({
 				payoutId: saved.id,
 				partnerId: partner.id,
 				organizationId: command.partnerOrganizationId,
@@ -99,11 +111,13 @@ export async function requestPayout(
 			partnerId: partner.id,
 			payoutId: saved.id,
 			commissionAmount: requestedAmount,
+			payoutStatus: saved.status,
 		});
 		await ctx.commandJournal.save({
 			commandId: command.commandId,
 			organizationId: command.partnerOrganizationId,
 			commandName: "requestPayout",
+			requestHash: intent.requestHash,
 			responseSnapshot: toCommandResultSnapshot(result),
 		});
 		return result;

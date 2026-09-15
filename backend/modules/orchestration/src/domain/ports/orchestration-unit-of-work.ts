@@ -3,6 +3,7 @@ import type {} from "@anxionos/contracts/orchestration";
 import type { CommandJournalRepository } from "./command-journal";
 import type { GateBindingRepository } from "./gate-binding-repository";
 import type { GoalRepository } from "./goal-repository";
+import type { OperationalBudgetPort } from "./operational-budget";
 import type { RunHeartbeatRepository } from "./run-heartbeat-repository";
 import type { RunRepository } from "./run-repository";
 import type { TaskLeaseRepository } from "./task-lease-repository";
@@ -18,6 +19,7 @@ export interface OrchestrationTransactionContext {
 	commandJournal: CommandJournalRepository;
 	runHeartbeatRepository: RunHeartbeatRepository;
 	taskboardMirrorRepository: TaskboardMirrorRepository;
+	operationalBudget?: OperationalBudgetPort;
 	publishEvents(envelopes: DomainEventEnvelope[]): Promise<void>;
 }
 export interface OrchestrationCommandOutcome<

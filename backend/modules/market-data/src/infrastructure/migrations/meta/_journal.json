@@ -29,6 +29,13 @@
 			"when": 1795000000000,
 			"tag": "0003_market_data_calendars",
 			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "7",
+			"when": 1797000000000,
+			"tag": "0004_market_data_command_intent",
+			"breakpoints": true
 		}
 	]
 }

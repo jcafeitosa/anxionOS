@@ -6,14 +6,18 @@ import {
 	billingCommandResultSchema,
 	processRefundCommandSchema,
 } from "@anxionos/contracts/billing";
-import { createInvoiceRefundedEvent } from "../../domain/events/billing-events";
+import {
+	createInvoiceRefundedEvent,
+	createRefundProcessedEvent,
+} from "../../domain/events/billing-events";
 import type { BillingUnitOfWork } from "../../domain/ports/billing-unit-of-work";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import {
+	createBillingCommandIntent,
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwBillingError } from "../errors";
+import { throwBillingError } from "../errors";
 
 export interface ProcessRefundDeps {
 	unitOfWork: BillingUnitOfWork;
@@ -25,32 +29,25 @@ export async function processRefund(
 	input: ProcessRefundCommand,
 ): Promise<BillingCommandResult> {
 	const command = processRefundCommandSchema.parse(input);
-	const existingCommand = await deps.commandJournal.findByCommandId(
-		command.commandId,
-	);
-	if (
-		existingCommand &&
-		existingCommand.organizationId !== command.organizationId
-	) {
-		throwBillingError(
-			"BIL_CROSS_TENANT",
-			"command journal organization mismatch",
-		);
-	}
+	const intent = createBillingCommandIntent("processRefund", command);
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
+		command.organizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay) return replay;
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
-		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
-		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return billingCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
-		}
+		await ctx.lockIdempotencyKey(
+			`${command.organizationId}:${command.commandId}`,
+		);
+		const raced = await loadIdempotentCommandResult(
+			ctx.commandJournal,
+			command.organizationId,
+			command.commandId,
+			intent,
+		);
+		if (raced) return raced;
 		const subscription = await ctx.subscriptions.findById(
 			command.subscriptionId,
 		);
@@ -85,11 +82,12 @@ export async function processRefund(
 				commandId: command.commandId,
 				organizationId: command.organizationId,
 				commandName: "processRefund",
+				requestHash: intent.requestHash,
 				responseSnapshot: toCommandResultSnapshot(result),
 			});
 			return result;
 		}
-		if (invoice.status !== "ISSUED") {
+		if (invoice.status !== "ISSUED" && invoice.status !== "PAID") {
 			throwBillingError(
 				"BIL_INVOICE_NOT_ISSUED",
 				"invoice must be ISSUED before refund",
@@ -102,6 +100,16 @@ export async function processRefund(
 		);
 		await ctx.publishEvents([
 			createInvoiceRefundedEvent({
+				invoiceId: refunded.id,
+				refundId: command.commandId,
+				organizationId: refunded.organizationId,
+				subscriptionId: refunded.subscriptionId,
+				refundAmount: command.refundAmount,
+				refundedAt: command.refundedAt,
+				reason: command.reason,
+			}),
+			createRefundProcessedEvent({
+				refundId: command.commandId,
 				invoiceId: refunded.id,
 				organizationId: refunded.organizationId,
 				subscriptionId: refunded.subscriptionId,
@@ -120,6 +128,7 @@ export async function processRefund(
 			commandId: command.commandId,
 			organizationId: command.organizationId,
 			commandName: "processRefund",
+			requestHash: intent.requestHash,
 			responseSnapshot: toCommandResultSnapshot(result),
 		});
 		return result;

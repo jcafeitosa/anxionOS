@@ -194,10 +194,6 @@ export {
 } from "./infrastructure/adapters/in-memory-graph-store";
 export { createKernelAwareTraversalEvaluator } from "./infrastructure/adapters/kernel-aware-traversal-evaluator";
 export {
-	createMockTraversalEvaluator,
-	type GraphF0Fixture,
-} from "./infrastructure/adapters/mock-traversal-evaluator";
-export {
 	type BuildGraphCacheKeyInput,
 	buildGraphCacheKeyParts,
 	buildGraphCacheRedisKeyFromInput,

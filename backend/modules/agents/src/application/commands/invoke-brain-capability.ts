@@ -12,10 +12,12 @@ import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
 import type { BrainInvocationGuardPort } from "../../domain/ports/brain-invocation-guard";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import {
+	createAgentCommandIntent,
+	loadIdempotentCommandResult,
 	readSnapshotString,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwAgentsError } from "../errors";
+import { throwAgentsError } from "../errors";
 import { buildOrganizationTenantContext } from "../services/tenant-context";
 
 export async function invokeBrainCapability(
@@ -23,6 +25,10 @@ export async function invokeBrainCapability(
 	input: InvokeBrainCapabilityInput,
 ): Promise<CommandResult & { invocationId: string; agentVersionId: string }> {
 	const command = invokeBrainCapabilityCommandSchema.parse(input);
+	const intent = createAgentCommandIntent("InvokeBrainCapability", {
+		...command,
+		actorPrincipalId: input.actorPrincipalId,
+	});
 	const preflightAgent = await deps.agentRepository.findById(command.agentId);
 	if (!preflightAgent) {
 		throwAgentsError(
@@ -35,7 +41,18 @@ export async function invokeBrainCapability(
 		command.commandId,
 	);
 	if (existingJournal) {
-		const replay = parseCommandResultSnapshot(existingJournal.responseSnapshot);
+		const replay = await loadIdempotentCommandResult(
+			deps.commandJournal,
+			preflightAgent.organizationId,
+			command.commandId,
+			intent,
+		);
+		if (!replay) {
+			throwAgentsError(
+				"AGT_DUPLICATE_IDEMPOTENCY",
+				`Command journal entry disappeared during replay: ${command.commandId}`,
+			);
+		}
 		const replayedAgentVersionId =
 			readSnapshotString(existingJournal.responseSnapshot, "agentVersionId") ??
 			command.agentVersionId ??
@@ -90,7 +107,18 @@ export async function invokeBrainCapability(
 				command.commandId,
 			);
 			if (raced) {
-				const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
+				const parsed = await loadIdempotentCommandResult(
+					context.commandJournal,
+					preflightAgent.organizationId,
+					command.commandId,
+					intent,
+				);
+				if (!parsed) {
+					throwAgentsError(
+						"AGT_DUPLICATE_IDEMPOTENCY",
+						`Command journal entry disappeared during replay: ${command.commandId}`,
+					);
+				}
 				const racedAgentVersionId =
 					readSnapshotString(raced.responseSnapshot, "agentVersionId") ??
 					agentVersionId;
@@ -121,6 +149,7 @@ export async function invokeBrainCapability(
 				aggregateId: invocationId,
 				aggregateType: "BrainInvocation",
 				revision: preflightAgent.revision,
+				requestHash: intent.requestHash,
 				responseSnapshot: toCommandResultSnapshot(result, { agentVersionId }),
 			});
 			await context.publishEvents([event]);

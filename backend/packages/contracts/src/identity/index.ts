@@ -70,6 +70,11 @@ export {
 	identitySessionRevokedV1PayloadSchema,
 } from "./events";
 export type {
+	PrincipalLookup,
+	PrincipalLookupOptions,
+} from "./principal-lookup";
+export { PrincipalLookupUnavailableError } from "./principal-lookup";
+export type {
 	PrincipalDto,
 	ServiceCredentialDto,
 	SessionRefDto,

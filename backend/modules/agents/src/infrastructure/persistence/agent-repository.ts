@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Agent } from "../../domain/entities/agent";
 import type { AgentRepository } from "../../domain/ports/agent-repository";
@@ -73,6 +73,19 @@ export function createDrizzleAgentRepository(
 				.where(eq(agents.id, agentId))
 				.limit(1);
 			return rows[0] ? toAgent(rows[0]) : null;
+		},
+		async listByAgency({ organizationId, agencyId }) {
+			const rows = await db
+				.select()
+				.from(agents)
+				.where(
+					and(
+						eq(agents.organizationId, organizationId),
+						eq(agents.agencyId, agencyId),
+					),
+				)
+				.orderBy(asc(agents.createdAt), asc(agents.id));
+			return rows.map(toAgent);
 		},
 	};
 }

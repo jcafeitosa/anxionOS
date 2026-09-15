@@ -1,6 +1,11 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { deniedPostLoginFixture, expectAxeClean } from "./a11y";
+import {
+	assertAuthorizedConsoleHeading,
+	mockAuthorizedPartnerApis,
+	mockAuthorizedPlatformApis,
+} from "./fixtures/authorized-consoles";
 import { DEV_SEED_ACCOUNTS, signInLive } from "./fixtures/live-auth";
 
 async function holdPostLoginContext(page: import("@playwright/test").Page): Promise<void> {
@@ -35,6 +40,34 @@ test.describe("WCAG 2.2 axe — login + shells (ANX-340)", () => {
 			page.getByRole("link", { name: "Pular para o conteúdo principal" }),
 		).toBeFocused();
 		await expectAxeClean(page, "/login");
+	});
+
+	for (const route of [
+		{ path: "/register", heading: "Criar conta" },
+		{ path: "/forgot-password", heading: "Esqueci a senha" },
+		{ path: "/mfa", heading: "MFA pendente" },
+	]) {
+		test(`${route.path} renders an axe-clean honest auth state`, async ({ page }) => {
+			await page.goto(route.path);
+			await expect(page.getByRole("heading", { name: route.heading })).toBeVisible();
+			await expectAxeClean(page, route.path);
+		});
+	}
+
+	test("authorized Partner console is axe-clean", async ({ page }) => {
+		await mockAuthorizedPartnerApis(page);
+		await page.goto("/partner");
+		await assertAuthorizedConsoleHeading(page, "Partner Console");
+		await expect(page.getByTestId("partner-dashboard")).toBeVisible();
+		await expectAxeClean(page, "/partner authorized");
+	});
+
+	test("authorized Platform console is axe-clean", async ({ page }) => {
+		await mockAuthorizedPlatformApis(page);
+		await page.goto("/platform");
+		await assertAuthorizedConsoleHeading(page, "Platform Console");
+		await expect(page.getByTestId("platform-dashboard")).toBeVisible();
+		await expectAxeClean(page, "/platform authorized");
 	});
 
 	test("Owner finance panel (live seed) is axe-clean", async ({ page }) => {
@@ -131,6 +164,26 @@ test.describe("WCAG 2.2 axe — login + shells (ANX-340)", () => {
 		});
 		await expect(page.getByRole("heading", { name: "Acesso não autorizado" })).toBeVisible();
 		await expectAxeClean(page, "/access-denied");
+	});
+
+	test("onboarding route is axe-clean within its main content", async ({ page }) => {
+		await signInLive(page, DEV_SEED_ACCOUNTS.none);
+		await expect(page).toHaveURL(/\/onboarding$/, { timeout: 20_000 });
+		await expect(
+			page.getByRole("heading", { name: "Organização ainda não vinculada" }),
+		).toBeVisible();
+		await expectAxeClean(page, "/onboarding");
+	});
+
+	test("select-organization route is axe-clean within its main content", async ({
+		page,
+	}) => {
+		await signInLive(page, DEV_SEED_ACCOUNTS.multi);
+		await expect(page).toHaveURL(/\/select-organization$/, { timeout: 20_000 });
+		await expect(
+			page.getByRole("heading", { name: "Escolher organização" }),
+		).toBeVisible();
+		await expectAxeClean(page, "/select-organization");
 	});
 
 	test("/platform bounce fail-closed lands on axe-clean Owner shell", async ({

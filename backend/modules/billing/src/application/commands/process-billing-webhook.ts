@@ -7,17 +7,19 @@ import {
 	processBillingWebhookCommandSchema,
 } from "@anxionos/contracts/billing";
 import {
+	createInvoicePaidEvent,
 	createSubscriptionCancelledEvent,
 	createWebhookProcessedEvent,
 } from "../../domain/events/billing-events";
 import type { BillingUnitOfWork } from "../../domain/ports/billing-unit-of-work";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
 import {
+	createBillingCommandIntent,
 	loadIdempotentByWebhookEventId,
 	loadIdempotentCommandResult,
 	toCommandResultSnapshot,
 } from "../command-support";
-import { parseCommandResultSnapshot, throwBillingError } from "../errors";
+import { throwBillingError } from "../errors";
 
 export interface ProcessBillingWebhookDeps {
 	unitOfWork: BillingUnitOfWork;
@@ -29,26 +31,19 @@ export async function processBillingWebhook(
 	input: ProcessBillingWebhookCommand,
 ): Promise<BillingCommandResult> {
 	const command = processBillingWebhookCommandSchema.parse(input);
-	const existingCommand = await deps.commandJournal.findByCommandId(
-		command.commandId,
-	);
-	if (
-		existingCommand &&
-		existingCommand.organizationId !== command.organizationId
-	) {
-		throwBillingError(
-			"BIL_CROSS_TENANT",
-			"command journal organization mismatch",
-		);
-	}
+	const intent = createBillingCommandIntent("processBillingWebhook", command);
 	const replayByWebhook = await loadIdempotentByWebhookEventId(
 		deps.commandJournal,
+		command.organizationId,
 		command.webhookEventId,
+		intent,
 	);
 	if (replayByWebhook) return replayByWebhook;
 	const replay = await loadIdempotentCommandResult(
 		deps.commandJournal,
+		command.organizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay) return replay;
 	if (
@@ -71,32 +66,26 @@ export async function processBillingWebhook(
 		);
 	}
 	return deps.unitOfWork.runInTransaction(async (ctx) => {
-		const racedByWebhook = await ctx.commandJournal.findByWebhookEventId(
-			command.webhookEventId,
+		await ctx.lockIdempotencyKey(
+			`${command.organizationId}:webhook:${command.webhookEventId}`,
 		);
-		if (racedByWebhook) {
-			if (racedByWebhook.organizationId !== command.organizationId) {
-				throwBillingError(
-					"BIL_CROSS_TENANT",
-					"webhook event organization mismatch",
-				);
-			}
-			const parsed = parseCommandResultSnapshot(
-				racedByWebhook.responseSnapshot,
-			);
-			return billingCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
-		}
-		const raced = await ctx.commandJournal.findByCommandId(command.commandId);
-		if (raced) {
-			const parsed = parseCommandResultSnapshot(raced.responseSnapshot);
-			return billingCommandResultSchema.parse({
-				...parsed,
-				idempotentReplay: true,
-			});
-		}
+		await ctx.lockIdempotencyKey(
+			`${command.organizationId}:${command.commandId}`,
+		);
+		const racedByWebhook = await loadIdempotentByWebhookEventId(
+			ctx.commandJournal,
+			command.organizationId,
+			command.webhookEventId,
+			intent,
+		);
+		if (racedByWebhook) return racedByWebhook;
+		const raced = await loadIdempotentCommandResult(
+			ctx.commandJournal,
+			command.organizationId,
+			command.commandId,
+			intent,
+		);
+		if (raced) return raced;
 		if (
 			command.eventType === "subscription.cancelled" &&
 			command.subscriptionId
@@ -125,6 +114,42 @@ export async function processBillingWebhook(
 				]);
 			}
 		}
+		if (
+			command.eventType === "invoice.payment_succeeded" &&
+			command.invoiceId
+		) {
+			const invoice = await ctx.invoices.findById(command.invoiceId);
+			if (!invoice || invoice.organizationId !== command.organizationId) {
+				throwBillingError(
+					"BIL_INVOICE_NOT_FOUND",
+					"invoice not found for organization",
+				);
+			}
+			if (invoice.status !== "ISSUED" && invoice.status !== "PAID") {
+				throwBillingError(
+					"BIL_INVOICE_NOT_ISSUED",
+					"invoice must be ISSUED before payment",
+				);
+			}
+			const paid =
+				invoice.status === "PAID"
+					? invoice
+					: await ctx.invoices.updateStatus(
+							invoice.id,
+							"PAID",
+							invoice.issuedAt,
+						);
+			await ctx.publishEvents([
+				createInvoicePaidEvent({
+					invoiceId: paid.id,
+					organizationId: paid.organizationId,
+					subscriptionId: paid.subscriptionId,
+					billingPeriod: paid.billingPeriod,
+					totalAmount: paid.totalAmount,
+					paidAt: command.occurredAt,
+				}),
+			]);
+		}
 		const aggregateId =
 			command.invoiceId ?? command.subscriptionId ?? command.webhookEventId;
 		const result = billingCommandResultSchema.parse({
@@ -145,6 +170,7 @@ export async function processBillingWebhook(
 			commandId: command.commandId,
 			organizationId: command.organizationId,
 			commandName: "processBillingWebhook",
+			requestHash: intent.requestHash,
 			webhookEventId: command.webhookEventId,
 			responseSnapshot: toCommandResultSnapshot(result),
 		});

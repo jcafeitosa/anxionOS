@@ -1,7 +1,11 @@
 import { institutionalUuidSchema } from "@anxionos/contracts";
-import { partnersPartnerIdSchema } from "@anxionos/contracts/partners";
+import {
+	partnersPartnerIdSchema,
+	redactPartnerText,
+} from "@anxionos/contracts/partners";
 import {
 	type CommissionAccrualRecord,
+	getPartnerById,
 	getPartnerByOrganization,
 	listCommissionAccruals,
 	listPayouts,
@@ -15,6 +19,10 @@ export const organizationIdParamSchema = z.object({
 	organizationId: institutionalUuidSchema,
 });
 
+export const partnerIdParamSchema = organizationIdParamSchema.extend({
+	partnerId: partnersPartnerIdSchema,
+});
+
 const partnerIdQuerySchema = z
 	.object({
 		partnerId: partnersPartnerIdSchema.optional(),
@@ -25,8 +33,8 @@ export function toPartnerDto(partner: PartnerRecord) {
 	return {
 		id: partner.id,
 		organizationId: partner.organizationId,
-		referralCode: partner.referralCode,
-		displayName: partner.displayName,
+		referralCode: redactPartnerText(partner.referralCode),
+		displayName: redactPartnerText(partner.displayName),
 		commissionRate: partner.commissionRate,
 		referredOrganizationId: partner.referredOrganizationId,
 		status: partner.status,
@@ -59,7 +67,15 @@ export function toPayoutDto(payout: PayoutRecord) {
 		status: payout.status,
 		requestedAt: payout.requestedAt,
 		approvedAt: payout.approvedAt,
-		approvalReference: payout.approvalReference,
+		approvalReference: redactPartnerText(payout.approvalReference),
+		processingAt: payout.processingAt,
+		settledAt: payout.settledAt,
+		failedAt: payout.failedAt,
+		failureReason: redactPartnerText(payout.failureReason),
+		providerReference: redactPartnerText(payout.providerReference),
+		reversalReference: redactPartnerText(payout.reversalReference),
+		reversedAt: payout.reversedAt,
+		attemptCount: payout.attemptCount,
 	};
 }
 
@@ -72,6 +88,15 @@ export async function handleGetPartnerByOrganization(
 		{ partners: deps.partners },
 		organizationId,
 	);
+	return { partner: toPartnerDto(partner) };
+}
+
+export async function handleGetPartnerById(
+	deps: Pick<PartnersPluginDeps, "partners">,
+	input: { organizationId: string; partnerId: string },
+) {
+	const params = partnerIdParamSchema.parse(input);
+	const partner = await getPartnerById({ partners: deps.partners }, params);
 	return { partner: toPartnerDto(partner) };
 }
 

@@ -9,8 +9,12 @@ import type { AgentBudgetRepository } from "../../domain/ports/agent-budget-repo
 import type { AgentRepository } from "../../domain/ports/agent-repository";
 import type { AgentsUnitOfWork } from "../../domain/ports/agents-unit-of-work";
 import type { CommandJournalRepository } from "../../domain/ports/command-journal";
-import { loadIdempotentCommandResult } from "../command-support";
-import { parseCommandResultSnapshot, throwAgentsError } from "../errors";
+import {
+	createAgentCommandIntent,
+	loadIdempotentCommandResult,
+	toCommandResultSnapshot,
+} from "../command-support";
+import { throwAgentsError } from "../errors";
 import { buildOrganizationTenantContext } from "../services/tenant-context";
 
 function isExhausted(policy: {
@@ -31,6 +35,10 @@ export async function consumeAgentBudget(
 	input: ConsumeAgentBudgetInput,
 ): Promise<ConsumeAgentBudgetResult> {
 	const command = consumeAgentBudgetCommandSchema.parse(input);
+	const intent = createAgentCommandIntent("ConsumeAgentBudget", {
+		...command,
+		actorPrincipalId: input.actorPrincipalId,
+	});
 	const agent = await deps.agentRepository.findById(command.agentId);
 	if (!agent)
 		throwAgentsError(
@@ -41,6 +49,7 @@ export async function consumeAgentBudget(
 		deps.commandJournal,
 		agent.organizationId,
 		command.commandId,
+		intent,
 	);
 	if (replay?.aggregateId) {
 		const policy = await deps.agentBudgetRepository.findByAgentId(
@@ -59,15 +68,28 @@ export async function consumeAgentBudget(
 			agencyId: agent.agencyId,
 		}),
 		async (context) => {
-			const raced = await context.commandJournal.findByCommandId(
+			const raced = await loadIdempotentCommandResult(
+				context.commandJournal,
 				agent.organizationId,
 				command.commandId,
+				intent,
 			);
-			if (raced?.responseSnapshot) {
-				const parsed = consumeAgentBudgetResultSchema.safeParse(
-					raced.responseSnapshot,
+			if (raced) {
+				const policy = await context.agentBudgetRepository.findByAgentId(
+					command.agentId,
 				);
-				if (parsed.success) return { ...parsed.data, idempotentReplay: true };
+				if (!policy) {
+					throwAgentsError(
+						"AGT_BUDGET_NOT_FOUND",
+						`Budget policy not found for agent: ${command.agentId}`,
+					);
+				}
+				return {
+					agentId: command.agentId,
+					revision: policy.revision,
+					status: policy.status,
+					idempotentReplay: true,
+				};
 			}
 			const policy = await context.agentBudgetRepository.findByAgentId(
 				command.agentId,
@@ -136,7 +158,11 @@ export async function consumeAgentBudget(
 				aggregateId: saved.id,
 				aggregateType: "AgentBudgetPolicy",
 				revision,
-				responseSnapshot: result,
+				requestHash: intent.requestHash,
+				responseSnapshot: toCommandResultSnapshot(
+					{ aggregateId: saved.id, revision },
+					result,
+				),
 			});
 			if (events.length > 0) await context.publishEvents(events);
 			return result;

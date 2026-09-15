@@ -201,8 +201,8 @@ export interface RevokeGrantActor {
  * o grant: um `operator` revogava grants do `owner` da propria agencia. O
  * catalogo declara `governance.grant.revoke` como "owner ou issuer", entao a
  * decisao vive no contrato (`roleMayRevokeGrant`, mesma fonte da matriz de
- * emissao) e o alvo passa a ser considerado: `owner`/`admin` revogam qualquer
- * grant da agencia; qualquer outro papel de mutacao so' o grant que ele mesmo
+ * emissao) e o alvo passa a ser considerado: `owner` revoga qualquer grant da
+ * agencia; qualquer outro papel de mutacao so' o grant que ele mesmo
  * emitiu, e nunca um de classe superior a que pode emitir.
  *
  * Recusa antes de qualquer escrita: o grant permanece `active`.

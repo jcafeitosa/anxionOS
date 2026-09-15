@@ -6,6 +6,7 @@ export const DEV_SEED_ACCOUNTS = {
 	owner: "owner@anxionos.local",
 	operator: "operator@anxionos.local",
 	platform: "platform@anxionos.local",
+	partner: "partner@anxionos.local",
 	none: "none@anxionos.local",
 	multi: "multi@anxionos.local",
 } as const;

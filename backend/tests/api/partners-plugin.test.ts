@@ -1,14 +1,146 @@
 import { describe, expect, test } from "bun:test";
+import { randomUUID } from "node:crypto";
 import { partnersPartnerIdSchema } from "@anxionos/contracts/partners";
 import { PartnersCommandError } from "@anxionos/partners";
 import { mapPartnersError } from "../../apps/api/src/partners/error-handler";
+import { handleRegisterPartner } from "../../apps/api/src/partners/handlers/commands";
 import {
+	handleGetPartnerById,
 	toCommissionAccrualDto,
 	toPartnerDto,
 	toPayoutDto,
 } from "../../apps/api/src/partners/handlers/read";
+import { createPartnersCommandIntent } from "../../modules/partners/src/application/command-support";
+import {
+	createPartnersTestUow,
+	TEST_OTHER_PARTNER_ORG,
+	TEST_PARTNER_ORG,
+	TEST_REFERRED_ORG,
+} from "../../modules/partners/src/application/commands/partners-test-support";
 
 describe("partners API boundary", () => {
+	test("register handler maps Idempotency-Key and validates the command body", async () => {
+		const runtime = createPartnersTestUow();
+		const result = await handleRegisterPartner(
+			{
+				unitOfWork: runtime.unitOfWork,
+				commandJournal: runtime.commandJournal,
+			},
+			{
+				commandId: randomUUID(),
+				organizationId: TEST_PARTNER_ORG,
+				body: {
+					referralCode: "REF-HTTP",
+					displayName: "HTTP Partner",
+					commissionRate: "10",
+					referredOrganizationId: TEST_REFERRED_ORG,
+				},
+			},
+		);
+		expect(result.partnerId).toMatch(/^ptr_prt_/);
+	});
+
+	test("register handler rejects secret-bearing display names", async () => {
+		const runtime = createPartnersTestUow();
+		await expect(
+			handleRegisterPartner(
+				{
+					unitOfWork: runtime.unitOfWork,
+					commandJournal: runtime.commandJournal,
+				},
+				{
+					commandId: randomUUID(),
+					organizationId: TEST_PARTNER_ORG,
+					body: {
+						referralCode: "REF-DISPLAY",
+						displayName: "Acme_ghp_legacy_token",
+						commissionRate: "10",
+						referredOrganizationId: TEST_REFERRED_ORG,
+					},
+				},
+			),
+		).rejects.toThrow();
+	});
+
+	test("register handler replays a legacy unsafe body before validation", async () => {
+		const runtime = createPartnersTestUow();
+		const commandId = randomUUID();
+		const command = {
+			commandId,
+			organizationId: TEST_PARTNER_ORG,
+			referralCode: "campaign_ghp_legacy_token",
+			displayName: "Legacy Partner",
+			commissionRate: "10",
+			referredOrganizationId: TEST_REFERRED_ORG,
+		};
+		const intent = createPartnersCommandIntent("registerPartner", command);
+		await runtime.commandJournal.save({
+			commandId,
+			organizationId: TEST_PARTNER_ORG,
+			commandName: "registerPartner",
+			requestHash: intent.requestHash,
+			responseSnapshot: {
+				aggregateId: "ptr_prt_00000000-0000-4000-8000-000000000098",
+				revision: 1,
+				partnerId: "ptr_prt_00000000-0000-4000-8000-000000000098",
+				referralId: `[REDACTED:${commandId}]`,
+			},
+		});
+
+		const result = await handleRegisterPartner(
+			{
+				unitOfWork: runtime.unitOfWork,
+				commandJournal: runtime.commandJournal,
+			},
+			{
+				commandId,
+				organizationId: TEST_PARTNER_ORG,
+				body: {
+					referralCode: command.referralCode,
+					displayName: command.displayName,
+					commissionRate: command.commissionRate,
+					referredOrganizationId: command.referredOrganizationId,
+				},
+			},
+		);
+
+		expect(result).toMatchObject({
+			referralId: `[REDACTED:${commandId}]`,
+			idempotentReplay: true,
+		});
+		expect(runtime.getPartners().size).toBe(0);
+	});
+
+	test("partner detail handler enforces organization scope", async () => {
+		const partnerId = "ptr_prt_00000000-0000-4000-8000-000000000011";
+		const runtime = createPartnersTestUow({
+			partners: [
+				{
+					id: partnerId,
+					organizationId: TEST_PARTNER_ORG,
+					referralCode: "REF-DETAIL",
+					displayName: "Detail Partner",
+					commissionRate: "10",
+					referredOrganizationId: TEST_REFERRED_ORG,
+					status: "ACTIVE",
+					revision: 1,
+				},
+			],
+		});
+		const result = await handleGetPartnerById(
+			{ partners: runtime.partners },
+			{ organizationId: TEST_PARTNER_ORG, partnerId },
+		);
+		expect(result.partner.id).toBe(partnerId);
+		await expect(
+			handleGetPartnerById(
+				{ partners: runtime.partners },
+				{ organizationId: TEST_OTHER_PARTNER_ORG, partnerId },
+			),
+		).rejects.toMatchObject({
+			details: { code: "PTR_PARTNER_NOT_FOUND" },
+		});
+	});
 	test("mapPartnersError maps PTR_PARTNER_NOT_FOUND to 404", () => {
 		const error = new PartnersCommandError(
 			"PTR_PARTNER_NOT_FOUND",
@@ -65,11 +197,57 @@ describe("partners API boundary", () => {
 			partnerId: partner.id,
 			partnerOrganizationId: partner.organizationId,
 			requestedAmount: "10.00",
-			status: "REQUESTED",
+			status: "SCHEDULED",
 			requestedAt: "2026-09-10T13:00:00.000Z",
 			approvedAt: null,
 			approvalReference: null,
+			processingAt: null,
+			settledAt: null,
+			failedAt: null,
+			failureReason: null,
+			providerReference: null,
+			reversalReference: null,
+			reversedAt: null,
+			attemptCount: 0,
 		});
 		expect(payout.requestedAmount).toBe("10.00");
+	});
+
+	test("read DTOs redact unsafe legacy partner and payout text", () => {
+		const partner = toPartnerDto({
+			id: "ptr_prt_00000000-0000-4000-8000-000000000010",
+			organizationId: "00000000-0000-4000-8000-000000000011",
+			referralCode: "REF-ghp_legacy_token",
+			displayName: "Acme_ghp_legacy_token",
+			commissionRate: "10",
+			referredOrganizationId: "00000000-0000-4000-8000-000000000012",
+			status: "ACTIVE",
+			revision: 1,
+		});
+		expect(partner.referralCode).toBe("[REDACTED]");
+		expect(partner.displayName).toBe("[REDACTED]");
+
+		const payout = toPayoutDto({
+			id: "ptr_pay_00000000-0000-4000-8000-000000000013",
+			partnerId: partner.id,
+			partnerOrganizationId: partner.organizationId,
+			requestedAmount: "10.00",
+			status: "FAILED",
+			requestedAt: "2026-09-10T13:00:00.000Z",
+			approvedAt: null,
+			approvalReference: "provider_ghp_legacy_token",
+			processingAt: null,
+			settledAt: null,
+			failedAt: "2026-09-10T14:00:00.000Z",
+			failureReason: "provider_ghp_legacy_token",
+			providerReference: "provider_ghp_legacy_token",
+			reversalReference: "legacy_ghp_legacy_token",
+			reversedAt: null,
+			attemptCount: 1,
+		});
+		expect(payout.approvalReference).toBe("[REDACTED]");
+		expect(payout.failureReason).toBe("[REDACTED]");
+		expect(payout.providerReference).toBe("[REDACTED]");
+		expect(payout.reversalReference).toBe("[REDACTED]");
 	});
 });

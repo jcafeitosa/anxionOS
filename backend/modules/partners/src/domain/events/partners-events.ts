@@ -2,8 +2,17 @@ import { randomUUID } from "node:crypto";
 import { schemaVersion } from "@anxionos/contracts";
 import type { DomainEventEnvelope } from "@anxionos/contracts/events";
 import {
+	commissionAccruedPayloadSchema,
+	commissionReversedPayloadSchema,
 	PARTNERS_EVENT_TYPES,
 	PARTNERS_OWNER_DOMAIN,
+	payoutApprovedPayloadSchema,
+	payoutFailedPayloadSchema,
+	payoutProcessingPayloadSchema,
+	payoutRequestedPayloadSchema,
+	payoutReversedPayloadSchema,
+	payoutScheduledPayloadSchema,
+	payoutSettledPayloadSchema,
 } from "@anxionos/contracts/partners";
 
 export function createCommissionAccruedEvent(input: {
@@ -18,13 +27,14 @@ export function createCommissionAccruedEvent(input: {
 	commissionAmount: string;
 	accruedAt: string;
 }): DomainEventEnvelope {
+	const payload = commissionAccruedPayloadSchema.parse(input);
 	return {
 		eventId: randomUUID(),
 		eventType: PARTNERS_EVENT_TYPES.COMMISSION_ACCRUED,
 		schemaVersion,
 		ownerDomain: PARTNERS_OWNER_DOMAIN,
 		occurredAt: new Date().toISOString(),
-		payload: input,
+		payload,
 	};
 }
 
@@ -36,13 +46,14 @@ export function createCommissionReversedEvent(input: {
 	reversedAmount: string;
 	reversedAt: string;
 }): DomainEventEnvelope {
+	const payload = commissionReversedPayloadSchema.parse(input);
 	return {
 		eventId: randomUUID(),
 		eventType: PARTNERS_EVENT_TYPES.COMMISSION_REVERSED,
 		schemaVersion,
 		ownerDomain: PARTNERS_OWNER_DOMAIN,
 		occurredAt: new Date().toISOString(),
-		payload: input,
+		payload,
 	};
 }
 
@@ -53,13 +64,14 @@ export function createPayoutRequestedEvent(input: {
 	requestedAmount: string;
 	requestedAt: string;
 }): DomainEventEnvelope {
+	const payload = payoutRequestedPayloadSchema.parse(input);
 	return {
 		eventId: randomUUID(),
 		eventType: PARTNERS_EVENT_TYPES.PAYOUT_REQUESTED,
 		schemaVersion,
 		ownerDomain: PARTNERS_OWNER_DOMAIN,
 		occurredAt: new Date().toISOString(),
-		payload: input,
+		payload,
 	};
 }
 
@@ -71,12 +83,105 @@ export function createPayoutApprovedEvent(input: {
 	approvalReference: string;
 	approvedAt: string;
 }): DomainEventEnvelope {
+	const payload = payoutApprovedPayloadSchema.parse(input);
 	return {
 		eventId: randomUUID(),
 		eventType: PARTNERS_EVENT_TYPES.PAYOUT_APPROVED,
 		schemaVersion,
 		ownerDomain: PARTNERS_OWNER_DOMAIN,
 		occurredAt: new Date().toISOString(),
-		payload: input,
+		payload,
+	};
+}
+
+export function createPayoutScheduledEvent(input: {
+	payoutId: string;
+	partnerId: string;
+	organizationId: string;
+	requestedAmount: string;
+	requestedAt: string;
+}): DomainEventEnvelope {
+	const payload = payoutScheduledPayloadSchema.parse(input);
+	return {
+		eventId: randomUUID(),
+		eventType: PARTNERS_EVENT_TYPES.PAYOUT_SCHEDULED,
+		schemaVersion,
+		ownerDomain: PARTNERS_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload,
+	};
+}
+
+export function createPayoutProcessingEvent(input: {
+	payoutId: string;
+	partnerId: string;
+	organizationId: string;
+	processingAt: string;
+	attemptNumber: number;
+}): DomainEventEnvelope {
+	const payload = payoutProcessingPayloadSchema.parse(input);
+	return {
+		eventId: randomUUID(),
+		eventType: PARTNERS_EVENT_TYPES.PAYOUT_PROCESSING,
+		schemaVersion,
+		ownerDomain: PARTNERS_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload,
+	};
+}
+
+export function createPayoutSettledEvent(input: {
+	payoutId: string;
+	partnerId: string;
+	organizationId: string;
+	settledAmount: string;
+	providerReference: string;
+	settledAt: string;
+}): DomainEventEnvelope {
+	const payload = payoutSettledPayloadSchema.parse(input);
+	return {
+		eventId: randomUUID(),
+		eventType: PARTNERS_EVENT_TYPES.PAYOUT_SETTLED,
+		schemaVersion,
+		ownerDomain: PARTNERS_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload,
+	};
+}
+
+export function createPayoutFailedEvent(input: {
+	payoutId: string;
+	partnerId: string;
+	organizationId: string;
+	failureReason: string;
+	attemptNumber: number;
+	failedAt: string;
+}): DomainEventEnvelope {
+	const payload = payoutFailedPayloadSchema.parse(input);
+	return {
+		eventId: randomUUID(),
+		eventType: PARTNERS_EVENT_TYPES.PAYOUT_FAILED,
+		schemaVersion,
+		ownerDomain: PARTNERS_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload,
+	};
+}
+
+export function createPayoutReversedEvent(input: {
+	payoutId: string;
+	partnerId: string;
+	organizationId: string;
+	reversalReference: string;
+	reversedAt: string;
+}): DomainEventEnvelope {
+	const payload = payoutReversedPayloadSchema.parse(input);
+	return {
+		eventId: randomUUID(),
+		eventType: PARTNERS_EVENT_TYPES.PAYOUT_REVERSED,
+		schemaVersion,
+		ownerDomain: PARTNERS_OWNER_DOMAIN,
+		occurredAt: new Date().toISOString(),
+		payload,
 	};
 }

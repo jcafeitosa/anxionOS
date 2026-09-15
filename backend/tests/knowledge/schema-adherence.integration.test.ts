@@ -13,7 +13,7 @@ import {
 } from "../pg-harness-guard";
 
 /**
- * ANX-470 — prova de aderencia codigo<->DDL do modulo knowledge: as 8 tabelas
+ * ANX-470 — prova de aderencia codigo<->DDL do modulo knowledge: as 9 tabelas
  * sao exercitadas pelos repositorios REAIS contra o schema real.
  */
 describe("knowledge schema adherence (ANX-470)", () => {
@@ -26,7 +26,7 @@ describe("knowledge schema adherence (ANX-470)", () => {
 			await ensureKnowledgeSchema(pool);
 			await truncateDomainTables(
 				pool,
-				"TRUNCATE knowledge_sources, knowledge_documents, knowledge_document_versions, knowledge_chunks, knowledge_embeddings, knowledge_embedding_spaces, knowledge_index_generations, knowledge_command_journal RESTART IDENTITY CASCADE",
+				"TRUNCATE knowledge_sources, knowledge_documents, knowledge_document_versions, knowledge_chunks, knowledge_embeddings, knowledge_embedding_spaces, knowledge_index_generations, knowledge_command_journal, knowledge_memories RESTART IDENTITY CASCADE",
 			);
 			const unitOfWork = createKnowledgeUnitOfWork(pool);
 			const commandJournal = createPgCommandJournalRepository(pool);
@@ -132,6 +132,29 @@ describe("knowledge schema adherence (ANX-470)", () => {
 				});
 				const replay = await ctx.commandJournal.findByCommandId(cmdId);
 				expect(replay?.commandName).toBe("createDocument");
+
+				const memoryStore = ctx.memoryStore;
+				if (!memoryStore)
+					throw new Error("memory store missing from transaction");
+				const memory = await memoryStore.save({
+					id: `kn_mem_${randomUUID()}`,
+					organizationId,
+					tier: "CANDIDATE",
+					summary: "Test memory",
+					contentHash: "memory-hash",
+					sourceDocumentId: documentId,
+					createdAt: new Date().toISOString(),
+					promotedAt: null,
+				});
+				expect(
+					(await memoryStore.findById(memory.id, organizationId))?.tier,
+				).toBe("CANDIDATE");
+				const promoted = await memoryStore.update({
+					...memory,
+					tier: "PROMOTED",
+					promotedAt: new Date().toISOString(),
+				});
+				expect(promoted?.tier).toBe("PROMOTED");
 			});
 			expect(commandJournal).toBeDefined();
 		} finally {
